@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block content %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">HTML Test Report</a>
+
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+              <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item active">
+                  <a class="nav-link" href="index.html">Top</a>
+                </li>
+              </ul>
+            </div>
+        </div>
+    </nav>
+    <table class="table table-hover">
+        <tr class="remove-table-hover"><pre style="display: inline; color: maroon">Feature: </pre><pre style="display: inline; color: grey">{{ feature['name'] }}</pre></tr>
+        {% for scenario in scenarios %}
+        <tr role="link" style="cursor: pointer;" onclick="window.location='{{ feature['name'] }}/{{ scenario['name'] }}/index.html';" >
+            <td><pre style="display: inline; color: green">  Scenario: </pre><pre style="display: inline; color: grey">{{ scenario['name'] }}</pre></td>
+            <td><pre style="display: inline; color: black">{{ scenario['status'] }}</pre></td> 
+            <td><pre style="display: inline; color: grey">{{ '{:.3f}'.format(scenario['duration']) }}s</pre></td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

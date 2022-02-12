@@ -1,0 +1,16 @@
+dist
+.cache
+.coverage
+.DS_Store
+*.egg-info
+cucurc.yml
+htmlcov
+.nox
+terraform.tfstate
+terraform.tfstate.backup
+.terraform
+.pytest_cache
+__pycache__
+*.pyc
+report
+results

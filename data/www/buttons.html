@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <title>Buttons!</title>
+    <style>
+      .button { text-decoration: none; -webkit-appearance: button; color: #333333; display: inline; }
+    </style>
+    <script>
+    function update(value) { document.querySelector("#input").value = value; }
+    </script>
+  </head>
+  <body>
+    <label>value:</label><input id="input" type="text"></input>
+    <br/>
+    <button onclick="update('button');">button</button>
+    <button onclick="update('button with child');"><b>button with child</b></button>
+    <input  onclick="update('input type=button');" type="button" value="input type=button"></input>
+    <input  onclick="update('input type=submit');" type="submit" value="input type=submit"></input>
+    <a      onclick="update('a link');" class="button" href="#">a link</a>
+    <div    onclick="update('* role=button');" class="button" role="button">* role=button</div>
+    <label for="button-for">button with label for</label><button id="button-for" onclick="update('button with label for');"></button>
+  </body>
+</html>

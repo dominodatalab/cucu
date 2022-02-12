@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <title>Duplicate Buttons!</title>
+    <style>
+      .button { text-decoration: none; -webkit-appearance: button; color: #333333; display: inline; }
+    </style>
+    <script>
+    function update(value) {
+      document.querySelector("#input").value = value;
+    }
+    </script>
+  </head>
+  <body>
+    <label>value:</label><input id="input" type="text"></input>
+    <br/>
+    <button onclick="update('1st button');">button</button>
+    <button onclick="update('2nd button');">button</button>
+    <button onclick="update('3rd button');">button</button>
+    <button onclick="update('4th button');">button</button>
+  </body>
+</html>
