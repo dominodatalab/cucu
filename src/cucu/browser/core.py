@@ -19,6 +19,12 @@ class Browser:
     def navigate(self, url):
         raise RuntimeError('implement me')
 
+    def switch_to_next_tab(self):
+        raise RuntimeError('implement me')
+
+    def switch_to_previous_tab(self):
+        raise RuntimeError('implement me')
+
     def refresh(self):
         raise RuntimeError('implement me')
 

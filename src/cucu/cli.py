@@ -42,13 +42,17 @@ def main(debug):
               help='set logging level to one of debug, warn or info (default)')
 @click.option('-n',
               '--name')
-@click.option('-r',
-              '--results',
-              default='results')
+@click.option('-i',
+              '--ipdb-on-failure/--no-ipdb-oo-failure',
+              help='',
+              default=False)
 @click.option('-p',
               '--preserve-results/--no-preserve-results',
               help='',
               default=False)
+@click.option('-r',
+              '--results',
+              default='results')
 @click.option('--source/--no-source',
               default=False,
               help='show the source for each step definition in the logs')
@@ -68,35 +72,40 @@ def run(filepath,
         headless,
         logging_level,
         name,
-        results,
+        ipdb_on_failure,
         preserve_results,
+        results,
         source,
         tags,
         selenium_remote_url):
     """
     run a set of feature files
     """
-    os.environ['CUCU_LOGGING_LEVEL'] = logging_level.upper()
-    logger.init_logging(logging_level.upper())
-    os.environ['CUCU_BROWSER'] = browser
 
     if headless:
         os.environ['CUCU_BROWSER_HEADLESS'] = 'True'
 
-    if selenium_remote_url is not None:
-        os.environ['CUCU_SELENIUM_REMOTE_URL'] = selenium_remote_url
+    for variable in list(env):
+        key, value = variable.split('=')
+        os.environ[key] = value
 
-    if not preserve_results and os.path.exists(results):
-        shutil.rmtree(results)
+    os.environ['CUCU_LOGGING_LEVEL'] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
+    os.environ['CUCU_BROWSER'] = browser
+
+    if ipdb_on_failure:
+        os.environ['CUCU_IPDB_ON_FAILURE'] = 'true'
 
     os.environ['CUCU_RESULTS_DIR'] = results
     if os.path.exists(results):
         shutil.rmtree(results)
     os.makedirs(results)
 
-    for variable in list(env):
-        key, value = variable.split('=')
-        os.environ[key] = value
+    if not preserve_results and os.path.exists(results):
+        shutil.rmtree(results)
+
+    if selenium_remote_url is not None:
+        os.environ['CUCU_SELENIUM_REMOTE_URL'] = selenium_remote_url
 
     args = [
         # JUNIT xml file generated per feature file executed
@@ -108,8 +117,6 @@ def run(filepath,
         # use our own built in formatter
         '--format', 'cucu.formatter.cucu:CucuFormatter',
         '--logging-level', logging_level.upper(),
-        # stop all log/stdout capturing
-        # '--no-capture', '--no-capture-stderr', '--no-logcapture',
         # always print the skipped steps and scenarios
         '--show-skipped',
         filepath

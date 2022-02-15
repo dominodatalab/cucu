@@ -1,4 +1,4 @@
-Feature: Feature with special steps
+Feature: Feature with multilines and tables
 
   Scenario: Scenario with a step that has a multiline argument
     Given I echo the following

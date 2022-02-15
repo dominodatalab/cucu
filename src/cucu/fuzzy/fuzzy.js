@@ -124,7 +124,7 @@
             }
 
             /*
-             * element labeled by previous or next sibling
+             * element labeled by previous sibling
              */
             if (direction === LEFT_TO_RIGHT) {
                 for(var tIndex = 0; tIndex < things.length; tIndex++) {
@@ -139,9 +139,16 @@
                     results = jQuery('*:vis:' + matcher + '("' + name + '") ~ ' + thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<*>name</*>...<thing>...', results); }
                     elements = elements.concat(results);
+
+                    // <...><*>name</*></...>...<...><thing></...>
+                    // XXX: this rule is horribly complicated and I'd rather see it gone
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")').nextAll().find(thing + ':vis').toArray();
+                    if (cucu.debug) { console.log('<...><*>name</*></...>...<...><thing></...>', results); }
+                    elements = elements.concat(results);
                 }
             }
 
+            // element labeled with next sibling
             if (direction === RIGHT_TO_LEFT) {
                 for(var tIndex = 0; tIndex < things.length; tIndex++) {
                     var thing = things[tIndex];
@@ -154,6 +161,12 @@
                     // next siblings: <thing>...<*>name</*>...
                     results = jQuery('*:vis:' + matcher + '("' + name + '")').prevAll(thing).toArray();
                     if (cucu.debug) { console.log('<thing>...<*>name</*>...', results); }
+                    elements = elements.concat(results);
+
+                    // <...><thing></...>...<...><*>name</*></...>
+                    // XXX: this rule is horribly complicated and I'd rather see it gone
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")').siblings().find(thing + ':vis').toArray();
+                    if (cucu.debug) { console.log('<...><thin></...>...<...><*>name</*></...>', results); }
                     elements = elements.concat(results);
                 }
             }

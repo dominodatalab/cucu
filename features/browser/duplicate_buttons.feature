@@ -2,7 +2,7 @@ Feature: Duplicate Buttons
   As a developer I want to make sure the test writer can interact with duplicate
   buttons elements.
 
-  Scenario: Can interact with various buttons with the same name
+  Scenario: User can interact with various buttons with the same name
     Given I start a webserver on port "40000" at directory "data/www"
       And I open a browser at the url "http://{HOST_ADDRESS}:40000/duplicate_buttons.html"
      Then I should see no value in the input "value:"

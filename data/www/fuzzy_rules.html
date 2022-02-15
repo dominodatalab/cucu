@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <title>Fuzzy Rules!</title>
+    <script>
+    function update(value) {
+      document.querySelector("#input").value = value;
+    }
+    </script>
+  </head>
+  <body>    
+    <label>value:</label><input id="input" type="text"></input>
+    <br/>
+    <button onclick="update('button with inner text');">button with inner text</button>
+    <button onclick="update('button with aria-label');" aria-label="button with aria-label"></button>
+    <button onclick="update('button with title');" title="button with title"></button>
+    <button onclick="update('button with placeholder');" placeholder="button with placeholder"></button>
+    <button onclick="update('button with value');" value="button with value"></button>
+    <div>
+        <label for="button-with-label">button with for/id label</label>
+        <div><button onclick="update('button with for/id label');" id="button-with-label"></button></div>
+    </div>
+    <button onclick="update('button with nested label');"><label>button with nested label</label></button>
+    <label>button with immediate previous sibling label</label><button onclick="update('button with immediate previous sibling label');"></button>
+    <label>button with any previous sibling label</label><div></div><div></div><button onclick="update('button with any previous sibling label');"></button>
+    <div>
+        <div>
+            <label>button with previous nested sibling label</label>
+        </div>
+    </div>
+    <div>
+        <div>
+            <button onclick="update('button with previous nested sibling label');"></button>
+        </div>
+    </div>
+  </body>
+</html>

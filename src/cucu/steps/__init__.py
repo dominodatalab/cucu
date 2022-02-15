@@ -7,6 +7,7 @@ import cucu.steps.browser_steps
 import cucu.steps.button_steps
 import cucu.steps.command_steps
 import cucu.steps.checkbox_steps
+import cucu.steps.dropdown_steps
 import cucu.steps.filesystem_steps
 import cucu.steps.input_steps
 import cucu.steps.link_steps

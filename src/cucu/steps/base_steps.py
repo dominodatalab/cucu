@@ -1,3 +1,4 @@
+import sys
 import time
 
 from behave import step
@@ -16,15 +17,16 @@ def sleep(context, value):
 
 @step('I echo "{value}"')
 def i_echo(context, value):
-    context.print(value)
+    print(f'{value}\n')
 
 
 @step('I echo the following')
 def i_echo_the_following(context):
     if context.text is not None:
-        context.print(context.text)
+        print(f'{context.text}\n')
+
     elif context.table is not None:
-        printer = ModelPrinter(context.stdout)
+        printer = ModelPrinter(sys.stdout)
         # indentation is 2 spaces for Scenario 2 spaces for the start of keyword
         # "Given" and the length of "Given" minus one so we align with the last
         # character.
