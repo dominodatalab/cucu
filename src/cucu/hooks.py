@@ -11,10 +11,15 @@ def run_steps(context, steps_text):
     #      assumptions
     for formatter in context._runner.formatters:
         step_index = formatter.steps.index(context.current_step)
+
         index = 1
         for step in steps:
             step.substep = True
             formatter.insert_step(step, index=step_index + index)
             index += 1
 
-    context.scenario.steps += steps
+    index = 1
+    for step in steps:
+        step_index = context.scenario.steps.index(context.current_step)
+        context.scenario.steps.insert(step_index + index, step)
+        index += 1

@@ -104,8 +104,6 @@ class CucuJSONFormatter(Formatter):
         return table_data
 
     def insert_step(self, step, index=-1):
-        self.steps.append(step)
-
         s = {
             'keyword': step.keyword,
             'step_type': step.step_type,
@@ -124,8 +122,10 @@ class CucuJSONFormatter(Formatter):
         element = self.current_feature_element
 
         if index == -1:
+            self.steps.append(step)
             element['steps'].append(s)
         else:
+            self.steps.insert(index, step)
             element['steps'].insert(index, s)
 
     def step(self, step):

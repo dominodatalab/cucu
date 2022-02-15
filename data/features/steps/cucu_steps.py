@@ -22,6 +22,20 @@ def step_with_substeps(context):
     """)
 
 
+@step('I use a step with substeps that fail')
+def step_with_substeps_that_fail(context):
+    run_steps(context, """
+    When I fail
+    """)
+
+
+@step('I use a step with substeps that waits to fail')
+def step_with_substeps_that_waits_to_fail(context):
+    run_steps(context, """
+    When I wait to fail
+    """)
+
+
 @step('I do nothing')
 def do_nothing(_):
     pass
@@ -30,6 +44,11 @@ def do_nothing(_):
 @step('I fail')
 def i_fail(_):
     raise RuntimeError('step fails on purpose')
+
+
+@step('I wait to fail', wait_for=True)
+def i_wait_to_fail(_):
+    raise RuntimeError('step fails on purpose after a while')
 
 
 @step('I search for "{query}" on google search')

@@ -17,7 +17,7 @@ class CucuFormatter(Formatter):
     description = 'cucu specific formatter to make the logs more readable'
 
     DEFAULT_INDENT_SIZE = 2
-    SUBSTEP_PREFIX = '    ⤷'
+    SUBSTEP_PREFIX = '  ⤷'
 
     def __init__(self, stream_opener, config, **kwargs):
         super(CucuFormatter, self).__init__(stream_opener, config)
@@ -139,7 +139,7 @@ class CucuFormatter(Formatter):
         line_lengths = [len(f'{step.keyword.rjust(5)} {step.name}')
                         for step in self.steps]
 
-        return max(line_lengths)
+        return max(line_lengths) + 4
 
     def result(self, step):
         indent_extra = 0

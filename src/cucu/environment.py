@@ -31,6 +31,7 @@ for decorator_name in ['given', 'when', 'then', 'step']:
     decorator = behave.__dict__[decorator_name]
 
     ui_wait_timeout_ms = int(config.CONFIG['CUCU_WEB_WAIT_TIMEOUT_MS'])
+    ui_wait_before_retry_ms = int(config.CONFIG['CUCU_WEB_WAIT_BEFORE_RETRY_MS'])
 
     def inner_step_func(func, *args, **kwargs):
         #
@@ -61,7 +62,8 @@ for decorator_name in ['given', 'when', 'then', 'step']:
         def wrapper(func):
             if wait_for:
                 @decorator(step_text)
-                @retry(stop_max_delay=ui_wait_timeout_ms)
+                @retry(stop_max_delay=ui_wait_timeout_ms,
+                       wait_fixed=ui_wait_before_retry_ms)
                 def inner_step(*args, **kwargs):
                     inner_step_func(func, *args, **kwargs)
 
@@ -94,13 +96,9 @@ def cucu_print(context, value):
 
 
 def before_all(context):
-    logging_level = config.CONFIG['CUCU_LOGGING_LEVEL'].upper()
-    logger.init_logging(logging_level)
-
-    import logging
-    logging.getLogger('parse').setLevel(logging.WARNING)
-    logging.getLogger('selenium').setLevel(logging.WARNING)
-    logging.getLogger('urlib3').setLevel(logging.WARNING)
+    pass
+#    logging_level = config.CONFIG['CUCU_LOGGING_LEVEL'].upper()
+#    logger.init_logging(logging_level)
 
 
 def before_feature(context, feature):
@@ -112,9 +110,6 @@ def after_feature(context, feature):
 
 
 def before_scenario(context, scenario):
-    import logging
-    context.config.setup_logging(logging.DEBUG)
-
     scenario_dir = os.path.join(config.CONFIG['CUCU_RESULTS_DIR'],
                                 scenario.feature.name,
                                 scenario.name)
@@ -126,7 +121,6 @@ def before_scenario(context, scenario):
     context.browser = None
     context.stdout = sys.stdout
     context.scenario_tasks = []
-    context.previous_process = None
 
     # TODO: move this into a pre-scenario hook which any module can use to
     #       register their own hooks and then you would just call of the
@@ -157,12 +151,11 @@ def before_step(context, step):
 
 
 def after_step(context, step):
-
     if context.browser is not None:
         step_name = escape_filename(step.name)
         filepath = os.path.join(context.scenario_dir,
                                 f'{context.step_index-1} - {step_name}.png')
-   
+
         context.browser.screenshot(filepath)
         logger.debug(f'wrote screenshot {filepath}')
 

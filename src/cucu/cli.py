@@ -45,9 +45,19 @@ def main(debug):
 @click.option('-r',
               '--results',
               default='results')
+@click.option('-p',
+              '--preserve-results/--no-preserve-results',
+              help='',
+              default=False)
 @click.option('--source/--no-source',
               default=False,
               help='show the source for each step definition in the logs')
+@click.option('-t',
+              '--tags',
+              help='Only execute features or scenarios with tags matching '
+                   'expression provided. example: --tags @dev, --tags ~@dev',
+              default=[],
+              multiple=True)
 @click.option('-s',
               '--selenium-remote-url',
               default=None)
@@ -59,7 +69,9 @@ def run(filepath,
         logging_level,
         name,
         results,
+        preserve_results,
         source,
+        tags,
         selenium_remote_url):
     """
     run a set of feature files
@@ -74,6 +86,9 @@ def run(filepath,
     if selenium_remote_url is not None:
         os.environ['CUCU_SELENIUM_REMOTE_URL'] = selenium_remote_url
 
+    if not preserve_results and os.path.exists(results):
+        shutil.rmtree(results)
+
     os.environ['CUCU_RESULTS_DIR'] = results
     if os.path.exists(results):
         shutil.rmtree(results)
@@ -83,24 +98,26 @@ def run(filepath,
         key, value = variable.split('=')
         os.environ[key] = value
 
-    args = []
     args = [
         # JUNIT xml file generated per feature file executed
         '--junit', f'--junit-directory={results}',
         # don't run disabled tests
         '--tags', '~@disabled',
         # generate a JSOn file containing the exact details of the whole run
-        # '--format', 'json', f'--outfile={results}/run.json',
         '--format', 'cucu.formatter.json:CucuJSONFormatter', f'--outfile={results}/run.json',
         # use our own built in formatter
         '--format', 'cucu.formatter.cucu:CucuFormatter',
         '--logging-level', logging_level.upper(),
         # stop all log/stdout capturing
-        #'--no-capture', '--no-capture-stderr', '--no-logcapture',
+        # '--no-capture', '--no-capture-stderr', '--no-logcapture',
         # always print the skipped steps and scenarios
         '--show-skipped',
         filepath
     ]
+
+    for tag in tags:
+        args.append('--tags')
+        args.append(tag)
 
     if source:
         args += ['--show-source']

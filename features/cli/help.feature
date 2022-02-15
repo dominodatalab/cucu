@@ -2,7 +2,7 @@ Feature: Run
   As a developer I want the user to 
 
   Scenario: User gets can get the help menu from cucu to show
-    Given I run the command "cucu --help" and save stdout to "STDOUT", stderr to "STDERR" and exit code to "EXIT_CODE"
+    Given I run the command "cucu --help" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
       And I should see "{STDOUT}" is equal to the following:
       """

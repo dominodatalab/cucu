@@ -8,6 +8,10 @@ def init_logging(logging_level):
     logging.basicConfig(level=logging_level)
     logging.debug('logger initialized')
 
+    logging.getLogger('parse').setLevel(logging.WARNING)
+    logging.getLogger('selenium').setLevel(logging.WARNING)
+    logging.getLogger('urllib3').setLevel(logging.WARNING)
+
 
 @wraps(logging.debug)
 def debug(*args, **kwargs):
