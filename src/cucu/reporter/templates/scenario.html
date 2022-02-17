@@ -45,6 +45,44 @@
                     <td><pre style="display: inline; color: gray;"># {{ '{:.3f}'.format(step['result']['duration']) }}s</pre></td>
                 {% endif %}
             </tr>
+            {% if step['text'] %}
+            <tr>
+                <td colspan="2">
+                    <pre style="color: black; margin: 0">      """</pre>
+                    {% for line in step['text'] %}
+                    <pre style="color: black; margin: 0">      {{line}}</pre>
+                    {% endfor %}
+                    <pre style="color: black; margin: 0">      """</pre>
+                </td>
+            </tr>
+            {% endif %}
+            {% if step['table'] %}
+            <tr>
+                <td colspan="2">
+                    <pre style="color: black; margin: 0; display: inline">      |</pre>
+                    {% for heading in step['table']['headings'] %}
+                    <pre style="color: black; margin: 0; display: inline"> {{ heading }} |</pre>
+                    {% endfor %}
+                    </br>
+                    {% for row in step['table']['rows'] %}
+                        <pre style="color: black; margin: 0; display: inline">      |</pre>
+                        {% for value in row %}
+                        <pre style="color: black; margin: 0; display: inline"> {{ value }} |</pre>
+                        {% endfor %}
+                        </br>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endif %}
+            {% if step['result'] is defined %}
+                {% if step['result']['stdout'] %}
+                <tr>
+                    {% for line in step['result']['stdout'] %}
+                        <td colspan="2"><pre style="color: darkgray">{{ line }}</pre></td>
+                    {% endfor %}
+                </tr>
+                {% endif %}
+            {% endif %}
             {% if step['image'] is defined %}
             <tr>
                 <td colspan="2"><img class="col-12 shadow p-3 mb-5 bg-white rounded" src='{{ step["image"] }}'></img></td>

@@ -4,14 +4,14 @@
 #   https://github.com/behave/behave/blob/master/behave/formatter/json.py
 #
 from __future__ import absolute_import
+
 import base64
+import json
+import six
+import sys
+
 from behave.formatter.base import Formatter
 from behave.model_core import Status
-import six
-try:
-    import json
-except ImportError:
-    import simplejson as json
 
 
 # -----------------------------------------------------------------------------
@@ -162,6 +162,8 @@ class CucuJSONFormatter(Formatter):
     def result(self, step):
         steps = self.current_feature_element['steps']
         steps[self._step_index]['result'] = {
+            'stdout': step.stdout,
+            'stderr': step.stderr,
             'status': step.status.name,
             'duration': step.duration,
         }

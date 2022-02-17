@@ -49,6 +49,26 @@ class Selenium(Browser):
     def navigate(self, url):
         self.driver.get(url)
 
+    def switch_to_next_tab(self):
+        window_handles = self.driver.window_handles
+        window_handle = self.driver.current_window_handle
+        window_handle_index = window_handles.index(window_handle)
+
+        if window_handle_index == len(window_handles) - 1:
+            raise RuntimeError('next tab not available')
+
+        self.driver.switch_to.window(window_handles[window_handle_index + 1])
+
+    def switch_to_previous_tab(self):
+        window_handles = self.driver.window_handles
+        window_handle = self.driver.current_window_handle
+        window_handle_index = window_handles.index(window_handle)
+
+        if window_handle_index == 0:
+            raise RuntimeError('previous tab not available')
+
+        self.driver.switch_to.window(window_handles[window_handle_index - 1])
+
     def refresh(self):
         self.driver.refresh()
 

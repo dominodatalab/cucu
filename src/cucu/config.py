@@ -71,9 +71,12 @@ def get_local_address():
     return google_dns_socket.getsockname()[0]
 
 
+# XXX: need a way to register these with description so that we can create a
+#      `cucu vars` command which spits out the available variables, their
+#      defaults and a description of their usage.
 CONFIG['HOST_ADDRESS'] = get_local_address()
-CONFIG['CUCU_WEB_WAIT_TIMEOUT_MS'] = 15000
-CONFIG['CUCU_WEB_WAIT_BEFORE_RETRY_MS'] = 500  # retry every 500ms
+CONFIG['CUCU_STEP_WAIT_TIMEOUT_MS'] = 20000  # default of 20s to wait
+CONFIG['CUCU_STEP_RETRY_AFTER_MS'] = 500     # default of 500ms to wait between retries
 CONFIG['CUCU_KEEP_BROWSER_ALIVE'] = False
 
 CONFIG['CUCU_BROWSER_WINDOW_HEIGHT'] = 1080

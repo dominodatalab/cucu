@@ -1,5 +1,6 @@
-from behave import step
+import tenacity
 
+from behave import step
 from cucu import fuzzy
 
 
@@ -22,20 +23,30 @@ def find_text(context, name, index=0):
                       direction=fuzzy.Direction.RIGHT_TO_LEFT)
 
 
-@step('I should see the text "{name}"')
-def should_see_the_text(context, name):
+def assert_text_found(context, name, index=0):
     text = find_text(context, name)
 
     if text is None:
         raise Exception(f'unable to find the text "{name}"')
+
+
+@step('I should see the text "{name}"')
+def should_see_the_text(context, name):
+    assert_text_found(context, name)
 
 
 @step('I wait to see the text "{name}"', wait_for=True)
 def wait_see_the_text(context, name):
-    text = find_text(context, name)
+    assert_text_found(context, name)
 
-    if text is None:
-        raise Exception(f'unable to find the text "{name}"')
+
+# XXX: the way we do wait for steps needs to be generalized
+@step('I wait up to "{seconds}" seconds to see the text "{name}"')
+def wait_up_to_seconds_to_see_the_text(context, seconds, name):
+    assert_func = tenacity.retry(stop=tenacity.stop_after_delay(int(seconds)),
+                                 wait=tenacity.wait_fixed(0.250))(assert_text_found)
+
+    assert_func(context, seconds, name)
 
 
 @step('I should not see the text "{name}"')

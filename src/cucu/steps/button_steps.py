@@ -16,6 +16,10 @@ def find_button(context, name, index=0):
         * <* role="link">
         * <* role="menuitem">
         * <* role="option">
+        * <* role="radio">
+
+    note: the reason we're allowing link, menuitem, option and radio buttons
+          to be clickable is that on screen they maybe presented as such.
 
     arguments:
       context - behave context object passed to a behave step
