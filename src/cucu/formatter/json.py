@@ -161,9 +161,19 @@ class CucuJSONFormatter(Formatter):
 
     def result(self, step):
         steps = self.current_feature_element['steps']
+
+        if 'stdout' in step.__dict__:
+            stdout = step.stdout
+        else:
+            stdout = ''
+        if 'stderr' in step.__dict__:
+            stderr = step.stderr
+        else:
+            stderr = ''
+
         steps[self._step_index]['result'] = {
-            'stdout': step.stdout,
-            'stderr': step.stderr,
+            'stdout': stdout,
+            'stderr': stderr,
             'status': step.status.name,
             'duration': step.duration,
         }
