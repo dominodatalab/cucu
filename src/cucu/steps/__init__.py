@@ -13,6 +13,7 @@ import cucu.steps.input_steps
 import cucu.steps.link_steps
 import cucu.steps.menuitem_steps
 import cucu.steps.radio_steps
+import cucu.steps.tab_steps
 import cucu.steps.text_steps
 import cucu.steps.variable_steps
 import cucu.steps.webserver_steps

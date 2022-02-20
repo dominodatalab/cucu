@@ -134,11 +134,11 @@ def switch_to_next_browser(context):
         raise RuntimeError('no previous browser window available')
 
 
-@step('I switch to the next tab')
-def switch_to_next_tab(context):
+@step('I switch to the next browser tab')
+def switch_to_next_browser_tab(context):
     context.browser.switch_to_next_tab()
 
 
-@step('I switch to the previous tab')
-def switch_to_previous_tab(context):
+@step('I switch to the previous browser tab')
+def switch_to_previous_browser_tab(context):
     context.browser.switch_to_previous_tab()
