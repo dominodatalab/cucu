@@ -8,7 +8,7 @@ Feature: Browser management
      Then I should see the browser title is "Buttons!"
      When I open a new browser at the url "http://{HOST_ADDRESS}:40000/inputs.html"
      Then I should see the browser title is "Inputs!"
-     When I close the current browser 
+     When I close the current browser
      Then I should see the browser title is "Buttons!"
 
   Scenario: User can open multiple browsers and switch between them
