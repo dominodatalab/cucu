@@ -28,7 +28,7 @@ def find_dropdown(ctx, name, index=0):
                           '*[role="listbox"]',
                       ],
                       index=index,
-                      direction=fuzzy.Direction.RIGHT_TO_LEFT)
+                      direction=fuzzy.Direction.LEFT_TO_RIGHT)
 
 
 def find_dropdown_option(ctx, name, index=0):
@@ -53,7 +53,7 @@ def find_dropdown_option(ctx, name, index=0):
                           '*[role="option"]',
                       ],
                       index=index,
-                      direction=fuzzy.Direction.RIGHT_TO_LEFT)
+                      direction=fuzzy.Direction.LEFT_TO_RIGHT)
 
 
 def select_dropdown_option(ctx, dropdown, option):
@@ -84,3 +84,32 @@ def select_option_from_dropdown(ctx, option, dropdown):
 @step('I wait to select the option "{option}" from the dropdown "{dropdown}"', wait_for=True)
 def wait_to_select_option_from_dropdown(ctx, option, dropdown):
     select_dropdown_option(ctx, dropdown, option)
+
+
+@step('I should see the option "{option}" is selected on the dropdown "{dropdown}"')
+def option_is_selected(ctx, option, dropdown):
+    dropdown_element = find_dropdown(ctx, dropdown)
+    selected_option = None
+
+    if dropdown_element.tag_name == 'select':
+        select_element = Select(dropdown_element)
+        selected_option = select_element.first_selected_option
+    else:
+        if dropdown_element.get_attribute('aria-expanded') != 'true':
+            # open the dropdown to see its options
+            dropdown_element.click()
+
+        selected_option = find_dropdown_option(ctx, option)
+        # close the dropdown
+        selected_option.click()
+
+    if selected_option is None:
+        raise RuntimeError(f'unable to find selected option in dropdown {dropdown}')
+
+    selected_name = selected_option.get_attribute('textContent')
+
+    # XXX: we're doing contains because a lot of our existing dropdown/comboboxes
+    #      are messy and do not use things like aria-label/aria-describedby to
+    #      make them accessible and easier to find for automation by their name
+    if selected_name.index(option) == -1:
+        raise RuntimeError(f'seleced option is {selected_name} not {option}')

@@ -17,7 +17,7 @@
         jQuery.expr[ ":" ],
         {
             has_text: function(elem, index, match) {
-                return (elem.textContent || elem.innerText || jQuery(elem).text() || '').trim() === match[3].trim();
+                return (elem.textContent || elem.innerText || jQuery(elem).text() || '') === match[3].trim();
             },
             vis: function (elem) {
                 return !(jQuery(elem).is(":hidden") || jQuery(elem).parents(":hidden").length);
@@ -142,7 +142,8 @@
 
                     // <...><*>name</*></...>...<...><thing></...>
                     // XXX: this rule is horribly complicated and I'd rather see it gone
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")').nextAll().find(thing + ':vis').toArray();
+                    //      basically: common great grandpranet
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")').parent().parent().parent().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<...><*>name</*></...>...<...><thing></...>', results); }
                     elements = elements.concat(results);
                 }
@@ -165,7 +166,7 @@
 
                     // <...><thing></...>...<...><*>name</*></...>
                     // XXX: this rule is horribly complicated and I'd rather see it gone
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")').siblings().find(thing + ':vis').toArray();
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")').parent().parent().parent().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<...><thin></...>...<...><*>name</*></...>', results); }
                     elements = elements.concat(results);
                 }

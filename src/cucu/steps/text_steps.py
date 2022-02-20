@@ -20,7 +20,7 @@ def find_text(context, name, index=0):
                       name,
                       ['*'],
                       index=index,
-                      direction=fuzzy.Direction.RIGHT_TO_LEFT)
+                      direction=fuzzy.Direction.LEFT_TO_RIGHT)
 
 
 def assert_text_found(context, name, index=0):
