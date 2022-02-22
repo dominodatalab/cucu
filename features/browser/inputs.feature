@@ -1,7 +1,7 @@
 Feature: Inputs
   As a developer I want to make sure the test writer can interact with different
   input elements
-  
+
   Background: HTML page with buttons
     Given I start a webserver on port "40000" at directory "data/www"
       And I open a browser at the url "http://{HOST_ADDRESS}:40000/inputs.html"
