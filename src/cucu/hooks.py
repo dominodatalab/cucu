@@ -1,3 +1,13 @@
+from cucu.config import CONFIG
+
+
+def register_after_scenario_hook(after_scenario_func):
+    """
+    register an after scenario hook which is called with the current behave
+    context object.
+    """
+    CONFIG['__CUCU_AFTER_SCENARIO_HOOKS'].append(after_scenario_func)
+
 
 def run_steps(context, steps_text):
     """

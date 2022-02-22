@@ -50,12 +50,12 @@ def before_scenario(context, scenario):
     context.step_index = 1
     context.browsers = []
     context.browser = None
-    context.scenario_tasks = []
 
-    # TODO: move this into a pre-scenario hook which any module can use to
-    #       register their own hooks and then you would just call of the
-    #       specific hooks here
+    # internal cucu config variables
     config.CONFIG['SCENARIO_RUN_ID'] = uuid.uuid1().hex
+
+    # internal cucu config objects
+    CONFIG['__CUCU_AFTER_SCENARIO_HOOKS'] = []
 
 
 def after_scenario(context, scenario):
@@ -72,8 +72,10 @@ def after_scenario(context, scenario):
 
         context.browsers = []
 
-    for task in context.scenario_tasks:
-        task.quit()
+    for hook in CONFIG['__CUCU_AFTER_SCENARIO_HOOKS']:
+        hook(context)
+
+    CONFIG['__CUCU_AFTER_SCENARIO_HOOKS'] = []
 
 
 def before_step(context, step):
