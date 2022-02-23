@@ -46,7 +46,7 @@ def wait_up_to_seconds_to_see_the_text(context, seconds, name):
     assert_func = tenacity.retry(stop=tenacity.stop_after_delay(int(seconds)),
                                  wait=tenacity.wait_fixed(0.250))(assert_text_found)
 
-    assert_func(context, seconds, name)
+    assert_func(context, name)
 
 
 @step('I should not see the text "{name}"')

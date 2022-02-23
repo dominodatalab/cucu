@@ -5,8 +5,8 @@ import time
 import os
 
 from click import ClickException
-from cucu import fuzzy, logger
-from cucu import reporter
+from cucu import fuzzy, reporter, logger
+from cucu.config import CONFIG
 
 
 @click.group()
@@ -81,6 +81,17 @@ def run(filepath,
     """
     run a set of feature files
     """
+
+    # load all cucurc.yml files in the paths from the path given backwards
+    dirname = os.path.dirname(os.path.abspath(filepath))
+
+    while dirname != os.getcwd():
+        cucurc_filepath = os.path.join(dirname, 'cucurc.yml')
+        if os.path.exists(cucurc_filepath):
+            logger.debug(f'loading for {cucurc_filepath}')
+            CONFIG.load(cucurc_filepath)
+
+        dirname = os.path.dirname(dirname)
 
     if headless:
         os.environ['CUCU_BROWSER_HEADLESS'] = 'True'
