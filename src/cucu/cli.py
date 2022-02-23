@@ -83,7 +83,10 @@ def run(filepath,
     """
 
     # load all cucurc.yml files in the paths from the path given backwards
-    dirname = os.path.dirname(os.path.abspath(filepath))
+    if os.path.isdir(filepath):
+        dirname = filepath
+    else:
+        dirname = os.path.dirname(os.path.abspath(filepath))
 
     while dirname != os.getcwd():
         cucurc_filepath = os.path.join(dirname, 'cucurc.yml')
