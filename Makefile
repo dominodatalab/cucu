@@ -1,4 +1,4 @@
-# help menu when you run just `make`
+ # help menu when you run just `make`
 help:
 	#   install  - installs the necesary developmenet dependencies.
 	#   build    - rebuilds the existing installation pushing any local code to the 
@@ -17,7 +17,6 @@ build:
 
 dist: build
 	pip install dist/cucu-*.tar.gz
-	
 
 test: src/* tests/*
 	poetry run pytest
