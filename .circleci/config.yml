@@ -47,6 +47,10 @@ jobs:
           path: report/
           destination: report
 
+      - store_artifacts:
+          path: results/
+          destination: report
+
 workflows:
   build-n-test:
     jobs:
