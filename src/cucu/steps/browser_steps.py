@@ -48,7 +48,7 @@ def open_a_browser(context, url):
 
     logger.debug(f'navigating to url #{url}')
     context.browser.navigate(url)
-    fuzzy.init(context.browser.execute)
+    fuzzy.init(context.browser)
 
 
 @step('I open a new browser at the url "{url}"')
@@ -57,7 +57,7 @@ def open_a_new_browser(context, url):
     context.browsers.append(context.browser)
     logger.debug(f'navigating to url #{url}')
     context.browser.navigate(url)
-    fuzzy.init(context.browser.execute)
+    fuzzy.init(context.browser)
 
 
 @step('I refresh the browser')

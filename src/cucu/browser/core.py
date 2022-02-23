@@ -34,6 +34,12 @@ class Browser:
     def execute(self, javascript):
         raise RuntimeError('implement me')
 
+    def switch_to_default_frame(self):
+        raise RuntimeError('implement me')
+
+    def switch_to_frame(self, frame):
+        raise RuntimeError('implement me')
+
     def screenshot(self, filepath):
         raise RuntimeError('implement me')
 
