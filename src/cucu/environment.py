@@ -1,9 +1,13 @@
+import functools
 import os
 import sys
 import uuid
 
 from cucu import behave_tweaks, config, logger
 from cucu.config import CONFIG
+
+# make all prints flush immediately
+print = functools.partial(print, flush=True)
 
 behave_tweaks.init_step_hooks(sys.stdout, sys.stderr)
 
