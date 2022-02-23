@@ -197,7 +197,8 @@ class CucuFormatter(Formatter):
                     value = cucu.config.CONFIG[variable]
 
                     if value is not None:
-                        value = cucu.config.CONFIG[variable].replace('\n', '\\n')
+                        value = str(cucu.config.CONFIG[variable])
+                        value = value.replace('\n', '\\n')
                         value = value[:32] + '...' * (len(value) > 32)
                     else:
                         value = None
