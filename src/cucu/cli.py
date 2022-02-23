@@ -84,7 +84,7 @@ def run(filepath,
 
     # load all cucurc.yml files in the paths from the path given backwards
     if os.path.isdir(filepath):
-        dirname = filepath
+        dirname = os.path.abspath(filepath)
     else:
         dirname = os.path.dirname(os.path.abspath(filepath))
 
