@@ -111,5 +111,5 @@ def option_is_selected(ctx, option, dropdown):
     # XXX: we're doing contains because a lot of our existing dropdown/comboboxes
     #      are messy and do not use things like aria-label/aria-describedby to
     #      make them accessible and easier to find for automation by their name
-    if selected_name.index(option) == -1:
+    if selected_name.find(option) == -1:
         raise RuntimeError(f'seleced option is {selected_name} not {option}')

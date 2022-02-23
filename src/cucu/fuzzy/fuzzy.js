@@ -136,14 +136,14 @@
                     elements = elements.concat(results);
 
                     // <*>name</*>...<thing>...
-                    results = jQuery('*:vis:' + matcher + '("' + name + '") ~ ' + thing + ':vis').toArray();
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")').nextAll(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<*>name</*>...<thing>...', results); }
                     elements = elements.concat(results);
 
                     // <...><*>name</*></...>...<...><thing></...>
                     // XXX: this rule is horribly complicated and I'd rather see it gone
                     //      basically: common great grandpranet
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")').parent().parent().parent().find(thing + ':vis').toArray();
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")').nextAll().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<...><*>name</*></...>...<...><thing></...>', results); }
                     elements = elements.concat(results);
                 }
@@ -166,7 +166,7 @@
 
                     // <...><thing></...>...<...><*>name</*></...>
                     // XXX: this rule is horribly complicated and I'd rather see it gone
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")').parent().parent().parent().find(thing + ':vis').toArray();
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")').prevAll().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<...><thin></...>...<...><*>name</*></...>', results); }
                     elements = elements.concat(results);
                 }
