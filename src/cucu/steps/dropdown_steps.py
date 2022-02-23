@@ -20,7 +20,7 @@ def find_dropdown(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
-    return fuzzy.find(ctx.browser.execute,
+    return fuzzy.find(ctx.browser,
                       name,
                       [
                           'select',
@@ -46,7 +46,7 @@ def find_dropdown_option(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
-    return fuzzy.find(ctx.browser.execute,
+    return fuzzy.find(ctx.browser,
                       name,
                       [
                           'option',

@@ -21,7 +21,7 @@ def find_menuitem(context, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
-    return fuzzy.find(context.browser.execute,
+    return fuzzy.find(context.browser,
                       name,
                       ['*[role="menuitem"]'],
                       index=index)

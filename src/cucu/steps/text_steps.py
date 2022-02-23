@@ -16,7 +16,7 @@ def find_text(context, name, index=0):
     returns:
         the WebElement that matches the provided arguments or None if none found
     """
-    return fuzzy.find(context.browser.execute,
+    return fuzzy.find(context.browser,
                       name,
                       ['*'],
                       index=index,
