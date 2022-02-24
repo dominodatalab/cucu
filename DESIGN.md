@@ -6,10 +6,13 @@ end to end testing framework.
 
 # overview
 
-`cucu` is an end to end testing framework that uses [gherkin]() to drive various
-underlying tools/frameworks to create real world testing scenarios. As of now
-`cucu` uses selenium to interact with a browser. There are a few reasons for
-writing the actual tests in `gherkin` including:
+`cucu` is an end to end testing framework that uses [gherkin](https://cucumber.io/docs/gherkin/)
+to drive various underlying tools/frameworks to create real world testing
+scenarios. As of now `cucu` uses selenium to interact with a browser but we 
+will have support for running the tests through other selenium testing
+frameworks.
+
+There are a few reasons for writing the actual tests in `gherkin` including:
 
  * tests are readable by anyone in the organization, since they're just plain
    English that describe interactions and validations.
@@ -19,7 +22,6 @@ writing the actual tests in `gherkin` including:
    pause/stop/restart containers, etc.)
  * there's only one implementation per "step" and this makes for better reusing
    of existing test code which can be maintained in the long term.
-
 
 # cucu fuzzy matching
 
@@ -47,9 +49,6 @@ done using any of the following rules:
 Where `thing` is any of the previously identified element types. With the above
 rules we created a simple method method that uses the those rules to find a set
 of elements labeled with the name you provide and type of elements you're
-looking for. We currently use [swizzle]() as the underlying element query
-language as its highly portable and has a bit more flexibility that CSS does
-not give us.
-
-... wip ...
-
+looking for. We currently use [swizzle](https://github.com/jquery/sizzle) as
+the underlying element query language as its highly portable and has a bit
+useful features than basic CSS gives us.
