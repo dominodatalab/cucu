@@ -7,17 +7,13 @@ orbs:
 
 jobs:
   test:
-
-
     docker:
       - image: cimg/python:3.8.12-browsers
 
     steps:
       - browser-tools/install-browser-tools
-
-    steps:
-      - checkout
       - browser-tools/install-chrome
+      - checkout
 
       - run:
           name: install cucu dependencies
