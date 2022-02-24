@@ -15,6 +15,12 @@ install: src/*
 build:
 	poetry build
 
+release:
+	echo "tag a new release of cucu"
+	poetry version minor
+	git tag `poetry version -s`
+	echo "make sure to commit your change sand then 'git push origin --tags'"
+
 dist: build
 	pip install dist/cucu-*.tar.gz
 	
