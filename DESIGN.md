@@ -32,19 +32,19 @@ elements on the page by having a label and a type of element we're searching for
 The principal is simple you want to `click the button "Foo"` so we know you want
 to find a button which can be one of a few different kind of HTML elements:
 
-  * <a>
-  * <button>
-  * <input type="button">
-  * <* role="button">
+  * `<a>`
+  * `<button>`
+  * `<input type="button">`
+  * `<* role="button">`
   * etc
 
 We also know that it has the name you provided labeling it and that can be
 done using any of the following rules:
 
-  * <thing>name</thing> 
-  * <*>name</*><thing></thing>
-  * <thing attribute="name"></thing>
-  * <*>name</*>...<thing>...
+  * `<thing>name</thing>`
+  * `<*>name</*><thing></thing>`
+  * `<thing attribute="name"></thing>`
+  * `<*>name</*>...<thing>...`
 
 Where `thing` is any of the previously identified element types. With the above
 rules we created a simple method method that uses the those rules to find a set
