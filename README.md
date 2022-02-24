@@ -1,6 +1,8 @@
 # cucu
 
-end to end testing framework that uses [cucumber](https://cucumber.io/) to
+[![CircleCI](https://circleci.com/gh/cerebrotech/cucu/tree/main.svg?style=svg&circle-token=8ad8867cae9cd93ece480ab64236c08307a4df35)](https://circleci.com/gh/cerebrotech/cucu/tree/main)
+
+End to end testing framework that uses [cucumber](https://cucumber.io/) to
 validate a product behaves as expected.
 
 # requirements
