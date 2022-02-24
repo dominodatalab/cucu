@@ -24,6 +24,10 @@ def main(debug):
               '--browser',
               default='chrome',
               help='browser name to use default: chrome')
+@click.option('-c',
+              '--color-output/--no-color-output',
+              default=True,
+              help='produce output with colors or not')
 @click.option('-e',
               '--env',
               default=[],
@@ -67,6 +71,7 @@ def main(debug):
               default=None)
 def run(filepath,
         browser,
+        color_output,
         env,
         fail_fast,
         headless,
@@ -96,21 +101,24 @@ def run(filepath,
 
         dirname = os.path.dirname(dirname)
 
+    if color_output:
+        CONFIG['CUCU_COLOR_OUTPUT'] = str(color_output).lower()
+
     if headless:
-        os.environ['CUCU_BROWSER_HEADLESS'] = 'True'
+        CONFIG['CUCU_BROWSER_HEADLESS'] = 'True'
 
     for variable in list(env):
         key, value = variable.split('=')
-        os.environ[key] = value
+        CONFIG[key] = value
 
-    os.environ['CUCU_LOGGING_LEVEL'] = logging_level.upper()
+    CONFIG['CUCU_LOGGING_LEVEL'] = logging_level.upper()
     logger.init_logging(logging_level.upper())
-    os.environ['CUCU_BROWSER'] = browser
+    CONFIG['CUCU_BROWSER'] = browser
 
     if ipdb_on_failure:
-        os.environ['CUCU_IPDB_ON_FAILURE'] = 'true'
+        CONFIG['CUCU_IPDB_ON_FAILURE'] = 'true'
 
-    os.environ['CUCU_RESULTS_DIR'] = results
+    CONFIG['CUCU_RESULTS_DIR'] = results
     if os.path.exists(results):
         shutil.rmtree(results)
     os.makedirs(results)
@@ -119,7 +127,7 @@ def run(filepath,
         shutil.rmtree(results)
 
     if selenium_remote_url is not None:
-        os.environ['CUCU_SELENIUM_REMOTE_URL'] = selenium_remote_url
+        CONFIG['CUCU_SELENIUM_REMOTE_URL'] = selenium_remote_url
 
     args = [
         # JUNIT xml file generated per feature file executed

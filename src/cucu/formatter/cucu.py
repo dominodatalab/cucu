@@ -32,7 +32,8 @@ class CucuFormatter(Formatter):
         self.printer = ModelPrinter(self.stream)
         # -- LAZY-EVALUATE:
         self._multiline_indentation = None
-        self.monochrome = not self.stream.isatty()
+        self.monochrome = not self.stream.isatty() or \
+            cucu.config.CONFIG['CUCU_COLOR_OUTPUT'] != 'true'
 
     @property
     def multiline_indentation(self):
