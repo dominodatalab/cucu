@@ -2,20 +2,23 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
+orbs:
+  browser-tools: circleci/browser-tools@1.2.4
+
 jobs:
   test:
-    
+
+
     docker:
       - image: cimg/python:3.8.12-browsers
-      - image: selenium/standalone-chrome-debug:latest
-        name: chrome
+
+    steps:
+      - browser-tools/install-browser-tools
 
     steps:
       - checkout
+      - browser-tools/install-chrome
 
-      - setup_remote_docker:
-          version: 20.10.11
- 
       - run:
           name: install cucu dependencies
           command: make install
@@ -32,7 +35,6 @@ jobs:
           name: run functional tests
           command: cucu run features
           environment: 
-            CUCU_SELENIUM_REMOTE_URL: http://chrome:4444/wd/hub
             CUCU_COLOR_OUTPUT: false
 
       - run:
