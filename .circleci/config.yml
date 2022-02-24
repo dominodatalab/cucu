@@ -29,8 +29,8 @@ jobs:
           command: pip install dist/cucu-*.tar.gz
 
       - run:
-          name: run tests
-          command: cucu run features/browser/buttons.feature
+          name: run functional tests
+          command: cucu run features
           environment: 
             CUCU_SELENIUM_REMOTE_URL: http://chrome:4444/wd/hub
             CUCU_COLOR_OUTPUT: false
