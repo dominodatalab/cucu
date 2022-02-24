@@ -36,11 +36,6 @@ jobs:
             CUCU_COLOR_OUTPUT: false
 
       - run:
-          name: dump cucu thread stacks
-          command: pkill -SIGQUIT cucu
-          when: on_fail
-
-      - run:
           name: generate html test report
           command: cucu report
           when: always
