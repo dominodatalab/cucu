@@ -37,7 +37,7 @@ jobs:
 
       - run:
           name: dump cucu thread stacks
-          command: pkill -SIGQUIT python
+          command: pkill -SIGQUIT cucu
           when: on_fail
 
       - run:
