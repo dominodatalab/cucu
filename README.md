@@ -68,3 +68,12 @@ specific version of chrome on any setup you run this on.
 
 You can run the existing `cucu` tests by simply executing `make test` and can
 also check the code coverage by running `make coverage`.
+
+# development
+
+## tagging a new release
+
+To tag a new release of cucu on your branch you can simply run `make release`
+and it'll update the package version and create a new git tag which you can
+then add those changes to your PR and `git push origin --tags` to push the new
+tag up to git.
