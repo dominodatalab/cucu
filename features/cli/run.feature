@@ -2,7 +2,7 @@ Feature: Run
   As a developer I want the user to 
 
   Scenario: User gets an error when running an inexistent feature file
-    Given I run the command "cucu run data/features/inexistent.feature" and save stdout to "STDOUT", exit code to "EXIT_CODE"
+    Given I run the command "cucu run data/features/inexistent.feature --results {CUCU_RESULTS_DIR}/inexistent-results" and save stdout to "STDOUT", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "1"
       And I should see "{STDOUT}" is equal to the following
       """
@@ -11,7 +11,7 @@ Feature: Run
       """
 
   Scenario: User gets expected output when running steps with substeps
-    Given I run the command "cucu run data/features/scenario_with_substeps.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+    Given I run the command "cucu run data/features/scenario_with_substeps.feature --results {CUCU_RESULTS_DIR}/substeps-results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
       And I should see "{STDOUT}" matches the following
       """
@@ -32,7 +32,7 @@ Feature: Run
       And I should see "{STDERR}" is empty
 
   Scenario: User gets expected non zero exit code when a scenario fails
-    Given I run the command "cucu run data/features/feature_with_failing_scenario.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+    Given I run the command "cucu run data/features/feature_with_failing_scenario.feature --results {CUCU_RESULTS_DIR}/failing-scenario-results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "1"
       And I should see "{STDOUT}" matches the following
       """
