@@ -6,6 +6,24 @@ import uuid
 from cucu import behave_tweaks, config, logger
 from cucu.config import CONFIG
 
+# quick hack to get a sense of where things are stuck
+
+import threading, sys, traceback
+
+def dumpstacks(signal, frame):
+    id2name = dict([(th.ident, th.name) for th in threading.enumerate()])
+    code = []
+    for threadId, stack in sys._current_frames().items():
+        code.append("\n# Thread: %s(%d)" % (id2name.get(threadId,""), threadId))
+        for filename, lineno, name, line in traceback.extract_stack(stack):
+            code.append('File: "%s", line %d, in %s' % (filename, lineno, name))
+            if line:
+                code.append("  %s" % (line.strip()))
+    print("\n".join(code))
+
+import signal
+signal.signal(signal.SIGQUIT, dumpstacks)
+
 # make all prints flush immediately
 print = functools.partial(print, flush=True)
 
