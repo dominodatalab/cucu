@@ -6,13 +6,13 @@ def test_config_lookup_for_inexistent_is_none():
 
 
 def test_config_lookup_env_works():
-    assert CONFIG['SHELL'] is not None
+    assert CONFIG['HOME'] is not None
 
 
 def test_config_lookup_env_precedes_internal_value():
-    env_value = CONFIG['SHELL']
-    CONFIG['SHELL'] = 'foo'
-    assert CONFIG['SHELL'] == env_value
+    env_value = CONFIG['HOME']
+    CONFIG['HOME'] = 'foo'
+    assert CONFIG['HOME'] == env_value
 
 
 def test_config_true_method():

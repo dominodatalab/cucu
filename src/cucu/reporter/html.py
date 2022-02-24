@@ -28,10 +28,11 @@ def generate(results,
         scenarios = feature['elements']
         feature_duration = 0
 
-        # copy each feature directories contents over to the report directory
-        src_feature_filepath = os.path.join(results, feature['name'])
-        dst_feature_filepath = os.path.join(basepath, feature['name'])
-        shutil.copytree(src_feature_filepath, dst_feature_filepath, dirs_exist_ok=True)
+        if feature['status'] != 'skipped':
+            # copy each feature directories contents over to the report directory
+            src_feature_filepath = os.path.join(results, feature['name'])
+            dst_feature_filepath = os.path.join(basepath, feature['name'])
+            shutil.copytree(src_feature_filepath, dst_feature_filepath, dirs_exist_ok=True)
 
         for scenario in scenarios:
             scenario_duration = 0

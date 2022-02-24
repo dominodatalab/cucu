@@ -1,0 +1,58 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+orbs:
+  browser-tools: circleci/browser-tools@1.2.4
+
+jobs:
+  test:
+    docker:
+      - image: cimg/python:3.8.12-browsers
+
+    steps:
+      - browser-tools/install-browser-tools
+      - browser-tools/install-chrome
+      - checkout
+
+      - run:
+          name: install cucu dependencies
+          command: make install
+
+      - run:
+          name: build the cucu python package
+          command: poetry build
+      
+      - run:
+          name: install cucu globally
+          command: pip install dist/cucu-*.tar.gz
+
+      - run:
+          name: run functional tests
+          command: cucu run features
+          environment: 
+            CUCU_COLOR_OUTPUT: false
+
+      - run:
+          name: generate html test report
+          command: cucu report
+          when: always
+
+      - run:
+          name: tar up results and report
+          command: tar cvfz results.tgz results && tar cvfz report.tgz report
+          when: always
+
+      - store_test_results:
+          path: results/
+
+      - store_artifacts:
+          path: results.tgz
+
+      - store_artifacts:
+          path: report.tgz
+
+workflows:
+  build-n-test:
+    jobs:
+      - test
