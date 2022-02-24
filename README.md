@@ -1,5 +1,7 @@
 # cucu
 
+[![CircleCI](https://circleci.com/gh/cerebrotech/cucu/tree/main.svg?style=svg)](https://circleci.com/gh/cerebrotech/cucu/tree/main)
+
 end to end testing framework that uses [cucumber](https://cucumber.io/) to
 validate a product behaves as expected.
 
