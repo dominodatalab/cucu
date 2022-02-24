@@ -38,16 +38,19 @@ jobs:
           command: cucu report
           when: always
 
+      - run:
+          name: tar up results and report
+          command: tar cvfz results.tgz results && tar cvfz report.tgz report
+          when: always
+
       - store_test_results:
           path: results/
 
       - store_artifacts:
-          path: report/
-          destination: report
+          path: results.tgz
 
       - store_artifacts:
-          path: results/
-          destination: report
+          path: report.tgz
 
 workflows:
   build-n-test:
