@@ -13,6 +13,7 @@ install: src/*
 	poetry install
 
 build:
+	rm -f dist/*.tar.gz
 	poetry build
 
 release:

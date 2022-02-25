@@ -1,18 +1,36 @@
 import importlib
+import os
+import pkgutil
+import sys
 
 from cucu.config import CONFIG
 
 
-def init(locals):
+def init_steps():
+    """
+    initialize cucu steps and load underlying
+    """
+    __all__ = []
+    # trick to get the path of the script that called this function
+    f_globals = sys._getframe(1).f_globals
+    f_locals = sys._getframe(1).f_locals
+
+    path = [os.path.dirname(f_globals['__file__'])]
+
+    for loader, module_name, is_pkg in pkgutil.walk_packages(path):
+        __all__.append(module_name)
+        _module = loader.find_module(module_name).load_module(module_name)
+        f_globals[module_name] = _module
+    
+    f_locals.update(importlib.import_module('cucu.steps').__dict__)
+
+
+def init_environment():
     """
     initialize cucu internal environment hooks
-
-    Params:
-        locals - the locals() object from the environment.py file this is being
-                 called from since we have to be able to set the behave hooks
-                 at that exact module level.
     """
-    locals.update(importlib.import_module('cucu.environment').__dict__)
+    f_locals = sys._getframe(1).f_locals
+    f_locals.update(importlib.import_module('cucu.environment').__dict__)
 
 
 def register_after_scenario_hook(after_scenario_func):

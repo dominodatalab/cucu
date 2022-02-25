@@ -1,5 +1,3 @@
-import cucu.steps
-
 from behave import step
 from cucu import run_steps
 
