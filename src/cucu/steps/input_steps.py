@@ -1,5 +1,8 @@
 from behave import step
 
+# XXX: this would have to be generalized to other browser abstraactions
+from selenium.webdriver.common.keys import Keys
+
 from cucu import fuzzy
 
 
@@ -39,6 +42,12 @@ def writes_into_input(context, value, name):
 def wait_to_write_into_input(context, value, name):
     input_ = find_input(context, name)
     input_.send_keys(value)
+
+
+@step('I send the "{key}" key to the input "{name}"')
+def send_keys_to_input(context, key, name):
+    input_ = find_input(context, name)
+    input_.send_keys(Keys.__dict__[key.upper()])
 
 
 @step('I wait to see the input "{name}"', wait_for=True)
