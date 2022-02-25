@@ -90,6 +90,7 @@ class CucuJSONFormatter(Formatter):
             'steps': [],
             'status': None,
         })
+        self.steps = []
         if scenario.description:
             element['description'] = scenario.description
         self._step_index = 0

@@ -103,6 +103,8 @@ class CucuFormatter(Formatter):
                                 scenario.name)
         self.write_tags(scenario.tags, indent)
         self.stream.write(text)
+        self.steps = []
+        self.match_step_index = 0
 
     def step(self, step):
         self.insert_step(step)
