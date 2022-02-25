@@ -47,7 +47,7 @@ def before_scenario(context, scenario):
     os.makedirs(scenario_dir)
     context.scenario = scenario
     context.scenario_dir = scenario_dir
-    context.step_index = 1
+    context.step_index = 0
     context.browsers = []
     context.browser = None
 
@@ -93,7 +93,7 @@ def after_step(context, step):
     if context.browser is not None:
         step_name = escape_filename(step.name)
         filepath = os.path.join(context.scenario_dir,
-                                f'{context.step_index-1} - {step_name}.png')
+                                f'{context.step_index} - {step_name}.png')
 
         context.browser.screenshot(filepath)
         logger.debug(f'wrote screenshot {filepath}')

@@ -7,7 +7,7 @@
             <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
               <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                 <li class="nav-item active">
-                  <a class="nav-link" href="../index.html">Top</a>
+                  <a class="nav-link" href="../../index.html">Top</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -28,6 +28,7 @@
             <td style="color: gray;"></td>
         </tr>
         {% for step in steps %}
+            {% set step_name = step['keyword'] + ' ' + step['name'] %}
             {% if step['substep'] %}
                 {% set step_prefix = "     ⤷" %}
             {% else %}
@@ -35,13 +36,13 @@
             {% endif %}
             <tr>
                 {% if step['result'] is not defined %}
-                    <td><pre style="display: inline; color: blue;">{{ step_prefix }}{{ step['keyword'] }} {{ step['name'] }}</pre></td>
+                    <td><pre style="display: inline; color: blue;">{{ step_prefix }}{{ step_name }}</pre></td>
                     <td></td>
                 {% elif step['result']['status'] == 'passed' %}
                     <td><pre style="display: inline; color: green">{{ step_prefix }}{{ step['keyword'].rjust(6, ' ') }}</pre><pre style="display: inline"> {{ step['name'] }}</pre></td>
                     <td><pre style="display: inline; color: gray;"># {{ '{:.3f}'.format(step['result']['duration']) }}s</pre></td>
                 {% elif step['result']['status'] == 'failed' %}
-                    <td><pre style="display: inline; color: red">{{ step_prefix }}{{ step['keyword'].rjust(6, ' ') }} {{ step['name'] }}</pre></td>
+                    <td><pre style="display: inline; color: red">{{ step_prefix }}{{ step_name }}</pre></td>
                     <td><pre style="display: inline; color: gray;"># {{ '{:.3f}'.format(step['result']['duration']) }}s</pre></td>
                 {% endif %}
             </tr>
@@ -85,7 +86,7 @@
             {% endif %}
             {% if step['image'] is defined %}
             <tr>
-                <td colspan="2"><img class="col-12 shadow p-3 mb-5 bg-white rounded" src='{{ step["image"] }}'></img></td>
+                <td colspan="2"><img class="col-12 shadow p-3 mb-5 bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img></td>
             </tr>
             {% endif %}
         {% endfor %}
