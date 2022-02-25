@@ -1,4 +1,18 @@
+import importlib
+
 from cucu.config import CONFIG
+
+
+def init(locals):
+    """
+    initialize cucu internal environment hooks
+
+    Params:
+        locals - the locals() object from the environment.py file this is being
+                 called from since we have to be able to set the behave hooks
+                 at that exact module level.
+    """
+    locals.update(importlib.import_module('cucu.environment').__dict__)
 
 
 def register_after_scenario_hook(after_scenario_func):
