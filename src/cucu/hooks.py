@@ -21,7 +21,7 @@ def init_steps():
         __all__.append(module_name)
         _module = loader.find_module(module_name).load_module(module_name)
         f_globals[module_name] = _module
-    
+
     f_locals.update(importlib.import_module('cucu.steps').__dict__)
 
 
