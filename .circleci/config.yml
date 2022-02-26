@@ -6,6 +6,20 @@ orbs:
   browser-tools: circleci/browser-tools@1.2.4
 
 jobs:
+  lint:
+    docker:
+      - image: cimg/python:3.8.12-browsers
+
+    steps:
+      - checkout
+      - run:
+          name: install cucu dependencies
+          command: pip install poetry && poetry install
+      
+      - run:
+          name: lint the source code
+          command: poetry run flake8 src tests *.py
+
   test:
     docker:
       - image: cimg/python:3.8.12-browsers
@@ -17,7 +31,7 @@ jobs:
 
       - run:
           name: install cucu dependencies
-          command: make install
+          command: pip install poetry && poetry install
 
       - run:
           name: build the cucu python package
@@ -55,4 +69,5 @@ jobs:
 workflows:
   build-n-test:
     jobs:
+      - lint
       - test
