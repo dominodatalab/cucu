@@ -20,7 +20,8 @@ jobs:
           name: lint the source code
           command: poetry run flake8 src tests *.py
 
-  functional-tests:
+
+  test:
     docker:
       - image: cimg/python:3.8.12-browsers
 
@@ -43,7 +44,7 @@ jobs:
 
       - run:
           name: run functional tests
-          command: cucu run features
+          command: poetry run coverage run --source=src/ src/cucu/cli.py run features
           environment: 
             CUCU_COLOR_OUTPUT: false
 
@@ -57,36 +58,27 @@ jobs:
           command: tar cvfz results.tgz results && tar cvfz report.tgz report
           when: always
 
-      - store_test_results:
-          path: results/
-
       - store_artifacts:
           path: results.tgz
 
       - store_artifacts:
           path: report.tgz
-
-  unit-tests:
-    docker:
-      - image: cimg/python:3.8.12-browsers
-
-    steps:
-      - checkout
-
-      - run:
-          name: install cucu dependencies
-          command: pip install poetry && poetry install
-
+      
       - run:
           name: run unit tests
-          command: poetry run pytest  --junit-xml=unit-tests.xml
+          command: poetry run coverage run --append --source=src/ -m pytest  --junit-xml=results/unit-tests.xml
+          when: always
 
       - store_test_results:
-          path: unit-tests.xml
+          path: results/
+
+      - run:
+        name: code coverage report
+        run: poetry run coverage report --fail-under=68
 
 workflows:
   build-n-test:
     jobs:
       - lint
-      - functional-tests
-      - unit-tests
+      - test
+      - coverage
