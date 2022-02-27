@@ -1,9 +1,9 @@
 Feature: Multiple scenarios with browser steps
 
-  Scenario: Search for cats on www.google.com
-    Given I search for "define: cats" on google search
-     Then I should see the text "Cat - Wikipedia"
+  Scenario: Search for cat on www.google.com
+    Given I search for "define: cat" on google search
+     Then I should see the text "/kat/"
   
-  Scenario: Search for dogs on www.google.com
-    Given I search for "define: dogs" on google search
-     Then I should see the text "Dog - Wikipedia"
+  Scenario: Search for dog on www.google.com
+    Given I search for "define: dog" on google search
+     Then I should see the text "/dôɡ/"
