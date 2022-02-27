@@ -12,6 +12,7 @@ jobs:
 
     steps:
       - checkout
+
       - run:
           name: install cucu dependencies
           command: pip install poetry && poetry install
@@ -73,12 +74,11 @@ jobs:
           path: results/
 
       - run:
-        name: code coverage report
-        run: poetry run coverage report --fail-under=68
+          name: code coverage report
+          command: poetry run coverage report --fail-under=65
 
 workflows:
   build-n-test:
     jobs:
       - lint
       - test
-      - coverage
