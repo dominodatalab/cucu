@@ -20,7 +20,7 @@ jobs:
           name: lint the source code
           command: poetry run flake8 src tests *.py
 
-  test:
+  functional-tests:
     docker:
       - image: cimg/python:3.8.12-browsers
 
@@ -66,8 +66,27 @@ jobs:
       - store_artifacts:
           path: report.tgz
 
+  unit-tests:
+    docker:
+      - image: cimg/python:3.8.12-browsers
+
+    steps:
+      - checkout
+
+      - run:
+          name: install cucu dependencies
+          command: pip install poetry && poetry install
+
+      - run:
+          name: run unit tests
+          command: poetry run pytest  --junit-xml=unit-tests.xml
+
+      - store_test_results:
+          path: unit-tests.xml
+
 workflows:
   build-n-test:
     jobs:
       - lint
-      - test
+      - functional-tests
+      - unit-tests
