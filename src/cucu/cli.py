@@ -5,7 +5,7 @@ import time
 import os
 
 from click import ClickException
-from cucu import fuzzy, reporter, logger
+from cucu import fuzzy, reporter, language_server, logger
 from cucu.config import CONFIG
 
 
@@ -193,12 +193,20 @@ def steps():
     """
     print available cucu steps
     """
-    args = ['--format=steps.catalog', '--dry-run', '--no-summary']
+    args = ['--format=steps.doc', '--dry-run', '--no-summary']
 
     from behave.__main__ import main as behave_main
     exit_code = behave_main(args)
     if exit_code != 0:
         raise ClickException('listing steps failed, see above for details')
+
+
+@main.command()
+def lsp():
+    """
+    start the cucu language server
+    """
+    language_server.start()
 
 
 @main.command()

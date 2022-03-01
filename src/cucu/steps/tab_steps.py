@@ -51,14 +51,6 @@ def should_see_the_tab_is_not_selected(context, name):
         raise RuntimeError(f'tab "{name}" is selected')
 
 
-@step('I wait to see the menu item "{name}"', wait_for=True)
-def waits_toshould_see_the_menu_item(context, name):
-    tab = find_tab(context, name)
-
-    if tab is None:
-        raise Exception(f'unable to find the tab "{name}"')
-
-
 @step('I click the tab "{name}"')
 def click_tab(context, name):
     tab = find_tab(context, name)

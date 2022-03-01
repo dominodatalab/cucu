@@ -41,12 +41,14 @@ def after_feature(context, feature):
 
 
 def before_scenario(context, scenario):
-    scenario_dir = os.path.join(config.CONFIG['CUCU_RESULTS_DIR'],
-                                scenario.feature.name,
-                                scenario.name)
-    os.makedirs(scenario_dir)
+    if config.CONFIG['CUCU_RESULTS_DIR'] is not None:
+        scenario_dir = os.path.join(config.CONFIG['CUCU_RESULTS_DIR'],
+                                    scenario.feature.name,
+                                    scenario.name)
+        os.makedirs(scenario_dir)
+        context.scenario_dir = scenario_dir
+
     context.scenario = scenario
-    context.scenario_dir = scenario_dir
     context.step_index = 0
     context.browsers = []
     context.browser = None
