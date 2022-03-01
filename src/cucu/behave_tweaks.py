@@ -56,16 +56,15 @@ def init_step_hooks(stdout, stderr):
                     @decorator(step_text)
                     @retry(stop_max_delay=ui_wait_timeout_ms,
                            wait_fixed=ui_wait_before_retry_ms)
+                    @wraps(func)
                     def inner_step(*args, **kwargs):
                         inner_step_func(func, *args, **kwargs)
 
-                    wraps(func, inner_step)
                 else:
                     @decorator(step_text)
+                    @wraps(func)
                     def inner_step(*args, **kwargs):
                         inner_step_func(func, *args, **kwargs)
-
-                    wraps(func, inner_step)
 
             return wrapper
 

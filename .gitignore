@@ -12,5 +12,6 @@ terraform.tfstate.backup
 .pytest_cache
 __pycache__
 *.pyc
+pygls.log
 report
 results

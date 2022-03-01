@@ -14,13 +14,13 @@ Python 3.7+ is required and recommend setting up
 
 ## from source
 
-clone this repo locally and then proceed to install python 3.7+ as indicated
+Clone this repo locally and then proceed to install python 3.7+ as indicated
 earlier at this point you should be able to simply run `make install` at the
 top level of the source tree and it should install all required dependencies.
 
 ## from build
 
-within the cucu directory you can run `poetry build` and that will produce some
+Within the cucu directory you can run `poetry build` and that will produce some
 output like so:
 
 ```
@@ -37,13 +37,24 @@ run.
 
 # usage
 
-## writing your a test
-
-... wip ...
-
 ## running your a test
 
-... wip ...
+The command `cucu run` is used to run a given test or set of tests and in its
+simplest invocation you can use it like so:
+
+```
+cucu run data/features/google_kitten_search.feature
+```
+
+That would simply run the "google search for kittens test" and once it's
+finished executing you can use the `cucu report` command to generate an easy
+to navigate and read HTML test report which includes the steps and screenshots
+from that previous test run.
+
+*NOTE:*
+By default we'll simply use the `Google Chrome` you have installed and there's
+a python package that'll handle downloading chromedriver that matches your
+specific local Google Chrome version.
 
 # running exact version of chrome/firefox using docker
 
@@ -61,8 +72,20 @@ CONTAINER ID ... PORTS                                                NAMES
 ```
 
 Now when running `cucu run some.feature` you can provide
-`--selenium-remote-url https://localhost:4444` and this way you'll run a very
+`--selenium-remote-url http://localhost:4444` and this way you'll run a very
 specific version of chrome on any setup you run this on.
+
+To ease using various custom settings you can also set most of the command line
+options in a local `cucurc.yml` or in a more global place at `~/.cucurc.yml`
+the same settings. For the remote url above you'd simply have the following
+in your `cucurc.yml`:
+
+```
+CUCU_SELENIUM_REMOTE_URL: http://localhost:4444
+```
+
+Then you can simply run `cucu run path/to/some.feature` and `cucu` would load
+the local `cucurc.yml` or `~/.cucurc.yml` settings and use those. 
 
 # running built in tests
 
