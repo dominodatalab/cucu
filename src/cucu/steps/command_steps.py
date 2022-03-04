@@ -21,8 +21,8 @@ def run_command(command, stdout_var=None, stderr_var=None, exit_code_var=None):
     if stderr:
         config.CONFIG[stderr_var] = stderr
 
-    logger.info(f'STDOUT:\n{stdout}\n')
-    logger.info(f'STDERR:\n{stderr}\n')
+    logger.debug(f'STDOUT:\n{stdout}\n')
+    logger.debug(f'STDERR:\n{stderr}\n')
 
 
 @step('I run the command "{command}" and save stdout to "{stdout_var}", stderr to "{stderr_var}", exit code to "{exit_code_var}"')

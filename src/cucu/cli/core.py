@@ -3,19 +3,27 @@ import click
 import shutil
 import time
 import os
+import sys
 
 from click import ClickException
 from cucu import fuzzy, reporter, language_server, logger
 from cucu.config import CONFIG
+from cucu.cli.steps import print_human_readable_steps, print_json_steps
+from cucu.lint import linter
 
 
 @click.group()
 @click.option('--debug/--no-debug', default=False)
-def main(debug):
+@click.option('-l',
+              '--logging-level',
+              default='INFO',
+              help='set logging level to one of debug, warn or info (default)')
+def main(debug, logging_level):
     """
     main entrypoint
     """
-    pass
+    CONFIG['CUCU_LOGGING_LEVEL'] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
 
 
 @main.command()
@@ -28,22 +36,25 @@ def main(debug):
               '--color-output/--no-color-output',
               default=True,
               help='produce output with colors or not')
+@click.option('--dry-run/--no-dry-run',
+              default=False,
+              help='invokes output formatters without running the steps')
 @click.option('-e',
               '--env',
               default=[],
               multiple=True,
               help='set environment variable which can be referenced with')
 @click.option('-f',
+              '--format',
+              default='human',
+              help='set output step formatter to human or json, default: human')
+@click.option('-x',
               '--fail-fast/--no-fail-fast',
               default=False,
               help='stop running tests on the first failure')
 @click.option('-h',
               '--headless/--no-headless',
               default=True)
-@click.option('-l',
-              '--logging-level',
-              default='INFO',
-              help='set logging level to one of debug, warn or info (default)')
 @click.option('-n',
               '--name')
 @click.option('-i',
@@ -72,10 +83,11 @@ def main(debug):
 def run(filepath,
         browser,
         color_output,
+        dry_run,
         env,
+        format,
         fail_fast,
         headless,
-        logging_level,
         name,
         ipdb_on_failure,
         preserve_results,
@@ -99,38 +111,59 @@ def run(filepath,
         key, value = variable.split('=')
         CONFIG[key] = value
 
-    CONFIG['CUCU_LOGGING_LEVEL'] = logging_level.upper()
-    logger.init_logging(logging_level.upper())
     CONFIG['CUCU_BROWSER'] = browser
 
     if ipdb_on_failure:
         CONFIG['CUCU_IPDB_ON_FAILURE'] = 'true'
 
     CONFIG['CUCU_RESULTS_DIR'] = results
-    if os.path.exists(results):
-        shutil.rmtree(results)
-    os.makedirs(results)
 
-    if not preserve_results and os.path.exists(results):
-        shutil.rmtree(results)
+    if not dry_run:
+        if not preserve_results:
+            if os.path.exists(results):
+                shutil.rmtree(results)
+                os.makedirs(results)
+        else:
+            if not os.path.exists(results):
+                os.makedirs(results)
 
     if selenium_remote_url is not None:
         CONFIG['CUCU_SELENIUM_REMOTE_URL'] = selenium_remote_url
 
+    if format == 'human':
+        formatter = 'cucu.formatter.cucu:CucuFormatter'
+
+    elif format == 'json':
+        formatter = 'cucu.formatter.json:CucuJSONFormatter'
+
     args = [
-        # JUNIT xml file generated per feature file executed
-        '--junit', f'--junit-directory={results}',
         # don't run disabled tests
         '--tags', '~@disabled',
-        # generate a JSOn file containing the exact details of the whole run
-        '--format', 'cucu.formatter.json:CucuJSONFormatter', f'--outfile={results}/run.json',
-        # use our own built in formatter
-        '--format', 'cucu.formatter.cucu:CucuFormatter',
-        '--logging-level', logging_level.upper(),
         # always print the skipped steps and scenarios
         '--show-skipped',
         filepath
     ]
+
+    if dry_run:
+        args += [
+            '--dry-run',
+            # console formater
+            '--format', formatter,
+        ]
+
+    else:
+        args += [
+            # JUNIT xml file generated per feature file executed
+            '--junit', f'--junit-directory={results}',
+            # generate a JSOn file containing the exact details of the whole run
+            '--format', 'cucu.formatter.json:CucuJSONFormatter', f'--outfile={results}/run.json',
+            # console formater
+            '--format', formatter,
+            '--logging-level', CONFIG['CUCU_LOGGING_LEVEL'].upper(),
+        ]
+
+    if format == 'json':
+        args.append('--no-summary')
 
     for tag in tags:
         args.append('--tags')
@@ -156,15 +189,10 @@ def run(filepath,
 @main.command()
 @click.argument('filepath',
                 default='results')
-@click.option('-l',
-              '--logging-level',
-              default='INFO',
-              help='set logging level to one of debug, warn or info (default)')
 @click.option('-o',
               '--output',
               default='report')
 def report(filepath,
-           logging_level,
            output):
     """
     create an HTML test report from the results directory provided
@@ -177,16 +205,73 @@ def report(filepath,
 
 
 @main.command()
-def steps():
+@click.option('-f',
+              '--format',
+              default='human',
+              help='output format to use, available: human, json. default: human')
+def steps(format):
     """
     print available cucu steps
     """
-    args = ['--format=steps.doc', '--dry-run', '--no-summary']
+    if format == 'human':
+        print_human_readable_steps()
+    elif format == 'json':
+        print_json_steps()
+    else:
+        raise RuntimeError(f'unsupported format "{format}"')
 
-    from behave.__main__ import main as behave_main
-    exit_code = behave_main(args)
-    if exit_code != 0:
-        raise ClickException('listing steps failed, see above for details')
+
+@main.command()
+@click.argument('filepath', default='features')
+@click.option('--fix/--no-fix',
+              default=False,
+              help='fix lint violations, default: False')
+def lint(filepath, fix):
+    """
+    lint feature files
+    """
+    all_violations = linter.lint(filepath)
+
+    violations_found = 0
+    violations_fixed = 0
+
+    for violations in all_violations:
+        if fix:
+            violations = linter.fix(violations)
+
+        if violations:
+            for violation in violations:
+                violations_found += 1
+                location = violation['location']
+                type = violation['type'][0].upper()
+                message = violation['message']
+                suffix = ''
+
+                if fix:
+                    if 'fixed' in violation:
+                        suffix = ' ✓'
+                        violations_fixed += 1
+                    else:
+                        suffix = ' ✗ (must be fixed manually)'
+
+                filepath = location['filepath']
+                line_number = location['line'] + 1
+                print(f'{filepath}:{line_number}: {type} {message}{suffix}')
+
+    and_message = ''
+
+    if violations_found != 0:
+        if fix:
+            if violations_found == violations_fixed:
+                and_message = ' and fixed'
+            else:
+                and_message = ' and not all were fixed'
+
+        print(f'\nlinting errors were found{and_message}, see above for details')
+
+        if not fix:
+            print('NOTE: to try and fix violations automatically use --fix')
+            raise ClickException('see above for details')
 
 
 @main.command()

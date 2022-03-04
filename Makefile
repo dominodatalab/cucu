@@ -33,12 +33,14 @@ test: src/* tests/*
 
 lint: src/* tests/* *.py
 	poetry run flake8 src tests *.py
+	poetry run cucu lint data/features
+	poetry run cucu lint features
 
 nox: src/* tests/*
 	poetry run nox
 
 coverage: src/* tests/*
-	poetry run coverage run --source=src/ src/cucu/cli.py run features
+	poetry run coverage run --source=src/ src/cucu/cli/core.py run features
 	poetry run coverage run --append --source=src/ -m pytest
 	poetry run coverage html --omit='*virtualenvs*'
 	poetry run coverage report --omit='*virtualenvs*' --fail-under=68

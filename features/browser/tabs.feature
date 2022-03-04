@@ -10,7 +10,7 @@ Feature: Tabs
     Given I should see the tab "Joe" is selected
       And I should see the tab "Avery" is not selected
       And I should see the tab "Chris" is not selected
-     When I click the tab "Avery" 
+     When I click the tab "Avery"
      Then I should see the tab "Joe" is not selected
       And I should see the tab "Avery" is selected
       And I should see the tab "Chris" is not selected

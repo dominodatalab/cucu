@@ -14,6 +14,5 @@ Feature: Fuzzy rules
     Then I should see "button with title" in the input "value:"
     When I click the button "button with placeholder"
     Then I should see "button with placeholder" in the input "value:"
-    
     When I click the button "button with previous nested sibling label"
     Then I should see "button with previous nested sibling label" in the input "value:"

@@ -1,50 +1,12 @@
 import re
-import subprocess
 import logging
 
+from cucu.cli.steps import load_cucu_steps
 from fuzzywuzzy import fuzz
 
 from pygls.capabilities import COMPLETION
 from pygls.server import LanguageServer
 from pygls.lsp.types import CompletionItem, CompletionList, CompletionOptions, CompletionParams
-
-
-def load_cucu_steps():
-    """
-    loads the cucu steps definition using the `cucu steps` command and returns
-    a hashmap with the step name to location mapping.
-    """
-    steps_cache = {}
-    cucu_steps_output = subprocess.check_output(['cucu', 'steps'])
-    cucu_steps_output = cucu_steps_output.decode('utf8')
-
-    for cucu_step in cucu_steps_output.split('\n\n'):
-        # each blank line is a '\n\n' which is a split between two step
-        # definitions in the output, like so:
-        #
-        #   @step('I should see "{this}" matches "{that}"')
-        #     Function: inner_step()
-        #     Location: src/cucu/behave_tweaks.py:64
-        #
-        #   @step('I should see "{this}" matches the following')
-        #     Function: inner_step()
-        #     Location: src/cucu/behave_tweaks.py:64
-        #
-        if cucu_step.strip() == '':
-            continue
-
-        step_name, _, location = cucu_step.split('\n')
-        step_name = re.match(r"@step\('(.*)'\)", step_name).groups()[0]
-        _, filepath, line_number = location.split(':')
-
-        steps_cache[step_name] = {
-            'location': {
-                'filepath': filepath.strip(),
-                'line': line_number.strip(),
-            }
-        }
-
-    return steps_cache
 
 
 def find_completions(step_fragment, steps_cache=None):
