@@ -33,7 +33,7 @@ class Config(dict):
             self[k] = v
 
     def bool(self, key):
-        return self[key] not in [None, 'false', 'disabled', 'no']
+        return self[key] in [True, 'True', 'true', 'yes', 'enabled']
 
     def true(self, key):
         return self.bool(key)

@@ -62,10 +62,10 @@ def before_scenario(context, scenario):
 
 def after_scenario(context, scenario):
     if CONFIG.true('CUCU_KEEP_BROWSER_ALIVE'):
-        # TODO: need to create a logger for debug stuff like this
-        pass
+        logger.debug('keeping browser alive between sessions')
 
     else:
+        logger.debug('quitting browser between sessions')
         # close the browser unless someone has set the keep browser alive
         # environment variable which allows tests to reuse the same browser
         # session
