@@ -1,11 +1,11 @@
 # help menu when you run just `make`
 help:
-	#   install  - installs the necesary developmenet dependencies.
-	#   build    - rebuilds the existing installation pushing any local code to the 
-	#              current python environemnt.
+	#   install  - installs the necessary development dependencies.
+	#   build    - rebuilds the existing installation and pushes any local code to the 
+	#              current python environment.
 	#   test     - runs all of the cucu tests.
 	#   lint     - lints all of the source and test code.
-	#   nox      - runs all of the tests against the support python versions using nox.
+	#   nox      - runs all of the tests against supported python versions using nox.
 	#   coverage - work in progress...
 
 install: src/*
@@ -20,7 +20,7 @@ release:
 	echo "tag a new release of cucu"
 	poetry version minor
 	git tag `poetry version -s`
-	echo "make sure to commit your change sand then 'git push origin --tags'"
+	echo "make sure to commit your changes and then run 'git push origin --tags'"
 
 dist: build
 	pip install dist/cucu-*.tar.gz

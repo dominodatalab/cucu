@@ -15,7 +15,7 @@ Python 3.7+ is required and recommend setting up
 ## from source
 
 Clone this repo locally and then proceed to install python 3.7+ as indicated
-earlier at this point you should be able to simply run `make install` at the
+earlier. At this point you should be able to simply run `make install` at the
 top level of the source tree and it should install all required dependencies.
 
 ## from build
