@@ -44,6 +44,8 @@
                 {% elif step['result']['status'] == 'failed' %}
                     <td><pre style="display: inline; color: red">{{ step_prefix }}{{ step_name }}</pre></td>
                     <td><pre style="display: inline; color: gray;"># {{ '{:.3f}'.format(step['result']['duration']) }}s</pre></td>
+                {% elif step['result']['status'] == 'skipped' %}
+                    <td><pre style="display: inline; color: blue">{{ step_prefix }}{{ step_name }}</pre></td>
                 {% endif %}
             </tr>
             {% if step['text'] %}
