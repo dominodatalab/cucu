@@ -60,8 +60,17 @@ def run_steps(context, steps_text):
             formatter.insert_step(step, index=step_index + index)
             index += 1
 
-    index = 1
-    for step in steps:
+    try:
+        step_index = context.scenario.background.steps.index(context.current_step)
+
+        index = 1
+        for step in steps:
+            context.scenario.background.steps.insert(step_index + index, step)
+            index += 1
+    except Exception:
         step_index = context.scenario.steps.index(context.current_step)
-        context.scenario.steps.insert(step_index + index, step)
-        index += 1
+
+        index = 1
+        for step in steps:
+            context.scenario.steps.insert(step_index + index, step)
+            index += 1
