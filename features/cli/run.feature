@@ -77,4 +77,3 @@ Feature: Run
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
-

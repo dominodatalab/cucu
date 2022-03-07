@@ -86,20 +86,8 @@ def run(filepath,
     """
     run a set of feature files
     """
-
-    # load all cucurc.yml files in the paths from the path given backwards
-    if os.path.isdir(filepath):
-        dirname = os.path.abspath(filepath)
-    else:
-        dirname = os.path.dirname(os.path.abspath(filepath))
-
-    while dirname != os.getcwd():
-        cucurc_filepath = os.path.join(dirname, 'cucurc.yml')
-        if os.path.exists(cucurc_filepath):
-            logger.debug(f'loading for {cucurc_filepath}')
-            CONFIG.load(cucurc_filepath)
-
-        dirname = os.path.dirname(dirname)
+    # load all them configs
+    CONFIG.load_cucurc_files(filepath)
 
     if color_output:
         CONFIG['CUCU_COLOR_OUTPUT'] = str(color_output).lower()

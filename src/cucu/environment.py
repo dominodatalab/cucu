@@ -8,19 +8,6 @@ from cucu.config import CONFIG
 behave_tweaks.init_step_hooks(sys.stdout, sys.stderr)
 
 
-# load the ~/.cucurc.yml first
-home_cucurc_filepath = os.path.join(os.path.expanduser('~'), '.cucurc.yml')
-if os.path.exists(home_cucurc_filepath):
-    logger.debug('loading configuration values from ~/.cucurc.yml')
-    CONFIG.load(home_cucurc_filepath)
-
-# override any global values with local values in cucurc.yml
-local_cucurc_filepath = os.path.join(os.getcwd(), 'cucurc.yml')
-if os.path.exists(local_cucurc_filepath):
-    logger.debug('loading configuration values from cucurc.yml')
-    CONFIG.load(local_cucurc_filepath)
-
-
 def escape_filename(string):
     """
     escape string so it can be used as a filename safely.
