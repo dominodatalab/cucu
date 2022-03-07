@@ -1,8 +1,14 @@
+import os
+
 from behave import step
 
 
 @step('I create a file at "{filepath}" with the following')
 def create_file_with_the_following(context, filepath):
+    dirname = os.path.dirname(filepath)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
     with open(filepath, 'wb') as output:
         output.write(bytes(context.text, 'utf8'))
 

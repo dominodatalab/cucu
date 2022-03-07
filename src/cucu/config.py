@@ -2,6 +2,8 @@ import os
 import socket
 import yaml
 
+from cucu import logger
+
 
 class Config(dict):
 
@@ -10,6 +12,7 @@ class Config(dict):
 
     def __getitem__(self, key):
         try:
+            # environment always takes precedence
             value = os.environ.get(key)
 
             if value is None:
@@ -49,6 +52,38 @@ class Config(dict):
 
         for key in config.keys():
             self[key] = config[key]
+
+    def load_cucurc_files(self, filepath):
+        """
+        load in order the ~/.cucurc.yml and then subsequent config files
+        starting from the current working directory to the filepath provided
+        """
+
+        # load the ~/.cucurc.yml first
+        home_cucurc_filepath = os.path.join(os.path.expanduser('~'), '.cucurc.yml')
+        if os.path.exists(home_cucurc_filepath):
+            logger.debug('loading configuration values from ~/.cucurc.yml')
+            self.load(home_cucurc_filepath)
+
+        filepath = os.path.abspath(filepath)
+        if os.path.isfile(filepath):
+            basename = os.path.dirname(filepath)
+        else:
+            basename = filepath
+
+        # create the inverse list of the directories starting from cwd to the one
+        # containing the feature file we want to run to load the cucrc.yml files in
+        # the correct order
+        dirnames = [os.getcwd()]
+        while basename != os.getcwd():
+            dirnames.append(basename)
+            basename = os.path.dirname(basename)
+
+        for dirname in dirnames:
+            cucurc_filepath = os.path.join(dirname, 'cucurc.yml')
+            if os.path.exists(cucurc_filepath):
+                logger.debug(f'loading for {cucurc_filepath}')
+                self.load(cucurc_filepath)
 
     def resolve(self, value):
         """
