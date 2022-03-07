@@ -57,3 +57,24 @@ Feature: Run
       Error: test run failed, see above for details
 
       """
+
+  Scenario: User can run a scenario with background which uses a step with substeps
+    Given I run the command "cucu run data/features/feature_with_background_using_substeps.feature --results {CUCU_RESULTS_DIR}/background-with-substeps-results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "0"
+      And I should see "{STDOUT}" matches the following
+      """
+      Feature: Feature with background using substeps
+
+        Scenario: Scenario which now has a background using a step with substeps
+          Given I use a step with substeps             #  in .*
+      This is from the scenario
+
+           When I echo "This is from the scenario"     #  in .*
+
+      1 feature passed, 0 failed, 0 skipped
+      1 scenario passed, 0 failed, 0 skipped
+      2 steps passed, 0 failed, 0 skipped, 0 undefined
+      [\s\S]*
+      """
+      And I should see "{STDERR}" is empty
+

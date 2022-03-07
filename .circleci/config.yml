@@ -75,7 +75,7 @@ jobs:
 
       - run:
           name: code coverage report
-          command: poetry run coverage report --fail-under=65
+          command: poetry run coverage report
 
 workflows:
   build-n-test:
