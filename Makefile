@@ -41,7 +41,7 @@ coverage: src/* tests/*
 	poetry run coverage run --source=src/ src/cucu/cli.py run features
 	poetry run coverage run --append --source=src/ -m pytest
 	poetry run coverage html --omit='*virtualenvs*'
-	poetry run coverage report --omit='*virtualenvs*' --fail-under=67
+	poetry run coverage report --omit='*virtualenvs*' --fail-under=68
 	echo "open HTML coverage report at htmlcov/index.html"
 
 %-setup:
