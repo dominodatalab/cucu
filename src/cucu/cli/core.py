@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 import click
+import coverage
 import shutil
 import time
 import os
-import sys
 
 from click import ClickException
 from cucu import fuzzy, reporter, language_server, logger
 from cucu.config import CONFIG
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.lint import linter
+
+# will start coverage tracking once COVERAGE_PROCESS_START is set
+coverage.process_startup()
 
 
 @click.group()

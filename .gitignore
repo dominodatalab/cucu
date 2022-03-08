@@ -1,6 +1,6 @@
 dist
 .cache
-.coverage
+.coverage.*
 .DS_Store
 *.egg-info
 cucurc.yml
