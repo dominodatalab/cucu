@@ -2,6 +2,7 @@ import importlib
 import os
 import pkgutil
 import sys
+import traceback
 
 from cucu.config import CONFIG
 
@@ -41,36 +42,67 @@ def register_after_scenario_hook(after_scenario_func):
     CONFIG['__CUCU_AFTER_SCENARIO_HOOKS'].append(after_scenario_func)
 
 
+#
+# code below adapted from:
+# https://github.com/behave/behave/blob/994dbfe30e2a372182ea613333e06f069ab97d4b/behave/runner.py#L385
+# so we can have the sub steps printed in the console logs
+#
 def run_steps(context, steps_text):
     """
-    run sub steps within an existing step run by basically inserting those
-    steps into the behave runtime.
+    run sub steps within an existing step definition but also log their output
+    so that its easy to see what is happening.
     """
+
+    # -- PREPARE: Save original context data for current step.
+    # Needed if step definition that called this method uses .table/.text
+    original_table = getattr(context, 'table', None)
+    original_text = getattr(context, 'text', None)
+
     context.feature.parser.variant = 'steps'
     steps = context.feature.parser.parse_steps(steps_text)
 
-    # XXX: not pretty but we control both formatters so can make some
-    #      assumptions
-    for formatter in context._runner.formatters:
-        step_index = formatter.steps.index(context.current_step)
+    current_step = context.current_step
+    current_step_index = context.step_index
 
-        index = 1
-        for step in steps:
-            step.substep = True
-            formatter.insert_step(step, index=step_index + index)
-            index += 1
-
+    # XXX: I want to get back to this and find a slightly better way to handle
+    #      these substeps without mucking around with so much state in behave
+    #      but for now this works correctly and existing tests work as expected.
     try:
-        step_index = context.scenario.background.steps.index(context.current_step)
+        with context._use_with_behave_mode():
+            index = 1
 
-        index = 1
-        for step in steps:
-            context.scenario.background.steps.insert(step_index + index, step)
-            index += 1
-    except Exception:
-        step_index = context.scenario.steps.index(context.current_step)
+            context.step_index += 1
+            for step in steps:
+                for formatter in context._runner.formatters:
+                    step_index = formatter.steps.index(current_step)
+                    step.substep = True
+                    formatter.insert_step(step, index=step_index + index)
+                index += 1
 
-        index = 1
-        for step in steps:
-            context.scenario.steps.insert(step_index + index, step)
-            index += 1
+                passed = step.run(context._runner, quiet=False, capture=False)
+                if not passed:
+                    # -- ISSUE #96: Provide more substep info to diagnose problem.
+                    step_line = u'%s %s' % (step.keyword, step.name)
+                    message = '%s SUB-STEP: %s' % \
+                              (step.status.name.upper(), step_line)
+
+                    if step.error_message:
+                        message += '\nSubstep info: %s\n' % step.error_message
+                        message += 'Traceback (of failed substep):\n'
+                        message += ''.join(traceback.format_tb(step.exc_traceback))
+
+                    assert False, message
+
+            # -- FINALLY: Restore original context data for current step.
+            context.table = original_table
+            context.text = original_text
+
+    finally:
+        context.step_index = current_step_index
+        # XXX: icky relationships between this and the after_step hooks in
+        #      the environment.py which handles screenshots
+        context.substep_increment = len(steps)
+
+    CONFIG['CUCU_WROTE_TO_STDOUT'] = True
+
+    return True

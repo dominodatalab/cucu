@@ -19,14 +19,14 @@ Feature: Run
       Feature: Feature with substeps
       
         Scenario: Scenario that uses a step with substeps
-          Given I use a step with substeps  .*
             ⤷ When I do nothing             .*
             ⤷  And I do nothing             .*
             ⤷  And I do nothing             .*
+          Given I use a step with substeps  .*
       
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
-      4 steps passed, 0 failed, 0 skipped, 0 undefined
+      1 step passed, 0 failed, 0 skipped, 0 undefined
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
@@ -66,14 +66,20 @@ Feature: Run
       Feature: Feature with background using substeps
 
         Scenario: Scenario which now has a background using a step with substeps
-          Given I use a step with substeps             #  in .*
+      first line of the background
+
+          Given I echo "first line of the background"               #  in .*
+            ⤷ When I open a browser at the url "https://www.google.com/search"  #  in .*
+            ⤷  And I wait to write "define: kittens" into the input "Search"    #  in .*
+            ⤷  And I click the button "Google Search"                           #  in .*
+            And I search for "define: kittens" on google search                 #  in .*
       This is from the scenario
 
-           When I echo "This is from the scenario"     #  in .*
+           When I echo "This is from the scenario"                              #  in .*
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
-      2 steps passed, 0 failed, 0 skipped, 0 undefined
+      3 steps passed, 0 failed, 0 skipped, 0 undefined
       [\s\S]*
       """
       And I should see "{STDERR}" is empty

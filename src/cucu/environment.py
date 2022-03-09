@@ -16,7 +16,7 @@ def escape_filename(string):
 
 
 def before_all(context):
-    pass
+    context.substep_increment = 0
 
 
 def before_feature(context, feature):
@@ -79,13 +79,17 @@ def after_step(context, step):
     step.stderr = sys.stderr.captured()
     behave_tweaks.uninit_output_streams()
 
-    if context.browser is not None:
+    if context.browser is not None and not context.substep_increment:
         step_name = escape_filename(step.name)
         filepath = os.path.join(context.scenario_dir,
                                 f'{context.step_index} - {step_name}.png')
 
         context.browser.screenshot(filepath)
         logger.debug(f'wrote screenshot {filepath}')
+
+    if context.substep_increment != 0:
+        context.step_index += context.substep_increment
+        context.substep_increment = 0
 
     context.step_index += 1
 
