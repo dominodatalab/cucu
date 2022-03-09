@@ -1,5 +1,5 @@
 Feature: Run
-  As a developer I want the user to 
+  As a developer I want the user to
 
   Scenario: User gets an error when running an inexistent feature file
     Given I run the command "cucu run data/features/inexistent.feature --results {CUCU_RESULTS_DIR}/inexistent-results" and save stdout to "STDOUT", exit code to "EXIT_CODE"
@@ -45,7 +45,7 @@ Feature: Run
       RuntimeError: step fails on purpose
       [\s\S]*
       Failing scenarios:
-        data/features/feature_with_failing_scenario.feature:4  Just a scenario that fails
+        data/features/feature_with_failing_scenario.feature:3  Just a scenario that fails
       [\s\S]*
       0 features passed, 1 failed, 0 skipped
       0 scenarios passed, 1 failed, 0 skipped

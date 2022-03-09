@@ -6,4 +6,4 @@ Feature: Feature with scenario outline
     Examples: Things
       | thing        |
       | first thing  |
-      | second thing | 
+      | second thing |

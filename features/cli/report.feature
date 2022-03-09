@@ -4,7 +4,7 @@ Feature: Report
   Scenario: User can run a basic non browser test and create a report
     Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/non-browser-results" and save exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
-     When I run the command "cucu report {CUCU_RESULTS_DIR}/non-browser-results --output {CUCU_RESULTS_DIR}/non-browser-report" and save exit code to "EXIT_CODE" 
+     When I run the command "cucu report {CUCU_RESULTS_DIR}/non-browser-results --output {CUCU_RESULTS_DIR}/non-browser-report" and save exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
      When I start a webserver on port "40000" at directory "{CUCU_RESULTS_DIR}/non-browser-report/"
       And I open a browser at the url "http://{HOST_ADDRESS}:40000/index.html"
@@ -17,7 +17,7 @@ Feature: Report
   Scenario: User can run a basic browser test and create a report
     Given I run the command "cucu run data/features/google_kitten_search.feature --results {CUCU_RESULTS_DIR}/browser-results" and save exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
-     When I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and save exit code to "EXIT_CODE" 
+     When I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and save exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
      When I start a webserver on port "40000" at directory "{CUCU_RESULTS_DIR}/browser-report/"
       And I open a browser at the url "http://{HOST_ADDRESS}:40000/index.html"
@@ -30,7 +30,7 @@ Feature: Report
   Scenario: User can run a multi scenario test with web steps and generate a valid report
     Given I run the command "cucu run data/features/multiple_scenarios_with_browser_steps.feature --results {CUCU_RESULTS_DIR}/multi-scenario-browser-results" and save exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
-     When I run the command "cucu report {CUCU_RESULTS_DIR}/multi-scenario-browser-results --output {CUCU_RESULTS_DIR}/multi-scenario-browser-report" and save exit code to "EXIT_CODE" 
+     When I run the command "cucu report {CUCU_RESULTS_DIR}/multi-scenario-browser-results --output {CUCU_RESULTS_DIR}/multi-scenario-browser-report" and save exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
      When I start a webserver on port "40000" at directory "{CUCU_RESULTS_DIR}/multi-scenario-browser-report/"
       And I open a browser at the url "http://{HOST_ADDRESS}:40000/index.html"

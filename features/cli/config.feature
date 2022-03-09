@@ -2,7 +2,7 @@ Feature: Config
   As a developer I want the user to get the expected variable and config
   behavior when using cucu
 
-  Scenario: User can load cucurc values from a cucucrc file in 
+  Scenario: User can load cucurc values from a cucucrc file in
     Given I create a file at "{CUCU_RESULTS_DIR}/load_nested_cucurc/environment.py" with the following:
       """
       import cucu

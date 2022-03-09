@@ -33,15 +33,22 @@ test: src/* tests/*
 
 lint: src/* tests/* *.py
 	poetry run flake8 src tests *.py
+	poetry run cucu lint data/features
+	poetry run cucu lint features
 
 nox: src/* tests/*
 	poetry run nox
 
 coverage: src/* tests/*
-	poetry run coverage run --source=src/ src/cucu/cli.py run features
-	poetry run coverage run --append --source=src/ -m pytest
+	rm -fr .coverage .coverage.*
+	# this makes it so all of the underlying `cucu` command calls are run
+	# with the coverage enabled even when spawned as a separate process for the
+	# underlying `poetry run coverage run` process...
+	COVERAGE_PROCESS_START=.coveragerc poetry run cucu run features
+	poetry run coverage run -m pytest
+	poetry run coverage combine .coverage.*
 	poetry run coverage html --omit='*virtualenvs*'
-	poetry run coverage report --omit='*virtualenvs*' --fail-under=68
+	poetry run coverage report --omit='*virtualenvs*' --fail-under=75
 	echo "open HTML coverage report at htmlcov/index.html"
 
 %-setup:

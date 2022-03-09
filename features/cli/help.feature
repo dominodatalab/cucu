@@ -1,4 +1,4 @@
-Feature: Run
+Feature: Help
   As a developer I want the user to
 
   Scenario: User gets can get the help menu from cucu to show
@@ -12,10 +12,13 @@ Feature: Run
 
       Options:
         --debug / --no-debug
-        --help                Show this message and exit.
+        -l, --logging-level TEXT  set logging level to one of debug, warn or info
+                                  (default)
+        --help                    Show this message and exit.
 
       Commands:
         debug   debug cucu library
+        lint    lint feature files
         lsp     start the cucu language server
         report  create an HTML test report from the results directory provided
         run     run a set of feature files

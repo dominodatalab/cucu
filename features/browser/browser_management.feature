@@ -21,4 +21,3 @@ Feature: Browser management
      Then I should see the browser title is "Buttons!"
      When I switch to the next browser
      Then I should see the browser title is "Inputs!"
-

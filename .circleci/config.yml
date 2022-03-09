@@ -45,8 +45,9 @@ jobs:
 
       - run:
           name: run functional tests
-          command: poetry run coverage run --source=src/ src/cucu/cli.py run features
-          environment: 
+          command: poetry run cucu run features
+          environment:
+            COVERAGE_PROCESS_START: .coveragerc
             CUCU_COLOR_OUTPUT: false
 
       - run:
@@ -67,15 +68,19 @@ jobs:
       
       - run:
           name: run unit tests
-          command: poetry run coverage run --append --source=src/ -m pytest  --junit-xml=results/unit-tests.xml
+          command: poetry run coverage run -m pytest  --junit-xml=results/unit-tests.xml
           when: always
 
       - store_test_results:
           path: results/
 
       - run:
+          name: combine coverage reports
+          command: poetry run coverage combine .coverage.*
+
+      - run:
           name: code coverage report
-          command: poetry run coverage report
+          command: poetry run coverage report --fail-under=75
 
 workflows:
   build-n-test:
