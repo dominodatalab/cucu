@@ -81,8 +81,11 @@ def save_clipboard_value_to_variable(context, variable):
     """)
     # send ctrl+v or cmd+v to that element
     textarea = context.browser.css_find_elements('#cucu-copy-n-paste')[0]
-    textarea.send_keys(Keys.CONTROL, 'v')
-    textarea.send_keys(Keys.COMMAND, 'v')
+
+    if 'mac' in context.browser.execute('return navigator.platform').lower():
+        textarea.send_keys(Keys.COMMAND, 'v')
+    else:
+        textarea.send_keys(Keys.CONTROL, 'v')
 
     clipboard_contents = textarea.get_attribute('value')
     config.CONFIG[variable] = clipboard_contents
