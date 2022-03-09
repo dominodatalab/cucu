@@ -7,7 +7,7 @@ from cucu.browser.selenium import Selenium
 
 from selenium.webdriver.common.keys import Keys
 
-NTH_REGEX = r'(\d+)(nd|th|rd|st)'
+NTH_REGEX = r"(\d+)(nd|th|rd|st)"
 
 
 @parse.with_pattern(NTH_REGEX)
@@ -15,7 +15,7 @@ def parse_nth(nth):
     matcher = re.match(NTH_REGEX, nth)
 
     if matcher is None:
-        raise Exception(f'nth expression {nth} is invalid')
+        raise Exception(f"nth expression {nth} is invalid")
 
     number, _ = matcher.groups()
     return int(number) - 1
@@ -25,15 +25,15 @@ register_type(nth=parse_nth)
 
 
 def open_browser(context, url):
-    browser_name = config.CONFIG['CUCU_BROWSER']
-    headless = config.CONFIG['CUCU_BROWSER_HEADLESS']
-    selenium_remote_url = config.CONFIG['CUCU_SELENIUM_REMOTE_URL']
+    browser_name = config.CONFIG["CUCU_BROWSER"]
+    headless = config.CONFIG["CUCU_BROWSER_HEADLESS"]
+    selenium_remote_url = config.CONFIG["CUCU_SELENIUM_REMOTE_URL"]
 
     browser = Selenium()
-    logger.debug(f'opening browser {browser_name}')
-    browser.open(browser_name,
-                 headless=headless,
-                 selenium_remote_url=selenium_remote_url)
+    logger.debug(f"opening browser {browser_name}")
+    browser.open(
+        browser_name, headless=headless, selenium_remote_url=selenium_remote_url
+    )
 
     return browser
 
@@ -44,9 +44,9 @@ def open_a_browser(context, url):
         context.browser = open_browser(context, url)
         context.browsers.append(context.browser)
     else:
-        logger.debug('browser already open so using existing instance')
+        logger.debug("browser already open so using existing instance")
 
-    logger.debug(f'navigating to url #{url}')
+    logger.debug(f"navigating to url #{url}")
     context.browser.navigate(url)
     fuzzy.init(context.browser)
 
@@ -55,12 +55,12 @@ def open_a_browser(context, url):
 def open_a_new_browser(context, url):
     context.browser = open_browser(context, url)
     context.browsers.append(context.browser)
-    logger.debug(f'navigating to url #{url}')
+    logger.debug(f"navigating to url #{url}")
     context.browser.navigate(url)
     fuzzy.init(context.browser)
 
 
-@step('I refresh the browser')
+@step("I refresh the browser")
 def refresh_browser(context):
     context.browser.refresh()
 
@@ -68,7 +68,8 @@ def refresh_browser(context):
 @step('I save the contents of the clipboard to the variable "{variable}"')
 def save_clipboard_value_to_variable(context, variable):
     # create the hidden textarea so we can paste clipboard contents in
-    context.browser.execute("""
+    context.browser.execute(
+        """
     var textarea = document.getElementById('cucu-copy-n-paste')
     if (!textarea) {
         textarea = document.createElement('textarea');
@@ -78,13 +79,13 @@ def save_clipboard_value_to_variable(context, variable):
         textarea.style.width = '0px';
         document.body.appendChild(textarea);
     }
-    """)
+    """
+    )
     # send ctrl+v or cmd+v to that element
-    textarea = context.browser.css_find_elements('#cucu-copy-n-paste')[0]
-    textarea.send_keys(Keys.CONTROL, 'v')
-    textarea.send_keys(Keys.COMMAND, 'v')
+    textarea = context.browser.css_find_elements("#cucu-copy-n-paste")[0]
+    textarea.send_keys(Keys.CONTROL, "v")
 
-    clipboard_contents = textarea.get_attribute('value')
+    clipboard_contents = textarea.get_attribute("value")
     config.CONFIG[variable] = clipboard_contents
 
 
@@ -93,10 +94,10 @@ def should_see_browser_title(context, title):
     current_title = context.browser.title()
 
     if current_title != title:
-        raise RuntimeError(f'expected title: {title}, got {current_title}')
+        raise RuntimeError(f"expected title: {title}, got {current_title}")
 
 
-@step('I close the current browser')
+@step("I close the current browser")
 def close_browser(context):
     browser_index = context.browsers.index(context.browser)
 
@@ -110,35 +111,35 @@ def close_browser(context):
 
 @step('I navigate to the url "{url}"')
 def navigate_to_the_url(context, url):
-    logger.debug(f'navigating to url #{url}')
+    logger.debug(f"navigating to url #{url}")
     context.browser.navigate(url)
 
 
-@step('I switch to the previous browser')
+@step("I switch to the previous browser")
 def switch_to_previous_browser(context):
     browser_index = context.browsers.index(context.browser)
 
     if browser_index > 0:
         context.browser = context.browsers[browser_index - 1]
     else:
-        raise RuntimeError('no previous browser window available')
+        raise RuntimeError("no previous browser window available")
 
 
-@step('I switch to the next browser')
+@step("I switch to the next browser")
 def switch_to_next_browser(context):
     browser_index = context.browsers.index(context.browser)
 
     if browser_index < len(context.browsers) - 1:
         context.browser = context.browsers[browser_index + 1]
     else:
-        raise RuntimeError('no previous browser window available')
+        raise RuntimeError("no previous browser window available")
 
 
-@step('I switch to the next browser tab')
+@step("I switch to the next browser tab")
 def switch_to_next_browser_tab(context):
     context.browser.switch_to_next_tab()
 
 
-@step('I switch to the previous browser tab')
+@step("I switch to the previous browser tab")
 def switch_to_previous_browser_tab(context):
     context.browser.switch_to_previous_tab()
