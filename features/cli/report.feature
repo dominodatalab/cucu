@@ -40,7 +40,7 @@ Feature: Report
       And I should see the image with the alt text "When I open a browser at the url \"https://www.google.com/search\""
       And I should see the image with the alt text "And I wait to write \"define: cat\" into the input \"Search\""
       And I should see the image with the alt text "And I click the button \"Google Search\""
-      And I should see the image with the alt text "Then I should see the text \"/kat/\""
+      And I should see the image with the alt text "Then I should see the text \"Cat\""
      When I click the link "Top"
       And I click the link "Feature: Multiple scenarios with browser steps"
       And I click the link "Scenario: Search for dog on www.google.com"
@@ -48,7 +48,7 @@ Feature: Report
       And I should see the image with the alt text "When I open a browser at the url \"https://www.google.com/search\""
       And I should see the image with the alt text "And I wait to write \"define: dog\" into the input \"Search\""
       And I should see the image with the alt text "And I click the button \"Google Search\""
-      And I should see the image with the alt text "Then I should see the text \"/dôɡ/\""
+      And I should see the image with the alt text "Then I should see the text \"Dog\""
 
   @disabled @needs-work
   Scenario: User can run a scenario with console logs and see those logs linked in the report
