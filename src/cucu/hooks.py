@@ -91,7 +91,7 @@ def run_steps(context, steps_text):
                         message += 'Traceback (of failed substep):\n'
                         message += ''.join(traceback.format_tb(step.exc_traceback))
 
-                    assert False, message
+                    raise RuntimeError(message)
 
             # -- FINALLY: Restore original context data for current step.
             context.table = original_table

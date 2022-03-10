@@ -50,6 +50,17 @@ Feature: Report
       And I should see the image with the alt text "And I click the button \"Google Search\""
       And I should see the image with the alt text "Then I should see the text \"Dog\""
 
+  Scenario: User can run a feature with mixed results and has all results reported correctly
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/mixed-results" and save exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "1"
+     When I run the command "cucu report {CUCU_RESULTS_DIR}/mixed-results --output {CUCU_RESULTS_DIR}/mixed-results-report" and save exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "0"
+     When I start a webserver on port "40000" at directory "{CUCU_RESULTS_DIR}/mixed-results-report/"
+      And I open a browser at the url "http://{HOST_ADDRESS}:40000/index.html"
+      And I click the button "Feature: Feature with mixed results" 
+      And I click the button "Scenario: Scenario that fails"
+     Then I should see the text "RuntimeError: step fails on purpose"
+
   @disabled @needs-work
   Scenario: User can run a scenario with console logs and see those logs linked in the report
     Given I run the command "cucu run data/features/scenario_with_console_logs.feature --results {CUCU_RESULTS_DIR}/console-log-reporting" and save stdout to "STDOUT", exit code to "EXIT_CODE"
