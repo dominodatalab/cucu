@@ -1,5 +1,5 @@
+import glob
 import jinja2
-
 import shutil
 import os
 import urllib
@@ -36,14 +36,14 @@ def generate(results,
 
         for scenario in scenarios:
             scenario_duration = 0
+            scenario_filepath = os.path.join(basepath,
+                                             feature['name'],
+                                             scenario['name'])
 
             step_index = 0
             for step in scenario['steps']:
                 image_filename = f"{step_index} - {step['name'].replace('/', '_')}.png"
-                image_filepath = os.path.join(basepath,
-                                              feature['name'],
-                                              scenario['name'],
-                                              image_filename)
+                image_filepath = os.path.join(scenario_filepath, image_filename)
 
                 if os.path.exists(image_filepath):
                     step['image'] = urllib.parse.quote(image_filename)
@@ -52,6 +52,18 @@ def generate(results,
                     scenario_duration += step['result']['duration']
 
                 step_index += 1
+            logs_filepath = os.path.join(scenario_filepath, 'logs')
+
+            if os.path.exists(logs_filepath):
+                log_files = glob.iglob(os.path.join(logs_filepath, '*.*'))
+                log_files = [
+                    {
+                        'filepath': log_file.replace(f'{scenario_filepath}/', ''),
+                        'name': os.path.basename(log_file)
+                    }
+                    for log_file in log_files
+                ]
+                scenario['logs'] = log_files
 
             scenario['duration'] = scenario_duration
             feature_duration += scenario_duration

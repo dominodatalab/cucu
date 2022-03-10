@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import uuid
@@ -57,6 +58,19 @@ def after_scenario(context, scenario):
         # environment variable which allows tests to reuse the same browser
         # session
         for browser in context.browsers:
+            # save the browser logs to the current scenarios results directory
+            scenario_dir = os.path.join(config.CONFIG['CUCU_RESULTS_DIR'],
+                                        scenario.feature.name,
+                                        scenario.name)
+            browser_log_filepath = os.path.join(scenario_dir,
+                                                'logs',
+                                                'browser_console.log')
+
+            os.makedirs(os.path.dirname(browser_log_filepath))
+            with open(browser_log_filepath, 'w') as output:
+                for log in browser.get_log():
+                    output.write(f'{json.dumps(log)}\n')
+
             browser.quit()
 
         context.browsers = []

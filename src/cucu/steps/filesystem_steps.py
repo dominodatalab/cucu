@@ -1,4 +1,5 @@
 import os
+import re
 
 from behave import step
 
@@ -25,4 +26,13 @@ def should_see_file_with_the_following(context, filepath):
         file_contents = input.read().decode('utf8')
 
         if file_contents != context.text:
+            raise RuntimeError(f'expected:\n{context.text}\nbut got:\n{file_contents}\n')
+
+
+@step('I should see the file at "{filepath}" matches the following')
+def should_see_file_matches_the_following(context, filepath):
+    with open(filepath, 'rb') as input:
+        file_contents = input.read().decode('utf8')
+
+        if not re.match(context.text, file_contents):
             raise RuntimeError(f'expected:\n{context.text}\nbut got:\n{file_contents}\n')

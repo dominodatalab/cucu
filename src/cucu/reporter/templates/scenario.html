@@ -14,8 +14,9 @@
                         Logs
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                      <a class="dropdown-item" href="#">browser-console.log (not functional yet)</a>
-                      <a class="dropdown-item" href="#">etc...</a>
+                      {% for log_file in scenario['logs'] %}
+                      <a class="dropdown-item" href="{{ log_file['filepath'] }}">{{ log_file['name'] }}</a>
+                      {% endfor %}
                     </div>
                   </li>
               </ul>

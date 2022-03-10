@@ -33,18 +33,29 @@ class Selenium(Browser):
             if headless:
                 options.add_argument('--headless')
 
+            desired_capabilities = DesiredCapabilities.CHROME
+            desired_capabilities['goog:loggingPrefs'] = {
+                'browser': 'ALL'
+            }
+
             if selenium_remote_url is not None:
                 logger.debug(f'connecting to selenium: {selenium_remote_url}')
                 self.driver = webdriver.Remote(
                     command_executor=selenium_remote_url,
-                    desired_capabilities=DesiredCapabilities.CHROME,
+                    desired_capabilities=desired_capabilities,
                 )
             else:
                 # auto install chromedriver if not present
                 chromedriver_autoinstaller.install()
-                self.driver = webdriver.Chrome(chrome_options=options)
+                self.driver = webdriver.Chrome(
+                    chrome_options=options,
+                    desired_capabilities=desired_capabilities,
+                )
         else:
             raise Exception(f'unknown browser {browser}')
+
+    def get_log(self):
+        return self.driver.get_log('browser')
 
     def navigate(self, url):
         self.driver.get(url)
