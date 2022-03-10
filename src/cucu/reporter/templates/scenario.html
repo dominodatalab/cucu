@@ -37,16 +37,16 @@
             {% endif %}
             <tr>
                 {% if step['result'] is not defined %}
-                    <td><pre style="display: inline; color: blue;">{{ step_prefix }}{{ step_name }}</pre></td>
+                    <td><pre style="display: inline; color: blue">{{ step_prefix }}{{ step['keyword'].rjust(6, ' ') }}</pre><pre style="color: blue; display: inline"> {{ step['name'] }}</pre></td>
                     <td></td>
                 {% elif step['result']['status'] == 'passed' %}
                     <td><pre style="display: inline; color: green">{{ step_prefix }}{{ step['keyword'].rjust(6, ' ') }}</pre><pre style="display: inline"> {{ step['name'] }}</pre></td>
                     <td><pre style="display: inline; color: gray;"># {{ '{:.3f}'.format(step['result']['duration']) }}s</pre></td>
                 {% elif step['result']['status'] == 'failed' %}
-                    <td><pre style="display: inline; color: red">{{ step_prefix }}{{ step_name }}</pre></td>
+                    <td><pre style="display: inline; color: red">{{ step_prefix }}{{ step['keyword'].rjust(6, ' ') }}</pre><pre style="color: red; display: inline"> {{ step['name'] }}</pre></td>
                     <td><pre style="display: inline; color: gray;"># {{ '{:.3f}'.format(step['result']['duration']) }}s</pre></td>
                 {% elif step['result']['status'] == 'skipped' %}
-                    <td><pre style="display: inline; color: blue">{{ step_prefix }}{{ step_name }}</pre></td>
+                    <td><pre style="display: inline; color: blue">{{ step_prefix }}{{ step['keyword'].rjust(6, ' ') }}</pre><pre style="color: blue; display: inline"> {{ step['name'] }}</pre></td>
                 {% endif %}
             </tr>
             {% if step['text'] %}
@@ -86,6 +86,15 @@
                     {% endfor %}
                 </tr>
                 {% endif %}
+
+                {% if step['result']['error_message'] %}
+                    {% for line in step['result']['error_message'] %}
+                    <tr>
+                        <td colspan="2" style="margin: 0"><pre style="color: gray; margin: 0">{{ line }}</pre></td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+
             {% endif %}
             {% if step['image'] is defined and step['result'] is defined %}
             <tr>
