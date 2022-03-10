@@ -33,7 +33,7 @@ def before_scenario(context, scenario):
         scenario_dir = os.path.join(config.CONFIG['CUCU_RESULTS_DIR'],
                                     scenario.feature.name,
                                     scenario.name)
-        os.makedirs(scenario_dir)
+        os.makedirs(scenario_dir, exist_ok=True)
         context.scenario_dir = scenario_dir
 
     context.scenario = scenario
@@ -66,7 +66,7 @@ def after_scenario(context, scenario):
                                                 'logs',
                                                 'browser_console.log')
 
-            os.makedirs(os.path.dirname(browser_log_filepath))
+            os.makedirs(os.path.dirname(browser_log_filepath), exist_ok=True)
             with open(browser_log_filepath, 'w') as output:
                 for log in browser.get_log():
                     output.write(f'{json.dumps(log)}\n')

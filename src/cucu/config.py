@@ -110,6 +110,8 @@ def get_local_address():
 #      `cucu vars` command which spits out the available variables, their
 #      defaults and a description of their usage.
 CONFIG['HOST_ADDRESS'] = get_local_address()
+CONFIG['CWD'] = os.getcwd()
+
 CONFIG['CUCU_STEP_WAIT_TIMEOUT_MS'] = 20000  # default of 20s to wait
 CONFIG['CUCU_STEP_RETRY_AFTER_MS'] = 500     # default of 500ms to wait between retries
 CONFIG['CUCU_KEEP_BROWSER_ALIVE'] = False

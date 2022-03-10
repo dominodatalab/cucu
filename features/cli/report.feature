@@ -50,6 +50,7 @@ Feature: Report
       And I should see the image with the alt text "And I click the button \"Google Search\""
       And I should see the image with the alt text "Then I should see the text \"/dôɡ/\""
 
+  @disabled @needs-work
   Scenario: User can run a scenario with console logs and see those logs linked in the report
     Given I run the command "cucu run data/features/scenario_with_console_logs.feature --results {CUCU_RESULTS_DIR}/console-log-reporting" and save stdout to "STDOUT", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
@@ -62,7 +63,7 @@ Feature: Report
       And I click the button "Logs"
      Then I should see the button "browser_console.log"
      When I click the button "browser_console.log" 
-     Then I should see the text "this is a regular log"
+     Then I wait to see the text "this is a regular log"
       And I should see the text "this is an error log"
       And I should see the text "this is a debug log"
       And I should see the text "this is a warn log"
