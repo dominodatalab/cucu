@@ -11,6 +11,7 @@ from cucu import behave_tweaks, fuzzy, reporter, language_server, logger
 from cucu.config import CONFIG
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.lint import linter
+from importlib.metadata import version
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
@@ -23,6 +24,7 @@ behave_tweaks.init_step_hooks(sys.stdout, sys.stderr)
 
 
 @click.group()
+@click.version_option(version('cucu'))
 @click.option('--debug/--no-debug', default=False)
 @click.option('-l',
               '--logging-level',

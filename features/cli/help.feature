@@ -11,6 +11,7 @@ Feature: Help
         main entrypoint
 
       Options:
+        --version                 Show the version and exit.
         --debug / --no-debug
         -l, --logging-level TEXT  set logging level to one of debug, warn or info
                                   (default)

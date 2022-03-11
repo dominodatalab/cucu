@@ -10,6 +10,14 @@ Feature: Run
 
       """
 
+  Scenario: User can get the versino of the currently running cucu command
+    Given I run the command "cucu --version" and save stdout to "STDOUT", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "0"
+      And I should see "{STDOUT}" matches the following
+      """
+      cucu, version \d.\d.\d
+      """
+
   Scenario: User gets expected output when running steps with substeps
     Given I run the command "cucu run data/features/scenario_with_substeps.feature --results {CUCU_RESULTS_DIR}/substeps-results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
