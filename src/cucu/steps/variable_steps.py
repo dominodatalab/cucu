@@ -21,6 +21,18 @@ def should_see_is_equal(_, this, that):
         raise RuntimeError(f'{this} is not equal to {that}')
 
 
+@step('I should see "{this}" contains "{that}"')
+def should_see_it_contains(_, this, that):
+    if that not in this:
+        raise RuntimeError(f'{this} does not contain {that}')
+
+
+@step('I should see "{this}" does not contain "{that}"')
+def should_see_it_doest_not_contain(_, this, that):
+    if that in this:
+        raise RuntimeError(f'{this} contain {that}')
+
+
 @step('I should see "{this}" is equal to the following')
 def should_see_is_equal_to_the_following(context, this):
     that = context.text

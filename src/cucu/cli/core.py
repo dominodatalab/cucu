@@ -2,17 +2,24 @@
 import click
 import coverage
 import shutil
+import sys
 import time
 import os
 
 from click import ClickException
-from cucu import fuzzy, reporter, language_server, logger
+from cucu import behave_tweaks, fuzzy, reporter, language_server, logger
 from cucu.config import CONFIG
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.lint import linter
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
+
+# intercepts and makes sure to hide any secrets sent to the original stdout
+# and stderr streams
+sys.stdout = behave_tweaks.CucuStream(sys.stdout)
+sys.stderr = behave_tweaks.CucuStream(sys.stderr)
+behave_tweaks.init_step_hooks(sys.stdout, sys.stderr)
 
 
 @click.group()
@@ -71,6 +78,10 @@ def main(debug, logging_level):
 @click.option('-r',
               '--results',
               default='results')
+@click.option('--secrets',
+              default=None,
+              help='coma separated list of variable names that we should hide'
+                   ' their value all of the output produced by cucu')
 @click.option('--source/--no-source',
               default=False,
               help='show the source for each step definition in the logs')
@@ -95,6 +106,7 @@ def run(filepath,
         ipdb_on_failure,
         preserve_results,
         results,
+        secrets,
         source,
         tags,
         selenium_remote_url):
@@ -120,6 +132,9 @@ def run(filepath,
         CONFIG['CUCU_IPDB_ON_FAILURE'] = 'true'
 
     CONFIG['CUCU_RESULTS_DIR'] = results
+
+    if secrets:
+        CONFIG['CUCU_SECRETS'] = secrets
 
     if not dry_run:
         if not preserve_results:
