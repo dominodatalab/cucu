@@ -112,6 +112,10 @@ def get_local_address():
 CONFIG['HOST_ADDRESS'] = get_local_address()
 CONFIG['CWD'] = os.getcwd()
 
+# coma separated list of variables that we should hide if their values are to
+# be printed to the console
+CONFIG['CUCU_SECRETS'] = ''
+
 CONFIG['CUCU_STEP_WAIT_TIMEOUT_MS'] = 20000  # default of 20s to wait
 CONFIG['CUCU_STEP_RETRY_AFTER_MS'] = 500     # default of 500ms to wait between retries
 CONFIG['CUCU_KEEP_BROWSER_ALIVE'] = False

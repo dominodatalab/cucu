@@ -3,10 +3,8 @@ import os
 import sys
 import uuid
 
-from cucu import behave_tweaks, config, logger
+from cucu import config, logger
 from cucu.config import CONFIG
-
-behave_tweaks.init_step_hooks(sys.stdout, sys.stderr)
 
 
 def escape_filename(string):
@@ -91,7 +89,6 @@ def after_step(context, step):
     # grab the captured output during the step run and reset the wrappers
     step.stdout = sys.stdout.captured()
     step.stderr = sys.stderr.captured()
-    behave_tweaks.uninit_output_streams()
 
     if context.browser is not None and not context.substep_increment:
         step_name = escape_filename(step.name)

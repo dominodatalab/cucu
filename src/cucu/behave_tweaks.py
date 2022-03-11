@@ -47,7 +47,10 @@ def init_step_hooks(stdout, stderr):
                 warnings.simplefilter('ignore')
                 context.text = CONFIG.resolve(context.text)
 
-            init_output_streams(stdout, stderr)
+            # intercept the current stdout and stderr that behave is capturing
+            # and attach it to the captured output
+            sys.stdout = CucuStream(sys.stdout, parent=stdout)
+            sys.stderr = CucuStream(sys.stderr, parent=stderr)
             func(*args, **kwargs)
 
         def new_decorator(step_text, wait_for=False):
@@ -71,48 +74,55 @@ def init_step_hooks(stdout, stderr):
         behave.__dict__[decorator_name] = new_decorator
 
 
-def init_output_streams(parent_stdout, parent_stderr):
-    # intercept all stdout/stderr writes for capturing of output but also so we
-    # can tell the formatter when there was output produced within a step
-    class CucuStream:
+def hide_secrets(line):
+    secrets = CONFIG['CUCU_SECRETS']
 
-        def __init__(self, stream, parent_stream):
-            self.captured_data = []
-            self.stream = stream
-            self.parent_stream = parent_stream
+    # here's where we can hide secrets
+    for secret in secrets.split(','):
+        if secret != '':
+            value = CONFIG[secret]
+            line = line.replace(value, '*' * len(value))
 
-        def write(self, byte):
-            self.captured_data.append(byte)
-            self.stream.write(byte)
-            self.parent_stream.write(byte)
-            CONFIG['CUCU_WROTE_TO_CONSOLE'] = True
-
-        def writelines(self, lines):
-            for line in lines:
-                self.captured_data.append(line)
-
-            self.stream.writelines(lines)
-            self.parent_stream.writelines(lines)
-            CONFIG['CUCU_WROTE_TO_CONSOLE'] = True
-
-        def captured(self):
-            captured_data = self.captured_data
-            self.captured_data = []
-            return captured_data
-
-        def isatty(self):
-            return self.stream.isatty()
-
-        def flush(self):
-            self.stream.flush()
-
-    sys.original_stdout = sys.stdout
-    sys.original_stderr = sys.stderr
-
-    sys.stdout = CucuStream(sys.stdout, parent_stdout)
-    sys.stderr = CucuStream(sys.stderr, parent_stderr)
+    return line
 
 
-def uninit_output_streams():
-    sys.stdout = sys.original_stdout
-    sys.stderr = sys.original_stderr
+class CucuStream:
+
+    def __init__(self, stream, parent=None):
+        self.captured_data = []
+        self.stream = stream
+        self.parent = parent
+
+    def write(self, byte):
+        byte = hide_secrets(byte)
+
+        self.captured_data.append(byte)
+        self.stream.write(byte)
+
+        if self.parent:
+            self.parent.write(byte)
+
+        CONFIG['CUCU_WROTE_TO_CONSOLE'] = True
+
+    def writelines(self, lines):
+        lines = [hide_secrets(line) for line in lines]
+
+        for line in lines:
+            self.captured_data.append(line)
+
+        if self.parent:
+            self.parent.writelines(lines)
+
+        self.stream.writelines(lines)
+        CONFIG['CUCU_WROTE_TO_CONSOLE'] = True
+
+    def captured(self):
+        captured_data = self.captured_data
+        self.captured_data = []
+        return captured_data
+
+    def isatty(self):
+        return self.stream.isatty()
+
+    def flush(self):
+        self.stream.flush()

@@ -57,7 +57,7 @@ Feature: Report
      Then I should see "{EXIT_CODE}" is equal to "0"
      When I start a webserver on port "40000" at directory "{CUCU_RESULTS_DIR}/mixed-results-report/"
       And I open a browser at the url "http://{HOST_ADDRESS}:40000/index.html"
-      And I click the button "Feature: Feature with mixed results" 
+      And I click the button "Feature: Feature with mixed results"
       And I click the button "Scenario: Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
 
@@ -73,7 +73,7 @@ Feature: Report
       And I click the button "Scenario: Scenario with console logs"
       And I click the button "Logs"
      Then I should see the button "browser_console.log"
-     When I click the button "browser_console.log" 
+     When I click the button "browser_console.log"
      Then I wait to see the text "this is a regular log"
       And I should see the text "this is an error log"
       And I should see the text "this is a debug log"
