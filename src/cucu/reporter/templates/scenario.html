@@ -4,7 +4,7 @@
         <div class="container">
             <a class="navbar-brand" href="#">HTML Test Report</a>
 
-            <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+            <div class="collapse navbar-collapse">
               <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                 <li class="nav-item active">
                   <a class="nav-link" href="../../index.html">Top</a>
@@ -19,14 +19,36 @@
                       {% endfor %}
                     </div>
                   </li>
+                <li class="nav-item active">
+                    <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target=".multi-collapse" aria-expanded="false" aria-controls=".multi-collapse">toggle images</button>
+                </li>
               </ul>
+
             </div>
         </div>
     </nav>
+    <style>
+    .anchor {
+      display: inline;
+      margin: 0;
+      padding: 0;
+      font-size: 8px;
+      font-style: bold;
+      text-decoration: none;
+      visibility: hidden;
+    }
+
+    .anchor-toggle:hover > .anchor {
+      display: inline;
+      visibility: visible;
+    }
+    </style>
     <table class="table table-borderless">
-        <tr>
-            <td><pre style="display: inline; color: maroon;">Scenario:</pre> {{ scenario['name'] }}</td>
-            <td style="color: gray;"></td>
+        <tr class="d-flex">
+            <td class="col-9 text-truncate">
+                <pre style="display: inline; color: maroon;">Scenario:</pre> {{ scenario['name'] }}
+            </td>
+            <td class="col-9 text-truncate" style="color: gray;"></td>
         </tr>
         {% for step in steps %}
             {% set step_name = step['keyword'] + ' ' + step['name'] %}
@@ -35,19 +57,26 @@
             {% else %}
                 {% set step_prefix = "" %}
             {% endif %}
-            <tr>
+            {% if step['result'] is defined %}
+                {% set step_duration = "{:.3f}".format(step["result"]["duration"]) %}
+            {% else %}
+                {% set step_duration = "0.000" %}
+            {% endif %}
+            {% set step_keyword = step_prefix + step['keyword'].rjust(6, ' ') %}
+            <tr class="d-flex">
+                <td class="anchor-toggle text-truncate col-9" data-toggle="collapse" href="#collapsable-row-{{ loop.index }}" role="button" aria-expanded="false" aria-controls="collapsable-row-{{ loop.index }}">
+                    <a class="anchor" id="step_{{ loop.index}}" href="#step_{{ loop.index }}">🔗</a>
                 {% if step['result'] is not defined %}
-                    <td><pre style="display: inline; color: blue">{{ step_prefix }}{{ step['keyword'].rjust(6, ' ') }}</pre><pre style="color: blue; display: inline"> {{ step['name'] }}</pre></td>
-                    <td></td>
+                    <pre style="display: inline; color: blue">{{ step_keyword }}</pre><pre style="color: blue; display: inline"> {{ step['name'] }}</pre>
                 {% elif step['result']['status'] == 'passed' %}
-                    <td><pre style="display: inline; color: green">{{ step_prefix }}{{ step['keyword'].rjust(6, ' ') }}</pre><pre style="display: inline"> {{ step['name'] }}</pre></td>
-                    <td><pre style="display: inline; color: gray;"># {{ '{:.3f}'.format(step['result']['duration']) }}s</pre></td>
+                    <pre style="display: inline; color: green">{{ step_keyword }}</pre><pre style="display: inline; text-overflow: ellipsis; overflow: hidden;"> {{ step['name'] }}</pre>
                 {% elif step['result']['status'] == 'failed' %}
-                    <td><pre style="display: inline; color: red">{{ step_prefix }}{{ step['keyword'].rjust(6, ' ') }}</pre><pre style="color: red; display: inline"> {{ step['name'] }}</pre></td>
-                    <td><pre style="display: inline; color: gray;"># {{ '{:.3f}'.format(step['result']['duration']) }}s</pre></td>
+                    <pre style="display: inline; color: red">{{ step_keyword }}</pre><pre style="color: red; display: inline"> {{ step['name'] }}</pre>
                 {% elif step['result']['status'] == 'skipped' %}
-                    <td><pre style="display: inline; color: blue">{{ step_prefix }}{{ step['keyword'].rjust(6, ' ') }}</pre><pre style="color: blue; display: inline"> {{ step['name'] }}</pre></td>
+                    <pre style="display: inline; color: blue">{{ step_keyword }}</pre><pre style="color: blue; display: inline"> {{ step['name'] }}</pre>
                 {% endif %}
+                </td>
+                <td><pre style="display: inline; color: gray;"># {{ step_duration }}s</pre></td>
             </tr>
             {% if step['text'] %}
             <tr>
@@ -97,11 +126,56 @@
 
             {% endif %}
             {% if step['image'] is defined and step['result'] is defined %}
-            <tr>
-                <td colspan="2"><img class="col-12 shadow p-3 mb-5 bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img></td>
+            <tr class="d-flex">
+                <td class="collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
+                    <img class="col-10 shadow bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img>
+                </td>
             </tr>
             {% endif %}
         {% endfor %}
     </table>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search)
+        var expandables = [];
+        var expandable_ids = urlParams.get('expand');
+        if (expandable_ids === 'all') {
+            expand = $('.collapse');
+        } else if (expandable_ids) {
+            var ids = expandable_ids.split(',');
+            for (var index = 0; index < ids.length; index++) {
+                console.log('looking up ' + ids[index]);
+                expandables.push(document.getElementById(ids[index]));
+            }
+        }
+        for (var index=0; index < expandables.length; index++) {
+            $(expandables[index]).removeClass('hide')
+            $(expandables[index]).addClass('show')
+        }
+
+        // necessary to make sure we jump to the anchored step as the page loads
+        // and then we take the URL parameter and figure out which rows to
+        // expand and only then would it make sense to adjust for any anchors
+        // mentioned in the URL
+        // window.location.href = window.location.href;
+
+        $('document').ready(function() {
+            MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+            var observer = new MutationObserver(function(mutations, observer) {
+                // update any open/closed rows
+                var url = window.location.href.split('?')[0];
+                var anchor = '#' + (window.location.href.split('#')[1] || '');
+                var expanded = $('.collapse.show');
+                var expanded_ids = [];
+                for (var index=0; index < expanded.length; index++) {
+                    expanded_ids.push(expanded[index].getAttribute('id'))
+                }
+                url = url + '?expand=' + expanded_ids.join(',') + anchor;
+                history.pushState(null, "", url);
+            });
+            observer.observe(document, {
+              subtree: true,
+              attributes: true
+            });
+        });
     </script>
 {% endblock %}

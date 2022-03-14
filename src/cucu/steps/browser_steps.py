@@ -60,6 +60,11 @@ def open_a_new_browser(context, url):
     fuzzy.init(context.browser)
 
 
+@step('I save the current url to the variable "{variable}"')
+def save_current_url_to_variable(ctx, variable):
+    config.CONFIG[variable] = ctx.browser.get_current_url()
+
+
 @step('I refresh the browser')
 def refresh_browser(context):
     context.browser.refresh()

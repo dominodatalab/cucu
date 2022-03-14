@@ -28,6 +28,9 @@ class Browser:
     def refresh(self):
         raise RuntimeError('implement me')
 
+    def get_current_url(self):
+        raise RuntimeError('implement me')
+
     def title(self):
         raise RuntimeError('implement me')
 
