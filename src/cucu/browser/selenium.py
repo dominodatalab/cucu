@@ -57,6 +57,9 @@ class Selenium(Browser):
     def get_log(self):
         return self.driver.get_log('browser')
 
+    def get_current_url(self):
+        return self.driver.current_url
+
     def navigate(self, url):
         self.driver.get(url)
 
@@ -87,10 +90,20 @@ class Selenium(Browser):
         return self.driver.title
 
     def xpath_find_elements(self, xpath):
-        return self.driver.find_elements(By.XPATH, xpath)
+        elements = self.driver.find_elements(By.XPATH, xpath)
+
+        def visible(element):
+            return element.is_displayed()
+
+        return list(filter(visible, elements))
 
     def css_find_elements(self, selector):
-        return self.driver.find_elements(By.CSS_SELECTOR, selector)
+        elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
+
+        def visible(element):
+            return element.is_displayed()
+
+        return list(filter(visible, elements))
 
     def execute(self, javascript):
         return self.driver.execute_script(javascript)
