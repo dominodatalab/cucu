@@ -5,6 +5,8 @@ import sys
 import traceback
 
 from cucu.config import CONFIG
+from tenacity import retry as retrying
+from tenacity import stop_after_delay, wait_fixed
 
 
 def init_steps():
@@ -106,3 +108,14 @@ def run_steps(context, steps_text):
     CONFIG['CUCU_WROTE_TO_STDOUT'] = True
 
     return True
+
+
+def retry(func,
+          wait_up_to_ms=float(CONFIG['CUCU_STEP_WAIT_TIMEOUT_MS']),
+          retry_after_ms=float(CONFIG['CUCU_STEP_RETRY_AFTER_MS'])):
+    @retrying(stop=stop_after_delay(wait_up_to_ms),
+              wait=wait_fixed(retry_after_ms))
+    def new_decorator(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return new_decorator

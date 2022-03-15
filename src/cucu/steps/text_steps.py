@@ -1,57 +1,63 @@
-import tenacity
-
-from behave import step
-from cucu import fuzzy
+from cucu import fuzzy, retry, step
 
 
-def find_text(context, name, index=0):
+def find_text(ctx, name, index=0):
     """
     find any element containing the text provide.
 
     parameters:
-      context - behave context object passed to a behave step
-      name    - name that identifies the desired element on screen
-      index   - the index of the element if there are a few with the same name.
+      ctx(object): behave context object used to share data between steps
+      name(str):   name that identifies the desired radio text on screen
+      index(str):  the index of the radio text if there are duplicates
 
     returns:
         the WebElement that matches the provided arguments or None if none found
     """
-    return fuzzy.find(context.browser,
+    return fuzzy.find(ctx.browser,
                       name,
                       ['*'],
                       index=index,
                       direction=fuzzy.Direction.LEFT_TO_RIGHT)
 
 
-def assert_text_found(context, name, index=0):
-    text = find_text(context, name)
+def find_n_assert_text(ctx, name, index=0, is_visible=True):
+    """
+    find and assert text is visible
 
-    if text is None:
-        raise Exception(f'unable to find the text "{name}"')
+    parameters:
+      ctx(object): behave context object used to share data between steps
+      name(str):   name that identifies the desired radio text on screen
+      index(str):  the index of the radio text if there are duplicates
+
+    returns:
+        the WebElement that matches the provided arguments or None if none found
+    """
+    text = find_text(ctx, name)
+
+    if is_visible:
+        if text is None:
+            raise Exception(f'unable to find the text "{name}"')
+    else:
+        if text is not None:
+            raise Exception(f'able to find the text "{name}"')
 
 
 @step('I should see the text "{name}"')
-def should_see_the_text(context, name):
-    assert_text_found(context, name)
+def should_see_the_text(ctx, name):
+    find_n_assert_text(ctx, name)
 
 
-@step('I wait to see the text "{name}"', wait_for=True)
-def wait_see_the_text(context, name):
-    assert_text_found(context, name)
+@step('I wait to see the text "{name}"')
+def wait_see_the_text(ctx, name):
+    retry(find_n_assert_text)(ctx, name)
 
 
-# XXX: the way we do wait for steps needs to be generalized
-@step('I wait up to "{seconds}" seconds to see the text "{name}"')
-def wait_up_to_seconds_to_see_the_text(context, seconds, name):
-    assert_func = tenacity.retry(stop=tenacity.stop_after_delay(int(seconds)),
-                                 wait=tenacity.wait_fixed(0.250))(assert_text_found)
-
-    assert_func(context, name)
+@step('I wait up to "{seconds:f}" seconds to see the text "{name}"')
+def wait_up_to_seconds_to_see_the_text(ctx, seconds, name):
+    retry(find_n_assert_text,
+          wait_up_to_ms=seconds * 1000)(ctx, name)
 
 
 @step('I should not see the text "{name}"')
-def should_not_see_the_text(context, name):
-    text = find_text(context, name)
-
-    if text is not None:
-        raise Exception(f'able to find the text "{name}"')
+def should_not_see_the_text(ctx, name):
+    find_n_assert_text(ctx, name)

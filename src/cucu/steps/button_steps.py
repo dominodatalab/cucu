@@ -1,12 +1,11 @@
-from behave import step
+import humanize
 
-from cucu import fuzzy
+from cucu import fuzzy, retry, step
 
 
-def find_button(context, name, index=0):
+def find_button(ctx, name, index=0):
     """
-    find a button on screen by fuzzy matching on the name provided and the
-    target element:
+    find a button on screen by fuzzy matching on the name and index provided.
 
         * <button>
         * <input type="button">
@@ -19,82 +18,90 @@ def find_button(context, name, index=0):
         * <* role="radio">
 
     note: the reason we're allowing link, menuitem, option and radio buttons
-          to be clickable is that on screen they maybe presented as such.
+          to be clickable is that on screen they may simply look like a button.
 
-    arguments:
-      context - behave context object passed to a behave step
-      name    - name that identifies the desired element on screen
-      index   - the index of the element if there are a few with the same name.
+    parameters:
+      ctx(object): behave context object used to share data between steps
+      name(str):   name that identifies the desired button on screen
+      index(str):  the index of the button if there are duplicates
 
     returns:
         the WebElement that matches the provided arguments.
     """
-    return fuzzy.find(context.browser,
-                      name,
-                      [
-                          'button',
-                          'input[type="button"]',
-                          'input[type="submit"]',
-                          'a',
-                          '*[role="button"]',
-                          '*[role="link"]',
-                          '*[role="menuitem"]',
-                          '*[role="option"]',
-                      ],
-                      index=index)
+    button = fuzzy.find(ctx.browser,
+                        name,
+                        [
+                            'button',
+                            'input[type="button"]',
+                            'input[type="submit"]',
+                            'a',
+                            '*[role="button"]',
+                            '*[role="link"]',
+                            '*[role="menuitem"]',
+                            '*[role="option"]',
+                        ],
+                        index=index)
+
+    prefix = '' if index == 0 else f'{humanize.ordinal(index)} '
+
+    if button is None:
+        raise RuntimeError(f'unable to find the {prefix}input {name}')
+
+    return button
+
+
+def find_n_click_button(ctx, name, index=0):
+    """
+    find the button with the name and index provided and click it
+
+    parameters:
+      ctx(object): behave context object used to share data between steps
+      name(str):   name that identifies the desired button on screen
+      index(str):  the index of the button if there are duplicates
+
+    raises:
+        an error if the desired button is not found
+    """
+
+    button = find_button(ctx, name, index=index)
+    button.click()
 
 
 @step('I click the button "{name}"')
-def clicks_the_button(context, name):
-    button = find_button(context, name)
-    button.click()
+def clicks_the_button(ctx, name):
+    find_n_click_button(ctx, name)
 
 
-@step('I wait to click the button "{name}"', wait_for=True)
-def waits_to_clicks_the_button(context, name):
-    button = find_button(context, name)
-    button.click()
+@step('I wait to click the button "{name}"')
+def waits_to_clicks_the_button(ctx, name):
+    retry(find_n_click_button)(ctx, name)
 
 
 @step('I click the "{nth:nth}" button "{name}"')
-def clicks_the_nth_button(context, nth, name):
-    button = find_button(context, name, index=nth)
-    button.click()
+def clicks_the_nth_button(ctx, nth, name):
+    find_n_click_button(ctx, name, index=nth)
 
 
-@step('I wait to click the "{nth:nth}" button "{name}"', wait_for=True)
-def waits_to_clicks_the_nth_button(context, nth, name):
-    button = find_button(context, name, index=nth)
-    button.click()
+@step('I wait to click the "{nth:nth}" button "{name}"')
+def waits_to_clicks_the_nth_button(ctx, nth, name):
+    retry(find_n_click_button)(ctx, name, index=nth)
 
 
 @step('I should see the button "{name}"')
-def we_should_see_the_button(context, name):
-    button = find_button(context, name)
-
-    if button is None:
-        raise Exception(f'unable to find button "{name}"')
+def we_should_see_the_button(ctx, name):
+    find_button(ctx, name)
 
 
-@step('I wait to see the button "{name}"', wait_for=True)
-def waits_to_see_the_button(context, name):
-    button = find_button(context, name)
-
-    if button is None:
-        raise Exception(f'unable to find button "{name}"')
+@step('I wait to see the button "{name}"')
+def waits_to_see_the_button(ctx, name):
+    retry(find_button)(ctx, name)
 
 
 @step('I should see the "{nth:nth}" button "{name}"')
-def should_see_the_nth_button(context, nth, name):
-    button = find_button(context, name, index=nth)
-
-    if button is None:
-        raise Exception(f'unable to find button "{name}"')
+def should_see_the_nth_button(ctx, nth, name):
+    find_button(ctx, name, index=nth)
 
 
-@step('I wait to see the "{nth:nth}" button "{name}"', wait_for=True)
-def waits_to_see_the_nth_button(context, nth, name):
-    button = find_button(context, name, index=nth)
-
-    if button is None:
-        raise Exception(f'unable to find button "{name}"')
+@step('I wait to see the "{nth:nth}" button "{name}"')
+def waits_to_see_the_nth_button(ctx, nth, name):
+    retry(find_button)(ctx, name, index=nth)
