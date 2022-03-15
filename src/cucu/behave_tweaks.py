@@ -9,7 +9,6 @@ import sys
 
 from cucu.config import CONFIG
 from functools import wraps
-from retrying import retry
 
 
 def init_step_hooks(stdout, stderr):
@@ -20,9 +19,6 @@ def init_step_hooks(stdout, stderr):
     #
     for decorator_name in ['given', 'when', 'then', 'step']:
         decorator = behave.__dict__[decorator_name]
-
-        ui_wait_timeout_ms = int(CONFIG['CUCU_STEP_WAIT_TIMEOUT_MS'])
-        ui_wait_before_retry_ms = int(CONFIG['CUCU_STEP_RETRY_AFTER_MS'])
 
         def inner_step_func(func, *args, **kwargs):
             #
@@ -53,21 +49,12 @@ def init_step_hooks(stdout, stderr):
             sys.stderr = CucuStream(sys.stderr, parent=stderr)
             func(*args, **kwargs)
 
-        def new_decorator(step_text, wait_for=False):
+        def new_decorator(step_text):
             def wrapper(func):
-                if wait_for:
-                    @decorator(step_text)
-                    @retry(stop_max_delay=ui_wait_timeout_ms,
-                           wait_fixed=ui_wait_before_retry_ms)
-                    @wraps(func)
-                    def inner_step(*args, **kwargs):
-                        inner_step_func(func, *args, **kwargs)
-
-                else:
-                    @decorator(step_text)
-                    @wraps(func)
-                    def inner_step(*args, **kwargs):
-                        inner_step_func(func, *args, **kwargs)
+                @decorator(step_text)
+                @wraps(func)
+                def inner_step(*args, **kwargs):
+                    inner_step_func(func, *args, **kwargs)
 
             return wrapper
 

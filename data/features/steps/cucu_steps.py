@@ -1,5 +1,4 @@
-from behave import step
-from cucu import run_steps
+from cucu import retry, run_steps, step
 
 
 @step('I use a step with substeps that log')
@@ -44,9 +43,12 @@ def i_fail(_):
     raise RuntimeError('step fails on purpose')
 
 
-@step('I wait to fail', wait_for=True)
+@step('I wait to fail')
 def i_wait_to_fail(_):
-    raise RuntimeError('step fails on purpose after a while')
+    def fail():
+        raise RuntimeError('step fails on purpose after a while')
+
+    retry(fail)
 
 
 @step('I search for "{query}" on google search')
