@@ -27,7 +27,7 @@ Feature: Report
      When I click the link "Scenario: Search for kittens on www.google.com"
      Then I should see the text "And I wait to write \"define: kittens\" into the input \"Search\""
 
-  Scenario: User can run a multi scenario test with web steps and generate report with a shareable url 
+  Scenario: User can run a multi scenario test with web steps and generate report with a shareable url
     Given I run the command "cucu run data/features/multiple_scenarios_with_browser_steps.feature --results {CUCU_RESULTS_DIR}/multi-scenario-browser-results" and save exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
      When I run the command "cucu report {CUCU_RESULTS_DIR}/multi-scenario-browser-results --output {CUCU_RESULTS_DIR}/multi-scenario-browser-report" and save exit code to "EXIT_CODE"

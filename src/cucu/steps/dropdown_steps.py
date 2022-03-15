@@ -1,4 +1,4 @@
-import humanize 
+import humanize
 
 from cucu import fuzzy, retry, step
 from selenium.webdriver.support.ui import Select
