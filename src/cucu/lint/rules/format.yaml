@@ -1,5 +1,5 @@
 feature_name_on_first_line:
-  message: feature name should not have any indentation 
+  message: feature name should not have any indentation
   type: warning
   current_line:
     match: '^\s+Feature: .*'

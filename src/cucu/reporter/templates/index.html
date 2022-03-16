@@ -11,11 +11,11 @@
         <tr role="link" style="cursor: pointer;" onclick="window.location='{{ feature['name'] }}.html';" >
             <td><pre style="display: inline; color: green">Feature: </pre><pre style="display: inline; color: grey">{{ feature['name'] }}</pre></td>
             {% if feature['status'] == 'passed' %}
-                <td><pre style="display: inline; color: green">{{ feature['status'] }}</pre></td> 
+                <td><pre style="display: inline; color: green">{{ feature['status'] }}</pre></td>
             {% elif feature['status'] == 'failed' %}
-                <td><pre style="display: inline; color: red">{{ feature['status'] }}</pre></td> 
+                <td><pre style="display: inline; color: red">{{ feature['status'] }}</pre></td>
             {% elif feature['status'] == 'skipped' %}
-                <td><pre style="display: inline; color: blue">{{ feature['status'] }}</pre></td> 
+                <td><pre style="display: inline; color: blue">{{ feature['status'] }}</pre></td>
             {% endif %}
             <td><pre style="display: inline; color: grey">{{ '{:.3f}'.format(feature['duration']) }}s</pre></td>
         </tr>

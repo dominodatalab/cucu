@@ -8,7 +8,7 @@ end to end testing framework.
 
 `cucu` is an end to end testing framework that uses [gherkin](https://cucumber.io/docs/gherkin/)
 to drive various underlying tools/frameworks to create real world testing
-scenarios. As of now `cucu` uses selenium to interact with a browser but we 
+scenarios. As of now `cucu` uses selenium to interact with a browser but we
 will have support for running the tests through other selenium testing
 frameworks.
 
