@@ -25,13 +25,13 @@ Feature: Run
       """
       [\s\S]*
       Feature: Feature with substeps
-      
+
         Scenario: Scenario that uses a step with substeps
             ⤷ When I do nothing             .*
             ⤷  And I do nothing             .*
             ⤷  And I do nothing             .*
           Given I use a step with substeps  .*
-      
+
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
       1 step passed, 0 failed, 0 skipped, 0 undefined

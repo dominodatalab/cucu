@@ -1,7 +1,7 @@
 # help menu when you run just `make`
 help:
 	#   install  - installs the necessary development dependencies.
-	#   build    - rebuilds the existing installation and pushes any local code to the 
+	#   build    - rebuilds the existing installation and pushes any local code to the
 	#              current python environment.
 	#   test     - runs all of the cucu tests.
 	#   lint     - lints all of the source and test code.
@@ -26,7 +26,7 @@ release:
 
 dist: build
 	pip install dist/cucu-*.tar.gz
-	
+
 
 test: src/* tests/*
 	poetry run pytest

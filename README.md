@@ -85,7 +85,7 @@ CUCU_SELENIUM_REMOTE_URL: http://localhost:4444
 ```
 
 Then you can simply run `cucu run path/to/some.feature` and `cucu` would load
-the local `cucurc.yml` or `~/.cucurc.yml` settings and use those. 
+the local `cucurc.yml` or `~/.cucurc.yml` settings and use those.
 
 # running built in tests
 
