@@ -15,7 +15,7 @@ Feature: Run
      Then I should see "{EXIT_CODE}" is equal to "0"
       And I should see "{STDOUT}" matches the following
       """
-      cucu, version \d.\d.\d
+      cucu, version \d+.\d+.\d+
       """
 
   Scenario: User gets expected output when running steps with substeps
