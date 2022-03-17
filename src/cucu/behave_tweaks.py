@@ -79,12 +79,20 @@ class CucuStream:
         self.captured_data = []
         self.stream = stream
         self.parent = parent
+        self.encoding = stream.encoding
+
+    def fileno(self):
+        return self.stream.fileno()
 
     def write(self, byte):
         byte = hide_secrets(byte)
 
         self.captured_data.append(byte)
-        self.stream.write(byte)
+
+        if type(byte) == bytes:
+            self.stream.write(byte.decode('utf8'))
+        else:
+            self.stream.write(byte)
 
         if self.parent:
             self.parent.write(byte)

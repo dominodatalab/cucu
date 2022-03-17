@@ -3,6 +3,8 @@ import time
 
 from behave import step
 from behave.model_describe import ModelPrinter
+from cucu.config import CONFIG
+from strip_ansi import strip_ansi
 
 
 @step('I run a step that fails')
@@ -31,3 +33,8 @@ def i_echo_the_following(context):
         # "Given" and the length of "Given" minus one so we align with the last
         # character.
         printer.print_table(context.table, ' ' * 8)
+
+
+@step('I strip ansi codes from "{value}" and save to the variable "{variable}"')
+def strip_ansi_codes_and_save(ctx, value, variable):
+    CONFIG[variable] = strip_ansi(value)
