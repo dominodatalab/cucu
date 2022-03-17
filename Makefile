@@ -19,10 +19,9 @@ build:
 release:
 	echo "tag a new release of cucu"
 	poetry version minor
-	git tag `poetry version -s`
-	echo "make sure to commit your changes and then run 'git push origin --tags'"
 	git add pyproject.toml
 	git commit -m "tagged release `poetry version -s`"
+	git tag `poetry version -s`
 
 dist: build
 	pip install dist/cucu-*.tar.gz
