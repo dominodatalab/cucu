@@ -27,7 +27,7 @@ def run_command(command, stdout_var=None, stderr_var=None, exit_code_var=None):
 
 
 def run_script(script, stdout_var=None, stderr_var=None, exit_code_var=None):
-    shell_command = os.environ['SHELL']
+    shell_command = os.environ.get('SHELL', '/bin/sh')
     process = subprocess.run([shell_command],
                              capture_output=True,
                              shell=True,
