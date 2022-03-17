@@ -104,7 +104,7 @@ def after_step(context, step):
 
     context.step_index += 1
 
-    if CONFIG['CUCU_IPDB_ON_FAILURE'] == 'true' and step.status == 'failed':
+    if CONFIG.bool('CUCU_IPDB_ON_FAILURE') and step.status == 'failed':
         context._runner.stop_capture()
         import ipdb
         ipdb.post_mortem(step.exc_traceback)
