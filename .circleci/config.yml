@@ -80,7 +80,7 @@ jobs:
 
       - run:
           name: code coverage report
-          command: poetry run coverage report --fail-under=80
+          command: poetry run coverage report --fail-under=81
 
 workflows:
   build-n-test:

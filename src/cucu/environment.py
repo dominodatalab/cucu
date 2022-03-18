@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import time
 import uuid
 
 from cucu import config, logger
@@ -83,9 +84,13 @@ def before_step(context, step):
     step.stdout = []
     step.stderr = []
     context.current_step = step
+    context.start_time = time.monotonic()
 
 
 def after_step(context, step):
+    context.end_time = time.monotonic()
+    context.previous_step_duration = context.end_time - context.start_time
+
     # grab the captured output during the step run and reset the wrappers
     step.stdout = sys.stdout.captured()
     step.stderr = sys.stderr.captured()

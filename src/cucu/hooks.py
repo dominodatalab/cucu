@@ -2,7 +2,6 @@ import importlib
 import os
 import pkgutil
 import sys
-import traceback
 
 from cucu.config import CONFIG
 from tenacity import retry as retrying
@@ -82,18 +81,9 @@ def run_steps(context, steps_text):
                 index += 1
 
                 passed = step.run(context._runner, quiet=False, capture=False)
+
                 if not passed:
-                    # -- ISSUE #96: Provide more substep info to diagnose problem.
-                    step_line = u'%s %s' % (step.keyword, step.name)
-                    message = '%s SUB-STEP: %s' % \
-                              (step.status.name.upper(), step_line)
-
-                    if step.error_message:
-                        message += '\nSubstep info: %s\n' % step.error_message
-                        message += 'Traceback (of failed substep):\n'
-                        message += ''.join(traceback.format_tb(step.exc_traceback))
-
-                    raise RuntimeError(message)
+                    raise RuntimeError(step.error_message)
 
             # -- FINALLY: Restore original context data for current step.
             context.table = original_table
@@ -111,10 +101,10 @@ def run_steps(context, steps_text):
 
 
 def retry(func,
-          wait_up_to_ms=float(CONFIG['CUCU_STEP_WAIT_TIMEOUT_MS']),
-          retry_after_ms=float(CONFIG['CUCU_STEP_RETRY_AFTER_MS'])):
-    @retrying(stop=stop_after_delay(wait_up_to_ms),
-              wait=wait_fixed(retry_after_ms))
+          wait_up_to_s=float(CONFIG['CUCU_STEP_WAIT_TIMEOUT_S']),
+          retry_after_s=float(CONFIG['CUCU_STEP_RETRY_AFTER_S'])):
+    @retrying(stop=stop_after_delay(wait_up_to_s),
+              wait=wait_fixed(retry_after_s))
     def new_decorator(*args, **kwargs):
         return func(*args, **kwargs)
 

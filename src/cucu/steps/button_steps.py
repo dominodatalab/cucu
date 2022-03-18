@@ -45,7 +45,7 @@ def find_button(ctx, name, index=0):
     prefix = '' if index == 0 else f'{humanize.ordinal(index)} '
 
     if button is None:
-        raise RuntimeError(f'unable to find the {prefix}input {name}')
+        raise RuntimeError(f'unable to find the {prefix}button "{name}"')
 
     return button
 
