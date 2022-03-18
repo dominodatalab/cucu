@@ -60,4 +60,4 @@ def wait_up_to_seconds_to_see_the_text(ctx, seconds, name):
 
 @step('I should not see the text "{name}"')
 def should_not_see_the_text(ctx, name):
-    find_n_assert_text(ctx, name)
+    find_n_assert_text(ctx, name, is_visible=False)
