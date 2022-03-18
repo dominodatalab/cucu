@@ -52,10 +52,10 @@ def wait_see_the_text(ctx, name):
     retry(find_n_assert_text)(ctx, name)
 
 
-@step('I wait up to "{seconds:f}" seconds to see the text "{name}"')
+@step('I wait up to "{seconds}" seconds to see the text "{name}"')
 def wait_up_to_seconds_to_see_the_text(ctx, seconds, name):
     retry(find_n_assert_text,
-          wait_up_to_ms=seconds * 1000)(ctx, name)
+          wait_up_to_s=float(seconds))(ctx, name)
 
 
 @step('I should not see the text "{name}"')

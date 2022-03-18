@@ -35,7 +35,7 @@ def find_input(ctx, name, index=0):
     prefix = '' if index == 0 else f'{humanize.ordinal(index)} '
 
     if input_ is None:
-        raise RuntimeError(f'unable to find the {prefix}input {name}')
+        raise RuntimeError(f'unable to find the {prefix}input "{name}"')
 
     return input_
 
@@ -91,9 +91,9 @@ def wait_to_write_into_input(ctx, value, name):
     retry(find_n_write)(ctx, name, value)
 
 
-@step('I wait up to "{seconds:f}" seconds to write "{value}" into the input "{name}"')
+@step('I wait up to "{seconds}" seconds to write "{value}" into the input "{name}"')
 def wait_up_to_write_into_input(ctx, seconds, value, name):
-    retry(find_n_write, wait_up_to_ms=seconds * 1000.0)(ctx, name, value)
+    retry(find_n_write, wait_up_to_s=float(seconds))(ctx, name, value)
 
 
 @step('I send the "{key}" key to the input "{name}"')
