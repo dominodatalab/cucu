@@ -27,7 +27,7 @@ def find_radio_button(ctx, name, index=0):
                       direction=fuzzy.Direction.RIGHT_TO_LEFT)
 
 
-def find_n_assert_radio_button(ctx, name, is_visible=True):
+def find_n_assert_radio_button(ctx, name, index=0, is_visible=True):
     """
     find and assert a radio button is visible
 
@@ -39,7 +39,7 @@ def find_n_assert_radio_button(ctx, name, is_visible=True):
     returns:
         the WebElement that matches the provided arguments.
     """
-    radio = find_radio_button(ctx, name)
+    radio = find_radio_button(ctx, name, index=index)
 
     if is_visible:
         if radio is None:
