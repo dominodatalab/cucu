@@ -1,3 +1,5 @@
+import humanize
+import os
 import parse
 import re
 
@@ -160,3 +162,35 @@ def switch_to_next_browser_tab(ctx):
 @step('I switch to the previous browser tab')
 def switch_to_previous_browser_tab(ctx):
     ctx.browser.switch_to_previous_tab()
+
+
+def find_file_input(ctx, name, index=0):
+    """
+
+        * <input type="file">
+
+    parameters:
+      ctx(object): behave context object used to share data between steps
+      name(str):   name that identifies the desired button on screen
+      index(str):  the index of the button if there are duplicates
+
+    returns:
+        the WebElement that matches the provided arguments.
+    """
+    input = fuzzy.find(ctx.browser,
+                       name,
+                       ['input[type="file"]'],
+                       index=index)
+
+    prefix = '' if index == 0 else f'{humanize.ordinal(index)} '
+
+    if input is None:
+        raise RuntimeError(f'unable to find the {prefix}file input "{name}"')
+
+    return input
+
+
+@step('I upload the file "{filepath}" to the file input "{name}"')
+def upload_file_to_input(ctx, filepath, name):
+    input = find_file_input(ctx, name)
+    input.send_keys(os.path.abspath(filepath))
