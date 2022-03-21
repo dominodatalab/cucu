@@ -9,6 +9,7 @@ class Config(dict):
 
     def __init__(self, *args, **kwargs):
         self.update(*args, **kwargs)
+        self.resolving = False
 
     def __getitem__(self, key):
         try:
@@ -18,9 +19,15 @@ class Config(dict):
             if value is None:
                 value = dict.__getitem__(self, key)
 
+            if self.resolving and value is None:
+                return ''
+
             return value
         except KeyError:
-            return None
+            if self.resolving:
+                return ''
+            else:
+                return None
 
     def __setitem__(self, key, val):
         dict.__setitem__(self, key, val)
@@ -91,7 +98,11 @@ class Config(dict):
         the values currently stored in the config object.
         """
         if isinstance(value, str):
-            return value.format_map(self)
+            self.resolving = True
+            try:
+                return value.format_map(self)
+            finally:
+                self.resolving = False
         else:
             return value
 

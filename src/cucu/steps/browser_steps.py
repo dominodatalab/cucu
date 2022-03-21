@@ -24,7 +24,7 @@ def parse_nth(nth):
 register_type(nth=parse_nth)
 
 
-def open_browser(ctx, url):
+def open_browser(ctx):
     browser_name = config.CONFIG['CUCU_BROWSER']
     headless = config.CONFIG['CUCU_BROWSER_HEADLESS']
     selenium_remote_url = config.CONFIG['CUCU_SELENIUM_REMOTE_URL']
@@ -41,7 +41,7 @@ def open_browser(ctx, url):
 @step('I open a browser at the url "{url}"')
 def open_a_browser(ctx, url):
     if ctx.browser is None:
-        ctx.browser = open_browser(ctx, url)
+        ctx.browser = open_browser(ctx)
         ctx.browsers.append(ctx.browser)
     else:
         logger.debug('browser already open so using existing instance')
@@ -53,7 +53,7 @@ def open_a_browser(ctx, url):
 
 @step('I open a new browser at the url "{url}"')
 def open_a_new_browser(ctx, url):
-    ctx.browser = open_browser(ctx, url)
+    ctx.browser = open_browser(ctx)
     ctx.browsers.append(ctx.browser)
     logger.debug(f'navigating to url #{url}')
     ctx.browser.navigate(url)

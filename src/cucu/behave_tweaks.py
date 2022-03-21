@@ -81,6 +81,9 @@ class CucuStream:
         self.parent = parent
         self.encoding = stream.encoding
 
+    def __getattr__(self, item):
+        return self.stream.__getattribute__(item)
+
     def fileno(self):
         return self.stream.fileno()
 

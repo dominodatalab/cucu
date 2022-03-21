@@ -3,21 +3,6 @@ import re
 import subprocess
 
 
-from behave.__main__ import main as behave_main
-
-
-def print_human_readable_steps():
-    """
-    print steps in a human readable format
-    """
-    args = ['--format=steps.doc', '--dry-run', '--no-summary']
-
-    exit_code = behave_main(args)
-
-    if exit_code != 0:
-        raise RuntimeError('listing steps failed, see above for details')
-
-
 def load_cucu_steps():
     """
     loads the cucu steps definition using behave and returns an array of
@@ -36,10 +21,13 @@ def load_cucu_steps():
         an array of hashmaps
     """
     steps_cache = {}
-    cucu_steps_output = subprocess.check_output(['cucu', 'steps'])
-    cucu_steps_output = cucu_steps_output.decode('utf8')
+    steps_doc_output = subprocess.check_output(['behave',
+                                                '--dry-run',
+                                                '--no-summary',
+                                                '--format', 'steps.doc'])
+    steps_doc_output = steps_doc_output.decode('utf8')
 
-    for cucu_step in cucu_steps_output.split('\n\n'):
+    for cucu_step in steps_doc_output.split('\n\n'):
         # each blank line is a '\n\n' which is a split between two step
         # definitions in the output, like so:
         #
@@ -74,3 +62,10 @@ def print_json_steps():
     """
     steps = load_cucu_steps()
     print(json.dumps(steps, indent=2, sort_keys=True))
+
+
+def print_human_readable_steps():
+    steps = load_cucu_steps()
+
+    for step in steps.keys():
+        print(f'{step}')
