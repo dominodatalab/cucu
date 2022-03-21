@@ -25,6 +25,9 @@ class Browser:
     def switch_to_previous_tab(self):
         raise RuntimeError('implement me')
 
+    def back(self):
+        raise RuntimeError('implement me')
+
     def refresh(self):
         raise RuntimeError('implement me')
 
@@ -44,6 +47,9 @@ class Browser:
         raise RuntimeError('implement me')
 
     def screenshot(self, filepath):
+        raise RuntimeError('implement me')
+
+    def close_window(self):
         raise RuntimeError('implement me')
 
     def quit(self):
