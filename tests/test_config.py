@@ -33,3 +33,7 @@ def test_config_resolves_variables():
     CONFIG['VAR1'] = 'foo'
     CONFIG['VAR2'] = 'bar'
     assert CONFIG.resolve('{VAR1} and {VAR2}') == 'foo and bar'
+
+
+def test_config_resolves_not_set_to_empty_string():
+    assert CONFIG.resolve('{NOT_SET}') == ''

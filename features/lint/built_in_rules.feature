@@ -32,7 +32,6 @@ Feature: Built-In Rules
       NOTE: to try and fix violations automatically use --fix
 
       """
-      And I should see "{STDERR}" is empty
      When I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
       And I should see "{STDOUT}" is equal to the following:
@@ -44,7 +43,6 @@ Feature: Built-In Rules
       linting errors were found and fixed, see above for details
 
       """
-      And I should see "{STDERR}" is empty
       And I should see the file at "{CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" has the following:
       """
       Feature: Badly indented feature
@@ -91,7 +89,6 @@ Feature: Built-In Rules
       NOTE: to try and fix violations automatically use --fix
 
       """
-      And I should see "{STDERR}" is empty
      When I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
       And I should see "{STDOUT}" is equal to the following:
@@ -104,7 +101,6 @@ Feature: Built-In Rules
       linting errors were found and fixed, see above for details
 
       """
-      And I should see "{STDERR}" is empty
       And I should see the file at "{CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" has the following:
       """
       Feature: Feature with extraneous whitespace

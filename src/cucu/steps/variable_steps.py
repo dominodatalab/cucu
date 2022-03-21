@@ -11,7 +11,7 @@ def set_variable_to(_, variable, value):
 
 @step('I should see "{this}" is empty')
 def should_see_is_empty(_, this):
-    if not this:
+    if this or len(this) != 0:
         raise RuntimeError(f'{this} is not empty')
 
 

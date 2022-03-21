@@ -83,6 +83,9 @@ class Selenium(Browser):
 
         self.driver.switch_to.window(window_handles[window_handle_index - 1])
 
+    def back(self):
+        self.driver.back()
+
     def refresh(self):
         self.driver.refresh()
 
@@ -116,6 +119,17 @@ class Selenium(Browser):
 
     def screenshot(self, filepath):
         self.driver.get_screenshot_as_file(filepath)
+
+    def close_window(self):
+        window_handles = self.driver.window_handles
+        window_handle = self.driver.current_window_handle
+        window_handle_index = window_handles.index(window_handle)
+
+        if window_handle_index == 0:
+            raise RuntimeError('previous tab not available')
+
+        self.driver.close()
+        self.driver.switch_to.window(window_handles[window_handle_index - 1])
 
     def quit(self):
         self.driver.quit()

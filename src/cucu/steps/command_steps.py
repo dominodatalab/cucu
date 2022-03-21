@@ -16,10 +16,10 @@ def run_command(command, stdout_var=None, stderr_var=None, exit_code_var=None):
     stdout = process.stdout.decode('utf8')
     stderr = process.stderr.decode('utf8')
 
-    if stdout:
+    if stdout_var:
         config.CONFIG[stdout_var] = stdout
 
-    if stderr:
+    if stderr_var:
         config.CONFIG[stderr_var] = stderr
 
     logger.debug(f'STDOUT:\n{stdout}\n')
@@ -39,10 +39,10 @@ def run_script(script, stdout_var=None, stderr_var=None, exit_code_var=None):
     stdout = process.stdout.decode('utf8')
     stderr = process.stderr.decode('utf8')
 
-    if stdout:
+    if stdout_var:
         config.CONFIG[stdout_var] = stdout
 
-    if stderr:
+    if stderr_var:
         config.CONFIG[stderr_var] = stderr
 
     logger.debug(f'STDOUT:\n{stdout}\n')

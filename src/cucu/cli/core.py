@@ -221,7 +221,9 @@ def report(filepath,
 @click.option('-f',
               '--format',
               default='human',
-              help='output format to use, available: human, json. default: human')
+              help='output format to use, available: human, json.'
+                   'default: human. PRO TIP: `brew install fzf` and then '
+                   '`cucu steps | fzf` and easily find the step you need.')
 def steps(format):
     """
     print available cucu steps

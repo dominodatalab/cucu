@@ -21,3 +21,16 @@ Feature: Browser management
      Then I should see the browser title is "Buttons!"
      When I switch to the next browser
      Then I should see the browser title is "Inputs!"
+
+  Scenario: User can open multiple tabs and switch between them
+    Given I start a webserver on port "40000" at directory "data/www"
+     When I open a browser at the url "http://{HOST_ADDRESS}:40000/links.html"
+     Then I should see the browser title is "Links!"
+     When I click the button "buttons! in a new tab"
+      And I switch to the next browser tab
+     Then I should see the browser title is "Buttons!"
+     When I close the current browser tab
+     Then I should see the browser title is "Links!"
+     When I click the button "dropdowns! in a new tab"
+      And I switch to the next browser tab
+     Then I should see the browser title is "Dropdowns!"
