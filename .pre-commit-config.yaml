@@ -13,3 +13,10 @@ repos:
     rev: 4.0.1
     hooks:
     - id: flake8
+-   repo: https://github.com/ambv/black
+    rev: 22.1.0
+    hooks:
+      - id: black
+        name: format python code using black
+        language_version: python3
+        args: [ --line-length=80 ]
