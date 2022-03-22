@@ -6,7 +6,12 @@ from fuzzywuzzy import fuzz
 
 from pygls.capabilities import COMPLETION
 from pygls.server import LanguageServer
-from pygls.lsp.types import CompletionItem, CompletionList, CompletionOptions, CompletionParams
+from pygls.lsp.types import (
+    CompletionItem,
+    CompletionList,
+    CompletionOptions,
+    CompletionParams,
+)
 
 
 def find_completions(step_fragment, steps_cache=None):
@@ -29,7 +34,7 @@ def find_completions(step_fragment, steps_cache=None):
     for step in steps_cache.keys():
         if step.startswith(step_fragment):
             step_details = steps_cache[step]
-            location = step_details['location']
+            location = step_details["location"]
             location = f"{location['filepath']}:{location['line']}"
             items.append((step, location))
 
@@ -39,7 +44,7 @@ def find_completions(step_fragment, steps_cache=None):
         for step in steps_cache.keys():
             if fuzz.ratio(step_fragment, step) > 40:
                 step_details = steps_cache[step]
-                location = step_details['location']
+                location = step_details["location"]
                 location = f"{location['filepath']}:{location['line']}"
                 items.append((step, location))
 
@@ -55,32 +60,38 @@ def find_completions(step_fragment, steps_cache=None):
 def start():
     server = LanguageServer()
     steps_cache = load_cucu_steps()
-    logging.basicConfig(filename='pygls.log', filemode='w', level=logging.INFO)
+    logging.basicConfig(filename="pygls.log", filemode="w", level=logging.INFO)
 
-    @server.feature(COMPLETION, CompletionOptions(trigger_characters=['']))
+    @server.feature(COMPLETION, CompletionOptions(trigger_characters=[""]))
     def completions(ls: LanguageServer, params: CompletionParams):
-        logging.warn(f'{COMPLETION}: {params}')
+        logging.warn(f"{COMPLETION}: {params}")
 
         document_uri = params.text_document.uri
         document = document_lines = ls.workspace.get_document(document_uri)
-        document_lines = document.source.split('\n')
+        document_lines = document.source.split("\n")
 
         completion_line = document_lines[params.position.line]
         logging.debug(f'completions for "{completion_line}"')
 
         completion_line = completion_line.lstrip()
-        step_line = re.match('(Given|When|Then|And) (.*)',
-                             completion_line).groups()[1]
+        step_line = re.match(
+            "(Given|When|Then|And) (.*)", completion_line
+        ).groups()[1]
 
         items = []
-        step_completions = find_completions(completion_line,
-                                            steps_cache=steps_cache)
+        step_completions = find_completions(
+            completion_line, steps_cache=steps_cache
+        )
 
         for (step_name, step_location) in step_completions:
-            insert_text = step_name.replace(step_line, '')
-            items.append(CompletionItem(label=step_name,
-                                        detail=f'defined in {step_location}',
-                                        insert_text=insert_text))
+            insert_text = step_name.replace(step_line, "")
+            items.append(
+                CompletionItem(
+                    label=step_name,
+                    detail=f"defined in {step_location}",
+                    insert_text=insert_text,
+                )
+            )
 
         return CompletionList(
             is_incomplete=False,

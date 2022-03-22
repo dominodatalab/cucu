@@ -17,14 +17,14 @@ def init_steps():
     f_globals = sys._getframe(1).f_globals
     f_locals = sys._getframe(1).f_locals
 
-    path = [os.path.dirname(f_globals['__file__'])]
+    path = [os.path.dirname(f_globals["__file__"])]
 
     for loader, module_name, is_pkg in pkgutil.walk_packages(path):
         __all__.append(module_name)
         _module = loader.find_module(module_name).load_module(module_name)
         f_globals[module_name] = _module
 
-    f_locals.update(importlib.import_module('cucu.steps').__dict__)
+    f_locals.update(importlib.import_module("cucu.steps").__dict__)
 
 
 def init_environment():
@@ -32,7 +32,7 @@ def init_environment():
     initialize cucu internal environment hooks
     """
     f_locals = sys._getframe(1).f_locals
-    f_locals.update(importlib.import_module('cucu.environment').__dict__)
+    f_locals.update(importlib.import_module("cucu.environment").__dict__)
 
 
 def register_after_scenario_hook(after_scenario_func):
@@ -40,7 +40,7 @@ def register_after_scenario_hook(after_scenario_func):
     register an after scenario hook which is called with the current behave
     context object.
     """
-    CONFIG['__CUCU_AFTER_SCENARIO_HOOKS'].append(after_scenario_func)
+    CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"].append(after_scenario_func)
 
 
 #
@@ -56,10 +56,10 @@ def run_steps(context, steps_text):
 
     # -- PREPARE: Save original context data for current step.
     # Needed if step definition that called this method uses .table/.text
-    original_table = getattr(context, 'table', None)
-    original_text = getattr(context, 'text', None)
+    original_table = getattr(context, "table", None)
+    original_text = getattr(context, "text", None)
 
-    context.feature.parser.variant = 'steps'
+    context.feature.parser.variant = "steps"
     steps = context.feature.parser.parse_steps(steps_text)
 
     current_step = context.current_step
@@ -95,16 +95,19 @@ def run_steps(context, steps_text):
         #      the environment.py which handles screenshots
         context.substep_increment = len(steps)
 
-    CONFIG['CUCU_WROTE_TO_STDOUT'] = True
+    CONFIG["CUCU_WROTE_TO_STDOUT"] = True
 
     return True
 
 
-def retry(func,
-          wait_up_to_s=float(CONFIG['CUCU_STEP_WAIT_TIMEOUT_S']),
-          retry_after_s=float(CONFIG['CUCU_STEP_RETRY_AFTER_S'])):
-    @retrying(stop=stop_after_delay(wait_up_to_s),
-              wait=wait_fixed(retry_after_s))
+def retry(
+    func,
+    wait_up_to_s=float(CONFIG["CUCU_STEP_WAIT_TIMEOUT_S"]),
+    retry_after_s=float(CONFIG["CUCU_STEP_RETRY_AFTER_S"]),
+):
+    @retrying(
+        stop=stop_after_delay(wait_up_to_s), wait=wait_fixed(retry_after_s)
+    )
     def new_decorator(*args, **kwargs):
         return func(*args, **kwargs)
 

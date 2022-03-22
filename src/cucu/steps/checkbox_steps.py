@@ -18,14 +18,16 @@ def find_checkbox(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
-    return fuzzy.find(ctx.browser,
-                      name,
-                      [
-                          'input[type="checkbox"]',
-                          '*[role="checkbox"]',
-                      ],
-                      index=index,
-                      direction=fuzzy.Direction.RIGHT_TO_LEFT)
+    return fuzzy.find(
+        ctx.browser,
+        name,
+        [
+            'input[type="checkbox"]',
+            '*[role="checkbox"]',
+        ],
+        index=index,
+        direction=fuzzy.Direction.RIGHT_TO_LEFT,
+    )
 
 
 def find_n_assert_checkbox(ctx, name, index=0):
@@ -41,10 +43,10 @@ def find_n_assert_checkbox(ctx, name, index=0):
         an error if the desired checkbox is not found
     """
     checkbox = find_checkbox(ctx, name, index=index)
-    prefix = '' if index == 0 else f'{humanize.ordinal(index)} '
+    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
     if checkbox is None:
-        raise RuntimeError(f'unable to find the {prefix}checkbox {name}')
+        raise RuntimeError(f"unable to find the {prefix}checkbox {name}")
 
     return checkbox
 
@@ -63,8 +65,8 @@ def find_n_check_checkbox(ctx, name, index=0):
     """
 
     checkbox = find_checkbox(ctx, name)
-    prefix = '' if index == 0 else f'{humanize.ordinal(index)} '
-    checked = checkbox.get_attribute('checked') == 'true'
+    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+    checked = checkbox.get_attribute("checked") == "true"
 
     if checked:
         raise Exception(f'{prefix}checkbox "{name}" already checked')
@@ -86,12 +88,12 @@ def assert_checkbox_checked_state(ctx, name, state, index=0):
         an error if the desired checkbox is not found
     """
     checkbox = find_checkbox(ctx, name)
-    checked = bool(checkbox.get_attribute('checked'))
+    checked = bool(checkbox.get_attribute("checked"))
 
     if state:
-        op = 'is'
+        op = "is"
     else:
-        op = 'is not'
+        op = "is not"
 
     if state != checked:
         raise Exception(f'checkbox "{name}" {op} checked')

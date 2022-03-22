@@ -10,36 +10,31 @@ from selenium.webdriver.chrome.options import Options
 
 
 class Selenium(Browser):
-
     def __init__(self):
         self.driver = None
 
-    def open(self,
-             browser,
-             headless=False,
-             selenium_remote_url=None,
-             detach=False):
+    def open(
+        self, browser, headless=False, selenium_remote_url=None, detach=False
+    ):
 
-        if browser.startswith('chrome'):
+        if browser.startswith("chrome"):
             options = Options()
-            options.add_experimental_option('detach', detach)
+            options.add_experimental_option("detach", detach)
 
-            height = config.CONFIG['CUCU_BROWSER_WINDOW_HEIGHT']
-            width = config.CONFIG['CUCU_BROWSER_WINDOW_WIDTH']
-            options.add_argument(f'--window-size={width},{height}')
-            options.add_argument('--disable-dev-shm-usage')
-            options.add_argument('--ignore-certificate-errors')
+            height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
+            width = config.CONFIG["CUCU_BROWSER_WINDOW_WIDTH"]
+            options.add_argument(f"--window-size={width},{height}")
+            options.add_argument("--disable-dev-shm-usage")
+            options.add_argument("--ignore-certificate-errors")
 
             if headless:
-                options.add_argument('--headless')
+                options.add_argument("--headless")
 
             desired_capabilities = DesiredCapabilities.CHROME
-            desired_capabilities['goog:loggingPrefs'] = {
-                'browser': 'ALL'
-            }
+            desired_capabilities["goog:loggingPrefs"] = {"browser": "ALL"}
 
             if selenium_remote_url is not None:
-                logger.debug(f'connecting to selenium: {selenium_remote_url}')
+                logger.debug(f"connecting to selenium: {selenium_remote_url}")
                 self.driver = webdriver.Remote(
                     command_executor=selenium_remote_url,
                     desired_capabilities=desired_capabilities,
@@ -52,10 +47,10 @@ class Selenium(Browser):
                     desired_capabilities=desired_capabilities,
                 )
         else:
-            raise Exception(f'unknown browser {browser}')
+            raise Exception(f"unknown browser {browser}")
 
     def get_log(self):
-        return self.driver.get_log('browser')
+        return self.driver.get_log("browser")
 
     def get_current_url(self):
         return self.driver.current_url
@@ -69,7 +64,7 @@ class Selenium(Browser):
         window_handle_index = window_handles.index(window_handle)
 
         if window_handle_index == len(window_handles) - 1:
-            raise RuntimeError('next tab not available')
+            raise RuntimeError("next tab not available")
 
         self.driver.switch_to.window(window_handles[window_handle_index + 1])
 
@@ -79,7 +74,7 @@ class Selenium(Browser):
         window_handle_index = window_handles.index(window_handle)
 
         if window_handle_index == 0:
-            raise RuntimeError('previous tab not available')
+            raise RuntimeError("previous tab not available")
 
         self.driver.switch_to.window(window_handles[window_handle_index - 1])
 
@@ -126,7 +121,7 @@ class Selenium(Browser):
         window_handle_index = window_handles.index(window_handle)
 
         if window_handle_index == 0:
-            raise RuntimeError('previous tab not available')
+            raise RuntimeError("previous tab not available")
 
         self.driver.close()
         self.driver.switch_to.window(window_handles[window_handle_index - 1])

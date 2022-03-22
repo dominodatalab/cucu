@@ -17,13 +17,7 @@ def find_link(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
-    return fuzzy.find(ctx.browser,
-                      name,
-                      [
-                          'a',
-                          '*[role="link"]'
-                      ],
-                      index=index)
+    return fuzzy.find(ctx.browser, name, ["a", '*[role="link"]'], index=index)
 
 
 def find_n_assert_link(ctx, name, index=0, is_visible=True):

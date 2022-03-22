@@ -28,21 +28,23 @@ def find_button(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
-    button = fuzzy.find(ctx.browser,
-                        name,
-                        [
-                            'button',
-                            'input[type="button"]',
-                            'input[type="submit"]',
-                            'a',
-                            '*[role="button"]',
-                            '*[role="link"]',
-                            '*[role="menuitem"]',
-                            '*[role="option"]',
-                        ],
-                        index=index)
+    button = fuzzy.find(
+        ctx.browser,
+        name,
+        [
+            "button",
+            'input[type="button"]',
+            'input[type="submit"]',
+            "a",
+            '*[role="button"]',
+            '*[role="link"]',
+            '*[role="menuitem"]',
+            '*[role="option"]',
+        ],
+        index=index,
+    )
 
-    prefix = '' if index == 0 else f'{humanize.ordinal(index)} '
+    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
     if button is None:
         raise RuntimeError(f'unable to find the {prefix}button "{name}"')

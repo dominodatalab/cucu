@@ -17,14 +17,16 @@ def find_radio_button(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
-    return fuzzy.find(ctx.browser,
-                      name,
-                      [
-                          'input[type="radio"]',
-                          '*[role="radio"]',
-                      ],
-                      index=index,
-                      direction=fuzzy.Direction.RIGHT_TO_LEFT)
+    return fuzzy.find(
+        ctx.browser,
+        name,
+        [
+            'input[type="radio"]',
+            '*[role="radio"]',
+        ],
+        index=index,
+        direction=fuzzy.Direction.RIGHT_TO_LEFT,
+    )
 
 
 def find_n_assert_radio_button(ctx, name, index=0, is_visible=True):
@@ -65,7 +67,7 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
     """
     radio = find_n_assert_radio_button(ctx, name, index=index)
 
-    selected = radio.get_attribute('checked') == 'true'
+    selected = radio.get_attribute("checked") == "true"
 
     if selected:
         if ignore_if_selected:
@@ -90,13 +92,13 @@ def assert_radio_button_selected(ctx, name, is_selected=True):
     """
     radio = find_n_assert_radio_button(ctx, name)
 
-    selected = bool(radio.get_attribute('checked'))
+    selected = bool(radio.get_attribute("checked"))
 
     if is_selected:
-        if not(selected):
+        if not (selected):
             raise Exception(f'radio button "{name}" is not selected')
     else:
-        if not(is_selected) and selected:
+        if not (is_selected) and selected:
             raise Exception(f'radio button "{name}" is selected')
 
 

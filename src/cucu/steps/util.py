@@ -36,8 +36,8 @@ def define_should_see_steps(thing, find_func):
     def should_not_see_the(context, name):
         should_not_see(context, thing, name)
 
-    wait_timeout_s = float(CONFIG['CUCU_STEP_WAIT_TIMEOUT_MS']) / 1000.0
-    retry_after_s = float(CONFIG['CUCU_STEP_RETRY_AFTE_RMS']) / 1000.0
+    wait_timeout_s = float(CONFIG["CUCU_STEP_WAIT_TIMEOUT_MS"]) / 1000.0
+    retry_after_s = float(CONFIG["CUCU_STEP_RETRY_AFTE_RMS"]) / 1000.0
 
     @step(f'I wait to see the {thing} "{{name}}"')
     def wait_to_see_the(context, name):

@@ -1,4 +1,7 @@
 [flake8]
 
-ignore = E501
+select = Q0
+inline-quotes = "
+
+ignore = E501,W503
 docstring-convention = pep257

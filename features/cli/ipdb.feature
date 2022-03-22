@@ -18,8 +18,8 @@ Feature: ipdb
 
         Scenario: Just a scenario that fails
       [\s\S]*
-           42 def i_fail\(_\):
-      ---> 43     raise RuntimeError\('step fails on purpose'\)
+           54 def i_fail\(_\):
+      ---> 55     raise RuntimeError\("step fails on purpose"\)
       [\s\S]*
       ipdb>     Given I fail     #  .*
       Traceback \(most recent call last\):

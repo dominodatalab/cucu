@@ -13,11 +13,13 @@ def find_text(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments or None if none found
     """
-    return fuzzy.find(ctx.browser,
-                      name,
-                      ['*'],
-                      index=index,
-                      direction=fuzzy.Direction.LEFT_TO_RIGHT)
+    return fuzzy.find(
+        ctx.browser,
+        name,
+        ["*"],
+        index=index,
+        direction=fuzzy.Direction.LEFT_TO_RIGHT,
+    )
 
 
 def find_n_assert_text(ctx, name, index=0, is_visible=True):
@@ -54,8 +56,7 @@ def wait_see_the_text(ctx, name):
 
 @step('I wait up to "{seconds}" seconds to see the text "{name}"')
 def wait_up_to_seconds_to_see_the_text(ctx, seconds, name):
-    retry(find_n_assert_text,
-          wait_up_to_s=float(seconds))(ctx, name)
+    retry(find_n_assert_text, wait_up_to_s=float(seconds))(ctx, name)
 
 
 @step('I should not see the text "{name}"')

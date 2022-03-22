@@ -24,15 +24,17 @@ def find_input(ctx, name, index=0):
     raises:
         a RuntimeError if the input isn't found
     """
-    input_ = fuzzy.find(ctx.browser,
-                        name,
-                        [
-                            'input',
-                            'textarea',
-                        ],
-                        index=index)
+    input_ = fuzzy.find(
+        ctx.browser,
+        name,
+        [
+            "input",
+            "textarea",
+        ],
+        index=index,
+    )
 
-    prefix = '' if index == 0 else f'{humanize.ordinal(index)} '
+    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
     if input_ is None:
         raise RuntimeError(f'unable to find the {prefix}input "{name}"')
@@ -70,12 +72,14 @@ def assert_input_value(ctx, name, value, index=0):
                        inputs have the same name.
     """
     input_ = find_input(ctx, name, index=index)
-    actual = input_.get_attribute('value')
-    prefix = '' if index == 0 else f'{humanize.ordinal(index)} '
+    actual = input_.get_attribute("value")
+    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
     if value is None:
-        if actual != '':
-            raise RuntimeError(f'the {prefix}input "{name}" has value "{actual}"')
+        if actual != "":
+            raise RuntimeError(
+                f'the {prefix}input "{name}" has value "{actual}"'
+            )
 
     elif actual != value:
         raise RuntimeError(f'the {prefix}input "{name}" has value "{actual}"')
@@ -91,7 +95,9 @@ def wait_to_write_into_input(ctx, value, name):
     retry(find_n_write)(ctx, name, value)
 
 
-@step('I wait up to "{seconds}" seconds to write "{value}" into the input "{name}"')
+@step(
+    'I wait up to "{seconds}" seconds to write "{value}" into the input "{name}"'
+)
 def wait_up_to_write_into_input(ctx, seconds, value, name):
     retry(find_n_write, wait_up_to_s=float(seconds))(ctx, name, value)
 

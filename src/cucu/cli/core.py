@@ -17,94 +17,107 @@ coverage.process_startup()
 
 
 @click.group()
-@click.version_option(version('cucu'))
-@click.option('--debug/--no-debug', default=False)
-@click.option('-l',
-              '--logging-level',
-              default='INFO',
-              help='set logging level to one of debug, warn or info (default)')
+@click.version_option(version("cucu"))
+@click.option("--debug/--no-debug", default=False)
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
 def main(debug, logging_level):
     """
     main entrypoint
     """
-    CONFIG['CUCU_LOGGING_LEVEL'] = logging_level.upper()
+    CONFIG["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())
 
 
 @main.command()
-@click.argument('filepath')
-@click.option('-b',
-              '--browser',
-              default='chrome',
-              help='browser name to use default: chrome')
-@click.option('-c',
-              '--color-output/--no-color-output',
-              default=True,
-              help='produce output with colors or not')
-@click.option('--dry-run/--no-dry-run',
-              default=False,
-              help='invokes output formatters without running the steps')
-@click.option('-e',
-              '--env',
-              default=[],
-              multiple=True,
-              help='set environment variable which can be referenced with')
-@click.option('-f',
-              '--format',
-              default='human',
-              help='set output step formatter to human or json, default: human')
-@click.option('-x',
-              '--fail-fast/--no-fail-fast',
-              default=False,
-              help='stop running tests on the first failure')
-@click.option('-h',
-              '--headless/--no-headless',
-              default=True)
-@click.option('-n',
-              '--name')
-@click.option('-i',
-              '--ipdb-on-failure/--no-ipdb-oo-failure',
-              help='',
-              default=False)
-@click.option('-p',
-              '--preserve-results/--no-preserve-results',
-              help='',
-              default=False)
-@click.option('-r',
-              '--results',
-              default='results')
-@click.option('--secrets',
-              default=None,
-              help='coma separated list of variable names that we should hide'
-                   ' their value all of the output produced by cucu')
-@click.option('--source/--no-source',
-              default=False,
-              help='show the source for each step definition in the logs')
-@click.option('-t',
-              '--tags',
-              help='Only execute features or scenarios with tags matching '
-                   'expression provided. example: --tags @dev, --tags ~@dev',
-              default=[],
-              multiple=True)
-@click.option('-s',
-              '--selenium-remote-url',
-              default=None)
-def run(filepath,
-        browser,
-        color_output,
-        dry_run,
-        env,
-        format,
-        fail_fast,
-        headless,
-        name,
-        ipdb_on_failure,
-        preserve_results,
-        results,
-        secrets,
-        source,
-        tags,
-        selenium_remote_url):
+@click.argument("filepath")
+@click.option(
+    "-b",
+    "--browser",
+    default="chrome",
+    help="browser name to use default: chrome",
+)
+@click.option(
+    "-c",
+    "--color-output/--no-color-output",
+    default=True,
+    help="produce output with colors or not",
+)
+@click.option(
+    "--dry-run/--no-dry-run",
+    default=False,
+    help="invokes output formatters without running the steps",
+)
+@click.option(
+    "-e",
+    "--env",
+    default=[],
+    multiple=True,
+    help="set environment variable which can be referenced with",
+)
+@click.option(
+    "-f",
+    "--format",
+    default="human",
+    help="set output step formatter to human or json, default: human",
+)
+@click.option(
+    "-x",
+    "--fail-fast/--no-fail-fast",
+    default=False,
+    help="stop running tests on the first failure",
+)
+@click.option("-h", "--headless/--no-headless", default=True)
+@click.option("-n", "--name")
+@click.option(
+    "-i", "--ipdb-on-failure/--no-ipdb-oo-failure", help="", default=False
+)
+@click.option(
+    "-p", "--preserve-results/--no-preserve-results", help="", default=False
+)
+@click.option("-r", "--results", default="results")
+@click.option(
+    "--secrets",
+    default=None,
+    help="coma separated list of variable names that we should hide"
+    " their value all of the output produced by cucu",
+)
+@click.option(
+    "--source/--no-source",
+    default=False,
+    help="show the source for each step definition in the logs",
+)
+@click.option(
+    "-t",
+    "--tags",
+    help="Only execute features or scenarios with tags matching "
+    "expression provided. example: --tags @dev, --tags ~@dev",
+    default=[],
+    multiple=True,
+)
+@click.option("-s", "--selenium-remote-url", default=None)
+def run(
+    filepath,
+    browser,
+    color_output,
+    dry_run,
+    env,
+    format,
+    fail_fast,
+    headless,
+    name,
+    ipdb_on_failure,
+    preserve_results,
+    results,
+    secrets,
+    source,
+    tags,
+    selenium_remote_url,
+):
     """
     run a set of feature files
     """
@@ -112,24 +125,24 @@ def run(filepath,
     CONFIG.load_cucurc_files(filepath)
 
     if color_output:
-        CONFIG['CUCU_COLOR_OUTPUT'] = str(color_output).lower()
+        CONFIG["CUCU_COLOR_OUTPUT"] = str(color_output).lower()
 
     if headless:
-        CONFIG['CUCU_BROWSER_HEADLESS'] = 'True'
+        CONFIG["CUCU_BROWSER_HEADLESS"] = "True"
 
     for variable in list(env):
-        key, value = variable.split('=')
+        key, value = variable.split("=")
         CONFIG[key] = value
 
-    CONFIG['CUCU_BROWSER'] = browser
+    CONFIG["CUCU_BROWSER"] = browser
 
     if ipdb_on_failure:
-        CONFIG['CUCU_IPDB_ON_FAILURE'] = 'true'
+        CONFIG["CUCU_IPDB_ON_FAILURE"] = "true"
 
-    CONFIG['CUCU_RESULTS_DIR'] = results
+    CONFIG["CUCU_RESULTS_DIR"] = results
 
     if secrets:
-        CONFIG['CUCU_SECRETS'] = secrets
+        CONFIG["CUCU_SECRETS"] = secrets
 
     if not dry_run:
         if not preserve_results:
@@ -141,72 +154,76 @@ def run(filepath,
                 os.makedirs(results)
 
     if selenium_remote_url is not None:
-        CONFIG['CUCU_SELENIUM_REMOTE_URL'] = selenium_remote_url
+        CONFIG["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
 
-    if format == 'human':
-        formatter = 'cucu.formatter.cucu:CucuFormatter'
+    if format == "human":
+        formatter = "cucu.formatter.cucu:CucuFormatter"
 
-    elif format == 'json':
-        formatter = 'cucu.formatter.json:CucuJSONFormatter'
+    elif format == "json":
+        formatter = "cucu.formatter.json:CucuJSONFormatter"
 
     args = [
         # don't run disabled tests
-        '--tags', '~@disabled',
+        "--tags",
+        "~@disabled",
         # always print the skipped steps and scenarios
-        '--show-skipped',
-        filepath
+        "--show-skipped",
+        filepath,
     ]
 
     if dry_run:
         args += [
-            '--dry-run',
+            "--dry-run",
             # console formater
-            '--format', formatter,
+            "--format",
+            formatter,
         ]
 
     else:
         args += [
             # JUNIT xml file generated per feature file executed
-            '--junit', f'--junit-directory={results}',
+            "--junit",
+            f"--junit-directory={results}",
             # generate a JSOn file containing the exact details of the whole run
-            '--format', 'cucu.formatter.json:CucuJSONFormatter', f'--outfile={results}/run.json',
+            "--format",
+            "cucu.formatter.json:CucuJSONFormatter",
+            f"--outfile={results}/run.json",
             # console formater
-            '--format', formatter,
-            '--logging-level', CONFIG['CUCU_LOGGING_LEVEL'].upper(),
+            "--format",
+            formatter,
+            "--logging-level",
+            CONFIG["CUCU_LOGGING_LEVEL"].upper(),
         ]
 
-    if format == 'json':
-        args.append('--no-summary')
+    if format == "json":
+        args.append("--no-summary")
 
     for tag in tags:
-        args.append('--tags')
+        args.append("--tags")
         args.append(tag)
 
     if source:
-        args += ['--show-source']
+        args += ["--show-source"]
     else:
-        args += ['--no-source']
+        args += ["--no-source"]
 
     if name is not None:
-        args += ['--name', name]
+        args += ["--name", name]
 
     if fail_fast:
-        args.append('--stop')
+        args.append("--stop")
 
     from behave.__main__ import main as behave_main
+
     exit_code = behave_main(args)
     if exit_code != 0:
-        raise ClickException('test run failed, see above for details')
+        raise ClickException("test run failed, see above for details")
 
 
 @main.command()
-@click.argument('filepath',
-                default='results')
-@click.option('-o',
-              '--output',
-              default='report')
-def report(filepath,
-           output):
+@click.argument("filepath", default="results")
+@click.option("-o", "--output", default="report")
+def report(filepath, output):
     """
     create an HTML test report from the results directory provided
     """
@@ -214,33 +231,35 @@ def report(filepath,
         os.makedirs(output)
 
     report_location = reporter.generate(filepath, output)
-    print(f'HTML test report at {report_location}')
+    print(f"HTML test report at {report_location}")
 
 
 @main.command()
-@click.option('-f',
-              '--format',
-              default='human',
-              help='output format to use, available: human, json.'
-                   'default: human. PRO TIP: `brew install fzf` and then '
-                   '`cucu steps | fzf` and easily find the step you need.')
+@click.option(
+    "-f",
+    "--format",
+    default="human",
+    help="output format to use, available: human, json."
+    "default: human. PRO TIP: `brew install fzf` and then "
+    "`cucu steps | fzf` and easily find the step you need.",
+)
 def steps(format):
     """
     print available cucu steps
     """
-    if format == 'human':
+    if format == "human":
         print_human_readable_steps()
-    elif format == 'json':
+    elif format == "json":
         print_json_steps()
     else:
         raise RuntimeError(f'unsupported format "{format}"')
 
 
 @main.command()
-@click.argument('filepath', default='features')
-@click.option('--fix/--no-fix',
-              default=False,
-              help='fix lint violations, default: False')
+@click.argument("filepath", default="features")
+@click.option(
+    "--fix/--no-fix", default=False, help="fix lint violations, default: False"
+)
 def lint(filepath, fix):
     """
     lint feature files
@@ -257,36 +276,38 @@ def lint(filepath, fix):
         if violations:
             for violation in violations:
                 violations_found += 1
-                location = violation['location']
-                type = violation['type'][0].upper()
-                message = violation['message']
-                suffix = ''
+                location = violation["location"]
+                type = violation["type"][0].upper()
+                message = violation["message"]
+                suffix = ""
 
                 if fix:
-                    if 'fixed' in violation:
-                        suffix = ' ✓'
+                    if "fixed" in violation:
+                        suffix = " ✓"
                         violations_fixed += 1
                     else:
-                        suffix = ' ✗ (must be fixed manually)'
+                        suffix = " ✗ (must be fixed manually)"
 
-                filepath = location['filepath']
-                line_number = location['line'] + 1
-                print(f'{filepath}:{line_number}: {type} {message}{suffix}')
+                filepath = location["filepath"]
+                line_number = location["line"] + 1
+                print(f"{filepath}:{line_number}: {type} {message}{suffix}")
 
-    and_message = ''
+    and_message = ""
 
     if violations_found != 0:
         if fix:
             if violations_found == violations_fixed:
-                and_message = ' and fixed'
+                and_message = " and fixed"
             else:
-                and_message = ' and not all were fixed'
+                and_message = " and not all were fixed"
 
-        print(f'\nlinting errors were found{and_message}, see above for details')
+        print(
+            f"\nlinting errors were found{and_message}, see above for details"
+        )
 
         if not fix:
-            print('NOTE: to try and fix violations automatically use --fix')
-            raise ClickException('see above for details')
+            print("NOTE: to try and fix violations automatically use --fix")
+            raise ClickException("see above for details")
 
 
 @main.command()
@@ -298,22 +319,26 @@ def lsp():
 
 
 @main.command()
-@click.option('-b',
-              '--browser',
-              default='chrome',
-              help='when specified the browser will be opened with the fuzzy '
-                   'js library preloaded.')
-@click.option('-u',
-              '--url',
-              default='https://www.google.com',
-              help='URL to open the browser at for debugging')
-@click.option('--detach',
-              default=False,
-              help='when set to detach the browser will continue to run and '
-                   'the cucu process will exit')
-def debug(browser,
-          url,
-          detach):
+@click.option(
+    "-b",
+    "--browser",
+    default="chrome",
+    help="when specified the browser will be opened with the fuzzy "
+    "js library preloaded.",
+)
+@click.option(
+    "-u",
+    "--url",
+    default="https://www.google.com",
+    help="URL to open the browser at for debugging",
+)
+@click.option(
+    "--detach",
+    default=False,
+    help="when set to detach the browser will continue to run and "
+    "the cucu process will exit",
+)
+def debug(browser, url, detach):
     """
     debug cucu library
     """
@@ -321,6 +346,7 @@ def debug(browser,
     # XXX: need to make this more generic once we make the underlying
     #      browser framework swappable.
     from cucu.browser.selenium import Selenium
+
     selenium = Selenium()
     selenium.open(browser, detach=detach)
     selenium.navigate(url)
@@ -333,5 +359,5 @@ def debug(browser,
             time.sleep(5)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
