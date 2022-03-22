@@ -1,4 +1,5 @@
 import chromedriver_autoinstaller
+import logging
 
 from cucu.browser.core import Browser
 from cucu import config, logger
@@ -7,6 +8,14 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
+
+
+class DisableLogger:
+    def __enter__(self):
+        logging.disable(logging.CRITICAL)
+
+    def __exit__(self, exit_type, exit_value, exit_traceback):
+        logging.disable(logging.NOTSET)
 
 
 class Selenium(Browser):
@@ -41,7 +50,9 @@ class Selenium(Browser):
                 )
             else:
                 # auto install chromedriver if not present
-                chromedriver_autoinstaller.install()
+                with DisableLogger():
+                    chromedriver_autoinstaller.install()
+
                 self.driver = webdriver.Chrome(
                     chrome_options=options,
                     desired_capabilities=desired_capabilities,
