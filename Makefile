@@ -34,8 +34,7 @@ test: src/* tests/*
 
 lint: src/* tests/* *.py
 	poetry run flake8 src tests *.py
-	poetry run cucu lint data/features
-	poetry run cucu lint features
+	poetry run cucu lint features data/features
 
 nox: src/* tests/*
 	poetry run nox

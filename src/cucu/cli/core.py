@@ -256,7 +256,7 @@ def steps(format):
 
 
 @main.command()
-@click.argument("filepath", default="features")
+@click.argument("filepath", nargs=-1)
 @click.option(
     "--fix/--no-fix", default=False, help="fix lint violations, default: False"
 )
@@ -264,35 +264,41 @@ def lint(filepath, fix):
     """
     lint feature files
     """
-    all_violations = linter.lint(filepath)
+    filepaths = list(filepath)
+
+    if filepaths == []:
+        filepaths = ["features"]
 
     violations_found = 0
     violations_fixed = 0
 
-    for violations in all_violations:
-        if fix:
-            violations = linter.fix(violations)
+    for filepath in filepaths:
+        all_violations = linter.lint(filepath)
 
-        if violations:
-            for violation in violations:
-                violations_found += 1
-                location = violation["location"]
-                type = violation["type"][0].upper()
-                message = violation["message"]
-                suffix = ""
+        for violations in all_violations:
+            if fix:
+                violations = linter.fix(violations)
 
-                if fix:
-                    if "fixed" in violation:
-                        suffix = " ✓"
-                        violations_fixed += 1
-                    else:
-                        suffix = " ✗ (must be fixed manually)"
+            if violations:
+                for violation in violations:
+                    violations_found += 1
+                    location = violation["location"]
+                    type = violation["type"][0].upper()
+                    message = violation["message"]
+                    suffix = ""
 
-                filepath = location["filepath"]
-                line_number = location["line"] + 1
-                print(f"{filepath}:{line_number}: {type} {message}{suffix}")
+                    if fix:
+                        if "fixed" in violation:
+                            suffix = " ✓"
+                            violations_fixed += 1
+                        else:
+                            suffix = " ✗ (must be fixed manually)"
 
-    and_message = ""
+                    filepath = location["filepath"]
+                    line_number = location["line"] + 1
+                    print(f"{filepath}:{line_number}: {type} {message}{suffix}")
+
+        and_message = ""
 
     if violations_found != 0:
         if fix:

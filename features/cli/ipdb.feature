@@ -2,7 +2,6 @@ Feature: ipdb
   As a developer I want the test writer to be able to use the ipdb console to
   debug test runs.
 
-
   Scenario: User gets the ipdb console to show when hitting a failure and quit
     Given I run the following script and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
       """
