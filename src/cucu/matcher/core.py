@@ -6,8 +6,8 @@
 #       currently opened browser while also being able to handle opening
 #       browsers through selenium, cypress or whatever.
 
-class ElementMatcher:
 
+class ElementMatcher:
     def __init__(self):
         pass
 
@@ -27,4 +27,4 @@ class ElementMatcher:
             return the Element found
 
         """
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")

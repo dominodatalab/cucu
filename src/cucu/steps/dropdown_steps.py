@@ -21,20 +21,22 @@ def find_dropdown(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
-    dropdown = fuzzy.find(ctx.browser,
-                          name,
-                          [
-                              'select',
-                              '*[role="combobox"]',
-                              '*[role="listbox"]',
-                          ],
-                          index=index,
-                          direction=fuzzy.Direction.LEFT_TO_RIGHT)
+    dropdown = fuzzy.find(
+        ctx.browser,
+        name,
+        [
+            "select",
+            '*[role="combobox"]',
+            '*[role="listbox"]',
+        ],
+        index=index,
+        direction=fuzzy.Direction.LEFT_TO_RIGHT,
+    )
 
-    prefix = '' if index == 0 else f'{humanize.ordinal(index)} '
+    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
     if dropdown is None:
-        raise RuntimeError(f'unable to find the {prefix}dropdown {name}')
+        raise RuntimeError(f"unable to find the {prefix}dropdown {name}")
 
     return dropdown
 
@@ -54,19 +56,21 @@ def find_dropdown_option(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
-    option = fuzzy.find(ctx.browser,
-                        name,
-                        [
-                            'option',
-                            '*[role="option"]',
-                        ],
-                        index=index,
-                        direction=fuzzy.Direction.LEFT_TO_RIGHT)
+    option = fuzzy.find(
+        ctx.browser,
+        name,
+        [
+            "option",
+            '*[role="option"]',
+        ],
+        index=index,
+        direction=fuzzy.Direction.LEFT_TO_RIGHT,
+    )
 
-    prefix = '' if index == 0 else f'{humanize.ordinal(index)} '
+    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
     if option is None:
-        raise RuntimeError(f'unable to find the {prefix}option {name}')
+        raise RuntimeError(f"unable to find the {prefix}option {name}")
 
     return option
 
@@ -83,19 +87,21 @@ def find_n_select_dropdown_option(ctx, dropdown, option):
 
     dropdown_element = find_dropdown(ctx, dropdown)
 
-    if dropdown_element.tag_name == 'select':
+    if dropdown_element.tag_name == "select":
         select_element = Select(dropdown_element)
         select_element.select_by_visible_text(option)
 
     else:
-        if dropdown_element.get_attribute('aria-expanded') != 'true':
+        if dropdown_element.get_attribute("aria-expanded") != "true":
             # open the dropdown
             dropdown_element.click()
 
         option_element = find_dropdown_option(ctx, option)
 
         if option_element is None:
-            raise RuntimeError(f'unable to find option "{option}" in dropdown "{dropdown}"')
+            raise RuntimeError(
+                f'unable to find option "{option}" in dropdown "{dropdown}"'
+            )
 
         option_element.click()
 
@@ -112,11 +118,11 @@ def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
     dropdown_element = find_dropdown(ctx, dropdown)
     selected_option = None
 
-    if dropdown_element.tag_name == 'select':
+    if dropdown_element.tag_name == "select":
         select_element = Select(dropdown_element)
         selected_option = select_element.first_selected_option
     else:
-        if dropdown_element.get_attribute('aria-expanded') != 'true':
+        if dropdown_element.get_attribute("aria-expanded") != "true":
             # open the dropdown to see its options
             dropdown_element.click()
 
@@ -125,9 +131,11 @@ def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
         selected_option.click()
 
     if selected_option is None:
-        raise RuntimeError(f'unable to find selected option in dropdown {dropdown}')
+        raise RuntimeError(
+            f"unable to find selected option in dropdown {dropdown}"
+        )
 
-    selected_name = selected_option.get_attribute('textContent')
+    selected_name = selected_option.get_attribute("textContent")
 
     # XXX: we're doing contains because a lot of our existing dropdown/comboboxes
     #      are messy and do not use things like aria-label/aria-describedby to
@@ -135,10 +143,10 @@ def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
 
     if is_selected:
         if selected_name.find(option) == -1:
-            raise RuntimeError(f'{option} is not selected')
+            raise RuntimeError(f"{option} is not selected")
     else:
         if selected_name.find(option) != -1:
-            raise RuntimeError(f'{option} is selected')
+            raise RuntimeError(f"{option} is selected")
 
 
 @step('I should see the dropdown "{dropdown}"')
@@ -161,21 +169,33 @@ def wait_to_select_option_from_dropdown(ctx, option, dropdown):
     retry(find_n_select_dropdown_option)(ctx, dropdown, option)
 
 
-@step('I should see the option "{option}" is selected on the dropdown "{dropdown}"')
+@step(
+    'I should see the option "{option}" is selected on the dropdown "{dropdown}"'
+)
 def should_see_option_is_selected(ctx, option, dropdown):
     assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True)
 
 
-@step('I wait to see the option "{option}" is selected on the dropdown "{dropdown}"')
+@step(
+    'I wait to see the option "{option}" is selected on the dropdown "{dropdown}"'
+)
 def wait_to_see_option_is_selected(ctx, option, dropdown):
-    retry(assert_dropdown_option_selected)(ctx, dropdown, option, is_selected=True)
+    retry(assert_dropdown_option_selected)(
+        ctx, dropdown, option, is_selected=True
+    )
 
 
-@step('I should see the option "{option}" is not selected on the dropdown "{dropdown}"')
+@step(
+    'I should see the option "{option}" is not selected on the dropdown "{dropdown}"'
+)
 def should_see_option_is_not_selected(ctx, option, dropdown):
     assert_dropdown_option_selected(ctx, dropdown, option, is_selected=False)
 
 
-@step('I wait to see the option "{option}" is not selected on the dropdown "{dropdown}"')
-def wait_to_see_option_is_not_selected(ctx, option, dropdown, is_selected=False):
+@step(
+    'I wait to see the option "{option}" is not selected on the dropdown "{dropdown}"'
+)
+def wait_to_see_option_is_not_selected(
+    ctx, option, dropdown, is_selected=False
+):
     retry(assert_dropdown_option_selected)(ctx, dropdown, option)

@@ -18,15 +18,15 @@ def load_lint_rules(filepath):
     filepath = os.path.abspath(filepath)
 
     if os.path.isdir(filepath):
-        basepath = os.path.join(filepath, '**/*.yaml')
+        basepath = os.path.join(filepath, "**/*.yaml")
         lint_rule_filepaths = glob.iglob(basepath, recursive=True)
 
     else:
         lint_rule_filepaths = [filepath]
 
     for lint_rule_filepath in lint_rule_filepaths:
-        logger.debug(f'loading lint rules from {lint_rule_filepath}')
-        rules = yaml.safe_load(open(lint_rule_filepath, 'r').read())
+        logger.debug(f"loading lint rules from {lint_rule_filepath}")
+        rules = yaml.safe_load(open(lint_rule_filepath, "r").read())
 
         for (rule_name, rule) in rules.items():
             # XXX: check for duplicate rule names
@@ -36,8 +36,7 @@ def load_lint_rules(filepath):
 
 
 def lint_line(rules, line_number, lines, filepath):
-    """
-    """
+    """ """
     if line_number >= 1:
         previous_line = lines[line_number - 1]
     else:
@@ -61,44 +60,52 @@ def lint_line(rules, line_number, lines, filepath):
         previous_matcher = True
         next_matcher = True
 
-        if 'current_line' in rule:
-            if 'match' in rule['current_line']:
-                current_matcher = re.match(rule['current_line']['match'], current_line)
+        if "current_line" in rule:
+            if "match" in rule["current_line"]:
+                current_matcher = re.match(
+                    rule["current_line"]["match"], current_line
+                )
             else:
-                raise RuntimeError('unsupported matcher for current_line')
+                raise RuntimeError("unsupported matcher for current_line")
 
-        if 'previous_line' in rule and previous_line is not None:
-            if 'match' in rule['previous_line']:
-                previous_matcher = re.match(rule['previous_line']['match'], previous_line)
+        if "previous_line" in rule and previous_line is not None:
+            if "match" in rule["previous_line"]:
+                previous_matcher = re.match(
+                    rule["previous_line"]["match"], previous_line
+                )
             else:
-                raise RuntimeError('unsupported matcher for previous_line')
+                raise RuntimeError("unsupported matcher for previous_line")
 
-        if 'next_line' in rule and next_line is not None:
-            if 'match' in rule['next_line']:
-                next_matcher = re.match(rule['next_line']['match'], next_line)
+        if "next_line" in rule and next_line is not None:
+            if "match" in rule["next_line"]:
+                next_matcher = re.match(rule["next_line"]["match"], next_line)
             else:
-                raise RuntimeError('unsupported matcher for next_line')
+                raise RuntimeError("unsupported matcher for next_line")
 
-        logger.debug(f'previous matcher {previous_matcher} current matcher {current_matcher} next matcher {next_matcher}')
+        logger.debug(
+            f"previous matcher {previous_matcher} current matcher {current_matcher} next matcher {next_matcher}"
+        )
 
         if current_matcher and previous_matcher and next_matcher:
-            type = rule['type'][0].upper()
-            message = rule['message']
+            type = rule["type"][0].upper()
+            message = rule["message"]
 
-            if 'fix' in rule:
-                fix = rule['fix']
+            if "fix" in rule:
+                fix = rule["fix"]
             else:
                 fix = None
 
-            violations.append({
-                'location': {
-                    'filepath': os.path.relpath(filepath),
-                    'line': line_number
-                },
-                'type': type,
-                'message': message,
-                'fix': fix,
-            })
+            violations.append(
+                {
+                    "location": {
+                        "filepath": os.path.relpath(filepath),
+                        "line": line_number,
+                    },
+                    "type": type,
+                    "message": message,
+                    "fix": fix,
+                }
+            )
 
     return violations
 
@@ -112,36 +119,36 @@ def fix(violations):
         return
 
     deletions = []
-    filepath = violations[0]['location']['filepath']
-    lines = open(filepath, 'r').read().split('\n')
+    filepath = violations[0]["location"]["filepath"]
+    lines = open(filepath, "r").read().split("\n")
 
     for violation in violations:
-        line_number = violation['location']['line']
+        line_number = violation["location"]["line"]
         line_to_fix = lines[line_number]
 
-        if 'delete' in violation['fix']:
+        if "delete" in violation["fix"]:
             # store the deletions to do at the end
             deletions.append(violation)
 
-        elif 'match' in violation['fix']:
-            match = violation['fix']['match']
-            replace = violation['fix']['replace']
+        elif "match" in violation["fix"]:
+            match = violation["fix"]["match"]
+            replace = violation["fix"]["replace"]
             fixed_line = re.sub(match, replace, line_to_fix)
             lines[line_number] = fixed_line
-            violation['fixed'] = True
+            violation["fixed"] = True
 
         else:
-            raise RuntimeError(f'unknown fix type in {violation}')
+            raise RuntimeError(f"unknown fix type in {violation}")
 
     # sort the deletions from bottom to the top of the file and then perform
     # the deletions
-    deletions.sort(key=lambda x: x['location']['line'], reverse=True)
+    deletions.sort(key=lambda x: x["location"]["line"], reverse=True)
     for violation in deletions:
-        del lines[violation['location']['line']]
-        violation['fixed'] = True
+        del lines[violation["location"]["line"]]
+        violation["fixed"] = True
 
-    with open(filepath, 'w') as output:
-        output.write('\n'.join(lines))
+    with open(filepath, "w") as output:
+        output.write("\n".join(lines))
 
     return violations
 
@@ -150,8 +157,8 @@ def load_builtin_lint_rules():
     """
     load internal builtin lint rules and used primarily for unit testing
     """
-    cucu_path = os.path.dirname(importlib.util.find_spec('cucu').origin)
-    lint_rules_path = os.path.join(cucu_path, 'lint', 'rules')
+    cucu_path = os.path.dirname(importlib.util.find_spec("cucu").origin)
+    lint_rules_path = os.path.join(cucu_path, "lint", "rules")
     return load_lint_rules(lint_rules_path)
 
 
@@ -173,14 +180,14 @@ def lint(filepath):
     filepath = os.path.abspath(filepath)
 
     if os.path.isdir(filepath):
-        basepath = os.path.join(filepath, '**/*.feature')
+        basepath = os.path.join(filepath, "**/*.feature")
         feature_filepaths = glob.iglob(basepath, recursive=True)
 
     else:
         feature_filepaths = [filepath]
 
     for feature_filepath in feature_filepaths:
-        lines = open(feature_filepath).read().split('\n')
+        lines = open(feature_filepath).read().split("\n")
         line_number = 0
 
         violations = []
@@ -192,7 +199,9 @@ def lint(filepath):
                 in_docstring = not in_docstring
 
             if not in_docstring:
-                for violation in lint_line(rules, line_number, lines, feature_filepath):
+                for violation in lint_line(
+                    rules, line_number, lines, feature_filepath
+                ):
                     violations.append(violation)
 
             line_number += 1

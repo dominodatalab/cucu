@@ -21,13 +21,12 @@ def load_cucu_steps():
         an array of hashmaps
     """
     steps_cache = {}
-    steps_doc_output = subprocess.check_output(['behave',
-                                                '--dry-run',
-                                                '--no-summary',
-                                                '--format', 'steps.doc'])
-    steps_doc_output = steps_doc_output.decode('utf8')
+    steps_doc_output = subprocess.check_output(
+        ["behave", "--dry-run", "--no-summary", "--format", "steps.doc"]
+    )
+    steps_doc_output = steps_doc_output.decode("utf8")
 
-    for cucu_step in steps_doc_output.split('\n\n'):
+    for cucu_step in steps_doc_output.split("\n\n"):
         # each blank line is a '\n\n' which is a split between two step
         # definitions in the output, like so:
         #
@@ -39,17 +38,17 @@ def load_cucu_steps():
         #     Function: inner_step()
         #     Location: src/cucu/behave_tweaks.py:64
         #
-        if cucu_step.strip() == '':
+        if cucu_step.strip() == "":
             continue
 
-        step_name, _, location = cucu_step.split('\n')
+        step_name, _, location = cucu_step.split("\n")
         step_name = re.match(r"@step\('(.*)'\)", step_name).groups()[0]
-        _, filepath, line_number = location.split(':')
+        _, filepath, line_number = location.split(":")
 
         steps_cache[step_name] = {
-            'location': {
-                'filepath': filepath.strip(),
-                'line': line_number.strip(),
+            "location": {
+                "filepath": filepath.strip(),
+                "line": line_number.strip(),
             }
         }
 
@@ -68,4 +67,4 @@ def print_human_readable_steps():
     steps = load_cucu_steps()
 
     for step in steps.keys():
-        print(f'{step}')
+        print(f"{step}")

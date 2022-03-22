@@ -13,10 +13,7 @@ def find_tab(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
-    return fuzzy.find(ctx.browser,
-                      name,
-                      ['*[role="tab"]'],
-                      index=index)
+    return fuzzy.find(ctx.browser, name, ['*[role="tab"]'], index=index)
 
 
 def find_n_assert_tab(ctx, name, index=0):
@@ -55,10 +52,10 @@ def assert_tab_selected(ctx, name, index=0, is_selected=True):
     tab = find_n_assert_tab(ctx, name)
 
     if is_selected:
-        if tab.get_attribute('aria-selected') != 'true':
+        if tab.get_attribute("aria-selected") != "true":
             raise RuntimeError(f'tab "{name}" is not selected')
     else:
-        if tab.get_attribute('aria-selected') == 'true':
+        if tab.get_attribute("aria-selected") == "true":
             raise RuntimeError(f'tab "{name}" is selected')
 
 

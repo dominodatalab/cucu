@@ -9,48 +9,47 @@
 
 
 class Browser:
-
     def __init__(self):
         pass
 
     def open(self, *args, **kwargs):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def navigate(self, url):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def switch_to_next_tab(self):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def switch_to_previous_tab(self):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def back(self):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def refresh(self):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def get_current_url(self):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def title(self):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def execute(self, javascript):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def switch_to_default_frame(self):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def switch_to_frame(self, frame):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def screenshot(self, filepath):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def close_window(self):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")
 
     def quit(self):
-        raise RuntimeError('implement me')
+        raise RuntimeError("implement me")

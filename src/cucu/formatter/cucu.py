@@ -11,13 +11,13 @@ import re
 
 
 class CucuFormatter(Formatter):
-    """
-    """
-    name = 'cucu'
-    description = 'cucu specific formatter to make the logs more readable'
+    """ """
+
+    name = "cucu"
+    description = "cucu specific formatter to make the logs more readable"
 
     DEFAULT_INDENT_SIZE = 2
-    SUBSTEP_PREFIX = '  ⤷'
+    SUBSTEP_PREFIX = "  ⤷"
 
     def __init__(self, stream_opener, config, **kwargs):
         super(CucuFormatter, self).__init__(stream_opener, config)
@@ -32,8 +32,9 @@ class CucuFormatter(Formatter):
         self.printer = ModelPrinter(self.stream)
         # -- LAZY-EVALUATE:
         self._multiline_indentation = None
-        self.monochrome = not self.stream.isatty() or \
-            cucu.config.CONFIG['CUCU_COLOR_OUTPUT'] != 'true'
+
+        color_output = cucu.config.CONFIG["CUCU_COLOR_OUTPUT"]
+        self.monochrome = not self.stream.isatty() or color_output != "true"
 
     @property
     def multiline_indentation(self):
@@ -49,15 +50,15 @@ class CucuFormatter(Formatter):
         return self._multiline_indentation
 
     def write_tags(self, tags, indent=None):
-        indent = indent or ''
+        indent = indent or ""
         if tags:
-            text = ' @'.join(tags)
-            self.stream.write(self.colorize(f'{indent}@{text}\n', 'cyan'))
+            text = " @".join(tags)
+            self.stream.write(self.colorize(f"{indent}@{text}\n", "cyan"))
 
-    def write_entity(self, entity, indent='', has_tags=True):
+    def write_entity(self, entity, indent="", has_tags=True):
         if has_tags:
             self.write_tags(entity.tags, indent)
-        text = f'{indent}{entity.keyword}: {entity.name}\n'
+        text = f"{indent}{entity.keyword}: {entity.name}\n"
         self.stream.write(text)
 
     # -- IMPLEMENT-INTERFACE FOR: Formatter
@@ -70,14 +71,14 @@ class CucuFormatter(Formatter):
     def rule(self, rule):
         self.current_rule = rule
         indent = make_indentation(self.indent_size)
-        self.stream.write('\n')
+        self.stream.write("\n")
         self.write_entity(rule, indent)
 
     def colorize(self, text, color):
         if self.monochrome:
             return text
         else:
-            return colors[color] + text + escapes['reset']
+            return colors[color] + text + escapes["reset"]
 
     def background(self, background):
         indent_extra = 0
@@ -86,8 +87,8 @@ class CucuFormatter(Formatter):
 
         if not self.monochrome:
             indent = make_indentation(self.indent_size + indent_extra)
-            keyword = self.colorize(background.keyword, 'magenta')
-            text = f'\n{indent}{keyword}: {background.name}\n'
+            keyword = self.colorize(background.keyword, "magenta")
+            text = f"\n{indent}{keyword}: {background.name}\n"
             self.stream.write(text)
 
     def scenario(self, scenario):
@@ -96,11 +97,13 @@ class CucuFormatter(Formatter):
         if self.current_rule:
             indent_extra = self.indent_size
 
-        self.stream.write('\n')
+        self.stream.write("\n")
         indent = make_indentation(self.indent_size + indent_extra)
-        text = u'%s%s: %s\n' % (indent,
-                                self.colorize(scenario.keyword, 'magenta'),
-                                scenario.name)
+        text = "%s%s: %s\n" % (
+            indent,
+            self.colorize(scenario.keyword, "magenta"),
+            scenario.name,
+        )
         self.write_tags(scenario.tags, indent)
         self.stream.write(text)
         self.steps = []
@@ -130,17 +133,18 @@ class CucuFormatter(Formatter):
         indent = make_indentation(2 * self.indent_size + indent_extra)
         keyword = step.keyword.rjust(5)
 
-        prefix = ''
-        if getattr(step, 'substep', False):
+        prefix = ""
+        if getattr(step, "substep", False):
             prefix = self.SUBSTEP_PREFIX
 
-        text = self.colorize(f'{indent}{prefix}{keyword} {step.name}\n', 'grey')
+        text = self.colorize(f"{indent}{prefix}{keyword} {step.name}\n", "grey")
         self.stream.write(text)
         self.stream.flush()
 
     def calculate_max_line_length(self):
-        line_lengths = [len(f'{step.keyword.rjust(5)} {step.name}')
-                        for step in self.steps]
+        line_lengths = [
+            len(f"{step.keyword.rjust(5)} {step.name}") for step in self.steps
+        ]
 
         return max(line_lengths) + 4
 
@@ -152,47 +156,58 @@ class CucuFormatter(Formatter):
         indent = make_indentation(2 * self.indent_size + indent_extra)
         keyword = step.keyword.rjust(5)
 
-        if not self.monochrome and not cucu.config.CONFIG['CUCU_WROTE_TO_STDOUT']:
+        if (
+            not self.monochrome
+            and not cucu.config.CONFIG["CUCU_WROTE_TO_STDOUT"]
+        ):
             self.stream.write(up(1))
-        cucu.config.CONFIG['CUCU_WROTE_TO_STDOUT'] = False
+        cucu.config.CONFIG["CUCU_WROTE_TO_STDOUT"] = False
 
-        prefix = ''
-        if getattr(step, 'substep', False):
+        prefix = ""
+        if getattr(step, "substep", False):
             prefix = self.SUBSTEP_PREFIX
 
         if step.status == Status.passed:
-            keyword = self.colorize(keyword, 'green')
-            text = f'{indent}{prefix}{keyword} {step.name}'
+            keyword = self.colorize(keyword, "green")
+            text = f"{indent}{prefix}{keyword} {step.name}"
         elif step.status == Status.failed:
-            text = self.colorize(f'{indent}{prefix}{keyword} {step.name}', 'red')
+            text = self.colorize(
+                f"{indent}{prefix}{keyword} {step.name}", "red"
+            )
         elif step.status == Status.undefined:
-            text = self.colorize(f'{indent}{prefix}{keyword} {step.name}', 'yellow')
+            text = self.colorize(
+                f"{indent}{prefix}{keyword} {step.name}", "yellow"
+            )
         elif step.status == Status.skipped:
-            text = self.colorize(f'{indent}{prefix}{keyword} {step.name}', 'cyan')
+            text = self.colorize(
+                f"{indent}{prefix}{keyword} {step.name}", "cyan"
+            )
 
         if self.monochrome:
-            self.stream.write(f'{text}')
+            self.stream.write(f"{text}")
         else:
-            self.stream.write(f'\r{text}')
+            self.stream.write(f"\r{text}")
 
         if step.status in (Status.passed, Status.failed):
             max_line_length = self.calculate_max_line_length()
-            status_text = ''
+            status_text = ""
             if self.show_timings:
-                status_text += ' #  in %0.3fs' % step.duration
+                status_text += " #  in %0.3fs" % step.duration
 
-            current_step_text = f'{step.keyword.rjust(5)} {step.name}'
-            status_text_padding = max_line_length - len(current_step_text) - len(prefix)
+            current_step_text = f"{step.keyword.rjust(5)} {step.name}"
+            status_text_padding = (
+                max_line_length - len(current_step_text) - len(prefix)
+            )
             status_text = f'{" " * status_text_padding}{status_text}'
-            status_text = self.colorize(status_text, 'grey')
+            status_text = self.colorize(status_text, "grey")
 
             if step.error_message:
-                self.stream.write(f'{status_text}\n{step.error_message}\n')
+                self.stream.write(f"{status_text}\n{step.error_message}\n")
             else:
-                self.stream.write(f'{status_text}\n')
+                self.stream.write(f"{status_text}\n")
 
             # print the variable values as a comment to ease debugging
-            variables = re.findall('{([^{}]+)}', step.name)
+            variables = re.findall("{([^{}]+)}", step.name)
             if len(variables) != 0:
                 values = []
 
@@ -201,8 +216,8 @@ class CucuFormatter(Formatter):
 
                     if value is not None:
                         value = str(cucu.config.CONFIG[variable])
-                        value = value.replace('\n', '\\n')
-                        value = value[:32] + '...' * (len(value) > 32)
+                        value = value.replace("\n", "\\n")
+                        value = value[:32] + "..." * (len(value) > 32)
                     else:
                         value = None
 
@@ -210,7 +225,7 @@ class CucuFormatter(Formatter):
 
                 padding = f"    {' '*(len('Given')-len(step.keyword))}"
                 variable_comment_line = f"{padding}# {' '.join(values)}\n"
-                self.stream.write(self.colorize(variable_comment_line, 'grey'))
+                self.stream.write(self.colorize(variable_comment_line, "grey"))
 
         if step.text:
             self.doc_string(step.text)
@@ -218,7 +233,7 @@ class CucuFormatter(Formatter):
             self.table(step.table)
 
     def eof(self):
-        self.stream.write('\n')
+        self.stream.write("\n")
 
     # -- MORE: Formatter helpers
     def doc_string(self, doc_string):
