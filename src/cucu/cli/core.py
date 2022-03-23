@@ -17,7 +17,7 @@ coverage.process_startup()
 
 
 @click.group()
-@click.version_option(version("cucu"))
+@click.version_option(version("cucu"), message="%(version)s")
 @click.option("--debug/--no-debug", default=False)
 @click.option(
     "-l",
