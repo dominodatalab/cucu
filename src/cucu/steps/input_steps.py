@@ -58,6 +58,22 @@ def find_n_write(ctx, name, value, index=0):
     input_.send_keys(value)
 
 
+def find_n_clear(ctx, name, index=0):
+    """
+    find the input with the name provided and clear whatever value it has.
+
+    parameters:
+      ctx(object): behave context object used to share data between steps
+      name(str):   name that identifies the desired input on screen
+      index(str):  the index of the input if there are a few with the same name.
+
+    raises:
+        an error if the desired input is not found
+    """
+    input_ = find_input(ctx, name, index=index)
+    input_.clear()
+
+
 def assert_input_value(ctx, name, value, index=0):
     """
     assert the input with the name provided has the value specified, unless the
@@ -108,6 +124,26 @@ def wait_up_to_write_into_input(ctx, seconds, value, name):
 @step('I send the "{key}" key to the input "{name}"')
 def send_keys_to_input(ctx, key, name):
     find_n_write(ctx, name, Keys.__dict__[key.upper()])
+
+
+@step('I clear the input "{name}"')
+def clear_input(ctx, name):
+    find_n_clear(ctx, name)
+
+
+@step('I wait to clear the input "{name}"')
+def wait_to_clear_input(ctx, name):
+    retry(find_n_clear)(ctx, name)
+
+
+@step('I wait up to "{seconds}" seconds to clear the input "{name}"')
+def wait_up_to_clear_input(ctx, seconds, value, name):
+    retry(find_n_clear, wait_up_to_s=float(seconds))(ctx, name)
+
+
+@step('I wait to see the input "{name}"')
+def wait_to_see_the_input(ctx, name):
+    find_input(ctx, name)
 
 
 @step('I should see "{value}" in the input "{name}"')

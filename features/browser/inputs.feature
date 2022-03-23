@@ -72,3 +72,11 @@ Feature: Inputs
     Given I should see no value in the input "input with label for"
      When I write "boop" into the input "input with label for"
      Then I should see "boop" in the input "input with label for"
+
+  Scenario: User can clear an input
+    Given I should see no value in the input "input with label for"
+     When I write "beep" into the input "input with label for"
+      And I clear the input "input with label for"
+     Then I should see no value in the input "input with label for"
+     When I write "blup" into the input "input with label for"
+     Then I should see "blup" in the input "input with label for"
