@@ -66,6 +66,12 @@ def main(debug, logging_level):
     help="set output step formatter to human or json, default: human",
 )
 @click.option(
+    "-g",
+    "--generate-report/--no-generate-report",
+    default=False,
+    help="automatically generate a report at the end of the test run",
+)
+@click.option(
     "-x",
     "--fail-fast/--no-fail-fast",
     default=False,
@@ -79,6 +85,7 @@ def main(debug, logging_level):
 @click.option(
     "-p", "--preserve-results/--no-preserve-results", help="", default=False
 )
+@click.option("--report", default="report")
 @click.option("-r", "--results", default="results")
 @click.option(
     "--secrets",
@@ -107,11 +114,13 @@ def run(
     dry_run,
     env,
     format,
+    generate_report,
     fail_fast,
     headless,
     name,
     ipdb_on_failure,
     preserve_results,
+    report,
     results,
     secrets,
     source,
@@ -213,11 +222,32 @@ def run(
     if fail_fast:
         args.append("--stop")
 
-    from behave.__main__ import main as behave_main
+    try:
+        from behave.__main__ import main as behave_main
 
-    exit_code = behave_main(args)
-    if exit_code != 0:
-        raise ClickException("test run failed, see above for details")
+        exit_code = behave_main(args)
+        if exit_code != 0:
+            raise ClickException("test run failed, see above for details")
+    finally:
+        _generate_report(results, report)
+
+
+def _generate_report(filepath, output):
+    """
+    helper method to handle report generation so it can be used by the `cucu report`
+    command also the `cucu run` when told to generate a report.
+
+
+    parameters:
+        filepath(string): the results directory containing the previous test run
+        output(string): the directory where we'll generate the report
+    """
+
+    if not os.path.exists(output):
+        os.makedirs(output)
+
+    report_location = reporter.generate(filepath, output)
+    print(f"HTML test report at {report_location}")
 
 
 @main.command()
@@ -227,11 +257,7 @@ def report(filepath, output):
     """
     create an HTML test report from the results directory provided
     """
-    if not os.path.exists(output):
-        os.makedirs(output)
-
-    report_location = reporter.generate(filepath, output)
-    print(f"HTML test report at {report_location}")
+    _generate_report(filepath, output)
 
 
 @main.command()

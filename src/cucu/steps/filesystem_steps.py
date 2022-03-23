@@ -20,6 +20,12 @@ def append_to_file_the_following(context, filepath):
         output.write(bytes(context.text, "utf8"))
 
 
+@step('I should see the file at "{filepath}"')
+def should_see_file(context, filepath):
+    if not (os.path.exists(filepath) and os.path.isfile(filepath)):
+        raise RuntimeError(f"unable to see file at {filepath}")
+
+
 @step('I should see the file at "{filepath}" has the following')
 def should_see_file_with_the_following(context, filepath):
     with open(filepath, "rb") as input:
