@@ -229,7 +229,8 @@ def run(
         if exit_code != 0:
             raise ClickException("test run failed, see above for details")
     finally:
-        _generate_report(results, report)
+        if generate_report:
+            _generate_report(results, report)
 
 
 def _generate_report(filepath, output):
