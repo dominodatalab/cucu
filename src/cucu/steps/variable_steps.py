@@ -21,6 +21,12 @@ def should_see_is_equal(_, this, that):
         raise RuntimeError(f"{this} is not equal to {that}")
 
 
+@step('I should see "{this}" is not equal to "{that}"')
+def should_see_is_equal(_, this, that):
+    if this == that:
+        raise RuntimeError(f"{this} is equal to {that}")
+
+
 @step('I should see "{this}" contains "{that}"')
 def should_see_it_contains(_, this, that):
     if that not in this:
@@ -61,30 +67,3 @@ def should_see_matches_the_following(context, this):
 
     if re.match(that, this) is not None:
         raise RuntimeError(f"{this}\nmatches:\n{that}")
-
-
-@step('I should see the value of variable "{this}" is equal to "{that}"')
-def should_see_variable_equals(context, this, that):
-    value = config.CONFIG[this]
-    if that != value:
-        raise RuntimeError(f"Variable {this} had value {value}, which was not equal to {that}")
-
-
-@step('I should see the value of variable "{this}" is not equal to "{that}"')
-def should_see_variable_equals(context, this, that):
-    value = config.CONFIG[this]
-    if that == value:
-        raise RuntimeError(f"Variable {this} had value {value}, which was equal to {that}")
-
-@step('I should see the value of variable "{this}" contains "{that}"')
-def should_see_variable_contains(context, this, that):
-    value = config.CONFIG[this]
-    if not that in value:
-        raise RuntimeError(f"Variable {this} had value {value}, which did not contain {that}")
-
-
-@step('I should see the value of variable "{this}" does not contain "{that}"')
-def should_see_variable_contains(context, this, that):
-    value = config.CONFIG[this]
-    if this in value:
-        raise RuntimeError(f"Variable {this} had value {value}, which contained {that}")

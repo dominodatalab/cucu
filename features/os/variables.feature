@@ -1,32 +1,32 @@
-Feature: cucu variables
+Feature: variables
   As a cucu test developer
   I want to be able to use cucus internal variables
   So that I can save some values and reference them later
 
-  Scenario: Check a literal for equality
+  Scenario: User can validate two strings are equal
       Then I should see "Burns" is equal to "Burns"
 
-  Scenario: Check a literal for a substring
+  Scenario: User can validate a string contains a substring
        Then I should see "Burns" contains "urn"
 
-  Scenario: Check a literal for a regex match
+  Scenario: User can check a string matches a regular expression
        Then I should see "Burns" matches the following
           """
           B?urn(?![abcdefghijklmnopqrtuvwxyz])
           """
 
-  Scenario: Check a literal for lack of a regex match
+  Scenario: User can validate a string does not match a regular expression
        Then I should see "Burnz" does not match the following
           """
           B?urn(?![abcdefghijklmnopqrtuvwxyz])
           """
 
-  Scenario: Set and check a variable
+  Scenario: User can set and reference a variable
      When I set the variable "Robert" to "Burns"
-     Then I should see the value of variable "Robert" is equal to "Burns"
-      And I should see the value of variable "Robert" is not equal to "Frost"
+     Then I should see "{Robert}" is equal to "Burns"
+      And I should see "{Robert}" is not equal to "Frost"
 
-  Scenario: Check inclusion in a variable
+  Scenario: User can validate a variable contains substrings
     When I set the variable "Robert" to "bertrand"
-    Then I should see the value of variable "Robert" contains "tran"
-     And I should see the value of variable "Robert" does not contain "ober"
+    Then I should see "{Robert}" contains "tran"
+     And I should see "{Robert}" does not contain "ober"
