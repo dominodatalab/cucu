@@ -39,6 +39,9 @@ class Browser:
     def execute(self, javascript):
         raise RuntimeError("implement me")
 
+    def click(self, element):
+        raise RuntimeError("implement me")
+
     def switch_to_default_frame(self):
         raise RuntimeError("implement me")
 

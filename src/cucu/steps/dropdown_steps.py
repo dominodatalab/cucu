@@ -1,6 +1,6 @@
 import humanize
 
-from cucu import fuzzy, retry, step
+from cucu import helpers, fuzzy, retry, step
 from selenium.webdriver.support.ui import Select
 
 
@@ -149,14 +149,7 @@ def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
             raise RuntimeError(f"{option} is selected")
 
 
-@step('I should see the dropdown "{dropdown}"')
-def should_see_the_dropdown(ctx, dropdown):
-    find_dropdown(ctx, dropdown)
-
-
-@step('I wait to see the dropdown "{dropdown}"')
-def wait_to_see_the_dropdown(ctx, dropdown):
-    retry(find_dropdown)(ctx, dropdown)
+helpers.define_should_see_thing_with_name_steps("dropdown", find_dropdown)
 
 
 @step('I select the option "{option}" from the dropdown "{dropdown}"')

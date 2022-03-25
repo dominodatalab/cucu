@@ -10,8 +10,6 @@ behave_tweaks.init_step_hooks(sys.stdout, sys.stderr)
 sys.stdout = behave_tweaks.CucuStream(sys.stdout)
 sys.stderr = behave_tweaks.CucuStream(sys.stderr)
 
-# flake8: noqa
-# we only expose the exact hooks we want to the outside world here.
 from cucu.hooks import (
     init_environment,
     init_steps,
@@ -19,4 +17,5 @@ from cucu.hooks import (
     run_steps,
     retry,
 )
+from cucu import helpers
 from behave import step
