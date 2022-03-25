@@ -8,8 +8,8 @@
     <table class="table table-hover">
         {% for feature in features %}
 
-        <tr role="link" style="cursor: pointer;" onclick="window.location='{{ feature['name'] }}.html';" >
-            <td><pre style="display: inline; color: green">Feature: </pre><pre style="display: inline; color: grey">{{ feature['name'] }}</pre></td>
+        <tr role="link" style="cursor: pointer;" onclick="window.location='{{ escape(feature['name']) }}.html';" >
+            <td><pre style="display: inline; color: green">Feature: </pre><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></td>
             {% if feature['status'] == 'passed' %}
                 <td><pre style="display: inline; color: green">{{ feature['status'] }}</pre></td>
             {% elif feature['status'] == 'failed' %}

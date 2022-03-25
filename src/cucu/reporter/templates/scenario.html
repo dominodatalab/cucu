@@ -46,12 +46,12 @@
     <table class="table table-borderless">
         <tr class="d-flex">
             <td class="col-11 text-truncate">
-                <pre style="display: inline; color: maroon;">Scenario:</pre> {{ scenario['name'] }}
+                <pre style="display: inline; color: maroon;">Scenario:</pre> {{ escape(scenario['name']) }}
             </td>
             <td class="col-11 text-truncate" style="color: gray;"></td>
         </tr>
         {% for step in steps %}
-            {% set step_name = step['keyword'] + ' ' + step['name'] %}
+            {% set step_name = step['keyword'] + ' ' + escape(step['name']) %}
             {% if step['substep'] %}
                 {% set step_prefix = "     ⤷" %}
             {% else %}
@@ -67,13 +67,13 @@
                 <td class="anchor-toggle text-truncate col-11" data-toggle="collapse" href="#collapsable-row-{{ loop.index }}" role="button" aria-expanded="false" aria-controls="collapsable-row-{{ loop.index }}">
                     <a class="anchor" id="step_{{ loop.index}}" href="#step_{{ loop.index }}">🔗</a>
                 {% if step['result'] is not defined %}
-                    <pre style="display: inline; color: blue">{{ step_keyword }}</pre><pre style="color: blue; display: inline"> {{ step['name'] }}</pre>
+                    <pre style="display: inline; color: blue">{{ step_keyword }}</pre><pre style="color: blue; display: inline"> {{ escape(step['name']) }}</pre>
                 {% elif step['result']['status'] == 'passed' %}
-                    <pre style="display: inline; color: green">{{ step_keyword }}</pre><pre style="display: inline; text-overflow: ellipsis; overflow: hidden;"> {{ step['name'] }}</pre>
+                    <pre style="display: inline; color: green">{{ step_keyword }}</pre><pre style="display: inline; text-overflow: ellipsis; overflow: hidden;"> {{ escape(step['name']) }}</pre>
                 {% elif step['result']['status'] == 'failed' %}
-                    <pre style="display: inline; color: red">{{ step_keyword }}</pre><pre style="color: red; display: inline"> {{ step['name'] }}</pre>
+                    <pre style="display: inline; color: red">{{ step_keyword }}</pre><pre style="color: red; display: inline"> {{ escape(step['name']) }}</pre>
                 {% elif step['result']['status'] == 'skipped' %}
-                    <pre style="display: inline; color: blue">{{ step_keyword }}</pre><pre style="color: blue; display: inline"> {{ step['name'] }}</pre>
+                    <pre style="display: inline; color: blue">{{ step_keyword }}</pre><pre style="color: blue; display: inline"> {{ escape(step['name']) }}</pre>
                 {% endif %}
                 </td>
                 <td><pre style="display: inline; color: gray;"># {{ step_duration }}s</pre></td>
@@ -109,7 +109,7 @@
                 {% if step['result']['stdout'] %}
                 <tr>
                     {% for line in step['result']['stdout'] %}
-                        <td colspan="2"><pre style="color: darkgray">{{ line }}</pre></td>
+                        <td colspan="2"><pre style="color: darkgray">{{ escape(line) }}</pre></td>
                     {% endfor %}
                 </tr>
                 {% endif %}
@@ -117,7 +117,7 @@
                 {% if step['result']['error_message'] %}
                     {% for line in step['result']['error_message'] %}
                     <tr>
-                        <td colspan="2" style="margin: 0"><pre style="color: gray; margin: 0">{{ line }}</pre></td>
+                        <td colspan="2" style="margin: 0"><pre style="color: gray; margin: 0">{{ escape(line) }}</pre></td>
                     </tr>
                     {% endfor %}
                 {% endif %}

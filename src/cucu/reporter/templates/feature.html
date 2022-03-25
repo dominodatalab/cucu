@@ -14,19 +14,22 @@
         </div>
     </nav>
     <table class="table table-hover">
-        <tr class="remove-table-hover"><pre style="display: inline; color: maroon">Feature: </pre><pre style="display: inline; color: grey">{{ feature['name'] }}</pre></tr>
+        <tr class="remove-table-hover"><pre style="display: inline; color: maroon">Feature: </pre><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></tr>
         {% for scenario in scenarios %}
-        <tr role="link" style="cursor: pointer;" onclick="window.location='{{ feature['name'] }}/{{ scenario['name'] }}/index.html';" >
-            <td><pre style="display: inline; color: green">  Scenario: </pre><pre style="display: inline; color: grey">{{ scenario['name'] }}</pre></td>
-            {% if scenario['status'] == 'passed' %}
-                <td><pre style="display: inline; color: green">{{ scenario['status'] }}</pre></td>
-            {% elif scenario['status'] == 'failed' %}
-                <td><pre style="display: inline; color: red">{{ scenario['status'] }}</pre></td>
-            {% elif scenario['status'] == 'skipped' %}
-                <td><pre style="display: inline; color: blue">{{ scenario['status'] }}</pre></td>
-            {% endif %}
-            <td><pre style="display: inline; color: grey">{{ '{:.3f}'.format(scenario['duration']) }}s</pre></td>
-        </tr>
+            <!--- ignore Backgrounds for the time being -->
+            {% if scenario['keyword'] != 'Background' %}
+            <tr role="link" style="cursor: pointer;" onclick="window.location='{{ escape(feature['name']) }}/{{ escape(scenario['name']) }}/index.html';" >
+                <td><pre style="display: inline; color: green">  Scenario: </pre><pre style="display: inline; color: grey">{{ escape(scenario['name']) }}</pre></td>
+                {% if scenario['status'] == 'passed' %}
+                    <td><pre style="display: inline; color: green">{{ scenario['status'] }}</pre></td>
+                {% elif scenario['status'] == 'failed' %}
+                    <td><pre style="display: inline; color: red">{{ scenario['status'] }}</pre></td>
+                {% elif scenario['status'] == 'skipped' %}
+                    <td><pre style="display: inline; color: blue">{{ scenario['status'] }}</pre></td>
+                {% endif %}
+                <td><pre style="display: inline; color: grey">{{ '{:.3f}'.format(scenario['duration']) }}s</pre></td>
+            </tr>
+            {%  endif %}
         {% endfor %}
     </table>
 {% endblock %}
