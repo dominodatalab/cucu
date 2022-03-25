@@ -79,17 +79,17 @@
                 <td><pre style="display: inline; color: gray;"># {{ step_duration }}s</pre></td>
             </tr>
             {% if step['text'] %}
-            <tr>
-                <td colspan="2">
-                    <pre style="color: black; margin: 0">      """</pre>
-                    <pre style="color: black; margin: 0">      {{ step['text'] }}</pre>
-                    <pre style="color: black; margin: 0">      """</pre>
+            <tr class="d-flex">
+                <td class="col-11" colspan="2">
+                    <pre class="text-wrap" style="color: black; margin: 0">      """</pre>
+                    <pre class="text-wrap" style="color: black; margin: 0">      {{ step['text'] }}</pre>
+                    <pre class="text-wrap" style="color: black; margin: 0">      """</pre>
                 </td>
             </tr>
             {% endif %}
             {% if step['table'] %}
-            <tr>
-                <td colspan="2">
+            <tr class="d-flex">
+                <td class="col-11" colspan="2">
                     <pre style="color: black; margin: 0; display: inline">      |</pre>
                     {% for heading in step['table']['headings'] %}
                     <pre style="color: black; margin: 0; display: inline"> {{ heading }} |</pre>
@@ -98,7 +98,7 @@
                     {% for row in step['table']['rows'] %}
                         <pre style="color: black; margin: 0; display: inline">      |</pre>
                         {% for value in row %}
-                        <pre style="color: black; margin: 0; display: inline"> {{ value }} |</pre>
+                        <pre class="text-wrap" style="color: black; margin: 0; display: inline"> {{ value }} |</pre>
                         {% endfor %}
                         </br>
                     {% endfor %}
@@ -107,17 +107,17 @@
             {% endif %}
             {% if step['result'] is defined %}
                 {% if step['result']['stdout'] %}
-                <tr>
+                <tr class="d-flex">
                     {% for line in step['result']['stdout'] %}
-                        <td colspan="2"><pre style="color: darkgray">{{ escape(line) }}</pre></td>
+                        <td class="col-11" colspan="2"><pre class="text-wrap" style="color: darkgray">{{ escape(line) }}</pre></td>
                     {% endfor %}
                 </tr>
                 {% endif %}
 
                 {% if step['result']['error_message'] %}
                     {% for line in step['result']['error_message'] %}
-                    <tr>
-                        <td colspan="2" style="margin: 0"><pre style="color: gray; margin: 0">{{ escape(line) }}</pre></td>
+                    <tr class="d-flex">
+                        <td class="col-11" colspan="2" style="margin: 0"><pre class="text-wrap" style="color: gray; margin: 0">{{ escape(line) }}</pre></td>
                     </tr>
                     {% endfor %}
                 {% endif %}
