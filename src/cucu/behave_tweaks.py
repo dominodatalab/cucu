@@ -64,9 +64,10 @@ def hide_secrets(line):
 
     # here's where we can hide secrets
     for secret in secrets.split(","):
-        if secret != "":
+        if secret is not None:
             value = CONFIG[secret]
-            line = line.replace(value, "*" * len(value))
+            if value is not None:
+                line = line.replace(value, "*" * len(value))
 
     return line
 
