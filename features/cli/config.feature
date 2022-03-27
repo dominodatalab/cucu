@@ -58,3 +58,32 @@ Feature: Config
       3 steps passed, 0 failed, 0 skipped, 0 undefined
       [\s\S]*
       """
+
+
+  Scenario: User gets an appropriate error when cuucrc has invalid syntax
+    Given I create a file at "{CUCU_RESULTS_DIR}/load_bad_cucurc/environment.py" with the following:
+      """
+      import cucu
+      cucu.init_environment()
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/load_bad_cucurc/steps/__init__.py" with the following:
+      """
+      import cucu
+      cucu.init_steps()
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/load_bad_cucurc/cucurc.yml" with the following:
+      """
+      FOO: bar
+      completely=broken
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/load_bad_cucurc/directory/feature_that_prints.feature" with the following:
+      """
+      Feature: Feature tries to print something
+
+        Scenario: This scenario prints the value of FOO
+         Given I echo "{{FOO}}"
+      """
+      When I run the command "cucu run {CUCU_RESULTS_DIR}/load_bad_cucurc --results={CUCU_RESULTS_DIR}/nested_cucurc_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "1"
+      And I should see "{STDout}" is empty
+      And I should see "{STDERR}" contains "yaml.scanner.ScannerError: while scanning a simple key"

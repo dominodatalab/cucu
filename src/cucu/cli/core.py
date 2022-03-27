@@ -190,18 +190,15 @@ def run(
 
     else:
         args += [
-            # JUNIT xml file generated per feature file executed
+            # JUnit xml file generated per feature file executed
             "--junit",
             f"--junit-directory={results}",
-            # generate a JSOn file containing the exact details of the whole run
-            "--format",
-            "cucu.formatter.json:CucuJSONFormatter",
+            # generate a JSON file containing the exact details of the whole run
+            "--format=cucu.formatter.json:CucuJSONFormatter",
             f"--outfile={results}/run.json",
             # console formater
-            "--format",
-            formatter,
-            "--logging-level",
-            CONFIG["CUCU_LOGGING_LEVEL"].upper(),
+            f"--format={formatter}",
+            f"--logging-level={CONFIG['CUCU_LOGGING_LEVEL'].upper()}",
         ]
 
     if format == "json":
