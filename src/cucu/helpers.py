@@ -1,7 +1,65 @@
 import humanize
+import inspect
 
-from behave import step
 from cucu import retry
+
+
+class step(object):
+    """
+    Only to be used in this file as we're redefining the @step decorator in
+    order to fix the code location of the @step() usage.
+
+    Basically when you use any of the `define_xxx` steps below internally they
+    call @step() and when that decorator executes in behave it will take the
+    location of the function provided to the decorator and use that to both
+    report as the location of the step's "source"
+    (ie poetry run behave --no-summary --format steps.doc --dry-run). Now that
+    would be confusing as the step is likely defined somewhere under
+    `src/cucu/steps` but the location in the behave steps output would be wrong
+    and then at runtime if there's an exception throw from one of the other
+    functions inside the `define_xxx` method that trace would also not originate
+    from the `src/cucu/steps` location where the `define_xxx` was called.
+
+    So this redefinitino of @step will basically use a hook in the existing
+    @step definition in `src/cucu/behave_tweaks.py` and provide a function
+    to "fix" the inner_step function so its own code location now points back
+    to the location where the `define_xxx` was called from.
+    """
+
+    def __init__(self, step_text):
+        self.step_text = step_text
+        frame = inspect.stack()[3].frame
+
+        def fix_inner_step(func):
+            #
+            # Here is where we "fix" the code location for the function being
+            # passed to the step() decorator. We are basically realigning the
+            # filename and line location so it points to the original caller
+            # of the `define_xxx` method. To do this alignment though we have
+            # to subtract from the original file line number the number of code
+            # lines in the `src/cucu/behave_tweaks.py` between the functions
+            # wrapper and inner_step as that is the "actual code location" at
+            # runtime and below we can only set the `firstlineno` which is the
+            # "first line" of our __code__ point and by the time those N lines
+            # execute the line number python would print would be N lines ahead
+            # of the original location of the code we're trying to link to.
+            #
+            func.__code__ = func.__code__.replace(
+                co_filename=frame.f_code.co_filename,
+                co_firstlineno=frame.f_lineno - 3,
+                co_name=frame.f_code.co_name,
+            )
+
+        self.fix_inner_step = fix_inner_step
+
+    def __call__(self, func):
+        from behave import step
+
+        @step(self.step_text, fix_inner_step=self.fix_inner_step)
+        def wrapper(*args, **kwargs):
+            func(*args, **kwargs)
+
+        return wrapper
 
 
 def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):

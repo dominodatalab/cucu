@@ -4,11 +4,13 @@
 #      capturing
 #
 import behave
+import inspect
 import warnings
 import sys
 
 from cucu.config import CONFIG
 from functools import wraps
+from types import CodeType
 
 
 def init_step_hooks(stdout, stderr):
@@ -47,12 +49,22 @@ def init_step_hooks(stdout, stderr):
             sys.stderr = CucuStream(sys.stderr, parent=stderr)
             func(*args, **kwargs)
 
-        def new_decorator(step_text):
+        def new_decorator(step_text, fix_inner_step=lambda x: x):
+            #
+            # IMPORTANT: if you add any additional line from the `wrapper`
+            #            function name to the `inner_step` name then you HAVE to
+            #            update the `src/cucu/helpers.py` fix_inner_step
+            #            so it subtracts the lines between wrapper and
+            #            inner_step functions (lines of code). More details
+            #            at the `src/cucu/helpers.py` location.
+            #
             def wrapper(func):
                 @decorator(step_text)
                 @wraps(func)
                 def inner_step(*args, **kwargs):
                     inner_step_func(func, *args, **kwargs)
+
+                fix_inner_step(inner_step)
 
             return wrapper
 
