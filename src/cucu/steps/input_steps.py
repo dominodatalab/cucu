@@ -141,11 +141,6 @@ def wait_up_to_clear_input(ctx, seconds, value, name):
     retry(find_n_clear, wait_up_to_s=float(seconds))(ctx, name)
 
 
-@step('I wait to see the input "{name}"')
-def wait_to_see_the_input(ctx, name):
-    find_input(ctx, name)
-
-
 @step('I should see "{value}" in the input "{name}"')
 def should_see_the_input_with_value(ctx, value, name):
     assert_input_value(ctx, name, value)
