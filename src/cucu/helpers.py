@@ -28,7 +28,7 @@ class step(object):
 
     def __init__(self, step_text):
         self.step_text = step_text
-        frame = inspect.stack()[3].frame
+        frame = inspect.stack()[2].frame
 
         def fix_inner_step(func):
             #
