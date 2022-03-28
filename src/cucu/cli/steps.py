@@ -36,10 +36,11 @@ def load_cucu_steps():
         an array of hashmaps
     """
     steps_cache = {}
-    steps_doc_output = subprocess.check_output(
-        ["behave", "--dry-run", "--no-summary", "--format", "steps.doc"]
+    process = subprocess.run(
+        ["behave", "--dry-run", "--no-summary", "--format", "steps.doc"],
+        capture_output=True,
     )
-    steps_doc_output = steps_doc_output.decode("utf8")
+    steps_doc_output = process.stdout.decode("utf8")
 
     for cucu_step in steps_doc_output.split("\n\n"):
         # each blank line is a '\n\n' which is a split between two step

@@ -33,6 +33,12 @@ def should_see_it_contains(_, this, that):
         raise RuntimeError(f"{this} does not contain {that}")
 
 
+@step('I should see "{this}" contains the following')
+def should_see_it_contains(ctx, this):
+    if ctx.text not in this:
+        raise RuntimeError(f"{this} does not contain {ctx.text}")
+
+
 @step('I should see "{this}" does not contain "{that}"')
 def should_see_it_doest_not_contain(_, this, that):
     if that in this:
