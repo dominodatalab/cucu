@@ -1,6 +1,6 @@
 import humanize
 
-from cucu import fuzzy, retry, step
+from cucu import helpers, fuzzy, retry, step
 
 
 def find_button(ctx, name, index=0):
@@ -44,66 +44,16 @@ def find_button(ctx, name, index=0):
         index=index,
     )
 
-    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
-
-    if button is None:
-        raise RuntimeError(f'unable to find the {prefix}button "{name}"')
-
     return button
 
 
-def find_n_click_button(ctx, name, index=0):
-    """
-    find the button with the name and index provided and click it
-
-    parameters:
-      ctx(object): behave context object used to share data between steps
-      name(str):   name that identifies the desired button on screen
-      index(str):  the index of the button if there are duplicates
-
-    raises:
-        an error if the desired button is not found
-    """
-
-    button = find_button(ctx, name, index=index)
+def click_button(button):
     button.click()
 
 
-@step('I click the button "{name}"')
-def clicks_the_button(ctx, name):
-    find_n_click_button(ctx, name)
-
-
-@step('I wait to click the button "{name}"')
-def waits_to_clicks_the_button(ctx, name):
-    retry(find_n_click_button)(ctx, name)
-
-
-@step('I click the "{nth:nth}" button "{name}"')
-def clicks_the_nth_button(ctx, nth, name):
-    find_n_click_button(ctx, name, index=nth)
-
-
-@step('I wait to click the "{nth:nth}" button "{name}"')
-def waits_to_clicks_the_nth_button(ctx, nth, name):
-    retry(find_n_click_button)(ctx, name, index=nth)
-
-
-@step('I should see the button "{name}"')
-def we_should_see_the_button(ctx, name):
-    find_button(ctx, name)
-
-
-@step('I wait to see the button "{name}"')
-def waits_to_see_the_button(ctx, name):
-    retry(find_button)(ctx, name)
-
-
-@step('I should see the "{nth:nth}" button "{name}"')
-def should_see_the_nth_button(ctx, nth, name):
-    find_button(ctx, name, index=nth)
-
-
-@step('I wait to see the "{nth:nth}" button "{name}"')
-def waits_to_see_the_nth_button(ctx, nth, name):
-    retry(find_button)(ctx, name, index=nth)
+helpers.define_should_see_thing_with_name_steps(
+    "button", find_button, with_nth=True
+)
+helpers.define_action_on_thing_with_name_steps(
+    "button", "click", find_button, click_button, with_nth=True
+)

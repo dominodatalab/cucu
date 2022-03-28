@@ -1,4 +1,4 @@
-from cucu import fuzzy, retry, step
+from cucu import helpers, fuzzy, retry, step
 
 
 def find_radio_button(ctx, name, index=0):
@@ -78,38 +78,36 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
     radio.click()
 
 
-def assert_radio_button_selected(ctx, name, is_selected=True):
-    """
-    assert radio button selected
-
-    parameters:
-      ctx(object): behave context object used to share data between steps
-      name(str):   name that identifies the desired radio button on screen
-      index(str):  the index of the radio button if there are duplicates
-
-    returns:
-        the WebElement that matches the provided arguments.
-    """
-    radio = find_n_assert_radio_button(ctx, name)
-
-    selected = bool(radio.get_attribute("checked"))
-
-    if is_selected:
-        if not (selected):
-            raise Exception(f'radio button "{name}" is not selected')
-    else:
-        if not (is_selected) and selected:
-            raise Exception(f'radio button "{name}" is selected')
+def is_selected(radio):
+    return bool(radio.get_attribute("checked"))
 
 
-@step('I select the radio button "{name}"')
-def select_the_radio_button(ctx, name):
-    find_n_select_radio_button(ctx, name, ignore_if_selected=False)
+def is_not_selected(checkbox):
+    return not (is_selected(checkbox))
 
 
-@step('I wait to select the radio button "{name}"')
-def wait_to_select_the_radio_button(ctx, name):
-    find_n_select_radio_button(ctx, name, ignore_if_selected=False)
+def select_radio_button(radiobox):
+    """ """
+    selected = bool(radiobox.get_attribute("checked"))
+
+    if selected:
+        raise Exception("radiobox already selected")
+
+    radiobox.click()
+
+
+helpers.define_should_see_thing_with_name_steps(
+    "radio button", find_radio_button
+)
+helpers.define_action_on_thing_with_name_steps(
+    "radio button", "select", find_radio_button, select_radio_button
+)
+helpers.define_thing_with_name_in_state_steps(
+    "radio button", "selected", find_radio_button, is_selected
+)
+helpers.define_thing_with_name_in_state_steps(
+    "radio button", "not selected", find_radio_button, is_not_selected
+)
 
 
 @step('I select the radio button "{name}" if it is not selected')
@@ -120,23 +118,3 @@ def select_the_radio_button_if_not_selected(ctx, name):
 @step('I wait to select the radio button "{name}" if it is not selected')
 def wait_to_select_the_radio_button_if_not_selected(ctx, name):
     retry(find_n_select_radio_button)(ctx, name, ignore_if_selected=True)
-
-
-@step('I should see the radio button "{name}" is selected')
-def should_see_radio_button_is_checked(ctx, name):
-    assert_radio_button_selected(ctx, name, is_selected=True)
-
-
-@step('I wait to see the radio button "{name}" is selected')
-def wait_to_see_radio_button_is_checked(ctx, name):
-    retry(assert_radio_button_selected)(ctx, name, is_selected=True)
-
-
-@step('I should see the radio button "{name}" is not selected')
-def should_see_radio_button_is_not_checked(ctx, name):
-    assert_radio_button_selected(ctx, name, is_selected=False)
-
-
-@step('I wait to see the radio button "{name}" is not selected')
-def wait_to_see_radio_button_is_not_checked(ctx, name):
-    retry(assert_radio_button_selected)(ctx, name, is_selected=False)

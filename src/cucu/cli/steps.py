@@ -3,6 +3,21 @@ import re
 import subprocess
 
 
+from behave.__main__ import main as behave_main
+
+
+def print_human_readable_steps():
+    """
+    print steps in a human readable format
+    """
+    args = ["--format=steps.doc", "--dry-run", "--no-summary", "--no-source"]
+
+    exit_code = behave_main(args)
+
+    if exit_code != 0:
+        raise RuntimeError("listing steps failed, see above for details")
+
+
 def load_cucu_steps():
     """
     loads the cucu steps definition using behave and returns an array of

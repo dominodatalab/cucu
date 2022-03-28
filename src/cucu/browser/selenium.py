@@ -121,6 +121,9 @@ class Selenium(Browser):
     def execute(self, javascript):
         return self.driver.execute_script(javascript)
 
+    def click(self, element):
+        element.click()
+
     def switch_to_default_frame(self):
         self.driver.switch_to.default_content()
 

@@ -34,31 +34,30 @@ Feature: Config
            And I echo "{{BUZZ}}"
       """
       When I run the command "cucu run {CUCU_RESULTS_DIR}/load_nested_cucurc --results={CUCU_RESULTS_DIR}/nested_cucurc_results --env BUZZ=buzz" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-      And I should see "{STDOUT}" matches the following:
-      """
-      Feature: Feature file that prints some variables
+      Then I should see "{EXIT_CODE}" is equal to "0"
+       And I should see "{STDOUT}" matches the following:
+       """
+       Feature: Feature file that prints some variables
 
-        Scenario: This scenario prints a bunch of variables
-      bar
+         Scenario: This scenario prints a bunch of variables
+       bar
 
-          Given I echo "{{FOO}}"      #  in .*
-          # FOO="bar"
-      booze
+           Given I echo "{{FOO}}"      #  in .*
+           # FOO="bar"
+       booze
 
-            And I echo "{{FIZZ}}"     #  in .*
-            # FIZZ="booze"
-      buzz
+             And I echo "{{FIZZ}}"     #  in .*
+             # FIZZ="booze"
+       buzz
 
-            And I echo "{{BUZZ}}"     #  in .*
-            # BUZZ="buzz"
+             And I echo "{{BUZZ}}"     #  in .*
+             # BUZZ="buzz"
 
-      1 feature passed, 0 failed, 0 skipped
-      1 scenario passed, 0 failed, 0 skipped
-      3 steps passed, 0 failed, 0 skipped, 0 undefined
-      [\s\S]*
-      """
-
+       1 feature passed, 0 failed, 0 skipped
+       1 scenario passed, 0 failed, 0 skipped
+       3 steps passed, 0 failed, 0 skipped, 0 undefined
+       [\s\S]*
+       """
 
   Scenario: User gets an appropriate error when cuucrc has invalid syntax
     Given I create a file at "{CUCU_RESULTS_DIR}/load_bad_cucurc/environment.py" with the following:

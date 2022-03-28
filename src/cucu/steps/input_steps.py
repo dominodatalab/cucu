@@ -1,6 +1,6 @@
 import humanize
 
-from cucu import fuzzy, retry, step
+from cucu import helpers, fuzzy, retry, step
 
 # XXX: this would have to be generalized to other browser abstraactions
 from selenium.webdriver.common.keys import Keys
@@ -85,6 +85,9 @@ def assert_input_value(ctx, name, value, index=0):
         raise RuntimeError(f'the {prefix}input "{name}" has value "{actual}"')
 
 
+helpers.define_should_see_thing_with_name_steps("input", find_input)
+
+
 @step('I write "{value}" into the input "{name}"')
 def writes_into_input(ctx, value, name):
     find_n_write(ctx, name, value)
@@ -105,11 +108,6 @@ def wait_up_to_write_into_input(ctx, seconds, value, name):
 @step('I send the "{key}" key to the input "{name}"')
 def send_keys_to_input(ctx, key, name):
     find_n_write(ctx, name, Keys.__dict__[key.upper()])
-
-
-@step('I wait to see the input "{name}"')
-def wait_to_see_the_input(ctx, name):
-    find_input(ctx, name)
 
 
 @step('I should see "{value}" in the input "{name}"')
