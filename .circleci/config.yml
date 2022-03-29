@@ -21,6 +21,9 @@ jobs:
           name: lint the source code
           command: poetry run flake8 src tests *.py
 
+      - run:
+          name: lint the feature files
+          command: poetry run cucu lint features data/features
 
   test:
     docker:
