@@ -8,22 +8,24 @@ from cucu import config, logger
 
 def run_command(command, stdout_var=None, stderr_var=None, exit_code_var=None):
     args = shlex.split(command)
-    process = subprocess.run(args, capture_output=True)
+    capture_output = stdout_var != None and stderr_var != None
+    process = subprocess.run(args, capture_output=capture_output)
 
     if exit_code_var:
         config.CONFIG[exit_code_var] = str(process.returncode)
 
-    stdout = process.stdout.decode("utf8")
-    stderr = process.stderr.decode("utf8")
+    if capture_output:
+        stdout = process.stdout.decode("utf8")
+        stderr = process.stderr.decode("utf8")
 
-    if stdout_var:
-        config.CONFIG[stdout_var] = stdout
+        logger.debug(f"STDOUT:\n{stdout}\n")
+        logger.debug(f"STDERR:\n{stderr}\n")
 
-    if stderr_var:
-        config.CONFIG[stderr_var] = stderr
+        if stdout_var:
+            config.CONFIG[stdout_var] = stdout
 
-    logger.debug(f"STDOUT:\n{stdout}\n")
-    logger.debug(f"STDERR:\n{stderr}\n")
+        if stderr_var:
+            config.CONFIG[stderr_var] = stderr
 
 
 def run_script(script, stdout_var=None, stderr_var=None, exit_code_var=None):
