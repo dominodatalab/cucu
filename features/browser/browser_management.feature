@@ -11,6 +11,17 @@ Feature: Browser management
      When I close the current browser
      Then I should see the browser title is "Buttons!"
 
+  Scenario: User can reuse the same open browser and go back in the history
+    Given I start a webserver on port "40000" at directory "data/www"
+     When I open a browser at the url "http://{HOST_ADDRESS}:40000/buttons.html"
+     Then I should see the browser title is "Buttons!"
+     When I open a browser at the url "http://{HOST_ADDRESS}:40000/inputs.html"
+     Then I should see the browser title is "Inputs!"
+     When I go back on the browser
+     Then I should see the browser title is "Buttons!"
+     When I refresh the browser
+     Then I should see the browser title is "Buttons!"
+
   Scenario: User can open multiple browsers and switch between them
     Given I start a webserver on port "40000" at directory "data/www"
      When I open a browser at the url "http://{HOST_ADDRESS}:40000/buttons.html"
