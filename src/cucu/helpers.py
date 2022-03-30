@@ -213,24 +213,24 @@ def define_action_on_thing_with_name_steps(
     @step(
         f'I wait up to "{{seconds}}" seconds to {action} the {thing} "{{name}}"'
     )
-    def wait_up_to_seconds_to_action_the(ctx, name):
+    def wait_up_to_seconds_to_action_the(ctx, seconds, name):
         seconds = float(seconds)
         retry(action_it, wait_up_to_s=seconds)(ctx, thing, name)
 
     if with_nth:
 
         @step(f'I {action} the "{{nth:nth}}" {thing} "{{name}}"')
-        def action_the(ctx, nth, name):
+        def action_the_nth(ctx, nth, name):
             action_it(ctx, thing, name, index=nth)
 
         @step(f'I wait to {action} the "{{nth:nth}}" {thing} "{{name}}"')
-        def action_the(ctx, nth, name):
+        def action_the_nth(ctx, nth, name):
             retry(action_it)(ctx, thing, name, index=nth)
 
         @step(
             f'I wait up to "{{seconds}}" seconds to {action} the "{{nth:nth}}" {thing} "{{name}}"'
         )
-        def action_the(ctx, seconds, nth, name):
+        def action_the_nth(ctx, seconds, nth, name):
             seconds = float(seconds)
             retry(action_it, wait_up_to_s=seconds)(ctx, thing, name, index=nth)
 
