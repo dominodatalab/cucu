@@ -180,7 +180,11 @@ class CucuFormatter(Formatter):
             )
         elif step.status == Status.skipped:
             text = self.colorize(
-                f"{indent}{prefix}{keyword} {step.name}", "cyan"
+                f"{indent}{prefix}{keyword} {step.name}\n", "cyan"
+            )
+        elif step.status == Status.untested:
+            text = self.colorize(
+                f"{indent}{prefix}{keyword} {step.name}\n", "cyan"
             )
 
         if self.monochrome:

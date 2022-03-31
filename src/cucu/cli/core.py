@@ -60,12 +60,6 @@ def main(debug, logging_level):
     help="set environment variable which can be referenced with",
 )
 @click.option(
-    "-f",
-    "--format",
-    default="human",
-    help="set output step formatter to human or json, default: human",
-)
-@click.option(
     "-g",
     "--generate-report/--no-generate-report",
     default=False,
@@ -113,7 +107,6 @@ def run(
     color_output,
     dry_run,
     env,
-    format,
     generate_report,
     fail_fast,
     headless,
@@ -165,12 +158,6 @@ def run(
     if selenium_remote_url is not None:
         CONFIG["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
 
-    if format == "human":
-        formatter = "cucu.formatter.cucu:CucuFormatter"
-
-    elif format == "json":
-        formatter = "cucu.formatter.json:CucuJSONFormatter"
-
     args = [
         # don't run disabled tests
         "--tags",
@@ -184,8 +171,7 @@ def run(
         args += [
             "--dry-run",
             # console formater
-            "--format",
-            formatter,
+            "--format=cucu.formatter.cucu:CucuFormatter",
         ]
 
     else:
@@ -196,13 +182,10 @@ def run(
             # generate a JSON file containing the exact details of the whole run
             "--format=cucu.formatter.json:CucuJSONFormatter",
             f"--outfile={results}/run.json",
-            # console formater
-            f"--format={formatter}",
+            # console formatter
+            "--format=cucu.formatter.cucu:CucuFormatter",
             f"--logging-level={CONFIG['CUCU_LOGGING_LEVEL'].upper()}",
         ]
-
-    if format == "json":
-        args.append("--no-summary")
 
     for tag in tags:
         args.append("--tags")

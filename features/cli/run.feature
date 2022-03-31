@@ -18,6 +18,24 @@ Feature: Run
       \d+.\d+.\d+
       """
 
+  Scenario: User can --dry-run a passing scenario
+    Given I run the command "cucu run data/features/feature_with_passing_scenario.feature --dry-run --results {CUCU_RESULTS_DIR}/passing_feature_dry_run_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "0"
+      And I should not see the directory at "{CUCU_RESULTS_DIR}/passing_feature_dry_run_results"
+      And I should see "{STDOUT}" matches the following
+      """
+      Feature: Feature with passing scenario
+
+        Scenario: Just a scenario that passes
+          Given I echo "nothing to see here"
+
+      0 features passed, 0 failed, 0 skipped, 1 untested
+      0 scenarios passed, 0 failed, 0 skipped, 1 untested
+      0 steps passed, 0 failed, 0 skipped, 0 undefined, 1 untested
+      [\s\S]*
+      """
+      And I should see "{STDERR}" is empty
+
   Scenario: User gets expected output when running steps with substeps
     Given I run the command "cucu run data/features/scenario_with_substeps.feature --results {CUCU_RESULTS_DIR}/substeps-results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
