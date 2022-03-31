@@ -1,6 +1,7 @@
 import humanize
 
 from cucu import helpers, fuzzy, retry, step
+from selenium.webdriver.common.keys import Keys
 
 # XXX: this would have to be generalized to other browser abstraactions
 from selenium.webdriver.common.keys import Keys
@@ -72,6 +73,9 @@ def find_n_clear(ctx, name, index=0):
     """
     input_ = find_input(ctx, name, index=index)
     input_.clear()
+    # .clear() doesn't do it 100% of the time, so take out insurance
+    while input_.get_attribute("value") != "":
+        input_.send_keys(Keys.BACKSPACE)
 
 
 def assert_input_value(ctx, name, value, index=0):
