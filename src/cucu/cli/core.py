@@ -88,11 +88,6 @@ def main(debug, logging_level):
     " their value all of the output produced by cucu",
 )
 @click.option(
-    "--source/--no-source",
-    default=False,
-    help="show the source for each step definition in the logs",
-)
-@click.option(
     "-t",
     "--tags",
     help="Only execute features or scenarios with tags matching "
@@ -116,7 +111,6 @@ def run(
     report,
     results,
     secrets,
-    source,
     tags,
     selenium_remote_url,
 ):
@@ -190,11 +184,6 @@ def run(
     for tag in tags:
         args.append("--tags")
         args.append(tag)
-
-    if source:
-        args += ["--show-source"]
-    else:
-        args += ["--no-source"]
 
     if name is not None:
         args += ["--name", name]
