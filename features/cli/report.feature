@@ -72,6 +72,10 @@ Feature: Report
       And I click the button "Feature: Feature with mixed results"
       And I click the button "Scenario: Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
+     When I click the button "Top"
+      And I click the button "Feature: Feature with mixed results"
+      And I click the button "Scenario: Scenario that has an undefined step"
+     Then I should see the button "Given I attempt to use an undefined step"
 
   @disabled @needs-work
   Scenario: User can run a scenario with console logs and see those logs linked in the report

@@ -40,8 +40,8 @@ Feature: Run
         data/features/feature_with_mixed_results.feature:6  Scenario that fails
 
       0 features passed, 1 failed, 0 skipped
-      1 scenario passed, 1 failed, 0 skipped, 2 untested
-      1 step passed, 1 failed, 1 skipped, 0 undefined, 2 untested
+      1 scenario passed, 1 failed, 0 skipped, 3 untested
+      1 step passed, 1 failed, 1 skipped, 0 undefined, 3 untested
       [\s\S]*
       """
 
@@ -59,7 +59,7 @@ Feature: Run
           Given I echo "passing"     #  .*
       [\s]*
       1 feature passed, 0 failed, 0 skipped
-      1 scenario passed, 0 failed, 3 skipped
-      1 step passed, 0 failed, 4 skipped, 0 undefined
+      1 scenario passed, 0 failed, 4 skipped
+      1 step passed, 0 failed, 5 skipped, 0 undefined
       [\s\S]*
       """

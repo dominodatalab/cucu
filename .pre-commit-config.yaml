@@ -1,4 +1,4 @@
-exclude: '^features/cli/lint.feature'
+exclude: (^features/cli/lint.feature|^data/features/feature_with_mixed_results.feature)
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0
