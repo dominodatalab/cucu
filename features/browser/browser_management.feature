@@ -50,3 +50,35 @@ Feature: Browser management
      Then I should see the browser title is "Buttons!"
      When I close the current browser tab
      Then I should see the browser title is "Links!"
+
+  Scenario: User gets appropriate error when checking browser title
+    Given I start a webserver on port "40000" at directory "data/www"
+     When I open a browser at the url "http://{HOST_ADDRESS}:40000/links.html"
+     Then I expect the following step to fail with "unexpected browser title, got "Links!""
+     """
+     Then I should see the browser title is "foo"
+     """
+
+  Scenario: User gets an error when switching to an inexistent browser tab
+    Given I start a webserver on port "40000" at directory "data/www"
+     When I open a browser at the url "http://{HOST_ADDRESS}:40000/links.html"
+     Then I expect the following step to fail with "no next browser tab available"
+      """
+      When I switch to the next browser tab
+      """
+      And I expect the following step to fail with "no previous browser tab available"
+      """
+      When I switch to the previous browser tab
+      """
+
+  Scenario: User gets an error when switching to an inexistent browser window
+    Given I start a webserver on port "40000" at directory "data/www"
+     When I open a browser at the url "http://{HOST_ADDRESS}:40000/links.html"
+     Then I expect the following step to fail with "no next browser window available"
+      """
+      When I switch to the next browser
+      """
+      And I expect the following step to fail with "no previous browser window available"
+      """
+      When I switch to the previous browser
+      """
