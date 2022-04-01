@@ -18,7 +18,7 @@
         {% for scenario in scenarios %}
             <!--- ignore Backgrounds for the time being -->
             {% if scenario['keyword'] != 'Background' %}
-            <tr role="link" style="cursor: pointer;" onclick="window.location='{{ escape(feature['name']) }}/{{ escape(scenario['name']) }}/index.html';" >
+            <tr role="link" style="cursor: pointer;" onclick="window.location='{{ urlquotes(escape(feature['name'])) }}/{{ urlquotes(escape(scenario['name'])) }}/index.html';" >
                 <td><pre style="display: inline; color: green">  Scenario: </pre><pre style="display: inline; color: grey">{{ escape(scenario['name']) }}</pre></td>
                 {% if scenario['status'] == 'passed' %}
                     <td><pre style="display: inline; color: green">{{ scenario['status'] }}</pre></td>
