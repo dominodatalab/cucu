@@ -48,7 +48,7 @@ coverage: src/* tests/*
 	poetry run coverage run -m pytest
 	poetry run coverage combine .coverage.*
 	poetry run coverage html --omit='*virtualenvs*'
-	poetry run coverage report --omit='*virtualenvs*' --fail-under=75
+	poetry run coverage report --omit='*virtualenvs*' --fail-under=90
 	echo "open HTML coverage report at htmlcov/index.html"
 
 %-setup:
