@@ -231,6 +231,7 @@ def report(filepath, output):
 
 
 @main.command()
+@click.argument("filepath", default="features")
 @click.option(
     "-f",
     "--format",
@@ -239,14 +240,14 @@ def report(filepath, output):
     "default: human. PRO TIP: `brew install fzf` and then "
     "`cucu steps | fzf` and easily find the step you need.",
 )
-def steps(format):
+def steps(filepath, format):
     """
     print available cucu steps
     """
     if format == "human":
-        print_human_readable_steps()
+        print_human_readable_steps(filepath=filepath)
     elif format == "json":
-        print_json_steps()
+        print_json_steps(filepath=filepath)
     else:
         raise RuntimeError(f'unsupported format "{format}"')
 
@@ -284,7 +285,7 @@ def lint(filepath, fix):
                     suffix = ""
 
                     if fix:
-                        if "fixed" in violation:
+                        if violation["fixed"]:
                             suffix = " ✓"
                             violations_fixed += 1
                         else:
@@ -294,22 +295,14 @@ def lint(filepath, fix):
                     line_number = location["line"] + 1
                     print(f"{filepath}:{line_number}: {type} {message}{suffix}")
 
-        and_message = ""
-
     if violations_found != 0:
-        if fix:
-            if violations_found == violations_fixed:
-                and_message = " and fixed"
-            else:
-                and_message = " and not all were fixed"
+        if violations_found == violations_fixed:
+            print("\nlinting errors found and fixed, see above for details")
 
-        print(
-            f"\nlinting errors were found{and_message}, see above for details"
-        )
-
-        if not fix:
-            print("NOTE: to try and fix violations automatically use --fix")
-            raise ClickException("see above for details")
+        else:
+            raise ClickException(
+                "linting errors found, but not fixed, see above for details"
+            )
 
 
 @main.command()
