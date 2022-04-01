@@ -17,6 +17,15 @@ Feature: Duplicate Buttons
      When I click the "4th" button "button"
      Then I should see "4th button" in the input "value:"
 
+  Scenario: User can verify visibility of an nth button
+     When I open a browser at the url "http://{HOST_ADDRESS}:40000/duplicate_buttons.html"
+      And I should see the "1st" button "button"
+      And I should not see the "1st" button "inexistent"
+     Then I expect the following step to fail with "unable to find the "3rd" button "inexistent""
+      """
+      Then I should see the "3rd" button "inexistent"
+      """
+
   Scenario: User can wait to click nth button
      When I open a browser at the url "http://{HOST_ADDRESS}:40000/duplicate_buttons.html?delay_page_load_ms=5000"
      Then I wait to click the "2nd" button "button"
