@@ -102,14 +102,6 @@ class Selenium(Browser):
     def title(self):
         return self.driver.title
 
-    def xpath_find_elements(self, xpath):
-        elements = self.driver.find_elements(By.XPATH, xpath)
-
-        def visible(element):
-            return element.is_displayed()
-
-        return list(filter(visible, elements))
-
     def css_find_elements(self, selector):
         elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
 

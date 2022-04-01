@@ -40,8 +40,13 @@ Feature: Browser management
      When I click the button "buttons! in a new tab"
       And I switch to the next browser tab
      Then I should see the browser title is "Buttons!"
-     When I close the current browser tab
+     When I switch to the previous browser tab
      Then I should see the browser title is "Links!"
      When I click the button "dropdowns! in a new tab"
       And I switch to the next browser tab
+      And I switch to the next browser tab
      Then I should see the browser title is "Dropdowns!"
+     When I close the current browser tab
+     Then I should see the browser title is "Buttons!"
+     When I close the current browser tab
+     Then I should see the browser title is "Links!"
