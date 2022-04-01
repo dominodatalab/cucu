@@ -67,7 +67,7 @@ Feature: Buttons
 
   Scenario: User can wait the CUCU_STEP_WAIT_TIMEOUT_S to see a button
     Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5000"
-    Given I open a browser at the url "http://{HOST_ADDRESS}:40000/buttons.html?delay_page_load_ms={CUCU_STEP_WAIT_TIMEOUT_S}"
+      And I open a browser at the url "http://{HOST_ADDRESS}:40000/buttons.html?delay_page_load_ms={CUCU_STEP_WAIT_TIMEOUT_S}"
      When I wait to see the button "button"
      Then I should see the previous step took more than "4" seconds
 
