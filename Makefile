@@ -27,18 +27,6 @@ dist: build
 	pip install dist/cucu-*.tar.gz
 
 
-test: src/* tests/*
-	poetry run pytest
-	export CUCU_KEEP_BROWSER_ALIVE=true
-	poetry run cucu run features
-
-lint: src/* tests/* *.py
-	poetry run flake8 src tests *.py
-	poetry run cucu lint features data/features
-
-nox: src/* tests/*
-	poetry run nox
-
 coverage: src/* tests/*
 	rm -fr .coverage .coverage.*
 	# this makes it so all of the underlying `cucu` command calls are run
@@ -50,14 +38,3 @@ coverage: src/* tests/*
 	poetry run coverage html --omit='*virtualenvs*'
 	poetry run coverage report --omit='*virtualenvs*' --fail-under=90
 	echo "open HTML coverage report at htmlcov/index.html"
-
-%-setup:
-	terraform destroy -auto-approve terraform/docker/$(@:%-setup=selenium-%)
-	terraform apply -auto-approve terraform/docker/$(@:%-setup=selenium-%)
-	# overrides the cucurc.yml entries so that subsequent `cucu run ...` commands
-	# are running against the existing local setup
-	echo 'CUCU_SELENIUM_REMOTE_URL: http://localhost:4444' > cucurc.yml
-
-%-destroy:
-	terraform destroy -auto-approve terraform/docker/$(@:%-destroy=selenium-%)
-	rm cucurc.yml

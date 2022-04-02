@@ -6,24 +6,26 @@ orbs:
   browser-tools: circleci/browser-tools@1.2.4
 
 jobs:
-  lint:
+  pre-commit:
     docker:
-      - image: cimg/python:3.9.7-browsers
-
+      - image: cimg/python:3.9.7
     steps:
       - checkout
+      - run:
+          name: Install Dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip
+            pip install --upgrade setuptools
+            pip install pre-commit
+            pre-commit install-hooks
 
       - run:
-          name: install cucu dependencies
-          command: pip install poetry && poetry install
-
-      - run:
-          name: lint the source code
-          command: poetry run flake8 src tests *.py
-
-      - run:
-          name: lint the feature files
-          command: poetry run cucu lint features data/features
+          name: Run pre-commit validations
+          command: |
+            . venv/bin/activate
+            pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
 
   test:
     docker:
@@ -88,5 +90,5 @@ jobs:
 workflows:
   build-n-test:
     jobs:
-      - lint
+      - pre-commit
       - test
