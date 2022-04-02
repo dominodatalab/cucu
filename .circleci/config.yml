@@ -76,8 +76,16 @@ jobs:
           command: poetry run coverage run -m pytest  --junit-xml=results/unit-tests.xml
           when: always
 
+      - run:
+          name: move top level test results
+          # avoids picking up other test results files from sub directories that
+          # are from testing `cucu run` and producing irrelevant test results
+          command: |
+            mkdir -p test_results
+            cp results/*.xml test_results
+
       - store_test_results:
-          path: results/
+          path: test_results/
 
       - run:
           name: combine coverage reports
