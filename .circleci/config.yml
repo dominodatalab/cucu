@@ -15,10 +15,7 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
             pip install --upgrade pip
-            pip install --upgrade setuptools
             pip install pre-commit
             pre-commit install-hooks
 
@@ -37,7 +34,6 @@ jobs:
       - run:
           name: run pre-commit validations
           command: |
-            . venv/bin/activate
             pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
 
   test:
