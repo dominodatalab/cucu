@@ -74,6 +74,8 @@
                     <pre style="display: inline; color: red">{{ step_keyword }}</pre><pre style="color: red; display: inline"> {{ escape(step['name']) }}</pre>
                 {% elif step['result']['status'] == 'skipped' %}
                     <pre style="display: inline; color: blue">{{ step_keyword }}</pre><pre style="color: blue; display: inline"> {{ escape(step['name']) }}</pre>
+                {% elif step['result']['status'] == 'undefined' %}
+                    <pre style="display: inline; color: orange">{{ step_keyword }}</pre><pre style="color: orange; display: inline"> {{ escape(step['name']) }}</pre>
                 {% endif %}
                 </td>
                 <td><pre style="display: inline; color: gray;"># {{ step_duration }}s</pre></td>

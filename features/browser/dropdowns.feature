@@ -2,7 +2,7 @@ Feature: Dropdowns
   As a developer I want to make sure the test writer can interact with different
   dropdowns
 
-  Background: HTML page with buttons
+  Background: HTML page with dropdowns
     Given I start a webserver on port "40000" at directory "data/www"
       And I open a browser at the url "http://{HOST_ADDRESS}:40000/dropdowns.html"
 

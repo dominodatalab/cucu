@@ -5,6 +5,7 @@ import re
 import yaml
 
 from cucu import logger
+from cucu.cli.steps import load_cucu_steps
 
 
 def load_lint_rules(filepath):
@@ -26,7 +27,9 @@ def load_lint_rules(filepath):
 
     for lint_rule_filepath in lint_rule_filepaths:
         logger.debug(f"loading lint rules from {lint_rule_filepath}")
-        rules = yaml.safe_load(open(lint_rule_filepath, "r").read())
+
+        with open(lint_rule_filepath, "r", encoding="utf8") as _input:
+            rules = yaml.safe_load(_input.read())
 
         for (rule_name, rule) in rules.items():
             # XXX: check for duplicate rule names
@@ -35,7 +38,7 @@ def load_lint_rules(filepath):
     return all_rules
 
 
-def lint_line(rules, line_number, lines, filepath):
+def lint_line(rules, steps, line_number, lines, filepath):
     """ """
     if line_number >= 1:
         previous_line = lines[line_number - 1]
@@ -107,6 +110,24 @@ def lint_line(rules, line_number, lines, filepath):
                 }
             )
 
+    # find any undefined steps and mark them as an unfixable violation
+    current_line = current_line.strip()
+    for step_name in steps:
+        # step with no location/type/etc is an undefined step
+        if steps[step_name] is None:
+            if current_line.find(step_name) != -1:
+                violations.append(
+                    {
+                        "location": {
+                            "filepath": os.path.relpath(filepath),
+                            "line": line_number,
+                        },
+                        "type": "error",
+                        "message": f'undefined step "{step_name}"',
+                        "fix": None,
+                    }
+                )
+
     return violations
 
 
@@ -123,22 +144,26 @@ def fix(violations):
     lines = open(filepath, "r").read().split("\n")
 
     for violation in violations:
-        line_number = violation["location"]["line"]
-        line_to_fix = lines[line_number]
-
-        if "delete" in violation["fix"]:
-            # store the deletions to do at the end
-            deletions.append(violation)
-
-        elif "match" in violation["fix"]:
-            match = violation["fix"]["match"]
-            replace = violation["fix"]["replace"]
-            fixed_line = re.sub(match, replace, line_to_fix)
-            lines[line_number] = fixed_line
-            violation["fixed"] = True
+        if violation["fix"] is None:
+            violation["fixed"] = False
 
         else:
-            raise RuntimeError(f"unknown fix type in {violation}")
+            line_number = violation["location"]["line"]
+            line_to_fix = lines[line_number]
+
+            if "delete" in violation["fix"]:
+                # store the deletions to do at the end
+                deletions.append(violation)
+
+            elif "match" in violation["fix"]:
+                match = violation["fix"]["match"]
+                replace = violation["fix"]["replace"]
+                fixed_line = re.sub(match, replace, line_to_fix)
+                lines[line_number] = fixed_line
+                violation["fixed"] = True
+
+            else:
+                raise RuntimeError(f"unknown fix type in {violation}")
 
     # sort the deletions from bottom to the top of the file and then perform
     # the deletions
@@ -176,6 +201,7 @@ def lint(filepath):
     """
     # load the base lint rules
     rules = load_builtin_lint_rules()
+    steps = load_cucu_steps(filepath=filepath)
 
     filepath = os.path.abspath(filepath)
 
@@ -200,7 +226,7 @@ def lint(filepath):
 
             if not in_docstring:
                 for violation in lint_line(
-                    rules, line_number, lines, feature_filepath
+                    rules, steps, line_number, lines, feature_filepath
                 ):
                     violations.append(violation)
 
