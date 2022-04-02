@@ -14,7 +14,7 @@ repos:
     hooks:
     - id: flake8
 -   repo: https://github.com/ambv/black
-    rev: 22.1.0
+    rev: 22.3.0
     hooks:
       - id: black
         name: format python code using black
