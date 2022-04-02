@@ -9,10 +9,11 @@ jobs:
   pre-commit:
     docker:
       - image: cimg/python:3.9.7
+
     steps:
       - checkout
       - run:
-          name: Install Dependencies
+          name: install dependencies
           command: |
             python3 -m venv venv
             . venv/bin/activate
@@ -22,7 +23,7 @@ jobs:
             pre-commit install-hooks
 
       - run:
-          name: Run pre-commit validations
+          name: run pre-commit validations
           command: |
             . venv/bin/activate
             pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
