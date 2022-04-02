@@ -14,3 +14,16 @@ Feature: Radio Buttons
      Then I should see the radio button "cat" is not selected
       And I should see the radio button "dog" is selected
       And I should see the radio button "rat" is not selected
+
+  Scenario: User can select a radio button and account for it being selected
+    Given I should see the radio button "cat" is not selected
+      And I should see the radio button "dog" is not selected
+      And I should see the radio button "rat" is not selected
+     When I select the radio button "dog" if it is not selected
+     Then I should see the radio button "cat" is not selected
+      And I should see the radio button "dog" is selected
+      And I should see the radio button "rat" is not selected
+     When I select the radio button "dog" if it is not selected
+     Then I should see the radio button "cat" is not selected
+      And I should see the radio button "dog" is selected
+      And I should see the radio button "rat" is not selected

@@ -110,7 +110,7 @@ def should_see_browser_title(ctx, title):
     current_title = ctx.browser.title()
 
     if current_title != title:
-        raise RuntimeError(f"expected title: {title}, got {current_title}")
+        raise RuntimeError(f'unexpected browser title, got "{current_title}"')
 
 
 @step("I close the current browser")
@@ -148,7 +148,7 @@ def switch_to_next_browser(ctx):
     if browser_index < len(ctx.browsers) - 1:
         ctx.browser = ctx.browsers[browser_index + 1]
     else:
-        raise RuntimeError("no previous browser window available")
+        raise RuntimeError("no next browser window available")
 
 
 @step("I close the current browser tab")

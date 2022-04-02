@@ -26,7 +26,6 @@ class CucuFormatter(Formatter):
         self.match_step_index = 0
         self.show_timings = config.show_timings
         self.indent_size = self.DEFAULT_INDENT_SIZE
-        self.current_rule = None
         # -- ENSURE: Output stream is open.
         self.stream = self.open()
         self.printer = ModelPrinter(self.stream)
@@ -44,9 +43,6 @@ class CucuFormatter(Formatter):
             indentation = make_indentation(3 * self.indent_size + offset)
             self._multiline_indentation = indentation
 
-        if self.current_rule:
-            indent_extra = make_indentation(self.indent_size)
-            return self._multiline_indentation + indent_extra
         return self._multiline_indentation
 
     def write_tags(self, tags, indent=None):
@@ -55,24 +51,11 @@ class CucuFormatter(Formatter):
             text = " @".join(tags)
             self.stream.write(self.colorize(f"{indent}@{text}\n", "cyan"))
 
-    def write_entity(self, entity, indent="", has_tags=True):
-        if has_tags:
-            self.write_tags(entity.tags, indent)
-        text = f"{indent}{entity.keyword}: {entity.name}\n"
-        self.stream.write(text)
-
     # -- IMPLEMENT-INTERFACE FOR: Formatter
     def feature(self, feature):
-        self.current_rule = None
         self.write_tags(feature.tags)
         text = f'{self.colorize(feature.keyword, "magenta")}: {feature.name}\n'
         self.stream.write(text)
-
-    def rule(self, rule):
-        self.current_rule = rule
-        indent = make_indentation(self.indent_size)
-        self.stream.write("\n")
-        self.write_entity(rule, indent)
 
     def colorize(self, text, color):
         if self.monochrome:
@@ -81,24 +64,17 @@ class CucuFormatter(Formatter):
             return colors[color] + text + escapes["reset"]
 
     def background(self, background):
-        indent_extra = 0
-        if self.current_rule:
-            indent_extra = self.indent_size
-
         if not self.monochrome:
-            indent = make_indentation(self.indent_size + indent_extra)
+            indent = make_indentation(self.indent_size)
             keyword = self.colorize(background.keyword, "magenta")
             text = f"\n{indent}{keyword}: {background.name}\n"
             self.stream.write(text)
 
     def scenario(self, scenario):
         self.current_scenario = scenario
-        indent_extra = 0
-        if self.current_rule:
-            indent_extra = self.indent_size
 
         self.stream.write("\n")
-        indent = make_indentation(self.indent_size + indent_extra)
+        indent = make_indentation(self.indent_size)
         text = "%s%s: %s\n" % (
             indent,
             self.colorize(scenario.keyword, "magenta"),
@@ -126,11 +102,7 @@ class CucuFormatter(Formatter):
         step = self.steps[self.match_step_index]
         self.match_step_index += 1
 
-        indent_extra = 0
-        if self.current_rule:
-            indent_extra = self.indent_size
-
-        indent = make_indentation(2 * self.indent_size + indent_extra)
+        indent = make_indentation(2 * self.indent_size)
         keyword = step.keyword.rjust(5)
 
         prefix = ""
@@ -149,11 +121,7 @@ class CucuFormatter(Formatter):
         return max(line_lengths) + 4
 
     def result(self, step):
-        indent_extra = 0
-        if self.current_rule:
-            indent_extra = self.indent_size
-
-        indent = make_indentation(2 * self.indent_size + indent_extra)
+        indent = make_indentation(2 * self.indent_size)
         keyword = step.keyword.rjust(5)
 
         if (
@@ -180,7 +148,11 @@ class CucuFormatter(Formatter):
             )
         elif step.status == Status.skipped:
             text = self.colorize(
-                f"{indent}{prefix}{keyword} {step.name}", "cyan"
+                f"{indent}{prefix}{keyword} {step.name}\n", "cyan"
+            )
+        elif step.status == Status.untested:
+            text = self.colorize(
+                f"{indent}{prefix}{keyword} {step.name}\n", "cyan"
             )
 
         if self.monochrome:
@@ -229,6 +201,7 @@ class CucuFormatter(Formatter):
 
         if step.text:
             self.doc_string(step.text)
+
         if step.table:
             self.table(step.table)
 

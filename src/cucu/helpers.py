@@ -62,6 +62,10 @@ class step(object):
         return wrapper
 
 
+def nth_to_ordinal(index):
+    return "" if index == 0 else f'"{humanize.ordinal(index + 1)}" '
+
+
 def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
     """
     defines steps with with the following signatures:
@@ -100,14 +104,14 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
     """
 
     def should_see(ctx, thing, name, index=0):
-        prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+        prefix = nth_to_ordinal(index)
         element = find_func(ctx, name, index=index)
 
         if element is None:
             raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
 
     def should_not_see(ctx, thing, name, index=0):
-        prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+        prefix = nth_to_ordinal(index)
         element = find_func(ctx, name, index=index)
 
         if element is not None:
@@ -194,7 +198,7 @@ def define_action_on_thing_with_name_steps(
     """
 
     def action_it(ctx, thing, name, index=0):
-        prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+        prefix = nth_to_ordinal(index)
         element = find_func(ctx, name, index=index)
 
         if element is None:
@@ -213,24 +217,24 @@ def define_action_on_thing_with_name_steps(
     @step(
         f'I wait up to "{{seconds}}" seconds to {action} the {thing} "{{name}}"'
     )
-    def wait_up_to_seconds_to_action_the(ctx, name):
+    def wait_up_to_seconds_to_action_the(ctx, seconds, name):
         seconds = float(seconds)
         retry(action_it, wait_up_to_s=seconds)(ctx, thing, name)
 
     if with_nth:
 
         @step(f'I {action} the "{{nth:nth}}" {thing} "{{name}}"')
-        def action_the(ctx, nth, name):
+        def action_the_nth(ctx, nth, name):
             action_it(ctx, thing, name, index=nth)
 
         @step(f'I wait to {action} the "{{nth:nth}}" {thing} "{{name}}"')
-        def action_the(ctx, nth, name):
+        def action_the_nth(ctx, nth, name):
             retry(action_it)(ctx, thing, name, index=nth)
 
         @step(
             f'I wait up to "{{seconds}}" seconds to {action} the "{{nth:nth}}" {thing} "{{name}}"'
         )
-        def action_the(ctx, seconds, nth, name):
+        def action_the_nth(ctx, seconds, nth, name):
             seconds = float(seconds)
             retry(action_it, wait_up_to_s=seconds)(ctx, thing, name, index=nth)
 
@@ -281,7 +285,7 @@ def define_thing_with_name_in_state_steps(
     """
 
     def should_see_thing_in_state(ctx, thing, name, index=0):
-        prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+        prefix = nth_to_ordinal(index)
         element = find_func(ctx, name, index=index)
 
         if element is None:

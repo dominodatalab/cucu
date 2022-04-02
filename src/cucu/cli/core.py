@@ -60,12 +60,6 @@ def main(debug, logging_level):
     help="set environment variable which can be referenced with",
 )
 @click.option(
-    "-f",
-    "--format",
-    default="human",
-    help="set output step formatter to human or json, default: human",
-)
-@click.option(
     "-g",
     "--generate-report/--no-generate-report",
     default=False,
@@ -94,11 +88,6 @@ def main(debug, logging_level):
     " their value all of the output produced by cucu",
 )
 @click.option(
-    "--source/--no-source",
-    default=False,
-    help="show the source for each step definition in the logs",
-)
-@click.option(
     "-t",
     "--tags",
     help="Only execute features or scenarios with tags matching "
@@ -113,7 +102,6 @@ def run(
     color_output,
     dry_run,
     env,
-    format,
     generate_report,
     fail_fast,
     headless,
@@ -123,7 +111,6 @@ def run(
     report,
     results,
     secrets,
-    source,
     tags,
     selenium_remote_url,
 ):
@@ -165,12 +152,6 @@ def run(
     if selenium_remote_url is not None:
         CONFIG["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
 
-    if format == "human":
-        formatter = "cucu.formatter.cucu:CucuFormatter"
-
-    elif format == "json":
-        formatter = "cucu.formatter.json:CucuJSONFormatter"
-
     args = [
         # don't run disabled tests
         "--tags",
@@ -184,8 +165,7 @@ def run(
         args += [
             "--dry-run",
             # console formater
-            "--format",
-            formatter,
+            "--format=cucu.formatter.cucu:CucuFormatter",
         ]
 
     else:
@@ -196,22 +176,14 @@ def run(
             # generate a JSON file containing the exact details of the whole run
             "--format=cucu.formatter.json:CucuJSONFormatter",
             f"--outfile={results}/run.json",
-            # console formater
-            f"--format={formatter}",
+            # console formatter
+            "--format=cucu.formatter.cucu:CucuFormatter",
             f"--logging-level={CONFIG['CUCU_LOGGING_LEVEL'].upper()}",
         ]
-
-    if format == "json":
-        args.append("--no-summary")
 
     for tag in tags:
         args.append("--tags")
         args.append(tag)
-
-    if source:
-        args += ["--show-source"]
-    else:
-        args += ["--no-source"]
 
     if name is not None:
         args += ["--name", name]
@@ -259,6 +231,7 @@ def report(filepath, output):
 
 
 @main.command()
+@click.argument("filepath", default="features")
 @click.option(
     "-f",
     "--format",
@@ -267,14 +240,14 @@ def report(filepath, output):
     "default: human. PRO TIP: `brew install fzf` and then "
     "`cucu steps | fzf` and easily find the step you need.",
 )
-def steps(format):
+def steps(filepath, format):
     """
     print available cucu steps
     """
     if format == "human":
-        print_human_readable_steps()
+        print_human_readable_steps(filepath=filepath)
     elif format == "json":
-        print_json_steps()
+        print_json_steps(filepath=filepath)
     else:
         raise RuntimeError(f'unsupported format "{format}"')
 
@@ -312,7 +285,7 @@ def lint(filepath, fix):
                     suffix = ""
 
                     if fix:
-                        if "fixed" in violation:
+                        if violation["fixed"]:
                             suffix = " ✓"
                             violations_fixed += 1
                         else:
@@ -322,22 +295,14 @@ def lint(filepath, fix):
                     line_number = location["line"] + 1
                     print(f"{filepath}:{line_number}: {type} {message}{suffix}")
 
-        and_message = ""
-
     if violations_found != 0:
-        if fix:
-            if violations_found == violations_fixed:
-                and_message = " and fixed"
-            else:
-                and_message = " and not all were fixed"
+        if violations_found == violations_fixed:
+            print("\nlinting errors found and fixed, see above for details")
 
-        print(
-            f"\nlinting errors were found{and_message}, see above for details"
-        )
-
-        if not fix:
-            print("NOTE: to try and fix violations automatically use --fix")
-            raise ClickException("see above for details")
+        else:
+            raise ClickException(
+                "linting errors found, but not fixed, see above for details"
+            )
 
 
 @main.command()

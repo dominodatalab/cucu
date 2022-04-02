@@ -1,7 +1,7 @@
 import humanize
 
-from cucu import helpers, fuzzy, retry, step
 from selenium.webdriver.support.ui import Select
+from cucu import helpers, fuzzy, retry, step
 
 
 def find_dropdown(ctx, name, index=0):
@@ -121,32 +121,40 @@ def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
     if dropdown_element.tag_name == "select":
         select_element = Select(dropdown_element)
         selected_option = select_element.first_selected_option
+
+        if selected_option is None:
+            raise RuntimeError(
+                f"unable to find selected option in dropdown {dropdown}"
+            )
+
+        selected_name = selected_option.get_attribute("textContent")
+
+        # XXX: we're doing contains because a lot of our existing dropdowns
+        #      do not use aria-label/aria-describedby to make them accessible
+        #      and easier to find for automation by their name
+        if is_selected:
+            if selected_name.find(option) == -1:
+                raise RuntimeError(f"{option} is not selected")
+        else:
+            if selected_name.find(option) != -1:
+                raise RuntimeError(f"{option} is selected")
+
     else:
         if dropdown_element.get_attribute("aria-expanded") != "true":
             # open the dropdown to see its options
             dropdown_element.click()
 
         selected_option = find_dropdown_option(ctx, option)
+
         # close the dropdown
-        selected_option.click()
+        dropdown_element.click()
 
-    if selected_option is None:
-        raise RuntimeError(
-            f"unable to find selected option in dropdown {dropdown}"
-        )
-
-    selected_name = selected_option.get_attribute("textContent")
-
-    # XXX: we're doing contains because a lot of our existing dropdown/comboboxes
-    #      are messy and do not use things like aria-label/aria-describedby to
-    #      make them accessible and easier to find for automation by their name
-
-    if is_selected:
-        if selected_name.find(option) == -1:
-            raise RuntimeError(f"{option} is not selected")
-    else:
-        if selected_name.find(option) != -1:
-            raise RuntimeError(f"{option} is selected")
+        if is_selected:
+            if selected_option.get_attribute("aria-selected") != "true":
+                raise RuntimeError(f"{option} is not selected")
+        else:
+            if selected_option.get_attribute("aria-selected") == "true":
+                raise RuntimeError(f"{option} is selected")
 
 
 helpers.define_should_see_thing_with_name_steps("dropdown", find_dropdown)

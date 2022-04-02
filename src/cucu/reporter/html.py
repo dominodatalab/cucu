@@ -6,6 +6,7 @@ import urllib
 import json
 
 from xml.sax.saxutils import escape
+from urllib.parse import quote
 
 
 def generate(results, basepath):
@@ -45,7 +46,6 @@ def generate(results, basepath):
 
             step_index = 0
             for step in scenario["steps"]:
-                step["_name"] = escape(step["name"])
                 image_filename = (
                     f"{step_index} - {step['name'].replace('/', '_')}.png"
                 )
@@ -81,7 +81,10 @@ def generate(results, basepath):
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)
 
-    templates.globals.update(escape=escape)
+    templates.globals.update(
+        escape=escape,
+        urlquotes=lambda x: x.replace('"', "%22").replace("'", "%27"),
+    )
 
     index_template = templates.get_template("index.html")
     rendered_index_html = index_template.render(

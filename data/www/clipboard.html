@@ -1,0 +1,38 @@
+<html>
+  <head>
+    <title>Clipboard!</title>
+    <script>
+    function copyToClipboard() {
+        var copyText = document.getElementById("input-to-copy");
+        copyText.select();
+
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(copyText.value).then(function() {
+                var button = document.getElementById("copy-to-clipboard-button");
+                button.innerText = "Copied!";
+                setTimeout(function() {
+                    button.innerText = "Copy to Clipboard";
+                }, 2000);
+            }, function() {
+                console.error("unable to copy to clipboard");
+            });
+        } else {
+            if (document.execCommand("copy")) {
+                var button = document.getElementById("copy-to-clipboard-button");
+                button.innerText = "Copied!";
+                setTimeout(function() {
+                    button.innerText = "Copy to Clipboard";
+                }, 2000);
+            } else {
+                console.error("unable to copy to clipboard");
+            }
+        }
+    }
+    </script>
+
+  </head>
+  <body>
+      <input type="text" value="Hello World" id="input-to-copy">
+      <button id="copy-to-clipboard-button" onclick="copyToClipboard()">Copy to Clipboard</button>
+  </body>
+</html>
