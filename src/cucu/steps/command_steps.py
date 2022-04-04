@@ -8,7 +8,7 @@ from cucu import config, logger
 
 def run_command(command, stdout_var=None, stderr_var=None, exit_code_var=None):
     args = shlex.split(command)
-    capture_output = stdout_var != None and stderr_var != None
+    capture_output = stdout_var != None or stderr_var != None
     process = subprocess.run(args, capture_output=capture_output)
 
     if exit_code_var:
