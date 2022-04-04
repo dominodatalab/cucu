@@ -91,7 +91,9 @@ def generate(results, basepath):
         the browser handles those already.
 
         """
-        return string.replace('"', "%22").replace("'", "%27").replace("#", "%23")
+        return (
+            string.replace('"', "%22").replace("'", "%27").replace("#", "%23")
+        )
 
     templates.globals.update(escape=escape, urlencode=urlencode)
 

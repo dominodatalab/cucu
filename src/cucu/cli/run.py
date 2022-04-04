@@ -55,9 +55,10 @@ def behave(
 
     run_json_filename = "run.json"
     if redirect_output:
-        feature_filename = os.path.basename(filepath).replace(".feature", "-run")
+        feature_filename = os.path.basename(filepath).replace(
+            ".feature", "-run"
+        )
         run_json_filename = f"{feature_filename}.json"
-
 
     if dry_run:
         args += [
