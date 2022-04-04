@@ -129,10 +129,21 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
     def wait_to_see_the(ctx, name):
         retry(should_see)(ctx, thing, name)
 
+    @step(f'I wait to not see the {thing} "{{name}}"')
+    def wait_to_not_see_the(ctx, name):
+        retry(should_not_see)(ctx, thing, name)
+
     @step(f'I wait up to "{{seconds}}" seconds to see the {thing} "{{name}}"')
     def wait_up_to_seconds_to_see_the(ctx, seconds, name):
         milliseconds = float(seconds)
         retry(should_see, wait_up_to_s=milliseconds)(ctx, thing, name)
+
+    @step(
+        f'I wait up to "{{seconds}}" seconds to not see the {thing} "{{name}}"'
+    )
+    def wait_up_to_seconds_to_not_see_the(ctx, seconds, name):
+        milliseconds = float(seconds)
+        retry(should_not_see, wait_up_to_s=milliseconds)(ctx, thing, name)
 
     if with_nth:
 
@@ -148,12 +159,25 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
         def wait_to_see_the_nth(ctx, nth, name):
             retry(should_see)(ctx, thing, name, index=nth)
 
+        @step(f'I wait to not see the "{{nth:nth}}" {thing} "{{name}}"')
+        def wait_to_not_see_the_nth(ctx, nth, name):
+            retry(should_not_see)(ctx, thing, name, index=nth)
+
         @step(
             f'I wait up to "{{seconds}}" seconds to see the "{{nth:nth}}" {thing} "{{name}}"'
         )
         def wait_up_to_seconds_to_see_the_nth(ctx, seconds, nth, name):
             seconds = float(seconds)
             retry(should_see, wait_up_to_s=seconds)(ctx, thing, name, index=nth)
+
+        @step(
+            f'I wait up to "{{seconds}}" seconds to not see the "{{nth:nth}}" {thing} "{{name}}"'
+        )
+        def wait_up_to_seconds_to_not_see_the_nth(ctx, seconds, nth, name):
+            seconds = float(seconds)
+            retry(should_not_see, wait_up_to_s=seconds)(
+                ctx, thing, name, index=nth
+            )
 
 
 def define_action_on_thing_with_name_steps(
