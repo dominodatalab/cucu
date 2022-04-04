@@ -14,11 +14,16 @@ def find_button(ctx, name, index=0):
         * <* role="button">
         * <* role="link">
         * <* role="menuitem">
+        * <* role="treetem">
         * <* role="option">
         * <* role="radio">
 
-    note: the reason we're allowing link, menuitem, option and radio buttons
-          to be clickable is that on screen they may simply look like a button.
+    note: the reason we're allowing other items such as menuitem, option, etc
+          is that on screen they can present themselves like "buttons". When
+          searching for more things to include use the following image
+          reference:
+
+          https://www.w3.org/TR/2009/WD-wai-aria-20091215/rdf_model.png
 
     parameters:
       ctx(object): behave context object used to share data between steps
@@ -39,7 +44,9 @@ def find_button(ctx, name, index=0):
             '*[role="button"]',
             '*[role="link"]',
             '*[role="menuitem"]',
+            '*[role="treeitem"]',
             '*[role="option"]',
+            '*[role="radio"]',
         ],
         index=index,
     )
