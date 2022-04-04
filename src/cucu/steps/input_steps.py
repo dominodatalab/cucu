@@ -74,8 +74,15 @@ def find_n_clear(ctx, name, index=0):
     input_ = find_input(ctx, name, index=index)
     input_.clear()
     # .clear() doesn't do it 100% of the time, so take out insurance
-    while input_.get_attribute("value") != "":
-        input_.send_keys(Keys.BACKSPACE)
+    maximum_attempts = 5
+    attempts = 0
+    current_value = input_.get_attribute("value")
+    while current_value != "" and attempts < maximum_attempts:
+        input_.send_keys(Keys.BACKSPACE * len(current_value))
+        current_value = input_.get_attribute("value")
+
+    if not attempts < maximum_attempts:
+        raise RuntimeError(f"input '{name}' was not cleared after {maximum_attempts} attempts")
 
 
 def assert_input_value(ctx, name, value, index=0):
