@@ -109,7 +109,7 @@ jobs:
             poetry run coverage html
             poetry run coverage report --fail-under=90
 
-      - store_test_results:
+      - store_artifacts:
           path: htmlcov
 
 workflows:
