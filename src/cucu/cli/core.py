@@ -139,7 +139,7 @@ def run(
         if not os.path.exists(results):
             os.makedirs(results)
 
-    if workers is None:
+    if workers is None or workers == 1:
         try:
             exit_code = behave(
                 filepath,
@@ -164,8 +164,12 @@ def run(
                 _generate_report(results, report)
 
     else:
-        basepath = os.path.join(filepath, "**/*.feature")
-        feature_filepaths = glob.iglob(basepath, recursive=True)
+        if os.path.isdir(filepath):
+            basepath = os.path.join(filepath, "**/*.feature")
+            feature_filepaths = glob.iglob(basepath, recursive=True)
+
+        else:
+            feature_filepaths = [filepath]
 
         with multiprocessing.Pool(int(workers)) as pool:
             async_results = []
@@ -197,10 +201,12 @@ def run(
 
             for result in async_results:
                 result.wait()
-                # logger.info(f"finished feature: {feature_filepath}")
                 exit_code = result.get()
                 if exit_code != 0:
-                    logger.error("there are failures")
+                    logger.error("there are failures, see above for details")
+
+            pool.close()
+            pool.join()
 
 
 def _generate_report(filepath, output):
