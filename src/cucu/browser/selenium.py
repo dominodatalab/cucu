@@ -18,6 +18,16 @@ class DisableLogger:
         logging.disable(logging.NOTSET)
 
 
+def init():
+    """
+    initialize any selenium specific needs
+    """
+
+    # auto install chromedriver if not present
+    with DisableLogger():
+        chromedriver_autoinstaller.install()
+
+
 class Selenium(Browser):
     def __init__(self):
         self.driver = None

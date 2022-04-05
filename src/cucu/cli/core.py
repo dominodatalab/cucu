@@ -10,6 +10,7 @@ import os
 
 from click import ClickException
 from cucu import fuzzy, reporter, language_server, logger
+from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.cli.run import behave
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
@@ -131,6 +132,8 @@ def run(
     # load all them configs
     CONFIG.load_cucurc_files(filepath)
 
+    selenium.init()
+
     if not dry_run:
         if not preserve_results:
             if os.path.exists(results):
@@ -203,7 +206,9 @@ def run(
                 result.wait()
                 exit_code = result.get()
                 if exit_code != 0:
-                    logger.error("there are failures, see above for details")
+                    raise RuntimeError(
+                        "there are failures, see above for details"
+                    )
 
             pool.close()
             pool.join()
