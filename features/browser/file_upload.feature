@@ -3,8 +3,8 @@ Feature: File upload
   web application
 
   Scenario: User can upload a file
-    Given I start a webserver on port "40000" at directory "data/www"
-      And I open a browser at the url "http://{HOST_ADDRESS}:40000/files.html"
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/files.html"
      When I upload the file "features/browser/file_upload.feature" to the file input "upload some files:"
       And I click the button "upload!"
       And I save the current url to the variable "URL"

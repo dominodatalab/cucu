@@ -4,8 +4,8 @@ Feature: Helpers
   information
 
   Scenario: User gets appropriate error when a button is not found
-    Given I start a webserver on port "40000" at directory "data/www"
-      And I open a browser at the url "http://{HOST_ADDRESS}:40000/buttons.html"
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
      Then I expect the following step to fail with "unable to find the button "foo""
       """
       When I click the button "foo"
@@ -23,8 +23,8 @@ Feature: Helpers
       And I should see the previous step took more than "2" seconds
 
   Scenario: User gets appropriate error when a checkbox is not in the expected state
-    Given I start a webserver on port "40000" at directory "data/www"
-      And I open a browser at the url "http://{HOST_ADDRESS}:40000/checkboxes.html"
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html"
      Then I expect the following step to fail with "checkbox "checkbox with inner label" is not checked"
       """
       Then I should see the checkbox "checkbox with inner label" is checked
@@ -32,14 +32,14 @@ Feature: Helpers
 
   Scenario: User gets appropriate error when waiting to see a checkbox is not in the expected state
     Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5000"
-      And I start a webserver on port "40000" at directory "data/www"
-      And I open a browser at the url "http://{HOST_ADDRESS}:40000/checkboxes.html?delay_page_load_ms={CUCU_STEP_WAIT_TIMEOUT_S}"
+      And I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html?delay_page_load_ms={CUCU_STEP_WAIT_TIMEOUT_S}"
      Then I expect the following step to fail with "checkbox "checkbox with inner label" is not checked"
       """
       Then I wait to see the checkbox "checkbox with inner label" is checked
       """
       And I should see the previous step took more than "4" seconds
-     When I open a browser at the url "http://{HOST_ADDRESS}:40000/checkboxes.html?delay_page_load_ms=10000"
+     When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html?delay_page_load_ms=10000"
      Then I expect the following step to fail with "checkbox "checkbox with inner label" is not checked"
       """
       Then I wait up to "10" seconds to see the checkbox "checkbox with inner label" is checked

@@ -3,8 +3,8 @@ Feature: Dropdowns
   dropdowns
 
   Background: HTML page with dropdowns
-    Given I start a webserver on port "40000" at directory "data/www"
-      And I open a browser at the url "http://{HOST_ADDRESS}:40000/dropdowns.html"
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/dropdowns.html"
 
   Scenario: User can validate the state of a dropdown
     Given I should see the dropdown "Pick a color"

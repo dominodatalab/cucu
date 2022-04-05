@@ -3,8 +3,8 @@ Feature: Radio Buttons
   radio button elements
 
   Background: HTML page with radio butons
-    Given I start a webserver on port "40000" at directory "data/www"
-      And I open a browser at the url "http://{HOST_ADDRESS}:40000/radio_buttons.html"
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/radio_buttons.html"
 
   Scenario: User can select and verify from a few radio buttons
     Given I should see the radio button "cat" is not selected

@@ -3,8 +3,8 @@ Feature: Fuzzy rules
   in order.
 
   Scenario: User can click a <button>
-    Given I start a webserver on port "40000" at directory "data/www"
-     And I open a browser at the url "http://{HOST_ADDRESS}:40000/fuzzy_rules.html"
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+     And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/fuzzy_rules.html"
      Then I should see no value in the input "value:"
     When I click the button "button with inner text"
     Then I should see "button with inner text" in the input "value:"

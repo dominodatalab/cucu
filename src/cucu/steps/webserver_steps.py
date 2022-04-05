@@ -1,5 +1,6 @@
 from behave import step
 from cucu import register_after_scenario_hook
+from cucu.config import CONFIG
 from functools import partial
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
@@ -10,12 +11,17 @@ class QuietHTTPRequestHandler(SimpleHTTPRequestHandler):
         return
 
 
-@step('I start a webserver on port "{port}" at directory "{directory}"')
-def run_webserver_for_scenario(context, port, directory):
+@step(
+    'I start a webserver at directory "{directory}" and save the port to the variable "{variable}"'
+)
+def run_webserver_for_scenario(context, directory, variable):
     handler = partial(QuietHTTPRequestHandler, directory=directory)
-    httpd = HTTPServer(("", int(port)), handler)
+    httpd = HTTPServer(("", 0), handler)
     thread = Thread(target=httpd.serve_forever)
     thread.start()
+
+    _, port = httpd.server_address
+    CONFIG[variable] = str(port)
 
     def shutdown_webserver(_):
         httpd.shutdown()

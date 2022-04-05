@@ -4,8 +4,8 @@ Feature: Buttons
   iframe.
 
   Background: HTML page with buttons
-    Given I start a webserver on port "40000" at directory "data/www"
-      And I open a browser at the url "http://{HOST_ADDRESS}:40000/frames.html"
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/frames.html"
 
   Scenario: User can see and interact with various elements in iframes
     Given I should see the button "button with child"
