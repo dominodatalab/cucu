@@ -202,16 +202,18 @@ def run(
                     )
                 )
 
+            workers_failed = False
             for result in async_results:
                 result.wait()
                 exit_code = result.get()
                 if exit_code != 0:
-                    raise RuntimeError(
-                        "there are failures, see above for details"
-                    )
+                    workers_failed = True
 
             pool.close()
             pool.join()
+
+            if workers_failed:
+                raise RuntimeError("there are failures, see above for details")
 
 
 def _generate_report(filepath, output):
