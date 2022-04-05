@@ -80,6 +80,9 @@ jobs:
       - store_artifacts:
           path: report.tgz
 
+      - store_artifacts:
+          path: report/
+
       - run:
           name: run unit tests
           command: poetry run coverage run -m pytest  --junit-xml=results/unit-tests.xml
@@ -102,7 +105,12 @@ jobs:
 
       - run:
           name: code coverage report
-          command: poetry run coverage report --fail-under=90
+          command: |
+            poetry run coverage html
+            poetry run coverage report --fail-under=90
+
+      - store_artifacts:
+          path: htmlcov
 
 workflows:
   build-n-test:
