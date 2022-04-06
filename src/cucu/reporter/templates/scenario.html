@@ -111,7 +111,7 @@
                 {% if step['result']['stdout'] %}
                 <tr class="d-flex">
                     {% for line in step['result']['stdout'] %}
-                        <td class="col-11" colspan="2"><pre class="text-wrap" style="color: darkgray">{{ escape(line) }}</pre></td>
+                        <td class="col-11" colspan="2"><pre style="color: darkgray">{{ escape(line) }}</pre></td>
                     {% endfor %}
                 </tr>
                 {% endif %}
@@ -119,7 +119,7 @@
                 {% if step['result']['error_message'] %}
                     {% for line in step['result']['error_message'] %}
                     <tr class="d-flex">
-                        <td class="col-11" colspan="2" style="margin: 0"><pre class="text-wrap" style="color: gray; margin: 0">{{ escape(line) }}</pre></td>
+                        <td class="col-11" colspan="2" style="margin: 0"><pre style="color: gray; margin: 0">{{ escape(line) }}</pre></td>
                     </tr>
                     {% endfor %}
                 {% endif %}
