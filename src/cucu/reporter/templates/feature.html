@@ -14,20 +14,27 @@
         </div>
     </nav>
     <table class="table table-hover">
+        <tr>
+            <th>Scenario</th>
+            <th class="text-center">Total Steps</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Duration</th>
+        </tr>
         <tr class="remove-table-hover"><pre style="display: inline; color: maroon">Feature: </pre><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></tr>
         {% for scenario in scenarios %}
             <!--- ignore Backgrounds for the time being -->
             {% if scenario['keyword'] != 'Background' %}
             <tr role="link" style="cursor: pointer;" onclick="window.location='{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html';" >
-                <td><pre style="display: inline; color: green">  Scenario: </pre><pre style="display: inline; color: grey">{{ escape(scenario['name']) }}</pre></td>
+                <td><pre style="display: inline; color: grey">{{ escape(scenario['name']) }}</pre></td>
+                <td class="text-center">{{ scenario['total_steps'] }}</td>
                 {% if scenario['status'] == 'passed' %}
-                    <td><pre style="display: inline; color: green">{{ scenario['status'] }}</pre></td>
+                    <td class="text-center"><pre style="display: inline; color: green">{{ scenario['status'] }}</pre></td>
                 {% elif scenario['status'] == 'failed' %}
-                    <td><pre style="display: inline; color: red">{{ scenario['status'] }}</pre></td>
+                    <td class="text-center"><pre style="display: inline; color: red">{{ scenario['status'] }}</pre></td>
                 {% elif scenario['status'] == 'skipped' %}
-                    <td><pre style="display: inline; color: blue">{{ scenario['status'] }}</pre></td>
+                    <td class="text-center"><pre style="display: inline; color: blue">{{ scenario['status'] }}</pre></td>
                 {% endif %}
-                <td><pre style="display: inline; color: grey">{{ '{:.3f}'.format(scenario['duration']) }}s</pre></td>
+                <td class="text-center"><pre style="display: inline; color: grey">{{ '{:.3f}'.format(scenario['duration']) }}s</pre></td>
             </tr>
             {%  endif %}
         {% endfor %}

@@ -32,6 +32,10 @@ def generate(results, basepath):
         feature = features[index]
         scenarios = feature["elements"]
         feature_duration = 0
+        total_scenarios = 0
+        total_scenarios_passed = 0
+        total_scenarios_failed = 0
+        total_scenarios_skipped = 0
 
         if feature["status"] != "skipped":
             # copy each feature directories contents over to the report directory
@@ -43,12 +47,25 @@ def generate(results, basepath):
 
         for scenario in scenarios:
             scenario_duration = 0
+            total_scenarios += 1
+            total_steps = 0
+
+            if "status" not in scenario:
+                total_scenarios_skipped += 1
+            elif scenario["status"] == "passed":
+                total_scenarios_passed += 1
+            elif scenario["status"] == "failed":
+                total_scenarios_failed += 1
+            elif scenario["status"] == "skipped":
+                total_scenarios_skipped += 1
+
             scenario_filepath = os.path.join(
                 basepath, feature["name"], scenario["name"]
             )
 
             step_index = 0
             for step in scenario["steps"]:
+                total_steps += 1
                 image_filename = (
                     f"{step_index} - {step['name'].replace('/', '_')}.png"
                 )
@@ -77,8 +94,13 @@ def generate(results, basepath):
                 scenario["logs"] = log_files
 
             scenario["duration"] = scenario_duration
+            scenario["total_steps"] = total_steps
             feature_duration += scenario_duration
 
+        feature["total_scenarios"] = total_scenarios
+        feature["total_scenarios_passed"] = total_scenarios_passed
+        feature["total_scenarios_failed"] = total_scenarios_failed
+        feature["total_scenarios_skipped"] = total_scenarios_skipped
         feature["duration"] = feature_duration
 
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
