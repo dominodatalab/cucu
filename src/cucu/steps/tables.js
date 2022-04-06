@@ -3,13 +3,15 @@
         var tables = [];
         function tableToJSON(table) {
             var data = [];
-            for (var rIndex=1; rIndex < table.rows.length; rIndex++) {
+            for (var rIndex=0; rIndex < table.rows.length; rIndex++) {
                 var row = table.rows[rIndex];
                 var values = [];
                 for (var vIndex=0; vIndex < row.cells.length; vIndex++) {
-                    values.push(row.cells[vIndex].innerHTML);
+                    values.push(row.cells[vIndex].innerText.trim());
                 }
-                data.push(values);
+                if (values.length != 0) {
+                    data.push(values);
+                }
             }
             return data;
         }

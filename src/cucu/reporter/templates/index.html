@@ -6,18 +6,31 @@
         </div>
     </nav>
     <table class="table table-hover">
+        <tr>
+            <th>Feauture</th>
+            <th class="text-center">Total</th>
+            <th class="text-center">Passed</th>
+            <th class="text-center">Failed</th>
+            <th class="text-center">Skipped</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Duration</th>
+        </tr>
         {% for feature in features %}
 
         <tr role="link" style="cursor: pointer;" onclick="window.location='{{ urlencode(escape(feature['name'])) }}.html';" >
-            <td><pre style="display: inline; color: green">Feature: </pre><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></td>
+            <td><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></td>
+            <td class="text-center">{{ feature['total_scenarios'] }}</td>
+            <td class="text-center">{{ feature['total_scenarios_passed'] }}</td>
+            <td class="text-center">{{ feature['total_scenarios_failed'] }}</td>
+            <td class="text-center">{{ feature['total_scenarios_skipped'] }}</td>
             {% if feature['status'] == 'passed' %}
-                <td><pre style="display: inline; color: green">{{ feature['status'] }}</pre></td>
+                <td class="text-center"><pre style="display: inline; color: green">{{ feature['status'] }}</pre></td>
             {% elif feature['status'] == 'failed' %}
-                <td><pre style="display: inline; color: red">{{ feature['status'] }}</pre></td>
+                <td class="text-center"><pre style="display: inline; color: red">{{ feature['status'] }}</pre></td>
             {% elif feature['status'] == 'skipped' %}
-                <td><pre style="display: inline; color: blue">{{ feature['status'] }}</pre></td>
+                <td class="text-center"><pre style="display: inline; color: blue">{{ feature['status'] }}</pre></td>
             {% endif %}
-            <td><pre style="display: inline; color: grey">{{ '{:.3f}'.format(feature['duration']) }}s</pre></td>
+            <td class="text-center"><pre style="display: inline; color: grey">{{ '{:.3f}'.format(feature['duration']) }}s</pre></td>
         </tr>
         {% endfor %}
     </table>

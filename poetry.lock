@@ -745,6 +745,17 @@ optional = false
 python-versions = ">=3.6,<4.0"
 
 [[package]]
+name = "tabulate"
+version = "0.8.9"
+description = "Pretty-print tabular data"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+widechars = ["wcwidth"]
+
+[[package]]
 name = "tenacity"
 version = "8.0.1"
 description = "Retry code until it succeeds"
@@ -884,7 +895,7 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "b3caa35af3d86c82bcbdbcff484f3222a36efe80c89f78f1600e8d921e2e3a09"
+content-hash = "00ce57cefb484df2c3dc3e4d473fe890f7b96fefd41a00798b06f9732db6eafb"
 
 [metadata.files]
 appnope = [
@@ -1334,6 +1345,10 @@ stack-data = [
 strip-ansi = [
     {file = "strip-ansi-0.1.1.tar.gz", hash = "sha256:5d60f239cc8a37fdd52b43c3e66e893d45ba0423115db59eca0d2eef83b07729"},
     {file = "strip_ansi-0.1.1-py3-none-any.whl", hash = "sha256:9f55280e1b0ba84dac49d4f18aa6b51b90ff766b22e4918ffc01cc87b394ecd1"},
+]
+tabulate = [
+    {file = "tabulate-0.8.9-py3-none-any.whl", hash = "sha256:d7c013fe7abbc5e491394e10fa845f8f32fe54f8dc60c6622c6cf482d25d47e4"},
+    {file = "tabulate-0.8.9.tar.gz", hash = "sha256:eb1d13f25760052e8931f2ef80aaf6045a6cceb47514db8beab24cded16f13a7"},
 ]
 tenacity = [
     {file = "tenacity-8.0.1-py3-none-any.whl", hash = "sha256:f78f4ea81b0fabc06728c11dc2a8c01277bfc5181b321a4770471902e3eb844a"},

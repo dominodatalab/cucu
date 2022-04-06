@@ -1,7 +1,10 @@
 import pkgutil
 import re
 
+from behave.model_describe import ModelPrinter
 from cucu import retry, step
+from io import StringIO
+from tabulate import tabulate
 
 
 def find_tables(ctx):
@@ -30,7 +33,7 @@ def behave_table_to_array(table):
     returns:
         array of rows representing the behave table provided.
     """
-    result = []
+    result = [table.headings]
 
     for row in table.rows:
         values = []
@@ -99,6 +102,15 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     return False
 
 
+def report_unable_to_find_table(tables):
+    stream = StringIO()
+    for table in tables:
+        stream.write(f"\n{tabulate(table, [], tablefmt='jira')}\n")
+
+    stream.seek(0)
+    raise RuntimeError(f"unable to find desired table, found: {stream.read()}")
+
+
 def find_table(ctx, assert_func, nth=None):
     """
     validate we can find the table passed in the ctx object and assert it
@@ -126,7 +138,7 @@ def find_table(ctx, assert_func, nth=None):
             if assert_func(table, expected):
                 return
 
-    raise RuntimeError("unable to find desired table")
+    report_unable_to_find_table(tables)
 
 
 def do_not_find_table(ctx, assert_func, nth=None):
@@ -156,7 +168,7 @@ def do_not_find_table(ctx, assert_func, nth=None):
             if not assert_func(table, expected):
                 return
 
-    raise RuntimeError("able to find desired table")
+    report_unable_to_find_table(tables)
 
 
 for (thing, check_func) in {
