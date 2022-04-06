@@ -115,25 +115,22 @@ jobs:
           destination: coverage
 
       - run:
-        name: Post Status to GitHub PR
-        command: |
-          sudo apt-get install jq
+          name: github PR status update
+          command: |
+            sudo apt-get install jq
 
-          pr_response=$(curl --location --request GET "https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/pulls?head=$CIRCLE_PROJECT_USERNAME:$CIRCLE_BRANCH&state=open" \
-          -u $GH_USER:$GH_TOKEN)
+            pr_response=$(curl --location --request GET "https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/pulls?head=$CIRCLE_PROJECT_USERNAME:$CIRCLE_BRANCH&state=open" -u $GH_USER:$GH_TOKEN)
 
-          if [ $(echo $pr_response | jq length) -eq 0 ]; then
-            echo "No PR found to update"
-          else
-            pr_comment_url=$(echo $pr_response | jq -r ".[]._links.comments.href")
+            if [ $(echo $pr_response | jq length) -eq 0 ]; then
+              echo "No PR found to update"
+            else
+              pr_comment_url=$(echo $pr_response | jq -r ".[]._links.comments.href")
+            fi
 
             curl --location --request POST "$pr_comment_url" \
-                 -u $GH_USER:$GH_TOKEN \
-                 --header 'Content-Type: application/json' \
-                 --data-raw '{
-                   "body": "[HTML Test Report](${CIRCLE_BUILD_URL}/artifacts/report/index.html)"
-                 }'
-          fi
+            -u $GH_USER:$GH_TOKEN \
+            --header 'Content-Type: application/json' \
+            --data-raw '{ "body": "[HTML Test Report](${CIRCLE_BUILD_URL}/artifacts/report/index.html)" }'
 
 workflows:
   build-n-test:
