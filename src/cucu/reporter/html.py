@@ -50,7 +50,9 @@ def generate(results, basepath):
             total_scenarios += 1
             total_steps = 0
 
-            if scenario["status"] == "passed":
+            if "status" not in scenario:
+                total_scenarios_skipped += 1
+            elif scenario["status"] == "passed":
                 total_scenarios_passed += 1
             elif scenario["status"] == "failed":
                 total_scenarios_failed += 1
