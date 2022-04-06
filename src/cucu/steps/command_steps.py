@@ -1,6 +1,7 @@
 import os
 import shlex
 import subprocess
+import sys
 
 from behave import step
 from cucu import config, logger
@@ -8,24 +9,22 @@ from cucu import config, logger
 
 def run_command(command, stdout_var=None, stderr_var=None, exit_code_var=None):
     args = shlex.split(command)
-    capture_output = stdout_var != None or stderr_var != None
-    process = subprocess.run(args, capture_output=capture_output)
+    process = subprocess.run(args, capture_output=True)
 
     if exit_code_var:
         config.CONFIG[exit_code_var] = str(process.returncode)
 
-    if capture_output:
-        stdout = process.stdout.decode("utf8")
-        stderr = process.stderr.decode("utf8")
+    stdout = process.stdout.decode("utf8")
+    stderr = process.stderr.decode("utf8")
 
-        logger.debug(f"STDOUT:\n{stdout}\n")
-        logger.debug(f"STDERR:\n{stderr}\n")
+    logger.debug(f"STDOUT:\n{stdout}\n")
+    logger.debug(f"STDERR:\n{stderr}\n")
 
-        if stdout_var:
-            config.CONFIG[stdout_var] = stdout
+    if stdout_var:
+        config.CONFIG[stdout_var] = stdout
 
-        if stderr_var:
-            config.CONFIG[stderr_var] = stderr
+    if stderr_var:
+        config.CONFIG[stderr_var] = stderr
 
 
 def run_script(script, stdout_var=None, stderr_var=None, exit_code_var=None):
