@@ -1,6 +1,7 @@
 import os
 import shlex
 import subprocess
+import sys
 
 from behave import step
 from cucu import config, logger
@@ -16,14 +17,14 @@ def run_command(command, stdout_var=None, stderr_var=None, exit_code_var=None):
     stdout = process.stdout.decode("utf8")
     stderr = process.stderr.decode("utf8")
 
+    logger.debug(f"STDOUT:\n{stdout}\n")
+    logger.debug(f"STDERR:\n{stderr}\n")
+
     if stdout_var:
         config.CONFIG[stdout_var] = stdout
 
     if stderr_var:
         config.CONFIG[stderr_var] = stderr
-
-    logger.debug(f"STDOUT:\n{stdout}\n")
-    logger.debug(f"STDERR:\n{stderr}\n")
 
 
 def run_script(script, stdout_var=None, stderr_var=None, exit_code_var=None):

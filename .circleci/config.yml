@@ -59,7 +59,7 @@ jobs:
 
       - run:
           name: run functional tests
-          command: poetry run cucu run features
+          command: poetry run cucu run --workers 2 features
           environment:
             COVERAGE_PROCESS_START: .coveragerc
             CUCU_COLOR_OUTPUT: false

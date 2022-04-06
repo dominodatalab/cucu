@@ -3,8 +3,8 @@ Feature: Tabs
   tab elements.
 
   Background: HTML page with tabs
-    Given I start a webserver on port "40000" at directory "data/www"
-      And I open a browser at the url "http://{HOST_ADDRESS}:40000/tabs.html"
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tabs.html"
 
   Scenario: User can switch tabs and verify state
     Given I should see the tab "Joe" is selected

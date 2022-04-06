@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 import click
+import contextlib
 import coverage
+import glob
+import multiprocessing
 import shutil
 import time
 import os
 
 from click import ClickException
 from cucu import fuzzy, reporter, language_server, logger
+from cucu.browser import selenium
 from cucu.config import CONFIG
+from cucu.cli.run import behave
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.lint import linter
 from importlib.metadata import version
@@ -29,7 +34,7 @@ def main(debug, logging_level):
     """
     main entrypoint
     """
-    CONFIG["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())
 
 
@@ -95,6 +100,12 @@ def main(debug, logging_level):
     default=[],
     multiple=True,
 )
+@click.option(
+    "-w",
+    "--workers",
+    help="Specifies the number of workers to use to run tests in parallel",
+    default=None,
+)
 @click.option("-s", "--selenium-remote-url", default=None)
 def run(
     filepath,
@@ -113,6 +124,7 @@ def run(
     secrets,
     tags,
     selenium_remote_url,
+    workers,
 ):
     """
     run a set of feature files
@@ -120,86 +132,88 @@ def run(
     # load all them configs
     CONFIG.load_cucurc_files(filepath)
 
-    if color_output:
-        CONFIG["CUCU_COLOR_OUTPUT"] = str(color_output).lower()
-
-    if headless:
-        CONFIG["CUCU_BROWSER_HEADLESS"] = "True"
-
-    for variable in list(env):
-        key, value = variable.split("=")
-        CONFIG[key] = value
-
-    CONFIG["CUCU_BROWSER"] = browser
-
-    if ipdb_on_failure:
-        CONFIG["CUCU_IPDB_ON_FAILURE"] = "true"
-
-    CONFIG["CUCU_RESULTS_DIR"] = results
-
-    if secrets:
-        CONFIG["CUCU_SECRETS"] = secrets
+    selenium.init()
 
     if not dry_run:
         if not preserve_results:
             if os.path.exists(results):
                 shutil.rmtree(results)
-                os.makedirs(results)
-        else:
-            if not os.path.exists(results):
-                os.makedirs(results)
 
-    if selenium_remote_url is not None:
-        CONFIG["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
+        if not os.path.exists(results):
+            os.makedirs(results)
 
-    args = [
-        # don't run disabled tests
-        "--tags",
-        "~@disabled",
-        # always print the skipped steps and scenarios
-        "--show-skipped",
-        filepath,
-    ]
+    if workers is None or workers == 1:
+        try:
+            exit_code = behave(
+                filepath,
+                browser,
+                color_output,
+                dry_run,
+                env,
+                fail_fast,
+                headless,
+                name,
+                ipdb_on_failure,
+                results,
+                secrets,
+                tags,
+                selenium_remote_url,
+            )
 
-    if dry_run:
-        args += [
-            "--dry-run",
-            # console formater
-            "--format=cucu.formatter.cucu:CucuFormatter",
-        ]
+            if exit_code != 0:
+                raise ClickException("test run failed, see above for details")
+        finally:
+            if generate_report:
+                _generate_report(results, report)
 
     else:
-        args += [
-            # JUnit xml file generated per feature file executed
-            "--junit",
-            f"--junit-directory={results}",
-            # generate a JSON file containing the exact details of the whole run
-            "--format=cucu.formatter.json:CucuJSONFormatter",
-            f"--outfile={results}/run.json",
-            # console formatter
-            "--format=cucu.formatter.cucu:CucuFormatter",
-            f"--logging-level={CONFIG['CUCU_LOGGING_LEVEL'].upper()}",
-        ]
+        if os.path.isdir(filepath):
+            basepath = os.path.join(filepath, "**/*.feature")
+            feature_filepaths = glob.iglob(basepath, recursive=True)
 
-    for tag in tags:
-        args.append("--tags")
-        args.append(tag)
+        else:
+            feature_filepaths = [filepath]
 
-    if name is not None:
-        args += ["--name", name]
+        with multiprocessing.Pool(int(workers)) as pool:
+            async_results = []
+            for feature_filepath in feature_filepaths:
+                async_results.append(
+                    pool.apply_async(
+                        behave,
+                        [
+                            feature_filepath,
+                            browser,
+                            color_output,
+                            dry_run,
+                            env,
+                            fail_fast,
+                            headless,
+                            name,
+                            ipdb_on_failure,
+                            results,
+                            secrets,
+                            tags,
+                            selenium_remote_url,
+                        ],
+                        {
+                            "redirect_output": True,
+                            "log_start_n_stop": True,
+                        },
+                    )
+                )
 
-    if fail_fast:
-        args.append("--stop")
+            workers_failed = False
+            for result in async_results:
+                result.wait()
+                exit_code = result.get()
+                if exit_code != 0:
+                    workers_failed = True
 
-    try:
-        from behave.__main__ import main as behave_main
+            pool.close()
+            pool.join()
 
-        exit_code = behave_main(args)
-        if exit_code != 0:
-            raise ClickException("test run failed, see above for details")
-    finally:
-        if generate_report:
-            _generate_report(results, report)
+            if workers_failed:
+                raise RuntimeError("there are failures, see above for details")
 
 
 def _generate_report(filepath, output):
@@ -212,9 +226,10 @@ def _generate_report(filepath, output):
         filepath(string): the results directory containing the previous test run
         output(string): the directory where we'll generate the report
     """
+    if os.path.exists(output):
+        shutil.rmtree(output)
 
-    if not os.path.exists(output):
-        os.makedirs(output)
+    os.makedirs(output)
 
     report_location = reporter.generate(filepath, output)
     print(f"HTML test report at {report_location}")

@@ -3,8 +3,8 @@ Feature: Comboboxes
   comboboxes
 
   Background: HTML page with comboboxes
-    Given I start a webserver on port "40000" at directory "data/www"
-      And I open a browser at the url "http://{HOST_ADDRESS}:40000/comboboxes.html"
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/comboboxes.html"
 
   Scenario: User can validate the state of a combox
     Given I should see the dropdown "Pick a Fruit"

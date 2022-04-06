@@ -1,6 +1,6 @@
 Feature: Feature with failing scenario with web
 
   Scenario: Just a scenario that opens a web page
-    Given I start a webserver on port "40000" at directory "data/www"
-      And I open a browser at the url "http://{HOST_ADDRESS}:40000/buttons.html"
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
       And I should see the text "inexistent"

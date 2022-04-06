@@ -12,7 +12,7 @@ Feature: Steps
       """
       And I should see "{STDOUT}" contains the following:
       """
-      I start a webserver on port "{{port}}" at directory "{{directory}}"
+      I start a webserver at directory "{{directory}}" and save the port to the variable "{{variable}}"
       """
 
   Scenario: User can use `cucu steps` even if there are undefined steps
@@ -52,5 +52,5 @@ Feature: Steps
       """
       And I should see "{STDOUT}" contains the following:
       """
-      I start a webserver on port "{{port}}" at directory "{{directory}}"
+      I start a webserver at directory "{{directory}}" and save the port to the variable "{{variable}}"
       """

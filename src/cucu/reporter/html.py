@@ -13,11 +13,14 @@ def generate(results, basepath):
     """
     generate an HTML report for the results provided.
     """
-    run_json_filepath = os.path.join(results, "run.json")
+
     features = []
 
-    with open(run_json_filepath, "rb") as index_input:
-        features = json.loads(index_input.read())
+    run_json_filepaths = glob.iglob(os.path.join(results, "*run.json"))
+
+    for run_json_filepath in run_json_filepaths:
+        with open(run_json_filepath, "rb") as index_input:
+            features += json.loads(index_input.read())
 
     #
     # augment existing test run data with:
@@ -81,10 +84,18 @@ def generate(results, basepath):
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)
 
-    templates.globals.update(
-        escape=escape,
-        urlquotes=lambda x: x.replace('"', "%22").replace("'", "%27"),
-    )
+    def urlencode(string):
+        """
+        handles encoding specific characters in the names of features/scenarios
+        so they can be used in a URL. NOTICE: we're not handling spaces since
+        the browser handles those already.
+
+        """
+        return (
+            string.replace('"', "%22").replace("'", "%27").replace("#", "%23")
+        )
+
+    templates.globals.update(escape=escape, urlencode=urlencode)
 
     index_template = templates.get_template("index.html")
     rendered_index_html = index_template.render(

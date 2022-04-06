@@ -3,8 +3,8 @@ Feature: Clipboard
   clipboard
 
   Scenario: User can interact with the clipboard
-    Given I start a webserver on port "40000" at directory "data/www"
-     When I open a browser at the url "http://{HOST_ADDRESS}:40000/clipboard.html"
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+     When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/clipboard.html"
       And I click the button "Copy to Clipboard"
       And I wait to see the button "Copied!"
       And I wait to see the button "Copy to Clipboard"
