@@ -82,6 +82,7 @@ jobs:
 
       - store_artifacts:
           path: report/
+          destination: report
 
       - run:
           name: run unit tests
@@ -111,6 +112,7 @@ jobs:
 
       - store_artifacts:
           path: htmlcov
+          destination: coverage
 
 workflows:
   build-n-test:
