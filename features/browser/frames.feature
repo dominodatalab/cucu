@@ -1,4 +1,4 @@
-Feature: Buttons
+Feature: Frames
   As a developer I want to make sure the test writer can interact with different
   elements inside an iframe without knowing something on screen is inside an
   iframe.
@@ -7,7 +7,7 @@ Feature: Buttons
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/frames.html"
 
-  Scenario: User can see and interact with various elements in iframes
+  Scenario: User can see and interact with Buttons in iframes
     Given I should see the button "button with child"
       And I should see no value in the input "value:"
       And I should see the checkbox "checkbox with inner label" is not checked
@@ -15,3 +15,7 @@ Feature: Buttons
      Then I should see "button with child" in the input "value:"
      When I check the checkbox "checkbox with inner label"
      Then I should see the checkbox "checkbox with inner label" is checked
+
+  Scenario: User can see and interact with inputs in iframes
+     When I write "some text" into the input "input type=text"
+     Then I should see "some text" in the input "input type=text"
