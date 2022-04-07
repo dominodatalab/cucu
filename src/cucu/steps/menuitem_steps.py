@@ -3,7 +3,7 @@
 # menuitem steps
 # https://www.w3.org/TR/wai-aria-1.1/#menuitem
 #
-from cucu import helpers, fuzzy, retry, step
+from cucu import helpers, fuzzy
 
 
 def find_menuitem(ctx, name, index=0):

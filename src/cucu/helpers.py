@@ -213,8 +213,9 @@ def define_action_on_thing_with_name_steps(
                                 '''
         action_func(function): function that performs the desired action:
 
-                               def action_func(element):
+                               def action_func(ctx, element):
                                   '''
+                                  ctx(object):  behave context object
                                   element(object): the element found
                                   '''
         with_nth(bool):     when set to True we'll define the expanded set of
@@ -228,7 +229,7 @@ def define_action_on_thing_with_name_steps(
         if element is None:
             raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
 
-        action_func(element)
+        action_func(ctx, element)
 
     @step(f'I {action} the {thing} "{{name}}"')
     def action_the(ctx, name):

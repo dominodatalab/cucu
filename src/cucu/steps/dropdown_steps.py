@@ -94,7 +94,7 @@ def find_n_select_dropdown_option(ctx, dropdown, option):
     else:
         if dropdown_element.get_attribute("aria-expanded") != "true":
             # open the dropdown
-            dropdown_element.click()
+            ctx.browser.click(dropdown_element)
 
         option_element = find_dropdown_option(ctx, option)
 
@@ -103,7 +103,7 @@ def find_n_select_dropdown_option(ctx, dropdown, option):
                 f'unable to find option "{option}" in dropdown "{dropdown}"'
             )
 
-        option_element.click()
+        ctx.browser.click(option_element)
 
 
 def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
@@ -142,12 +142,12 @@ def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
     else:
         if dropdown_element.get_attribute("aria-expanded") != "true":
             # open the dropdown to see its options
-            dropdown_element.click()
+            ctx.browser.click(dropdown_element)
 
         selected_option = find_dropdown_option(ctx, option)
 
         # close the dropdown
-        dropdown_element.click()
+        ctx.browser.click(dropdown_element)
 
         if is_selected:
             if selected_option.get_attribute("aria-selected") != "true":

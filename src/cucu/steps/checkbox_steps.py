@@ -1,6 +1,4 @@
-import humanize
-
-from cucu import helpers, fuzzy, retry, step
+from cucu import helpers, fuzzy
 
 
 def find_checkbox(ctx, name, index=0):
@@ -31,27 +29,37 @@ def find_checkbox(ctx, name, index=0):
 
 
 def is_checked(checkbox):
+    """
+    internal method to check a checkbox is checked
+    """
     return checkbox.get_attribute("checked") == "true"
 
 
 def is_not_checked(checkbox):
-    return not (is_checked(checkbox))
+    """
+    internal method to check a checkbox is not checked
+    """
+    return not is_checked(checkbox)
 
 
-def check_checkbox(checkbox):
-    """ """
+def check_checkbox(ctx, checkbox):
+    """
+    internal method used to check a checkbox if it is not already checked
+    """
     if is_checked(checkbox):
         raise Exception("checkbox already checked")
 
-    checkbox.click()
+    ctx.browser.click(checkbox)
 
 
-def uncheck_checkbox(checkbox):
-    """ """
+def uncheck_checkbox(ctx, checkbox):
+    """
+    internal method used to uncheck a checkbox if it is not already unchecked
+    """
     if is_not_checked(checkbox):
         raise Exception("checkbox already unchecked")
 
-    checkbox.click()
+    ctx.browser.click(checkbox)
 
 
 helpers.define_should_see_thing_with_name_steps("checkbox", find_checkbox)

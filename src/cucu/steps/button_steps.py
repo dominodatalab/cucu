@@ -1,6 +1,4 @@
-import humanize
-
-from cucu import helpers, fuzzy, retry, step
+from cucu import helpers, fuzzy
 
 
 def find_button(ctx, name, index=0):
@@ -54,8 +52,11 @@ def find_button(ctx, name, index=0):
     return button
 
 
-def click_button(button):
-    button.click()
+def click_button(ctx, button):
+    """
+    internal method used to simply click a button element
+    """
+    ctx.browser.click(button)
 
 
 helpers.define_should_see_thing_with_name_steps(

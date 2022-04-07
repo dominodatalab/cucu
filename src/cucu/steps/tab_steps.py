@@ -1,4 +1,4 @@
-from cucu import helpers, fuzzy, retry, step
+from cucu import helpers, fuzzy
 
 
 def find_tab(ctx, name, index=0):
@@ -16,15 +16,24 @@ def find_tab(ctx, name, index=0):
     return fuzzy.find(ctx.browser, name, ['*[role="tab"]'], index=index)
 
 
-def click_tab(tab):
-    tab.click()
+def click_tab(ctx, tab):
+    """
+    internal method to click a tab
+    """
+    ctx.browser.click(tab)
 
 
 def is_selected(tab):
+    """
+    internal method to check if a tab is currently selected
+    """
     return tab.get_attribute("aria-selected") == "true"
 
 
 def is_not_selected(tab):
+    """
+    internal method to check if a tab is currently not selected
+    """
     return not is_selected(tab)
 
 
