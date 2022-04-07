@@ -46,7 +46,13 @@ def before_scenario(context, scenario):
     config.CONFIG["SCENARIO_RUN_ID"] = uuid.uuid1().hex
 
     # internal cucu config objects
+    CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"] = []
     CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
+    CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
+    CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
+
+    CONFIG["__CUCU_BEFORE_STEP_HOOKS"] = []
+    CONFIG["__CUCU_AFTER_STEP_HOOKS"] = []
 
 
 def after_scenario(context, scenario):
@@ -80,10 +86,15 @@ def after_scenario(context, scenario):
 
         context.browsers = []
 
+    # run after all scenario hooks
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"]:
         hook(context)
 
-    CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
+    # run after this scenario hooks
+    for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"]:
+        hook(context)
+
+    CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 
 
 def before_step(context, step):
@@ -121,3 +132,13 @@ def after_step(context, step):
         import ipdb
 
         ipdb.post_mortem(step.exc_traceback)
+
+    # run before all scenario hooks
+    for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
+        hook(context)
+
+    # run before this scenario hooks
+    for hook in CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"]:
+        hook(context)
+
+    CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
