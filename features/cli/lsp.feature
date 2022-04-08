@@ -7,6 +7,6 @@ Feature: Lsp
       cucu lsp < /dev/null
       """
      Then I should see "{EXIT_CODE}" is equal to "0"
-      And I should see "{STDERR}" contains "Starting IO server"
-      And I should see "{STDERR}" contains "Closing the event loop"
-      And I should see "{STDOUT}" is empty
+      And I should see "{STDOUT}" contains "Starting IO server"
+      And I should see "{STDOUT}" contains "Closing the event loop"
+      And I should see "{STDERR}" is empty
