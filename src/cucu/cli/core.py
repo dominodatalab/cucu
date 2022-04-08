@@ -23,19 +23,11 @@ coverage.process_startup()
 
 @click.group()
 @click.version_option(version("cucu"), message="%(version)s")
-@click.option("--debug/--no-debug", default=False)
-@click.option(
-    "-l",
-    "--logging-level",
-    default="INFO",
-    help="set logging level to one of debug, warn or info (default)",
-)
-def main(debug, logging_level):
+def main():
     """
     main entrypoint
     """
-    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
-    logger.init_logging(logging_level.upper())
+    pass
 
 
 @main.command()
@@ -82,6 +74,12 @@ def main(debug, logging_level):
     "-i", "--ipdb-on-failure/--no-ipdb-oo-failure", help="", default=False
 )
 @click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+@click.option(
     "-p", "--preserve-results/--no-preserve-results", help="", default=False
 )
 @click.option("--report", default="report")
@@ -118,6 +116,7 @@ def run(
     headless,
     name,
     ipdb_on_failure,
+    logging_level,
     preserve_results,
     report,
     results,
@@ -131,6 +130,9 @@ def run(
     """
     # load all them configs
     CONFIG.load_cucurc_files(filepath)
+
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
 
     # only install chromedriver if we're not running rmeotely
     if selenium_remote_url is None:
@@ -323,10 +325,19 @@ def lint(filepath, fix):
 
 
 @main.command()
-def lsp():
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+def lsp(logging_level):
     """
     start the cucu language server
     """
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
+
     language_server.start()
 
 

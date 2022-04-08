@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+
+import re
+
 from behave.formatter.base import Formatter
 from behave.formatter.ansi_escapes import colors, escapes, up
 from behave.model_describe import ModelPrinter
 from behave.model_core import Status
 from behave.textutil import make_indentation
-
-import cucu
-import re
+from cucu.config import CONFIG
 
 
 class CucuFormatter(Formatter):
@@ -32,7 +33,7 @@ class CucuFormatter(Formatter):
         # -- LAZY-EVALUATE:
         self._multiline_indentation = None
 
-        color_output = cucu.config.CONFIG["CUCU_COLOR_OUTPUT"]
+        color_output = CONFIG["CUCU_COLOR_OUTPUT"]
         self.monochrome = not self.stream.isatty() or color_output != "true"
 
     @property
@@ -124,12 +125,8 @@ class CucuFormatter(Formatter):
         indent = make_indentation(2 * self.indent_size)
         keyword = step.keyword.rjust(5)
 
-        if (
-            not self.monochrome
-            and not cucu.config.CONFIG["CUCU_WROTE_TO_STDOUT"]
-        ):
+        if not self.monochrome and not CONFIG["CUCU_WROTE_TO_STDOUT"]:
             self.stream.write(up(1))
-        cucu.config.CONFIG["CUCU_WROTE_TO_STDOUT"] = False
 
         prefix = ""
         if getattr(step, "substep", False):
@@ -158,7 +155,12 @@ class CucuFormatter(Formatter):
         if self.monochrome:
             self.stream.write(f"{text}")
         else:
-            self.stream.write(f"\r{text}")
+            if CONFIG["CUCU_WROTE_TO_STDOUT"]:
+                self.stream.write(f"{text}")
+            else:
+                self.stream.write(f"\r{text}")
+
+        CONFIG["CUCU_WROTE_TO_STDOUT"] = False
 
         if step.status in (Status.passed, Status.failed):
             max_line_length = self.calculate_max_line_length()
@@ -184,10 +186,10 @@ class CucuFormatter(Formatter):
                 values = []
 
                 for variable in variables:
-                    value = cucu.config.CONFIG[variable]
+                    value = CONFIG[variable]
 
                     if value is not None:
-                        value = str(cucu.config.CONFIG[variable])
+                        value = str(CONFIG[variable])
                         value = value.replace("\n", "\\n")
                         value = value[:32] + "..." * (len(value) > 32)
                     else:

@@ -2,8 +2,6 @@ import os
 import socket
 import yaml
 
-from cucu import logger
-
 
 class Config(dict):
     def __init__(self, *args, **kwargs):
@@ -70,7 +68,6 @@ class Config(dict):
             os.path.expanduser("~"), ".cucurc.yml"
         )
         if os.path.exists(home_cucurc_filepath):
-            logger.debug("loading configuration values from ~/.cucurc.yml")
             self.load(home_cucurc_filepath)
 
         filepath = os.path.abspath(filepath)
@@ -90,7 +87,6 @@ class Config(dict):
         for dirname in dirnames:
             cucurc_filepath = os.path.join(dirname, "cucurc.yml")
             if os.path.exists(cucurc_filepath):
-                logger.debug(f"loading for {cucurc_filepath}")
                 self.load(cucurc_filepath)
 
     def resolve(self, value):

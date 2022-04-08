@@ -1,7 +1,8 @@
+import operator
 import sys
 import time
 
-from cucu import run_steps, step
+from cucu import logger, run_steps, step
 from behave.model_describe import ModelPrinter
 from cucu.config import CONFIG
 from strip_ansi import strip_ansi
@@ -13,26 +14,36 @@ def this_step_fails(_):
 
 
 @step('I sleep for "{value}" seconds')
-def sleep(context, value):
+def sleep(ctx, value):
     time.sleep(int(value))
 
 
 @step('I echo "{value}"')
-def i_echo(context, value):
+def i_echo(ctx, value):
     print(f"{value}\n")
 
 
 @step("I echo the following")
-def i_echo_the_following(context):
-    if context.text is not None:
-        print(f"{context.text}\n")
+def i_echo_the_following(ctx):
+    if ctx.text is not None:
+        print(f"{ctx.text}\n")
 
-    elif context.table is not None:
+    elif ctx.table is not None:
         printer = ModelPrinter(sys.stdout)
         # indentation is 2 spaces for Scenario 2 spaces for the start of keyword
         # "Given" and the length of "Given" minus one so we align with the last
         # character.
-        printer.print_table(context.table, " " * 8)
+        printer.print_table(ctx.table, " " * 8)
+
+
+@step('I log "{message}" at level "{level}"')
+def i_log(_, message, level):
+    operator.methodcaller(level.lower(), message)(logger)
+
+
+@step('I log the following at level "{level}"')
+def i_log_following(ctx, level):
+    operator.methodcaller(level.lower(), ctx.text)(logger)
 
 
 @step('I strip ansi codes from "{value}" and save to the variable "{variable}"')
