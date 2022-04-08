@@ -59,10 +59,6 @@ class Selenium(Browser):
                     desired_capabilities=desired_capabilities,
                 )
             else:
-                # auto install chromedriver if not present
-                with DisableLogger():
-                    chromedriver_autoinstaller.install()
-
                 self.driver = webdriver.Chrome(
                     chrome_options=options,
                     desired_capabilities=desired_capabilities,

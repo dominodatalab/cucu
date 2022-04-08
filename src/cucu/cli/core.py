@@ -132,7 +132,9 @@ def run(
     # load all them configs
     CONFIG.load_cucurc_files(filepath)
 
-    selenium.init()
+    # only install chromedriver if we're not running rmeotely
+    if selenium_remote_url is None:
+        selenium.init()
 
     if not dry_run:
         if not preserve_results:
