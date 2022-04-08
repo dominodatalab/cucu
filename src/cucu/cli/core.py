@@ -21,21 +21,18 @@ from importlib.metadata import version
 coverage.process_startup()
 
 
+def init_logging_level(logging_level):
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
+
+
 @click.group()
 @click.version_option(version("cucu"), message="%(version)s")
-@click.option("--debug/--no-debug", default=False)
-@click.option(
-    "-l",
-    "--logging-level",
-    default="INFO",
-    help="set logging level to one of debug, warn or info (default)",
-)
-def main(debug, logging_level):
+def main():
     """
     main entrypoint
     """
-    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
-    logger.init_logging(logging_level.upper())
+    pass
 
 
 @main.command()
@@ -82,6 +79,12 @@ def main(debug, logging_level):
     "-i", "--ipdb-on-failure/--no-ipdb-oo-failure", help="", default=False
 )
 @click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+@click.option(
     "-p", "--preserve-results/--no-preserve-results", help="", default=False
 )
 @click.option("--report", default="report")
@@ -118,6 +121,7 @@ def run(
     headless,
     name,
     ipdb_on_failure,
+    logging_level,
     preserve_results,
     report,
     results,
@@ -129,6 +133,8 @@ def run(
     """
     run a set of feature files
     """
+    init_logging_level(logging_level)
+
     # load all them configs
     CONFIG.load_cucurc_files(filepath)
 
@@ -237,11 +243,18 @@ def _generate_report(filepath, output):
 
 @main.command()
 @click.argument("filepath", default="results")
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
 @click.option("-o", "--output", default="report")
-def report(filepath, output):
+def report(filepath, logging_level, output):
     """
     create an HTML test report from the results directory provided
     """
+    init_logging_level(logging_level)
     _generate_report(filepath, output)
 
 
@@ -255,10 +268,18 @@ def report(filepath, output):
     "default: human. PRO TIP: `brew install fzf` and then "
     "`cucu steps | fzf` and easily find the step you need.",
 )
-def steps(filepath, format):
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+def steps(filepath, format, loggin_level):
     """
     print available cucu steps
     """
+    init_logging_level(logging_level)
+
     if format == "human":
         print_human_readable_steps(filepath=filepath)
     elif format == "json":
@@ -272,10 +293,18 @@ def steps(filepath, format):
 @click.option(
     "--fix/--no-fix", default=False, help="fix lint violations, default: False"
 )
-def lint(filepath, fix):
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+def lint(filepath, fix, logging_level):
     """
     lint feature files
     """
+    init_logging_level(logging_level)
+
     filepaths = list(filepath)
 
     if filepaths == []:
