@@ -27,8 +27,8 @@ repos:
       entry: ./bin/cucu lint --fix
       language: script
       files: ^.*\.feature$
-    - id: circleci_config_validate
-      name: validate the circleci config file
-      entry: circleci config validate
-      language: system
-      files: '\.circleci\/config\.yml'
+#   - id: circleci_config_validate
+#     name: validate the circleci config file
+#     entry: circleci config validate
+#     language: system
+#     files: '\.circleci\/config\.yml'

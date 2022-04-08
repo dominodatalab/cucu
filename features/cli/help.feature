@@ -11,11 +11,8 @@ Feature: Help
         main entrypoint
 
       Options:
-        --version                 Show the version and exit.
-        --debug / --no-debug
-        -l, --logging-level TEXT  set logging level to one of debug, warn or info
-                                  (default)
-        --help                    Show this message and exit.
+        --version  Show the version and exit.
+        --help     Show this message and exit.
 
       Commands:
         debug   debug cucu library
