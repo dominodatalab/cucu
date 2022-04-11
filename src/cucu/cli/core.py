@@ -134,10 +134,6 @@ def run(
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())
 
-    # only install chromedriver if we're not running rmeotely
-    if selenium_remote_url is None:
-        selenium.init()
-
     if not dry_run:
         if not preserve_results:
             if os.path.exists(results):
@@ -145,6 +141,13 @@ def run(
 
         if not os.path.exists(results):
             os.makedirs(results)
+
+    if selenium_remote_url is not None:
+        CONFIG["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
+
+    # only install chromedriver if we're not running rmeotely
+    if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
+        selenium.init()
 
     if workers is None or workers == 1:
         try:
