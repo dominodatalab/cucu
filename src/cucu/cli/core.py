@@ -164,7 +164,6 @@ def run(
                 results,
                 secrets,
                 tags,
-                selenium_remote_url,
             )
 
             if exit_code != 0:
@@ -200,7 +199,6 @@ def run(
                             results,
                             secrets,
                             tags,
-                            selenium_remote_url,
                         ],
                         {
                             "redirect_output": True,
