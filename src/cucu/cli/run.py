@@ -18,7 +18,6 @@ def behave(
     results,
     secrets,
     tags,
-    selenium_remote_url,
     log_start_n_stop=False,
     redirect_output=False,
 ):
@@ -41,13 +40,6 @@ def behave(
 
     if secrets:
         CONFIG["CUCU_SECRETS"] = secrets
-
-    if selenium_remote_url is not None:
-        CONFIG["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
-
-    # only install chromedriver if we're not running rmeotely
-    if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
-        selenium.init()
 
     args = [
         # don't run disabled tests
