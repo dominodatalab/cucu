@@ -4,8 +4,8 @@ import yaml
 
 
 class Config(dict):
-    def __init__(self, *args, **kwargs):
-        self.update(*args, **kwargs)
+    def __init__(self, **kwargs):
+        self.update(**kwargs)
         self.resolving = False
 
     def __getitem__(self, key):
@@ -35,8 +35,8 @@ class Config(dict):
         except KeyError:
             return default
 
-    def update(self, *args, **kwargs):
-        for k, v in dict(*args, **kwargs):
+    def update(self, **kwargs):
+        for k, v in kwargs.items():
             self[k] = v
 
     def bool(self, key):
@@ -102,6 +102,20 @@ class Config(dict):
                 self.resolving = False
         else:
             return value
+
+    def snapshot(self):
+        """
+        make a shallow copy of the current config values which can later be
+        restored using the `restore` method.
+        """
+        self.snapshot_data = self.copy()
+
+    def restore(self):
+        """
+        restore a previous `snapshot`
+        """
+        self.clear()
+        self.update(**self.snapshot_data)
 
 
 # global config object

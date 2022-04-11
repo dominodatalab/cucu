@@ -13,10 +13,12 @@ sys.stderr = behave_tweaks.CucuStream(sys.stderr)
 from cucu.hooks import (
     init_environment,
     init_steps,
+    init_hook_variables,
     register_before_this_scenario_hook,
     register_after_this_scenario_hook,
     register_before_all_scenario_hook,
     register_after_all_scenario_hook,
+    register_page_check_hook,
 )
 
 from cucu.utils import (

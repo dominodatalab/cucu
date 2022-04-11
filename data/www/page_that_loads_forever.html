@@ -1,0 +1,14 @@
+<html>
+  <head>
+    <title>Forever loading!</title>
+  </head>
+  <body>
+      <script>
+      let readyState = 'loading';
+      Object.defineProperty(document, 'readyState', {
+          get() { return readyState },
+          set(value) { return readyState = value },
+      });
+      </script>
+  </body>
+</html>

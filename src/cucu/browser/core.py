@@ -3,9 +3,10 @@
 # run the same tests against a browser being managed by selenium, cypress or
 # any other future browser testing framework
 #
+import time
 
-# WIP: thinking about how to abstract the browser in a way that would allow any
-#      cucu matcher implementation to just work with any browser framework
+from cucu.config import CONFIG
+from cucu import logger
 
 
 class Browser:
@@ -56,3 +57,23 @@ class Browser:
 
     def quit(self):
         raise RuntimeError("implement me")
+
+    # built in methods to be used by all browser implementations
+    def wait_for_page_to_load(self):
+        """
+        this method is to be used by all browser implementations and called
+        when after clicking something or refreshing the page and we'd like to
+        make sure the is "loaded" and ready to be interacted with.
+
+        this also gives us a place to fire off any additional page checks such
+        as a console log checker, broken image checker, etc.
+        """
+
+        # run the page checks
+        for (name, hook) in CONFIG["__CUCU_PAGE_CHECK_HOOKS"].items():
+            logger.debug(f'executing page check "{name}"')
+            start = time.time()
+            hook(self)
+            logger.debug(
+                f'executed page check "{name}" in {round(time.time()-start, 3)}s'
+            )
