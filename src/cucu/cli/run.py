@@ -2,7 +2,6 @@ import contextlib
 import os
 
 from behave.__main__ import main as behave_main
-from cucu.config import CONFIG
 
 
 def behave(
@@ -22,24 +21,24 @@ def behave(
     redirect_output=False,
 ):
     if color_output:
-        CONFIG["CUCU_COLOR_OUTPUT"] = str(color_output).lower()
+        os.environ["CUCU_COLOR_OUTPUT"] = str(color_output).lower()
 
     if headless:
-        CONFIG["CUCU_BROWSER_HEADLESS"] = "True"
+        os.environ["CUCU_BROWSER_HEADLESS"] = "True"
 
     for variable in list(env):
         key, value = variable.split("=")
-        CONFIG[key] = value
+        os.environ[key] = value
 
-    CONFIG["CUCU_BROWSER"] = browser
+    os.environ["CUCU_BROWSER"] = browser
 
     if ipdb_on_failure:
-        CONFIG["CUCU_IPDB_ON_FAILURE"] = "true"
+        os.environ["CUCU_IPDB_ON_FAILURE"] = "true"
 
-    CONFIG["CUCU_RESULTS_DIR"] = results
+    os.environ["CUCU_RESULTS_DIR"] = results
 
     if secrets:
-        CONFIG["CUCU_SECRETS"] = secrets
+        os.environ["CUCU_SECRETS"] = secrets
 
     args = [
         # don't run disabled tests
@@ -73,7 +72,7 @@ def behave(
             f"--outfile={results}/{run_json_filename}",
             # console formatter
             "--format=cucu.formatter.cucu:CucuFormatter",
-            f"--logging-level={CONFIG['CUCU_LOGGING_LEVEL'].upper()}",
+            f"--logging-level={os.environ['CUCU_LOGGING_LEVEL'].upper()}",
         ]
 
     for tag in tags:

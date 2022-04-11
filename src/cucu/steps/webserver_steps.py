@@ -1,5 +1,5 @@
 from behave import step
-from cucu import register_after_scenario_hook
+from cucu import register_after_this_scenario_hook
 from cucu.config import CONFIG
 from functools import partial
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -27,4 +27,4 @@ def run_webserver_for_scenario(context, directory, variable):
         httpd.shutdown()
         thread.join()
 
-    register_after_scenario_hook(shutdown_webserver)
+    register_after_this_scenario_hook(shutdown_webserver)

@@ -1,4 +1,4 @@
-from cucu import helpers, fuzzy, retry, step
+from cucu import helpers, fuzzy
 
 
 def find_link(ctx, name, index=0):
@@ -20,7 +20,14 @@ def find_link(ctx, name, index=0):
     return fuzzy.find(ctx.browser, name, ["a", '*[role="link"]'], index=index)
 
 
+def click_link(ctx, link):
+    """
+    internal method to click a link
+    """
+    ctx.browser.click(link)
+
+
 helpers.define_should_see_thing_with_name_steps("link", find_link)
 helpers.define_action_on_thing_with_name_steps(
-    "link", "click", find_link, lambda link: link.click()
+    "link", "click", find_link, click_link
 )

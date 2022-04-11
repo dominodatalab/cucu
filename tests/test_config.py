@@ -37,3 +37,12 @@ def test_config_resolves_variables():
 
 def test_config_resolves_not_set_to_empty_string():
     assert CONFIG.resolve("{NOT_SET}") == ""
+
+
+def test_config_snapshot_and_restore_works():
+    CONFIG["FOO"] = None
+    CONFIG.snapshot()
+    CONFIG["FOO"] = "bar"
+    assert CONFIG["FOO"] == "bar"
+    CONFIG.restore()
+    assert CONFIG["FOO"] == None

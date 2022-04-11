@@ -78,6 +78,7 @@ class Selenium(Browser):
 
     def navigate(self, url):
         self.driver.get(url)
+        self.wait_for_page_to_load()
 
     def switch_to_next_tab(self):
         window_handles = self.driver.window_handles
@@ -101,9 +102,11 @@ class Selenium(Browser):
 
     def back(self):
         self.driver.back()
+        self.wait_for_page_to_load()
 
     def refresh(self):
         self.driver.refresh()
+        self.wait_for_page_to_load()
 
     def title(self):
         return self.driver.title
@@ -121,6 +124,8 @@ class Selenium(Browser):
 
     def click(self, element):
         element.click()
+        # let cucu's own wait for page to load checks run
+        self.wait_for_page_to_load()
 
     def switch_to_default_frame(self):
         self.driver.switch_to.default_content()

@@ -75,25 +75,33 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
 
         raise Exception(f'radio button "{name}" already selected')
 
-    radio.click()
+    ctx.browser.click(radio)
 
 
 def is_selected(radio):
+    """
+    internal method to check if radiobox is selected
+    """
     return bool(radio.get_attribute("checked"))
 
 
-def is_not_selected(checkbox):
-    return not (is_selected(checkbox))
+def is_not_selected(radio):
+    """
+    internal method to check if a radiobox is not selected
+    """
+    return not is_selected(radio)
 
 
-def select_radio_button(radiobox):
-    """ """
+def select_radio_button(ctx, radiobox):
+    """
+    internal method to select a radio button that isn't already selected
+    """
     selected = bool(radiobox.get_attribute("checked"))
 
     if selected:
         raise Exception("radiobox already selected")
 
-    radiobox.click()
+    ctx.browser.click(radiobox)
 
 
 helpers.define_should_see_thing_with_name_steps(

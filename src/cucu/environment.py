@@ -6,6 +6,8 @@ import uuid
 
 from cucu import config, logger
 from cucu.config import CONFIG
+from cucu import init_hook_variables
+from cucu.page_checks import init_page_checks
 
 
 def escape_filename(string):
@@ -17,6 +19,7 @@ def escape_filename(string):
 
 def before_all(context):
     context.substep_increment = 0
+    CONFIG.snapshot()
 
 
 def before_feature(context, feature):
@@ -28,6 +31,12 @@ def after_feature(context, feature):
 
 
 def before_scenario(context, scenario):
+    # we want every scenario to start with the exact same reinitialized config
+    # values and not really bleed values between scenario runs
+    CONFIG.restore()
+    init_hook_variables()
+    init_page_checks()
+
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         scenario_dir = os.path.join(
             config.CONFIG["CUCU_RESULTS_DIR"],
@@ -44,9 +53,6 @@ def before_scenario(context, scenario):
 
     # internal cucu config variables
     config.CONFIG["SCENARIO_RUN_ID"] = uuid.uuid1().hex
-
-    # internal cucu config objects
-    CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
 
 
 def after_scenario(context, scenario):
@@ -80,10 +86,15 @@ def after_scenario(context, scenario):
 
         context.browsers = []
 
+    # run after all scenario hooks
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"]:
         hook(context)
 
-    CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
+    # run after this scenario hooks
+    for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"]:
+        hook(context)
+
+    CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 
 
 def before_step(context, step):
@@ -108,7 +119,6 @@ def after_step(context, step):
         )
 
         context.browser.screenshot(filepath)
-        logger.debug(f"wrote screenshot {filepath}")
 
     if context.substep_increment != 0:
         context.step_index += context.substep_increment
@@ -121,3 +131,13 @@ def after_step(context, step):
         import ipdb
 
         ipdb.post_mortem(step.exc_traceback)
+
+    # run before all scenario hooks
+    for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
+        hook(context)
+
+    # run before this scenario hooks
+    for hook in CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"]:
+        hook(context)
+
+    CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
