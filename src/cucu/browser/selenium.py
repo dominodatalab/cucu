@@ -23,9 +23,12 @@ def init():
     initialize any selenium specific needs
     """
 
-    # auto install chromedriver if not present
-    with DisableLogger():
-        chromedriver_autoinstaller.install()
+    try:
+        # auto install chromedriver if not present
+        with DisableLogger():
+            chromedriver_autoinstaller.install()
+    except:
+        logger.warn(f"unable to auto install chromedriver: {exception}")
 
 
 class Selenium(Browser):

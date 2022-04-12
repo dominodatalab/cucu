@@ -145,9 +145,7 @@ def run(
     if selenium_remote_url is not None:
         CONFIG["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
 
-    # only install chromedriver if we're not running rmeotely
-    if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
-        selenium.init()
+    selenium.init()
 
     if workers is None or workers == 1:
         try:
