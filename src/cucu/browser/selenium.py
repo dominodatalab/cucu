@@ -27,7 +27,7 @@ def init():
         # auto install chromedriver if not present
         with DisableLogger():
             chromedriver_autoinstaller.install()
-    except:
+    except Exception as exception:
         logger.warn(f"unable to auto install chromedriver: {exception}")
 
 
