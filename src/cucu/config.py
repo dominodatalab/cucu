@@ -54,8 +54,9 @@ class Config(dict):
         """
         config = yaml.safe_load(open(filepath, "rb"))
 
-        for key in config.keys():
-            self[key] = config[key]
+        if config:
+            for key in config.keys():
+                self[key] = config[key]
 
     def load_cucurc_files(self, filepath):
         """

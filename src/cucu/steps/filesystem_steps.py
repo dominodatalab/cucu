@@ -2,6 +2,7 @@ import os
 import re
 
 from cucu import retry, step
+from cucu.config import CONFIG
 
 
 @step('I create a file at "{filepath}" with the following')
@@ -23,6 +24,14 @@ def delete_file_at(ctx, filepath):
 def delete_file_at_if_it_exists(ctx, filepath):
     if os.path.exists(filepath):
         os.remove(filepath)
+
+        
+@step(
+    'I read the contents of the file at "{filepath}" and save to the variable "{variable}"'
+)
+def read_file_contents(ctx, filepath, variable):
+    with open(filepath, "r") as _input:
+        CONFIG[variable] = _input.read()
 
 
 @step('I append to the file at "{filepath}" the following')

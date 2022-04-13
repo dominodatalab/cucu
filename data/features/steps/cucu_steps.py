@@ -73,3 +73,8 @@ def search_for_on_google(context, query):
      And I click the button "Google Search"
     """,
     )
+
+
+@step('I use a step with "{nth:nth}" usage')
+def uses_nth_g(ctx, nth):
+    print("just a step that nth behave argument type")
