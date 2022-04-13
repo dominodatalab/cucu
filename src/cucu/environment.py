@@ -1,5 +1,7 @@
+import glob
 import json
 import os
+import shutil
 import sys
 import time
 import uuid
@@ -23,7 +25,11 @@ def before_all(context):
 
 
 def before_feature(context, feature):
-    pass
+    if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
+        feature_dir = os.path.join(
+            config.CONFIG["CUCU_RESULTS_DIR"], feature.name
+        )
+        CONFIG["FEATURE_RESULTS_DIR"] = feature_dir
 
 
 def after_feature(context, feature):
@@ -38,11 +44,14 @@ def before_scenario(context, scenario):
     init_page_checks()
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
+        feature_path = (config.CONFIG["FEATURE_RESULTS_DIR"],)
         scenario_dir = os.path.join(
             config.CONFIG["CUCU_RESULTS_DIR"],
             scenario.feature.name,
             scenario.name,
         )
+
+        CONFIG["SCENARIO_RESULTS_DIR"] = scenario_dir
         os.makedirs(scenario_dir, exist_ok=True)
         context.scenario_dir = scenario_dir
 
@@ -52,10 +61,23 @@ def before_scenario(context, scenario):
     context.browser = None
 
     # internal cucu config variables
-    config.CONFIG["SCENARIO_RUN_ID"] = uuid.uuid1().hex
+    CONFIG["SCENARIO_RUN_ID"] = uuid.uuid1().hex
 
 
 def after_scenario(context, scenario):
+    # copy any files in the CUCU_BROWSER_DOWNLOADS_DIR to the results
+    # directory for that scenario
+    downloads_dir = CONFIG["SCENARIO_DOWNLOADS_DIR"]
+
+    if downloads_dir:
+        scenario_downloads_dir = os.path.join(
+            CONFIG["SCENARIO_RESULTS_DIR"], "downloads"
+        )
+        os.makedirs(scenario_downloads_dir, exist_ok=True)
+        filepaths = glob.iglob(os.path.join(downloads_dir, "*.*"))
+        for filepath in filepaths:
+            shutil.copy(filepath, scenario_downloads_dir)
+
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
 

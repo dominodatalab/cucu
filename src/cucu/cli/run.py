@@ -17,6 +17,7 @@ def behave(
     results,
     secrets,
     tags,
+    verbose,
     log_start_n_stop=False,
     redirect_output=False,
 ):
@@ -47,6 +48,9 @@ def behave(
         # always print the skipped steps and scenarios
         "--show-skipped",
     ]
+
+    if verbose:
+        args.append("--verbose")
 
     run_json_filename = "run.json"
     if redirect_output:

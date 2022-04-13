@@ -1,5 +1,7 @@
 import chromedriver_autoinstaller
 import logging
+import os
+import uuid
 
 from cucu.browser.core import Browser
 from cucu import config, logger
@@ -42,6 +44,16 @@ class Selenium(Browser):
         if browser.startswith("chrome"):
             options = Options()
             options.add_experimental_option("detach", detach)
+
+            cucu_downloads_path = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
+            scenario_downloads_path = os.path.join(
+                cucu_downloads_path, uuid.uuid1().hex
+            )
+            config.CONFIG["SCENARIO_DOWNLOADS_DIR"] = scenario_downloads_path
+            logger.debug(f"scenario downloads path: {scenario_downloads_path}")
+
+            prefs = {"download.default_directory": scenario_downloads_path}
+            options.add_experimental_option("prefs", prefs)
 
             height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
             width = config.CONFIG["CUCU_BROWSER_WINDOW_WIDTH"]

@@ -104,6 +104,11 @@ def main():
     help="Specifies the number of workers to use to run tests in parallel",
     default=None,
 )
+@click.option(
+    "--verbose/--no-verbose",
+    help="runs with verbose logging and shows additional stacktrace",
+    default=False,
+)
 @click.option("-s", "--selenium-remote-url", default=None)
 def run(
     filepath,
@@ -124,6 +129,7 @@ def run(
     tags,
     selenium_remote_url,
     workers,
+    verbose,
 ):
     """
     run a set of feature files
@@ -162,6 +168,7 @@ def run(
                 results,
                 secrets,
                 tags,
+                verbose,
             )
 
             if exit_code != 0:
@@ -197,6 +204,7 @@ def run(
                             results,
                             secrets,
                             tags,
+                            verbose,
                         ],
                         {
                             "redirect_output": True,
