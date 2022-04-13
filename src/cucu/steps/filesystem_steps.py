@@ -25,7 +25,7 @@ def delete_file_at_if_it_exists(ctx, filepath):
     if os.path.exists(filepath):
         os.remove(filepath)
 
-        
+
 @step(
     'I read the contents of the file at "{filepath}" and save to the variable "{variable}"'
 )
