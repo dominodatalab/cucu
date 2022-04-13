@@ -11,3 +11,14 @@ Feature: File steps
       """
       foobar
       """
+
+  Scenario: User can create a new file and read the contents to a variable
+    Given I create a file at "{CUCU_RESULTS_DIR}/create_file_test.txt" with the following
+      """
+      foobar
+      """
+     When I read the contents of the file at "{CUCU_RESULTS_DIR}/create_file_test.txt" and save to the variable "DATA"
+     Then I should see "{DATA}" is equal to the following
+      """
+      foobar
+      """
