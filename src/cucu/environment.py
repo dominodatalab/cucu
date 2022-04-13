@@ -68,13 +68,15 @@ def after_scenario(context, scenario):
     # copy any files in the CUCU_BROWSER_DOWNLOADS_DIR to the results
     # directory for that scenario
     downloads_dir = CONFIG["SCENARIO_DOWNLOADS_DIR"]
-    scenario_downloads_dir = os.path.join(
-        CONFIG["SCENARIO_RESULTS_DIR"], "downloads"
-    )
-    os.makedirs(scenario_downloads_dir, exist_ok=True)
-    filepaths = glob.iglob(os.path.join(downloads_dir, "*.*"))
-    for filepath in filepaths:
-        shutil.copy(filepath, scenario_downloads_dir)
+
+    if downloads_dir:
+        scenario_downloads_dir = os.path.join(
+            CONFIG["SCENARIO_RESULTS_DIR"], "downloads"
+        )
+        os.makedirs(scenario_downloads_dir, exist_ok=True)
+        filepaths = glob.iglob(os.path.join(downloads_dir, "*.*"))
+        for filepath in filepaths:
+            shutil.copy(filepath, scenario_downloads_dir)
 
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
