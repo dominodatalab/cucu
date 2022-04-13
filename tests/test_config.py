@@ -1,3 +1,5 @@
+import tempfile
+
 from cucu.config import CONFIG
 
 
@@ -46,3 +48,8 @@ def test_config_snapshot_and_restore_works():
     assert CONFIG["FOO"] == "bar"
     CONFIG.restore()
     assert CONFIG["FOO"] == None
+
+
+def test_config_can_load_an_empty_config():
+    with tempfile.NamedTemporaryFile(suffix="cucurc") as temp_cucurc:
+        CONFIG.load(temp_cucurc.name)
