@@ -1,7 +1,8 @@
 import os
 import re
 
-from behave import step
+from cucu import step
+from cucu.config import CONFIG
 
 
 @step('I create a file at "{filepath}" with the following')
@@ -12,6 +13,14 @@ def create_file_with_the_following(ctx, filepath):
 
     with open(filepath, "wb") as output:
         output.write(bytes(ctx.text, "utf8"))
+
+
+@step(
+    'I read the contents of the file at "{filepath}" and save to the variable "{variable}"'
+)
+def read_file_contents(ctx, filepath, variable):
+    with open(filepath, "r") as _input:
+        CONFIG[variable] = _input.read()
 
 
 @step('I append to the file at "{filepath}" the following')
