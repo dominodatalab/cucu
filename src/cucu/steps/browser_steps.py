@@ -1,29 +1,11 @@
 import humanize
 import os
-import parse
 import re
 
-from behave import step, register_type
-from cucu import config, logger, fuzzy
+from cucu import config, logger, fuzzy, step
 from cucu.browser.selenium import Selenium
 
 from selenium.webdriver.common.keys import Keys
-
-NTH_REGEX = r"(\d+)(nd|th|rd|st)"
-
-
-@parse.with_pattern(NTH_REGEX)
-def parse_nth(nth):
-    matcher = re.match(NTH_REGEX, nth)
-
-    if matcher is None:
-        raise Exception(f"nth expression {nth} is invalid")
-
-    number, _ = matcher.groups()
-    return int(number) - 1
-
-
-register_type(nth=parse_nth)
 
 
 def open_browser(ctx):
