@@ -153,8 +153,8 @@ def run(
 
     selenium.init()
 
-    if workers is None or workers == 1:
-        try:
+    try:
+        if workers is None or workers == 1:
             exit_code = behave(
                 filepath,
                 browser,
@@ -173,58 +173,60 @@ def run(
 
             if exit_code != 0:
                 raise ClickException("test run failed, see above for details")
-        finally:
-            if generate_report:
-                _generate_report(results, report)
-
-    else:
-        if os.path.isdir(filepath):
-            basepath = os.path.join(filepath, "**/*.feature")
-            feature_filepaths = glob.iglob(basepath, recursive=True)
 
         else:
-            feature_filepaths = [filepath]
+            if os.path.isdir(filepath):
+                basepath = os.path.join(filepath, "**/*.feature")
+                feature_filepaths = glob.iglob(basepath, recursive=True)
 
-        with multiprocessing.Pool(int(workers)) as pool:
-            async_results = []
-            for feature_filepath in feature_filepaths:
-                async_results.append(
-                    pool.apply_async(
-                        behave,
-                        [
-                            feature_filepath,
-                            browser,
-                            color_output,
-                            dry_run,
-                            env,
-                            fail_fast,
-                            headless,
-                            name,
-                            ipdb_on_failure,
-                            results,
-                            secrets,
-                            tags,
-                            verbose,
-                        ],
-                        {
-                            "redirect_output": True,
-                            "log_start_n_stop": True,
-                        },
+            else:
+                feature_filepaths = [filepath]
+
+            with multiprocessing.Pool(int(workers)) as pool:
+                async_results = []
+                for feature_filepath in feature_filepaths:
+                    async_results.append(
+                        pool.apply_async(
+                            behave,
+                            [
+                                feature_filepath,
+                                browser,
+                                color_output,
+                                dry_run,
+                                env,
+                                fail_fast,
+                                headless,
+                                name,
+                                ipdb_on_failure,
+                                results,
+                                secrets,
+                                tags,
+                                verbose,
+                            ],
+                            {
+                                "redirect_output": True,
+                                "log_start_n_stop": True,
+                            },
+                        )
                     )
-                )
 
-            workers_failed = False
-            for result in async_results:
-                result.wait()
-                exit_code = result.get()
-                if exit_code != 0:
-                    workers_failed = True
+                workers_failed = False
+                for result in async_results:
+                    result.wait()
+                    exit_code = result.get()
+                    if exit_code != 0:
+                        workers_failed = True
 
-            pool.close()
-            pool.join()
+                pool.close()
+                pool.join()
 
-            if workers_failed:
-                raise RuntimeError("there are failures, see above for details")
+                if workers_failed:
+                    raise RuntimeError(
+                        "there are failures, see above for details"
+                    )
+    finally:
+        if generate_report:
+            _generate_report(results, report)
 
 
 def _generate_report(filepath, output):
