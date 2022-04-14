@@ -6,33 +6,6 @@ import sys
 from cucu.config import CONFIG
 
 
-def init_steps():
-    """
-    initialize cucu steps and load underlying
-    """
-    __all__ = []
-    # trick to get the path of the script that called this function
-    f_globals = sys._getframe(1).f_globals
-    f_locals = sys._getframe(1).f_locals
-
-    path = [os.path.dirname(f_globals["__file__"])]
-
-    importlib.import_module("cucu.steps")
-
-    for loader, module_name, is_pkg in pkgutil.walk_packages(path):
-        __all__.append(module_name)
-        _module = loader.find_module(module_name).load_module(module_name)
-        f_globals[module_name] = _module
-
-
-def init_environment():
-    """
-    initialize cucu internal environment hooks
-    """
-    f_locals = sys._getframe(1).f_locals
-    f_locals.update(importlib.import_module("cucu.environment").__dict__)
-
-
 def init_hook_variables():
     CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"] = []
     CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []

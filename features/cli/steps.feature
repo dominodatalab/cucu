@@ -18,13 +18,11 @@ Feature: Steps
   Scenario: User can use `cucu steps` even if there are undefined steps
     Given I create a file at "{CUCU_RESULTS_DIR}/undefined_steps/features/environment.py" with the following:
       """
-      import cucu
-      cucu.init_environment()
+      from cucu.environment import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/undefined_steps/features/steps/__init__.py" with the following:
       """
-      import cucu
-      cucu.init_steps()
+      from cucu.steps import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/undefined_steps/features/cucurc.yml" with the following:
       """
