@@ -16,13 +16,13 @@ def init_steps():
     f_locals = sys._getframe(1).f_locals
 
     path = [os.path.dirname(f_globals["__file__"])]
-
     importlib.import_module("cucu.steps")
 
     for loader, module_name, is_pkg in pkgutil.walk_packages(path):
-        __all__.append(module_name)
-        _module = loader.find_module(module_name).load_module(module_name)
-        f_globals[module_name] = _module
+        if module_name.endswith("_steps"):
+            __all__.append(module_name)
+            _module = loader.find_module(module_name).load_module(module_name)
+            f_globals[module_name] = _module
 
 
 def init_environment():
