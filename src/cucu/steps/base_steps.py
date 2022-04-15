@@ -1,11 +1,30 @@
+import parse
 import operator
+import re
 import sys
 import time
 
-from cucu import logger, run_steps, step
+from behave import register_type
 from behave.model_describe import ModelPrinter
+from cucu import logger, run_steps, step
 from cucu.config import CONFIG
 from strip_ansi import strip_ansi
+
+NTH_REGEX = r"(\d+)(nd|th|rd|st)"
+
+
+@parse.with_pattern(NTH_REGEX)
+def parse_nth(nth):
+    matcher = re.match(NTH_REGEX, nth)
+
+    if matcher is None:
+        raise Exception(f"nth expression {nth} is invalid")
+
+    number, _ = matcher.groups()
+    return int(number) - 1
+
+
+register_type(nth=parse_nth)
 
 
 @step("I run a step that fails")

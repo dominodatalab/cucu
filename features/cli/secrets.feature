@@ -5,13 +5,11 @@ Feature: Secrets
   Scenario: User can run a test while hiding secrets using their cucurc.yml file
     Given I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/environment.py" with the following:
       """
-      import cucu
-      cucu.init_environment()
+      from cucu.environment import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/steps/__init__.py" with the following:
       """
-      import cucu
-      cucu.init_steps()
+      from cucu.steps import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/cucurc.yml" with the following:
       """
@@ -34,13 +32,11 @@ Feature: Secrets
   Scenario: User can run a test while hiding secrets identified by the command line option
     Given I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/environment.py" with the following:
       """
-      import cucu
-      cucu.init_environment()
+      from cucu.environment import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/steps/__init__.py" with the following:
       """
-      import cucu
-      cucu.init_steps()
+      from cucu.steps import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/cucurc.yml" with the following:
       """

@@ -1,5 +1,1 @@
-import cucu
-
-
-# initialize cucu steps
-cucu.init_steps()
+from cucu.steps import *

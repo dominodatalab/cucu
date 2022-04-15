@@ -4,13 +4,11 @@ Feature: Lint
   Scenario: User gets error message when violation can not be fixed
     Given I create a file at "{CUCU_RESULTS_DIR}/undefined_step_lint/environment.py" with the following:
       """
-      import cucu
-      cucu.init_environment()
+      from cucu.environment import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/undefined_step_lint/steps/__init__.py" with the following:
       """
-      import cucu
-      cucu.init_steps()
+      from cucu.steps import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/undefined_step_lint/undefined_step_feature.feature" with the following:
       """
@@ -47,13 +45,11 @@ Feature: Lint
   Scenario: User can find and fix indentation violations
     Given I create a file at "{CUCU_RESULTS_DIR}/indent_lint/environment.py" with the following:
       """
-      import cucu
-      cucu.init_environment()
+      from cucu.environment import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/indent_lint/steps/__init__.py" with the following:
       """
-      import cucu
-      cucu.init_steps()
+      from cucu.steps import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" with the following:
       """
@@ -104,13 +100,11 @@ Feature: Lint
   Scenario: User can find and fix unnecessary whitespace
     Given I create a file at "{CUCU_RESULTS_DIR}/whitespace_lint/environment.py" with the following:
       """
-      import cucu
-      cucu.init_environment()
+      from cucu.environment import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/whitespace_lint/steps/__init__.py" with the following:
       """
-      import cucu
-      cucu.init_steps()
+      from cucu.steps import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" with the following:
       """

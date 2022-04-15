@@ -5,13 +5,11 @@ Feature: Config
   Scenario: User can load cucurc values from a cucucrc file in
     Given I create a file at "{CUCU_RESULTS_DIR}/load_nested_cucurc/environment.py" with the following:
       """
-      import cucu
-      cucu.init_environment()
+      from cucu.environment import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/load_nested_cucurc/steps/__init__.py" with the following:
       """
-      import cucu
-      cucu.init_steps()
+      from cucu.steps import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/load_nested_cucurc/cucurc.yml" with the following:
       """
@@ -62,13 +60,11 @@ Feature: Config
   Scenario: User gets an appropriate error when cuucrc has invalid syntax
     Given I create a file at "{CUCU_RESULTS_DIR}/load_bad_cucurc/environment.py" with the following:
       """
-      import cucu
-      cucu.init_environment()
+      from cucu.environment import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/load_bad_cucurc/steps/__init__.py" with the following:
       """
-      import cucu
-      cucu.init_steps()
+      from cucu.steps import *
       """
       And I create a file at "{CUCU_RESULTS_DIR}/load_bad_cucurc/cucurc.yml" with the following:
       """
