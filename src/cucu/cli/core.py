@@ -5,6 +5,7 @@ import coverage
 import glob
 import multiprocessing
 import shutil
+import socket
 import time
 import os
 
@@ -19,6 +20,11 @@ from importlib.metadata import version
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
+
+# quick and dirty way to simply handle having a default socket timeout for all
+# things within the framework
+timeout = float(CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT"])
+socket.setdefaulttimeout(timeout)
 
 
 @click.group()
