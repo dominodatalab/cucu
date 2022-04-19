@@ -70,15 +70,22 @@
     transform: rotate(45deg);
   }
   </style>
+  <script>
+  function update(value) { document.querySelector("#input").value = value; }
+  </script>
   </head>
   <body>
-    <input type="checkbox"><label>checkbox with inner label</label></checkbox>
-    <input type="checkbox"></checkbox><label>checkbox with label after</label>
+    <label>last touched checkbox:</label><input id="input" type="text"></input>
     <br/>
-    <label class="container">checkbox with role=checkbox
-      <input type="checkbox" checked="checked">
-      <span role="checkbox" class="checkmark"></span>
-    </label>
+    <input onclick="update('checkbox with inner label')" type="checkbox"><label>checkbox with inner label</label></input>
+    <br/>
+    <input onclick="update('checkbox with label after')" type="checkbox"></input><label>checkbox with label after</label>
+    <br/>
+    <label><input onclick="update('checkbox wrapped with label')" type="checkbox"></input>checkbox wrapped with label</label>
+    <br/>
+    <input onclick="update('checkbox with role=checkbox')" type="checkbox">
+    <span role="checkbox" class="checkmark"></span>
+    <label class="container">checkbox with role=checkbox</label>
 
     <!-- load the utility library that can be used to delay the page loading -->
     <script src="js/util.js"></script>
