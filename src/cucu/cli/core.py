@@ -13,6 +13,7 @@ from click import ClickException
 from cucu import fuzzy, reporter, language_server, logger
 from cucu.browser import selenium
 from cucu.config import CONFIG
+from cucu.cli import thread_dumper
 from cucu.cli.run import behave
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.lint import linter
@@ -86,6 +87,11 @@ def main():
     help="set logging level to one of debug, warn or info (default)",
 )
 @click.option(
+    "--periodic-thread-dumper",
+    default=None,
+    help="sets the interval in minutes of when to run the periodic thread dumper",
+)
+@click.option(
     "-p", "--preserve-results/--no-preserve-results", help="", default=False
 )
 @click.option("--report", default="report")
@@ -128,6 +134,7 @@ def run(
     name,
     ipdb_on_failure,
     logging_level,
+    periodic_thread_dumper,
     preserve_results,
     report,
     results,
@@ -140,6 +147,8 @@ def run(
     """
     run a set of feature files
     """
+    dumper = None
+
     # load all them configs
     CONFIG.load_cucurc_files(filepath)
 
@@ -156,6 +165,10 @@ def run(
 
     if selenium_remote_url is not None:
         CONFIG["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
+
+    if periodic_thread_dumper is not None:
+        interval_min = float(periodic_thread_dumper)
+        dumper = thread_dumper.start(interval_min)
 
     if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
         selenium.init()
@@ -232,6 +245,9 @@ def run(
                         "there are failures, see above for details"
                     )
     finally:
+        if dumper is not None:
+            dumper.stop()
+
         if generate_report:
             _generate_report(results, report)
 
