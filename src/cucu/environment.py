@@ -144,7 +144,7 @@ def after_step(context, step):
         CONFIG["CUCU_LAST_SCREENSHOT_PNG"] = filepath
 
         if CONFIG["CUCU_MONITOR_PNG"] is not None:
-            shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"] )
+            shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
 
     if context.substep_increment != 0:
         context.step_index += context.substep_increment
