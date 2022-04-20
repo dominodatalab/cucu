@@ -24,21 +24,9 @@ def init():
     """
     initialize any selenium specific needs
     """
-    utils = chromedriver_autoinstaller.utils
-    chromedriver_autoinstaller_path = utils.get_chromedriver_path()
-    chromedriver_filename = utils.get_chromedriver_filename()
-    chrome_version = utils.get_chrome_version()
-    chrome_major_version = utils.get_major_version(chrome_version)
-    chromedriver_path = os.path.join(
-        chromedriver_autoinstaller_path,
-        chrome_major_version,
-        chromedriver_filename,
-    )
-
-    # auto install chromedriver if not present
-    if not os.path.exists(chromedriver_path):
-        with DisableLogger():
-            chromedriver_autoinstaller.install()
+    with DisableLogger():
+        # auto install chromedriver if not present
+        chromedriver_autoinstaller.install()
 
 
 class Selenium(Browser):
