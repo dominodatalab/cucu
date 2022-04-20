@@ -170,7 +170,6 @@ def run(
         interval_min = float(periodic_thread_dumper)
         dumper = thread_dumper.start(interval_min)
 
-    selenium.init()
 
     if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
         selenium.init()
