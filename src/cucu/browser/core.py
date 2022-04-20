@@ -70,10 +70,11 @@ class Browser:
         """
 
         # run the page checks
-        for (name, hook) in CONFIG["__CUCU_PAGE_CHECK_HOOKS"].items():
-            logger.debug(f'executing page check "{name}"')
-            start = time.time()
-            hook(self)
-            logger.debug(
-                f'executed page check "{name}" in {round(time.time()-start, 3)}s'
-            )
+        if CONFIG["__CUCU_PAGE_CHECK_HOOKS"]:
+            for (name, hook) in CONFIG["__CUCU_PAGE_CHECK_HOOKS"].items():
+                logger.debug(f'executing page check "{name}"')
+                start = time.time()
+                hook(self)
+                logger.debug(
+                    f'executed page check "{name}" in {round(time.time()-start, 3)}s'
+                )

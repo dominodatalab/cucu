@@ -32,7 +32,7 @@ def is_checked(checkbox):
     """
     internal method to check a checkbox is checked
     """
-    return checkbox.get_attribute("checked") == "true"
+    return checkbox.get_attribute("checked")
 
 
 def is_not_checked(checkbox):
