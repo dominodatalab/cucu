@@ -11,11 +11,13 @@ sys.stdout = behave_tweaks.CucuStream(sys.stdout)
 sys.stderr = behave_tweaks.CucuStream(sys.stderr)
 
 from cucu.hooks import (
-    init_hook_variables,
-    register_before_this_scenario_hook,
+    init_global_hook_variables,
+    init_scenario_hook_variables,
     register_after_this_scenario_hook,
-    register_before_all_scenario_hook,
-    register_after_all_scenario_hook,
+    register_before_scenario_hook,
+    register_after_scenario_hook,
+    register_before_step_hook,
+    register_after_step_hook,
     register_page_check_hook,
 )
 
