@@ -26,6 +26,13 @@ Feature: Report
      Then I should see the link "Search for kittens on www.google.com"
      When I click the link "Search for kittens on www.google.com"
      Then I should see the text "And I wait to write \"define: kittens\" into the input \"Search\""
+     When I run the command "ls "{SCENARIO_RESULTS_DIR}/"" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "0"
+      And I should see "{STDOUT}" matches the following
+      """
+      [\s\S]*\.png
+      [\s\S]*
+      """
 
   Scenario: User can run a multi scenario test with web steps and generate report with a shareable url
     Given I run the command "cucu run data/features/multiple_scenarios_with_browser_steps.feature --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled --results {CUCU_RESULTS_DIR}/multi-scenario-browser-results" and save exit code to "EXIT_CODE"

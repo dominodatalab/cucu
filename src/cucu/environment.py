@@ -141,7 +141,6 @@ def after_step(context, step):
         )
 
         context.browser.screenshot(filepath)
-        CONFIG["CUCU_LAST_SCREENSHOT_PNG"] = filepath
 
         if CONFIG["CUCU_MONITOR_PNG"] is not None:
             shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
