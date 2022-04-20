@@ -118,8 +118,22 @@
                 /*
                  * <thing><*>...name...</*></thing>
                  */
-                results = jQuery('*:' + matcher + '("' + name + '")').parents(thing).toArray();
+                results = jQuery('*:vis:' + matcher + '("' + name + '")').parents(thing).toArray();
                 if (cucu.debug) { console.log('<thing><*>...name...</*></thing>', results); }
+                elements = elements.concat(results);
+            }
+
+            /*
+             * element labeled by a text sibling
+             */
+            for(var tIndex = 0; tIndex < things.length; tIndex++) {
+                var thing = things[tIndex];
+
+                /*
+                 * <*><thing></thing>name</*>
+                 */
+                results = jQuery('*:vis:has_text("' + name + '")').children(thing + ':vis').toArray();
+                if (cucu.debug) { console.log('<*><thing></thing>name</*>', results); }
                 elements = elements.concat(results);
             }
 

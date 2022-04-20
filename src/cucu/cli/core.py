@@ -5,6 +5,7 @@ import coverage
 import glob
 import multiprocessing
 import shutil
+import socket
 import time
 import os
 
@@ -20,6 +21,11 @@ from importlib.metadata import version
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
+
+# quick and dirty way to simply handle having a default socket timeout for all
+# things within the framework
+timeout = float(CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT"])
+socket.setdefaulttimeout(timeout)
 
 
 @click.group()
@@ -165,6 +171,9 @@ def run(
         dumper = thread_dumper.start(interval_min)
 
     selenium.init()
+
+    if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
+        selenium.init()
 
     try:
         if workers is None or workers == 1:

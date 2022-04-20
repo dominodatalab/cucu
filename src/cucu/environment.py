@@ -8,8 +8,11 @@ import uuid
 
 from cucu import config, logger
 from cucu.config import CONFIG
-from cucu import init_hook_variables
+from cucu import init_global_hook_variables, init_scenario_hook_variables
 from cucu.page_checks import init_page_checks
+
+
+init_global_hook_variables()
 
 
 def escape_filename(string):
@@ -40,7 +43,7 @@ def before_scenario(context, scenario):
     # we want every scenario to start with the exact same reinitialized config
     # values and not really bleed values between scenario runs
     CONFIG.restore()
-    init_hook_variables()
+    init_scenario_hook_variables()
     init_page_checks()
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
@@ -62,6 +65,10 @@ def before_scenario(context, scenario):
 
     # internal cucu config variables
     CONFIG["SCENARIO_RUN_ID"] = uuid.uuid1().hex
+
+    # run before all scenario hooks
+    for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
+        hook(context)
 
 
 def after_scenario(context, scenario):
@@ -125,6 +132,10 @@ def before_step(context, step):
     context.current_step = step
     context.start_time = time.monotonic()
 
+    # run before all step hooks
+    for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
+        hook(context)
+
 
 def after_step(context, step):
     context.end_time = time.monotonic()
@@ -154,12 +165,8 @@ def after_step(context, step):
 
         ipdb.post_mortem(step.exc_traceback)
 
-    # run before all scenario hooks
-    for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
-        hook(context)
-
-    # run before this scenario hooks
-    for hook in CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"]:
-        hook(context)
-
     CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
+
+    # run after all step hooks
+    for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
+        hook(context)
