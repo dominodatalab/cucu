@@ -24,7 +24,7 @@ coverage.process_startup()
 # quick and dirty way to simply handle having a default socket timeout for all
 # things within the framework
 timeout = float(CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT"])
-# socket.setdefaulttimeout(timeout)
+socket.setdefaulttimeout(timeout)
 
 
 @click.group()
