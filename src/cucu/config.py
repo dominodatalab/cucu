@@ -153,3 +153,6 @@ CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT"] = 60  # 60 seconds seems reasonable
 
 # cucu internals
 CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
+
+# filepath to where copy the latest screenshot, None to disable
+CONFIG["CUCU_MONITOR_PNG"] = None
