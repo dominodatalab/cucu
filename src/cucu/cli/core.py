@@ -157,7 +157,8 @@ def run(
     if selenium_remote_url is not None:
         CONFIG["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
 
-    selenium.init()
+    if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
+        selenium.init()
 
     try:
         if workers is None or workers == 1:

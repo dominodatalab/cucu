@@ -63,3 +63,8 @@ Feature: Run
       1 step passed, 0 failed, 5 skipped, 0 undefined
       [\s\S]*
       """
+
+  Scenario: User can run a simple test within a reasonable amount of time
+    Given I run the command "cucu run data/features/echo.feature" and save stdout to "STDOUT", exit code to "EXIT_CODE"
+     Then I should see the previous step took less than "5" seconds
+     Then I should see "{EXIT_CODE}" is equal to "0"
