@@ -2,6 +2,7 @@ import chromedriver_autoinstaller
 import logging
 import os
 import uuid
+import urllib3
 
 from cucu.browser.core import Browser
 from cucu import config, logger
@@ -67,12 +68,23 @@ class Selenium(Browser):
             desired_capabilities["goog:loggingPrefs"] = {"browser": "ALL"}
 
             if selenium_remote_url is not None:
-                logger.debug(f"connecting to selenium: {selenium_remote_url}")
-                self.driver = webdriver.Remote(
-                    command_executor=selenium_remote_url,
-                    desired_capabilities=desired_capabilities,
-                )
+                logger.debug(f"webdriver.Remote init: {selenium_remote_url}")
+                try:
+                    self.driver = webdriver.Remote(
+                        command_executor=selenium_remote_url,
+                        desired_capabilities=desired_capabilities,
+                    )
+                except urllib3.exceptions.ReadTimeoutError:
+                    print("*" * 80)
+                    print(
+                        "* unable to connect to the remote selenium setup,"
+                        " you may need to restart it"
+                    )
+                    print("*" * 80)
+                    print("")
+                    raise
             else:
+                logger.debug("webdriver.Chrome init")
                 self.driver = webdriver.Chrome(
                     chrome_options=options,
                     desired_capabilities=desired_capabilities,
