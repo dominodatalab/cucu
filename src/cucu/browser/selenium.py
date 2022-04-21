@@ -44,14 +44,13 @@ class Selenium(Browser):
             options = Options()
             options.add_experimental_option("detach", detach)
 
-            cucu_downloads_path = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
-            scenario_downloads_path = os.path.join(
-                cucu_downloads_path, uuid.uuid1().hex
+            cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
+            selenium_downloads_dir = os.path.join(
+                cucu_downloads_dir, uuid.uuid1().hex
             )
-            config.CONFIG["SCENARIO_DOWNLOADS_DIR"] = scenario_downloads_path
-            logger.debug(f"scenario downloads path: {scenario_downloads_path}")
+            config.CONFIG["SCENARIO_DOWNLOADS_DIR"] = selenium_downloads_dir
 
-            prefs = {"download.default_directory": scenario_downloads_path}
+            prefs = {"download.default_directory": selenium_downloads_dir}
             options.add_experimental_option("prefs", prefs)
 
             height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
@@ -69,6 +68,7 @@ class Selenium(Browser):
             if selenium_remote_url is not None:
                 logger.debug(f"connecting to selenium: {selenium_remote_url}")
                 self.driver = webdriver.Remote(
+                    options=options,
                     command_executor=selenium_remote_url,
                     desired_capabilities=desired_capabilities,
                 )
