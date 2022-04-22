@@ -387,11 +387,10 @@ def vars(filepath):
     variables = []
     variables.append(["Name", "Description", "Default"])
 
-    for name in CONFIG.defined_variables:
-        definition = CONFIG.defined_variables[name]
-        variables.append(
-            [name, definition["description"], definition["default"]]
-        )
+    variables.extend([
+        [name, definition["description"], definition["default"]]
+        for name, definition in CONFIG.defined_variables.items()
+    ])
 
     print(tabulate(variables, tablefmt="fancy_grid"))
 
