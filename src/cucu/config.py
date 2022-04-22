@@ -7,6 +7,25 @@ class Config(dict):
     def __init__(self, **kwargs):
         self.update(**kwargs)
         self.resolving = False
+        self.defined_variables = {}
+
+    def define(self, name, description, default=None):
+        """
+        used to define variables and set their default so that we can then
+        provide the info using the `cucu vars` command for test writers to know
+        where and how to use various built-in variables.
+
+        parameters:
+            name(string): the name of the variable
+            description(string): a succint description of variables purpose
+            default(string): an optional default to set the variable to
+        """
+        self.defined_variables[name] = {
+            "description": description,
+            "default": default,
+        }
+        # set the default
+        self.__setitem__(name, default)
 
     def __getitem__(self, key):
         try:
@@ -124,35 +143,72 @@ CONFIG = Config()
 
 
 def get_local_address():
+    """
+    internal method to get the current host address
+    """
     google_dns_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     google_dns_socket.connect(("8.8.8.8", 80))
     return google_dns_socket.getsockname()[0]
 
 
-# XXX: need a way to register these with description so that we can create a
-#      `cucu vars` command which spits out the available variables, their
-#      defaults and a description of their usage.
-CONFIG["HOST_ADDRESS"] = get_local_address()
-CONFIG["CWD"] = os.getcwd()
+CONFIG.define(
+    "HOST_ADDRESS",
+    "host address of the current machine cucu is running on",
+    default=get_local_address(),
+)
+CONFIG.define(
+    "CWD",
+    "the current working directory of the cucu process",
+    default=os.getcwd,
+)
+CONFIG.define(
+    "CUCU_SECRETS",
+    "a comma separated list of VARIABLE names that we want to hide "
+    "their values in the various outputs of cucu by replacing with asterisks",
+    default="",
+)
+CONFIG.define(
+    "CUCU_STEP_WAIT_TIMEOUT_S",
+    "the total amount of wait time in seconds `wait for` steps",
+    default=20.0,
+)
+CONFIG.define(
+    "CUCU_STEP_RETRY_AFTER_S",
+    "the amount of time to wait between retries in `wait for` steps",
+    default=0.5,
+)
+CONFIG.define(
+    "CUCU_KEEP_BROWSER_ALIVE",
+    "when set to true we'll reuse the browser between scenario runs",
+    default=False,
+)
+CONFIG.define(
+    "CUCU_BROWSER_WINDOW_HEIGHT",
+    "the browser window height when running browser tests",
+    default=1080,
+)
+CONFIG.define(
+    "CUCU_BROWSER_WINDOW_WIDTH",
+    "the browser window width when running browser tests",
+    default=1920,
+)
+CONFIG.define(
+    "CUCU_BROWSER_DOWNLOADS_DIR",
+    "the browser download directory when running browser tests",
+    default="/tmp/cucu-browser-downloads",
+)
+CONFIG.define(
+    "CUCU_SELENIUM_DEFAULT_TIMEOUT_S",
+    "the default timeout (seconds) for selenium connect/read "
+    "network timeouts",
+    default=60,
+)
+CONFIG.define(
+    "CUCU_MONITOR_PNG",
+    "when set to a filename `cucu` will update the image to match "
+    "the exact image step at runtime.",
+    default=None,
+)
 
-# coma separated list of variables that we should hide if their values are to
-# be printed to the console
-CONFIG["CUCU_SECRETS"] = ""
-
-CONFIG["CUCU_STEP_WAIT_TIMEOUT_S"] = 20.0  # default of 20s to wait
-CONFIG[
-    "CUCU_STEP_RETRY_AFTER_S"
-] = 0.5  # default of 500ms to wait between retries
-CONFIG["CUCU_KEEP_BROWSER_ALIVE"] = False
-
-CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"] = 1080
-CONFIG["CUCU_BROWSER_WINDOW_WIDTH"] = 1920
-CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"] = "/tmp/cucu-browser-downloads"
-
-CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT"] = 60  # 60 seconds seems reasonable
-
-# cucu internals
+# cucu internals - we do not expose these as defined variables in `cucu vars`
 CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
-
-# filepath to where copy the latest screenshot, None to disable
-CONFIG["CUCU_MONITOR_PNG"] = None

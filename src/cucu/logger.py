@@ -19,25 +19,25 @@ def init_logging(logging_level):
 def debug(*args, **kwargs):
     if logging.getLogger("cucu").getEffectiveLevel() <= logging.DEBUG:
         logging.getLogger("cucu").debug(*args, **kwargs)
-        CONFIG["CUCU_WROTE_TO_STDOUT"] = True
+        CONFIG["__CUCU_WROTE_TO_STDOUT"] = True
 
 
 @wraps(logging.warn)
 def warn(*args, **kwargs):
     if logging.getLogger("cucu").getEffectiveLevel() <= logging.WARN:
         logging.getLogger("cucu").warn(*args, **kwargs)
-        CONFIG["CUCU_WROTE_TO_STDOUT"] = True
+        CONFIG["__CUCU_WROTE_TO_STDOUT"] = True
 
 
 @wraps(logging.info)
 def info(*args, **kwargs):
     if logging.getLogger("cucu").getEffectiveLevel() <= logging.INFO:
         logging.getLogger("cucu").info(*args, **kwargs)
-        CONFIG["CUCU_WROTE_TO_STDOUT"] = True
+        CONFIG["__CUCU_WROTE_TO_STDOUT"] = True
 
 
 @wraps(logging.error)
 def error(*args, **kwargs):
     if logging.getLogger("cucu").getEffectiveLevel() <= logging.error:
         logging.getLogger("cucu").error(*args, **kwargs)
-        CONFIG["CUCU_WROTE_TO_STDOUT"] = True
+        CONFIG["__CUCU_WROTE_TO_STDOUT"] = True

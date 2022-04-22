@@ -4,6 +4,17 @@ import os
 from behave.__main__ import main as behave_main
 
 
+def behave_init(filepath):
+    """
+    behave internal init method used to load the various parts of set of
+    feature files and supporting code without executing any of it.
+
+    parameters:
+        filepath(string): the file system path of the features directory to load
+    """
+    behave_main(["--dry-run", "--format=null", "--no-summary", filepath])
+
+
 def behave(
     filepath,
     browser,

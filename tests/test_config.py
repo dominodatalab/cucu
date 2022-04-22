@@ -53,3 +53,8 @@ def test_config_snapshot_and_restore_works():
 def test_config_can_load_an_empty_config():
     with tempfile.NamedTemporaryFile(suffix="cucurc") as temp_cucurc:
         CONFIG.load(temp_cucurc.name)
+
+
+def test_confi_validate_defined_variables():
+    for variable in CONFIG.defined_variables:
+        print(variable)

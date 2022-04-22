@@ -14,17 +14,18 @@ from cucu import fuzzy, reporter, language_server, logger
 from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.cli import thread_dumper
-from cucu.cli.run import behave
+from cucu.cli.run import behave, behave_init
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.lint import linter
 from importlib.metadata import version
+from tabulate import tabulate
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
 
 # quick and dirty way to simply handle having a default socket timeout for all
 # things within the framework
-timeout = float(CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT"])
+timeout = float(CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT_S"])
 socket.setdefaulttimeout(timeout)
 
 
@@ -32,7 +33,7 @@ socket.setdefaulttimeout(timeout)
 @click.version_option(version("cucu"), message="%(version)s")
 def main():
     """
-    main entrypoint
+    cucu e2e testing framework
     """
     pass
 
@@ -276,7 +277,7 @@ def _generate_report(filepath, output):
 @click.option("-o", "--output", default="report")
 def report(filepath, output):
     """
-    create an HTML test report from the results directory provided
+    generate a test report from a results directory
     """
     _generate_report(filepath, output)
 
@@ -371,6 +372,28 @@ def lsp(logging_level):
     logger.init_logging(logging_level.upper())
 
     language_server.start()
+
+
+@main.command()
+@click.argument("filepath", default="features")
+def vars(filepath):
+    """
+    print built-in cucu variables
+    """
+    # loading the steps make it so the code that registers config variables
+    # elsewhere get to execute
+    behave_init(filepath)
+
+    variables = []
+    variables.append(["Name", "Description", "Default"])
+
+    for name in CONFIG.defined_variables:
+        definition = CONFIG.defined_variables[name]
+        variables.append(
+            [name, definition["description"], definition["default"]]
+        )
+
+    print(tabulate(variables, tablefmt="fancy_grid"))
 
 
 @main.command()
