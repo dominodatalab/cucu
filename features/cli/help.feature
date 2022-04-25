@@ -8,7 +8,7 @@ Feature: Help
       """
       Usage: cucu [OPTIONS] COMMAND [ARGS]...
 
-        main entrypoint
+        cucu e2e testing framework
 
       Options:
         --version  Show the version and exit.
@@ -18,9 +18,10 @@ Feature: Help
         debug   debug cucu library
         lint    lint feature files
         lsp     start the cucu language server
-        report  create an HTML test report from the results directory provided
+        report  generate a test report from a results directory
         run     run a set of feature files
         steps   print available cucu steps
+        vars    print built-in cucu variables
 
       """
       And I should see "{STDERR}" is empty

@@ -110,8 +110,6 @@ class CucuStream:
         if self.parent:
             self.parent.write(byte)
 
-        CONFIG["CUCU_WROTE_TO_CONSOLE"] = True
-
     def writelines(self, lines):
         lines = [hide_secrets(line) for line in lines]
 
@@ -122,7 +120,6 @@ class CucuStream:
             self.parent.writelines(lines)
 
         self.stream.writelines(lines)
-        CONFIG["CUCU_WROTE_TO_CONSOLE"] = True
 
     def captured(self):
         captured_data = self.captured_data

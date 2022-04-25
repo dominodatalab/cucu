@@ -5,6 +5,17 @@ import sys
 
 from cucu.config import CONFIG
 
+CONFIG.define(
+    "CUCU_BROKEN_IMAGES_PAGE_CHECK",
+    "enable/disable the broken image page checker",
+    default="enabled",
+)
+CONFIG.define(
+    "CUCU_READY_STATE_PAGE_CHECK",
+    "enable/disable the ready state page checker",
+    default="enabled",
+)
+
 
 def init_global_hook_variables():
     CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"] = []
@@ -14,9 +25,6 @@ def init_global_hook_variables():
     CONFIG["__CUCU_AFTER_STEP_HOOKS"] = []
 
     CONFIG["__CUCU_PAGE_CHECK_HOOKS"] = {}
-
-    CONFIG["CUCU_BROKEN_IMAGES_PAGE_CHECK"] = "enabled"
-    CONFIG["CUCU_READY_STATE_PAGE_CHECK"] = "enabled"
 
 
 def init_scenario_hook_variables():

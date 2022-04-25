@@ -14,6 +14,22 @@ from cucu.page_checks import init_page_checks
 
 init_global_hook_variables()
 
+CONFIG.define(
+    "FEATURE_RESULTS_DIR",
+    "the results directory for the currently executing feature",
+    default=None,
+)
+CONFIG.define(
+    "SCENARIO_RESULTS_DIR",
+    "the results directory for the currently executing scenario",
+    default=None,
+)
+CONFIG.define(
+    "SCENARIO_DOWNLOADS_DIR",
+    "the browser downloads directory for the currently " "executing scenario",
+    default=None,
+)
+
 
 def escape_filename(string):
     """

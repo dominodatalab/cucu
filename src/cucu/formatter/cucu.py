@@ -125,7 +125,7 @@ class CucuFormatter(Formatter):
         indent = make_indentation(2 * self.indent_size)
         keyword = step.keyword.rjust(5)
 
-        if not self.monochrome and not CONFIG["CUCU_WROTE_TO_STDOUT"]:
+        if not self.monochrome and not CONFIG["__CUCU_WROTE_TO_STDOUT"]:
             self.stream.write(up(1))
 
         prefix = ""
@@ -155,12 +155,12 @@ class CucuFormatter(Formatter):
         if self.monochrome:
             self.stream.write(f"{text}")
         else:
-            if CONFIG["CUCU_WROTE_TO_STDOUT"]:
+            if CONFIG["__CUCU_WROTE_TO_STDOUT"]:
                 self.stream.write(f"{text}")
             else:
                 self.stream.write(f"\r{text}")
 
-        CONFIG["CUCU_WROTE_TO_STDOUT"] = False
+        CONFIG["__CUCU_WROTE_TO_STDOUT"] = False
 
         if step.status in (Status.passed, Status.failed):
             max_line_length = self.calculate_max_line_length()
