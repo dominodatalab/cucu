@@ -153,6 +153,22 @@ def run(
     # load all them configs
     CONFIG.load_cucurc_files(filepath)
 
+    if os.environ.get("CUCU") == "true":
+        # when cucu is already running it means that we're running inside
+        # another cucu process and therefore we should make sure the results
+        # directory isn't the default one and throw an exception otherwise
+        if results == "results":
+            raise Exception(
+                "running within cucu but --results was not used, "
+                "this would lead to some very difficult to debug "
+                "failures as this process would clobber the "
+                "parent results directory"
+            )
+
+    # set for testing cucu itself but basically allows you to know when cucu
+    # is running itself as part of internal testing
+    os.environ["CUCU"] = "true"
+
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())
 
