@@ -76,14 +76,14 @@
                 /*
                  * <thing>name</thing>
                  */
-                results = jQuery(thing + ':vis:' + matcher + '("' + name + '")').toArray();
+                results = jQuery(thing + ':vis:' + matcher + '("' + name + '")', document.body).toArray();
                 if (cucu.debug) { console.log('<thing>name</thing>', results); }
                 elements = elements.concat(results);
 
                 // <thing attribute="name"></thing>
                 for(var aIndex=0; aIndex < attributes.length; aIndex++) {
                     var attribute_name = attributes[aIndex];
-                    results = jQuery(thing + '[' + attribute_name + '="' + name + '"]:vis').toArray();
+                    results = jQuery(thing + '[' + attribute_name + '="' + name + '"]:vis', document.body).toArray();
                     if (cucu.debug) { console.log('<thing attibute="name"></thing>', results); }
                     elements = elements.concat(results);
                 }
@@ -92,7 +92,7 @@
             /*
              * element labeled by another using the for/id attributes
              */
-            var labels = jQuery('*[for]:vis:' + matcher + '("' + name + '")').toArray();
+            var labels = jQuery('*[for]:vis:' + matcher + '("' + name + '")', document.body).toArray();
             for(var tIndex = 0; tIndex < things.length; tIndex++) {
                 var thing = things[tIndex];
                 results = [];
@@ -103,7 +103,7 @@
                 for(var lIndex=0; lIndex < labels.length; lIndex++) {
                     var label = labels[lIndex];
                     var id = label.getAttribute('for');
-                    results = jQuery(thing + '[id="' + id + '"]:vis').toArray();
+                    results = jQuery(thing + '[id="' + id + '"]:vis', document.body).toArray();
                     if (cucu.debug) { console.log('<* for=...>name</*>...<thing id=...></thing>', results); }
                     elements = elements.concat(results);
                 }
@@ -118,7 +118,7 @@
                 /*
                  * <thing><*>...name...</*></thing>
                  */
-                results = jQuery('*:vis:' + matcher + '("' + name + '")').parents(thing).toArray();
+                results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).parents(thing).toArray();
                 if (cucu.debug) { console.log('<thing><*>...name...</*></thing>', results); }
                 elements = elements.concat(results);
             }
@@ -132,7 +132,7 @@
                 /*
                  * <*><thing></thing>name</*>
                  */
-                results = jQuery('*:vis:has_text("' + name + '")').children(thing + ':vis').toArray();
+                results = jQuery('*:vis:has_text("' + name + '")', document.body).children(thing + ':vis').toArray();
                 if (cucu.debug) { console.log('<*><thing></thing>name</*>', results); }
                 elements = elements.concat(results);
             }
@@ -145,19 +145,19 @@
                     var thing = things[tIndex];
 
                     // <*>name</*><thing/>
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")').next(thing + ':vis').toArray();
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).next(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<*>name</*><thing/>', results); }
                     elements = elements.concat(results);
 
                     // <*>name</*>...<thing>...
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")').nextAll(thing + ':vis').toArray();
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).nextAll(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<*>name</*>...<thing>...', results); }
                     elements = elements.concat(results);
 
                     // <...><*>name</*></...>...<...><thing></...>
                     // XXX: this rule is horribly complicated and I'd rather see it gone
                     //      basically: common great grandpranet
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")').nextAll().find(thing + ':vis').toArray();
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).nextAll().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<...><*>name</*></...>...<...><thing></...>', results); }
                     elements = elements.concat(results);
                 }
@@ -169,18 +169,18 @@
                     var thing = things[tIndex];
 
                     // <thing/> <*>name</*>
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")').prev(thing).toArray();
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prev(thing).toArray();
                     if (cucu.debug) { console.log('<thing/><*>name</*>', results); }
                     elements = elements.concat(results);
 
                     // next siblings: <thing>...<*>name</*>...
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")').prevAll(thing).toArray();
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prevAll(thing).toArray();
                     if (cucu.debug) { console.log('<thing>...<*>name</*>...', results); }
                     elements = elements.concat(results);
 
                     // <...><thing></...>...<...><*>name</*></...>
                     // XXX: this rule is horribly complicated and I'd rather see it gone
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")').prevAll().find(thing + ':vis').toArray();
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prevAll().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<...><thin></...>...<...><*>name</*></...>', results); }
                     elements = elements.concat(results);
                 }

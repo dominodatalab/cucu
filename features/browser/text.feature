@@ -18,3 +18,6 @@ Feature: Text
      When I wait up to "5" seconds to see the text "inexistent"
      """
      Then I should see the previous step took more than "5" seconds
+
+  Scenario: User should not match on text inside a <script> element
+     Then I should not see the text "here i am"
