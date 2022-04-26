@@ -38,24 +38,23 @@ def escape_filename(string):
     return string.replace("/", "_")
 
 
-def before_all(context):
-    context.substep_increment = 0
+def before_all(ctx):
+    ctx.substep_increment = 0
     CONFIG.snapshot()
 
 
-def before_feature(context, feature):
+def before_feature(ctx, feature):
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
-        feature_dir = os.path.join(
-            config.CONFIG["CUCU_RESULTS_DIR"], feature.name
-        )
-        CONFIG["FEATURE_RESULTS_DIR"] = feature_dir
+        results_dir = config.CONFIG["CUCU_RESULTS_DIR"]
+        ctx.feature_dir = os.path.join(results_dir, feature.name)
+        CONFIG["FEATURE_RESULTS_DIR"] = ctx.feature_dir
 
 
-def after_feature(context, feature):
+def after_feature(ctx, feature):
     pass
 
 
-def before_scenario(context, scenario):
+def before_scenario(ctx, scenario):
     # we want every scenario to start with the exact same reinitialized config
     # values and not really bleed values between scenario runs
     CONFIG.restore()
@@ -63,55 +62,48 @@ def before_scenario(context, scenario):
     init_page_checks()
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
-        feature_path = (config.CONFIG["FEATURE_RESULTS_DIR"],)
-        scenario_dir = os.path.join(
-            config.CONFIG["CUCU_RESULTS_DIR"],
-            scenario.feature.name,
-            scenario.name,
-        )
+        ctx.scenario_dir = os.path.join(ctx.feature_dir, scenario.name)
+        CONFIG["SCENARIO_RESULTS_DIR"] = ctx.scenario_dir
+        os.makedirs(ctx.scenario_dir, exist_ok=True)
 
-        CONFIG["SCENARIO_RESULTS_DIR"] = scenario_dir
-        os.makedirs(scenario_dir, exist_ok=True)
-        context.scenario_dir = scenario_dir
+        ctx.scenario_downloads_dir = os.path.join(ctx.scenario_dir, "downloads")
+        CONFIG["SCENARIO_DOWNLOADS_DIR"] = ctx.scenario_downloads_dir
 
-    context.scenario = scenario
-    context.step_index = 0
-    context.browsers = []
-    context.browser = None
+    ctx.scenario = scenario
+    ctx.step_index = 0
+    ctx.browsers = []
+    ctx.browser = None
 
     # internal cucu config variables
     CONFIG["SCENARIO_RUN_ID"] = uuid.uuid1().hex
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
-        hook(context)
+        hook(ctx)
 
 
-def after_scenario(context, scenario):
+def after_scenario(ctx, scenario):
     # copy any files in the CUCU_BROWSER_DOWNLOADS_DIR to the results
     # directory for that scenario
     downloads_dir = CONFIG["SCENARIO_DOWNLOADS_DIR"]
 
     if downloads_dir:
-        scenario_downloads_dir = os.path.join(
-            CONFIG["SCENARIO_RESULTS_DIR"], "downloads"
-        )
-        os.makedirs(scenario_downloads_dir, exist_ok=True)
+        os.makedirs(ctx.scenario_downloads_dir, exist_ok=True)
         filepaths = glob.iglob(os.path.join(downloads_dir, "*.*"))
         for filepath in filepaths:
-            shutil.copy(filepath, scenario_downloads_dir)
+            shutil.copy(filepath, ctx.scenario_downloads_dir)
 
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
 
     else:
-        if len(context.browsers) != 0:
+        if len(ctx.browsers) != 0:
             logger.debug("quitting browser between sessions")
 
         # close the browser unless someone has set the keep browser alive
         # environment variable which allows tests to reuse the same browser
         # session
-        for browser in context.browsers:
+        for browser in ctx.browsers:
             # save the browser logs to the current scenarios results directory
             scenario_dir = os.path.join(
                 config.CONFIG["CUCU_RESULTS_DIR"],
@@ -129,57 +121,57 @@ def after_scenario(context, scenario):
 
             browser.quit()
 
-        context.browsers = []
+        ctx.browsers = []
 
     # run after all scenario hooks
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"]:
-        hook(context)
+        hook(ctx)
 
     # run after this scenario hooks
     for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"]:
-        hook(context)
+        hook(ctx)
 
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 
 
-def before_step(context, step):
+def before_step(ctx, step):
     step.stdout = []
     step.stderr = []
-    context.current_step = step
-    context.start_time = time.monotonic()
+    ctx.current_step = step
+    ctx.start_time = time.monotonic()
 
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
-        hook(context)
+        hook(ctx)
 
 
-def after_step(context, step):
-    context.end_time = time.monotonic()
-    context.previous_step_duration = context.end_time - context.start_time
+def after_step(ctx, step):
+    ctx.end_time = time.monotonic()
+    ctx.previous_step_duration = ctx.end_time - ctx.start_time
 
     # grab the captured output during the step run and reset the wrappers
     step.stdout = sys.stdout.captured()
     step.stderr = sys.stderr.captured()
 
-    if context.browser is not None and not context.substep_increment:
+    if ctx.browser is not None and not ctx.substep_increment:
         step_name = escape_filename(step.name)
         filepath = os.path.join(
-            context.scenario_dir, f"{context.step_index} - {step_name}.png"
+            ctx.scenario_dir, f"{ctx.step_index} - {step_name}.png"
         )
 
-        context.browser.screenshot(filepath)
+        ctx.browser.screenshot(filepath)
 
         if CONFIG["CUCU_MONITOR_PNG"] is not None:
             shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
 
-    if context.substep_increment != 0:
-        context.step_index += context.substep_increment
-        context.substep_increment = 0
+    if ctx.substep_increment != 0:
+        ctx.step_index += ctx.substep_increment
+        ctx.substep_increment = 0
 
-    context.step_index += 1
+    ctx.step_index += 1
 
     if CONFIG.bool("CUCU_IPDB_ON_FAILURE") and step.status == "failed":
-        context._runner.stop_capture()
+        ctx._runner.stop_capture()
         import ipdb
 
         ipdb.post_mortem(step.exc_traceback)
@@ -188,4 +180,4 @@ def after_step(context, step):
 
     # run after all step hooks
     for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
-        hook(context)
+        hook(ctx)
