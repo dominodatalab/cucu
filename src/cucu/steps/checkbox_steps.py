@@ -1,4 +1,5 @@
 from cucu import helpers, fuzzy
+from . import base_steps
 
 
 def find_checkbox(ctx, name, index=0):
@@ -74,4 +75,10 @@ helpers.define_thing_with_name_in_state_steps(
 )
 helpers.define_thing_with_name_in_state_steps(
     "checkbox", "not checked", find_checkbox, is_not_checked
+)
+helpers.define_thing_with_name_in_state_steps(
+    "checkbox", "disabled", find_checkbox, base_steps.is_disabled
+)
+helpers.define_thing_with_name_in_state_steps(
+    "checkbox", "not disabled", find_checkbox, base_steps.is_not_disabled
 )

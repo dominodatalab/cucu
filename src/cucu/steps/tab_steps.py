@@ -1,4 +1,5 @@
 from cucu import helpers, fuzzy
+from . import base_steps
 
 
 def find_tab(ctx, name, index=0):
@@ -46,4 +47,10 @@ helpers.define_thing_with_name_in_state_steps(
 )
 helpers.define_thing_with_name_in_state_steps(
     "tab", "not selected", find_tab, is_not_selected
+)
+helpers.define_thing_with_name_in_state_steps(
+    "tab", "disabled", find_tab, base_steps.is_disabled
+)
+helpers.define_thing_with_name_in_state_steps(
+    "tab", "not disabled", find_tab, base_steps.is_not_disabled
 )

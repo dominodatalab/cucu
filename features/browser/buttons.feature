@@ -88,3 +88,17 @@ Feature: Buttons
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?clear_page_after_ms=10000"
      When I wait up to "10" seconds to not see the button "* role=button"
      Then I should see the previous step took more than "9" seconds
+
+  Scenario: User can verify a button is disabled or not
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
+     Then I should see the button "button" is not disabled
+      And I should see the button "disabled button" is disabled
+      And I expect the following step to fail with "button "button" is not disabled"
+      """
+      Then I should see the button "button" is disabled
+      """
+      # XXX: should fix up the `not not` situation
+      And I expect the following step to fail with "button "disabled button" is not not disabled"
+      """
+      Then I should see the button "disabled button" is not disabled
+      """
