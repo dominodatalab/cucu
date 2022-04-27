@@ -1,4 +1,5 @@
 from cucu import helpers, fuzzy
+from . import base_steps
 
 
 def find_button(ctx, name, index=0):
@@ -64,4 +65,10 @@ helpers.define_should_see_thing_with_name_steps(
 )
 helpers.define_action_on_thing_with_name_steps(
     "button", "click", find_button, click_button, with_nth=True
+)
+helpers.define_thing_with_name_in_state_steps(
+    "button", "disabled", find_button, base_steps.is_disabled
+)
+helpers.define_thing_with_name_in_state_steps(
+    "button", "not disabled", find_button, base_steps.is_not_disabled
 )

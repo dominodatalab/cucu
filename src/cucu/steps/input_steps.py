@@ -4,6 +4,7 @@ from cucu import helpers, fuzzy, retry, step
 
 # XXX: this would have to be generalized to other browser abstraactions
 from selenium.webdriver.common.keys import Keys
+from . import base_steps
 
 
 def find_input(ctx, name, index=0):
@@ -102,6 +103,12 @@ def assert_input_value(ctx, name, value, index=0):
 
 
 helpers.define_should_see_thing_with_name_steps("input", find_input)
+helpers.define_thing_with_name_in_state_steps(
+    "input", "disabled", find_input, base_steps.is_disabled
+)
+helpers.define_thing_with_name_in_state_steps(
+    "input", "not disabled", find_input, base_steps.is_not_disabled
+)
 
 
 @step('I write "{value}" into the input "{name}"')

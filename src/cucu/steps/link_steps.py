@@ -1,4 +1,5 @@
 from cucu import helpers, fuzzy
+from . import base_steps
 
 
 def find_link(ctx, name, index=0):
@@ -30,4 +31,10 @@ def click_link(ctx, link):
 helpers.define_should_see_thing_with_name_steps("link", find_link)
 helpers.define_action_on_thing_with_name_steps(
     "link", "click", find_link, click_link
+)
+helpers.define_thing_with_name_in_state_steps(
+    "link", "disabled", find_link, base_steps.is_disabled
+)
+helpers.define_thing_with_name_in_state_steps(
+    "link", "not disabled", find_link, base_steps.is_not_disabled
 )

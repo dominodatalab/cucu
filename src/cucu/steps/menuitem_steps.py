@@ -1,9 +1,9 @@
-# XXX: experimental
 #
 # menuitem steps
 # https://www.w3.org/TR/wai-aria-1.1/#menuitem
 #
 from cucu import helpers, fuzzy
+from . import base_steps
 
 
 def find_menuitem(ctx, name, index=0):
@@ -22,3 +22,9 @@ def find_menuitem(ctx, name, index=0):
 
 
 helpers.define_should_see_thing_with_name_steps("menu item", find_menuitem)
+helpers.define_thing_with_name_in_state_steps(
+    "menu item", "disabled", find_menuitem, base_steps.is_disabled
+)
+helpers.define_thing_with_name_in_state_steps(
+    "menu item", "not disabled", find_menuitem, base_steps.is_not_disabled
+)
