@@ -1,4 +1,5 @@
 from cucu import helpers, fuzzy, retry, step
+from . import base_steps
 
 
 def find_radio_button(ctx, name, index=0):
@@ -115,6 +116,15 @@ helpers.define_thing_with_name_in_state_steps(
 )
 helpers.define_thing_with_name_in_state_steps(
     "radio button", "not selected", find_radio_button, is_not_selected
+)
+helpers.define_thing_with_name_in_state_steps(
+    "radio button", "disabled", find_radio_button, base_steps.is_disabled
+)
+helpers.define_thing_with_name_in_state_steps(
+    "radio button",
+    "not disabled",
+    find_radio_button,
+    base_steps.is_not_disabled,
 )
 
 

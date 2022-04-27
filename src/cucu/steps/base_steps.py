@@ -27,6 +27,20 @@ def parse_nth(nth):
 register_type(nth=parse_nth)
 
 
+def is_disabled(element):
+    """
+    internal method to check an element is disabled
+    """
+    return element.get_attribute("disabled")
+
+
+def is_not_disabled(element):
+    """
+    internal method to check an element is not disabled
+    """
+    return not is_disabled(element)
+
+
 @step("I run a step that fails")
 def this_step_fails(_):
     raise Exception("failing on purpose")

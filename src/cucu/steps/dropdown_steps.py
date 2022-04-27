@@ -2,6 +2,7 @@ import humanize
 
 from selenium.webdriver.support.ui import Select
 from cucu import helpers, fuzzy, retry, step
+from . import base_steps
 
 
 def find_dropdown(ctx, name, index=0):
@@ -158,6 +159,12 @@ def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
 
 
 helpers.define_should_see_thing_with_name_steps("dropdown", find_dropdown)
+helpers.define_thing_with_name_in_state_steps(
+    "dropdown", "disabled", find_dropdown, base_steps.is_disabled
+)
+helpers.define_thing_with_name_in_state_steps(
+    "dropdown", "not disabled", find_dropdown, base_steps.is_not_disabled
+)
 
 
 @step('I select the option "{option}" from the dropdown "{dropdown}"')
