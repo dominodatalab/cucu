@@ -93,3 +93,5 @@ Feature: Browser management
       return (window.innerHeight + "x" + window.innerWidth);
       """
      Then I should see "{BROWSER_DIMENSIONS}" is equal to "800x600"
+      # so the next test doesn't end up with a silly tiny browser window
+      And I close the current browser
