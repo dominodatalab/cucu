@@ -24,6 +24,12 @@ def open_browser(ctx):
 
 @step('I open a browser at the url "{url}"')
 def open_a_browser(ctx, url):
+    """
+    open a browser at the url provided
+
+    example:
+        Given I open a browser at the url "https://www.google.com"
+    """
     if ctx.browser is None:
         ctx.browser = open_browser(ctx)
         ctx.browsers.append(ctx.browser)
