@@ -14,7 +14,15 @@ class QuietHTTPRequestHandler(SimpleHTTPRequestHandler):
 @step(
     'I start a webserver at directory "{directory}" and save the port to the variable "{variable}"'
 )
-def run_webserver_for_scenario(context, directory, variable):
+def run_webserver_for_scenario(ctx, directory, variable):
+    """
+    start a webserver with the root at the directory provided and save the
+    port that the server is listening at to the variable name provided
+
+    examples:
+        Given I start webserver at directory "/some/path" and save the port to the variable "PORT"
+          And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/somefile.html"
+    """
     handler = partial(QuietHTTPRequestHandler, directory=directory)
     httpd = HTTPServer(("", 0), handler)
     thread = Thread(target=httpd.serve_forever)
