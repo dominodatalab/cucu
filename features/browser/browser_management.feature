@@ -85,11 +85,11 @@ Feature: Browser management
 
   Scenario: User can set the exact browser dimensions
     Given I set the variable "CUCU_BROWSER_WINDOW_HEIGHT" to "800"
-      And I set the variable "CUCU_BROWSER_WINDOW_WIDTH" to "800"
+      And I set the variable "CUCU_BROWSER_WINDOW_WIDTH" to "600"
      When I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
       And I execute in the current browser the following javascript and save the result to the variable "BROWSER_DIMENSIONS"
       """
       return (window.innerHeight + "x" + window.innerWidth);
       """
-     Then I should see "{BROWSER_DIMENSIONS}" is equal to "800x800"
+     Then I should see "{BROWSER_DIMENSIONS}" is equal to "800x600"
