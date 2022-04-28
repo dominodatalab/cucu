@@ -89,12 +89,10 @@ class Selenium(Browser):
                     chrome_options=options,
                     desired_capabilities=desired_capabilities,
                 )
+
+            self.driver.set_window_size(width, height)
         else:
             raise Exception(f"unknown browser {browser}")
-
-        # we want the window to always maximize at start and use up the
-        # available desktop space
-        self.driver.maximize_window()
 
     def get_log(self):
         return self.driver.get_log("browser")

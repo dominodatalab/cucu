@@ -44,6 +44,19 @@ def open_a_new_browser(ctx, url):
     fuzzy.init(ctx.browser)
 
 
+@step("I execute in the current browser the following javascript")
+def execute_javascript(ctx):
+    ctx.browser.execute(ctx.text)
+
+
+@step(
+    'I execute in the current browser the following javascript and save the result to the variable "{variable}"'
+)
+def execute_javascript_and_save(ctx, variable):
+    result = ctx.browser.execute(ctx.text)
+    config.CONFIG[variable] = result
+
+
 @step('I save the current url to the variable "{variable}"')
 def save_current_url_to_variable(ctx, variable):
     config.CONFIG[variable] = ctx.browser.get_current_url()
