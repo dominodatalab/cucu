@@ -35,12 +35,13 @@ def load_cucu_steps(filepath=None):
     process = subprocess.run(args, capture_output=True)
     steps_doc_output = process.stdout.decode("utf8")
     for cucu_step in steps_doc_output.split("@step"):
-        # each blank line is a '\n\n' which is a split between two step
-        # definitions in the output, like so:
+        # Each line of a step definition looks like so:
         #
         #   @step('I should see "{this}" matches "{that}"')
         #     Function: inner_step()
         #     Location: src/cucu/behave_tweaks.py:64
+        #      possibly a doc string here on the function that can be used
+        #      to add a little documentation to each step definition
         #
         #   @step('I should see "{this}" matches the following')
         #     Function: inner_step()
