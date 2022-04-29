@@ -1,7 +1,6 @@
 import os
 import shlex
 import subprocess
-import sys
 
 from behave import step
 from cucu import config, logger

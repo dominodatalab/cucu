@@ -1,6 +1,5 @@
 import humanize
 import os
-import re
 
 from cucu import config, logger, fuzzy, step
 from cucu.browser.selenium import Selenium

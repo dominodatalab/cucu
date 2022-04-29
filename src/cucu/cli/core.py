@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import click
-import contextlib
 import coverage
 import glob
 import multiprocessing

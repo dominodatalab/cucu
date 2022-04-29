@@ -4,13 +4,11 @@
 #      capturing
 #
 import behave
-import inspect
 import warnings
 import sys
 
 from cucu.config import CONFIG
 from functools import wraps
-from types import CodeType
 
 
 def init_step_hooks(stdout, stderr):

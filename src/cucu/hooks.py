@@ -1,8 +1,3 @@
-import importlib
-import os
-import pkgutil
-import sys
-
 from cucu.config import CONFIG
 
 CONFIG.define(
