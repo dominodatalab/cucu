@@ -97,6 +97,14 @@ class Selenium(Browser):
                 )
 
             self.driver.set_window_size(width, height)
+            dimensions = self.driver.get_window_size()
+
+            if str(dimensions["width"]) != str(width) or str(
+                dimensions["height"]
+            ) != str(height):
+                raise RuntimeError(
+                    f"window dimensions are {dimensions['width']}x{dimensions['height']} not desired {width}x{height}"
+                )
         else:
             raise Exception(f"unknown browser {browser}")
 
