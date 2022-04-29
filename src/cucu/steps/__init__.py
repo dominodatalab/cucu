@@ -1,4 +1,5 @@
 # flake8: noqa
+# nopycln: file
 import cucu.hooks
 
 import cucu.steps.base_steps

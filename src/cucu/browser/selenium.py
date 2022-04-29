@@ -1,7 +1,6 @@
 import chromedriver_autoinstaller
 import logging
 import os
-import socket
 import uuid
 import urllib3
 
