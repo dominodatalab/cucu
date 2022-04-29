@@ -381,14 +381,20 @@ def lint(filepath, fix):
     default="INFO",
     help="set logging level to one of debug, warn or info (default)",
 )
-def lsp(logging_level):
+@click.option(
+    "-p",
+    "--port",
+    default=None,
+    help="when the port is set the lsp will run in TCP mode and not STDIO mode",
+)
+def lsp(logging_level, port):
     """
     start the cucu language server
     """
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())
 
-    language_server.start()
+    language_server.start(port=port)
 
 
 @main.command()
