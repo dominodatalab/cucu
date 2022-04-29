@@ -1,6 +1,7 @@
 import chromedriver_autoinstaller
 import logging
 import os
+import socket
 import uuid
 import urllib3
 
@@ -11,6 +12,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.remote.remote_connection import RemoteConnection
 
 
 class DisableLogger:
@@ -25,6 +28,9 @@ def init():
     """
     initialize any selenium specific needs
     """
+    timeout = float(config.CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT_S"])
+    RemoteConnection.set_timeout(timeout)
+
     try:
         with DisableLogger():
             # auto install chromedriver if not present

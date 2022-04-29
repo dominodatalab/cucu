@@ -20,13 +20,14 @@ from cucu.lint import linter
 from importlib.metadata import version
 from tabulate import tabulate
 
+
+# general socket timeout instead of letting the framework ever get stuck on a
+# socket connect/read call
+timeout = float(CONFIG["CUCU_SOCKET_DEFAULT_TIMEOUT_S"])
+socket.setdefaulttimeout(timeout)
+
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
-
-# quick and dirty way to simply handle having a default socket timeout for all
-# things within the framework
-timeout = float(CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT_S"])
-socket.setdefaulttimeout(timeout)
 
 
 @click.group()
