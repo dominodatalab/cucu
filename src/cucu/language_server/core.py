@@ -57,12 +57,12 @@ def find_completions(step_fragment, steps_cache=None):
     return items
 
 
-def start():
+def start(port=None):
     server = LanguageServer()
     steps_cache = load_cucu_steps()
-    logging.basicConfig(filename="pygls.log", filemode="w", level=logging.INFO)
+    logging.basicConfig(filename="pygls.log", filemode="w", level=logging.DEBUG)
 
-    @server.feature(COMPLETION, CompletionOptions(trigger_characters=[""]))
+    @server.feature(COMPLETION, CompletionOptions(trigger_characters=[","]))
     def completions(ls: LanguageServer, params: CompletionParams):
         logging.warn(f"{COMPLETION}: {params}")
 
@@ -98,4 +98,8 @@ def start():
             items=items,
         )
 
-    server.start_io()
+    if port:
+        server.start_tcp("0.0.0.0", int(port))
+
+    else:
+        server.start_io()
