@@ -2,11 +2,16 @@ import os
 import shlex
 import subprocess
 
-from behave import step
-from cucu import config, logger
+from cucu import config, logger, step
 
 
-def run_command(command, stdout_var=None, stderr_var=None, exit_code_var=None):
+def run_command(
+    command,
+    stdout_var=None,
+    stderr_var=None,
+    exit_code_var=None,
+    check_exit_code=None,
+):
     args = shlex.split(command)
     process = subprocess.run(args, capture_output=True)
 
@@ -16,17 +21,32 @@ def run_command(command, stdout_var=None, stderr_var=None, exit_code_var=None):
     stdout = process.stdout.decode("utf8")
     stderr = process.stderr.decode("utf8")
 
-    logger.debug(f"STDOUT:\n{stdout}\n")
-    logger.debug(f"STDERR:\n{stderr}\n")
-
     if stdout_var:
         config.CONFIG[stdout_var] = stdout
 
     if stderr_var:
         config.CONFIG[stderr_var] = stderr
 
+    if check_exit_code != None:
+        if str(check_exit_code) != str(process.returncode):
+            logger.error(f"STDOUT:\n{stdout}\n")
+            logger.error(f"STDERR:\n{stderr}\n")
+            raise RuntimeError(
+                f"got exit code {process.returncode} expected {check_exit_code}, see above for details"
+            )
 
-def run_script(script, stdout_var=None, stderr_var=None, exit_code_var=None):
+    else:
+        logger.debug(f"STDOUT:\n{stdout}\n")
+        logger.debug(f"STDERR:\n{stderr}\n")
+
+
+def run_script(
+    script,
+    stdout_var=None,
+    stderr_var=None,
+    exit_code_var=None,
+    check_exit_code=None,
+):
     shell_command = os.environ.get("SHELL", "/bin/sh")
     process = subprocess.run(
         [shell_command], capture_output=True, shell=True, input=script.encode()
@@ -44,8 +64,16 @@ def run_script(script, stdout_var=None, stderr_var=None, exit_code_var=None):
     if stderr_var:
         config.CONFIG[stderr_var] = stderr
 
-    logger.debug(f"STDOUT:\n{stdout}\n")
-    logger.debug(f"STDERR:\n{stderr}\n")
+    if check_exit_code != None:
+        if str(check_exit_code) != str(process.returncode):
+            logger.error(f"STDOUT:\n{stdout}\n")
+            logger.error(f"STDERR:\n{stderr}\n")
+            raise RuntimeError(
+                f"got exit code {process.returncode} expected {check_exit_code}, see above for details"
+            )
+    else:
+        logger.debug(f"STDOUT:\n{stdout}\n")
+        logger.debug(f"STDERR:\n{stderr}\n")
 
 
 @step(
@@ -59,6 +87,20 @@ def runs_command_and_save_everything(
         stdout_var=stdout_var,
         stderr_var=stderr_var,
         exit_code_var=exit_code_var,
+    )
+
+
+@step(
+    'I run the command "{command}" and save stdout to "{stdout_var}", stderr to "{stderr_var}" and expect exit code "{exit_code}"'
+)
+def runs_command_and_check_exit_code(
+    context, command, stdout_var, stderr_var, exit_code
+):
+    run_command(
+        command,
+        stdout_var=stdout_var,
+        stderr_var=stderr_var,
+        check_exit_code=exit_code,
     )
 
 
@@ -87,4 +129,16 @@ def run_script_and_save_everything(
         stdout_var=stdout_var,
         stderr_var=stderr_var,
         exit_code_var=exit_code_var,
+    )
+
+
+@step(
+    'I run the following script and save stdout to "{stdout_var}", stderr to "{stderr_var}" and expect exit code "{exit_code}"'
+)
+def run_script_and_check_exit_code(context, stdout_var, stderr_var, exit_code):
+    run_script(
+        context.text,
+        stdout_var=stdout_var,
+        stderr_var=stderr_var,
+        check_exit_code=exit_code,
     )
