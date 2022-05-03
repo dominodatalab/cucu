@@ -27,13 +27,13 @@ def run_command(
     if stderr_var:
         config.CONFIG[stderr_var] = stderr
 
-    if check_exit_code != None:
-        if str(check_exit_code) != str(process.returncode):
-            logger.error(f"STDOUT:\n{stdout}\n")
-            logger.error(f"STDERR:\n{stderr}\n")
-            raise RuntimeError(
-                f"got exit code {process.returncode} expected {check_exit_code}, see above for details"
-            )
+    return_code = process.returncode
+    if check_exit_code is not None and int(check_exit_code) != return_code:
+        logger.error(f"STDOUT:\n{stdout}\n")
+        logger.error(f"STDERR:\n{stderr}\n")
+        raise RuntimeError(
+            f"expected exit code {check_exit_code}, got {return_code}, see above for details"
+        )
 
     else:
         logger.debug(f"STDOUT:\n{stdout}\n")
@@ -64,13 +64,13 @@ def run_script(
     if stderr_var:
         config.CONFIG[stderr_var] = stderr
 
-    if check_exit_code != None:
-        if str(check_exit_code) != str(process.returncode):
-            logger.error(f"STDOUT:\n{stdout}\n")
-            logger.error(f"STDERR:\n{stderr}\n")
-            raise RuntimeError(
-                f"got exit code {process.returncode} expected {check_exit_code}, see above for details"
-            )
+    return_code = process.returncode
+    if check_exit_code is not None and int(check_exit_code) != return_code:
+        logger.error(f"STDOUT:\n{stdout}\n")
+        logger.error(f"STDERR:\n{stderr}\n")
+        raise RuntimeError(
+            f"expected exit code {check_exit_code}, got {return_code}, see above for details"
+        )
     else:
         logger.debug(f"STDOUT:\n{stdout}\n")
         logger.debug(f"STDERR:\n{stderr}\n")
