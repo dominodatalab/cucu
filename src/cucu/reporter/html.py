@@ -30,12 +30,15 @@ def generate(results, basepath):
     #
     for index in range(0, len(features)):
         feature = features[index]
-        scenarios = feature["elements"]
         feature_duration = 0
         total_scenarios = 0
         total_scenarios_passed = 0
         total_scenarios_failed = 0
         total_scenarios_skipped = 0
+
+        scenarios = []
+        if "elements" in feature.keys():
+            scenarios = feature["elements"]
 
         if feature["status"] != "skipped":
             # copy each feature directories contents over to the report directory
@@ -135,7 +138,10 @@ def generate(results, basepath):
         if not os.path.exists(feature_basepath):
             os.makedirs(feature_basepath)
 
-        scenarios = feature["elements"]
+        scenarios = []
+        if "elements" in feature.keys():
+            scenarios = feature["elements"]
+
         rendered_feature_html = feature_template.render(
             feature=feature, scenarios=scenarios
         )

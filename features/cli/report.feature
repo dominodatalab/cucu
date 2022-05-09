@@ -111,3 +111,14 @@ Feature: Report
       And I should see the text "this is an error log"
       And I should see the text "this is a debug log"
       And I should see the text "this is a warn log"
+
+  Scenario: User can generate a report when an empty feature is present
+    Given I run the command "cucu run data/features/feature_with_no_scenarios.feature --results {CUCU_RESULTS_DIR}/empty_feature_results" and save exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "0"
+     When I run the command "cucu report {CUCU_RESULTS_DIR}/empty_feature_results --output {CUCU_RESULTS_DIR}/empty_feature_report" and save exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "0"
+     When I start a webserver at directory "{CUCU_RESULTS_DIR}/empty_feature_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+      And I click the link "Feature with no scenarios"
+     Then I wait to see a table that is the following:
+      | Scenario | Total Steps | Status | Duration |
