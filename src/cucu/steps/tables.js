@@ -8,8 +8,7 @@
                 var values = [];
                 for (var vIndex=0; vIndex < row.cells.length; vIndex++) {
                     var value = row.cells[vIndex].innerText.trim();
-                    value = value.replace(/[\r\n]+/g, " ");
-                    value = value.replace(/\s+/g, " ");
+                    value = value.replace(/[\r\n\s]+/g, " ");
                     values.push(value);
                 }
                 if (values.length != 0) {
