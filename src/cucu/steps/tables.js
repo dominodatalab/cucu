@@ -7,7 +7,7 @@
                 var row = table.rows[rIndex];
                 var values = [];
                 for (var vIndex=0; vIndex < row.cells.length; vIndex++) {
-                    values.push(row.cells[vIndex].innerText.trim());
+                    values.push(row.cells[vIndex].innerText.trim().replace(/[\r\n]+/g," "));
                 }
                 if (values.length != 0) {
                     data.push(values);
