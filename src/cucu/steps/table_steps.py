@@ -105,7 +105,7 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
 def report_unable_to_find_table(tables):
     stream = StringIO()
     for table in tables:
-        stream.write(f"\n{tabulate(table, [], tablefmt='jira')}\n")
+        stream.write(f"\n{tabulate(table, [], tablefmt='grid')}\n")
 
     stream.seek(0)
     raise RuntimeError(f"unable to find desired table, found: {stream.read()}")
