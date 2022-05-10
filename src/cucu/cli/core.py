@@ -24,7 +24,6 @@ from tabulate import tabulate
 # socket connect/read call
 timeout = float(CONFIG["CUCU_SOCKET_DEFAULT_TIMEOUT_S"])
 socket.setdefaulttimeout(timeout)
-socket._GLOBAL_DEFAULT_TIMEOUT = timeout
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
