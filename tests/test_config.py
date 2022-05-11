@@ -1,3 +1,4 @@
+import pytest
 import tempfile
 
 from cucu.config import CONFIG
@@ -37,8 +38,8 @@ def test_config_resolves_variables():
     assert CONFIG.resolve("{VAR1} and {VAR2}") == "foo and bar"
 
 
-def test_config_resolves_not_set_to_empty_string():
-    assert CONFIG.resolve("{NOT_SET}") == ""
+def test_config_resolve_leaves_unresolved_variables():
+    assert CONFIG.resolve("{NOT_SET}") == "{NOT_SET}"
 
 
 def test_config_snapshot_and_restore_works():
@@ -58,3 +59,19 @@ def test_config_can_load_an_empty_config():
 def test_confi_validate_defined_variables():
     for variable in CONFIG.defined_variables:
         print(variable)
+
+
+def test_config_resolves_nested_variables():
+    CONFIG["FIZZ"] = "{BUZZ}"
+    CONFIG["BUZZ"] = "boom"
+    assert CONFIG.resolve("{FIZZ}") == "boom"
+
+
+def test_config_resolves_wont_get_stuck_in_infinite_loop():
+    CONFIG["FIZZ"] = "{BUZZ}"
+    CONFIG["BUZZ"] = "{FIZZ}"
+
+    with pytest.raises(
+        RuntimeError, match="infinite replacement loop detected"
+    ):
+        assert CONFIG.resolve("{FIZZ}") == "boom"

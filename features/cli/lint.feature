@@ -13,7 +13,7 @@ Feature: Lint
       And I create a file at "{CUCU_RESULTS_DIR}/undefined_step_lint/undefined_step_feature.feature" with the following:
       """
       Feature: Feature with undefined step
-      
+
         Scenario: This is a scenario that is using an undefined step
           Given I use an undefined step
       """
@@ -21,11 +21,11 @@ Feature: Lint
      Then I should see "{EXIT_CODE}" is equal to "1"
       And I should see "{STDOUT}" contains the following:
       """
-      You can implement step definitions for undefined steps with these snippets:
+      You can implement step definitions for undefined steps with these snippets
       """
       And I should see "{STDERR}" contains the following:
       """
-      RuntimeError: error loading steps, see above for details
+      failed to load steps, see above for details
       """
 
   Scenario: User can find and fix indentation violations
@@ -40,7 +40,7 @@ Feature: Lint
       And I create a file at "{CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" with the following:
       """
         Feature: Badly indented feature
-      
+
           Scenario: This is a scenario in a badly indented feature name line
             Given I echo "I should never see this"
       """
@@ -141,8 +141,7 @@ Feature: Lint
       And I should see "{STDOUT}" is empty
       And I should see "{STDERR}" is empty
 
-
-  Scenario: User gets error message when underlying steps have python errors
+  Scenario: User gets error when cucu lint has an issue in the underlying step code
     Given I create a file at "{CUCU_RESULTS_DIR}/broken_step_lint/environment.py" with the following:
       """
       from cucu.environment import *
@@ -165,5 +164,5 @@ Feature: Lint
       """
       And I should see "{STDERR}" contains the following:
       """
-      RuntimeError: error loading steps, see above for details
+      failed to load steps, see above for details
       """

@@ -8,14 +8,14 @@ Feature: Steps
       # just validate some built-in steps show up
       And I should see "{STDOUT}" contains the following:
       """
-      I open a browser at the url "{{url}}"
+      I open a browser at the url "\{url\}"
       """
       And I should see "{STDOUT}" contains the following:
       """
-      I start a webserver at directory "{{directory}}" and save the port to the variable "{{variable}}"
+      I start a webserver at directory "\{directory\}" and save the port to the variable "\{variable\}"
       """
 
-  Scenario: User can use `cucu steps` even if there are undefined steps
+  Scenario: User can gets an appropriate error when there are steps with errors
     Given I create a file at "{CUCU_RESULTS_DIR}/undefined_steps/features/environment.py" with the following:
       """
       from cucu.environment import *
@@ -42,13 +42,13 @@ Feature: Steps
       pushd {CUCU_RESULTS_DIR}/undefined_steps
       cucu steps
       """
-     Then I should see "{EXIT_CODE}" is equal to "0"
+     Then I should see "{EXIT_CODE}" is equal to "1"
       # just validate some built-in steps show up
       And I should see "{STDOUT}" contains the following:
       """
-      I open a browser at the url "{{url}}"
+      You can implement step definitions for undefined steps with these snippets:
       """
-      And I should see "{STDOUT}" contains the following:
+      And I should see "{STDERR}" contains the following:
       """
-      I start a webserver at directory "{{directory}}" and save the port to the variable "{{variable}}"
+      failed to load steps, see above for details
       """

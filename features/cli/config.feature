@@ -27,9 +27,9 @@ Feature: Config
       Feature: Feature file that prints some variables
 
         Scenario: This scenario prints a bunch of variables
-         Given I echo "{{FOO}}"
-           And I echo "{{FIZZ}}"
-           And I echo "{{BUZZ}}"
+         Given I echo "\{FOO\}"
+           And I echo "\{FIZZ\}"
+           And I echo "\{BUZZ\}"
       """
       When I run the command "cucu run {CUCU_RESULTS_DIR}/load_nested_cucurc --results={CUCU_RESULTS_DIR}/nested_cucurc_results --env BUZZ=buzz" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
       Then I should see "{EXIT_CODE}" is equal to "0"
@@ -40,15 +40,15 @@ Feature: Config
          Scenario: This scenario prints a bunch of variables
        bar
 
-           Given I echo "{{FOO}}"      #  in .*
+           Given I echo "\{FOO\}"      #  in .*
            # FOO="bar"
        booze
 
-             And I echo "{{FIZZ}}"     #  in .*
+             And I echo "\{FIZZ\}"     #  in .*
              # FIZZ="booze"
        buzz
 
-             And I echo "{{BUZZ}}"     #  in .*
+             And I echo "\{BUZZ\}"     #  in .*
              # BUZZ="buzz"
 
        1 feature passed, 0 failed, 0 skipped
@@ -76,9 +76,9 @@ Feature: Config
       Feature: Feature tries to print something
 
         Scenario: This scenario prints the value of FOO
-         Given I echo "{{FOO}}"
+         Given I echo "\{FOO\}"
       """
       When I run the command "cucu run {CUCU_RESULTS_DIR}/load_bad_cucurc --results={CUCU_RESULTS_DIR}/nested_cucurc_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "1"
-      And I should see "{STDout}" is empty
+      And I should see "{STDOUT}" is empty
       And I should see "{STDERR}" contains "yaml.scanner.ScannerError: while scanning a simple key"
