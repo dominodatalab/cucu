@@ -19,27 +19,13 @@ Feature: Lint
       """
      When I run the command "cucu lint {CUCU_RESULTS_DIR}/undefined_step_lint/undefined_step_feature.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "1"
-      And I should see "{STDOUT}" is equal to the following:
+      And I should see "{STDOUT}" contains the following:
       """
-      results/undefined_step_lint/undefined_step_feature.feature:4: E undefined step "I use an undefined step"
-
+      You can implement step definitions for undefined steps with these snippets:
       """
-      And I should see "{STDERR}" is equal to the following:
+      And I should see "{STDERR}" contains the following:
       """
-      Error: linting errors found, but not fixed, see above for details
-
-      """
-     When I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/undefined_step_lint/undefined_step_feature.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "1"
-      And I should see "{STDOUT}" is equal to the following:
-      """
-      results/undefined_step_lint/undefined_step_feature.feature:4: E undefined step "I use an undefined step" ✗ (must be fixed manually)
-
-      """
-      And I should see "{STDERR}" is equal to the following:
-      """
-      Error: linting errors found, but not fixed, see above for details
-
+      RuntimeError: error loading steps, see above for details
       """
 
   Scenario: User can find and fix indentation violations
@@ -154,3 +140,30 @@ Feature: Lint
      Then I should see "{EXIT_CODE}" is equal to "0"
       And I should see "{STDOUT}" is empty
       And I should see "{STDERR}" is empty
+
+
+  Scenario: User gets error message when underlying steps have python errors
+    Given I create a file at "{CUCU_RESULTS_DIR}/broken_step_lint/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/broken_step_lint/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+
+      raise RuntimeError("boom")
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/broken_step_lint/broken_step_feature.feature" with the following:
+      """
+      Feature: Just a place holder
+      """
+     When I run the command "cucu lint {CUCU_RESULTS_DIR}/broken_step_lint/broken_step_feature.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "1"
+      And I should see "{STDOUT}" contains the following:
+      """
+      RuntimeError: boom
+      """
+      And I should see "{STDERR}" contains the following:
+      """
+      RuntimeError: error loading steps, see above for details
+      """
