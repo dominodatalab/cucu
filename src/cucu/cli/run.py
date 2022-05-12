@@ -25,6 +25,7 @@ def behave(
     headless,
     name,
     ipdb_on_failure,
+    junit,
     results,
     secrets,
     tags,
@@ -81,7 +82,7 @@ def behave(
         args += [
             # JUnit xml file generated per feature file executed
             "--junit",
-            f"--junit-directory={results}",
+            f"--junit-directory={junit}",
             # generate a JSON file containing the exact details of the whole run
             "--format=cucu.formatter.json:CucuJSONFormatter",
             f"--outfile={results}/{run_json_filename}",

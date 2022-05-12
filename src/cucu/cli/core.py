@@ -76,10 +76,25 @@ def main():
     default=False,
     help="stop running tests on the first failure",
 )
-@click.option("-h", "--headless/--no-headless", default=True)
-@click.option("-n", "--name")
 @click.option(
-    "-i", "--ipdb-on-failure/--no-ipdb-oo-failure", help="", default=False
+    "-h",
+    "--headless/--no-headless",
+    default=True,
+    help="controls if the browser is run in headless mode",
+)
+@click.option("-n", "--name", help="used to specify the exact scenario to run")
+@click.option(
+    "-i",
+    "--ipdb-on-failure/--no-ipdb-oo-failure",
+    default=False,
+    help="on failure drop into the ipdb debug shell",
+)
+@click.option(
+    "-j",
+    "--junit",
+    default=None,
+    help="specify the output directory for JUnit XML files, default is "
+    "the same location as --results",
 )
 @click.option(
     "-l",
@@ -93,10 +108,22 @@ def main():
     help="sets the interval in minutes of when to run the periodic thread dumper",
 )
 @click.option(
-    "-p", "--preserve-results/--no-preserve-results", help="", default=False
+    "-p",
+    "--preserve-results/--no-preserve-results",
+    default=False,
+    help="when set we will not remove any existing results directory",
 )
-@click.option("--report", default="report")
-@click.option("-r", "--results", default="results")
+@click.option(
+    "--report",
+    default="report",
+    help="the location to put the test report when --generate-report is used",
+)
+@click.option(
+    "-r",
+    "--results",
+    default="results",
+    help="the results directory used by cucu",
+)
 @click.option(
     "--secrets",
     default=None,
@@ -106,23 +133,28 @@ def main():
 @click.option(
     "-t",
     "--tags",
-    help="Only execute features or scenarios with tags matching "
-    "expression provided. example: --tags @dev, --tags ~@dev",
     default=[],
     multiple=True,
+    help="Only execute features or scenarios with tags matching "
+    "expression provided. example: --tags @dev, --tags ~@dev",
 )
 @click.option(
     "-w",
     "--workers",
-    help="Specifies the number of workers to use to run tests in parallel",
     default=None,
+    help="Specifies the number of workers to use to run tests in parallel",
 )
 @click.option(
     "--verbose/--no-verbose",
-    help="runs with verbose logging and shows additional stacktrace",
     default=False,
+    help="runs with verbose logging and shows additional stacktrace",
 )
-@click.option("-s", "--selenium-remote-url", default=None)
+@click.option(
+    "-s",
+    "--selenium-remote-url",
+    default=None,
+    help="the HTTP url for a selenium hub setup to run the browser tests on",
+)
 def run(
     filepath,
     browser,
@@ -134,6 +166,7 @@ def run(
     headless,
     name,
     ipdb_on_failure,
+    junit,
     logging_level,
     periodic_thread_dumper,
     preserve_results,
@@ -190,6 +223,9 @@ def run(
     if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
         selenium.init()
 
+    if junit is None:
+        junit = results
+
     try:
         if workers is None or workers == 1:
             exit_code = behave(
@@ -202,6 +238,7 @@ def run(
                 headless,
                 name,
                 ipdb_on_failure,
+                junit,
                 results,
                 secrets,
                 tags,
@@ -235,6 +272,7 @@ def run(
                                 headless,
                                 name,
                                 ipdb_on_failure,
+                                junit,
                                 results,
                                 secrets,
                                 tags,
