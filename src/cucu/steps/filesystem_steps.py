@@ -50,13 +50,19 @@ def should_see_file(ctx, filepath):
     assert_file(ctx, filepath)
 
 
+@step('I should not see the file at "{filepath}"')
+def should_not_see_file(ctx, filepath):
+    if os.path.exists(filepath) and os.path.isfile(filepath):
+        raise RuntimeError(f"able to see file at {filepath}")
+
+
 @step('I wait to see the file at "{filepath}"')
-def should_see_file(ctx, filepath):
+def wait_to_see_file(ctx, filepath):
     retry(assert_file)(ctx, filepath)
 
 
 @step('I wait up to "{seconds}" seconds to see the file at "{filepath}"')
-def should_see_file(ctx, seconds, filepath):
+def wait_up_to_see_file(ctx, seconds, filepath):
     seconds = float(seconds)
     retry(assert_file, wait_up_to_s=seconds)(ctx, filepath)
 
