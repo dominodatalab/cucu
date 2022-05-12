@@ -93,7 +93,7 @@ def main():
     "-j",
     "--junit",
     default=None,
-    help="specify the output directory for JUnit XML files, default is to "
+    help="specify the output directory for JUnit XML files, default is "
     "the same location as --results",
 )
 @click.option(
