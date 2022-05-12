@@ -154,3 +154,30 @@ Feature: Lint
      Then I should see "{EXIT_CODE}" is equal to "0"
       And I should see "{STDOUT}" is empty
       And I should see "{STDERR}" is empty
+
+
+  Scenario: User gets error message when underlying steps have python errors
+    Given I create a file at "{CUCU_RESULTS_DIR}/broken_step_lint/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/broken_step_lint/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+
+      raise RuntimeError("boom")
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/broken_step_lint/broken_step_feature.feature" with the following:
+      """
+      Feature: Just a place holder
+      """
+     When I run the command "cucu lint {CUCU_RESULTS_DIR}/broken_step_lint/broken_step_feature.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "1"
+      And I should see "{STDOUT}" contains the following:
+      """
+      RuntimeError: boom
+      """
+      And I should see "{STDERR}" contains the following:
+      """
+      RuntimeError: error loading steps, see above for details
+      """

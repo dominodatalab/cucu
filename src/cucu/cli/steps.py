@@ -33,6 +33,12 @@ def load_cucu_steps(filepath=None):
         args.append(filepath)
 
     process = subprocess.run(args, capture_output=True)
+
+    if process.returncode != 0:
+        print(process.stdout.decode("utf8"))
+        print(process.stderr.decode("utf8"))
+        raise RuntimeError("error loading steps, see above for details")
+
     steps_doc_output = process.stdout.decode("utf8")
     for cucu_step in steps_doc_output.split("@step"):
         # Each line of a step definition looks like so:
