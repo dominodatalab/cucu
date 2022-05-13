@@ -24,8 +24,8 @@
         {% for scenario in scenarios %}
             <!--- ignore Backgrounds for the time being -->
             {% if scenario['keyword'] != 'Background' %}
-            <tr role="link" style="cursor: pointer;" onclick="window.location='{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html';" >
-                <td><pre style="display: inline; color: grey">{{ escape(scenario['name']) }}</pre></td>
+            <tr>
+                <td><a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><pre style="display: inline; color: grey">{{ escape(scenario['name']) }}</pre></a></td>
                 <td class="text-center">{{ scenario['total_steps'] }}</td>
                 {% if scenario['status'] == 'passed' %}
                     <td class="text-center"><pre style="display: inline; color: green">{{ scenario['status'] }}</pre></td>

@@ -42,14 +42,8 @@ Feature: Browser management
      Then I should see the browser title is "Buttons!"
      When I switch to the previous browser tab
      Then I should see the browser title is "Links!"
-     When I click the button "dropdowns! in a new tab"
-      And I switch to the next browser tab
-      And I switch to the next browser tab
-     Then I should see the browser title is "Dropdowns!"
      When I close the current browser tab
      Then I should see the browser title is "Buttons!"
-     When I close the current browser tab
-     Then I should see the browser title is "Links!"
 
   Scenario: User gets appropriate error when checking browser title
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
@@ -92,6 +86,16 @@ Feature: Browser management
       """
       return (window.innerHeight + "x" + window.innerWidth);
       """
-     Then I should see "{BROWSER_DIMENSIONS}" is equal to "1281x1081"
+      # on firefox the window height is always slightly shorter due to the way
+      # that firefox makes the full window the size you specified and not the
+      # viewport
+      And I run the following steps if the current browser is "chrome":
+      """
+        Then I should see "{BROWSER_DIMENSIONS}" is equal to "1281x1081"
+      """
+      And I run the following steps if the current browser is "firefox":
+      """
+        Then I should see "{BROWSER_DIMENSIONS}" matches ".*x1081"
+      """
       # so the next test doesn't end up with a silly tiny browser window
       And I close the current browser
