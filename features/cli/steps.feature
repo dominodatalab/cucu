@@ -42,9 +42,8 @@ Feature: Steps
       pushd {CUCU_RESULTS_DIR}/undefined_steps
       cucu steps
       """
-     Then I should see "{EXIT_CODE}" is equal to "1"
       # just validate some built-in steps show up
-      And I should see "{STDOUT}" contains the following:
+     Then I should see "{STDOUT}" contains the following:
       """
       You can implement step definitions for undefined steps with these snippets:
       """
@@ -52,3 +51,4 @@ Feature: Steps
       """
       failed to load steps, see above for details
       """
+      And I should see "{EXIT_CODE}" is equal to "1"
