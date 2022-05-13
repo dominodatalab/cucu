@@ -1,4 +1,3 @@
-import glob
 import json
 import os
 import shutil
@@ -61,6 +60,11 @@ def before_scenario(ctx, scenario):
     init_scenario_hook_variables()
     init_page_checks()
 
+    ctx.scenario = scenario
+    ctx.step_index = 0
+    ctx.browsers = []
+    ctx.browser = None
+
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         ctx.scenario_dir = os.path.join(ctx.feature_dir, scenario.name)
         CONFIG["SCENARIO_RESULTS_DIR"] = ctx.scenario_dir
@@ -68,11 +72,7 @@ def before_scenario(ctx, scenario):
 
         ctx.scenario_downloads_dir = os.path.join(ctx.scenario_dir, "downloads")
         CONFIG["SCENARIO_DOWNLOADS_DIR"] = ctx.scenario_downloads_dir
-
-    ctx.scenario = scenario
-    ctx.step_index = 0
-    ctx.browsers = []
-    ctx.browser = None
+        os.makedirs(ctx.scenario_downloads_dir, exist_ok=True)
 
     # internal cucu config variables
     CONFIG["SCENARIO_RUN_ID"] = uuid.uuid1().hex
@@ -83,16 +83,6 @@ def before_scenario(ctx, scenario):
 
 
 def after_scenario(ctx, scenario):
-    # copy any files in the CUCU_BROWSER_DOWNLOADS_DIR to the results
-    # directory for that scenario
-    downloads_dir = CONFIG["SCENARIO_DOWNLOADS_DIR"]
-
-    if downloads_dir:
-        os.makedirs(ctx.scenario_downloads_dir, exist_ok=True)
-        filepaths = glob.iglob(os.path.join(downloads_dir, "*.*"))
-        for filepath in filepaths:
-            shutil.copy(filepath, ctx.scenario_downloads_dir)
-
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
 
@@ -105,13 +95,8 @@ def after_scenario(ctx, scenario):
         # session
         for browser in ctx.browsers:
             # save the browser logs to the current scenarios results directory
-            scenario_dir = os.path.join(
-                config.CONFIG["CUCU_RESULTS_DIR"],
-                scenario.feature.name,
-                scenario.name,
-            )
             browser_log_filepath = os.path.join(
-                scenario_dir, "logs", "browser_console.log"
+                ctx.scenario_dir, "logs", "browser_console.log"
             )
 
             os.makedirs(os.path.dirname(browser_log_filepath), exist_ok=True)

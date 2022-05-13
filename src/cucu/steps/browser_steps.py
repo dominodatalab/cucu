@@ -1,3 +1,4 @@
+import base64
 import humanize
 import os
 
@@ -187,6 +188,56 @@ def find_file_input(ctx, name, index=0):
         raise RuntimeError(f'unable to find the {prefix}file input "{name}"')
 
     return input
+
+
+@step('I wait to see the downloaded file "{filename}"')
+def wait_to_see_downloaded_file(ctx, filename):
+    """
+    wait to see the expected downloaded filename appears in the current
+    browsers download directory and internally we then copy the contents of
+    that file to the SCENARIO_DOWNLOADS_DIR so the test can continue to
+    use the file as it deems necessary.
+    """
+    elem = ctx.browser.execute(
+        """
+        var input = window.document.createElement('INPUT');
+        input.setAttribute('type', 'file');
+        input.hidden = true;
+        input.onchange = function (e) { e.stopPropagation() };
+        return window.document.documentElement.appendChild(input);
+        """
+    )
+    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
+    elem.send_keys(f"{cucu_downloads_dir}/{filename}")
+    ctx.browser.execute(
+        """
+        var input = arguments[0];
+        window.__cucu_downloaded_file = null;
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+            window.__cucu_downloaded_file = reader.result;
+        };
+        reader.onerror = function (ex) {
+            window.__cucu_downloaded_file = ex.message;
+        };
+        reader.readAsDataURL(input.files[0]);
+        input.remove();
+        """,
+        elem,
+    )
+
+    while ctx.browser.execute("return window.__cucu_downloaded_file;") == None:
+        sleep(1)
+
+    result = ctx.browser.execute("return window.__cucu_downloaded_file;")
+
+    if not result.startswith("data:"):
+        raise Exception("Failed to get file content: %s" % result)
+
+    filedata = base64.b64decode(result[result.find("base64,") + 7 :])
+    scenario_downloads_dir = config.CONFIG["SCENARIO_DOWNLOADS_DIR"]
+    download_filepath = os.path.join(scenario_downloads_dir, filename)
+    open(download_filepath, "w").write(filedata.decode("utf8"))
 
 
 @step('I upload the file "{filepath}" to the file input "{name}"')
