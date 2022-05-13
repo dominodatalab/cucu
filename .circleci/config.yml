@@ -25,6 +25,8 @@ setup_remote_docker_env: &setup_remote_docker_env
 executors:
   chrome-test-executor:
     docker:
+      - image: cimp/python:3.9.7
+
       - image: selenium/standalone-chrome:4.1.2-20220217
         environment:
           SE_NODE_MAX_SESSIONS: 5
