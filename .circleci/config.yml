@@ -18,8 +18,21 @@ install_cucu_globally: &install_cucu_globally
     command: pip install dist/cucu-*.tar.gz
 
 
-orbs:
-  browser-tools: circleci/browser-tools@1.2.4
+setup_remote_docker_env: &setup_remote_docker_env
+  setup_remote_docker:
+    version: 20.10.14
+
+executors:
+  chrome-test-executor:
+    docker:
+      - image: selenium/standalone-chrome:4.1.2-20220217
+        environment:
+          SE_NODE_MAX_SESSIONS: 5
+          SE_NODE_OVERRIDE_MAX_SESSIONS: true
+          SE_NODE_SESSION_TIMEOUT: 900 # 15 minutes
+          SCREEN_WIDTH: 1920
+          SCREEN_HEIGHT: 1080
+    resource_class: large
 
 jobs:
   pre-commit:
@@ -47,21 +60,24 @@ jobs:
           command: |
             pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
 
-  test:
-    docker:
-      - image: cimg/python:3.9.7-browsers
+  test-chrome:
+    executor: chrome-test-executor
 
     steps:
-      - browser-tools/install-browser-tools
-      - browser-tools/install-chrome
       - checkout
       - *install_cucu_dependencies
       - *build_cucu_python_package
       - *install_cucu_globally
+      - *setup_remote_docker_env
+
+      - run:
+          name: wait for selenium to be running
+          # retry connection every 5s x 60 which is a total of 5 minutes
+          command: curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
 
       - run:
           name: run functional tests
-          command: poetry run cucu run features --workers 2
+          command: poetry run cucu run features --workers 2 --selenium-remote-url http://localhost:4444
           environment:
             COVERAGE_PROCESS_START: .coveragerc
             CUCU_COLOR_OUTPUT: false
@@ -118,4 +134,4 @@ workflows:
   build-n-test:
     jobs:
       - pre-commit
-      - test
+      - test-chrome
