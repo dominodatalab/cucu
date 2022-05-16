@@ -2,7 +2,7 @@ import base64
 import humanize
 import os
 
-from cucu import config, logger, fuzzy, step
+from cucu import config, logger, fuzzy, retry, step
 from cucu.browser.selenium import Selenium
 
 from selenium.webdriver.common.keys import Keys
@@ -190,14 +190,7 @@ def find_file_input(ctx, name, index=0):
     return input
 
 
-@step('I wait to see the downloaded file "{filename}"')
-def wait_to_see_downloaded_file(ctx, filename):
-    """
-    wait to see the expected downloaded filename appears in the current
-    browsers download directory and internally we then copy the contents of
-    that file to the SCENARIO_DOWNLOADS_DIR so the test can continue to
-    use the file as it deems necessary.
-    """
+def save_downloaded_file(ctx, filename):
     elem = ctx.browser.execute(
         """
         var input = window.document.createElement('INPUT');
@@ -226,8 +219,11 @@ def wait_to_see_downloaded_file(ctx, filename):
         elem,
     )
 
-    while ctx.browser.execute("return window.__cucu_downloaded_file;") == None:
-        sleep(1)
+    def wait_for_file():
+        if ctx.browser.execute("return window.__cucu_downloaded_file;") == None:
+            raise RuntimeError(f"waiting on file {filename}")
+
+    retry(wait_for_file)
 
     result = ctx.browser.execute("return window.__cucu_downloaded_file;")
 
@@ -237,7 +233,26 @@ def wait_to_see_downloaded_file(ctx, filename):
     filedata = base64.b64decode(result[result.find("base64,") + 7 :])
     scenario_downloads_dir = config.CONFIG["SCENARIO_DOWNLOADS_DIR"]
     download_filepath = os.path.join(scenario_downloads_dir, filename)
-    open(download_filepath, "w").write(filedata.decode("utf8"))
+    open(download_filepath, "wb").write(filedata)
+
+
+@step('I wait to see the downloaded file "{filename}"')
+def wait_to_see_downloaded_file(ctx, filename):
+    """
+    wait to see the expected downloaded filename appears in the current
+    browsers download directory and internally we then copy the contents of
+    that file to the SCENARIO_DOWNLOADS_DIR so the test can continue to
+    use the file as it deems necessary.
+    """
+    retry(save_downloaded_file)(ctx, filename)
+
+
+@step(
+    'I wait up to "{seconds}" seconds to see the downloaded file "{filename}"'
+)
+def wait_to_see_downloaded_file(ctx, filename):
+    seconds = float(seconds)
+    retry(save_downloaded_file, wait_up_to_s=seconds)(ctx, filename)
 
 
 @step('I upload the file "{filepath}" to the file input "{name}"')
