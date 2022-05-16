@@ -17,6 +17,7 @@ def find_image(ctx, name, index=0):
         the WebElement that matches the provided arguments.
     """
     image = None
+    name = name.replace('"', '\\"')
     imgs = ctx.browser.css_find_elements(f'img[alt="{name}"')
 
     if len(imgs) > index:

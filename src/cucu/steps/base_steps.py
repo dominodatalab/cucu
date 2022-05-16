@@ -63,10 +63,7 @@ def i_echo_the_following(ctx):
 
     elif ctx.table is not None:
         printer = ModelPrinter(sys.stdout)
-        # indentation is 2 spaces for Scenario 2 spaces for the start of keyword
-        # "Given" and the length of "Given" minus one so we align with the last
-        # character.
-        printer.print_table(ctx.table, " " * 8)
+        printer.print_table(ctx.table)
 
 
 @step('I log "{message}" at level "{level}"')

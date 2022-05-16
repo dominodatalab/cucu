@@ -8,14 +8,14 @@ Feature: Steps
       # just validate some built-in steps show up
       And I should see "{STDOUT}" contains the following:
       """
-      I open a browser at the url "{{url}}"
+      I open a browser at the url "\{url\}"
       """
       And I should see "{STDOUT}" contains the following:
       """
-      I start a webserver at directory "{{directory}}" and save the port to the variable "{{variable}}"
+      I start a webserver at directory "\{directory\}" and save the port to the variable "\{variable\}"
       """
 
-  Scenario: User can use `cucu steps` even if there are undefined steps
+  Scenario: User can use `cucu steps` and get an error when there are undefined steps
     Given I create a file at "{CUCU_RESULTS_DIR}/undefined_steps/features/environment.py" with the following:
       """
       from cucu.environment import *
@@ -36,19 +36,14 @@ Feature: Steps
         Scenario: This scenario with an undefined step
           Given I attempt to use an undefined step
       """
-     When I run the following script and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-      """
-      #!{SHELL}
-      pushd {CUCU_RESULTS_DIR}/undefined_steps
-      cucu steps
-      """
-     Then I should see "{EXIT_CODE}" is equal to "0"
+     When I run the command "cucu steps {CUCU_RESULTS_DIR}/undefined_steps/features/feature_that_spills_the_beans.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "1"
       # just validate some built-in steps show up
       And I should see "{STDOUT}" contains the following:
       """
-      I open a browser at the url "{{url}}"
+      You can implement step definitions for undefined steps with these snippets:
       """
-      And I should see "{STDOUT}" contains the following:
+      And I should see "{STDERR}" contains the following:
       """
-      I start a webserver at directory "{{directory}}" and save the port to the variable "{{variable}}"
+      failed to load steps, see above for details
       """

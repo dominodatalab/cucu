@@ -72,6 +72,12 @@ def find(browser, name, things, index=0, direction=Direction.LEFT_TO_RIGHT):
     """
     browser.switch_to_default_frame()
     init(browser)
+
+    # always need to protect names in which double quotes are used as below
+    # we pass arguments to the fuzzy_find javascript function wrapped in double
+    # quotes
+    name = name.replace('"', '\\"')
+
     args = [f'"{name}"', str(things), str(index), str(direction.value)]
     script = f"return cucu.fuzzy_find({','.join(args)});"
     result = browser.execute(script)
