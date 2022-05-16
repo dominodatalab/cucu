@@ -11,3 +11,12 @@ Feature: Links
       And I should see the link "dropdowns!"
      When I click the button "buttons!"
      Then I should not see the link "buttons!"
+
+  Scenario: User can interact with duplicate links
+    Given I should see the "1st" link "duplicate link!"
+      And I should see the "2nd" link "duplicate link!"
+      When I click the "1st" link "duplicate link!"
+      Then I should see the browser title is "File!"
+      When I go back on the browser
+       And I click the "2nd" link "duplicate link!"
+      Then I should see the browser title is "Iframes!"
