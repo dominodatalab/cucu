@@ -23,3 +23,55 @@ Feature: Internals
       """
       running within cucu but --results was not used
       """
+
+  Scenario: User gets a warning when using an unbound variable reference
+    Given I create a file at "{CUCU_RESULTS_DIR}/unbound_variable_usage/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/unbound_variable_usage/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/unbound_variable_usage/unbound_variable_feature.feature" with the following:
+      """
+      Feature: Feature with unbound variable
+
+        Scenario: This is a scenario that is using an unbound variable
+          Given I echo "\{UNBOUND\}"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/unbound_variable_usage/unbound_variable_feature.feature --results {CUCU_RESULTS_DIR}/unbound_variable_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "0"
+      And I should see "{STDOUT}" contains the following:
+      """
+      WARNING unbound variable UNBOUND replaced with empty string
+      """
+
+  Scenario: User can use variables with various value types
+    Given I create a file at "{CUCU_RESULTS_DIR}/variable_value_types/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/variable_value_types/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      from cucu.config import CONFIG
+
+      CONFIG["BOOLEAN_VARIABLE"] = True
+      CONFIG["INT_VARIABLE"] = 42
+      CONFIG["STRING_VARIABLE"] = "foobar"
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/variable_value_types/variable_types_feature.feature" with the following:
+      """
+      Feature: Variable types feature
+
+        Scenario: This is a senario that echos variables of various types
+          Given I echo "\{BOOLEAN_VARIABLE\} \{INT_VARIABLE\} \{STRING_VARIABLE\}"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/variable_value_types/variable_types_feature.feature --results {CUCU_RESULTS_DIR}/variable_value_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "0"
+      And I should see "{STDOUT}" contains the following:
+      """
+      True 42 foobar
+      """
+      And I should see "{STDERR}" is empty
