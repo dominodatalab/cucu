@@ -142,14 +142,12 @@ class Config(dict):
 
                 for match in Config.__VARIABLE_REGEX.findall(string):
                     value = self.get(match)
-                    value = str(value)
 
                     if value is None:
                         value = ""
-                        logger.warning(
-                            f"unbound variable {match} replaced with empty string"
-                        )
+                        logger.warn(f'variable "{match}" is undefined')
 
+                    value = str(value)
                     string = string.replace("{" + match + "}", value)
 
             # we are only going to allow escaping of { and " characters for the

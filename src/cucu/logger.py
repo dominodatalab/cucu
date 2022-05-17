@@ -27,7 +27,7 @@ def info(*args, **kwargs):
 
 
 @wraps(logging.warn)
-def warning(*args, **kwargs):
+def warn(*args, **kwargs):
     if logging.getLogger("cucu").getEffectiveLevel() <= logging.WARN:
         logging.getLogger("cucu").warning(*args, **kwargs)
 

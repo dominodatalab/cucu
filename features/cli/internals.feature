@@ -24,27 +24,27 @@ Feature: Internals
       running within cucu but --results was not used
       """
 
-  Scenario: User gets a warning when using an unbound variable reference
-    Given I create a file at "{CUCU_RESULTS_DIR}/unbound_variable_usage/environment.py" with the following:
+  Scenario: User gets a warning when using an undefined variable reference
+    Given I create a file at "{CUCU_RESULTS_DIR}/undefined_variable_usage/environment.py" with the following:
       """
       from cucu.environment import *
       """
-      And I create a file at "{CUCU_RESULTS_DIR}/unbound_variable_usage/steps/__init__.py" with the following:
+      And I create a file at "{CUCU_RESULTS_DIR}/undefined_variable_usage/steps/__init__.py" with the following:
       """
       from cucu.steps import *
       """
-      And I create a file at "{CUCU_RESULTS_DIR}/unbound_variable_usage/unbound_variable_feature.feature" with the following:
+      And I create a file at "{CUCU_RESULTS_DIR}/undefined_variable_usage/undefined_variable_feature.feature" with the following:
       """
-      Feature: Feature with unbound variable
+      Feature: Feature with undefined variable
 
-        Scenario: This is a scenario that is using an unbound variable
+        Scenario: This is a scenario that is using an undefined variable
           Given I echo "\{UNBOUND\}"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/unbound_variable_usage/unbound_variable_feature.feature --results {CUCU_RESULTS_DIR}/unbound_variable_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/undefined_variable_usage/undefined_variable_feature.feature --results {CUCU_RESULTS_DIR}/undefined_variable_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
       And I should see "{STDOUT}" contains the following:
       """
-      WARNING unbound variable UNBOUND replaced with empty string
+      WARNING variable "UNBOUND" is undefined
       """
 
   Scenario: User can use variables with various value types
