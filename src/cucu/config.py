@@ -58,7 +58,6 @@ class Config(dict):
             return None
 
     def __setitem__(self, key, val):
-        val = self.escape(val)
         dict.__setitem__(self, key, val)
 
     def get(self, key, default=None):
@@ -141,14 +140,15 @@ class Config(dict):
                 previouses.append(string)
 
                 for match in Config.__VARIABLE_REGEX.findall(string):
+                    print(f"match {match}")
                     value = self.get(match)
+                    print(f"match {match} value {value}")
 
                     if value is None:
                         value = ""
                         logger.warn(f'variable "{match}" is undefined')
 
-                    value = str(value)
-                    string = string.replace("{" + match + "}", value)
+                    string = string.replace("{" + match + "}", str(value))
 
             # we are only going to allow escaping of { and " characters for the
             # time being as they're part of the language:
