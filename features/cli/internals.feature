@@ -38,13 +38,13 @@ Feature: Internals
       Feature: Feature with undefined variable
 
         Scenario: This is a scenario that is using an undefined variable
-          Given I echo "\{UNBOUND\}"
+          Given I echo "\{UNDEFINED\}"
       """
      When I run the command "cucu run {CUCU_RESULTS_DIR}/undefined_variable_usage/undefined_variable_feature.feature --results {CUCU_RESULTS_DIR}/undefined_variable_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
       And I should see "{STDOUT}" contains the following:
       """
-      WARNING variable "UNBOUND" is undefined
+      WARNING variable "UNDEFINED" is undefined
       """
 
   Scenario: User can use variables with various value types
