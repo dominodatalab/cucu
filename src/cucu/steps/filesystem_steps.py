@@ -31,7 +31,7 @@ def delete_file_at_if_it_exists(ctx, filepath):
 )
 def read_file_contents(ctx, filepath, variable):
     with open(filepath, "r") as _input:
-        CONFIG[variable] = _input.read()
+        CONFIG[variable] = CONFIG.escape(_input.read())
 
 
 @step('I append to the file at "{filepath}" the following')

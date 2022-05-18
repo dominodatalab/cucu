@@ -22,10 +22,10 @@ def run_command(
     stderr = process.stderr.decode("utf8")
 
     if stdout_var:
-        config.CONFIG[stdout_var] = stdout
+        config.CONFIG[stdout_var] = config.CONFIG.escape(stdout)
 
     if stderr_var:
-        config.CONFIG[stderr_var] = stderr
+        config.CONFIG[stderr_var] = config.CONFIG.escape(stderr)
 
     return_code = process.returncode
     if check_exit_code is not None and int(check_exit_code) != return_code:
@@ -59,10 +59,10 @@ def run_script(
     stderr = process.stderr.decode("utf8")
 
     if stdout_var:
-        config.CONFIG[stdout_var] = stdout
+        config.CONFIG[stdout_var] = config.CONFIG.escape(stdout)
 
     if stderr_var:
-        config.CONFIG[stderr_var] = stderr
+        config.CONFIG[stderr_var] = config.CONFIG.escape(stderr)
 
     return_code = process.returncode
     if check_exit_code is not None and int(check_exit_code) != return_code:

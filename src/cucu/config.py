@@ -3,6 +3,8 @@ import re
 import socket
 import yaml
 
+from cucu import logger
+
 
 class Config(dict):
 
@@ -31,6 +33,17 @@ class Config(dict):
         }
         # set the default
         self.__setitem__(name, default)
+
+    def escape(self, string):
+        """
+        utility method used to escape strings that would be otherwise problematic
+        if the values were passed around as is in cucu steps.
+        """
+        if type(string) == str:
+            string = string.replace("{", "\\{")
+            string = string.replace("}", "\\}")
+
+        return string
 
     def __getitem__(self, key):
         try:
@@ -127,10 +140,15 @@ class Config(dict):
                 previouses.append(string)
 
                 for match in Config.__VARIABLE_REGEX.findall(string):
+                    print(f"match {match}")
                     value = self.get(match)
+                    print(f"match {match} value {value}")
 
-                    if value is not None:
-                        string = string.replace("{" + match + "}", value)
+                    if value is None:
+                        value = ""
+                        logger.warn(f'variable "{match}" is undefined')
+
+                    string = string.replace("{" + match + "}", str(value))
 
             # we are only going to allow escaping of { and " characters for the
             # time being as they're part of the language:

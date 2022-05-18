@@ -39,7 +39,7 @@ def test_config_resolves_variables():
 
 
 def test_config_resolve_leaves_unresolved_variables():
-    assert CONFIG.resolve("{NOT_SET}") == "{NOT_SET}"
+    assert CONFIG.resolve("{NOT_SET}") == ""
 
 
 def test_config_snapshot_and_restore_works():
