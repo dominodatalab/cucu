@@ -79,6 +79,16 @@ Feature: Inputs
      When I write "022012" into the input "input type=week"
      Then I should see "2012-W02" in the input "input type=week"
 
+  Scenario: User can write into an <textarea>
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
+      And I should see no value in the input "textarea"
+     When I write into the input "textarea" the following
+      """
+      line 1
+      line 2
+      """
+     Then I should see "line 1line 2" in the input "textarea"
+
   Scenario: User can write into an <input> with label for
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
       And I should see no value in the input "input with label for"
