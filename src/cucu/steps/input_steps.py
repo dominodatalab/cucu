@@ -128,23 +128,17 @@ def wait_up_to_write_into_input(ctx, seconds, value, name):
     retry(find_n_write, wait_up_to_s=float(seconds))(ctx, name, value)
 
 
-@step(
-    'I write the following into the input "{name}"'
-)
+@step('I write the following into the input "{name}"')
 def writes_multi_lines_into_input(ctx, name):
     find_n_write(ctx, name, ctx.text)
 
 
-@step(
-    'I wait to write the following into the input "{name}"'
-)
+@step('I wait to write the following into the input "{name}"')
 def wait_to_write_multi_lines_into_input(ctx, name):
     retry(find_n_write)(ctx, name, ctx.text)
     
 
-@step(
-    'I wait up to "{seconds}" to write the following into the input "{name}"'
-)
+@step('I wait up to "{seconds}" to write the following into the input "{name}"')
 def wait_up_to_write_multi_lines_into_input(ctx, seconds, name):
     retry(find_n_write, wait_up_to_s=float(seconds))(ctx, name, ctx.text)
     
