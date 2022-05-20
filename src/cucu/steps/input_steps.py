@@ -136,12 +136,12 @@ def writes_multi_lines_into_input(ctx, name):
 @step('I wait to write the following into the input "{name}"')
 def wait_to_write_multi_lines_into_input(ctx, name):
     retry(find_n_write)(ctx, name, ctx.text)
-    
+
 
 @step('I wait up to "{seconds}" to write the following into the input "{name}"')
 def wait_up_to_write_multi_lines_into_input(ctx, seconds, name):
     retry(find_n_write, wait_up_to_s=float(seconds))(ctx, name, ctx.text)
-    
+
 
 @step('I send the "{key}" key to the input "{name}"')
 def send_keys_to_input(ctx, key, name):
