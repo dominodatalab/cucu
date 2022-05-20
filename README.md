@@ -94,6 +94,12 @@ also check the code coverage by running `make coverage`.
 
 # development
 
+* Install the `pre-commit` utility. This can be done using the command
+`brew install pre-commit`. (If you don't have `brew`,
+[install that, first](https://brew.sh/).
+* From the top-level director of the `cucu` repository,
+run `pre-commit install`.
+
 ## tagging a new release
 
 To tag a new release of cucu on your branch you can simply run `make release`
