@@ -28,20 +28,27 @@ wait_for_selenium: &wait_for_selenium
 
 run_functional_tests: &run_functional_tests
   run:
-    command: poetry run cucu run features --workers 2 --selenium-remote-url http://localhost:4444 --generate-report
+    command: poetry run cucu run features --workers 2 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results
     environment:
       COVERAGE_PROCESS_START: .coveragerc
       CUCU_COLOR_OUTPUT: false
 
+run_unit_tests: &run_unit_tests
+  run:
+    name: run unit tests
+    command: poetry run coverage run -m pytest  --junit-xml=results/unit-tests.xml
+
 tar_up_results_and_report: &tar_up_results_and_report
   run:
     name: tar up results and report
-    # avoids picking up other test results files from sub directories that
-    # are from testing `cucu run` and producing irrelevant test results
+    command: tar cvfz results.tgz results && tar cvfz report.tgz report
+
+code_coverage_check: &code_coverage_check
+  run:
     command: |
-      mkdir -p test_results
-      cp results/*.xml test_results
-      tar cvfz results.tgz results && tar cvfz report.tgz report
+      poetry run coverage combine .coverage.*
+      poetry run coverage html
+      poetry run coverage report --fail-under=90
 
 executors:
   unit-test-executor:
@@ -108,13 +115,18 @@ jobs:
       - *setup_remote_docker_env
       - *wait_for_selenium
       - *run_functional_tests
+      - *run_unit_tests
       - *tar_up_results_and_report
+      - *code_coverage_check
 
       - store_artifacts:
           path: results.tgz
 
       - store_artifacts:
           path: report.tgz
+
+      - store_results:
+          path: junit_results
 
       - store_artifacts:
           path: report/
@@ -130,7 +142,9 @@ jobs:
       - *setup_remote_docker_env
       - *wait_for_selenium
       - *run_functional_tests
+      - *run_unit_tests
       - *tar_up_results_and_report
+      - *code_coverage_check
 
       - store_artifacts:
           path: results.tgz
@@ -138,44 +152,15 @@ jobs:
       - store_artifacts:
           path: report.tgz
 
+      - store_results:
+          path: junit_results
+
       - store_artifacts:
           path: report/
-
-  test:
-    executor: unit-test-executor
-
-    steps:
-      - checkout
-      - *install_cucu_dependencies
-      - *build_cucu_python_package
-      - *install_cucu_globally
-
-      - run:
-          name: run unit tests
-          command: poetry run coverage run -m pytest  --junit-xml=results/unit-tests.xml
-          when: always
-
-
-      - store_test_results:
-          path: test_results/
-
-      - run:
-          name: combine coverage reports
-          command: poetry run coverage combine .coverage.*
-
-      - run:
-          name: code coverage report
-          command: |
-            poetry run coverage html
-            poetry run coverage report --fail-under=90
-
-      - store_artifacts:
-          path: htmlcov
 
 workflows:
   build-n-test:
     jobs:
       - pre-commit
-      - test
       - test-chrome
       - test-firefox
