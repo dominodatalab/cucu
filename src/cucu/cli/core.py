@@ -214,7 +214,7 @@ def run(
             os.makedirs(results)
 
     if selenium_remote_url is not None:
-        CONFIG["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
+        os.environ["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
 
     if periodic_thread_dumper is not None:
         interval_min = float(periodic_thread_dumper)
