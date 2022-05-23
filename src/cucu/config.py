@@ -140,9 +140,7 @@ class Config(dict):
                 previouses.append(string)
 
                 for match in Config.__VARIABLE_REGEX.findall(string):
-                    print(f"match {match}")
                     value = self.get(match)
-                    print(f"match {match} value {value}")
 
                     if value is None:
                         value = ""
