@@ -2,53 +2,67 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-install_cucu_dependencies: &install_cucu_dependencies
-  run:
-    name: install cucu dependencies
-    command: pip install poetry && poetry install
+commands:
+  install_cucu_dependencies: &install_cucu_dependencies
+    steps:
+      - run:
+          name: install cucu dependencies
+          command: pip install poetry && poetry install
 
-build_cucu_python_package: &build_cucu_python_package
-  run:
-    name: build the cucu python package
-    command: poetry build
+  build_cucu_python_package: &build_cucu_python_package
+    steps:
+      - run:
+          name: build the cucu python package
+          command: poetry build
 
-install_cucu_globally: &install_cucu_globally
-  run:
-    name: install cucu globally
-    command: pip install dist/cucu-*.tar.gz
+  install_cucu_globally: &install_cucu_globally
+    steps:
+      - run:
+          name: install cucu globally
+          command: pip install dist/cucu-*.tar.gz
 
-setup_remote_docker_env: &setup_remote_docker_env
-  setup_remote_docker:
-    version: 20.10.14
+  setup_remote_docker_env: &setup_remote_docker_env
+    steps:
+      - setup_remote_docker:
+          version: 20.10.14
 
-wait_for_selenium: &wait_for_selenium
-  run:
-    # retry connection every 5s x 60 which is a total of 5 minutes
-    command: curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
+  wait_for_selenium: &wait_for_selenium
+    steps:
+      - run:
+          # retry connection every 5s x 60 which is a total of 5 minutes
+          command: curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
 
-run_functional_tests: &run_functional_tests
-  run:
-    command: poetry run cucu run features --workers 2 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results
-    environment:
-      COVERAGE_PROCESS_START: .coveragerc
-      CUCU_COLOR_OUTPUT: false
+  run_functional_tests: &run_functional_tests
+    parameters:
+      browser:
+        type: string
+        default: "chrome"
+    steps:
+      - run:
+          command: poetry run cucu run features --workers 2 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<< parameters.browser >>"
+          environment:
+            COVERAGE_PROCESS_START: .coveragerc
+            CUCU_COLOR_OUTPUT: false
 
-run_unit_tests: &run_unit_tests
-  run:
-    name: run unit tests
-    command: poetry run coverage run -m pytest  --junit-xml=results/unit-tests.xml
+  run_unit_tests: &run_unit_tests
+    steps:
+      - run:
+          name: run unit tests
+          command: poetry run coverage run -m pytest  --junit-xml=results/unit-tests.xml
 
-tar_up_results_and_report: &tar_up_results_and_report
-  run:
-    name: tar up results and report
-    command: tar cvfz results.tgz results && tar cvfz report.tgz report
+  tar_up_results_and_report: &tar_up_results_and_report
+    steps:
+      - run:
+          name: tar up results and report
+          command: tar cvfz results.tgz results && tar cvfz report.tgz report
 
-code_coverage_check: &code_coverage_check
-  run:
-    command: |
-      poetry run coverage combine .coverage.*
-      poetry run coverage html
-      poetry run coverage report --fail-under=90
+  code_coverage_check: &code_coverage_check
+    steps:
+      - run:
+          command: |
+            poetry run coverage combine .coverage.*
+            poetry run coverage html
+            poetry run coverage report --fail-under=90
 
 executors:
   unit-test-executor:
@@ -58,10 +72,7 @@ executors:
   chrome-test-executor:
     docker:
       - image: python:3.9.7
-        environment:
-          CUCU_BROWSER=chrome
-
-      - image: selenium/standalone-chrome:4.1.2-20220217
+      - image: selenium/standalone-chrome:100.0
         environment:
           SE_NODE_MAX_SESSIONS: 10
           SE_NODE_OVERRIDE_MAX_SESSIONS: true
@@ -73,10 +84,7 @@ executors:
   firefox-test-executor:
     docker:
       - image: python:3.9.7
-        environment:
-          CUCU_BROWSER=firefox
-
-      - image: selenium/standalone-firefox:4.1.2-20220217
+      - image: selenium/standalone-firefox:98.0
         environment:
           SE_NODE_MAX_SESSIONS: 10
           SE_NODE_OVERRIDE_MAX_SESSIONS: true
@@ -99,9 +107,9 @@ jobs:
             pip install pre-commit
             pre-commit install-hooks
 
-      - *install_cucu_dependencies
-      - *build_cucu_python_package
-      - *install_cucu_globally
+      - install_cucu_dependencies
+      - build_cucu_python_package
+      - install_cucu_globally
 
       - run:
           name: run pre-commit validations
@@ -118,15 +126,16 @@ jobs:
 
     steps:
       - checkout
-      - *install_cucu_dependencies
-      - *build_cucu_python_package
-      - *install_cucu_globally
-      - *setup_remote_docker_env
-      - *wait_for_selenium
-      - *run_functional_tests
-      - *run_unit_tests
-      - *tar_up_results_and_report
-      - *code_coverage_check
+      - install_cucu_dependencies
+      - build_cucu_python_package
+      - install_cucu_globally
+      - setup_remote_docker_env
+      - wait_for_selenium
+      - run_functional_tests:
+          browser: "<< parameters.browser >>"
+      - run_unit_tests
+      - tar_up_results_and_report
+      - code_coverage_check
 
       - store_artifacts:
           path: results.tgz
