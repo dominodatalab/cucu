@@ -220,6 +220,9 @@ def run(
         interval_min = float(periodic_thread_dumper)
         dumper = thread_dumper.start(interval_min)
 
+    # need to set this before initializing any browsers below
+    os.environ["CUCU_BROWSER"] = browser
+
     if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
         selenium.init()
 

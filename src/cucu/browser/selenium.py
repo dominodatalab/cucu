@@ -1,4 +1,5 @@
 import chromedriver_autoinstaller
+import geckodriver_autoinstaller
 import logging
 import urllib3
 
@@ -28,12 +29,18 @@ def init():
     timeout = float(config.CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT_S"])
     RemoteConnection.set_timeout(timeout)
 
-    try:
-        with DisableLogger():
-            # auto install chromedriver if not present
-            chromedriver_autoinstaller.install()
-    except:
-        logging.debug("unable to auto install chromedriver")
+    if config.CONFIG["CUCU_BROWSER"] == "chrome":
+        try:
+            with DisableLogger():
+                # auto install chromedriver if not present
+                chromedriver_autoinstaller.install()
+        except:
+            logging.debug("unable to auto install chromedriver")
+
+    if config.CONFIG["CUCU_BROWSER"] == "firefox":
+        # https://github.com/mozilla/geckodriver/issues/330
+        logger.warn("browser console logs not available on firefox")
+        geckodriver_autoinstaller.install()
 
 
 class Selenium(Browser):
@@ -43,6 +50,8 @@ class Selenium(Browser):
     def open(
         self, browser, headless=False, selenium_remote_url=None, detach=False
     ):
+        height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
+        width = config.CONFIG["CUCU_BROWSER_WINDOW_WIDTH"]
 
         if browser.startswith("chrome"):
             options = Options()
@@ -52,8 +61,6 @@ class Selenium(Browser):
             prefs = {"download.default_directory": cucu_downloads_dir}
             options.add_experimental_option("prefs", prefs)
 
-            height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
-            width = config.CONFIG["CUCU_BROWSER_WINDOW_WIDTH"]
             options.add_argument(f"--window-size={width},{height}")
             options.add_argument("--disable-dev-shm-usage")
             options.add_argument("--ignore-certificate-errors")
@@ -87,12 +94,58 @@ class Selenium(Browser):
                     chrome_options=options,
                     desired_capabilities=desired_capabilities,
                 )
+        elif browser.startswith("firefox"):
+            options = webdriver.FirefoxOptions()
+            profile = webdriver.FirefoxProfile()
+            profile.accept_untrusted_certs = True
+            profile.set_preference("browser.download.folderList", 2)
+            profile.set_preference(
+                "browser.download.manager.showWhenStarting", False
+            )
+            cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
+            profile.set_preference("browser.download.dir", cucu_downloads_dir)
+            # profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/x-gzip")
 
-            self.driver.set_window_size(width, height)
+            desired_capabilities = DesiredCapabilities.FIREFOX
+            desired_capabilities["loggingPrefs"] = {"browser": "ALL"}
+
+            if headless:
+                options.add_argument("--headless")
+
+            if selenium_remote_url is not None:
+                logger.debug(f"webdriver.Remote init: {selenium_remote_url}")
+                try:
+                    self.driver = webdriver.Remote(
+                        options=options,
+                        command_executor=selenium_remote_url,
+                        desired_capabilities=desired_capabilities,
+                    )
+                except urllib3.exceptions.ReadTimeoutError:
+                    print("*" * 80)
+                    print(
+                        "* unable to connect to the remote selenium setup,"
+                        " you may need to restart it"
+                    )
+                    print("*" * 80)
+                    print("")
+                    raise
+            else:
+                logger.debug("webdriver.Chrome init")
+
+                self.driver = webdriver.Firefox(
+                    firefox_profile=profile,
+                    options=options,
+                    desired_capabilities=desired_capabilities,
+                )
         else:
             raise Exception(f"unknown browser {browser}")
 
+        self.driver.set_window_size(width, height)
+
     def get_log(self):
+        if config.CONFIG["CUCU_BROWSER"] == "firefox":
+            return []
+
         return self.driver.get_log("browser")
 
     def get_current_url(self):

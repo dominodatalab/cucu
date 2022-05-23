@@ -242,6 +242,14 @@ python-versions = "*"
 speedup = ["python-levenshtein (>=0.12)"]
 
 [[package]]
+name = "geckodriver-autoinstaller"
+version = "0.1.0"
+description = "Automatically install geckodriver that supports the currently installed version of chrome."
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
 name = "h11"
 version = "0.13.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -895,7 +903,7 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "e7bbd013215735c843313f660f7224a059b4af87c102ba20b323f4e1e1316e4b"
+content-hash = "67924d1ca08643c0eb1bb8989580070acfa0cbcd0455688de7bcd44895b6f3b9"
 
 [metadata.files]
 appnope = [
@@ -1084,6 +1092,10 @@ flake8-quotes = [
 fuzzywuzzy = [
     {file = "fuzzywuzzy-0.18.0-py2.py3-none-any.whl", hash = "sha256:928244b28db720d1e0ee7587acf660ea49d7e4c632569cad4f1cd7e68a5f0993"},
     {file = "fuzzywuzzy-0.18.0.tar.gz", hash = "sha256:45016e92264780e58972dca1b3d939ac864b78437422beecebb3095f8efd00e8"},
+]
+geckodriver-autoinstaller = [
+    {file = "geckodriver-autoinstaller-0.1.0.tar.gz", hash = "sha256:08953404903750a7e0905913d86eab13849c75ed61eb281c45697d9f5b5e2eb2"},
+    {file = "geckodriver_autoinstaller-0.1.0-py3-none-any.whl", hash = "sha256:609236aab9c111af10685cab1ab5551ce86b471101b6add34642545bc7e84bdc"},
 ]
 h11 = [
     {file = "h11-0.13.0-py3-none-any.whl", hash = "sha256:8ddd78563b633ca55346c8cd41ec0af27d3c79931828beffb46ce70a379e7442"},

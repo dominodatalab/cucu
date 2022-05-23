@@ -43,8 +43,6 @@ def behave(
         key, value = variable.split("=")
         os.environ[key] = value
 
-    os.environ["CUCU_BROWSER"] = browser
-
     if ipdb_on_failure:
         os.environ["CUCU_IPDB_ON_FAILURE"] = "true"
 
