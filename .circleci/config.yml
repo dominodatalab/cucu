@@ -113,7 +113,9 @@ jobs:
       browser:
         type: string
         default: chrome
+
     executor: << parameter.browser >>-test-executor
+
     steps:
       - checkout
       - *install_cucu_dependencies
