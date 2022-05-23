@@ -146,5 +146,3 @@ workflows:
       - pre-commit
       - test:
           browser: chrome
-      - test:
-          browser: firefox
