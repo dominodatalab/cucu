@@ -145,6 +145,7 @@ workflows:
     jobs:
       - pre-commit
       - test:
+          name: "test-chrome"
           browser: chrome
       - test:
           browser: firefox
