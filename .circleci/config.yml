@@ -112,9 +112,9 @@ jobs:
     parameters:
       browser:
         type: string
-        default: chrome
+        default: "chrome"
 
-    executor: << parameter.browser >>-test-executor
+    executor: << parameters.browser >>-test-executor
 
     steps:
       - checkout
