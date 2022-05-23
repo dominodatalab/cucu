@@ -1,7 +1,5 @@
 import chromedriver_autoinstaller
 import logging
-import os
-import uuid
 import urllib3
 
 from cucu.browser.core import Browser
@@ -51,12 +49,7 @@ class Selenium(Browser):
             options.add_experimental_option("detach", detach)
 
             cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
-            selenium_downloads_dir = os.path.join(
-                cucu_downloads_dir, uuid.uuid1().hex
-            )
-            config.CONFIG["SCENARIO_DOWNLOADS_DIR"] = selenium_downloads_dir
-
-            prefs = {"download.default_directory": selenium_downloads_dir}
+            prefs = {"download.default_directory": cucu_downloads_dir}
             options.add_experimental_option("prefs", prefs)
 
             height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
@@ -148,8 +141,8 @@ class Selenium(Browser):
 
         return list(filter(visible, elements))
 
-    def execute(self, javascript):
-        return self.driver.execute_script(javascript)
+    def execute(self, javascript, *args):
+        return self.driver.execute_script(javascript, *args)
 
     def click(self, element):
         element.click()

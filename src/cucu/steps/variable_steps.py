@@ -34,7 +34,7 @@ def should_see_it_contains(_, this, that):
 
 
 @step('I should see "{this}" contains the following')
-def should_see_it_contains(ctx, this):
+def should_see_it_contains_the_following(ctx, this):
     if ctx.text not in this:
         raise RuntimeError(f"{this} does not contain {ctx.text}")
 

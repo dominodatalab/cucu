@@ -2,7 +2,7 @@ import humanize
 
 from cucu import helpers, fuzzy, retry, step
 
-# XXX: this would have to be generalized to other browser abstraactions
+# XXX: this would have to be generalized to other browser abstractions
 from selenium.webdriver.common.keys import Keys
 from . import base_steps
 
@@ -128,6 +128,21 @@ def wait_up_to_write_into_input(ctx, seconds, value, name):
     retry(find_n_write, wait_up_to_s=float(seconds))(ctx, name, value)
 
 
+@step('I write the following into the input "{name}"')
+def writes_multi_lines_into_input(ctx, name):
+    find_n_write(ctx, name, ctx.text)
+
+
+@step('I wait to write the following into the input "{name}"')
+def wait_to_write_multi_lines_into_input(ctx, name):
+    retry(find_n_write)(ctx, name, ctx.text)
+
+
+@step('I wait up to "{seconds}" to write the following into the input "{name}"')
+def wait_up_to_write_multi_lines_into_input(ctx, seconds, name):
+    retry(find_n_write, wait_up_to_s=float(seconds))(ctx, name, ctx.text)
+
+
 @step('I send the "{key}" key to the input "{name}"')
 def send_keys_to_input(ctx, key, name):
     find_n_write(ctx, name, Keys.__dict__[key.upper()])
@@ -156,6 +171,16 @@ def should_see_the_input_with_value(ctx, value, name):
 @step('I wait to see the value "{value}" in the input "{name}"')
 def wait_to_see_the_input_with_value(ctx, value, name):
     retry(assert_input_value)(ctx, name, value)
+
+
+@step('I should see the following in the input "{name}"')
+def should_see_the_input_with_value(ctx, name):
+    assert_input_value(ctx, name, ctx.text)
+
+
+@step('I wait to see the following in the input "{name}"')
+def wait_to_see_the_input_with_value(ctx, name):
+    retry(assert_input_value)(ctx, name, ctx.text)
 
 
 @step('I should see no value in the input "{name}"')

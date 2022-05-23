@@ -1,9 +1,16 @@
 import os
+import re
 import socket
 import yaml
 
+from cucu import logger
+
 
 class Config(dict):
+
+    # only match variables {...}
+    __VARIABLE_REGEX = re.compile(r"\{(?<!\\{)([^{}]+)\}(?<!\\})")
+
     def __init__(self, **kwargs):
         self.update(**kwargs)
         self.resolving = False
@@ -27,6 +34,17 @@ class Config(dict):
         # set the default
         self.__setitem__(name, default)
 
+    def escape(self, string):
+        """
+        utility method used to escape strings that would be otherwise problematic
+        if the values were passed around as is in cucu steps.
+        """
+        if type(string) == str:
+            string = string.replace("{", "\\{")
+            string = string.replace("}", "\\}")
+
+        return string
+
     def __getitem__(self, key):
         try:
             # environment always takes precedence
@@ -35,15 +53,9 @@ class Config(dict):
             if value is None:
                 value = dict.__getitem__(self, key)
 
-            if self.resolving and value is None:
-                return ""
-
             return value
         except KeyError:
-            if self.resolving:
-                return ""
-            else:
-                return None
+            return None
 
     def __setitem__(self, key, val):
         dict.__setitem__(self, key, val)
@@ -109,19 +121,49 @@ class Config(dict):
             if os.path.exists(cucurc_filepath):
                 self.load(cucurc_filepath)
 
-    def resolve(self, value):
+    def resolve(self, string):
         """
         resolve any variable references {...} in the string provided using
-        the values currently stored in the config object.
+        the values currently stored in the config object. We also unescape any
+        characters preceding by a backslash as to allow for test writers to
+        escape special characters
         """
-        if isinstance(value, str):
-            self.resolving = True
-            try:
-                return value.format_map(self)
-            finally:
-                self.resolving = False
-        else:
-            return value
+        if isinstance(string, str):
+            previouses = [None]
+            while previouses[-1] != string:
+                # if any of the previous iterations of replacing variables looks
+                # like the exact string we have now then break out of the loop
+                # as there's an infinite recursion of variable replacing values
+                if string in previouses:
+                    raise RuntimeError("infinite replacement loop detected")
+
+                previouses.append(string)
+
+                for match in Config.__VARIABLE_REGEX.findall(string):
+                    print(f"match {match}")
+                    value = self.get(match)
+                    print(f"match {match} value {value}")
+
+                    if value is None:
+                        value = ""
+                        logger.warn(f'variable "{match}" is undefined')
+
+                    string = string.replace("{" + match + "}", str(value))
+
+            # we are only going to allow escaping of { and " characters for the
+            # time being as they're part of the language:
+            #
+            #   * " are used around step arguments
+            #   * {} are used by variable references
+            #
+            # regex below uses negative lookbehind to assert we're not replacing
+            # any escapes that have the backslash itself escaped.
+            #
+            string = re.sub(r"(?<!\\)\\{", "{", string)
+            string = re.sub(r"(?<!\\)\\}", "}", string)
+            string = re.sub(r'(?<!\\)\\"', '"', string)
+
+        return string
 
     def snapshot(self):
         """

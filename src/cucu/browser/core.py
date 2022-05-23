@@ -37,7 +37,7 @@ class Browser:
     def title(self):
         raise RuntimeError("implement me")
 
-    def execute(self, javascript):
+    def execute(self, javascript, *args, **kwargs):
         raise RuntimeError("implement me")
 
     def click(self, element):

@@ -7,3 +7,9 @@ Feature: Echo
       current user is '{USER}'
       """
       And I echo "current working directory is '{PWD}'"
+      And I echo the following:
+      """
+      {
+        "user": "{USER}"
+      }
+      """

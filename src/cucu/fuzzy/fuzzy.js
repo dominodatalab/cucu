@@ -58,7 +58,7 @@
         var attributes = ['aria-label', 'title', 'placeholder', 'value'];
         var matchers = ['has_text', 'contains'];
 
-        name = name.replaceAll('"', '\\\"')
+        name = name.replaceAll('"', '\\"')
 
         /*
          * try to match on exact text but ultimately fall back to matching on

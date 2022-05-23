@@ -7,4 +7,5 @@ Feature: File downloads
       And I delete the file at "{CUCU_BROWSER_DOWNLOADS_PATH}/file.txt" if it exists
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/files.html"
      When I click the link "download this file"
-     Then I wait to see the file at "{SCENARIO_DOWNLOADS_DIR}/file.txt"
+     Then I wait to see the downloaded file "file.txt"
+      And I wait to see the file at "{SCENARIO_DOWNLOADS_DIR}/file.txt"

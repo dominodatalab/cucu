@@ -23,3 +23,77 @@ Feature: Internals
       """
       running within cucu but --results was not used
       """
+
+  Scenario: User gets a warning when using an undefined variable reference
+    Given I create a file at "{CUCU_RESULTS_DIR}/undefined_variable_usage/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/undefined_variable_usage/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/undefined_variable_usage/undefined_variable_feature.feature" with the following:
+      """
+      Feature: Feature with undefined variable
+
+        Scenario: This is a scenario that is using an undefined variable
+          Given I echo "\{UNDEFINED\}"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/undefined_variable_usage/undefined_variable_feature.feature --results {CUCU_RESULTS_DIR}/undefined_variable_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "0"
+      And I should see "{STDOUT}" contains the following:
+      """
+      WARNING variable "UNDEFINED" is undefined
+      """
+
+  Scenario: User can use variables with various value types
+    Given I create a file at "{CUCU_RESULTS_DIR}/variable_value_types/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/variable_value_types/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      from cucu.config import CONFIG
+
+      CONFIG["BOOLEAN_VARIABLE"] = True
+      CONFIG["INT_VARIABLE"] = 42
+      CONFIG["STRING_VARIABLE"] = "foobar"
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/variable_value_types/variable_types_feature.feature" with the following:
+      """
+      Feature: Variable types feature
+
+        Scenario: This is a senario that echos variables of various types
+          Given I echo "\{BOOLEAN_VARIABLE\} \{INT_VARIABLE\} \{STRING_VARIABLE\}"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/variable_value_types/variable_types_feature.feature --results {CUCU_RESULTS_DIR}/variable_value_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "0"
+      And I should see "{STDOUT}" contains the following:
+      """
+      True 42 foobar
+      """
+      And I should see "{STDERR}" is empty
+
+  Scenario: User can run consecutive scenarios and be sure that variable values do not "bleed"
+    Given I create a file at "{CUCU_RESULTS_DIR}/variable_bleed/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/variable_bleed/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/variable_bleed/bleed.feature" with the following:
+      """
+      Feature: Feature with two scenarios that make sure variables do not bleed
+
+        Scenario: This scenario sets variables
+          Given I set the variable "FOO" to "bar"
+
+        Scenario: This sceneario should not see variables set by the previous one
+          Given I should see "\{FOO\}" is empty
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/variable_bleed/bleed.feature --results {CUCU_RESULTS_DIR}/variable_bleed_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
+     Then I should see "{EXIT_CODE}" is equal to "0"

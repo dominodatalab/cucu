@@ -83,22 +83,22 @@
             {% if step['text'] %}
             <tr class="d-flex">
                 <td class="col-11" colspan="2">
-                    <pre class="text-wrap" style="color: black; margin: 0">      """</pre>
-                    <pre class="text-wrap" style="color: black; margin: 0">      {{ step['text'] }}</pre>
-                    <pre class="text-wrap" style="color: black; margin: 0">      """</pre>
+                    <pre style="color: black; margin: 0">       """</pre>
+                    <pre style="color: black; margin: 0">       {{ step['text'] }}</pre>
+                    <pre style="color: black; margin: 0">       """</pre>
                 </td>
             </tr>
             {% endif %}
             {% if step['table'] %}
             <tr class="d-flex">
                 <td class="col-11" colspan="2">
-                    <pre style="color: black; margin: 0; display: inline">      |</pre>
+                    <pre style="color: black; margin: 0; display: inline">       |</pre>
                     {% for heading in step['table']['headings'] %}
-                    <pre style="color: black; margin: 0; display: inline"> {{ heading }} |</pre>
+                    <pre style="color: black; margin: 0; display: inline">{{ heading }} |</pre>
                     {% endfor %}
                     </br>
                     {% for row in step['table']['rows'] %}
-                        <pre style="color: black; margin: 0; display: inline">      |</pre>
+                        <pre style="color: black; margin: 0; display: inline">       |</pre>
                         {% for value in row %}
                         <pre class="text-wrap" style="color: black; margin: 0; display: inline"> {{ value }} |</pre>
                         {% endfor %}
