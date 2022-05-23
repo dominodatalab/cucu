@@ -141,7 +141,7 @@ jobs:
       - store_artifacts:
           path: report/
 
-  test-unit:
+  test:
     executor: unit-test-executor
 
     steps:
