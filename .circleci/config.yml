@@ -125,7 +125,7 @@ jobs:
       - store_artifacts:
           path: report.tgz
 
-      - store_results:
+      - store_test_results:
           path: junit_results
 
       - store_artifacts:
@@ -152,7 +152,7 @@ jobs:
       - store_artifacts:
           path: report.tgz
 
-      - store_results:
+      - store_test_results:
           path: junit_results
 
       - store_artifacts:
