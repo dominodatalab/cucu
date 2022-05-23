@@ -17,12 +17,34 @@ install_cucu_globally: &install_cucu_globally
     name: install cucu globally
     command: pip install dist/cucu-*.tar.gz
 
-
 setup_remote_docker_env: &setup_remote_docker_env
   setup_remote_docker:
     version: 20.10.14
 
+wait_for_selenium: &wait_for_selenium
+  run:
+    # retry connection every 5s x 60 which is a total of 5 minutes
+    command: curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
+
+run_functional_tests: &run_functional_tests
+  run:
+    command: poetry run cucu run features --workers 2 --selenium-remote-url http://localhost:4444 --generate-report
+    environment:
+      COVERAGE_PROCESS_START: .coveragerc
+      CUCU_COLOR_OUTPUT: false
+
+tar_up_results_and_report: &tar_up_results_and_report
+   run:
+     name: tar up results and report
+     command: tar cvfz results.tgz results && tar cvfz report.tgz report
+     when: always
+
+
 executors:
+  unit-test-executor:
+    docker:
+      - image: python:3.9.7
+
   chrome-test-executor:
     docker:
       - image: python:3.9.7
@@ -31,7 +53,20 @@ executors:
         environment:
           SE_NODE_MAX_SESSIONS: 10
           SE_NODE_OVERRIDE_MAX_SESSIONS: true
-          SE_NODE_SESSION_TIMEOUT: 300 # 5 minutes
+          SE_NODE_SESSION_TIMEOUT: 300
+          SCREEN_WIDTH: 1920
+          SCREEN_HEIGHT: 1080
+    resource_class: large
+
+  firefox-test-executor:
+    docker:
+      - image: python:3.9.7
+
+      - image: selenium/standalone-firefox:4.1.2-20220217
+        environment:
+          SE_NODE_MAX_SESSIONS: 10
+          SE_NODE_OVERRIDE_MAX_SESSIONS: true
+          SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1920
           SCREEN_HEIGHT: 1080
     resource_class: large
@@ -52,10 +87,7 @@ jobs:
 
       - *install_cucu_dependencies
       - *build_cucu_python_package
-
-      - run:
-          name: install cucu globally
-          command: pip install dist/cucu-*.tar.gz
+      - *install_cucu_globally
 
       - run:
           name: run pre-commit validations
@@ -71,28 +103,9 @@ jobs:
       - *build_cucu_python_package
       - *install_cucu_globally
       - *setup_remote_docker_env
-
-      - run:
-          name: wait for selenium to be running
-          # retry connection every 5s x 60 which is a total of 5 minutes
-          command: curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
-
-      - run:
-          name: run functional tests
-          command: poetry run cucu run features --workers 2 --selenium-remote-url http://localhost:4444
-          environment:
-            COVERAGE_PROCESS_START: .coveragerc
-            CUCU_COLOR_OUTPUT: false
-
-      - run:
-          name: generate html test report
-          command: cucu report
-          when: always
-
-      - run:
-          name: tar up results and report
-          command: tar cvfz results.tgz results && tar cvfz report.tgz report
-          when: always
+      - *wait_for_selenium
+      - *run_functional_tests
+      - *tar_up_results_and_report
 
       - store_artifacts:
           path: results.tgz
@@ -102,6 +115,36 @@ jobs:
 
       - store_artifacts:
           path: report/
+
+  test-firefox:
+    executor: firefox-test-executor
+
+    steps:
+      - checkout
+      - *install_cucu_dependencies
+      - *build_cucu_python_package
+      - *install_cucu_globally
+      - *setup_remote_docker_env
+      - *wait_for_selenium
+      - *run_functional_tests
+      - *tar_up_results_and_report
+
+      - store_artifacts:
+          path: results.tgz
+
+      - store_artifacts:
+          path: report.tgz
+
+      - store_artifacts:
+          path: report/
+
+  test-unit:
+    executor: unit-test-executor
+
+    steps:
+      - *install_cucu_dependencies
+      - *build_cucu_python_package
+      - *install_cucu_globally
 
       - run:
           name: run unit tests
@@ -136,4 +179,6 @@ workflows:
   build-n-test:
     jobs:
       - pre-commit
+      - test-unit
       - test-chrome
+      - test-firefox
