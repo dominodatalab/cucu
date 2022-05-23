@@ -17,7 +17,6 @@ def behave_init(filepath):
 
 def behave(
     filepath,
-    browser,
     color_output,
     dry_run,
     env,

@@ -221,7 +221,7 @@ def run(
         dumper = thread_dumper.start(interval_min)
 
     # need to set this before initializing any browsers below
-    os.environ["CUCU_BROWSER"] = browser
+    os.environ["CUCU_BROWSER"] = browser.lower()
 
     if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
         selenium.init()
@@ -233,7 +233,6 @@ def run(
         if workers is None or workers == 1:
             exit_code = behave(
                 filepath,
-                browser,
                 color_output,
                 dry_run,
                 env,
@@ -267,7 +266,6 @@ def run(
                             behave,
                             [
                                 feature_filepath,
-                                browser,
                                 color_output,
                                 dry_run,
                                 env,

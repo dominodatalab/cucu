@@ -108,36 +108,12 @@ jobs:
           command: |
             pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
 
-  test-chrome:
-    executor: chrome-test-executor
-
-    steps:
-      - checkout
-      - *install_cucu_dependencies
-      - *build_cucu_python_package
-      - *install_cucu_globally
-      - *setup_remote_docker_env
-      - *wait_for_selenium
-      - *run_functional_tests
-      - *run_unit_tests
-      - *tar_up_results_and_report
-      - *code_coverage_check
-
-      - store_artifacts:
-          path: results.tgz
-
-      - store_artifacts:
-          path: report.tgz
-
-      - store_test_results:
-          path: junit_results
-
-      - store_artifacts:
-          path: report/
-
-  test-firefox:
-    executor: firefox-test-executor
-
+  test:
+    parameters:
+      browser:
+        type: string
+        default: chrome
+    executor: << parameter.browser >>-test-executor
     steps:
       - checkout
       - *install_cucu_dependencies
@@ -166,5 +142,7 @@ workflows:
   build-n-test:
     jobs:
       - pre-commit
-      - test-chrome
-      - test-firefox
+      - test:
+          browser: chrome
+      - test:
+          browser: firefox
