@@ -226,7 +226,6 @@ def save_downloaded_file(ctx, filename):
     retry(wait_for_file)
 
     result = ctx.browser.execute("return window.__cucu_downloaded_file;")
-
     if not result.startswith("data:"):
         raise Exception("Failed to get file content: %s" % result)
 
@@ -263,7 +262,7 @@ def upload_file_to_input(ctx, filepath, name):
 
 @step('I run the following steps if the current browser is "{name}"')
 def run_if_browser(ctx, name):
-    if config.CONFIG["CUCU_BROWSER"].lower() != name.lower():
+    if config.CONFIG["CUCU_BROWSER"].lower() == name.lower():
         run_steps(ctx, ctx.text)
 
 

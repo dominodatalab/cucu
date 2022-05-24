@@ -52,12 +52,12 @@ class Selenium(Browser):
     ):
         height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
         width = config.CONFIG["CUCU_BROWSER_WINDOW_WIDTH"]
+        cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
 
         if browser.startswith("chrome"):
             options = Options()
             options.add_experimental_option("detach", detach)
 
-            cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
             prefs = {"download.default_directory": cucu_downloads_dir}
             options.add_experimental_option("prefs", prefs)
 
@@ -102,9 +102,11 @@ class Selenium(Browser):
             profile.set_preference(
                 "browser.download.manager.showWhenStarting", False
             )
-            cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
             profile.set_preference("browser.download.dir", cucu_downloads_dir)
-            # profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/x-gzip")
+            profile.set_preference(
+                "browser.helperApps.neverAsk.saveToDisk",
+                "images/jpeg, application/pdf, application/octet-stream, text/plain",
+            )
 
             options.add_argument(f"--width={width}")
             options.add_argument(f"--height={height}")
@@ -119,9 +121,9 @@ class Selenium(Browser):
                 logger.debug(f"webdriver.Remote init: {selenium_remote_url}")
                 try:
                     self.driver = webdriver.Remote(
-                        options=options,
                         command_executor=selenium_remote_url,
                         desired_capabilities=desired_capabilities,
+                        browser_profile=profile,
                     )
                 except urllib3.exceptions.ReadTimeoutError:
                     print("*" * 80)
@@ -133,8 +135,7 @@ class Selenium(Browser):
                     print("")
                     raise
             else:
-                logger.debug("webdriver.Chrome init")
-
+                logger.debug("webdriver.Firefox init")
                 self.driver = webdriver.Firefox(
                     firefox_profile=profile,
                     options=options,
