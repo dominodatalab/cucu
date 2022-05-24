@@ -106,6 +106,9 @@ class Selenium(Browser):
             profile.set_preference("browser.download.dir", cucu_downloads_dir)
             # profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/x-gzip")
 
+            options.add_argument(f"--width={width}")
+            options.add_argument(f"--height={height}")
+
             desired_capabilities = DesiredCapabilities.FIREFOX
             desired_capabilities["loggingPrefs"] = {"browser": "ALL"}
 
@@ -215,9 +218,6 @@ class Selenium(Browser):
         window_handles = self.driver.window_handles
         window_handle = self.driver.current_window_handle
         window_handle_index = window_handles.index(window_handle)
-
-        if window_handle_index == 0:
-            raise RuntimeError("previous tab not available")
 
         self.driver.close()
         self.driver.switch_to.window(window_handles[window_handle_index - 1])

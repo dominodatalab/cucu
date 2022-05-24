@@ -43,7 +43,7 @@ def main():
 @click.option(
     "-b",
     "--browser",
-    default="chrome",
+    default=os.environ.get("CUCU_BROWSER") or "chrome",
     help="browser name to use default: chrome",
 )
 @click.option(

@@ -2,7 +2,7 @@ import base64
 import humanize
 import os
 
-from cucu import config, logger, fuzzy, retry, step
+from cucu import config, logger, fuzzy, retry, run_steps, step
 from cucu.browser.selenium import Selenium
 
 from selenium.webdriver.common.keys import Keys
@@ -259,3 +259,27 @@ def wait_to_see_downloaded_file(ctx, filename):
 def upload_file_to_input(ctx, filepath, name):
     input = find_file_input(ctx, name)
     input.send_keys(os.path.abspath(filepath))
+
+
+@step('I run the following steps if the current browser is "{name}"')
+def run_if_browser(ctx, name):
+    if config.CONFIG["CUCU_BROWSER"].lower() != name.lower():
+        run_steps(ctx, ctx.text)
+
+
+@step('I do not run the following steps if the current browser is "{name}"')
+def run_if_not_browser(ctx, name):
+    if config.CONFIG["CUCU_BROWSER"].lower() != name.lower():
+        run_steps(ctx, ctx.text)
+
+
+@step('I skip this scenario if the current browser is "{name}"')
+def skip_if_browser(ctx, name):
+    if config.CONFIG["CUCU_BROWSER"].lower() == name.lower():
+        ctx.scenario.skip(reason=f"skipping scenario since we're on {name}")
+
+
+@step('I skip this scenario if the current browser is not "{name}"')
+def skip_if_not_browser(ctx, name):
+    if config.CONFIG["CUCU_BROWSER"].lower() != name.lower():
+        ctx.scenario.skip(reason=f"skipping scenario since we're not on {name}")

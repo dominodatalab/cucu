@@ -75,7 +75,6 @@ executors:
       - image: selenium/standalone-chrome:100.0
         environment:
           SE_NODE_MAX_SESSIONS: 10
-          SE_NODE_OVERRIDE_MAX_SESSIONS: true
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1920
           SCREEN_HEIGHT: 1080
@@ -87,7 +86,6 @@ executors:
       - image: selenium/standalone-firefox:98.0
         environment:
           SE_NODE_MAX_SESSIONS: 10
-          SE_NODE_OVERRIDE_MAX_SESSIONS: true
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1920
           SCREEN_HEIGHT: 1080

@@ -59,7 +59,7 @@ specific local Google Chrome version.
 # running exact version of chrome/firefox using docker
 
 ```
-docker run -d -p 4444:4444 selenium/standalone-chrome:85.0
+docker run -d -p 4444:4444 --env SE_NODE_MAX_SESSIONS=10 selenium/standalone-chrome:85.0
 ```
 
 Which will spin up a standalone selenium chrome container and you can then use
