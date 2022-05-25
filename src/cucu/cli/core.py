@@ -385,21 +385,32 @@ def lint(filepath, fix):
             if violations:
                 for violation in violations:
                     violations_found += 1
-                    location = violation["location"]
-                    type = violation["type"][0].upper()
-                    message = violation["message"]
-                    suffix = ""
 
-                    if fix:
-                        if violation["fixed"]:
-                            suffix = " ✓"
-                            violations_fixed += 1
-                        else:
-                            suffix = " ✗ (must be fixed manually)"
+                    if violation["type"] == "steps_error":
+                        print(violation["message"])
+                        print(
+                            "failure loading some steps, see above for details"
+                        )
+                        print("")
 
-                    filepath = location["filepath"]
-                    line_number = location["line"] + 1
-                    print(f"{filepath}:{line_number}: {type} {message}{suffix}")
+                    else:
+                        location = violation["location"]
+                        _type = violation["type"][0].upper()
+                        message = violation["message"]
+                        suffix = ""
+
+                        if fix:
+                            if violation["fixed"]:
+                                suffix = " ✓"
+                                violations_fixed += 1
+                            else:
+                                suffix = " ✗ (must be fixed manually)"
+
+                        filepath = location["filepath"]
+                        line_number = location["line"] + 1
+                        print(
+                            f"{filepath}:{line_number}: {_type} {message}{suffix}"
+                        )
 
     if violations_found != 0:
         if violations_found == violations_fixed:

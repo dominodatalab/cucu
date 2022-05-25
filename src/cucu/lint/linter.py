@@ -203,10 +203,13 @@ def lint(filepath):
     rules = load_builtin_lint_rules()
     steps, steps_error = load_cucu_steps(filepath=filepath)
 
-    if steps_error is not None:
-        print(steps_error)
-        print("Failure loading some steps, see above for details")
-        print("")
+    if steps_error:
+        yield [
+            {
+                "type": "steps_error",
+                "message": steps_error,
+            }
+        ]
 
     filepath = os.path.abspath(filepath)
 

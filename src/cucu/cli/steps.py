@@ -51,6 +51,10 @@ def load_cucu_steps(filepath=None):
         if cucu_step.strip() == "":
             continue
 
+        if not cucu_step.startswith("("):
+            print(f"unable to parse some step lines")
+            continue
+
         lines = cucu_step.split("\n")
 
         #
