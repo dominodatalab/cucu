@@ -133,18 +133,19 @@ class Config(dict):
         references = {}
 
         variables = re.findall("{([^{}]+)}", string)
-        if len(variables) != 0:
-            for variable in variables:
-                value = self[variable]
 
-                if value is not None:
-                    value = str(self[variable])
-                    value = value.replace("\n", "\\n")
-                    value = value[:32] + "..." * (len(value) > 32)
-                else:
-                    value = None
+        for variable in variables:
+            value = self[variable]
 
-                references[variable] = value
+            if value is not None:
+                value = str(self[variable])
+                value = value.replace("\n", "\\n")
+                value = value[:32] + "..." * (len(value) > 32)
+            else:
+                value = None
+
+            references[variable] = value
+
         return references
 
     def resolve(self, string):
