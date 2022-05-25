@@ -7,6 +7,7 @@ import behave
 import warnings
 import sys
 
+from behave.model import Table
 from cucu.config import CONFIG
 from functools import wraps
 
@@ -35,13 +36,31 @@ def init_step_hooks(stdout, stderr):
                 }
 
                 # resolve variables in text and table data
-                context = args[0]
+                ctx = args[0]
 
-                # we know what we're doing modifying this context value and so lets
+                # we know what we're doing modifying this ctx value and so lets
                 # avoid the unnecessary warning int he logs
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
-                    context.text = CONFIG.resolve(context.text)
+
+                    # resolve variables in the multiline string arguments
+                    ctx.text = CONFIG.resolve(ctx.text)
+
+                    # resolve variables in the table values
+                    if ctx.table is not None:
+                        ctx.table.original = Table(
+                            ctx.table.headings, rows=ctx.table.rows
+                        )
+                        new_rows = []
+                        for row in ctx.table.rows:
+                            new_row = []
+
+                            for value in row:
+                                new_row.append(CONFIG.resolve(value))
+
+                            new_rows.append(new_row)
+
+                        ctx.table.rows = new_rows
 
             # intercept the current stdout and stderr that behave is capturing
             # and attach it to the captured output

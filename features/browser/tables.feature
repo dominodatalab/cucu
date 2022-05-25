@@ -104,3 +104,11 @@ Feature: Tables
         | User Title   | Yearly Salary |
         | Alfred White | 120,000       |
         | Maria Lopez  | 133,000       |
+
+  Scenario: User can verify a table with variables in the cell names
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
+      And I set the variable "USERNAME" to "Alfred White"
+     Then I should see a table that is the following:
+        | User Title   | Yearly Salary |
+        | {USERNAME}   | 120,000       |
+        | Maria Lopez  | 133,000       |
