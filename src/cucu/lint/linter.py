@@ -201,7 +201,12 @@ def lint(filepath):
     """
     # load the base lint rules
     rules = load_builtin_lint_rules()
-    steps = load_cucu_steps(filepath=filepath)
+    steps, steps_error = load_cucu_steps(filepath=filepath)
+
+    if steps_error is not None:
+        print(steps_error)
+        print("Failure loading some steps, see above for details")
+        print("")
 
     filepath = os.path.abspath(filepath)
 

@@ -34,10 +34,6 @@ def load_cucu_steps(filepath=None):
 
     process = subprocess.run(args, capture_output=True)
 
-    if process.returncode != 0:
-        print(process.stderr.decode("utf8"))
-        raise RuntimeError("failed to load steps, see above for details")
-
     steps_doc_output = process.stdout.decode("utf8")
     for cucu_step in steps_doc_output.split("@step"):
         # Each line of a step definition looks like so:
@@ -84,20 +80,29 @@ def load_cucu_steps(filepath=None):
             step_name = match.group(1)
             steps_cache[step_name] = None
 
-    return steps_cache
+    error = None
+
+    if process.returncode != 0:
+        error = process.stderr.decode("utf8")
+
+    return (steps_cache, error)
 
 
 def print_json_steps(filepath=None):
     """
     pretty print the steps in a JSON fart
     """
-    steps = load_cucu_steps(filepath=filepath)
+    steps, steps_error = load_cucu_steps(filepath=filepath)
     print(json.dumps(steps, indent=2, sort_keys=True))
 
 
 def print_human_readable_steps(filepath=None):
-    steps = load_cucu_steps(filepath=filepath)
+    steps, steps_error = load_cucu_steps(filepath=filepath)
 
     for step_name in steps:
         if steps[step_name] is not None:
             print(f"{step_name}")
+
+    if steps_error is not None:
+        print(steps_error)
+        print("Failure loading some steps, see above for details")
