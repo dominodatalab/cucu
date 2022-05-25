@@ -9,7 +9,7 @@ Feature: Echo
       And I echo "current working directory is '{PWD}'"
       And I echo the following:
       """
-      {
+      \{
         "user": "{USER}"
-      }
+      \}
       """

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-import re
 
 from behave.formatter.base import Formatter
 from behave.formatter.ansi_escapes import colors, escapes, up
@@ -180,32 +179,36 @@ class CucuFormatter(Formatter):
             else:
                 self.stream.write(f"{status_text}\n")
 
-            # print the variable values as a comment to ease debugging
-            variables = re.findall("{([^{}]+)}", step.name)
-            if len(variables) != 0:
-                values = []
-
-                for variable in variables:
-                    value = CONFIG[variable]
-
-                    if value is not None:
-                        value = str(CONFIG[variable])
-                        value = value.replace("\n", "\\n")
-                        value = value[:32] + "..." * (len(value) > 32)
-                    else:
-                        value = None
-
-                    values.append(f'{variable}="{value}"')
-
-                padding = f"    {' '*(len('Given')-len(step.keyword))}"
-                variable_comment_line = f"{padding}# {' '.join(values)}\n"
-                self.stream.write(self.colorize(variable_comment_line, "grey"))
-
         if step.text:
             self.doc_string(step.text)
 
         if step.table:
-            self.table(step.table)
+            self.table(step.table.original)
+
+        if step.status in (Status.passed, Status.failed):
+            # print the variable values in step name, multiline/table arguments
+            # as a comment to ease debugging
+            step_variables = CONFIG.expand(step.name)
+
+            if step.text:
+                step_variables.update(CONFIG.expand(step.text))
+
+            if step.table:
+                for row in step.table.original.rows:
+                    for value in row:
+                        step_variables.update(CONFIG.expand(value))
+
+            if step_variables:
+                expanded = " ".join(
+                    [
+                        f"{key}={value}"
+                        for (key, value) in step_variables.items()
+                    ]
+                )
+
+                padding = f"    {' '*(len('Given')-len(step.keyword))}"
+                variable_comment_line = f"{padding}# {expanded}\n"
+                self.stream.write(self.colorize(variable_comment_line, "grey"))
 
     def eof(self):
         self.stream.write("\n")

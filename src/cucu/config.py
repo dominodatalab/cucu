@@ -121,6 +121,32 @@ class Config(dict):
             if os.path.exists(cucurc_filepath):
                 self.load(cucurc_filepath)
 
+    def expand(self, string):
+        """
+        find any variable references and return an dictionary of all of the
+        variable names and values within the string provided.
+
+        returns:
+            a dictionary of all of the variable names found in the string
+            provided with the exact value of the variable at runtime.
+        """
+        references = {}
+
+        variables = re.findall("{([^{}]+)}", string)
+        if len(variables) != 0:
+            for variable in variables:
+                value = self[variable]
+
+                if value is not None:
+                    value = str(self[variable])
+                    value = value.replace("\n", "\\n")
+                    value = value[:32] + "..." * (len(value) > 32)
+                else:
+                    value = None
+
+                references[variable] = value
+        return references
+
     def resolve(self, string):
         """
         resolve any variable references {...} in the string provided using

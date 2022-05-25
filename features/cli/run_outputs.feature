@@ -93,3 +93,44 @@ Feature: Run outputs
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
+
+  Scenario: User can run a scenario with various types of output and see the variable values expanded at runtime
+    Given I run the command "cucu run data/features/feature_with_multilines_and_tables.feature --results {CUCU_RESULTS_DIR}/variable_values_expanded_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I should see "{STDOUT}" matches the following
+      """
+      Feature: Feature with multilines and tables
+
+        Scenario: Scenario with a step that has a multiline argument
+          Given I set the variable "FOO" to "bar" .*
+      This is a multiline text that
+      can go on for a few lines
+      and print variables like FOO=bar
+
+           Then I echo the following .*
+              \"\"\"
+              This is a multiline text that
+              can go on for a few lines
+              and print variables like FOO=\{FOO\}
+              \"\"\"
+           # FOO=bar
+
+        Scenario: Scenario with a step that has a table argument
+          Given I set the variable "FIZZ" to "buzz" .*
+      | header |
+      | row 1  |
+      | row 2  |
+      | buzz   |
+
+          Given I echo the following .*
+              | header |
+              | row 1  |
+              | row 2  |
+              | \{FIZZ\} |
+          # FIZZ=buzz
+
+      1 feature passed, 0 failed, 0 skipped
+      2 scenarios passed, 0 failed, 0 skipped
+      4 steps passed, 0 failed, 0 skipped, 0 undefined
+      [\s\S]*
+      """
+      And I should see "{STDERR}" is empty

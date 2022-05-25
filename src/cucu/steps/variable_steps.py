@@ -9,6 +9,11 @@ def set_variable_to(_, variable, value):
     config.CONFIG[variable] = value
 
 
+@step('I set the variable "{variable}" to the following')
+def set_variable_to_the_following(ctx, variable):
+    config.CONFIG[variable] = ctx.text
+
+
 @step('I should see "{this}" is empty')
 def should_see_is_empty(_, this):
     if this or len(this) != 0:
@@ -52,8 +57,8 @@ def should_see_it_does_not_contain(ctx, this):
 
 
 @step('I should see "{this}" is equal to the following')
-def should_see_is_equal_to_the_following(context, this):
-    that = context.text
+def should_see_is_equal_to_the_following(ctx, this):
+    that = ctx.text
 
     if this != that:
         raise RuntimeError(f"{this} is not equal to {that}")
@@ -66,16 +71,16 @@ def should_see_matches(_, this, that):
 
 
 @step('I should see "{this}" matches the following')
-def should_see_matches_the_following(context, this):
-    that = context.text
+def should_see_matches_the_following(ctx, this):
+    that = ctx.text
 
     if re.match(that, this) is None:
         raise RuntimeError(f"{this}\ndoes not match:\n{that}")
 
 
 @step('I should see "{this}" does not match the following')
-def should_see_matches_the_following(context, this):
-    that = context.text
+def should_see_matches_the_following(ctx, this):
+    that = ctx.text
 
     if re.match(that, this) is not None:
         raise RuntimeError(f"{this}\nmatches:\n{that}")
