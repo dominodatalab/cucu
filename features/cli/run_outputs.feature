@@ -112,7 +112,7 @@ Feature: Run outputs
               can go on for a few lines
               and print variables like FOO=\{FOO\}
               \"\"\"
-           # FOO=bar
+           # FOO="bar"
 
         Scenario: Scenario with a step that has a table argument
           Given I set the variable "FIZZ" to "buzz" .*
@@ -126,7 +126,7 @@ Feature: Run outputs
               | row 1  |
               | row 2  |
               | \{FIZZ\} |
-          # FIZZ=buzz
+          # FIZZ="buzz"
 
       1 feature passed, 0 failed, 0 skipped
       2 scenarios passed, 0 failed, 0 skipped

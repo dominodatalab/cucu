@@ -201,7 +201,7 @@ class CucuFormatter(Formatter):
             if step_variables:
                 expanded = " ".join(
                     [
-                        f"{key}={value}"
+                        f'{key}="{value}"'
                         for (key, value) in step_variables.items()
                     ]
                 )
