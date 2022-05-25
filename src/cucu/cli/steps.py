@@ -109,4 +109,4 @@ def print_human_readable_steps(filepath=None):
 
     if steps_error is not None:
         print(steps_error)
-        print("Failure loading some steps, see above for details")
+        raise RuntimeError("Failure loading some steps, see above for details")

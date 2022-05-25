@@ -45,5 +45,5 @@ Feature: Steps
       """
       And I should see "{STDERR}" contains the following:
       """
-      failed to load steps, see above for details
+      Failure loading some steps, see above for details
       """
