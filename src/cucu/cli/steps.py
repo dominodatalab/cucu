@@ -52,7 +52,13 @@ def load_cucu_steps(filepath=None):
             continue
 
         if not cucu_step.startswith("("):
-            print(f"unable to parse some step lines")
+            #
+            # any block of lines between the `@step` that doesn't start with the
+            # character ( is an error being reported behave when loading steps
+            # and we'll ignore it when processing the step definitions and then
+            # report the actual underlying trace reported in STDERR below
+            #
+            print("unable to parse some step lines")
             continue
 
         lines = cucu_step.split("\n")
