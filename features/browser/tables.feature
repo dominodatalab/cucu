@@ -89,7 +89,7 @@ Feature: Tables
         | Name   | City          | Country       |
         | .*     | .*            | .*            |
         | Maria  | Cancun        | Mexico        |
-     And I should see the previous step took more than "4" seconds
+      And I should see the previous step took more than "4" seconds
 
   Scenario: User can verify a table with values containing html tags
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
