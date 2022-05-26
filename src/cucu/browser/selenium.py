@@ -163,6 +163,7 @@ class Selenium(Browser):
                     self.driver = webdriver.Remote(
                         command_executor=selenium_remote_url,
                         desired_capabilities=desired_capabilities,
+                        options=options,
                     )
                 except urllib3.exceptions.ReadTimeoutError:
                     print("*" * 80)
