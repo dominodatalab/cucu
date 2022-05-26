@@ -119,7 +119,7 @@ Feature: Inputs
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html?delay_page_load_ms={CUCU_STEP_WAIT_TIMEOUT_S}"
      When I wait to write "01/01/2019" into the input "input type=date"
      Then I should see the previous step took more than "4" seconds
-     And I should see "2019-01-01" in the input "input type=date"
+      And I should see "2019-01-01" in the input "input type=date"
 
   Scenario: User can wait up to 10s to write into an input
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html?delay_page_load_ms=10000"

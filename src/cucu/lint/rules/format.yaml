@@ -17,7 +17,7 @@ scenario_name_with_appropriate_indentation:
     match: '^\s+'
     replace: '  '
 
-step_keywords_indented_correctly:
+given_keyword_indented_correctly:
   message: given keyword should be indented with 4 spaces
   type: warning
   current_line:
@@ -25,6 +25,33 @@ step_keywords_indented_correctly:
   fix:
     match: '^\s+'
     replace: '    '
+
+when_keyword_indented_correctly:
+  message: when keyword should be indented with 5 spaces
+  type: warning
+  current_line:
+    match: '^(\s{0,4}|\s{6,})When .*'
+  fix:
+    match: '^\s+'
+    replace: '     '
+
+then_keyword_indented_correctly:
+  message: then keyword should be indented with 5 spaces
+  type: warning
+  current_line:
+    match: '^(\s{0,4}|\s{6,})Then .*'
+  fix:
+    match: '^\s+'
+    replace: '     '
+
+and_keyword_indented_correctly:
+  message: and keyword should be indented with 6 spaces
+  type: warning
+  current_line:
+    match: '^(\s{0,5}|\s{7,})And .*'
+  fix:
+    match: '^\s+'
+    replace: '      '
 
 line_with_extraneous_whitespace:
   message: line has extraneous whitespace at the end

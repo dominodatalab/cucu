@@ -1,7 +1,7 @@
 Feature: Vars
   As a developer I want the `cucu vars` command to work as expected
 
-  Scenario: User gets error message when violation can not be fixed
+  Scenario: User can use cucu vars as expected
     Given I create a file at "{CUCU_RESULTS_DIR}/cucu_vars_features/environment.py" with the following:
       """
       from cucu.environment import *
@@ -32,3 +32,15 @@ Feature: Vars
       """
       JUST_A_TEST
       """
+
+  Scenario: User can set variable values at runtime
+    Given I set the variable "FOO" to "blah"
+     Then I should see "{FOO}" is equal to "blah"
+
+  Scenario: User can set variable values with multiline strings at runtime
+    Given I set the variable "FOO" to "bar"
+     When I set the variable "FIZZ" to the following:
+      """
+      the value of FOO is {FOO}
+      """
+     Then I should see "{FIZZ}" is equal to "the value of FOO is bar"
