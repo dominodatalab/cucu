@@ -1,4 +1,5 @@
 import chromedriver_autoinstaller
+import edgedriver_autoinstaller
 import geckodriver_autoinstaller
 import logging
 import urllib3
@@ -42,6 +43,9 @@ def init():
         logger.warn("browser console logs not available on firefox")
         geckodriver_autoinstaller.install()
 
+    if config.CONFIG["CUCU_BROWSER"] == "edge":
+        edgedriver_autoinstaller.install()
+
 
 class Selenium(Browser):
     def __init__(self):
@@ -63,7 +67,6 @@ class Selenium(Browser):
 
             options.add_argument(f"--window-size={width},{height}")
             options.add_argument("--disable-dev-shm-usage")
-            options.add_argument("--ignore-certificate-errors")
 
             if headless:
                 options.add_argument("--headless")
@@ -94,10 +97,10 @@ class Selenium(Browser):
                     chrome_options=options,
                     desired_capabilities=desired_capabilities,
                 )
+
         elif browser.startswith("firefox"):
             options = webdriver.FirefoxOptions()
             profile = webdriver.FirefoxProfile()
-            profile.accept_untrusted_certs = True
             profile.set_preference("browser.download.folderList", 2)
             profile.set_preference(
                 "browser.download.manager.showWhenStarting", False
@@ -141,6 +144,44 @@ class Selenium(Browser):
                     options=options,
                     desired_capabilities=desired_capabilities,
                 )
+
+        elif browser.startswith("edge"):
+            options = webdriver.EdgeOptions()
+
+            options.add_experimental_option(
+                "prefs", {"download.default_directory": cucu_downloads_dir}
+            )
+
+            if headless:
+                options.use_chromium = True
+                options.add_argument("--headless")
+
+            if selenium_remote_url is not None:
+                logger.debug(f"webdriver.Remote init: {selenium_remote_url}")
+                desired_capabilities = DesiredCapabilities.EDGE
+                try:
+                    self.driver = webdriver.Remote(
+                        command_executor=selenium_remote_url,
+                        desired_capabilities=desired_capabilities,
+                    )
+                except urllib3.exceptions.ReadTimeoutError:
+                    print("*" * 80)
+                    print(
+                        "* unable to connect to the remote selenium setup,"
+                        " you may need to restart it"
+                    )
+                    print("*" * 80)
+                    print("")
+                    raise
+            else:
+                logger.debug("webdriver.Firefox init")
+                edgedriver_filepath = (
+                    edgedriver_autoinstaller.utils.download_edgedriver()
+                )
+                self.driver = webdriver.Edge(
+                    executable_path=edgedriver_filepath, options=options
+                )
+
         else:
             raise Exception(f"unknown browser {browser}")
 
