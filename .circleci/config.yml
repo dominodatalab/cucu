@@ -72,7 +72,7 @@ executors:
   chrome-test-executor:
     docker:
       - image: python:3.9.7
-      - image: selenium/standalone-chrome:100.0
+      - image: selenium/standalone-chrome:latest
         environment:
           SE_NODE_MAX_SESSIONS: 10
           SE_NODE_SESSION_TIMEOUT: 300
@@ -83,7 +83,18 @@ executors:
   firefox-test-executor:
     docker:
       - image: python:3.9.7
-      - image: selenium/standalone-firefox:98.0
+      - image: selenium/standalone-firefox:latest
+        environment:
+          SE_NODE_MAX_SESSIONS: 10
+          SE_NODE_SESSION_TIMEOUT: 300
+          SCREEN_WIDTH: 1920
+          SCREEN_HEIGHT: 1080
+    resource_class: large
+
+  edge-test-executor:
+    docker:
+      - image: python:3.9.7
+      - image: selenium/standalone-edge:latest
         environment:
           SE_NODE_MAX_SESSIONS: 10
           SE_NODE_SESSION_TIMEOUT: 300
@@ -154,6 +165,9 @@ workflows:
       - test:
           name: test-chrome
           browser: chrome
+      - test:
+          name: test-edge
+          browser: edge
       - test:
           name: test-firefox
           browser: firefox
