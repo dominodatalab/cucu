@@ -1,25 +1,120 @@
 # Use the latest 2.1 version of CircleCI pipeline process engine.
 # See: https://circleci.com/docs/2.0/configuration-reference
+---
 version: 2.1
 
-install_cucu_dependencies: &install_cucu_dependencies
-  run:
-    name: install cucu dependencies
-    command: pip install poetry && poetry install
+commands:
+  install_cucu_dependencies: &install_cucu_dependencies
+    steps:
+      - run:
+          name: install cucu dependencies
+          command: pip install poetry && poetry install
 
-build_cucu_python_package: &build_cucu_python_package
-  run:
-    name: build the cucu python package
-    command: poetry build
+  build_cucu_python_package: &build_cucu_python_package
+    steps:
+      - run:
+          name: build the cucu python package
+          command: poetry build
 
-install_cucu_globally: &install_cucu_globally
-  run:
-    name: install cucu globally
-    command: pip install dist/cucu-*.tar.gz
+  install_cucu_globally: &install_cucu_globally
+    steps:
+      - run:
+          name: install cucu globally
+          command: pip install dist/cucu-*.tar.gz
 
+  setup_remote_docker_env: &setup_remote_docker_env
+    steps:
+      - setup_remote_docker:
+          version: 20.10.14
 
-orbs:
-  browser-tools: circleci/browser-tools@1.2.4
+  wait_for_selenium: &wait_for_selenium
+    steps:
+      - run:
+          # retry connection every 5s x 60 which is a total of 5 minutes
+          command: >
+            curl --retry 60
+                 --retry-delay 5
+                 --retry-connrefused
+                 http://localhost:4444
+
+  run_functional_tests: &run_functional_tests
+    parameters:
+      browser:
+        type: string
+        default: "chrome"
+    steps:
+      - run:
+          command: >
+            poetry run cucu run features
+                   --workers 2
+                   --selenium-remote-url http://localhost:4444
+                   --generate-report
+                   --junit junit_results
+                   --browser "<< parameters.browser >>"
+          environment:
+            COVERAGE_PROCESS_START: .coveragerc
+            CUCU_COLOR_OUTPUT: false
+
+  run_unit_tests: &run_unit_tests
+    steps:
+      - run:
+          name: run unit tests
+          command: >
+            poetry run coverage run
+                   -m pytest
+                   --junit-xml=results/unit-tests.xml
+
+  tar_up_results_and_report: &tar_up_results_and_report
+    steps:
+      - run:
+          name: tar up results and report
+          command: tar cvfz results.tgz results && tar cvfz report.tgz report
+
+  code_coverage_check: &code_coverage_check
+    steps:
+      - run:
+          command: |
+            poetry run coverage combine .coverage.*
+            poetry run coverage html
+            poetry run coverage report --fail-under=90
+
+executors:
+  unit-test-executor:
+    docker:
+      - image: python:3.9.7
+
+  chrome-test-executor:
+    docker:
+      - image: python:3.9.7
+      - image: selenium/standalone-chrome:latest
+        environment:
+          SE_NODE_MAX_SESSIONS: 10
+          SE_NODE_SESSION_TIMEOUT: 300
+          SCREEN_WIDTH: 1920
+          SCREEN_HEIGHT: 1080
+    resource_class: large
+
+  firefox-test-executor:
+    docker:
+      - image: python:3.9.7
+      - image: selenium/standalone-firefox:latest
+        environment:
+          SE_NODE_MAX_SESSIONS: 10
+          SE_NODE_SESSION_TIMEOUT: 300
+          SCREEN_WIDTH: 1920
+          SCREEN_HEIGHT: 1080
+    resource_class: large
+
+  edge-test-executor:
+    docker:
+      - image: python:3.9.7
+      - image: selenium/standalone-edge:latest
+        environment:
+          SE_NODE_MAX_SESSIONS: 10
+          SE_NODE_SESSION_TIMEOUT: 300
+          SCREEN_WIDTH: 1920
+          SCREEN_HEIGHT: 1080
+    resource_class: large
 
 jobs:
   pre-commit:
@@ -35,46 +130,38 @@ jobs:
             pip install pre-commit
             pre-commit install-hooks
 
-      - *install_cucu_dependencies
-      - *build_cucu_python_package
-
-      - run:
-          name: install cucu globally
-          command: pip install dist/cucu-*.tar.gz
+      - install_cucu_dependencies
+      - build_cucu_python_package
+      - install_cucu_globally
 
       - run:
           name: run pre-commit validations
-          command: |
-            pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
+          command: >
+            pre-commit run
+                       --show-diff-on-failure
+                       --from-ref origin/HEAD
+                       --to-ref HEAD
 
   test:
-    docker:
-      - image: cimg/python:3.9.7-browsers
+    parameters:
+      browser:
+        type: string
+        default: "chrome"
+
+    executor: << parameters.browser >>-test-executor
 
     steps:
-      - browser-tools/install-browser-tools
-      - browser-tools/install-chrome
       - checkout
-      - *install_cucu_dependencies
-      - *build_cucu_python_package
-      - *install_cucu_globally
-
-      - run:
-          name: run functional tests
-          command: poetry run cucu run features --workers 2
-          environment:
-            COVERAGE_PROCESS_START: .coveragerc
-            CUCU_COLOR_OUTPUT: false
-
-      - run:
-          name: generate html test report
-          command: cucu report
-          when: always
-
-      - run:
-          name: tar up results and report
-          command: tar cvfz results.tgz results && tar cvfz report.tgz report
-          when: always
+      - install_cucu_dependencies
+      - build_cucu_python_package
+      - install_cucu_globally
+      - setup_remote_docker_env
+      - wait_for_selenium
+      - run_functional_tests:
+          browser: "<< parameters.browser >>"
+      - run_unit_tests
+      - tar_up_results_and_report
+      - code_coverage_check
 
       - store_artifacts:
           path: results.tgz
@@ -82,40 +169,22 @@ jobs:
       - store_artifacts:
           path: report.tgz
 
+      - store_test_results:
+          path: junit_results
+
       - store_artifacts:
           path: report/
-
-      - run:
-          name: run unit tests
-          command: poetry run coverage run -m pytest  --junit-xml=results/unit-tests.xml
-          when: always
-
-      - run:
-          name: move top level test results
-          # avoids picking up other test results files from sub directories that
-          # are from testing `cucu run` and producing irrelevant test results
-          command: |
-            mkdir -p test_results
-            cp results/*.xml test_results
-
-      - store_test_results:
-          path: test_results/
-
-      - run:
-          name: combine coverage reports
-          command: poetry run coverage combine .coverage.*
-
-      - run:
-          name: code coverage report
-          command: |
-            poetry run coverage html
-            poetry run coverage report --fail-under=90
-
-      - store_artifacts:
-          path: htmlcov
 
 workflows:
   build-n-test:
     jobs:
       - pre-commit
-      - test
+      - test:
+          name: test-chrome
+          browser: chrome
+      - test:
+          name: test-edge
+          browser: edge
+      - test:
+          name: test-firefox
+          browser: firefox
