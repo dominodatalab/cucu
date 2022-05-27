@@ -63,7 +63,7 @@ commands:
           command: |
             poetry run coverage combine .coverage.*
             poetry run coverage html
-            poetry run coverage report --fail-under=90
+            poetry run coverage report --fail-under=85
 
 executors:
   unit-test-executor:
