@@ -21,7 +21,7 @@ def test_find_completions_returns_something_when_prefix_does_not_match():
 
 
 def test_load_cucu_steps_returns_valid_list_of_existing_steps():
-    steps, _ = load_cucu_steps()
+    steps = load_cucu_steps()
 
     for step_name in steps.keys():
         step_details = steps[step_name]
