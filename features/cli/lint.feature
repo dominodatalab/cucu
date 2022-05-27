@@ -23,13 +23,9 @@ Feature: Lint
       """
       You can implement step definitions for undefined steps with these snippets
       """
-      And I should see "{STDOUT}" contains the following:
-      """
-      failure loading some steps, see above for details
-      """
       And I should see "{STDERR}" contains the following:
       """
-      Error: linting errors found, but not fixed, see above for details
+      failed to load steps, see above for details
       """
 
   Scenario: User can find and fix indentation violations
@@ -178,11 +174,7 @@ Feature: Lint
       """
       RuntimeError: boom
       """
-      And I should see "{STDOUT}" contains the following:
-      """
-      failure loading some steps, see above for details
-      """
       And I should see "{STDERR}" contains the following:
       """
-      Error: linting errors found, but not fixed, see above for details
+      failed to load steps, see above for details
       """
