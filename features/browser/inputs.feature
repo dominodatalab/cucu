@@ -5,6 +5,7 @@ Feature: Inputs
   Background: HTML page with buttons
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
 
+  @disabled @QE-7005
   Scenario: User can write into an <input type="date">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
      Then I should see no value in the input "input type=date"
@@ -46,8 +47,8 @@ Feature: Inputs
   Scenario: User can write into an <input type="search">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
       And I should see no value in the input "input type=search"
-     When I write "supersecret" into the input "input type=search"
-     Then I should see "supersecret" in the input "input type=search"
+     When I write "just a query" into the input "input type=search"
+     Then I should see "just a query" in the input "input type=search"
 
   Scenario: User can write into an <input type="tel">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
@@ -61,6 +62,7 @@ Feature: Inputs
      When I write "some text" into the input "input type=text"
      Then I should see "some text" in the input "input type=text"
 
+  @disabled @QE-7005
   Scenario: User can write into an <input type="time">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
       And I should see no value in the input "input type=time"
@@ -73,6 +75,7 @@ Feature: Inputs
      When I write "https://www.google.com" into the input "input type=url"
      Then I should see "https://www.google.com" in the input "input type=url"
 
+  @disabled @QE-7005
   Scenario: User can write into an <input type="week">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
       And I should see no value in the input "input type=week"
@@ -117,15 +120,15 @@ Feature: Inputs
   Scenario: User can wait to write into an input
     Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5000"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html?delay_page_load_ms={CUCU_STEP_WAIT_TIMEOUT_S}"
-     When I wait to write "01/01/2019" into the input "input type=date"
+     When I wait to write "8675309" into the input "input type=tel"
      Then I should see the previous step took more than "4" seconds
-      And I should see "2019-01-01" in the input "input type=date"
+      And I should see "8675309" in the input "input type=tel"
 
   Scenario: User can wait up to 10s to write into an input
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html?delay_page_load_ms=10000"
-     When I wait to write "01/01/2019" into the input "input type=date"
+     When I wait up to "10" seconds to write "8675309" into the input "input type=tel"
      Then I should see the previous step took more than "9" seconds
-      And I should see "2019-01-01" in the input "input type=date"
+      And I should see "8675309" in the input "input type=tel"
 
   Scenario: User can wait to clear an input
     Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5000"

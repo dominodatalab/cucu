@@ -43,7 +43,7 @@ def main():
 @click.option(
     "-b",
     "--browser",
-    default="chrome",
+    default=os.environ.get("CUCU_BROWSER") or "chrome",
     help="browser name to use default: chrome",
 )
 @click.option(
@@ -214,11 +214,14 @@ def run(
             os.makedirs(results)
 
     if selenium_remote_url is not None:
-        CONFIG["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
+        os.environ["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
 
     if periodic_thread_dumper is not None:
         interval_min = float(periodic_thread_dumper)
         dumper = thread_dumper.start(interval_min)
+
+    # need to set this before initializing any browsers below
+    os.environ["CUCU_BROWSER"] = browser.lower()
 
     if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
         selenium.init()
@@ -230,7 +233,6 @@ def run(
         if workers is None or workers == 1:
             exit_code = behave(
                 filepath,
-                browser,
                 color_output,
                 dry_run,
                 env,
@@ -264,7 +266,6 @@ def run(
                             behave,
                             [
                                 feature_filepath,
-                                browser,
                                 color_output,
                                 dry_run,
                                 env,
@@ -385,17 +386,8 @@ def lint(filepath, fix):
             if violations:
                 for violation in violations:
                     violations_found += 1
-
-                    if violation["type"] == "steps_error":
-                        print(violation["message"])
-                        print(
-                            "failure loading some steps, see above for details"
-                        )
-                        print("")
-                        continue
-
                     location = violation["location"]
-                    _type = violation["type"][0].upper()
+                    type = violation["type"][0].upper()
                     message = violation["message"]
                     suffix = ""
 
@@ -408,9 +400,7 @@ def lint(filepath, fix):
 
                     filepath = location["filepath"]
                     line_number = location["line"] + 1
-                    print(
-                        f"{filepath}:{line_number}: {_type} {message}{suffix}"
-                    )
+                    print(f"{filepath}:{line_number}: {type} {message}{suffix}")
 
     if violations_found != 0:
         if violations_found == violations_fixed:
