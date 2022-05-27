@@ -29,7 +29,7 @@ strip-ansi = "^0.1.1"
 tabulate = "^0.8.9"
 ipdb = "^0.13.9"
 geckodriver-autoinstaller = "^0.1.0"
-edgedriver-autoinstaller = { git = "https://github.com/cerebrotech/python-edgedriver-autoinstaller" }
+edgedriver-autoinstaller = { git = "ssh://git@github.com/cerebrotech/python-edgedriver-autoinstaller.git", branch="main"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.3"
