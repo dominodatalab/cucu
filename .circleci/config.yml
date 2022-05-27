@@ -31,11 +31,7 @@ commands:
     steps:
       - run:
           # retry connection every 5s x 60 which is a total of 5 minutes
-          command: >
-            curl --retry 60
-                 --retry-delay 5
-                 --retry-connrefused
-                 http://localhost:4444
+          command: curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
 
   run_functional_tests: &run_functional_tests
     parameters:
@@ -44,13 +40,7 @@ commands:
         default: "chrome"
     steps:
       - run:
-          command: >
-            poetry run cucu run features
-                   --workers 2
-                   --selenium-remote-url http://localhost:4444
-                   --generate-report
-                   --junit junit_results
-                   --browser "<< parameters.browser >>"
+          command: poetry run cucu run features --workers 2 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<< parameters.browser >>"
           environment:
             COVERAGE_PROCESS_START: .coveragerc
             CUCU_COLOR_OUTPUT: false
@@ -59,10 +49,7 @@ commands:
     steps:
       - run:
           name: run unit tests
-          command: >
-            poetry run coverage run
-                   -m pytest
-                   --junit-xml=results/unit-tests.xml
+          command: poetry run coverage run -m pytest --junit-xml=results/unit-tests.xml
 
   tar_up_results_and_report: &tar_up_results_and_report
     steps:
@@ -136,11 +123,7 @@ jobs:
 
       - run:
           name: run pre-commit validations
-          command: >
-            pre-commit run
-                       --show-diff-on-failure
-                       --from-ref origin/HEAD
-                       --to-ref HEAD
+          command: pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
 
   test:
     parameters:
