@@ -17,8 +17,8 @@
         </tr>
         {% for feature in features %}
 
-        <tr role="link" style="cursor: pointer;" onclick="window.location='{{ urlencode(escape(feature['name'])) }}.html';" >
-            <td><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></td>
+        <tr>
+            <td><a href="{{ urlencode(escape(feature['name'])) }}.html"><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></a></td>
             <td class="text-center">{{ feature['total_scenarios'] }}</td>
             <td class="text-center">{{ feature['total_scenarios_passed'] }}</td>
             <td class="text-center">{{ feature['total_scenarios_failed'] }}</td>
