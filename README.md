@@ -104,5 +104,6 @@ run `pre-commit install`.
 
 To tag a new release of cucu, first create a branch. On your new branch you can
 simply run `make release` and it'll update the package version and create a new
-git tag. Add those changes to a git commit and run `git push origin --tags` to
-push the new tag up to git. Then, you can create a PR for the new release.
+git tag. Add those changes to a git commit and run
+`git push origin --tags  [your branch name here]` to push the new tag up to
+git. Then, you can create a PR for the new release.
