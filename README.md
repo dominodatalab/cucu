@@ -56,14 +56,21 @@ By default we'll simply use the `Google Chrome` you have installed and there's
 a python package that'll handle downloading chromedriver that matches your
 specific local Google Chrome version.
 
-# running exact version of chrome/firefox using docker
+# running exact versions of any browser using docker
+
+[docker hub](https://hub.docker.com/) has easy to use docker containers for
+running specific versions of chrome, edge and firefox browsers for testing that
+you can spin up manually in standalone mode like so:
 
 ```
-docker run -d -p 4444:4444 selenium/standalone-chrome:85.0
+docker run -d -p 4444:4444 selenium/standalone-chrome:latest
 ```
 
-Which will spin up a standalone selenium chrome container and you can then use
-`docker ps -a` to see where the selenium driver is listening on:
+And can choose a specific version replacing the `latest` with any tag from
+[here](https://hub.docker.com/r/selenium/standalone-chrome/tags). You can find
+browser tags for `standalone-edge` and `standalone-firefox` the same way. Once
+you run the command you will see with `docker  ps -a` that the container
+is running and listening on port `4444`:
 
 ```
 > docker ps -a
@@ -74,6 +81,11 @@ CONTAINER ID ... PORTS                                                NAMES
 Now when running `cucu run some.feature` you can provide
 `--selenium-remote-url http://localhost:4444` and this way you'll run a very
 specific version of chrome on any setup you run this on.
+
+You can also create a docker hub setup with all 3 browser nodes connected using
+the utilty script at `./bin/start_selenium_hub.sh` and you can point your tests
+at `http://localhost:4444` and then specify the `--browser` to be `chrome`,
+`firefox` or `edge` and use that specific browser for testing.
 
 To ease using various custom settings you can also set most of the command line
 options in a local `cucurc.yml` or in a more global place at `~/.cucurc.yml`
