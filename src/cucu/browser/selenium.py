@@ -1,11 +1,11 @@
 import chromedriver_autoinstaller
-import edgedriver_autoinstaller
 import geckodriver_autoinstaller
 import logging
 import urllib3
 
 from cucu.browser.core import Browser
 from cucu import config, logger
+from cucu import edgedriver_autoinstaller
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
