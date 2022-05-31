@@ -51,12 +51,6 @@ commands:
           name: run unit tests
           command: poetry run coverage run -m pytest --junit-xml=results/unit-tests.xml
 
-  tar_up_results_and_report: &tar_up_results_and_report
-    steps:
-      - run:
-          name: tar up results and report
-          command: tar cvfz results.tgz results && tar cvfz report.tgz report
-
   code_coverage_check: &code_coverage_check
     steps:
       - run:
@@ -143,8 +137,12 @@ jobs:
       - run_functional_tests:
           browser: "<< parameters.browser >>"
       - run_unit_tests
-      - tar_up_results_and_report
       - code_coverage_check
+
+      - run:
+          name: tar up results and report
+          command: tar cvfz results.tgz results && tar cvfz report.tgz report
+          when: always
 
       - store_artifacts:
           path: results.tgz
