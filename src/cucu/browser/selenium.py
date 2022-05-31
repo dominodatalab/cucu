@@ -27,9 +27,6 @@ def init():
     """
     initialize any selenium specific needs
     """
-    timeout = float(config.CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT_S"])
-    RemoteConnection.set_timeout(timeout)
-
     if config.CONFIG["CUCU_BROWSER"] == "chrome":
         try:
             with DisableLogger():
@@ -54,6 +51,13 @@ class Selenium(Browser):
     def open(
         self, browser, headless=False, selenium_remote_url=None, detach=False
     ):
+        if selenium_remote_url is None:
+            init()
+
+        else:
+            timeout = float(config.CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT_S"])
+            RemoteConnection.set_timeout(timeout)
+
         height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
         width = config.CONFIG["CUCU_BROWSER_WINDOW_WIDTH"]
         cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
