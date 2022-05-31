@@ -12,7 +12,14 @@ from cucu.config import CONFIG
 from functools import wraps
 
 
+def init_outputs(stdout, stderr):
+    # capturing stdout and stderr output to record in reporting
+    sys.stdout = CucuCaptureStream(sys.stdout)
+    sys.stderr = CucuCaptureStream(sys.stderr)
+
+
 def init_step_hooks(stdout, stderr):
+    init_outputs(stdout, stderr)
     #
     # wrap the given, when, then, step decorators from behave so we can intercept
     # the step arguments and do things such as replacing variable references that
@@ -62,10 +69,6 @@ def init_step_hooks(stdout, stderr):
 
                         ctx.table.rows = new_rows
 
-            # intercept the current stdout and stderr that behave is capturing
-            # and attach it to the captured output
-            sys.stdout = CucuStream(sys.stdout, parent=stdout)
-            sys.stderr = CucuStream(sys.stderr, parent=stderr)
             func(*args, **kwargs)
 
         def new_decorator(
@@ -126,18 +129,20 @@ def hide_secrets(line):
     return line
 
 
-class CucuStream:
-    def __init__(self, stream, parent=None):
+class CucuCaptureStream:
+    def __init__(self, stream):
         self.captured_data = []
         self.stream = stream
-        self.parent = parent
         self.encoding = stream.encoding
 
     def __getattr__(self, item):
         return self.stream.__getattribute__(item)
 
-    def fileno(self):
-        return self.stream.fileno()
+    def isatty(self, *args, **kwargs):
+        return self.stream.isatty(*args, **kwargs)
+
+    def flush(self):
+        self.stream.flush()
 
     def write(self, byte):
         byte = hide_secrets(byte)
@@ -149,27 +154,19 @@ class CucuStream:
         else:
             self.stream.write(byte)
 
-        if self.parent:
-            self.parent.write(byte)
-
     def writelines(self, lines):
         lines = [hide_secrets(line) for line in lines]
 
         for line in lines:
             self.captured_data.append(line)
 
-        if self.parent:
-            self.parent.writelines(lines)
-
         self.stream.writelines(lines)
 
     def captured(self):
+        """
+        returns the data captured thus far to the stream and resets the internal
+        buffer to empty.
+        """
         captured_data = self.captured_data
         self.captured_data = []
         return captured_data
-
-    def isatty(self):
-        return self.stream.isatty()
-
-    def flush(self):
-        self.stream.flush()

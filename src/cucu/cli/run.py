@@ -1,6 +1,9 @@
 import contextlib
 import os
 
+import sys
+from cucu import behave_tweaks
+
 from behave.__main__ import main as behave_main
 
 
@@ -46,6 +49,7 @@ def behave(
         os.environ["CUCU_IPDB_ON_FAILURE"] = "true"
 
     os.environ["CUCU_RESULTS_DIR"] = results
+    os.environ["CUCU_JUNIT_DIR"] = junit
 
     if secrets:
         os.environ["CUCU_SECRETS"] = secrets
@@ -77,15 +81,18 @@ def behave(
 
     else:
         args += [
-            # JUnit xml file generated per feature file executed
-            "--junit",
-            f"--junit-directory={junit}",
+            "--no-capture",
+            "--no-capture-stderr",
+            "--no-logcapture",
             # generate a JSON file containing the exact details of the whole run
             "--format=cucu.formatter.json:CucuJSONFormatter",
             f"--outfile={results}/{run_json_filename}",
             # console formatter
             "--format=cucu.formatter.cucu:CucuFormatter",
             f"--logging-level={os.environ['CUCU_LOGGING_LEVEL'].upper()}",
+            # disable behave's junit output in favor of our own formatter
+            "--no-junit",
+            "--format=cucu.formatter.junit:CucuJUnitFormatter",
         ]
 
     for tag in tags:
@@ -112,8 +119,14 @@ def behave(
             with open(log_filepath, "w", encoding="utf8") as output:
                 with contextlib.redirect_stderr(output):
                     with contextlib.redirect_stdout(output):
+                        # intercept the stdout/stderr so we can do things such
+                        # as hiding secrets in logs
+                        behave_tweaks.init_outputs(sys.stdout, sys.stderr)
                         result = behave_main(args)
         else:
+            # intercept the stdout/stderr so we can do things such
+            # as hiding secrets in logs
+            behave_tweaks.init_outputs(sys.stdout, sys.stderr)
             result = behave_main(args)
     except:
         result = -1

@@ -120,8 +120,9 @@ def after_scenario(ctx, scenario):
 
 
 def before_step(ctx, step):
-    step.stdout = []
-    step.stderr = []
+    sys.stdout.captured()
+    sys.stderr.captured()
+
     ctx.current_step = step
     ctx.start_time = time.monotonic()
 
@@ -131,12 +132,11 @@ def before_step(ctx, step):
 
 
 def after_step(ctx, step):
-    ctx.end_time = time.monotonic()
-    ctx.previous_step_duration = ctx.end_time - ctx.start_time
-
-    # grab the captured output during the step run and reset the wrappers
     step.stdout = sys.stdout.captured()
     step.stderr = sys.stderr.captured()
+
+    ctx.end_time = time.monotonic()
+    ctx.previous_step_duration = ctx.end_time - ctx.start_time
 
     if ctx.browser is not None and not ctx.substep_increment:
         step_name = escape_filename(step.name)

@@ -30,6 +30,7 @@ tabulate = "^0.8.9"
 ipdb = "^0.13.9"
 geckodriver-autoinstaller = "^0.1.0"
 requests = "^2.27.1"
+beautifulsoup4 = "^4.11.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.3"
