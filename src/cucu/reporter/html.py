@@ -85,7 +85,9 @@ def generate(results, basepath):
                 log_files = []
 
                 for log_file in glob.iglob(os.path.join(logs_filepath, "*.*")):
-                    log_filepath = log_file.replace(f"{scenario_filepath}/", "")
+                    log_filepath = log_file.removeprefix(
+                        f"{scenario_filepath}/"
+                    )
 
                     if ".console." in log_filepath:
                         log_filepath += ".html"
@@ -96,32 +98,31 @@ def generate(results, basepath):
                             "name": os.path.basename(log_file),
                         }
                     )
-
                 scenario["logs"] = log_files
 
-                for log_file in log_files:
-                    if ".console." in log_file["name"]:
-                        converter = Ansi2HTMLConverter(dark_bg=False)
-                        log_file_filepath = os.path.join(
-                            scenario_filepath, "logs", log_file["name"]
-                        )
+                only_console_logs = lambda log: ".console." in log["name"]
+                for log_file in filter(only_console_logs, log_files):
+                    converter = Ansi2HTMLConverter(dark_bg=False)
+                    log_file_filepath = os.path.join(
+                        scenario_filepath, "logs", log_file["name"]
+                    )
 
-                        input_data = None
-                        with open(
-                            log_file_filepath, "r", encoding="utf8"
-                        ) as log_file_input:
-                            input_data = log_file_input.read()
+                    input_data = None
+                    with open(
+                        log_file_filepath, "r", encoding="utf8"
+                    ) as log_file_input:
+                        input_data = log_file_input.read()
 
-                        html = "\n".join(
-                            [
-                                converter.convert(line)
-                                for line in input_data.split("\n")
-                            ]
-                        )
-                        with open(
-                            log_file_filepath + ".html", "w", encoding="utf8"
-                        ) as log_file_output:
-                            log_file_output.write(html)
+                    html = "\n".join(
+                        [
+                            converter.convert(line)
+                            for line in input_data.split("\n")
+                        ]
+                    )
+                    with open(
+                        log_file_filepath + ".html", "w", encoding="utf8"
+                    ) as log_file_output:
+                        log_file_output.write(html)
 
             scenario["duration"] = scenario_duration
             scenario["total_steps"] = total_steps
