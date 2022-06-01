@@ -5,6 +5,7 @@ import os
 import urllib
 import json
 
+from ansi2html import Ansi2HTMLConverter
 from xml.sax.saxutils import escape
 from urllib.parse import quote
 
@@ -81,17 +82,46 @@ def generate(results, basepath):
             logs_filepath = os.path.join(scenario_filepath, "logs")
 
             if os.path.exists(logs_filepath):
-                log_files = glob.iglob(os.path.join(logs_filepath, "*.*"))
-                log_files = [
-                    {
-                        "filepath": log_file.replace(
-                            f"{scenario_filepath}/", ""
-                        ),
-                        "name": os.path.basename(log_file),
-                    }
-                    for log_file in log_files
-                ]
+                log_files = []
+
+                for log_file in glob.iglob(os.path.join(logs_filepath, "*.*")):
+                    log_filepath = log_file.replace(f"{scenario_filepath}/", "")
+
+                    if ".console." in log_filepath:
+                        log_filepath += ".html"
+
+                    log_files.append(
+                        {
+                            "filepath": log_filepath,
+                            "name": os.path.basename(log_file),
+                        }
+                    )
+
                 scenario["logs"] = log_files
+
+                for log_file in log_files:
+                    if ".console." in log_file["name"]:
+                        converter = Ansi2HTMLConverter(dark_bg=False)
+                        log_file_filepath = os.path.join(
+                            scenario_filepath, "logs", log_file["name"]
+                        )
+
+                        input_data = None
+                        with open(
+                            log_file_filepath, "r", encoding="utf8"
+                        ) as log_file_input:
+                            input_data = log_file_input.read()
+
+                        html = "\n".join(
+                            [
+                                converter.convert(line)
+                                for line in input_data.split("\n")
+                            ]
+                        )
+                        with open(
+                            log_file_filepath + ".html", "w", encoding="utf8"
+                        ) as log_file_output:
+                            log_file_output.write(html)
 
             scenario["duration"] = scenario_duration
             scenario["total_steps"] = total_steps

@@ -14,8 +14,8 @@ from functools import wraps
 
 def init_outputs(stdout, stderr):
     # capturing stdout and stderr output to record in reporting
-    sys.stdout = CucuCaptureStream(sys.stdout)
-    sys.stderr = CucuCaptureStream(sys.stderr)
+    sys.stdout = CucuOutputStream(sys.stdout)
+    sys.stderr = CucuOutputStream(sys.stderr)
 
 
 def init_step_hooks(stdout, stderr):
@@ -129,11 +129,20 @@ def hide_secrets(line):
     return line
 
 
-class CucuCaptureStream:
-    def __init__(self, stream):
+class CucuOutputStream:
+    """
+    encapsulates a lot of the logic to handle capturing step by step console
+    logging but also redirecting logging at runtime to another stream
+    """
+
+    def __init__(self, stream, other_stream=None):
         self.captured_data = []
         self.stream = stream
         self.encoding = stream.encoding
+        self.other_stream = other_stream
+
+    def set_other_stream(self, other):
+        self.other_stream = other
 
     def __getattr__(self, item):
         return self.stream.__getattribute__(item)
@@ -144,6 +153,9 @@ class CucuCaptureStream:
     def flush(self):
         self.stream.flush()
 
+        if self.other_stream:
+            self.other_stream.flush()
+
     def write(self, byte):
         byte = hide_secrets(byte)
 
@@ -151,8 +163,14 @@ class CucuCaptureStream:
 
         if type(byte) == bytes:
             self.stream.write(byte.decode("utf8"))
+
+            if self.other_stream:
+                self.other_stream.write(byte.decode("utf8"))
         else:
             self.stream.write(byte)
+
+            if self.other_stream:
+                self.other_stream.write(byte)
 
     def writelines(self, lines):
         lines = [hide_secrets(line) for line in lines]
@@ -161,6 +179,8 @@ class CucuCaptureStream:
             self.captured_data.append(line)
 
         self.stream.writelines(lines)
+        if self.other_stream:
+            self.other_stream.writelines(lines)
 
     def captured(self):
         """
