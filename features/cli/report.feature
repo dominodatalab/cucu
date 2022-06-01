@@ -96,6 +96,7 @@ Feature: Report
      Then I should see the button "Given I attempt to use an undefined step"
 
   @workaround @QE-7075
+  @disabled
   Scenario: User can run a scenario with console logs and see those logs linked in the report
     Given I skip this scenario if the current browser is not "chrome"
      When I run the command "cucu run data/features/scenario_with_console_logs.feature --results {CUCU_RESULTS_DIR}/console-log-reporting" and save stdout to "STDOUT", exit code to "EXIT_CODE"
