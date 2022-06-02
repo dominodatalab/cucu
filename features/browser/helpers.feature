@@ -31,9 +31,9 @@ Feature: Helpers
       """
 
   Scenario: User gets appropriate error when waiting to see a checkbox is not in the expected state
-    Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5000"
+    Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"
       And I start a webserver at directory "data/www" and save the port to the variable "PORT"
-      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html?delay_page_load_ms={CUCU_STEP_WAIT_TIMEOUT_S}"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html?delay_page_load_ms=5000"
      Then I expect the following step to fail with "checkbox "checkbox with inner label" is not checked"
       """
       Then I wait to see the checkbox "checkbox with inner label" is checked

@@ -55,8 +55,8 @@ Feature: Buttons
      Then I should see "button with label for" in the input "value:"
 
   Scenario: User can wait the CUCU_STEP_WAIT_TIMEOUT_S to click a button
-    Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5000"
-    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?delay_page_load_ms={CUCU_STEP_WAIT_TIMEOUT_S}"
+    Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?delay_page_load_ms=5000"
      When I wait to click the button "button"
      Then I should see the previous step took more than "4" seconds
 
@@ -66,8 +66,8 @@ Feature: Buttons
      Then I should see the previous step took more than "9" seconds
 
   Scenario: User can wait the CUCU_STEP_WAIT_TIMEOUT_S to see a button
-    Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5000"
-      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?delay_page_load_ms={CUCU_STEP_WAIT_TIMEOUT_S}"
+    Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?delay_page_load_ms=5000"
      When I wait to see the button "button"
      Then I should see the previous step took more than "4" seconds
 
@@ -78,8 +78,8 @@ Feature: Buttons
 
   @negative
   Scenario: User can wait the CUCU_STEP_WAIT_TIMEOUT_S to not see a button
-    Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5000"
-      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?clear_page_after_ms={CUCU_STEP_WAIT_TIMEOUT_S}"
+    Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?clear_page_after_ms=5000"
      When I wait to not see the button "* role=button"
      Then I should see the previous step took more than "4" seconds
 
