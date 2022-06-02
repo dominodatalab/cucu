@@ -159,7 +159,7 @@ def wait_to_clear_input(ctx, name):
 
 
 @step('I wait up to "{seconds}" seconds to clear the input "{name}"')
-def wait_up_to_clear_input(ctx, seconds, value, name):
+def wait_up_to_clear_input(ctx, seconds, name):
     retry(find_n_clear, wait_up_to_s=float(seconds))(ctx, name)
 
 
