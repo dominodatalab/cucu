@@ -52,11 +52,11 @@ class CucuJUnitFormatter(Formatter):
             self.current_scenario_results["time"] = str(
                 round(self.current_scenario_duration, 3)
             )
-            self.current_scenario_results[
-                "status"
-            ] = self.current_scenario.compute_status().name
 
-            if self.current_scenario_traceback is not None:
+            status = self.current_scenario.compute_status().name
+            self.current_scenario_results["status"] = status
+
+            if status == "failed" and self.current_scenario_traceback:
                 failure = traceback.format_tb(self.current_scenario_traceback)
                 self.current_scenario_results["failure"] = failure
 
