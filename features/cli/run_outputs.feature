@@ -134,3 +134,14 @@ Feature: Run outputs
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
+
+  Scenario: User gets JUnit XML results file as expected
+    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/validate_junit_xml_results" and save stdout to "STDOUT", exit code to "EXIT_CODE"
+     Then I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Echo.xml"
+      And I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Echo.xml" matches the following:
+      """
+      <testsuite name="Echo" tests="0" errors="0" failures="0" skipped="0" timestamp=".*">
+       <testcase classname="Echo" name="Echo an environment variable" status="passed" time=".*">
+       </testcase>
+      </testsuite>
+      """

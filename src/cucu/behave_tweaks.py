@@ -12,7 +12,14 @@ from cucu.config import CONFIG
 from functools import wraps
 
 
+def init_outputs(stdout, stderr):
+    # capturing stdout and stderr output to record in reporting
+    sys.stdout = CucuOutputStream(sys.stdout)
+    sys.stderr = CucuOutputStream(sys.stderr)
+
+
 def init_step_hooks(stdout, stderr):
+    init_outputs(stdout, stderr)
     #
     # wrap the given, when, then, step decorators from behave so we can intercept
     # the step arguments and do things such as replacing variable references that
@@ -62,10 +69,6 @@ def init_step_hooks(stdout, stderr):
 
                         ctx.table.rows = new_rows
 
-            # intercept the current stdout and stderr that behave is capturing
-            # and attach it to the captured output
-            sys.stdout = CucuStream(sys.stdout, parent=stdout)
-            sys.stderr = CucuStream(sys.stderr, parent=stderr)
             func(*args, **kwargs)
 
         def new_decorator(
@@ -126,18 +129,32 @@ def hide_secrets(line):
     return line
 
 
-class CucuStream:
-    def __init__(self, stream, parent=None):
+class CucuOutputStream:
+    """
+    encapsulates a lot of the logic to handle capturing step by step console
+    logging but also redirecting logging at runtime to another stream
+    """
+
+    def __init__(self, stream, other_stream=None):
         self.captured_data = []
         self.stream = stream
-        self.parent = parent
         self.encoding = stream.encoding
+        self.other_stream = other_stream
+
+    def set_other_stream(self, other):
+        self.other_stream = other
 
     def __getattr__(self, item):
         return self.stream.__getattribute__(item)
 
-    def fileno(self):
-        return self.stream.fileno()
+    def isatty(self, *args, **kwargs):
+        return self.stream.isatty(*args, **kwargs)
+
+    def flush(self):
+        self.stream.flush()
+
+        if self.other_stream:
+            self.other_stream.flush()
 
     def write(self, byte):
         byte = hide_secrets(byte)
@@ -146,11 +163,14 @@ class CucuStream:
 
         if type(byte) == bytes:
             self.stream.write(byte.decode("utf8"))
+
+            if self.other_stream:
+                self.other_stream.write(byte.decode("utf8"))
         else:
             self.stream.write(byte)
 
-        if self.parent:
-            self.parent.write(byte)
+            if self.other_stream:
+                self.other_stream.write(byte)
 
     def writelines(self, lines):
         lines = [hide_secrets(line) for line in lines]
@@ -158,18 +178,15 @@ class CucuStream:
         for line in lines:
             self.captured_data.append(line)
 
-        if self.parent:
-            self.parent.writelines(lines)
-
         self.stream.writelines(lines)
+        if self.other_stream:
+            self.other_stream.writelines(lines)
 
     def captured(self):
+        """
+        returns the data captured thus far to the stream and resets the internal
+        buffer to empty.
+        """
         captured_data = self.captured_data
         self.captured_data = []
         return captured_data
-
-    def isatty(self):
-        return self.stream.isatty()
-
-    def flush(self):
-        self.stream.flush()

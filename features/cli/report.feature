@@ -95,9 +95,11 @@ Feature: Report
       And I click the button "Scenario that has an undefined step"
      Then I should see the button "Given I attempt to use an undefined step"
 
-  @disabled @needs-work
+  @workaround @QE-7075
+  @disabled
   Scenario: User can run a scenario with console logs and see those logs linked in the report
-    Given I run the command "cucu run data/features/scenario_with_console_logs.feature --results {CUCU_RESULTS_DIR}/console-log-reporting" and save stdout to "STDOUT", exit code to "EXIT_CODE"
+    Given I skip this scenario if the current browser is not "chrome"
+     When I run the command "cucu run data/features/scenario_with_console_logs.feature --results {CUCU_RESULTS_DIR}/console-log-reporting" and save stdout to "STDOUT", exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
      When I run the command "cucu report {CUCU_RESULTS_DIR}/console-log-reporting --output {CUCU_RESULTS_DIR}/console-log-reporting-report" and save exit code to "EXIT_CODE"
      Then I should see "{EXIT_CODE}" is equal to "0"
@@ -112,3 +114,16 @@ Feature: Report
       And I should see the text "this is an error log"
       And I should see the text "this is a debug log"
       And I should see the text "this is a warn log"
+
+  Scenario: User can run a scenario without debug logging on the console but still found the cucu.debug.log in the report
+    Given I run the command "cucu run  data/features/feature_with_passing_scenario_with_web.feature --results {CUCU_RESULTS_DIR}/cucu_debug_results --generate-report --report {CUCU_RESULTS_DIR}/cucu_debug_report" and save stdout to "STDOUT" and expect exit code "0"
+     When I start a webserver at directory "{CUCU_RESULTS_DIR}/cucu_debug_report" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+      And I click the link "Feature with passing scenario with web"
+     Then I should not see the text "DEBUG executing page check \"wait for document.readyState\""
+      And I should not see the text "DEBUG executing page check \"broken image checker\""
+      And I click the button "Just a scenario that opens a web page"
+     When I click the button "Logs"
+      And I click the button "cucu.debug.console.log"
+     Then I wait to see the text "DEBUG executing page check \"wait for document.readyState\""
+      And I wait to see the text "DEBUG executing page check \"broken image checker\""

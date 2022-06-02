@@ -74,6 +74,25 @@ def before_scenario(ctx, scenario):
         CONFIG["SCENARIO_DOWNLOADS_DIR"] = ctx.scenario_downloads_dir
         os.makedirs(ctx.scenario_downloads_dir, exist_ok=True)
 
+        ctx.scenario_logs_dir = os.path.join(ctx.scenario_dir, "logs")
+        CONFIG["SCENARIO_LOGS_DIR"] = ctx.scenario_logs_dir
+        os.makedirs(ctx.scenario_logs_dir, exist_ok=True)
+
+        cucu_debug_filepath = os.path.join(
+            ctx.scenario_logs_dir, "cucu.debug.console.log"
+        )
+        ctx.scenario_debug_log_file = open(
+            cucu_debug_filepath, "w", encoding=sys.stdout.encoding
+        )
+
+        # redirect stdout, stderr and setup a logger at debug level to fill
+        # the scenario cucu.debug.log file which makes it possible to have
+        # debug logging for every single scenario run without polluting the
+        # console logs at runtime.
+        sys.stdout.set_other_stream(ctx.scenario_debug_log_file)
+        sys.stderr.set_other_stream(ctx.scenario_debug_log_file)
+        logger.init_debug_logger(ctx.scenario_debug_log_file)
+
     # internal cucu config variables
     CONFIG["SCENARIO_RUN_ID"] = uuid.uuid1().hex
 
@@ -96,7 +115,7 @@ def after_scenario(ctx, scenario):
         for browser in ctx.browsers:
             # save the browser logs to the current scenarios results directory
             browser_log_filepath = os.path.join(
-                ctx.scenario_dir, "logs", "browser_console.log"
+                ctx.scenario_logs_dir, "browser_console.log"
             )
 
             os.makedirs(os.path.dirname(browser_log_filepath), exist_ok=True)
@@ -120,8 +139,9 @@ def after_scenario(ctx, scenario):
 
 
 def before_step(ctx, step):
-    step.stdout = []
-    step.stderr = []
+    sys.stdout.captured()
+    sys.stderr.captured()
+
     ctx.current_step = step
     ctx.start_time = time.monotonic()
 
@@ -131,12 +151,11 @@ def before_step(ctx, step):
 
 
 def after_step(ctx, step):
-    ctx.end_time = time.monotonic()
-    ctx.previous_step_duration = ctx.end_time - ctx.start_time
-
-    # grab the captured output during the step run and reset the wrappers
     step.stdout = sys.stdout.captured()
     step.stderr = sys.stderr.captured()
+
+    ctx.end_time = time.monotonic()
+    ctx.previous_step_duration = ctx.end_time - ctx.start_time
 
     if ctx.browser is not None and not ctx.substep_increment:
         step_name = escape_filename(step.name)

@@ -7,9 +7,6 @@ from cucu import behave_tweaks
 # intercept the stdout/stderr so we can do things such as hiding secrets in logs
 behave_tweaks.init_step_hooks(sys.stdout, sys.stderr)
 
-sys.stdout = behave_tweaks.CucuStream(sys.stdout)
-sys.stderr = behave_tweaks.CucuStream(sys.stderr)
-
 from cucu.hooks import (
     init_global_hook_variables,
     init_scenario_hook_variables,

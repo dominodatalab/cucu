@@ -223,6 +223,9 @@ def run(
     # need to set this before initializing any browsers below
     os.environ["CUCU_BROWSER"] = browser.lower()
 
+    if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
+        selenium.init()
+
     if junit is None:
         junit = results
 
