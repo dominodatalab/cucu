@@ -168,13 +168,13 @@ Feature: Run outputs
               \"\"\"
               current user is '\{USER\}'
               \"\"\"
-            # USER="{USER}"
+            # USER=".*"
       current working directory is '.*'
 
             And I echo "current working directory is '\{PWD\}'"  .*
             # PWD=".*"
       \{
-        "user": "{USER}"
+        "user": ".*"
       \}
 
             And I echo the following                 .*
@@ -183,7 +183,7 @@ Feature: Run outputs
                 "user": "\{USER\}"
               \\\\}
               \"\"\"
-            # USER="{USER}"
+            # USER=".*"
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
