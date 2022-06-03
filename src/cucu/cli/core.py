@@ -210,8 +210,7 @@ def run(
             if os.path.exists(results):
                 shutil.rmtree(results)
 
-        if not os.path.exists(results):
-            os.makedirs(results)
+        os.makedirs(results, exist_ok=True)
 
     if selenium_remote_url is not None:
         os.environ["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url

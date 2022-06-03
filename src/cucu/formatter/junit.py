@@ -181,9 +181,7 @@ class CucuJUnitFormatter(Formatter):
             testsuite.append(testcase)
 
         junit_dir = CONFIG["CUCU_JUNIT_DIR"]
-
-        if not os.path.exists(junit_dir):
-            os.makedirs(junit_dir)
+        os.makedirs(junit_dir, exist_ok=True)
 
         feature_name = results["name"].replace(" ", "_")
         output_filepath = os.path.join(junit_dir, f"TESTS-{feature_name}.xml")

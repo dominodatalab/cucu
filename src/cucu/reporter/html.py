@@ -166,8 +166,7 @@ def generate(results, basepath):
 
     for feature in features:
         feature_basepath = os.path.join(basepath, feature["name"])
-        if not os.path.exists(feature_basepath):
-            os.makedirs(feature_basepath)
+        os.makedirs(feature_basepath, exist_ok=True)
 
         scenarios = feature["elements"]
         rendered_feature_html = feature_template.render(
@@ -186,9 +185,7 @@ def generate(results, basepath):
         for scenario in scenarios:
             steps = scenario["steps"]
             scenario_basepath = os.path.join(feature_basepath, scenario["name"])
-
-            if not os.path.exists(scenario_basepath):
-                os.makedirs(scenario_basepath)
+            os.makedirs(scenario_basepath, exist_ok=True)
 
             scenario_output_filepath = os.path.join(
                 scenario_basepath, "index.html"
