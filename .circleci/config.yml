@@ -140,12 +140,18 @@ jobs:
       - code_coverage_check
 
       - run:
-          name: tar up results and report
-          command: tar cvfz results.tgz results && tar cvfz report.tgz report
+          name: tar up results and reporting
+          command: |
+            tar cvfz results.tgz results
+            tar cvfz report.tgz report
+            tar cvfz junit_results.tgz junit_results
           when: always
 
       - store_artifacts:
           path: results.tgz
+
+      - store_artifacts:
+          path: junit_results.tgz
 
       - store_artifacts:
           path: report.tgz
