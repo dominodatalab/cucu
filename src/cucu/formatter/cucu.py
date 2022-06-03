@@ -45,15 +45,25 @@ class CucuFormatter(Formatter):
 
         return self._multiline_indentation
 
-    def write_tags(self, tags, indent=None):
+    def write_tags(self, tags, indent=None, for_feature=False):
+        """
+        writes the tags for a scenario or feature and takes extra care to be
+        sure to indent corectly for scenarios when `indent` is specified. We
+        also handle putting new lines in the right locations if its a scenario
+        or feature based on `for_feature` boolean flag.
+        """
         indent = indent or ""
         if tags:
             text = " @".join(tags)
-            self.stream.write(self.colorize(f"{indent}@{text}\n", "cyan"))
+            line = self.colorize(f"{indent}@{text}", "cyan")
+            if for_feature:
+                self.stream.write(f"{line}\n")
+            else:
+                self.stream.write(f"\n{line}")
 
     # -- IMPLEMENT-INTERFACE FOR: Formatter
     def feature(self, feature):
-        self.write_tags(feature.tags)
+        self.write_tags(feature.tags, for_feature=True)
         text = f'{self.colorize(feature.keyword, "magenta")}: {feature.name}\n'
         self.stream.write(text)
 
