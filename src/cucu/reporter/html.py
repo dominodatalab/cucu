@@ -78,6 +78,9 @@ def generate(results, basepath):
                 if "result" in step:
                     scenario_duration += step["result"]["duration"]
 
+                if "text" in step and not isinstance(step["text"], list):
+                    step["text"] = [step["text"]]
+
                 step_index += 1
             logs_filepath = os.path.join(scenario_filepath, "logs")
 

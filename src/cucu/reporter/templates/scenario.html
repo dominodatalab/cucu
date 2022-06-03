@@ -84,7 +84,9 @@
             <tr class="d-flex">
                 <td class="col-11" colspan="2">
                     <pre style="color: black; margin: 0">       """</pre>
-                    <pre style="color: black; margin: 0">       {{ step['text'] }}</pre>
+                    {% for line in step['text'] %}
+                        <pre style="color: black; margin: 0">       {{ line }}</pre>
+                    {% endfor %}
                     <pre style="color: black; margin: 0">       """</pre>
                 </td>
             </tr>
