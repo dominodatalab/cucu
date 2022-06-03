@@ -73,9 +73,8 @@ class CucuFormatter(Formatter):
     def scenario(self, scenario):
         self.current_scenario = scenario
 
-        self.stream.write("\n")
         indent = make_indentation(self.indent_size)
-        text = "%s%s: %s\n" % (
+        text = "\n%s%s: %s\n" % (
             indent,
             self.colorize(scenario.keyword, "magenta"),
             scenario.name,
@@ -89,6 +88,10 @@ class CucuFormatter(Formatter):
         self.insert_step(step)
 
     def insert_step(self, step, index=-1):
+        # used to determine how to better handle console output
+        step.has_substeps = False
+        step.is_substep = False
+
         if index == -1:
             self.steps.append(step)
         else:
@@ -106,7 +109,7 @@ class CucuFormatter(Formatter):
         keyword = step.keyword.rjust(5)
 
         prefix = ""
-        if getattr(step, "substep", False):
+        if step.is_substep:
             prefix = self.SUBSTEP_PREFIX
 
         text = self.colorize(f"{indent}{prefix}{keyword} {step.name}\n", "grey")
@@ -124,11 +127,11 @@ class CucuFormatter(Formatter):
         indent = make_indentation(2 * self.indent_size)
         keyword = step.keyword.rjust(5)
 
-        if not self.monochrome and not CONFIG["__CUCU_WROTE_TO_STDOUT"]:
+        if not self.monochrome and not step.has_substeps:
             self.stream.write(up(1))
 
         prefix = ""
-        if getattr(step, "substep", False):
+        if step.is_substep:
             prefix = self.SUBSTEP_PREFIX
 
         if step.status == Status.passed:
@@ -154,12 +157,7 @@ class CucuFormatter(Formatter):
         if self.monochrome:
             self.stream.write(f"{text}")
         else:
-            if CONFIG["__CUCU_WROTE_TO_STDOUT"]:
-                self.stream.write(f"{text}")
-            else:
-                self.stream.write(f"\r{text}")
-
-        CONFIG["__CUCU_WROTE_TO_STDOUT"] = False
+            self.stream.write(f"\r{text}")
 
         if step.status in (Status.passed, Status.failed):
             max_line_length = self.calculate_max_line_length()
@@ -174,10 +172,9 @@ class CucuFormatter(Formatter):
             status_text = f'{" " * status_text_padding}{status_text}'
             status_text = self.colorize(status_text, "grey")
 
+            self.stream.write(f"{status_text}\n")
             if step.error_message:
-                self.stream.write(f"{status_text}\n{step.error_message}\n")
-            else:
-                self.stream.write(f"{status_text}\n")
+                self.stream.write(f"{step.error_message}\n")
 
         if step.text:
             self.doc_string(step.text)
@@ -209,6 +206,9 @@ class CucuFormatter(Formatter):
                 padding = f"    {' '*(len('Given')-len(step.keyword))}"
                 variable_comment_line = f"{padding}# {expanded}\n"
                 self.stream.write(self.colorize(variable_comment_line, "grey"))
+                self.stream.flush()
+
+        self.previous_step = step
 
     def eof(self):
         self.stream.write("\n")
