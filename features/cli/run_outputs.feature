@@ -162,6 +162,7 @@ Feature: Run outputs
 
           Given I echo "current shell is '\{SHELL\}'" .*
           # SHELL=".*"
+      [\s\S]*
       current user is '.*'
 
             And I echo the following                 .*
@@ -169,10 +170,12 @@ Feature: Run outputs
               current user is '\{USER\}'
               \"\"\"
             # USER=".*"
+      [\s\S]*
       current working directory is '.*'
 
             And I echo "current working directory is '\{PWD\}'"  .*
             # PWD=".*"
+      [\s\S]*
       \{
         "user": ".*"
       \}
