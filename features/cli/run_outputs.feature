@@ -136,7 +136,7 @@ Feature: Run outputs
       And I should see "{STDERR}" is empty
 
   Scenario: User gets JUnit XML results file as expected
-    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/validate_junit_xml_results" and save stdout to "STDOUT", exit code to "EXIT_CODE"
+    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/validate_junit_xml_results" and save stdout to "STDOUT" and expect exit code "0"
      Then I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Echo.xml"
       And I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Echo.xml" matches the following:
       """
@@ -144,4 +144,52 @@ Feature: Run outputs
        <testcase classname="Echo" name="Echo an environment variable" status="passed" time=".*">
        </testcase>
       </testsuite>
+      """
+
+  Scenario: User gets exact expected output from various console outputs
+    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/validate_junit_xml_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      # {SHELL} and {PWD} contain slashes which we don't have a good way of
+      # escaping in the tests yet so we'll just .* to match them and for the
+      # crazy looking 4 backslashes its because the original test has 2
+      # backslashes and in order to escape each one we need another 2 so we end
+      # up with 4 backlslashes
+      And I should see "{STDOUT}" matches the following
+      """
+      Feature: Echo
+
+        Scenario: Echo an environment variable
+      [\s\S]*
+      current shell is '.*'
+      [\s\S]*
+          Given I echo "current shell is '\{SHELL\}'"       .*
+          # SHELL=".*"
+      [\s\S]*
+      current user is '.*'
+
+            And I echo the following                        .*
+              \"\"\"
+              current user is '\{USER\}'
+              \"\"\"
+            # USER=".*"
+      current working directory is '.*'
+      [\s\S]*
+            And I echo "current working directory is '\{PWD\}'" .*
+            # PWD=".*"
+      [\s\S]*
+      \{
+        "user": ".*"
+      \}
+      [\s\S]*
+            And I echo the following                       .*
+              \"\"\"
+              \\\\{
+                "user": "\{USER\}"
+              \\\\}
+              \"\"\"
+            # USER=".*"
+      [\s\S]*
+      1 feature passed, 0 failed, 0 skipped
+      1 scenario passed, 0 failed, 0 skipped
+      4 steps passed, 0 failed, 0 skipped, 0 undefined
+      [\s\S]*
       """

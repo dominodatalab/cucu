@@ -45,15 +45,25 @@ class CucuFormatter(Formatter):
 
         return self._multiline_indentation
 
-    def write_tags(self, tags, indent=None):
+    def write_tags(self, tags, indent=None, for_feature=False):
+        """
+        writes the tags for a scenario or feature and takes extra care to be
+        sure to indent corectly for scenarios when `indent` is specified. We
+        also handle putting new lines in the right locations if its a scenario
+        or feature based on `for_feature` boolean flag.
+        """
         indent = indent or ""
         if tags:
             text = " @".join(tags)
-            self.stream.write(self.colorize(f"{indent}@{text}\n", "cyan"))
+            line = self.colorize(f"{indent}@{text}", "cyan")
+            if for_feature:
+                self.stream.write(f"{line}\n")
+            else:
+                self.stream.write(f"\n{line}")
 
     # -- IMPLEMENT-INTERFACE FOR: Formatter
     def feature(self, feature):
-        self.write_tags(feature.tags)
+        self.write_tags(feature.tags, for_feature=True)
         text = f'{self.colorize(feature.keyword, "magenta")}: {feature.name}\n'
         self.stream.write(text)
 
@@ -73,9 +83,8 @@ class CucuFormatter(Formatter):
     def scenario(self, scenario):
         self.current_scenario = scenario
 
-        self.stream.write("\n")
         indent = make_indentation(self.indent_size)
-        text = "%s%s: %s\n" % (
+        text = "\n%s%s: %s\n" % (
             indent,
             self.colorize(scenario.keyword, "magenta"),
             scenario.name,
@@ -89,6 +98,10 @@ class CucuFormatter(Formatter):
         self.insert_step(step)
 
     def insert_step(self, step, index=-1):
+        # used to determine how to better handle console output
+        step.has_substeps = False
+        step.is_substep = False
+
         if index == -1:
             self.steps.append(step)
         else:
@@ -106,7 +119,7 @@ class CucuFormatter(Formatter):
         keyword = step.keyword.rjust(5)
 
         prefix = ""
-        if getattr(step, "substep", False):
+        if step.is_substep:
             prefix = self.SUBSTEP_PREFIX
 
         text = self.colorize(f"{indent}{prefix}{keyword} {step.name}\n", "grey")
@@ -124,11 +137,11 @@ class CucuFormatter(Formatter):
         indent = make_indentation(2 * self.indent_size)
         keyword = step.keyword.rjust(5)
 
-        if not self.monochrome and not CONFIG["__CUCU_WROTE_TO_STDOUT"]:
+        if not self.monochrome and not step.has_substeps:
             self.stream.write(up(1))
 
         prefix = ""
-        if getattr(step, "substep", False):
+        if step.is_substep:
             prefix = self.SUBSTEP_PREFIX
 
         if step.status == Status.passed:
@@ -154,12 +167,7 @@ class CucuFormatter(Formatter):
         if self.monochrome:
             self.stream.write(f"{text}")
         else:
-            if CONFIG["__CUCU_WROTE_TO_STDOUT"]:
-                self.stream.write(f"{text}")
-            else:
-                self.stream.write(f"\r{text}")
-
-        CONFIG["__CUCU_WROTE_TO_STDOUT"] = False
+            self.stream.write(f"\r{text}")
 
         if step.status in (Status.passed, Status.failed):
             max_line_length = self.calculate_max_line_length()
@@ -174,10 +182,9 @@ class CucuFormatter(Formatter):
             status_text = f'{" " * status_text_padding}{status_text}'
             status_text = self.colorize(status_text, "grey")
 
+            self.stream.write(f"{status_text}\n")
             if step.error_message:
-                self.stream.write(f"{status_text}\n{step.error_message}\n")
-            else:
-                self.stream.write(f"{status_text}\n")
+                self.stream.write(f"{step.error_message}\n")
 
         if step.text:
             self.doc_string(step.text)
@@ -209,6 +216,9 @@ class CucuFormatter(Formatter):
                 padding = f"    {' '*(len('Given')-len(step.keyword))}"
                 variable_comment_line = f"{padding}# {expanded}\n"
                 self.stream.write(self.colorize(variable_comment_line, "grey"))
+                self.stream.flush()
+
+        self.previous_step = step
 
     def eof(self):
         self.stream.write("\n")

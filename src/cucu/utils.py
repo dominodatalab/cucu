@@ -41,7 +41,7 @@ def run_steps(context, steps_text):
             for step in steps:
                 for formatter in context._runner.formatters:
                     step_index = formatter.steps.index(current_step)
-                    step.substep = True
+                    step.is_substep = True
                     formatter.insert_step(step, index=step_index + index)
                 index += 1
 

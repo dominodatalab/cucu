@@ -108,12 +108,13 @@ class CucuJSONFormatter(Formatter):
         return table_data
 
     def insert_step(self, step, index=-1):
+        is_substep = getattr(step, "is_substep", False)
         s = {
             "keyword": step.keyword,
             "step_type": step.step_type,
             "name": step.name,
             "location": six.text_type(step.location),
-            "substep": "substep" in step.__dict__,
+            "substep": is_substep,
         }
 
         if step.text:
