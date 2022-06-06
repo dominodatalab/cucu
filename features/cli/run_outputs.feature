@@ -158,36 +158,36 @@ Feature: Run outputs
       Feature: Echo
 
         Scenario: Echo an environment variable
+      [\s\S]*
       current shell is '.*'
-
-          Given I echo "current shell is '\{SHELL\}'" .*
+      [\s\S]*
+          Given I echo "current shell is '\{SHELL\}'"       .*
           # SHELL=".*"
       [\s\S]*
       current user is '.*'
 
-            And I echo the following                 .*
+            And I echo the following                        .*
               \"\"\"
               current user is '\{USER\}'
               \"\"\"
             # USER=".*"
-      [\s\S]*
       current working directory is '.*'
-
-            And I echo "current working directory is '\{PWD\}'"  .*
+      [\s\S]*
+            And I echo "current working directory is '\{PWD\}'" .*
             # PWD=".*"
       [\s\S]*
       \{
         "user": ".*"
       \}
-
-            And I echo the following                 .*
+      [\s\S]*
+            And I echo the following                       .*
               \"\"\"
               \\\\{
                 "user": "\{USER\}"
               \\\\}
               \"\"\"
             # USER=".*"
-
+      [\s\S]*
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
       4 steps passed, 0 failed, 0 skipped, 0 undefined
