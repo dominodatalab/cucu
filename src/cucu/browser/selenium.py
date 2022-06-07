@@ -72,7 +72,7 @@ class Selenium(Browser):
             options.add_argument(f"--window-size={width},{height}")
             options.add_argument("--disable-dev-shm-usage")
 
-            if headless:
+            if headless and selenium_remote_url is None:
                 options.add_argument("--headless")
 
             desired_capabilities = DesiredCapabilities.CHROME
@@ -121,7 +121,7 @@ class Selenium(Browser):
             desired_capabilities = DesiredCapabilities.FIREFOX
             desired_capabilities["loggingPrefs"] = {"browser": "ALL"}
 
-            if headless:
+            if headless and selenium_remote_url is None:
                 options.add_argument("--headless")
 
             if selenium_remote_url is not None:
@@ -156,7 +156,7 @@ class Selenium(Browser):
                 "prefs", {"download.default_directory": cucu_downloads_dir}
             )
 
-            if headless:
+            if headless and selenium_remote_url is None:
                 options.use_chromium = True
                 options.add_argument("--headless")
 
