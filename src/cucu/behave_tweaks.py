@@ -150,6 +150,9 @@ class CucuOutputStream:
     def isatty(self, *args, **kwargs):
         return self.stream.isatty(*args, **kwargs)
 
+    def fileno(self):
+        return self.stream.fileno()
+
     def flush(self):
         self.stream.flush()
 

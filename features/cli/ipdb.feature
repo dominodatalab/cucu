@@ -11,26 +11,7 @@ Feature: ipdb
       # XXX: temporary solution as the ipdb output contains ansi codes we can't
       #      seem to make ipdb output stop producing those.
       And I strip ansi codes from "{STDOUT}" and save to the variable "STDOUT"
-      And I should see "{STDOUT}" matches the following
+      And I should see "{STDOUT}" contains the following
       """
-      Feature: Feature with failing scenario
-
-        Scenario: Just a scenario that fails
-      [\s\S]*
-           54 def i_fail\(_\):
-      ---> 55     raise RuntimeError\("step fails on purpose"\)
-      [\s\S]*
-      ipdb>     Given I fail     #  .*
-      Traceback \(most recent call last\):
-      [\s\S]*
-      RuntimeError: step fails on purpose
-      [\s\S]*
-
-      Failing scenarios:
-        data/features/feature_with_failing_scenario.feature:3  Just a scenario that fails
-
-      0 features passed, 1 failed, 0 skipped
-      0 scenarios passed, 1 failed, 0 skipped
-      0 steps passed, 1 failed, 0 skipped, 0 undefined
-      [\s\S]*
+      ---> 55     raise RuntimeError("step fails on purpose")
       """
