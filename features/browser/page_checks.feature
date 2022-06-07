@@ -4,11 +4,12 @@ Feature: Page checks
 
   Scenario: User will get an error from the readyState page checker if the page never finishes loading
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"
      Then I expect the following step to fail with "document.readyState is in "loading""
       """
       When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/page_that_loads_forever.html"
       """
-      And I should see the previous step took more than "10" seconds
+      And I should see the previous step took more than "5" seconds
 
   Scenario: User will get an error from the broken image page checker if there are broken images
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"

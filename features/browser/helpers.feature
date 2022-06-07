@@ -10,7 +10,7 @@ Feature: Helpers
       """
       When I click the button "foo"
       """
-     When I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "3000"
+     When I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "3"
      Then I expect the following step to fail with "unable to find the button "foo""
       """
       When I wait to click the button "foo"

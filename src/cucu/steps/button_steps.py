@@ -72,3 +72,4 @@ helpers.define_thing_with_name_in_state_steps(
 helpers.define_thing_with_name_in_state_steps(
     "button", "not disabled", find_button, base_steps.is_not_disabled
 )
+helpers.define_run_steps_if_visible_with_name_steps("button", find_button)

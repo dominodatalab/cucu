@@ -23,3 +23,4 @@ def find_text(ctx, name, index=0):
 
 
 helpers.define_should_see_thing_with_name_steps("text", find_text)
+helpers.define_run_steps_if_visible_with_name_steps("text", find_text)

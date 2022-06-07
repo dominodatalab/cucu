@@ -147,7 +147,7 @@ Feature: Run outputs
       """
 
   Scenario: User gets exact expected output from various console outputs
-    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/validate_junit_xml_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+    Given I run the command "cucu run data/features/echo.feature --env SHELL=/foo/bar/zsh --env USER=that_guy --env PWD=/some/place/nice --results {CUCU_RESULTS_DIR}/validate_junit_xml_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       # {SHELL} and {PWD} contain slashes which we don't have a good way of
       # escaping in the tests yet so we'll just .* to match them and for the
       # crazy looking 4 backslashes its because the original test has 2
@@ -158,36 +158,33 @@ Feature: Run outputs
       Feature: Echo
 
         Scenario: Echo an environment variable
-      [\s\S]*
-      current shell is '.*'
-      [\s\S]*
-          Given I echo "current shell is '\{SHELL\}'"       .*
-          # SHELL=".*"
-      [\s\S]*
-      current user is '.*'
+      current shell is '/foo/bar/zsh'
 
-            And I echo the following                        .*
+          Given I echo "current shell is '\{SHELL\}'" .*
+          # SHELL="/foo/bar/zsh"
+      current user is 'that_guy'
+
+            And I echo the following .*
               \"\"\"
               current user is '\{USER\}'
               \"\"\"
-            # USER=".*"
-      current working directory is '.*'
-      [\s\S]*
+            # USER="that_guy"
+      current working directory is '/some/place/nice'
+
             And I echo "current working directory is '\{PWD\}'" .*
-            # PWD=".*"
-      [\s\S]*
+            # PWD="/some/place/nice*"
       \{
-        "user": ".*"
+        "user": "that_guy"
       \}
-      [\s\S]*
-            And I echo the following                       .*
+
+            And I echo the following .*
               \"\"\"
               \\\\{
                 "user": "\{USER\}"
               \\\\}
               \"\"\"
-            # USER=".*"
-      [\s\S]*
+            # USER="that_guy"
+
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
       4 steps passed, 0 failed, 0 skipped, 0 undefined

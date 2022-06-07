@@ -217,14 +217,21 @@ def lint(filepath):
         line_number = 0
 
         violations = []
-        in_docstring = False
+        in_docstring = {
+            '"""': False,
+            "'''": False,
+        }
+
         for line in lines:
             # maintain state of if we're inside a docstring and if we are then
             # do not apply any linting rules as its a freeform space for text
-            if line.strip() == '"""' or line.strip() == "'''":
-                in_docstring = not in_docstring
+            if line.strip() == '"""':
+                in_docstring['"""'] = not in_docstring['"""']
 
-            if not in_docstring:
+            if line.strip() == "'''":
+                in_docstring["'''"] = not in_docstring["'''"]
+
+            if not (in_docstring['"""'] or in_docstring["'''"]):
                 for violation in lint_line(
                     rules, steps, line_number, lines, feature_filepath
                 ):

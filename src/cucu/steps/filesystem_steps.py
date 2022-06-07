@@ -15,6 +15,11 @@ def create_file_with_the_following(ctx, filepath):
         output.write(bytes(ctx.text, "utf8"))
 
 
+@step('I create the directory at "{filepath}"')
+def create_directory_at(ctx, filepath):
+    os.makedirs(filepath)
+
+
 @step('I delete the file at "{filepath}"')
 def delete_file_at(ctx, filepath):
     os.remove(filepath)
