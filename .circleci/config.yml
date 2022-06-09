@@ -73,7 +73,7 @@ executors:
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1920
           SCREEN_HEIGHT: 1080
-    resource_class: large
+    resource_class: xlarge
 
   firefox-test-executor:
     docker:
@@ -84,7 +84,7 @@ executors:
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1920
           SCREEN_HEIGHT: 1080
-    resource_class: large
+    resource_class: xlarge
 
   edge-test-executor:
     docker:
@@ -95,7 +95,7 @@ executors:
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1920
           SCREEN_HEIGHT: 1080
-    resource_class: large
+    resource_class: xlarge
 
 jobs:
   pre-commit:
