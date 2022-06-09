@@ -82,3 +82,6 @@ helpers.define_thing_with_name_in_state_steps(
 helpers.define_thing_with_name_in_state_steps(
     "checkbox", "not disabled", find_checkbox, base_steps.is_not_disabled
 )
+helpers.define_run_steps_if_I_can_see_element_with_name_steps(
+    "checkbox", find_checkbox
+)

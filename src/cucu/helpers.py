@@ -1,7 +1,7 @@
 import humanize
 import inspect
 
-from cucu import retry
+from cucu import retry, run_steps
 
 
 class step(object):
@@ -333,3 +333,38 @@ def define_thing_with_name_in_state_steps(
     def wait_up_to_seconds_to_see_the_in_state(ctx, seconds, name):
         seconds = float(seconds)
         retry(should_see_thing_in_state, wait_up_to_s=seconds)(ctx, thing, name)
+
+
+def define_run_steps_if_I_can_see_element_with_name_steps(thing, find_func):
+    """
+    defines steps with with the following signatures:
+
+      I run the following steps if I can see the {thing} "{name}"
+      I run the following steps if I can not see the {thing} "{name}"
+
+    parameters:
+        thing(string):       name of the thing we're creating the steps for such
+                             as button, dialog, etc.
+        find_func(function): function that returns the element that matches the
+                             name provided and is visible
+
+                             def find_func(ctx, name):
+                                '''
+                                ctx(object):  behave context object
+                                name(string): name of the thing to find
+                                '''
+    """
+
+    @step(f'I run the following steps if I can see the {thing} "{{name}}"')
+    def run_if_visibile(ctx, name):
+        element = find_func(ctx, name)
+
+        if element is not None:
+            run_steps(ctx, ctx.text)
+
+    @step(f'I run the following steps if I can not see the {thing} "{{name}}"')
+    def run_if_not_visibile(ctx, name):
+        element = find_func(ctx, name)
+
+        if element is None:
+            run_steps(ctx, ctx.text)

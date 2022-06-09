@@ -13,6 +13,7 @@ import cucu.steps.filesystem_steps
 import cucu.steps.image_steps
 import cucu.steps.input_steps
 import cucu.steps.link_steps
+import cucu.steps.flow_control_steps
 import cucu.steps.menuitem_steps
 import cucu.steps.platform_steps
 import cucu.steps.radio_steps

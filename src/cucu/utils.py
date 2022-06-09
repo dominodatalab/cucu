@@ -13,63 +13,73 @@ from tenacity import stop_after_delay, wait_fixed
 # https://github.com/behave/behave/blob/994dbfe30e2a372182ea613333e06f069ab97d4b/behave/runner.py#L385
 # so we can have the sub steps printed in the console logs
 #
-def run_steps(context, steps_text):
+def run_steps(ctx, steps_text):
     """
     run sub steps within an existing step definition but also log their output
     so that its easy to see what is happening.
     """
 
-    # -- PREPARE: Save original context data for current step.
+    # -- PREPARE: Save original ctx data for current step.
     # Needed if step definition that called this method uses .table/.text
-    original_table = getattr(context, "table", None)
-    original_text = getattr(context, "text", None)
+    original_table = getattr(ctx, "table", None)
+    original_text = getattr(ctx, "text", None)
 
-    context.feature.parser.variant = "steps"
-    steps = context.feature.parser.parse_steps(steps_text)
+    ctx.current_step.has_substeps = True
 
-    current_step = context.current_step
-    current_step_index = context.step_index
+    ctx.feature.parser.variant = "steps"
+    steps = ctx.feature.parser.parse_steps(steps_text)
+
+    current_step = ctx.current_step
+    current_step_index = ctx.step_index
+    current_step_start_time = ctx.start_time
 
     # XXX: I want to get back to this and find a slightly better way to handle
     #      these substeps without mucking around with so much state in behave
     #      but for now this works correctly and existing tests work as expected.
     try:
-        with context._use_with_behave_mode():
+        with ctx._use_with_behave_mode():
             index = 1
 
-            context.step_index += 1
+            ctx.step_index += 1
             for step in steps:
-                for formatter in context._runner.formatters:
+                for formatter in ctx._runner.formatters:
                     step_index = formatter.steps.index(current_step)
                     step.is_substep = True
                     formatter.insert_step(step, index=step_index + index)
                 index += 1
 
-                passed = step.run(context._runner, quiet=False, capture=False)
+                passed = step.run(ctx._runner, quiet=False, capture=False)
 
                 if not passed:
                     raise RuntimeError(step.error_message)
 
-            # -- FINALLY: Restore original context data for current step.
-            context.table = original_table
-            context.text = original_text
+            # -- FINALLY: Restore original ctx data for current step.
+            ctx.table = original_table
+            ctx.text = original_text
 
     finally:
-        context.step_index = current_step_index
+        ctx.current_step = current_step
+        ctx.step_index = current_step_index
+        ctx.start_time = current_step_start_time
         # XXX: icky relationships between this and the after_step hooks in
         #      the environment.py which handles screenshots
-        context.substep_increment = len(steps)
-
-    CONFIG["CUCU_WROTE_TO_STDOUT"] = True
+        ctx.substep_increment = len(steps)
 
     return True
 
 
-def retry(
-    func,
-    wait_up_to_s=float(CONFIG["CUCU_STEP_WAIT_TIMEOUT_S"]),
-    retry_after_s=float(CONFIG["CUCU_STEP_RETRY_AFTER_S"]),
-):
+def retry(func, wait_up_to_s=None, retry_after_s=None):
+    """
+    utility retry function that can retry the provided `func` for the maximum
+    amount of seconds specified by `wait_up_to_s` and wait the number of seconds
+    specified in `retry_after_s`
+    """
+    if wait_up_to_s is None:
+        wait_up_to_s = float(CONFIG["CUCU_STEP_WAIT_TIMEOUT_S"])
+
+    if retry_after_s is None:
+        retry_after_s = float(CONFIG["CUCU_STEP_RETRY_AFTER_S"])
+
     @retrying(
         stop=stop_after_delay(wait_up_to_s), wait=wait_fixed(retry_after_s)
     )

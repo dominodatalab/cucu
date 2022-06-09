@@ -76,5 +76,5 @@ def search_for_on_google(context, query):
 
 
 @step('I use a step with "{nth:nth}" usage')
-def uses_nth_g(ctx, nth):
+def uses_nth_step(ctx, nth):
     print("just a step that nth behave argument type")

@@ -109,6 +109,9 @@ helpers.define_thing_with_name_in_state_steps(
 helpers.define_thing_with_name_in_state_steps(
     "input", "not disabled", find_input, base_steps.is_not_disabled
 )
+helpers.define_run_steps_if_I_can_see_element_with_name_steps(
+    "input", find_input
+)
 
 
 @step('I write "{value}" into the input "{name}"')
@@ -163,6 +166,11 @@ def wait_up_to_clear_input(ctx, seconds, name):
     retry(find_n_clear, wait_up_to_s=float(seconds))(ctx, name)
 
 
+@step('I should see the input "{name}" is empty')
+def should_see_the_input_is_empty(ctx, name):
+    assert_input_value(ctx, name, None)
+
+
 @step('I should see "{value}" in the input "{name}"')
 def should_see_the_input_with_value(ctx, value, name):
     assert_input_value(ctx, name, value)
@@ -174,12 +182,12 @@ def wait_to_see_the_input_with_value(ctx, value, name):
 
 
 @step('I should see the following in the input "{name}"')
-def should_see_the_input_with_value(ctx, name):
+def should_see_the_following_input_with_value(ctx, name):
     assert_input_value(ctx, name, ctx.text)
 
 
 @step('I wait to see the following in the input "{name}"')
-def wait_to_see_the_input_with_value(ctx, name):
+def wait_to_see_the_following_input_with_value(ctx, name):
     retry(assert_input_value)(ctx, name, ctx.text)
 
 
@@ -205,7 +213,7 @@ def wait_to_see_the_nth_input(ctx, nth, name):
 
 @step('I should see "{value}" in the "{nth:nth}" input "{name}"')
 def should_see_the_nth_input_with_value(ctx, value, nth, name):
-    find_input(ctx, name, value, index=nth)
+    assert_input_value(ctx, name, value, index=nth)
 
 
 @step('I wait to see the value "{value}" in the "{nth:nth}" input "{name}"')
