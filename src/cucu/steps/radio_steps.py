@@ -126,7 +126,9 @@ helpers.define_thing_with_name_in_state_steps(
     find_radio_button,
     base_steps.is_not_disabled,
 )
-helpers.define_run_steps_if_visible_with_name_steps("radio", find_radio_button)
+helpers.define_run_steps_if_I_can_see_element_with_name_steps(
+    "radio", find_radio_button
+)
 
 
 @step('I select the radio button "{name}" if it is not selected')

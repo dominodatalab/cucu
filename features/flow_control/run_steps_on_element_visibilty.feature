@@ -5,7 +5,7 @@ Feature: Run steps on element visibility
   Scenario: User can run steps if a button is visible
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
-     When I run the following steps if the button "button with child" is visible
+     When I run the following steps if I can see the button "button with child"
      """
      Then I click the button "button with child"
      """
@@ -14,7 +14,7 @@ Feature: Run steps on element visibility
   Scenario: User won't run steps if the button is not visible
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
-     When I run the following steps if the button "nonexistent button" is visible
+     When I run the following steps if I can see the button "nonexistent button"
      """
      Then I click the button "button with child"
      """
@@ -23,7 +23,7 @@ Feature: Run steps on element visibility
   Scenario: User can run steps if a button is not visible
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
-     When I run the following steps if the button "nonexistent button" is not visible
+     When I run the following steps if I can not see the button "nonexistent button"
      """
      Then I click the button "button with child"
      """
@@ -32,7 +32,7 @@ Feature: Run steps on element visibility
   Scenario: User can won't run steps if the button is visible
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
-     When I run the following steps if the button "button with child" is not visible
+     When I run the following steps if I can not see the button "button with child"
      """
      Then I click the button "button with child"
      """
