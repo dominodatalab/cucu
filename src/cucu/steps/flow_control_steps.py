@@ -52,7 +52,7 @@ def wait_for_steps_to_fail(ctx, steps, timeout=None):
         except:
             return
 
-        raise Exception("underlying steps did not fail")
+        raise RuntimeError("underlying steps did not fail")
 
     retry(steps_should_fail, wait_up_to_s=timeout)()
 
