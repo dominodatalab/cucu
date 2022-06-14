@@ -184,9 +184,18 @@ Feature: Run outputs
               \\\\}
               \"\"\"
             # USER="that_guy"
+      .* INFO hello that_guy
+            And I log "hello \{USER\}" at level "info" .*
+            # USER="that_guy"
+      .* INFO good bye that_guy
+            And I log the following at level "info" .*
+              \"\"\"
+              good bye \{USER\}
+              \"\"\"
+            # USER="that_guy"
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
-      4 steps passed, 0 failed, 0 skipped, 0 undefined
+      6 steps passed, 0 failed, 0 skipped, 0 undefined
       [\s\S]*
       """

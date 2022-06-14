@@ -3,8 +3,6 @@ import re
 import socket
 import yaml
 
-from cucu import logger
-
 
 class Config(dict):
 
@@ -171,7 +169,7 @@ class Config(dict):
 
                     if value is None:
                         value = ""
-                        logger.warn(f'variable "{match}" is undefined')
+                        print(f'WARNING variable "{match}" is undefined')
 
                     string = string.replace("{" + match + "}", str(value))
 
