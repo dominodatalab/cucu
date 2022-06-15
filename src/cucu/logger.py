@@ -1,6 +1,7 @@
 import logging
 import sys
 
+from cucu.config import CONFIG
 from functools import wraps
 
 
@@ -14,6 +15,9 @@ def init_logging(logging_level):
     handler.setLevel(logging_level)
 
     logging.getLogger().addHandler(handler)
+    # set the top level logger to DEBUG while the console stream handler is
+    # actually set to whatever you passed in using --logging-level which is
+    # INFO by default
     logging.getLogger().setLevel(logging.DEBUG)
 
     logging.debug("logger initialized")
@@ -44,23 +48,43 @@ def init_debug_logger(output_file):
 
 @wraps(logging.debug)
 def debug(*args, **kwargs):
-    if logging.getLogger("cucu").getEffectiveLevel() <= logging.DEBUG:
-        logging.getLogger("cucu").debug(*args, **kwargs)
+    console_handler = logging.getLogger().handlers[0]
+    logging_level = console_handler.level
+
+    if logging_level <= logging.DEBUG:
+        CONFIG["__CUCU_WROTE_TO_OUTPUT"] = True
+
+    logging.getLogger().debug(*args, **kwargs)
 
 
 @wraps(logging.info)
 def info(*args, **kwargs):
-    if logging.getLogger("cucu").getEffectiveLevel() <= logging.INFO:
-        logging.getLogger("cucu").info(*args, **kwargs)
+    console_handler = logging.getLogger().handlers[0]
+    logging_level = console_handler.level
+
+    if logging_level <= logging.INFO:
+        CONFIG["__CUCU_WROTE_TO_OUTPUT"] = True
+
+    logging.info(*args, **kwargs)
 
 
 @wraps(logging.warn)
 def warn(*args, **kwargs):
-    if logging.getLogger("cucu").getEffectiveLevel() <= logging.WARN:
-        logging.getLogger("cucu").warning(*args, **kwargs)
+    console_handler = logging.getLogger().handlers[0]
+    logging_level = console_handler.level
+
+    if logging_level <= logging.WARN:
+        CONFIG["__CUCU_WROTE_TO_OUTPUT"] = True
+
+    logging.getLogger().warning(*args, **kwargs)
 
 
 @wraps(logging.error)
 def error(*args, **kwargs):
-    if logging.getLogger("cucu").getEffectiveLevel() <= logging.ERROR:
-        logging.getLogger("cucu").error(*args, **kwargs)
+    console_handler = logging.getLogger().handlers[0]
+    logging_level = console_handler.level
+
+    if logging_level <= logging.ERROR:
+        CONFIG["__CUCU_WROTE_TO_OUTPUT"] = True
+
+    logging.getLogger().error(*args, **kwargs)

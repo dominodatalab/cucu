@@ -137,7 +137,11 @@ class CucuFormatter(Formatter):
         indent = make_indentation(2 * self.indent_size)
         keyword = step.keyword.rjust(5)
 
-        if not self.monochrome and not step.has_substeps:
+        if not (
+            self.monochrome
+            or step.has_substeps
+            or CONFIG["__CUCU_WROTE_TO_OUTPUT"]
+        ):
             self.stream.write(up(1))
 
         prefix = ""
@@ -219,6 +223,7 @@ class CucuFormatter(Formatter):
                 self.stream.flush()
 
         self.previous_step = step
+        CONFIG["__CUCU_WROTE_TO_OUTPUT"] = False
 
     def eof(self):
         self.stream.write("\n")

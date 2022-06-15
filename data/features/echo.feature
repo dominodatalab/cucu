@@ -13,3 +13,8 @@ Feature: Echo
         "user": "{USER}"
       \}
       """
+      And I log "hello {USER}" at level "info"
+      And I log the following at level "info"
+      """
+      good bye {USER}
+      """

@@ -367,6 +367,7 @@ def lint(filepath, fix):
     """
     lint feature files
     """
+    logger.init_logging("INFO")
     filepaths = list(filepath)
 
     if filepaths == []:
