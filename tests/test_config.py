@@ -1,3 +1,4 @@
+import cucu
 import pytest
 import tempfile
 
@@ -75,3 +76,11 @@ def test_config_resolves_wont_get_stuck_in_infinite_loop():
         RuntimeError, match="infinite replacement loop detected"
     ):
         assert CONFIG.resolve("{FIZZ}") == "boom"
+
+
+def test_config_custom_variable_resolution():
+    cucu.register_custom_variable_handling("FOO_.*", lambda x: "foo")
+    CONFIG["FOO_BAR"] = "wassup"
+    # if the custom resolution takes precedence then we'll never see the
+    # "wassup" value
+    assert CONFIG.resolve("{FOO_BAR}") == "foo"

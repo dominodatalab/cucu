@@ -84,3 +84,21 @@ def register_page_check_hook(name, hook_func):
                              `cucu.browser.Browser` instance
     """
     CONFIG["__CUCU_PAGE_CHECK_HOOKS"][name] = hook_func
+
+
+def register_custom_variable_handling(regex, lookup):
+    """
+    register a regex to match variable names on and allow the lookup
+    function provided to do the handling of the resolution of the variable
+    name.
+
+    parameters:
+        regex(string): regular expression to match on any config variable
+                       name when doing lookups
+        lookup(func): a function that accepts a variable name to return its
+                      value at runtime.
+
+                      def lookup(name):
+                        return [value of the variable at runtime]
+    """
+    CONFIG.register_custom_variable_handling(regex, lookup)
