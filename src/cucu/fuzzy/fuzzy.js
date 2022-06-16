@@ -121,6 +121,14 @@
                 results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).parents(thing).toArray();
                 if (cucu.debug) { console.log('<thing><*>...name...</*></thing>', results); }
                 elements = elements.concat(results);
+
+                // <thing><* attribute="name"></*></thing>
+                for(var aIndex=0; aIndex < attributes.length; aIndex++) {
+                    var attribute_name = attributes[aIndex];
+                    results = jQuery('*:vis[' + attribute_name + '="' + name + '"]', document.body).parents(thing).toArray();
+                    if (cucu.debug) { console.log('<thing><* attibute="name"></*></thing>', results); }
+                    elements = elements.concat(results);
+                }
             }
 
             /*

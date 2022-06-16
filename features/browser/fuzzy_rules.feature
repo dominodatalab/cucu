@@ -10,6 +10,8 @@ Feature: Fuzzy rules
      Then I should see "button with inner text" in the input "value:"
      When I click the button "button with aria-label"
      Then I should see "button with aria-label" in the input "value:"
+     When I click the button "button with child that has aria-label"
+     Then I should see "button with child that has aria-label" in the input "value:"
      When I click the button "button with title"
      Then I should see "button with title" in the input "value:"
      When I click the button "button with placeholder"
