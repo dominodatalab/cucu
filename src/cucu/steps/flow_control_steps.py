@@ -1,6 +1,7 @@
 import os
+import time
 
-from cucu import retry, run_steps, step
+from cucu import logger, retry, run_steps, step
 from cucu.config import CONFIG
 from cucu.cli.run import behave
 
@@ -97,3 +98,27 @@ def run_steps_if_file_does_not_exist(ctx, filepath):
 def run_steps_if_file_exists(ctx, filepath):
     if os.path.exists(filepath):
         run_steps(ctx, ctx.text)
+
+
+@step('I run the following timed steps as "{name}"')
+def run_and_measure_the_following_steps(ctx, name):
+    start = time.time()
+    run_steps(ctx, ctx.text)
+    duration = round(time.time() - start, 3)
+    logger.info(f'"{name}" timer took {duration}s')
+
+
+@step('I start the timer "{name}"')
+def start_the_timer(ctx, name):
+    ctx.step_timers[name] = time.time()
+
+
+@step('I stop the timer "{name}"')
+def stop_the_timer(ctx, name):
+    if name not in ctx.step_timers:
+        raise RuntimeError(f'no previously started timer with name "{name}"')
+    start = ctx.step_timers[name]
+    del ctx.step_timers[name]
+
+    duration = round(time.time() - start, 3)
+    logger.info(f'"{name}" timer took {duration}s')

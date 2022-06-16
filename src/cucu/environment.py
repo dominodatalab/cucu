@@ -65,6 +65,9 @@ def before_scenario(ctx, scenario):
     ctx.browsers = []
     ctx.browser = None
 
+    # reset the step timer dictionary
+    ctx.step_timers = {}
+
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         ctx.scenario_dir = os.path.join(ctx.feature_dir, scenario.name)
         CONFIG["SCENARIO_RESULTS_DIR"] = ctx.scenario_dir
@@ -102,6 +105,9 @@ def before_scenario(ctx, scenario):
 
 
 def after_scenario(ctx, scenario):
+    for timer_name in ctx.step_timers:
+        logger.warn(f'timer "{timer_name}" was never stopped/recorded')
+
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
 
