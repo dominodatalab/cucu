@@ -13,6 +13,7 @@ class Config(dict):
         self.update(**kwargs)
         self.resolving = False
         self.defined_variables = {}
+        self.variable_lookups = {}
 
     def define(self, name, description, default=None):
         """
@@ -164,14 +165,20 @@ class Config(dict):
 
                 previouses.append(string)
 
-                for match in Config.__VARIABLE_REGEX.findall(string):
-                    value = self.get(match)
+                for var_name in Config.__VARIABLE_REGEX.findall(string):
+                    lookup_func = self.get
+
+                    for regex, lookup in self.variable_lookups.items():
+                        if regex.match(var_name):
+                            lookup_func = lookup
+
+                    value = lookup_func(var_name)
 
                     if value is None:
                         value = ""
-                        print(f'WARNING variable "{match}" is undefined')
+                        print(f'WARNING variable "{var_name}" is undefined')
 
-                    string = string.replace("{" + match + "}", str(value))
+                    string = string.replace("{" + var_name + "}", str(value))
 
             # we are only going to allow escaping of { and " characters for the
             # time being as they're part of the language:
@@ -201,6 +208,23 @@ class Config(dict):
         """
         self.clear()
         self.update(**self.snapshot_data)
+
+    def register_custom_variable_handling(self, regex, lookup):
+        """
+        register a regex to match variable names on and allow the lookup
+        function provided to do the handling of the resolution of the variable
+        name.
+
+        parameters:
+            regex(string): regular expression to match on any config variable
+                           name when doing lookups
+            lookup(func): a function that accepts a variable name to return its
+                          value at runtime.
+
+                          def lookup(name):
+                            return [value of the variable at runtime]
+        """
+        self.variable_lookups[re.compile(regex)] = lookup
 
 
 # global config object
