@@ -1,22 +1,30 @@
 <html>
   <head>
     <title>Inputs!</title>
+    <script>
+    function update(value) { document.querySelector("#input").value = value; }
+    </script>
   </head>
   <body>
-    <label>input type=date</label><input type="date"></input><br/>
-    <label>input type=datetime-local</label><input type="datetime-local"></input><br/>
-    <label>input type=email</label><input type="email"></input><br/>
-    <label>input type=month</label><input type="month"></input><br/>
-    <label>input type=number</label><input type="number"></input><br/>
-    <label>input type=password</label><input type="password"></input><br/>
-    <label>input type=search</label><input type="search"></input><br/>
-    <label>input type=tel</label><input type="tel"></input><br/>
-    <label>input type=text</label><input type="text"></input><br/>
-    <label>input type=time</label><input type="time"></input><br/>
-    <label>input type=url</label><input  type="url"></input><br/>
-    <label>input type=week</label><input type="week"></input><br/>
-    <p for="input-for">input with label for</p><input id="input-for" type="text"></input><br/>
-    <label>textarea</label><textarea></textarea><br/>
+    <label>last touched input</label><input id="input" type="text"></input>
+    </br>
+    </br>
+
+    <label>input type=date</label>              <input onkeypress="update('input type=date');" type="date"></input><br/>
+    <label>input type=datetime-local</label>    <input onkeypress="update('input type=datetime-local');" type="datetime-local"></input><br/>
+    <label>input type=email</label>             <input onkeypress="update('input type=email');" type="email"></input><br/>
+    <label>input type=month</label>             <input onkeypress="update('input type=month');" type="month"></input><br/>
+    <label>input type=number</label>            <input onkeypress="update('input type=number');" type="number"></input><br/>
+    <label>input type=password</label>          <input onkeypress="update('input type=password');" type="password"></input><br/>
+    <label>input type=search</label>            <input onkeypress="update('input type=search');" type="search"></input><br/>
+    <label>input type=tel</label>               <input onkeypress="update('input type=tel');" type="tel"></input><br/>
+    <label>input type=text</label>              <input onkeypress="update('input type=text');" type="text"></input><br/>
+    <label>input type=time</label>              <input onkeypress="update('input type=time');" type="time"></input><br/>
+    <label>input type=url</label>               <input onkeypress="update('input type=url');" type="url"></input><br/>
+    <label>input type=week</label>              <input onkeypress="update('input type=week');" type="week"></input><br/>
+    <p for="input-for">input with label for</p> <input onkeypress="update('input with label for');" id="input-for" type="text"></input><br/>
+    <label>textarea with label</label>          <textarea onkeypress="update('textarea with label');"></textarea><br/>
+    <p for="following-input">following input to a textarea</p><input onkeypress="update('following input to a textarea');" id="following-input" type="text"></input><br/>
 
     <!-- load the utility library that can be used to delay the page loading -->
     <script src="js/util.js"></script>

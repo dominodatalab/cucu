@@ -33,7 +33,10 @@ def is_checked(checkbox):
     """
     internal method to check a checkbox is checked
     """
-    return checkbox.get_attribute("checked")
+    return (
+        checkbox.get_attribute("checked")
+        or checkbox.get_attribute("aria-checked") == "true"
+    )
 
 
 def is_not_checked(checkbox):

@@ -121,6 +121,14 @@
                 results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).parents(thing).toArray();
                 if (cucu.debug) { console.log('<thing><*>...name...</*></thing>', results); }
                 elements = elements.concat(results);
+
+                // <thing><* attribute="name"></*></thing>
+                for(var aIndex=0; aIndex < attributes.length; aIndex++) {
+                    var attribute_name = attributes[aIndex];
+                    results = jQuery('*:vis[' + attribute_name + '="' + name + '"]', document.body).parents(thing).toArray();
+                    if (cucu.debug) { console.log('<thing><* attibute="name"></*></thing>', results); }
+                    elements = elements.concat(results);
+                }
             }
 
             /*
@@ -137,9 +145,7 @@
                 elements = elements.concat(results);
             }
 
-            /*
-             * element labeled by previous sibling
-             */
+            // element labeled with direct previous sibling
             if (direction === LEFT_TO_RIGHT) {
                 for(var tIndex = 0; tIndex < things.length; tIndex++) {
                     var thing = things[tIndex];
@@ -148,6 +154,29 @@
                     results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).next(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<*>name</*><thing/>', results); }
                     elements = elements.concat(results);
+                }
+            }
+
+            // element labeled with direct next sibling
+            if (direction === RIGHT_TO_LEFT) {
+                for(var tIndex = 0; tIndex < things.length; tIndex++) {
+                    var thing = things[tIndex];
+
+                    // <thing/><*>name</*>
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prev(thing).toArray();
+                    if (cucu.debug) { console.log('<thing/><*>name</*>', results); }
+                    elements = elements.concat(results);
+                }
+            }
+        }
+
+        for(var mIndex=0; mIndex < matchers.length; mIndex++) {
+            var matcher = matchers[mIndex];
+
+            // element labeled with any previous sibling
+            if (direction === LEFT_TO_RIGHT) {
+                for(var tIndex = 0; tIndex < things.length; tIndex++) {
+                    var thing = things[tIndex];
 
                     // <*>name</*>...<thing>...
                     results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).nextAll(thing + ':vis').toArray();
@@ -163,15 +192,10 @@
                 }
             }
 
-            // element labeled with next sibling
+            // element labeled with any next sibling
             if (direction === RIGHT_TO_LEFT) {
                 for(var tIndex = 0; tIndex < things.length; tIndex++) {
                     var thing = things[tIndex];
-
-                    // <thing/> <*>name</*>
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prev(thing).toArray();
-                    if (cucu.debug) { console.log('<thing/><*>name</*>', results); }
-                    elements = elements.concat(results);
 
                     // next siblings: <thing>...<*>name</*>...
                     results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prevAll(thing).toArray();

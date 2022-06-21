@@ -72,6 +72,15 @@
   </style>
   <script>
   function update(value) { document.querySelector("#input").value = value; }
+  function flip(id) {
+      var checkbox = document.querySelector("#" + id);
+      var state = checkbox.getAttribute("aria-checked");
+      if (state == "true") {
+        checkbox.setAttribute("aria-checked", "false");
+      } else {
+        checkbox.setAttribute("aria-checked", "true");
+      }
+  }
   </script>
   </head>
   <body>
@@ -83,9 +92,12 @@
     <br/>
     <label><input onclick="update('checkbox wrapped with label')" type="checkbox"></input>checkbox wrapped with label</label>
     <br/>
-    <input onclick="update('checkbox with role=checkbox')" type="checkbox">
-    <span role="checkbox" class="checkmark"></span>
-    <label class="container">checkbox with role=checkbox</label>
+
+    <label class="container">
+        <input type="checkbox">
+        <span id="aria-checkbox" onclick="update('checkbox with role=checkbox'); flip('aria-checkbox');" role="checkbox" class="checkmark" aria-checked="false"></span>
+        <div>checkbox with role=checkbox</div>
+    </label>
 
     <!-- load the utility library that can be used to delay the page loading -->
     <script src="js/util.js"></script>
