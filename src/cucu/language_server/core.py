@@ -27,8 +27,9 @@ def find_completions(step_fragment, steps_cache=None):
         an Array tuples of step name and locations.
     """
     items = []
+
     if steps_cache is None:
-        steps_cache = load_cucu_steps()
+        steps_cache, _ = load_cucu_steps()
 
     # first pass try to find steps that start with fragment provided
     for step in steps_cache.keys():
@@ -59,7 +60,7 @@ def find_completions(step_fragment, steps_cache=None):
 
 def start(port=None):
     server = LanguageServer()
-    steps_cache = load_cucu_steps()
+    steps_cache, _ = load_cucu_steps()
     logging.basicConfig(filename="pygls.log", filemode="w", level=logging.DEBUG)
 
     @server.feature(COMPLETION, CompletionOptions(trigger_characters=[","]))
