@@ -124,8 +124,13 @@ def hide_secrets(line):
         if secret is not None:
             value = CONFIG[secret]
             if value is not None:
-                line = line.replace(value, "*" * len(value))
+                replacement = "*" * len(value)
 
+                if isinstance(line, bytes):
+                    value = bytes(value, "utf8")
+                    replacement = bytes(replacement, "utf8")
+
+                line = line.replace(value, replacement)
     return line
 
 
@@ -133,6 +138,11 @@ class CucuOutputStream:
     """
     encapsulates a lot of the logic to handle capturing step by step console
     logging but also redirecting logging at runtime to another stream
+
+
+    FYI: in order to print to the screen you must use directly the sys.stdout object
+         and write to it here as doing something like `print(...)` will result
+         in an infinite recursive loop and break
     """
 
     def __init__(self, stream, other_stream=None):
