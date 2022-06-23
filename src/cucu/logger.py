@@ -36,7 +36,7 @@ def init_debug_logger(output_file):
     # assume that there's only 2 loggers the first one is the console one and
     # the second one if present is a previously set debug logger for the
     # previously executed scenario
-    if len(logging.getLogger().handlers) != 1:
+    if len(logging.getLogger().handlers) > 1:
         logging.getLogger().removeHandler(logging.getLogger().handlers[1])
 
     formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
