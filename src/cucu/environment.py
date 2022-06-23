@@ -39,6 +39,7 @@ def escape_filename(string):
 
 def before_all(ctx):
     ctx.substep_increment = 0
+    ctx.run_steps_in_use = False
     CONFIG.snapshot()
 
 

@@ -37,9 +37,15 @@ def run_steps(ctx, steps_text):
     current_step = ctx.current_step
     current_step_start_time = ctx.start_time
 
+    if ctx.run_steps_in_use:
+        raise RuntimeError(
+            "it is currently unsupported to run nested flow controls steps"
+        )
+
     # XXX: I want to get back to this and find a slightly better way to handle
     #      these substeps without mucking around with so much state in behave
     #      but for now this works correctly and existing tests work as expected.
+    ctx.run_steps_in_use = True
     try:
         with ctx._use_with_behave_mode():
             index = 0
@@ -61,6 +67,7 @@ def run_steps(ctx, steps_text):
     finally:
         ctx.current_step = current_step
         ctx.start_time = current_step_start_time
+        ctx.run_steps_in_use = False
 
     return True
 
