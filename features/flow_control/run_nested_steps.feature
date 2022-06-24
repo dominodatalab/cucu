@@ -2,7 +2,7 @@ Feature: Run nested steps
   As a developer I want the test writers to be able to measure the execution
   time for a given set of steps.
 
-  Scenario: User gets measurement step output in the logs when measuring following steps
+  Scenario: User gets an appropriate error when attempting to use nested run steps calls
     Given I create a file at "{CUCU_RESULTS_DIR}/nested_run_steps/environment.py" with the following:
       """
       from cucu.environment import *
