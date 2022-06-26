@@ -24,13 +24,17 @@ def run_steps(ctx, steps_text):
     original_table = getattr(ctx, "table", None)
     original_text = getattr(ctx, "text", None)
 
+    # first time a given step calls substeps we want to move the step_index
+    # so it starts the followings steps the right point.
+    if not ctx.current_step.has_substeps:
+        ctx.step_index += 1
+
     ctx.current_step.has_substeps = True
 
     ctx.feature.parser.variant = "steps"
     steps = ctx.feature.parser.parse_steps(steps_text)
 
     current_step = ctx.current_step
-    current_step_index = ctx.step_index
     current_step_start_time = ctx.start_time
 
     # XXX: I want to get back to this and find a slightly better way to handle
@@ -38,15 +42,10 @@ def run_steps(ctx, steps_text):
     #      but for now this works correctly and existing tests work as expected.
     try:
         with ctx._use_with_behave_mode():
-            index = 1
-
-            ctx.step_index += 1
             for step in steps:
                 for formatter in ctx._runner.formatters:
-                    step_index = formatter.steps.index(current_step)
                     step.is_substep = True
-                    formatter.insert_step(step, index=step_index + index)
-                index += 1
+                    formatter.insert_step(step, index=ctx.step_index)
 
                 passed = step.run(ctx._runner, quiet=False, capture=False)
 
@@ -56,14 +55,9 @@ def run_steps(ctx, steps_text):
             # -- FINALLY: Restore original ctx data for current step.
             ctx.table = original_table
             ctx.text = original_text
-
     finally:
         ctx.current_step = current_step
-        ctx.step_index = current_step_index
         ctx.start_time = current_step_start_time
-        # XXX: icky relationships between this and the after_step hooks in
-        #      the environment.py which handles screenshots
-        ctx.substep_increment = len(steps)
 
     return True
 

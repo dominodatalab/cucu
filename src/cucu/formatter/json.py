@@ -5,9 +5,9 @@
 #
 from __future__ import absolute_import
 
-import base64
 import json
 import six
+import uuid
 
 from behave.formatter.base import Formatter
 from behave.model_core import Status
@@ -34,14 +34,12 @@ class CucuJSONFormatter(Formatter):
         self.current_feature = None
         self.current_feature_data = None
         self.current_scenario = None
-        self._step_index = 0
         self.steps = []
 
     def reset(self):
         self.current_feature = None
         self.current_feature_data = None
         self.current_scenario = None
-        self._step_index = 0
 
     # -- FORMATTER API:
     def uri(self, uri):
@@ -73,7 +71,6 @@ class CucuJSONFormatter(Formatter):
         )
         if background.name:
             element["name"] = background.name
-        self._step_index = 0
 
         # -- ADD BACKGROUND STEPS: Support *.feature file regeneration.
         for step_ in background.steps:
@@ -97,7 +94,6 @@ class CucuJSONFormatter(Formatter):
         self.steps = []
         if scenario.description:
             element["description"] = scenario.description
-        self._step_index = 0
 
     @classmethod
     def make_table(cls, table):
@@ -108,8 +104,10 @@ class CucuJSONFormatter(Formatter):
         return table_data
 
     def insert_step(self, step, index=-1):
+        step.unique_id = uuid.uuid1()
         is_substep = getattr(step, "is_substep", False)
-        s = {
+
+        step_details = {
             "keyword": step.keyword,
             "step_type": step.step_type,
             "name": step.name,
@@ -121,48 +119,24 @@ class CucuJSONFormatter(Formatter):
             text = step.text
             if self.split_text_into_lines and "\n" in text:
                 text = text.splitlines()
-            s["text"] = text
+            step_details["text"] = text
         if step.table:
-            s["table"] = self.make_table(step.table)
+            step_details["table"] = self.make_table(step.table)
         element = self.current_feature_element
 
         if index == -1:
             self.steps.append(step)
-            element["steps"].append(s)
+            element["steps"].append(step_details)
         else:
             self.steps.insert(index, step)
-            element["steps"].insert(index, s)
+            element["steps"].insert(index, step_details)
 
     def step(self, step):
         self.insert_step(step, index=-1)
 
     def match(self, match):
-        args = []
-        for argument in match.arguments:
-            argument_value = argument.value
-            if not isinstance(argument_value, self.json_scalar_types):
-                # -- OOPS: Avoid invalid JSON format w/ custom types.
-                # Use raw string (original) instead.
-                argument_value = argument.original
-            assert isinstance(argument_value, self.json_scalar_types)
-            arg = {
-                "value": argument_value,
-            }
-            if argument.name:
-                arg["name"] = argument.name
-            if argument.original != argument_value:
-                # -- REDUNDANT DATA COMPRESSION: Suppress for strings.
-                arg["original"] = argument.original
-            args.append(arg)
-
-        match_data = {
-            "location": six.text_type(match.location) or "",
-            "arguments": args,
-        }
-        if match.location:
-            # -- NOTE: match.location=None occurs for undefined steps.
-            steps = self.current_feature_element["steps"]
-            steps[self._step_index]["match"] = match_data
+        # nothing to do, but we need to implement the method
+        pass
 
     def result(self, step):
         steps = self.current_feature_element["steps"]
@@ -176,7 +150,13 @@ class CucuJSONFormatter(Formatter):
         else:
             stderr = ""
 
-        steps[self._step_index]["result"] = {
+        step_index = 0
+        for other_step in self.steps:
+            if other_step.unique_id == step.unique_id:
+                break
+            step_index += 1
+
+        steps[step_index]["result"] = {
             "stdout": stdout,
             "stderr": stderr,
             "status": step.status.name,
@@ -187,22 +167,12 @@ class CucuJSONFormatter(Formatter):
             error_message = step.error_message
             if self.split_text_into_lines and "\n" in error_message:
                 error_message = error_message.splitlines()
-            result_element = steps[self._step_index]["result"]
+            result_element = steps[step_index]["result"]
             result_element["error_message"] = error_message
-        self._step_index += 1
 
     def embedding(self, mime_type, data):
-        step = self.current_feature_element["steps"][self._step_index]
-        if "embeddings" not in step:
-            step["embeddings"] = []
-        step["embeddings"].append(
-            {
-                "mime_type": mime_type,
-                "data": base64.b64encode(data).decode(
-                    self.stream.encoding or "utf-8"
-                ),
-            }
-        )
+        # nothing to do, but we need to implement the method
+        pass
 
     def eof(self):
         """

@@ -38,7 +38,6 @@ def escape_filename(string):
 
 
 def before_all(ctx):
-    ctx.substep_increment = 0
     CONFIG.snapshot()
 
 
@@ -149,6 +148,7 @@ def before_step(ctx, step):
     sys.stderr.captured()
 
     ctx.current_step = step
+    ctx.current_step.has_substeps = False
     ctx.start_time = time.monotonic()
 
     # run before all step hooks
@@ -163,7 +163,10 @@ def after_step(ctx, step):
     ctx.end_time = time.monotonic()
     ctx.previous_step_duration = ctx.end_time - ctx.start_time
 
-    if ctx.browser is not None and not ctx.substep_increment:
+    # we only take screenshots of steps where there's a browser currently open
+    # and this step has no substeps as in the reporting the substeps that
+    # may actually do something on the browser take their own screenshots
+    if ctx.browser is not None and ctx.current_step.has_substeps is False:
         step_name = escape_filename(step.name)
         filepath = os.path.join(
             ctx.scenario_dir, f"{ctx.step_index} - {step_name}.png"
@@ -174,11 +177,10 @@ def after_step(ctx, step):
         if CONFIG["CUCU_MONITOR_PNG"] is not None:
             shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
 
-    if ctx.substep_increment != 0:
-        ctx.step_index += ctx.substep_increment
-        ctx.substep_increment = 0
-
-    ctx.step_index += 1
+    # if the step has substeps from using `run_steps` then we already moved
+    # the step index in the run_steps method and shouldn't do it here
+    if not step.has_substeps:
+        ctx.step_index += 1
 
     if CONFIG.bool("CUCU_IPDB_ON_FAILURE") and step.status == "failed":
         ctx._runner.stop_capture()
