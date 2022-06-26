@@ -135,6 +135,7 @@ class CucuJSONFormatter(Formatter):
         self.insert_step(step, index=-1)
 
     def match(self, match):
+        # nothing to do, but we need to implement the method
         pass
 
     def result(self, step):
@@ -170,6 +171,7 @@ class CucuJSONFormatter(Formatter):
             result_element["error_message"] = error_message
 
     def embedding(self, mime_type, data):
+        # nothing to do, but we need to implement the method
         pass
 
     def eof(self):
