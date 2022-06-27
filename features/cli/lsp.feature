@@ -2,7 +2,7 @@ Feature: Lsp
   As a developer I want user to be able to start and stop the language server
 
   Scenario: User can start and stop the language server cleanly
-    Given I run the following script and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+    Given I run the following script and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       """
       cucu lsp < /dev/null
       """
