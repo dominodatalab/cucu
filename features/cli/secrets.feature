@@ -25,9 +25,8 @@ Feature: Secrets
            And I echo "\{MY_SECRET\}"
            And I echo "your home directory is at \{HOME\}"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/features_with_secrets --results={CUCU_RESULTS_DIR}/features_with_secrets_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-      And I should see "{STDOUT}" does not contain "super secret"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/features_with_secrets --results={CUCU_RESULTS_DIR}/features_with_secrets_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see "{STDOUT}" does not contain "super secret"
 
   Scenario: User can run a test while hiding secrets identified by the command line option
     Given I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/environment.py" with the following:
@@ -51,9 +50,8 @@ Feature: Secrets
            And I echo "\{MY_SECRET\}"
            And I echo "your home directory is at \{HOME\}"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/features_with_secrets --secrets MY_SECRET --results={CUCU_RESULTS_DIR}/features_with_secrets_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-      And I should see "{STDOUT}" does not contain "super secret"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/features_with_secrets --secrets MY_SECRET --results={CUCU_RESULTS_DIR}/features_with_secrets_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see "{STDOUT}" does not contain "super secret"
 
   Scenario: User gets expected behavior when not using variable passthru
     Given I create a file at "{CUCU_RESULTS_DIR}/substeps_without_variable_passthru/environment.py" with the following:

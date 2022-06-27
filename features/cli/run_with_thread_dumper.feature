@@ -3,9 +3,8 @@ Feature: Run with thread dumper
   get a periodic thread dump which can help debugging issues in CI.
 
   Scenario: User gets a single thread stacktrace dump and cucu exits cleanly
-    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/thread_dumper_results --periodic-thread-dumper=15" and save stdout to "STDOUT", exit code to "EXIT_CODE"
+    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/thread_dumper_results --periodic-thread-dumper=15" and save stdout to "STDOUT" and expect exit code "0"
      Then I should see the previous step took less than "10" seconds
-      And I should see "{EXIT_CODE}" is equal to "0"
       And I should see "{STDOUT}" matches the following
       """
       [\s\S]*

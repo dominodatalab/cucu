@@ -3,9 +3,8 @@ Feature: Run outputs
   when running with certain flags/feature files.
 
   Scenario: User can --dry-run a passing scenario
-    Given I run the command "cucu run data/features/feature_with_passing_scenario.feature --dry-run --results {CUCU_RESULTS_DIR}/passing_feature_dry_run_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-      And I should not see the directory at "{CUCU_RESULTS_DIR}/passing_feature_dry_run_results"
+    Given I run the command "cucu run data/features/feature_with_passing_scenario.feature --dry-run --results {CUCU_RESULTS_DIR}/passing_feature_dry_run_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should not see the directory at "{CUCU_RESULTS_DIR}/passing_feature_dry_run_results"
       And I should see "{STDOUT}" matches the following
       """
       Feature: Feature with passing scenario
@@ -21,9 +20,8 @@ Feature: Run outputs
       And I should see "{STDERR}" is empty
 
   Scenario: User gets expected output when running steps with substeps
-    Given I run the command "cucu run data/features/scenario_with_substeps.feature --results {CUCU_RESULTS_DIR}/substeps-results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-      And I should see "{STDOUT}" matches the following
+    Given I run the command "cucu run data/features/scenario_with_substeps.feature --results {CUCU_RESULTS_DIR}/substeps-results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*
       Feature: Feature with substeps
@@ -42,9 +40,8 @@ Feature: Run outputs
       And I should see "{STDERR}" is empty
 
   Scenario: User gets expected non zero exit code when a scenario fails
-    Given I run the command "cucu run data/features/feature_with_failing_scenario.feature --results {CUCU_RESULTS_DIR}/failing-scenario-results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "1"
-      And I should see "{STDOUT}" matches the following
+    Given I run the command "cucu run data/features/feature_with_failing_scenario.feature --results {CUCU_RESULTS_DIR}/failing-scenario-results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     Then I should see "{STDOUT}" matches the following
       """
       Feature: Feature with failing scenario
 
@@ -69,9 +66,8 @@ Feature: Run outputs
       """
 
   Scenario: User can run a scenario with background which uses a step with substeps
-    Given I run the command "cucu run data/features/feature_with_background_using_substeps.feature --results {CUCU_RESULTS_DIR}/background-with-substeps-results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-      And I should see "{STDOUT}" matches the following
+    Given I run the command "cucu run data/features/feature_with_background_using_substeps.feature --results {CUCU_RESULTS_DIR}/background-with-substeps-results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see "{STDOUT}" matches the following
       """
       Feature: Feature with background using substeps
 

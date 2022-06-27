@@ -3,23 +3,20 @@ Feature: Internals
   that happen to use our src/cucu/helpers.py functions to define steps.
 
   Scenario: User can load cucurc values from a cucucrc file in
-    Given I run the command "cucu run data/features/feature_with_failing_scenario_with_web.feature --results={CUCU_RESULTS_DIR}/helpers_stacktrace_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "1"
-      And I should see "{STDOUT}" matches the following:
-       """
-       [\s\S]*
-       .*File ".*\/src\/cucu\/steps\/text_steps.py", line 25, in \<module\>
-       [\s\S]*
-       """
+    Given I run the command "cucu run data/features/feature_with_failing_scenario_with_web.feature --results={CUCU_RESULTS_DIR}/helpers_stacktrace_results" and save stdout to "STDOUT" and expect exit code "1"
+     Then I should see "{STDOUT}" matches the following:
+      """
+      [\s\S]*
+      .*File ".*\/src\/cucu\/steps\/text_steps.py", line 25, in \<module\>
+      [\s\S]*
+      """
 
   Scenario: User can run a feature file that uses cucu behave types
-    Given I run the command "cucu run data/features/feature_with_scenario_using_nth_type.feature --results={CUCU_RESULTS_DIR}/with_nth_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
+    Given I run the command "cucu run data/features/feature_with_scenario_using_nth_type.feature --results={CUCU_RESULTS_DIR}/with_nth_results" and expect exit code "0"
 
   Scenario: Running cucu in cucu without --results results in exception
-    Given I run the command "cucu run data/features/echo.features" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is not equal to "0"
-      And I should see "{STDERR}" contains the following:
+    Given I run the command "cucu run data/features/echo.features" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see "{STDERR}" contains the following:
       """
       running within cucu but --results was not used
       """
@@ -40,8 +37,7 @@ Feature: Internals
         Scenario: This is a scenario that is using an undefined variable
           Given I echo "\{UNDEFINED\}"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/undefined_variable_usage/undefined_variable_feature.feature --results {CUCU_RESULTS_DIR}/undefined_variable_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/undefined_variable_usage/undefined_variable_feature.feature --results {CUCU_RESULTS_DIR}/undefined_variable_results" and save stdout to "STDOUT" and expect exit code "0"
       And I should see "{STDOUT}" contains the following:
       """
       WARNING variable "UNDEFINED" is undefined
@@ -68,8 +64,7 @@ Feature: Internals
         Scenario: This is a senario that echos variables of various types
           Given I echo "\{BOOLEAN_VARIABLE\} \{INT_VARIABLE\} \{STRING_VARIABLE\}"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/variable_value_types/variable_types_feature.feature --results {CUCU_RESULTS_DIR}/variable_value_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/variable_value_types/variable_types_feature.feature --results {CUCU_RESULTS_DIR}/variable_value_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" contains the following:
       """
       True 42 foobar
@@ -95,5 +90,4 @@ Feature: Internals
         Scenario: This sceneario should not see variables set by the previous one
           Given I should see "\{FOO\}" is empty
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/variable_bleed/bleed.feature --results {CUCU_RESULTS_DIR}/variable_bleed_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/variable_bleed/bleed.feature --results {CUCU_RESULTS_DIR}/variable_bleed_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"

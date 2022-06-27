@@ -3,9 +3,8 @@ Feature: Run with logging
   --logging-level option
 
   Scenario: User gets does not get debug logging by default
-    Given I run the command "cucu run data/features/feature_with_logging.feature --results {CUCU_RESULTS_DIR}/default-logging-results" and save stdout to "STDOUT", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-      And I should see "{STDOUT}" matches the following
+    Given I run the command "cucu run data/features/feature_with_logging.feature --results {CUCU_RESULTS_DIR}/default-logging-results" and save stdout to "STDOUT" and expect exit code "0"
+     Then I should see "{STDOUT}" matches the following
       """
       Feature: Feature with logging
 
@@ -23,9 +22,8 @@ Feature: Run with logging
       """
 
   Scenario: User can expose debug logging when they want it
-    Given I run the command "cucu run data/features/feature_with_logging.feature --logging-level debug --results {CUCU_RESULTS_DIR}/debug-logging-results" and save stdout to "STDOUT", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-      And I should see "{STDOUT}" matches the following
+    Given I run the command "cucu run data/features/feature_with_logging.feature --logging-level debug --results {CUCU_RESULTS_DIR}/debug-logging-results" and save stdout to "STDOUT" and expect exit code "0"
+     Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*
       Feature: Feature with logging
