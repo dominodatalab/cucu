@@ -107,7 +107,9 @@ def runs_command_and_check_exit_code(
 @step(
     'I run the command "{command}" and save stdout to "{stdout_var}" and expect exit code "{exit_code}"'
 )
-def runs_command_and_check_exit_code(context, command, stdout_var, exit_code):
+def runs_command__and_save_stdout_and_check_exit_code(
+    context, command, stdout_var, exit_code
+):
     run_command(
         command,
         stdout_var=stdout_var,
@@ -127,6 +129,11 @@ def run_command_and_save_stdout_and_exit_code(
 @step('I run the command "{command}" and save exit code to "{exit_code_var}"')
 def run_command_and_save_exit_code(context, command, exit_code_var):
     run_command(command, exit_code_var=exit_code_var)
+
+
+@step('I run the command "{command}" and expect exit code "{exit_code}"')
+def run_command_and_expect_exit_code(context, command, exit_code):
+    run_command(command, check_exit_code=exit_code)
 
 
 @step(
