@@ -1,4 +1,4 @@
-Feature: Run with hoks
+Feature: Run with hooks
   As a developer I want the user to be able to register various hooks and see
   them run at the expected times
 
@@ -40,8 +40,7 @@ Feature: Run with hoks
           Given I echo "Hello"
             And I echo "World"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/custom_hooks_results/ -l debug" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/custom_hooks_results/ -l debug" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" matches the following
       """
       [\s\S]*

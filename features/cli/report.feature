@@ -2,11 +2,9 @@ Feature: Report
   As a developer I want the user to be able to generate reports from tests runs
 
   Scenario: User can run a basic non browser test and create a report
-    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/non-browser-results" and save exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-     When I run the command "cucu report {CUCU_RESULTS_DIR}/non-browser-results --output {CUCU_RESULTS_DIR}/non-browser-report" and save exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-     When I start a webserver at directory "{CUCU_RESULTS_DIR}/non-browser-report/" and save the port to the variable "PORT"
+    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/non-browser-results" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/non-browser-results --output {CUCU_RESULTS_DIR}/non-browser-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/non-browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see the link "Echo"
      When I click the link "Echo"
@@ -15,20 +13,17 @@ Feature: Report
      Then I should see the text "I echo \"current shell is '\{SHELL\}'\""
 
   Scenario: User can run a basic browser test and create a report
-    Given I run the command "cucu run data/features/google_kitten_search.feature --results {CUCU_RESULTS_DIR}/browser-results" and save exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-     When I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and save exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-     When I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
+    Given I run the command "cucu run data/features/google_kitten_search.feature --results {CUCU_RESULTS_DIR}/browser-results" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see the link "Google kitten search"
      When I click the link "Google kitten search"
      Then I should see the link "Search for kittens on www.google.com"
      When I click the link "Search for kittens on www.google.com"
      Then I should see the text "And I wait to write \"define: kittens\" into the input \"Search\""
-     When I run the command "ls "{SCENARIO_RESULTS_DIR}/"" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-      And I should see "{STDOUT}" matches the following
+     When I run the command "ls "{SCENARIO_RESULTS_DIR}/"" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*\.png
       [\s\S]*
@@ -36,11 +31,9 @@ Feature: Report
 
   @disabled @QE-6852
   Scenario: User can run a multi scenario test with web steps and generate report with a shareable url
-    Given I run the command "cucu run data/features/multiple_scenarios_with_browser_steps.feature --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled --results {CUCU_RESULTS_DIR}/multi-scenario-browser-results" and save exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-     When I run the command "cucu report {CUCU_RESULTS_DIR}/multi-scenario-browser-results --output {CUCU_RESULTS_DIR}/multi-scenario-browser-report" and save exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-     When I start a webserver at directory "{CUCU_RESULTS_DIR}/multi-scenario-browser-report/" and save the port to the variable "PORT"
+    Given I run the command "cucu run data/features/multiple_scenarios_with_browser_steps.feature --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled --results {CUCU_RESULTS_DIR}/multi-scenario-browser-results" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/multi-scenario-browser-results --output {CUCU_RESULTS_DIR}/multi-scenario-browser-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/multi-scenario-browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I click the link "Multiple scenarios with browser steps"
      When I click the link "Search for cat on www.google.com"
@@ -71,11 +64,9 @@ Feature: Report
       And I should not see the image with the alt text "Then I should see the text \"Dog\""
 
   Scenario: User can run a feature with mixed results and has all results reported correctly
-    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/mixed-results" and save exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "1"
-     When I run the command "cucu report {CUCU_RESULTS_DIR}/mixed-results --output {CUCU_RESULTS_DIR}/mixed-results-report" and save exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-     When I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/mixed-results" and expect exit code "1"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/mixed-results --output {CUCU_RESULTS_DIR}/mixed-results-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
        | Feauture                   | Total | Passed | Failed | Skipped | Status | Duration |
@@ -99,11 +90,9 @@ Feature: Report
   @disabled
   Scenario: User can run a scenario with console logs and see those logs linked in the report
     Given I skip this scenario if the current browser is not "chrome"
-     When I run the command "cucu run data/features/scenario_with_console_logs.feature --results {CUCU_RESULTS_DIR}/console-log-reporting" and save stdout to "STDOUT", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-     When I run the command "cucu report {CUCU_RESULTS_DIR}/console-log-reporting --output {CUCU_RESULTS_DIR}/console-log-reporting-report" and save exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-     When I start a webserver at directory "{CUCU_RESULTS_DIR}/console-log-reporting-report/" and save the port to the variable "PORT"
+     When I run the command "cucu run data/features/scenario_with_console_logs.feature --results {CUCU_RESULTS_DIR}/console-log-reporting" and save stdout to "STDOUT" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/console-log-reporting --output {CUCU_RESULTS_DIR}/console-log-reporting-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/console-log-reporting-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
       And I click the link "Feature with console logs"
       And I click the button "Scenario with console logs"

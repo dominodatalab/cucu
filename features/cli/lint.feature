@@ -17,8 +17,7 @@ Feature: Lint
         Scenario: This is a scenario that is using an undefined step
           Given I use an undefined step
       """
-     When I run the command "cucu lint {CUCU_RESULTS_DIR}/undefined_step_lint/undefined_step_feature.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "1"
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/undefined_step_lint/undefined_step_feature.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" contains the following:
       """
       You can implement step definitions for undefined steps with these snippets
@@ -51,8 +50,7 @@ Feature: Lint
         And I echo "fizz"
         Then I echo "buzz"
       """
-     When I run the command "cucu lint {CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "1"
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
       results/indent_lint/bad_feature_indentation.feature:1: W feature name should not have any indentation
@@ -68,8 +66,7 @@ Feature: Lint
       Error: linting errors found, but not fixed, see above for details
 
       """
-     When I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
+     Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is equal to the following:
       """
       results/indent_lint/bad_feature_indentation.feature:1: W feature name should not have any indentation ✓
@@ -94,8 +91,7 @@ Feature: Lint
            Then I echo "buzz"
       """
       # nothing to fix at this point
-     When I run the command "cucu lint {CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is empty
       And I should see "{STDERR}" is empty
 
@@ -117,8 +113,7 @@ Feature: Lint
           Given I echo "foo" 
 
       """
-     When I run the command "cucu lint {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "1"
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
       results/whitespace_lint/extraneous_whitespace.feature:1: W line has extraneous whitespace at the end
@@ -132,8 +127,7 @@ Feature: Lint
       Error: linting errors found, but not fixed, see above for details
 
       """
-     When I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
+     Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is equal to the following:
       """
       results/whitespace_lint/extraneous_whitespace.feature:1: W line has extraneous whitespace at the end ✓
@@ -152,8 +146,7 @@ Feature: Lint
           Given I echo "foo"
 
       """
-     When I run the command "cucu lint {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is empty
       And I should see "{STDERR}" is empty
 
@@ -172,8 +165,7 @@ Feature: Lint
       """
       Feature: Just a place holder
       """
-     When I run the command "cucu lint {CUCU_RESULTS_DIR}/broken_step_lint/broken_step_feature.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "1"
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/broken_step_lint/broken_step_feature.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" contains the following:
       """
       RuntimeError: boom

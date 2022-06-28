@@ -3,10 +3,9 @@ Feature: Steps
   without any issues.
 
   Scenario: User can get the current set of available cucu steps
-    Given I run the command "cucu steps" and save stdout to "STDOUT", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
+    Given I run the command "cucu steps" and save stdout to "STDOUT" and expect exit code "0"
       # just validate some built-in steps show up
-      And I should see "{STDOUT}" contains the following:
+     Then I should see "{STDOUT}" contains the following:
       """
       I open a browser at the url "\{url\}"
       """
@@ -36,10 +35,9 @@ Feature: Steps
         Scenario: This scenario with an undefined step
           Given I attempt to use an undefined step
       """
-     When I run the command "cucu steps {CUCU_RESULTS_DIR}/undefined_steps/features/feature_that_spills_the_beans.feature" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "1"
+     When I run the command "cucu steps {CUCU_RESULTS_DIR}/undefined_steps/features/feature_that_spills_the_beans.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       # just validate some built-in steps show up
-      And I should see "{STDOUT}" contains the following:
+     Then I should see "{STDOUT}" contains the following:
       """
       You can implement step definitions for undefined steps with these snippets:
       """

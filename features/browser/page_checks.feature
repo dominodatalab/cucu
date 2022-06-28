@@ -19,9 +19,8 @@ Feature: Page checks
       """
 
   Scenario: User can disable built in page checks
-    Given I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --logging-level debug --results {CUCU_RESULTS_DIR}/disabling_page_checks_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-      And I should see "{STDOUT}" contains the following
+    Given I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --logging-level debug --results {CUCU_RESULTS_DIR}/disabling_page_checks_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see "{STDOUT}" contains the following
       """
       executing page check "wait for document.readyState"
       """
@@ -29,9 +28,8 @@ Feature: Page checks
       """
       executing page check "broken image checker"
       """
-     When I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --env CUCU_READY_STATE_PAGE_CHECK=false --logging-level debug --results {CUCU_RESULTS_DIR}/disabling_page_checks_results" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
-      And I should see "{STDOUT}" does not contain the following
+     When I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --env CUCU_READY_STATE_PAGE_CHECK=false --logging-level debug --results {CUCU_RESULTS_DIR}/disabling_page_checks_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see "{STDOUT}" does not contain the following
       """
       executing page check "wait for document.readyState"
       """

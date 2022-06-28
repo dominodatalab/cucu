@@ -20,10 +20,9 @@ Feature: Vars
         Scenario: This is a scenario that simply echos
           Given I echo "Hello There"
       """
-     When I run the command "cucu vars {CUCU_RESULTS_DIR}/cucu_vars_features/" and save stdout to "STDOUT", stderr to "STDERR", exit code to "EXIT_CODE"
-     Then I should see "{EXIT_CODE}" is equal to "0"
+     When I run the command "cucu vars {CUCU_RESULTS_DIR}/cucu_vars_features/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       # can see a built in variable
-      And I should see "{STDOUT}" contains the following:
+     Then I should see "{STDOUT}" contains the following:
       """
       FEATURE_RESULTS_DIR
       """
