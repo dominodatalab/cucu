@@ -139,6 +139,8 @@ Feature: Run outputs
       <testsuite name="Echo" tests="0" errors="0" failures="0" skipped="0" timestamp=".*">
        <testcase classname="Echo" name="Echo an environment variable" status="passed" time=".*">
        </testcase>
+       <testcase classname="Echo" name="Scenario with testrail tag" testcase_ids="123,346" status="passed" time=".*">
+       </testcase>
       </testsuite>
       """
 
@@ -190,8 +192,15 @@ Feature: Run outputs
               \"\"\"
             # USER="that_guy"
 
+        @testrail\(123,346\)
+        Scenario: Scenario with testrail tag
+      current shell is '/foo/bar/zsh'
+
+          Given I echo "current shell is '\{SHELL\}'" .*
+          # SHELL="/foo/bar/zsh"
+
       1 feature passed, 0 failed, 0 skipped
-      1 scenario passed, 0 failed, 0 skipped
-      6 steps passed, 0 failed, 0 skipped, 0 undefined
+      2 scenarios passed, 0 failed, 0 skipped
+      7 steps passed, 0 failed, 0 skipped, 0 undefined
       [\s\S]*
       """

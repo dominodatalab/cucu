@@ -18,8 +18,12 @@ Feature: Run with thread dumper
         Scenario: Echo an environment variable
       [\s\S]*
 
+        @testrail\(123,346\)
+        Scenario: Scenario with testrail tag
+      [\s\S]*
+
       1 feature passed, 0 failed, 0 skipped
-      1 scenario passed, 0 failed, 0 skipped
-      6 steps passed, 0 failed, 0 skipped, 0 undefined
+      2 scenarios passed, 0 failed, 0 skipped
+      7 steps passed, 0 failed, 0 skipped, 0 undefined
       [\s\S]*
       """

@@ -18,3 +18,7 @@ Feature: Echo
       """
       good bye {USER}
       """
+
+  @testrail(123,346)
+  Scenario: Scenario with testrail tag
+    Given I echo "current shell is '{SHELL}'"
