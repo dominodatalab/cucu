@@ -79,8 +79,41 @@ def should_see_matches_the_following(ctx, this):
 
 
 @step('I should see "{this}" does not match the following')
-def should_see_matches_the_following(ctx, this):
+def should_does_not_see_matches_the_following(ctx, this):
     that = ctx.text
 
     if re.match(that, this) is not None:
         raise RuntimeError(f"{this}\nmatches:\n{that}")
+
+
+def extract_and_save(regex, value, name, variable):
+    match = re.match(regex, value)
+
+    if match is None:
+        raise RuntimeError(
+            f'regex "{regex}" did not match anything in the value "{value}"'
+        )
+
+    groups = match.groupdict()
+
+    if name in groups:
+        config.CONFIG[variable] = groups[name]
+
+    else:
+        raise RuntimeError(
+            f'group "{name}" not found when applying regex "{regex}" to "{value}"'
+        )
+
+
+@step(
+    'I apply the regex "{regex}" to "{value}" and save the group "{name}" to the variable "{variable}"'
+)
+def apply_regex_and_save(ctx, regex, value, name, variable):
+    extract_and_save(regex, value, name, variable)
+
+
+@step(
+    'I apply the following regex to "{value}" and save the group "{name}" to the variable "{variable}"'
+)
+def apply_the_following_regex_and_save(ctx, value, name, variable):
+    extract_and_save(ctx.text, value, name, variable)
