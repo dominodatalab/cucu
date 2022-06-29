@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import bs4
 import os
-import re
 import traceback
 
 from behave.formatter.base import Formatter
@@ -41,6 +40,9 @@ class CucuJUnitFormatter(Formatter):
             "timestamp": date_now.strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
             "scenarios": {},
         }
+        if feature.tags:
+            self.feature_results["tags"] = ", ".join(feature.tags)
+
 
     def background(self, background):
 
@@ -72,13 +74,8 @@ class CucuJUnitFormatter(Formatter):
             "time": "n/a",
             "failure": None,
         }
-        testrail_re = re.compile(r"testrail\((.+)\)")
-        for tag in scenario.tags:
-            testrail_tag = testrail_re.match(tag)
-            if testrail_tag is not None:
-                self.current_scenario_results[
-                    "testcase_ids"
-                ] = testrail_tag.group(1)
+        if scenario.tags:
+            self.current_scenario_results["tags"] = ", ".join(scenario.tags)
 
         scenario_name = escape(scenario.name)
         self.feature_results["scenarios"][
@@ -132,7 +129,7 @@ class CucuJUnitFormatter(Formatter):
                 "timestamp": "",
                 "scnearios": {
                     "scenario name": {
-                        "testcase_ids": "3366, 45891",
+                        "tags": "DOM-3435, testrail(3366,45891)",
                         "status": "passed/failed/skipped",
                         "time": "0.0000":
                         "stdout": "",
@@ -150,7 +147,6 @@ class CucuJUnitFormatter(Formatter):
                 ordered = [
                     "classname",
                     "name",
-                    "testcase_ids",
                     "tests",
                     "errors",
                     "failures",
@@ -158,6 +154,7 @@ class CucuJUnitFormatter(Formatter):
                     "status",
                     "timestamp",
                     "time",
+                    "tags",
                 ]
 
                 return [
@@ -172,6 +169,8 @@ class CucuJUnitFormatter(Formatter):
         testsuite["failures"] = results["failures"]
         testsuite["skipped"] = results["skipped"]
         testsuite["timestamp"] = results["timestamp"]
+        if "tags" in results:
+            testsuite["tags"] = results["tags"]
         soup.append(testsuite)
 
         for scenario_name in results["scenarios"]:
@@ -179,8 +178,8 @@ class CucuJUnitFormatter(Formatter):
             testcase = bs4.Tag(name="testcase")
             testcase["classname"] = results["name"]
             testcase["name"] = scenario_name
-            if "testcase_ids" in scenario:
-                testcase["testcase_ids"] = scenario["testcase_ids"]
+            if "tags" in scenario:
+                testcase["tags"] = scenario["tags"]
             testcase["status"] = scenario["status"]
             testcase["time"] = scenario["time"]
 
