@@ -9,6 +9,6 @@ Feature: Feature with tagging
   Scenario: Scenario that is tagged with @second
     Given I echo "second"
 
-  @disabled
+  @disabled @testrail(123,456)
   Scenario: Scenario that is skipped
     Given I echo "should never see this"
