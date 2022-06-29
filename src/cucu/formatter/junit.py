@@ -126,7 +126,7 @@ class CucuJUnitFormatter(Formatter):
                 "failures": 0,
                 "skipped": 0,
                 "timestamp": "",
-                "scnearios": {
+                "scenarios": {
                     "scenario name": {
                         "tags": "DOM-3435, testrail(3366,45891)",
                         "status": "passed/failed/skipped",
