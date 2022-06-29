@@ -1,4 +1,6 @@
-from cucu import helpers, fuzzy, retry, step
+from cucu import config, helpers, fuzzy, retry, step
+from cucu.fuzzy.core import load_jquery_lib
+from cucu.steps import step_utils
 
 
 def find_text(ctx, name, index=0):
@@ -24,3 +26,25 @@ def find_text(ctx, name, index=0):
 
 helpers.define_should_see_thing_with_name_steps("text", find_text)
 helpers.define_run_steps_if_I_can_see_element_with_name_steps("text", find_text)
+
+
+@step(
+    'I search for the regex "{regex}" on the current page and save the group "{name}" to the variable "{variable}"'
+)
+def search_for_regex_to_page_and_save(ctx, regex, name, variable):
+    ctx.browser.execute(load_jquery_lib())
+    text = ctx.browser.execute(
+        'return jQuery("body").children(":visible").text();'
+    )
+    step_utils.search_and_save(regex, text, name, variable)
+
+
+@step(
+    'I match the regex "{regex}" on the current page and save the group "{name}" to the variable "{variable}"'
+)
+def match_for_regex_to_page_and_save(ctx, regex, name, variable):
+    ctx.browser.execute(load_jquery_lib())
+    text = ctx.browser.execute(
+        'return jQuery("body").children(":visible").text();'
+    )
+    step_utils.match_and_save(regex, text, name, variable)

@@ -1,3 +1,4 @@
+@variables
 Feature: Vars
   As a developer I want the `cucu vars` command to work as expected
 
@@ -43,3 +44,31 @@ Feature: Vars
       the value of FOO is {FOO}
       """
      Then I should see "{FIZZ}" is equal to "the value of FOO is bar"
+
+  @regex
+  Scenario: User can extract values from a string by matching on a regex
+    Given I set the variable "LOG" to "the commit sha is 38a465ae3ef5ad41fbecf03b752c3b25cc6302dc"
+     When I match the regex "the commit sha is (?P<sha>[a-f0-9]+)" in "{LOG}" and save the group "sha" to the variable "SHA"
+     Then I should see "{SHA}" is equal to "38a465ae3ef5ad41fbecf03b752c3b25cc6302dc"
+
+  @regex
+  Scenario: User can extract values from a string by searching for a regex
+    Given I set the variable "LOG" to "the commit sha is 38a465ae3ef5ad41fbecf03b752c3b25cc6302dc"
+     When I search for the regex "sha is (?P<sha>[a-f0-9]+)" in "{LOG}" and save the group "sha" to the variable "SHA"
+     Then I should see "{SHA}" is equal to "38a465ae3ef5ad41fbecf03b752c3b25cc6302dc"
+
+  @regex @negative
+  Scenario: User gets an error when they can not match on a regex
+    Given I set the variable "LOG" to "the commit sha is 38a465ae3ef5ad41fbecf03b752c3b25cc6302dc"
+     Then I expect the following step to fail with "\"sha is (?P<sha>[a-f0-9]+)\" did not match \"the commit sha is 38a465ae3ef5ad41fbecf03b752c3b25cc6302dc\""
+      """
+      Then I match the regex "sha is (?P<sha>[a-f0-9]+)" in "{LOG}" and save the group "sha" to the variable "SHA"
+      """
+
+  @regex @negative
+  Scenario: User gets an error when they can not search for a regex
+    Given I set the variable "LOG" to "the commit sha is 38a465ae3ef5ad41fbecf03b752c3b25cc6302dc"
+     Then I expect the following step to fail with "\"boopity\" did not match anything in \"the commit sha is 38a465ae3ef5ad41fbecf03b752c3b25cc6302dc\""
+      """
+      Then I search for the regex "boopity" in "{LOG}" and save the group "sha" to the variable "SHA"
+      """

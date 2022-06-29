@@ -1,7 +1,7 @@
 import re
 
-from behave import step
-from cucu import config
+from cucu import config, step
+from cucu.steps import step_utils
 
 
 @step('I set the variable "{variable}" to "{value}"')
@@ -79,8 +79,22 @@ def should_see_matches_the_following(ctx, this):
 
 
 @step('I should see "{this}" does not match the following')
-def should_see_matches_the_following(ctx, this):
+def should_does_not_see_matches_the_following(ctx, this):
     that = ctx.text
 
     if re.match(that, this) is not None:
         raise RuntimeError(f"{this}\nmatches:\n{that}")
+
+
+@step(
+    'I search for the regex "{regex}" in "{value}" and save the group "{name}" to the variable "{variable}"'
+)
+def search_and_save(ctx, regex, value, name, variable):
+    step_utils.search_and_save(regex, value, name, variable)
+
+
+@step(
+    'I match the regex "{regex}" in "{value}" and save the group "{name}" to the variable "{variable}"'
+)
+def match_and_save(ctx, regex, value, name, variable):
+    step_utils.match_and_save(regex, value, name, variable)
