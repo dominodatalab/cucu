@@ -2,6 +2,7 @@ import os
 import time
 
 from cucu import logger, retry, run_steps, step
+from cucu.hooks import register_after_this_scenario_hook
 from cucu.config import CONFIG
 from cucu.cli.run import behave
 
@@ -122,3 +123,44 @@ def stop_the_timer(ctx, name):
 
     duration = round(time.time() - start, 3)
     logger.info(f'"{name}" timer took {duration}s')
+
+
+def run_feature(ctx, filepath, results):
+    os.system(f"cucu run {filepath} --results {results}")
+
+
+@step(
+    'I run the feature at "{feature_filepath}" with results at "{results_filepath}"'
+)
+def run_feature_at(ctx, feature_filepath, results_filepath):
+    run_feature(ctx, feature_filepath, results_filepath)
+
+
+@step(
+    'I run the feature at "{feature_filepath}" with results at "{results_filepath}" if the file at "{filepath}" does not exist'
+)
+def run_feature_if_file_does_not_exist(
+    ctx, feature_filepath, results_filepath, filepath
+):
+    if not os.path.exists(filepath):
+        run_feature(ctx, feature_filepath, results_filepath)
+
+
+@step(
+    'I run the feature at "{feature_filepath}" with results at "{results_filepath}" if the file at "{filepath}" exists'
+)
+def run_feature_if_file_exists(
+    ctx, feature_filepath, results_filepath, filepath
+):
+    if os.path.exists(filepath):
+        run_feature(ctx, feature_filepath, results_filepath)
+
+
+@step("I run the following steps at the end of the current scenario")
+def run_the_following_steps_at_end_of_scenario(ctx):
+    steps = ctx.text
+
+    def run_final_steps(ctx):
+        run_steps(ctx, steps)
+
+    register_after_this_scenario_hook(run_final_steps)

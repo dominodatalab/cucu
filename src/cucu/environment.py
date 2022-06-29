@@ -107,6 +107,16 @@ def after_scenario(ctx, scenario):
     for timer_name in ctx.step_timers:
         logger.warn(f'timer "{timer_name}" was never stopped/recorded')
 
+    # run after all scenario hooks
+    for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"]:
+        hook(ctx)
+
+    # run after this scenario hooks
+    for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"]:
+        hook(ctx)
+
+    CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
+
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
 
@@ -131,16 +141,6 @@ def after_scenario(ctx, scenario):
             browser.quit()
 
         ctx.browsers = []
-
-    # run after all scenario hooks
-    for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"]:
-        hook(ctx)
-
-    # run after this scenario hooks
-    for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"]:
-        hook(ctx)
-
-    CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 
 
 def before_step(ctx, step):
