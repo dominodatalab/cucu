@@ -29,6 +29,7 @@ Feature: Text
   Scenario: User can see text across elements
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
+     Then I should see the text "and some text with nested tags"
 
   Scenario: User can find and save text from the current page
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
