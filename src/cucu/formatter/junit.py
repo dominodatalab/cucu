@@ -43,7 +43,6 @@ class CucuJUnitFormatter(Formatter):
         if feature.tags:
             self.feature_results["tags"] = ", ".join(feature.tags)
 
-
     def background(self, background):
 
         # -- ADD BACKGROUND STEPS: Support *.feature file regeneration.
