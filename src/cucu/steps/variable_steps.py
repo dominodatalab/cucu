@@ -1,7 +1,7 @@
 import re
 
-from behave import step
-from cucu import config
+from cucu import config, step
+from cucu.steps import step_utils
 
 
 @step('I set the variable "{variable}" to "{value}"')
@@ -86,34 +86,15 @@ def should_does_not_see_matches_the_following(ctx, this):
         raise RuntimeError(f"{this}\nmatches:\n{that}")
 
 
-def extract_and_save(regex, value, name, variable):
-    match = re.match(regex, value)
-
-    if match is None:
-        raise RuntimeError(
-            f'regex "{regex}" did not match anything in the value "{value}"'
-        )
-
-    groups = match.groupdict()
-
-    if name in groups:
-        config.CONFIG[variable] = groups[name]
-
-    else:
-        raise RuntimeError(
-            f'group "{name}" not found when applying regex "{regex}" to "{value}"'
-        )
+@step(
+    'I search for the regex "{regex}" in "{value}" and save the group "{name}" to the variable "{variable}"'
+)
+def search_and_save(ctx, regex, value, name, variable):
+    step_utils.search_and_save(regex, value, name, variable)
 
 
 @step(
-    'I apply the regex "{regex}" to "{value}" and save the group "{name}" to the variable "{variable}"'
+    'I match the regex "{regex}" in "{value}" and save the group "{name}" to the variable "{variable}"'
 )
-def apply_regex_and_save(ctx, regex, value, name, variable):
-    extract_and_save(regex, value, name, variable)
-
-
-@step(
-    'I apply the following regex to "{value}" and save the group "{name}" to the variable "{variable}"'
-)
-def apply_the_following_regex_and_save(ctx, value, name, variable):
-    extract_and_save(ctx.text, value, name, variable)
+def match_and_save(ctx, regex, value, name, variable):
+    step_utils.match_and_save(regex, value, name, variable)
