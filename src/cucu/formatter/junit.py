@@ -72,11 +72,13 @@ class CucuJUnitFormatter(Formatter):
             "time": "n/a",
             "failure": None,
         }
-        testrail_re = re.compile(r'testrail\((.+)\)')
+        testrail_re = re.compile(r"testrail\((.+)\)")
         for tag in scenario.tags:
             testrail_tag = testrail_re.match(tag)
             if testrail_tag is not None:
-                self.current_scenario_results["testcase_ids"] = testrail_tag.group(1)
+                self.current_scenario_results[
+                    "testcase_ids"
+                ] = testrail_tag.group(1)
 
         scenario_name = escape(scenario.name)
         self.feature_results["scenarios"][
