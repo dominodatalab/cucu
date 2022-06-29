@@ -18,7 +18,7 @@ Feature: Run with tags
 
           Given I echo "second"     #  .*
 
-        @disabled @testrail(123,456)
+        @disabled @testrail\(123,456\)
         Scenario: Scenario that is skipped
 
       1 feature passed, 0 failed, 0 skipped
@@ -44,7 +44,7 @@ Feature: Run with tags
         @second
         Scenario: Scenario that is tagged with @second
 
-        @disabled @testrail(123,456)
+        @disabled @testrail\(123,456\)
         Scenario: Scenario that is skipped
 
       1 feature passed, 0 failed, 0 skipped
