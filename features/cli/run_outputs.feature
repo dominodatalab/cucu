@@ -141,7 +141,7 @@ Feature: Run outputs
        </testcase>
        <testcase classname="Feature with tagging" name="Scenario that is tagged with @second" status="passed" time=".*" tags="second">
        </testcase>
-       <testcase classname="Feature with tagging" name="Scenario that is skipped" status="skipped" time=".*" tags="disabled, testrail(123,456)">
+       <testcase classname="Feature with tagging" name="Scenario that is skipped" status="skipped" time=".*" tags="disabled, testrail\(123,456\)">
        </testcase>
       </testsuite>
       """
