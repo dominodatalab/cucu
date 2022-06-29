@@ -40,6 +40,8 @@ class CucuJUnitFormatter(Formatter):
             "timestamp": date_now.strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
             "scenarios": {},
         }
+        if feature.tags:
+            self.feature_results["tags"] = ", ".join(feature.tags)
 
     def background(self, background):
 
@@ -71,6 +73,8 @@ class CucuJUnitFormatter(Formatter):
             "time": "n/a",
             "failure": None,
         }
+        if scenario.tags:
+            self.current_scenario_results["tags"] = ", ".join(scenario.tags)
 
         scenario_name = escape(scenario.name)
         self.feature_results["scenarios"][
@@ -122,8 +126,9 @@ class CucuJUnitFormatter(Formatter):
                 "failures": 0,
                 "skipped": 0,
                 "timestamp": "",
-                "scnearios": {
+                "scenarios": {
                     "scenario name": {
+                        "tags": "DOM-3435, testrail(3366,45891)",
                         "status": "passed/failed/skipped",
                         "time": "0.0000":
                         "stdout": "",
@@ -148,6 +153,7 @@ class CucuJUnitFormatter(Formatter):
                     "status",
                     "timestamp",
                     "time",
+                    "tags",
                 ]
 
                 return [
@@ -162,6 +168,8 @@ class CucuJUnitFormatter(Formatter):
         testsuite["failures"] = results["failures"]
         testsuite["skipped"] = results["skipped"]
         testsuite["timestamp"] = results["timestamp"]
+        if "tags" in results:
+            testsuite["tags"] = results["tags"]
         soup.append(testsuite)
 
         for scenario_name in results["scenarios"]:
@@ -169,6 +177,8 @@ class CucuJUnitFormatter(Formatter):
             testcase = bs4.Tag(name="testcase")
             testcase["classname"] = results["name"]
             testcase["name"] = scenario_name
+            if "tags" in scenario:
+                testcase["tags"] = scenario["tags"]
             testcase["status"] = scenario["status"]
             testcase["time"] = scenario["time"]
 
