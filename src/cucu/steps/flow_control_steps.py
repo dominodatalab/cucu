@@ -7,6 +7,14 @@ from cucu.config import CONFIG
 from cucu.cli.run import behave
 
 
+@step('I skip this scenario if the file at "{filepath}" exists')
+def skip_scenario_if_file_exists(ctx, filepath):
+    if os.path.exists(filepath):
+        ctx.scenario.skip(
+            reason='skipping scenario since file at "{filepath}" exists'
+        )
+
+
 @step('I expect the following step to fail with "{message}"')
 def expect_the_following_step_to_fail(ctx, message):
     try:
