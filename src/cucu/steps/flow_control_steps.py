@@ -1,4 +1,6 @@
 import os
+import shlex
+import subprocess
 import time
 
 from cucu import logger, retry, run_steps, step
@@ -134,7 +136,14 @@ def stop_the_timer(ctx, name):
 
 
 def run_feature(ctx, filepath, results):
-    os.system(f"cucu run {filepath} --results {results}")
+    command = f"cucu run {filepath} --results {results}"
+    process = subprocess.run(shlex.split(command))
+
+    return_code = process.returncode
+    if return_code != 0:
+        raise RuntimeError(
+            f'"{command}" exited with {return_code}, see above for details'
+        )
 
 
 @step(
