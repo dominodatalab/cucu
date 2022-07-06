@@ -12,7 +12,7 @@ Feature: Frames
       And I should see no value in the input "value:"
       And I should see the checkbox "checkbox with inner label" is not checked
      When I click the button "button with child"
-     Then I should see "button with child" in the input "value:"
+     Then I should see "button with child was clicked" in the input "value:"
      When I check the checkbox "checkbox with inner label"
      Then I should see the checkbox "checkbox with inner label" is checked
 
