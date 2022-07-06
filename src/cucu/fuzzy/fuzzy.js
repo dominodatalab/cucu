@@ -112,7 +112,6 @@
                     }).toArray();
                     if (cucu.debug) { console.log('<thing value="name"></thing>', results); }
                 } else if (matcher == 'contains') {
-                    results = jQuery(thing + '[' + attribute_name + '*="' + name + '"]:vis', document.body).toArray();
                     results = jQuery(thing + ':vis', document.body).filter(function(){
                         return this.value !== undefined && String(this.value).indexOf(name) != -1;
                     }).toArray();
