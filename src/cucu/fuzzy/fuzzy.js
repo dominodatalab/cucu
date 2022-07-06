@@ -121,7 +121,6 @@
                 elements = elements.concat(results);
             }
 
-
             /*
              * element labeled by another using the for/id attributes
              */

@@ -11,7 +11,7 @@ Feature: Inputs
      Then I should see no value in the input "input type=date"
      When I write "01/01/2019" into the input "input type=date"
      Then I should see "2019-01-01" in the input "input type=date"
-      And I should see "input type=date" in the input "last touched input"
+      And I should see "input type=date was modified" in the input "last touched input"
 
   @disabled
   Scenario: User can write into an <input type="datetime-local">
@@ -19,14 +19,14 @@ Feature: Inputs
       And I should see no value in the input "input type=datetime-local"
      When I write "01/01/2019 00:00:00" into the input "input type=datetime-local"
      Then I should see "2019-01-01 00:00:00" in the input "input type=datetime-local"
-      And I should see "input type=datetime-local" in the input "last touched input"
+      And I should see "input type=datetime-local was modified" in the input "last touched input"
 
   Scenario: User can write into an <input type="email">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
       And I should see no value in the input "input type=email"
      When I write "foo@bar.com" into the input "input type=email"
      Then I should see "foo@bar.com" in the input "input type=email"
-      And I should see "input type=email" in the input "last touched input"
+      And I should see "input type=email was modified" in the input "last touched input"
 
   @disabled
   Scenario: User can write into an <input type="month">
@@ -34,42 +34,42 @@ Feature: Inputs
       And I should see no value in the input "input type=month"
      When I write "August" into the input "input type=month"
      Then I should see "1980-08" in the input "input type=month"
-      And I should see "input type=month" in the input "last touched input"
+      And I should see "input type=month was modified" in the input "last touched input"
 
   Scenario: User can write into an <input type="number">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
       And I should see no value in the input "input type=number"
      When I write "1234" into the input "input type=number"
      Then I should see "1234" in the input "input type=number"
-      And I should see "input type=number" in the input "last touched input"
+      And I should see "input type=number was modified" in the input "last touched input"
 
   Scenario: User can write into an <input type="password">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
       And I should see no value in the input "input type=password"
      When I write "supersecret" into the input "input type=password"
      Then I should see "supersecret" in the input "input type=password"
-      And I should see "input type=password" in the input "last touched input"
+      And I should see "input type=password was modified" in the input "last touched input"
 
   Scenario: User can write into an <input type="search">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
       And I should see no value in the input "input type=search"
      When I write "just a query" into the input "input type=search"
      Then I should see "just a query" in the input "input type=search"
-      And I should see "input type=search" in the input "last touched input"
+      And I should see "input type=search was modified" in the input "last touched input"
 
   Scenario: User can write into an <input type="tel">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
       And I should see no value in the input "input type=tel"
      When I write "8675309" into the input "input type=tel"
      Then I should see "8675309" in the input "input type=tel"
-      And I should see "input type=tel" in the input "last touched input"
+      And I should see "input type=tel was modified" in the input "last touched input"
 
   Scenario: User can write into an <input type="text">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
       And I should see no value in the input "input type=text"
      When I write "some text" into the input "input type=text"
      Then I should see "some text" in the input "input type=text"
-      And I should see "input type=text" in the input "last touched input"
+      And I should see "input type=text was modified" in the input "last touched input"
 
   @disabled @QE-7005
   Scenario: User can write into an <input type="time">
@@ -77,14 +77,14 @@ Feature: Inputs
       And I should see no value in the input "input type=time"
      When I write "0810AM" into the input "input type=time"
      Then I should see "08:10" in the input "input type=time"
-      And I should see "input type=time" in the input "last touched input"
+      And I should see "input type=time was modified" in the input "last touched input"
 
   Scenario: User can write into an <input type="url">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
       And I should see no value in the input "input type=url"
      When I write "https://www.google.com" into the input "input type=url"
      Then I should see "https://www.google.com" in the input "input type=url"
-      And I should see "input type=url" in the input "last touched input"
+      And I should see "input type=url was modified" in the input "last touched input"
 
   @disabled @QE-7005
   Scenario: User can write into an <input type="week">
@@ -92,7 +92,7 @@ Feature: Inputs
       And I should see no value in the input "input type=week"
      When I write "022012" into the input "input type=week"
      Then I should see "2012-W02" in the input "input type=week"
-      And I should see "input type=week" in the input "last touched input"
+      And I should see "input type=week was modified" in the input "last touched input"
 
   Scenario: User can write into an <textarea>
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
@@ -107,14 +107,14 @@ Feature: Inputs
       line 1
       line 2
       """
-      And I should see "textarea with label" in the input "last touched input"
+      And I should see "textarea with label was modified" in the input "last touched input"
 
   Scenario: User can write into an <input> with label for
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
       And I should see no value in the input "input with label for"
      When I write "boop" into the input "input with label for"
      Then I should see "boop" in the input "input with label for"
-      And I should see "input with label for" in the input "last touched input"
+      And I should see "input with label for was modified" in the input "last touched input"
 
   Scenario: User can clear an input
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
@@ -124,7 +124,7 @@ Feature: Inputs
      Then I should see no value in the input "input with label for"
      When I write "blup" into the input "input with label for"
      Then I should see "blup" in the input "input with label for"
-      And I should see "input with label for" in the input "last touched input"
+      And I should see "input with label for was modified" in the input "last touched input"
 
   @wait
   Scenario: User can wait to clear an input
