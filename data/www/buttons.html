@@ -5,7 +5,9 @@
       .button { text-decoration: none; -webkit-appearance: button; color: #333333; display: inline; }
     </style>
     <script>
-    function update(value) { document.querySelector("#input").value = value; }
+    function update(value) {
+        document.querySelector("#input").value = value + " was clicked";
+    }
     </script>
   </head>
   <body>

@@ -10,49 +10,49 @@ Feature: Buttons
      Then I should see no value in the input "value:"
       And I should see the button "button"
      When I click the button "button"
-     Then I should see "button" in the input "value:"
+     Then I should see "button was clicked" in the input "value:"
 
   Scenario: User can click a <button> with child
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
      Then I should see no value in the input "value:"
       And I should see the button "button with child"
      When I click the button "button with child"
-     Then I should see "button with child" in the input "value:"
+     Then I should see "button with child was clicked" in the input "value:"
 
   Scenario: User can click a <input type="button">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
      Then I should see no value in the input "value:"
       And I should see the button "input type=button"
      When I click the button "input type=button"
-     Then I should see "input type=button" in the input "value:"
+     Then I should see "input type=button was clicked" in the input "value:"
 
   Scenario: User can click a <input type="submit">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
      Then I should see no value in the input "value:"
       And I should see the button "input type=submit"
      When I click the button "input type=submit"
-     Then I should see "input type=submit" in the input "value:"
+     Then I should see "input type=submit was clicked" in the input "value:"
 
   Scenario: User can click a <a>
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
      Then I should see no value in the input "value:"
       And I should see the button "a link"
      When I click the button "a link"
-     Then I should see "a link" in the input "value:"
+     Then I should see "a link was clicked" in the input "value:"
 
   Scenario: User can click a <* role="button">
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
      Then I should see no value in the input "value:"
       And I should see the button "* role=button"
      When I click the button "* role=button"
-     Then I should see "* role=button" in the input "value:"
+     Then I should see "* role=button was clicked" in the input "value:"
 
   Scenario: User can click a <button> with label for...
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
      Then I should see no value in the input "value:"
       And I should see the button "button with label for"
      When I click the button "button with label for"
-     Then I should see "button with label for" in the input "value:"
+     Then I should see "button with label for was clicked" in the input "value:"
 
   Scenario: User can wait the CUCU_STEP_WAIT_TIMEOUT_S to click a button
     Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"

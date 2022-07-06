@@ -36,3 +36,15 @@ Feature: Text
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
      Then I search for the regex "some text with (?P<word>[^ ]+)" on the current page and save the group "word" to the variable "WORD"
      Then I should see "{WORD}" is equal to "nested"
+
+  Scenario: User can see text within an input that was changed at runtime
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
+      And I should see the text "just some text in an input"
+     When I write "changing this text here" into the input "just some text in an input"
+      And I should see the text "changing this text here"
+
+  Scenario: User can see text that partially matches an attribute
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
+     Then I should see the text "just some text in a textarea"

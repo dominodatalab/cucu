@@ -83,10 +83,41 @@
                 // <thing attribute="name"></thing>
                 for(var aIndex=0; aIndex < attributes.length; aIndex++) {
                     var attribute_name = attributes[aIndex];
-                    results = jQuery(thing + '[' + attribute_name + '="' + name + '"]:vis', document.body).toArray();
-                    if (cucu.debug) { console.log('<thing attibute="name"></thing>', results); }
+                    if (matcher == 'has_text') {
+                        results = jQuery(thing + '[' + attribute_name + '="' + name + '"]:vis', document.body).toArray();
+                        if (cucu.debug) { console.log('<thing attibute="name"></thing>', results); }
+                    } else if (matcher == 'contains') {
+                        results = jQuery(thing + '[' + attribute_name + '*="' + name + '"]:vis', document.body).toArray();
+                        if (cucu.debug) { console.log('<thing attibute*="name"></thing>', results); }
+                    }
                     elements = elements.concat(results);
                 }
+            }
+
+            /*
+             * validate against the `value` attribute of the actual DOM object
+             * as that has the value that may have changed from having written
+             * a new value into an input which doesn't get reflected in the DOM.
+             *
+             * TODO: I think there may be a cleaner way to handle this but for
+             *       now lets just add another loop in here.
+             */
+            for(var tIndex = 0; tIndex < things.length; tIndex++) {
+                var thing = things[tIndex];
+
+                // <thing value="name"></thing>
+                if (matcher == 'has_text') {
+                    results = jQuery(thing + ':vis', document.body).filter(function(){
+                        return this.value == name;
+                    }).toArray();
+                    if (cucu.debug) { console.log('<thing value="name"></thing>', results); }
+                } else if (matcher == 'contains') {
+                    results = jQuery(thing + ':vis', document.body).filter(function(){
+                        return this.value !== undefined && String(this.value).indexOf(name) != -1;
+                    }).toArray();
+                    if (cucu.debug) { console.log('<thing value*="name"></thing>', results); }
+                }
+                elements = elements.concat(results);
             }
 
             /*
