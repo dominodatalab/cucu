@@ -1,5 +1,5 @@
 import humanize
-import inspect
+import sys
 
 from cucu import retry, run_steps
 
@@ -28,7 +28,7 @@ class step(object):
 
     def __init__(self, step_text):
         self.step_text = step_text
-        frame = inspect.stack()[2].frame
+        frame = sys._getframe(1).f_back
 
         def fix_inner_step(func):
             #
