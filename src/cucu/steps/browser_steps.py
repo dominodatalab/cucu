@@ -223,7 +223,7 @@ def save_downloaded_file(ctx, filename):
         if ctx.browser.execute("return window.__cucu_downloaded_file;") == None:
             raise RuntimeError(f"waiting on file {filename}")
 
-    retry(wait_for_file)
+    retry(wait_for_file)()
 
     result = ctx.browser.execute("return window.__cucu_downloaded_file;")
     if not result.startswith("data:"):
