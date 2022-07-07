@@ -62,4 +62,4 @@ Feature: Run
 
   Scenario: User can run a simple test within a reasonable amount of time
     Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/simple_echo_runtime_results" and save stdout to "STDOUT" and expect exit code "0"
-     Then I should see the previous step took less than "10" seconds
+     Then I should see the previous step took less than "6" seconds
