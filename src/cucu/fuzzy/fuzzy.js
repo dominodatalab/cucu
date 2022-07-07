@@ -17,7 +17,7 @@
         jQuery.expr[ ":" ],
         {
             has_text: function(elem, index, match) {
-                return (elem.textContent || elem.innerText || jQuery(elem).text() || '') === match[3].trim();
+                return (elem.textContent || elem.innerText || jQuery(elem).text() || '').trim() === match[3];
             },
             vis: function (elem) {
                 return !(jQuery(elem).is(":hidden") || jQuery(elem).parents(":hidden").length);
@@ -201,44 +201,45 @@
             }
         }
 
-        for(var mIndex=0; mIndex < matchers.length; mIndex++) {
-            var matcher = matchers[mIndex];
+        //
+        // we don't match with `contains` because at this point in the fuzzy
+        // matching rules we're already trying to find a match out of desperation
+        // and doing so with contains will lead to matching elements that would
+        // be containers to actual element we wanted to match on.
+        //
+        // element labeled with any previous sibling
+        if (direction === LEFT_TO_RIGHT) {
+            for(var tIndex = 0; tIndex < things.length; tIndex++) {
+                var thing = things[tIndex];
 
-            // element labeled with any previous sibling
-            if (direction === LEFT_TO_RIGHT) {
-                for(var tIndex = 0; tIndex < things.length; tIndex++) {
-                    var thing = things[tIndex];
+                // <*>name</*>...<thing>...
+                results = jQuery('*:vis:has_text("' + name + '")', document.body).nextAll(thing + ':vis').toArray();
+                if (cucu.debug) { console.log('<*>name</*>...<thing>...', results); }
+                elements = elements.concat(results);
 
-                    // <*>name</*>...<thing>...
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).nextAll(thing + ':vis').toArray();
-                    if (cucu.debug) { console.log('<*>name</*>...<thing>...', results); }
-                    elements = elements.concat(results);
-
-                    // <...><*>name</*></...>...<...><thing></...>
-                    // XXX: this rule is horribly complicated and I'd rather see it gone
-                    //      basically: common great grandpranet
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).nextAll().find(thing + ':vis').toArray();
-                    if (cucu.debug) { console.log('<...><*>name</*></...>...<...><thing></...>', results); }
-                    elements = elements.concat(results);
-                }
+                // <...><*>name</*></...>...<...><thing></...>
+                // TODO: this is not a great rule and should be deprecated at some point in the future
+                results = jQuery('*:vis:has_text("' + name + '")', document.body).nextAll().find(thing + ':vis').toArray();
+                if (cucu.debug) { console.log('<...><*>name</*></...>...<...><thing></...>', results); }
+                elements = elements.concat(results);
             }
+        }
 
-            // element labeled with any next sibling
-            if (direction === RIGHT_TO_LEFT) {
-                for(var tIndex = 0; tIndex < things.length; tIndex++) {
-                    var thing = things[tIndex];
+        // element labeled with any next sibling
+        if (direction === RIGHT_TO_LEFT) {
+            for(var tIndex = 0; tIndex < things.length; tIndex++) {
+                var thing = things[tIndex];
 
-                    // next siblings: <thing>...<*>name</*>...
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prevAll(thing).toArray();
-                    if (cucu.debug) { console.log('<thing>...<*>name</*>...', results); }
-                    elements = elements.concat(results);
+                // next siblings: <thing>...<*>name</*>...
+                results = jQuery('*:vis:has_text("' + name + '")', document.body).prevAll(thing).toArray();
+                if (cucu.debug) { console.log('<thing>...<*>name</*>...', results); }
+                elements = elements.concat(results);
 
-                    // <...><thing></...>...<...><*>name</*></...>
-                    // XXX: this rule is horribly complicated and I'd rather see it gone
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prevAll().find(thing + ':vis').toArray();
-                    if (cucu.debug) { console.log('<...><thin></...>...<...><*>name</*></...>', results); }
-                    elements = elements.concat(results);
-                }
+                // <...><thing></...>...<...><*>name</*></...>
+                // TODO: this is not a great rule and should be deprecated at some point in the future
+                results = jQuery('*:vis:has_text("' + name + '")', document.body).prevAll().find(thing + ':vis').toArray();
+                if (cucu.debug) { console.log('<...><thing></...>...<...><*>name</*></...>', results); }
+                elements = elements.concat(results);
             }
         }
 
