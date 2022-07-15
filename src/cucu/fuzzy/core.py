@@ -45,7 +45,7 @@ class Direction(Enum):
     RIGHT_TO_LEFT = 2
 
 
-def find(browser, name, things, index=0, direction=Direction.LEFT_TO_RIGHT):
+def find(browser, name, things, index=0, direction=Direction.LEFT_TO_RIGHT, attributes=['aria-label', 'title', 'placeholder', 'value']):
     """
     find an element by applying the fuzzy finding rules when given the name
     that identifies the element on screen and a list of possible `things` that
@@ -57,15 +57,16 @@ def find(browser, name, things, index=0, direction=Direction.LEFT_TO_RIGHT):
     input[type='button'], etc.
 
     parameters:
-      browser   - the cucu.browser.Browser object
-      name      - name that identifies the element you are trying to find
-      things    - array of CSS fragments that specify the kind of elements you
-                  want to match on
-      index     - which of the many matches to return
-      direction - the text to element direction to apply fuzzy in. Default we
-                  apply right to left but for checkboxes or certain languages
-                  this direction can be used to find things by prioritizing
-                  matching from "left to right"
+      browser     - the cucu.browser.Browser object
+      name        - name that identifies the element you are trying to find
+      things      - array of CSS fragments that specify the kind of elements you
+                    want to match on
+      index       - which of the many matches to return
+      direction   - the text to element direction to apply fuzzy in. Default we
+                    apply right to left but for checkboxes or certain languages
+                    this direction can be used to find things by prioritizing
+                    matching from "left to right"
+      attributes  - the attributes to look at when matching the name
 
     returns:
         the WebElement that matches the provided arguments.
@@ -78,7 +79,7 @@ def find(browser, name, things, index=0, direction=Direction.LEFT_TO_RIGHT):
     # quotes
     name = name.replace('"', '\\"')
 
-    args = [f'"{name}"', str(things), str(index), str(direction.value)]
+    args = [f'"{name}"', str(things), str(index), str(direction.value), str(attributes)]
     script = f"return cucu.fuzzy_find({','.join(args)});"
     result = browser.execute(script)
 

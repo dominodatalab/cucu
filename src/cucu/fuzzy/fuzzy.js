@@ -48,14 +48,15 @@
      *                    we apply right to left but for checkboxes or certain
      *                    languages this direction can be used to find things by
      *                    prioritizing matching from "left to right"
+     *   attributes     - the attributes to look at when matching the name
      */
     cucu.fuzzy_find = function(name,
                                things,
                                index=0,
-                               direction=LEFT_TO_RIGHT) {
+                               direction=LEFT_TO_RIGHT,
+                               attributes =['aria-label', 'title', 'placeholder', 'value']) {
         var elements = [];
         var results = null;
-        var attributes = ['aria-label', 'title', 'placeholder', 'value'];
         var matchers = ['has_text', 'contains'];
 
         name = name.replaceAll('"', '\\"')
