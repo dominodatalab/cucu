@@ -1,4 +1,5 @@
 from cucu import helpers, retry, step, fuzzy
+from cucu.browser.frames import search_in_all_frames
 
 
 def find_image(ctx, name, index=0):
@@ -16,13 +17,18 @@ def find_image(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
-    return fuzzy.find(
-        ctx.browser,
-        name,
-        ["img"],
-        index=index,
-        attributes=["alt"]
-    )
+    name = name.replace('"', '\\"')
+
+    def find_image_in_current_frame():
+        image = None
+        images = ctx.browser.css_find_elements(f'img[alt="{name}"')
+
+        if len(images) > index:
+            image = images[index]
+
+        return image
+
+    return search_in_all_frames(ctx.browser, find_image_in_current_frame)
 
 
 helpers.define_should_see_thing_with_name_steps(
