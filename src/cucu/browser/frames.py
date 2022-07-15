@@ -1,4 +1,13 @@
 def search_in_all_frames(browser, search_function):
+    """
+    search all frames on the page for an element
+
+    parameters:
+      browser           - the cucu.browser.Browser object
+      search_function   - function to search for the element (within a frame)
+    returns:
+        the WebElement that matches (if found)
+    """
     result = search_function()
 
     if result is None:
