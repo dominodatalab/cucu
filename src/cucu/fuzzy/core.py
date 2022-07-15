@@ -46,14 +46,7 @@ class Direction(Enum):
     RIGHT_TO_LEFT = 2
 
 
-def find(
-    browser,
-    name,
-    things,
-    index=0,
-    direction=Direction.LEFT_TO_RIGHT,
-    attributes=["aria-label", "title", "placeholder", "value"],
-):
+def find(browser, name, things, index=0, direction=Direction.LEFT_TO_RIGHT):
     """
     find an element by applying the fuzzy finding rules when given the name
     that identifies the element on screen and a list of possible `things` that
@@ -65,16 +58,15 @@ def find(
     input[type='button'], etc.
 
     parameters:
-      browser     - the cucu.browser.Browser object
-      name        - name that identifies the element you are trying to find
-      things      - array of CSS fragments that specify the kind of elements you
-                    want to match on
-      index       - which of the many matches to return
-      direction   - the text to element direction to apply fuzzy in. Default we
-                    apply right to left but for checkboxes or certain languages
-                    this direction can be used to find things by prioritizing
-                    matching from "left to right"
-      attributes  - the attributes to look at when matching the name
+      browser   - the cucu.browser.Browser object
+      name      - name that identifies the element you are trying to find
+      things    - array of CSS fragments that specify the kind of elements you
+                  want to match on
+      index     - which of the many matches to return
+      direction - the text to element direction to apply fuzzy in. Default we
+                  apply right to left but for checkboxes or certain languages
+                  this direction can be used to find things by prioritizing
+                  matching from "left to right"
 
     returns:
         the WebElement that matches the provided arguments.
@@ -91,7 +83,6 @@ def find(
         str(things),
         str(index),
         str(direction.value),
-        str(attributes),
     ]
 
     def execute_fuzzy_find():
