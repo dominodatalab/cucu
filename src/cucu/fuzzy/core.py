@@ -45,7 +45,14 @@ class Direction(Enum):
     RIGHT_TO_LEFT = 2
 
 
-def find(browser, name, things, index=0, direction=Direction.LEFT_TO_RIGHT, attributes=['aria-label', 'title', 'placeholder', 'value']):
+def find(
+    browser,
+    name,
+    things,
+    index=0,
+    direction=Direction.LEFT_TO_RIGHT,
+    attributes=["aria-label", "title", "placeholder", "value"],
+):
     """
     find an element by applying the fuzzy finding rules when given the name
     that identifies the element on screen and a list of possible `things` that
@@ -79,7 +86,13 @@ def find(browser, name, things, index=0, direction=Direction.LEFT_TO_RIGHT, attr
     # quotes
     name = name.replace('"', '\\"')
 
-    args = [f'"{name}"', str(things), str(index), str(direction.value), str(attributes)]
+    args = [
+        f'"{name}"',
+        str(things),
+        str(index),
+        str(direction.value),
+        str(attributes),
+    ]
     script = f"return cucu.fuzzy_find({','.join(args)});"
     result = browser.execute(script)
 
