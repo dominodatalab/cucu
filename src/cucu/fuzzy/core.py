@@ -1,6 +1,7 @@
 import pkgutil
 
 from enum import Enum
+from cucu.browser.frames import search_in_all_frames
 
 
 def load_jquery_lib():
@@ -71,33 +72,22 @@ def find(browser, name, things, index=0, direction=Direction.LEFT_TO_RIGHT):
         the WebElement that matches the provided arguments.
     """
     browser.switch_to_default_frame()
-    init(browser)
 
     # always need to protect names in which double quotes are used as below
     # we pass arguments to the fuzzy_find javascript function wrapped in double
     # quotes
     name = name.replace('"', '\\"')
 
-    args = [f'"{name}"', str(things), str(index), str(direction.value)]
-    script = f"return cucu.fuzzy_find({','.join(args)});"
-    result = browser.execute(script)
+    args = [
+        f'"{name}"',
+        str(things),
+        str(index),
+        str(direction.value),
+    ]
 
-    if result is None:
-        frames = browser.execute('return document.querySelectorAll("iframe");')
-        for frame in frames:
-            #
-            # need to switch back to the default frame before switching into any
-            # other inner frame otherwise the context will be wrong and we'd
-            # generate a stale element exception
-            #
-            browser.switch_to_default_frame()
-            browser.switch_to_frame(frame)
-            init(browser)
-            args = [f'"{name}"', str(things), str(index), str(direction.value)]
-            script = f"return cucu.fuzzy_find({','.join(args)});"
-            result = browser.execute(script)
+    def execute_fuzzy_find():
+        init(browser)
+        script = f"return cucu.fuzzy_find({','.join(args)});"
+        return browser.execute(script)
 
-            if result is not None:
-                return result
-
-    return result
+    return search_in_all_frames(browser, execute_fuzzy_find)
