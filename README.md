@@ -55,7 +55,7 @@ Python 3.7+ is required and recommend setting up
      ```
      Feature: My First Cucu Test
        We want to be sure the user get search results using the landing page
- 
+
        Scenario: User can get search results
          Given I open a browser at the url "https://www.google.com/search"
          When I wait to write "google" into the input "Search"
