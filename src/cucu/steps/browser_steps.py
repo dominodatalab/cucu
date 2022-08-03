@@ -115,7 +115,6 @@ def save_clipboard_value_to_variable(ctx, variable):
 @step('I should see the browser title is "{title}"')
 def should_see_browser_title(ctx, title):
     ctx.check_browser_initialized()
-    # create the hidden textarea so we can paste clipboard contents in
     current_title = ctx.browser.title()
 
     if current_title != title:
