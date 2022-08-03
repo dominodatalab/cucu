@@ -140,7 +140,9 @@ Feature: Run outputs
        <testcase classname="Feature with mixed results" name="Scenario that passes" status="passed" time=".*">
        </testcase>
        <testcase classname="Feature with mixed results" name="Scenario that fails" status="failed" time=".*">
+        <failure>
       [\s\S]*
+        </failure>
        </testcase>
        <testcase classname="Feature with mixed results" name="Scenario that also passes" status="passed" time=".*">
        </testcase>
