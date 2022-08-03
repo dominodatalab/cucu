@@ -132,16 +132,21 @@ Feature: Run outputs
       And I should see "{STDERR}" is empty
 
   Scenario: User gets JUnit XML results file as expected
-    Given I run the command "cucu run data/features/feature_with_tagging.feature --results {CUCU_RESULTS_DIR}/validate_junit_xml_results" and save stdout to "STDOUT" and expect exit code "0"
-     Then I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Feature_with_tagging.xml"
-      And I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Feature_with_tagging.xml" matches the following:
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/validate_junit_xml_results" and save stdout to "STDOUT" and expect exit code "1"
+     Then I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Feature_with_mixed_results.xml"
+      And I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Feature_with_mixed_results.xml" matches the following:
       """
-      <testsuite name="Feature with tagging" tests="3" errors="0" failures="0" skipped="1" timestamp=".*" tags="all">
-       <testcase classname="Feature with tagging" name="Scenario that is tagged with @first" status="passed" time=".*" tags="first">
+      <testsuite name="Feature with mixed results" tests="5" errors="0" failures="2" skipped="1" timestamp=".*">
+       <testcase classname="Feature with mixed results" name="Scenario that passes" status="passed" time=".*">
        </testcase>
-       <testcase classname="Feature with tagging" name="Scenario that is tagged with @second" status="passed" time=".*" tags="second">
+       <testcase classname="Feature with mixed results" name="Scenario that fails" status="failed" time=".*">
+      [\s\S]*
        </testcase>
-       <testcase classname="Feature with tagging" name="Scenario that is skipped" status="skipped" time=".*" tags="disabled, testrail\(123,456\)">
+       <testcase classname="Feature with mixed results" name="Scenario that also passes" status="passed" time=".*">
+       </testcase>
+       <testcase classname="Feature with mixed results" name="Scenario that has an undefined step" status=".*" time=".*">
+       </testcase>
+       <testcase classname="Feature with mixed results" name="Scenario that is skipped" status="skipped" time=".*" tags="disabled">
        </testcase>
       </testsuite>
       """
