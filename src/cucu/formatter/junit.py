@@ -169,15 +169,15 @@ class CucuJUnitFormatter(Formatter):
 
         # calculate with the latest data
         testsuite["tests"] = len(scenarios)
-        testsuite["failures"] = sum(
-            [1 for x in scenarios.values() if x["status"] == Status.failed]
+        testsuite["failures"] = len(
+            [x for x in scenarios.values() if x["status"] == Status.failed]
         )
-        testsuite["skipped"] = sum(
-            [1 for x in scenarios.values() if x["status"] == Status.skipped]
+        testsuite["skipped"] = len(
+            [x for x in scenarios.values() if x["status"] == Status.skipped]
         )
-        testsuite["errors"] = sum(
+        testsuite["errors"] = len(
             [
-                1
+                x
                 for x in scenarios.values()
                 if x["status"]
                 not in (Status.failed, Status.skipped, Status.passed)
