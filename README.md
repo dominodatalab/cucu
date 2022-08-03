@@ -58,9 +58,9 @@ Python 3.7+ is required and recommend setting up
 
        Scenario: User can get search results
          Given I open a browser at the url "https://www.google.com/search"
-         When I wait to write "google" into the input "Search"
+          When I wait to write "google" into the input "Search"
            And I click the button "Google Search"
-         Then I wait to see the text "results"
+          Then I wait to see the text "results"
      ```
 6. run it
    ```
