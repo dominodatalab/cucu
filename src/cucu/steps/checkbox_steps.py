@@ -17,6 +17,8 @@ def find_checkbox(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
+    ctx.check_browser_initialized()
+
     return fuzzy.find(
         ctx.browser,
         name,
@@ -50,6 +52,8 @@ def check_checkbox(ctx, checkbox):
     """
     internal method used to check a checkbox if it is not already checked
     """
+    ctx.check_browser_initialized()
+
     if is_checked(checkbox):
         raise Exception("checkbox already checked")
 
@@ -60,6 +64,8 @@ def uncheck_checkbox(ctx, checkbox):
     """
     internal method used to uncheck a checkbox if it is not already unchecked
     """
+    ctx.check_browser_initialized()
+
     if is_not_checked(checkbox):
         raise Exception("checkbox already unchecked")
 

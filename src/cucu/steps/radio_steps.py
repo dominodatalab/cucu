@@ -18,6 +18,7 @@ def find_radio_button(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
+    ctx.check_browser_initialized()
     return fuzzy.find(
         ctx.browser,
         name,
@@ -66,6 +67,7 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
     returns:
         the WebElement that matches the provided arguments.
     """
+    ctx.check_browser_initialized()
     radio = find_n_assert_radio_button(ctx, name, index=index)
 
     selected = radio.get_attribute("checked") == "true"
@@ -97,6 +99,7 @@ def select_radio_button(ctx, radiobox):
     """
     internal method to select a radio button that isn't already selected
     """
+    ctx.check_browser_initialized()
     selected = bool(radiobox.get_attribute("checked"))
 
     if selected:

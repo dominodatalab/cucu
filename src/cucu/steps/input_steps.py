@@ -25,6 +25,8 @@ def find_input(ctx, name, index=0):
     raises:
         a RuntimeError if the input isn't found
     """
+    ctx.check_browser_initialized()
+
     input_ = fuzzy.find(
         ctx.browser,
         name,
@@ -55,6 +57,8 @@ def find_n_write(ctx, name, value, index=0):
     raises:
         an error if the desired input is not found
     """
+    ctx.check_browser_initialized()
+
     input_ = find_input(ctx, name, index=index)
     input_.send_keys(value)
 
@@ -71,6 +75,8 @@ def find_n_clear(ctx, name, index=0):
     raises:
         an error if the desired input is not found
     """
+    ctx.check_browser_initialized()
+
     input_ = find_input(ctx, name, index=index)
     input_.clear()
 

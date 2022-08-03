@@ -22,6 +22,8 @@ def find_dropdown(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
+    ctx.check_browser_initialized()
+
     dropdown = fuzzy.find(
         ctx.browser,
         name,
@@ -57,6 +59,8 @@ def find_dropdown_option(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
+    ctx.check_browser_initialized()
+
     option = fuzzy.find(
         ctx.browser,
         name,
@@ -85,6 +89,7 @@ def find_n_select_dropdown_option(ctx, dropdown, option):
       name(str):   name that identifies the desired dropdown on screen
       option(str): name of the option to select
     """
+    ctx.check_browser_initialized()
 
     dropdown_element = find_dropdown(ctx, dropdown)
 
@@ -116,6 +121,8 @@ def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
       name(str):   name that identifies the desired dropdown on screen
       option(str): name of the option to select
     """
+    ctx.check_browser_initialized()
+
     dropdown_element = find_dropdown(ctx, dropdown)
     selected_option = None
 
