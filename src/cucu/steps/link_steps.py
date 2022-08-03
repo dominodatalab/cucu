@@ -18,6 +18,7 @@ def find_link(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
+    ctx.check_browser_initialized()
     return fuzzy.find(ctx.browser, name, ["a", '*[role="link"]'], index=index)
 
 
@@ -25,6 +26,7 @@ def click_link(ctx, link):
     """
     internal method to click a link
     """
+    ctx.check_browser_initialized()
     ctx.browser.click(link)
 
 

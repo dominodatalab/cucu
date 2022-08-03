@@ -17,6 +17,7 @@ def find_tables(ctx):
     returns:
       an array of arrays containing the HTML tables currently displayed
     """
+    ctx.check_browser_initialized()
     tables_lib = pkgutil.get_data("cucu", "steps/tables.js")
     tables_lib = tables_lib.decode("utf8")
     ctx.browser.execute(tables_lib)

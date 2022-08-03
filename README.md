@@ -10,34 +10,64 @@ validate a product behaves as expected.
 Python 3.7+ is required and recommend setting up
 [pyenv](https://github.com/pyenv/pyenv).
 
-# installation
+# use cucu as a library
+*or how to use cucu in your repo*
 
-## from source
+1. add cucu your `requirements.txt` to get from GH by label (use current label number)
+   ```
+   git+ssh://git@github.com/cerebrotech/cucu@0.65.0#egg=cucu
+   ```
+2. install it
+   ```
+   pip install -r requirements.txt
+   ```
 
-Clone this repo locally and then proceed to install python 3.7+ as indicated
-earlier. At this point you should be able to simply run `make install` at the
-top level of the source tree and it should install all required dependencies.
+3. create the folder structure and files with content:
+   - features/
+      - steps/
+      - `__init__.py` # enables cucu and custom steps
+        ```
+        # import all of the steps from cucu
+        from cucu.steps import *  # noqa: F403, F401
 
-## from build
+        # import individual sub-modules here (i.e. module names of py files)
+        # Example: For file features/steps/ui/login.py
+        # import steps.ui.login_steps
+        ```
+   - environment.py - enables before/after hooks
+     ```
+     # flake8: noqa
+     from cucu.environment import *
 
-Within the cucu directory you can run `poetry build` and that will produce some
-output like so:
+     # Define custom before/after hooks here
+     ```
+4. see cucu steps
+   ```
+   cucu steps
+   ```
+   - if you have `brew install fzf` then you can fuzzy find steps
+     ```
+     cucu steps | fzf
+     # start typing for search
+     ```
+5. create your first cucu test
+   - features/my_first_test.feature
+     ```
+     Feature: My First Cucu Test
+       We want to be sure the user get search results using the landing page
 
-```
-Building cucu (0.1.0)
-  - Building sdist
-  - Built cucu-0.1.0.tar.gz
-  - Building wheel
-  - Built cucu-0.1.0-py3-none-any.whl
-```
+       Scenario: User can get search results
+         Given I open a browser at the url "https://www.google.com/search"
+          When I wait to write "google" into the input "Search"
+           And I click the button "Google Search"
+          Then I wait to see the text "results"
+     ```
+6. run it
+   ```
+   cucu run features/my_first_test.feature
+   ```
 
-At this point you can install the file `dist/cucu-0.1.0.tar.gz` using
-`pip install ....tar.gz` anywhere you'd like and have the `cucu` tool ready to
-run.
-
-# usage
-
-## running your a test
+# run a test
 
 The command `cucu run` is used to run a given test or set of tests and in its
 simplest invocation you can use it like so:
@@ -56,7 +86,7 @@ By default we'll simply use the `Google Chrome` you have installed and there's
 a python package that'll handle downloading chromedriver that matches your
 specific local Google Chrome version.
 
-# running exact versions of any browser using docker
+# run specific browser version with docker
 
 [docker hub](https://hub.docker.com/) has easy to use docker containers for
 running specific versions of chrome, edge and firefox browsers for testing that
@@ -99,10 +129,30 @@ CUCU_SELENIUM_REMOTE_URL: http://localhost:4444
 Then you can simply run `cucu run path/to/some.feature` and `cucu` would load
 the local `cucurc.yml` or `~/.cucurc.yml` settings and use those.
 
-# running built in tests
+# more ways to install cucu
 
-You can run the existing `cucu` tests by simply executing `make test` and can
-also check the code coverage by running `make coverage`.
+## from source
+
+Clone this repo locally and then proceed to install python 3.7+ as indicated
+earlier. At this point you should be able to simply run `make install` at the
+top level of the source tree and it should install all required dependencies.
+
+## from build
+
+Within the cucu directory you can run `poetry build` and that will produce some
+output like so:
+
+```
+Building cucu (0.1.0)
+  - Building sdist
+  - Built cucu-0.1.0.tar.gz
+  - Building wheel
+  - Built cucu-0.1.0-py3-none-any.whl
+```
+
+At this point you can install the file `dist/cucu-0.1.0.tar.gz` using
+`pip install ....tar.gz` anywhere you'd like and have the `cucu` tool ready to
+run.
 
 # development
 
@@ -111,6 +161,12 @@ also check the code coverage by running `make coverage`.
 [install that, first](https://brew.sh/).
 * From the top-level director of the `cucu` repository,
 run `pre-commit install`.
+
+## running built in tests
+
+You can run the existing `cucu` tests by simply executing `make test` and can
+also check the code coverage by running `make coverage`.
+
 
 ## tagging a new release
 

@@ -10,6 +10,11 @@ Feature: Browser management
      Then I should see the browser title is "Inputs!"
      When I close the current browser
      Then I should see the browser title is "Buttons!"
+     When I close the current browser
+     Then I expect the following step to fail with "browser not currently open"
+     """
+     Then I should see the browser title is "foo"
+     """
 
   Scenario: User can reuse the same open browser and go back in the history
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"

@@ -52,6 +52,7 @@ def open_a_new_browser(ctx, url):
 
 @step("I execute in the current browser the following javascript")
 def execute_javascript(ctx):
+    ctx.check_browser_initialized()
     ctx.browser.execute(ctx.text)
 
 
@@ -59,27 +60,32 @@ def execute_javascript(ctx):
     'I execute in the current browser the following javascript and save the result to the variable "{variable}"'
 )
 def execute_javascript_and_save(ctx, variable):
+    ctx.check_browser_initialized()
     result = ctx.browser.execute(ctx.text)
     config.CONFIG[variable] = result
 
 
 @step('I save the current url to the variable "{variable}"')
 def save_current_url_to_variable(ctx, variable):
+    ctx.check_browser_initialized()
     config.CONFIG[variable] = ctx.browser.get_current_url()
 
 
 @step("I refresh the browser")
 def refresh_browser(ctx):
+    ctx.check_browser_initialized()
     ctx.browser.refresh()
 
 
 @step("I go back on the browser")
 def go_back_on_browser(ctx):
+    ctx.check_browser_initialized()
     ctx.browser.back()
 
 
 @step('I save the contents of the clipboard to the variable "{variable}"')
 def save_clipboard_value_to_variable(ctx, variable):
+    ctx.check_browser_initialized()
     # create the hidden textarea so we can paste clipboard contents in
     ctx.browser.execute(
         """
@@ -108,6 +114,7 @@ def save_clipboard_value_to_variable(ctx, variable):
 
 @step('I should see the browser title is "{title}"')
 def should_see_browser_title(ctx, title):
+    ctx.check_browser_initialized()
     current_title = ctx.browser.title()
 
     if current_title != title:
@@ -116,18 +123,21 @@ def should_see_browser_title(ctx, title):
 
 @step("I close the current browser")
 def close_browser(ctx):
+    ctx.check_browser_initialized()
     browser_index = ctx.browsers.index(ctx.browser)
 
     if browser_index > 0:
         ctx.browser = ctx.browsers[browser_index - 1]
     else:
-        ctx.current_borwser = None
+        ctx.browser = None
 
+    ctx.browsers[browser_index].quit()
     del ctx.browsers[browser_index]
 
 
 @step('I navigate to the url "{url}"')
 def navigate_to_the_url(ctx, url):
+    ctx.check_browser_initialized()
     logger.debug(f"navigating to url #{url}")
     ctx.browser.navigate(url)
 
@@ -154,16 +164,19 @@ def switch_to_next_browser(ctx):
 
 @step("I close the current browser tab")
 def close_browser_tab(ctx):
+    ctx.check_browser_initialized()
     ctx.browser.close_window()
 
 
 @step("I switch to the next browser tab")
 def switch_to_next_browser_tab(ctx):
+    ctx.check_browser_initialized()
     ctx.browser.switch_to_next_tab()
 
 
 @step("I switch to the previous browser tab")
 def switch_to_previous_browser_tab(ctx):
+    ctx.check_browser_initialized()
     ctx.browser.switch_to_previous_tab()
 
 
@@ -180,17 +193,19 @@ def find_file_input(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
-    input = fuzzy.find(ctx.browser, name, ['input[type="file"]'], index=index)
+    ctx.check_browser_initialized()
+    _input = fuzzy.find(ctx.browser, name, ['input[type="file"]'], index=index)
 
     prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
-    if input is None:
+    if _input is None:
         raise RuntimeError(f'unable to find the {prefix}file input "{name}"')
 
-    return input
+    return _input
 
 
 def save_downloaded_file(ctx, filename):
+    ctx.check_browser_initialized()
     elem = ctx.browser.execute(
         """
         var input = window.document.createElement('INPUT');
@@ -249,15 +264,15 @@ def wait_to_see_downloaded_file(ctx, filename):
 @step(
     'I wait up to "{seconds}" seconds to see the downloaded file "{filename}"'
 )
-def wait_to_see_downloaded_file(ctx, filename):
+def wait_up_to_seconds_to_see_downloaded_file(ctx, seconds, filename):
     seconds = float(seconds)
     retry(save_downloaded_file, wait_up_to_s=seconds)(ctx, filename)
 
 
 @step('I upload the file "{filepath}" to the file input "{name}"')
 def upload_file_to_input(ctx, filepath, name):
-    input = find_file_input(ctx, name)
-    input.send_keys(os.path.abspath(filepath))
+    _input = find_file_input(ctx, name)
+    _input.send_keys(os.path.abspath(filepath))
 
 
 @step('I run the following steps if the current browser is "{name}"')

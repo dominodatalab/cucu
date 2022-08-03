@@ -9,6 +9,7 @@ from cucu import config, logger
 from cucu.config import CONFIG
 from cucu import init_global_hook_variables, init_scenario_hook_variables
 from cucu.page_checks import init_page_checks
+from functools import partial
 
 
 init_global_hook_variables()
@@ -37,8 +38,19 @@ def escape_filename(string):
     return string.replace("/", "_")
 
 
+def check_browser_initialized(ctx):
+    """
+    check browser session initialized otherwise throw an exception indicating
+    such to be used consistently by all steps in this module.
+    """
+
+    if ctx.browser is None:
+        raise RuntimeError("browser not currently open")
+
+
 def before_all(ctx):
     CONFIG.snapshot()
+    ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
 
 
 def before_feature(ctx, feature):

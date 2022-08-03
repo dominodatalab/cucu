@@ -1,5 +1,4 @@
 import os
-import shlex
 import subprocess
 import time
 
@@ -137,7 +136,7 @@ def stop_the_timer(ctx, name):
 
 def run_feature(ctx, filepath, results):
     command = f"cucu run {filepath} --results {results}"
-    process = subprocess.run(shlex.split(command))
+    process = subprocess.run(command, shell=True)
 
     return_code = process.returncode
     if return_code != 0:

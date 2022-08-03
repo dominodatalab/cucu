@@ -15,6 +15,7 @@ def find_text(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments or None if none found
     """
+    ctx.check_browser_initialized()
     return fuzzy.find(
         ctx.browser,
         name,
@@ -32,6 +33,7 @@ helpers.define_run_steps_if_I_can_see_element_with_name_steps("text", find_text)
     'I search for the regex "{regex}" on the current page and save the group "{name}" to the variable "{variable}"'
 )
 def search_for_regex_to_page_and_save(ctx, regex, name, variable):
+    ctx.check_browser_initialized()
     ctx.browser.execute(load_jquery_lib())
     text = ctx.browser.execute(
         'return jQuery("body").children(":visible").text();'
@@ -43,6 +45,7 @@ def search_for_regex_to_page_and_save(ctx, regex, name, variable):
     'I match the regex "{regex}" on the current page and save the group "{name}" to the variable "{variable}"'
 )
 def match_for_regex_to_page_and_save(ctx, regex, name, variable):
+    ctx.check_browser_initialized()
     ctx.browser.execute(load_jquery_lib())
     text = ctx.browser.execute(
         'return jQuery("body").children(":visible").text();'
