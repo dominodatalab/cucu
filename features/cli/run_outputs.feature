@@ -136,7 +136,7 @@ Feature: Run outputs
      Then I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Feature_with_tagging.xml"
       And I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Feature_with_tagging.xml" matches the following:
       """
-      <testsuite name="Feature with tagging" tests="0" errors="0" failures="0" skipped="0" timestamp=".*" tags="all">
+      <testsuite name="Feature with tagging" tests="3" errors="0" failures="0" skipped="1" timestamp=".*" tags="all">
        <testcase classname="Feature with tagging" name="Scenario that is tagged with @first" status="passed" time=".*" tags="first">
        </testcase>
        <testcase classname="Feature with tagging" name="Scenario that is tagged with @second" status="passed" time=".*" tags="second">
