@@ -163,17 +163,33 @@ class CucuJUnitFormatter(Formatter):
         soup = bs4.BeautifulSoup()
         testsuite = bs4.Tag(name="testsuite")
         testsuite["name"] = results["name"]
-        testsuite["tests"] = results["tests"]
-        testsuite["errors"] = results["errors"]
-        testsuite["failures"] = results["failures"]
-        testsuite["skipped"] = results["skipped"]
         testsuite["timestamp"] = results["timestamp"]
+
+        scenarios = results["scenarios"]
+
+        # calculate with the latest data
+        testsuite["tests"] = len(scenarios)
+        testsuite["failures"] = len(
+            [x for x in scenarios.values() if x["status"] == Status.failed]
+        )
+        testsuite["skipped"] = len(
+            [x for x in scenarios.values() if x["status"] == Status.skipped]
+        )
+        testsuite["errors"] = len(
+            [
+                x
+                for x in scenarios.values()
+                if x["status"]
+                not in (Status.failed, Status.skipped, Status.passed)
+            ]
+        )
+
         if "tags" in results:
             testsuite["tags"] = results["tags"]
         soup.append(testsuite)
 
-        for scenario_name in results["scenarios"]:
-            scenario = results["scenarios"][scenario_name]
+        for scenario_name in scenarios:
+            scenario = scenarios[scenario_name]
             testcase = bs4.Tag(name="testcase")
             testcase["classname"] = results["name"]
             testcase["name"] = scenario_name
