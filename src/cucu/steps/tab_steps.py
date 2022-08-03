@@ -14,6 +14,7 @@ def find_tab(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
+    ctx.check_browser_initialized()
     return fuzzy.find(ctx.browser, name, ['*[role="tab"]'], index=index)
 
 
@@ -21,6 +22,7 @@ def click_tab(ctx, tab):
     """
     internal method to click a tab
     """
+    ctx.check_browser_initialized()
     ctx.browser.click(tab)
 
 

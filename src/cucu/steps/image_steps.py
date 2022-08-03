@@ -17,6 +17,8 @@ def find_image(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
+    ctx.check_browser_initialized()
+
     name = name.replace('"', '\\"')
 
     def find_image_in_current_frame():

@@ -18,6 +18,7 @@ def find_menuitem(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
+    ctx.check_browser_initialized()
     return fuzzy.find(ctx.browser, name, ['*[role="menuitem"]'], index=index)
 
 

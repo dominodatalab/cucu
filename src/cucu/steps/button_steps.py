@@ -32,6 +32,7 @@ def find_button(ctx, name, index=0):
     returns:
         the WebElement that matches the provided arguments.
     """
+    ctx.check_browser_initialized()
     button = fuzzy.find(
         ctx.browser,
         name,
