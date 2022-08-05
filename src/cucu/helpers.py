@@ -230,9 +230,11 @@ def define_action_on_thing_with_name_steps(
         prefix = nth_to_ordinal(index)
         element = find_func(ctx, name, index=index)
 
-        if element is None and not (it_exists):
-            raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
-
+        if element is None:
+            if not it_exists:
+                raise RuntimeError(
+                    f'unable to find the {prefix}{thing} "{name}"'
+                )
         else:
             action_func(ctx, element)
 
