@@ -189,12 +189,16 @@ def define_action_on_thing_with_name_steps(
       I {action} the {thing} "{name}"
       I wait to {action} the {thing} "{name}"
       I wait up to "{seconds}" seconds to {action} the {thing} "{name}"
+      ...
+      I {action} the {thing} "{name}" if it exists
 
       when with_nth=True we also define:
 
       I {action} the "{nth}" {thing} "{name}"
       I wait to {action} the "{nth}" {thing} "{name}"
       I wait up to "{seconds}" seconds to "{nth}" {action} the {thing} "{name}"
+      ...
+      I {action} the "{nth}" {thing} "{name}" if it exists
 
     parameters:
         thing(string):       name of the thing we're creating the steps for such
@@ -222,18 +226,23 @@ def define_action_on_thing_with_name_steps(
                             "nth" steps. default: False
     """
 
-    def action_it(ctx, thing, name, index=0):
+    def action_it(ctx, thing, name, index=0, it_exists=False):
         prefix = nth_to_ordinal(index)
         element = find_func(ctx, name, index=index)
 
-        if element is None:
+        if element is None and not (it_exists):
             raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
 
-        action_func(ctx, element)
+        else:
+            action_func(ctx, element)
 
     @step(f'I {action} the {thing} "{{name}}"')
     def action_the(ctx, name):
         action_it(ctx, thing, name)
+
+    @step(f'I {action} the {thing} "{{name}}" if it exists')
+    def action_the(ctx, name):
+        action_it(ctx, thing, name, it_exists=True)
 
     @step(f'I wait to {action} the {thing} "{{name}}"')
     def wait_to_action_the(ctx, name):
@@ -251,6 +260,10 @@ def define_action_on_thing_with_name_steps(
         @step(f'I {action} the "{{nth:nth}}" {thing} "{{name}}"')
         def action_the_nth(ctx, nth, name):
             action_it(ctx, thing, name, index=nth)
+
+        @step(f'I {action} the "{{nth:nth}}" {thing} "{{name}}" if it exists')
+        def action_the_nth(ctx, nth, name):
+            action_it(ctx, thing, name, index=nth, it_exists=True)
 
         @step(f'I wait to {action} the "{{nth:nth}}" {thing} "{{name}}"')
         def action_the_nth(ctx, nth, name):
