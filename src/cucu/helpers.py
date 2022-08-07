@@ -226,12 +226,12 @@ def define_action_on_thing_with_name_steps(
                             "nth" steps. default: False
     """
 
-    def action_it(ctx, thing, name, index=0, it_exists=False):
+    def action_it(ctx, thing, name, index=0, must_exist=True):
         prefix = nth_to_ordinal(index)
         element = find_func(ctx, name, index=index)
 
         if element is None:
-            if not it_exists:
+            if must_exist:
                 raise RuntimeError(
                     f'unable to find the {prefix}{thing} "{name}"'
                 )
@@ -243,8 +243,8 @@ def define_action_on_thing_with_name_steps(
         action_it(ctx, thing, name)
 
     @step(f'I {action} the {thing} "{{name}}" if it exists')
-    def action_the(ctx, name):
-        action_it(ctx, thing, name, it_exists=True)
+    def action_the_if_it_exists(ctx, name):
+        action_it(ctx, thing, name, must_exist=False)
 
     @step(f'I wait to {action} the {thing} "{{name}}"')
     def wait_to_action_the(ctx, name):
@@ -264,8 +264,8 @@ def define_action_on_thing_with_name_steps(
             action_it(ctx, thing, name, index=nth)
 
         @step(f'I {action} the "{{nth:nth}}" {thing} "{{name}}" if it exists')
-        def action_the_nth(ctx, nth, name):
-            action_it(ctx, thing, name, index=nth, it_exists=True)
+        def action_the_nth_if_it_exists(ctx, nth, name):
+            action_it(ctx, thing, name, index=nth, must_exist=False)
 
         @step(f'I wait to {action} the "{{nth:nth}}" {thing} "{{name}}"')
         def action_the_nth(ctx, nth, name):
