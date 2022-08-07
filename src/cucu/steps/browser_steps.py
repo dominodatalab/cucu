@@ -87,7 +87,7 @@ def go_back_on_browser(ctx):
 def save_clipboard_value_to_variable(ctx, variable):
     ctx.check_browser_initialized()
     # create the hidden textarea so we can paste clipboard contents in
-    ctx.browser.execute(
+    textarea = ctx.browser.execute(
         """
     var textarea = document.getElementById('cucu-copy-n-paste')
     if (!textarea) {
@@ -96,13 +96,13 @@ def save_clipboard_value_to_variable(ctx, variable):
         textarea.style.display = 'hidden';
         textarea.style.height = '0px';
         textarea.style.width = '0px';
-        document.body.appendChild(textarea);
+        document.body.insertBefore(textarea, document.body.firstChild);
     }
+    return textarea;
     """
     )
-    # send ctrl+v or cmd+v to that element
-    textarea = ctx.browser.css_find_elements("#cucu-copy-n-paste")[0]
 
+    # send ctrl+v or cmd+v to that element
     if "mac" in ctx.browser.execute("return navigator.platform").lower():
         textarea.send_keys(Keys.COMMAND, "v")
     else:
