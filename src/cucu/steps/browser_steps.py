@@ -168,16 +168,34 @@ def close_browser_tab(ctx):
     ctx.browser.close_window()
 
 
-@step("I switch to the next browser tab")
-def switch_to_next_browser_tab(ctx):
+def switch_to_next_tab(ctx):
     ctx.check_browser_initialized()
     ctx.browser.switch_to_next_tab()
 
 
-@step("I switch to the previous browser tab")
-def switch_to_previous_browser_tab(ctx):
+@step("I switch to the next browser tab")
+def switch_to_next_browser_tab(ctx):
+    switch_to_next_tab(ctx)
+
+
+@step("I wait to switch to the next browser tab")
+def wait_to_switch_to_next_browser_tab(ctx):
+    retry(switch_to_next_tab)(ctx)
+
+
+def switch_to_previous_tab(ctx):
     ctx.check_browser_initialized()
     ctx.browser.switch_to_previous_tab()
+
+
+@step("I switch to the previous browser tab")
+def switch_to_previous_browser_tab(ctx):
+    switch_to_previous_tab(ctx)
+
+
+@step("I wait to switch to the previous browser tab")
+def wait_to_switch_to_previous_browser_tab(ctx):
+    retry(switch_to_previous_tab)(ctx)
 
 
 def find_file_input(ctx, name, index=0):
