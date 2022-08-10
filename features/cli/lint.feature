@@ -205,7 +205,7 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/unique_feature_lint" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
-      {CUCU_RESULTS_DIR}/unique_feature_lint/first_feature.feature:1: E feature name must be unique, "Feature with non unique name" used in "{CUCU_RESULTS_DIR}/unique_feature_lint/first_feature.feature" and "{CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature"
+      {CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature:1: E feature name must be unique, "Feature with non unique name" used in "{CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature" and "{CUCU_RESULTS_DIR}/unique_feature_lint/first_feature.feature"
 
       """
       And I should see "{STDERR}" is equal to the following:
@@ -216,7 +216,7 @@ Feature: Lint
      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/unique_feature_lint" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
-      {CUCU_RESULTS_DIR}/unique_feature_lint/first_feature.feature:1: E feature name must be unique, "Feature with non unique name" used in "{CUCU_RESULTS_DIR}/unique_feature_lint/first_feature.feature" and "{CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature" ✗ (must be fixed manually)
+      {CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature:1: E feature name must be unique, "Feature with non unique name" used in "{CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature" and "{CUCU_RESULTS_DIR}/unique_feature_lint/first_feature.feature" ✗ (must be fixed manually)
 
       """
       And I should see "{STDERR}" is equal to the following:
@@ -251,7 +251,7 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/unique_scenario_lint" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
-      {CUCU_RESULTS_DIR}/unique_scenario_lint/first_feature.feature:3: E scenario name must be unique, "Scenario with non unique name" used in "{CUCU_RESULTS_DIR}/unique_scenario_lint/first_feature.feature" and "{CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature"
+      {CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature:3: E scenario name must be unique, "Scenario with non unique name" used in "{CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature" and "{CUCU_RESULTS_DIR}/unique_scenario_lint/first_feature.feature"
 
       """
       And I should see "{STDERR}" is equal to the following:
@@ -262,7 +262,7 @@ Feature: Lint
      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/unique_scenario_lint" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
-      {CUCU_RESULTS_DIR}/unique_scenario_lint/first_feature.feature:3: E scenario name must be unique, "Scenario with non unique name" used in "{CUCU_RESULTS_DIR}/unique_scenario_lint/first_feature.feature" and "{CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature" ✗ (must be fixed manually)
+      {CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature:3: E scenario name must be unique, "Scenario with non unique name" used in "{CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature" and "{CUCU_RESULTS_DIR}/unique_scenario_lint/first_feature.feature" ✗ (must be fixed manually)
 
       """
       And I should see "{STDERR}" is equal to the following:

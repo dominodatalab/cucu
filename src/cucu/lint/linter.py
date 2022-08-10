@@ -270,7 +270,9 @@ def lint(filepath):
 
     if os.path.isdir(filepath):
         basepath = os.path.join(filepath, "**/*.feature")
-        feature_filepaths = glob.iglob(basepath, recursive=True)
+        # XXX: for now sorted by name... we could expose some options for other
+        #      sorting orders if it makes sense
+        feature_filepaths = sorted(glob.iglob(basepath, recursive=True))
 
     else:
         feature_filepaths = [filepath]
