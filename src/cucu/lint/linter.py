@@ -48,6 +48,21 @@ def parse_matcher(name, rule_name, rule, line, state):
     (matched, extra_matcher_message) where matched is a boolean indicating that
     the rule name matcher name and rule matched on the line provided and the
     extra_matcher_message is used when reporting the linting failure upstream.
+
+    name(string): name of the line to match on, ie current_line, previous_line,
+                  next_line are currently supported
+    rule_name(string): the actual name of the rule from the rules file, such as:
+                       when_keyword_indented_correctly
+    rule(dict): the rule dictionary object which contains the matcher, fix, etc.
+    line(string): actual line to parse the matcher against
+    state(dict): state object passed in which contains a few things such as:
+                 current_feature_filepath, current_feature_name, etc.
+
+    returns: a tuple where the first element is True if the matcher matches the
+             specified line. False if the matcher simply doesn't apply to this
+             line. The second part of the tuple is an string used to augment
+             the lint violation if the remainder of the matchers in a rule
+             matched their specific line (current_line, previous_line, etc).
     """
     if name not in rule:
         # when the name provided isn't in the rule then we simply have a no-op
@@ -89,8 +104,8 @@ def parse_matcher(name, rule_name, rule, line, state):
             return (False, "")
 
         return (True, "")
-    else:
-        raise RuntimeError(f"unsupported matcher for {name}")
+
+    raise RuntimeError(f"unsupported matcher for {name}")
 
 
 def lint_line(state, rules, steps, line_number, lines, filepath):
