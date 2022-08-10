@@ -1,4 +1,4 @@
-Feature: File steps
+Feature: Platform steps
   As a developer I want the user to be able to interact with files on the
   filesystem
 

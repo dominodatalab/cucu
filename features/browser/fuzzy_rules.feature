@@ -2,7 +2,7 @@ Feature: Fuzzy rules
   As a developer I want to make sure the fuzzy rules match the expected elements
   in order.
 
-  Scenario: User can click a <button>
+  Scenario: User gets the expected matching before from fuzzy
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/fuzzy_rules.html"
      Then I should see no value in the input "value:"
