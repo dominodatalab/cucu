@@ -7,6 +7,7 @@ from __future__ import absolute_import
 
 import json
 import six
+import traceback
 import uuid
 
 from behave.formatter.base import Formatter
@@ -162,6 +163,7 @@ class CucuJSONFormatter(Formatter):
             "status": step.status.name,
             "duration": step.duration,
         }
+
         if step.error_message and step.status == Status.failed:
             # -- OPTIONAL: Provided for failed steps.
             error_message = step.error_message
@@ -225,6 +227,18 @@ class CucuJSONFormatter(Formatter):
         if self.current_scenario:
             status_name = self.current_scenario.status.name
             self.current_feature_element["status"] = status_name
+
+            if status_name == "failed":
+                # we need to record the error_message and exc_traceback in the
+                # last executed step and mark it as failed so the reporting can
+                # show the result correctly
+                error_message = [self.current_scenario.error_message]
+                error_message += traceback.format_tb(
+                    self.current_scenario.exc_traceback
+                )
+
+                last_step = self.current_feature_element["steps"][-1]
+                last_step["result"]["error_message"] = error_message
 
     # -- JSON-WRITER:
     def write_json_header(self):
