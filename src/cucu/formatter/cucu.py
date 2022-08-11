@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
+import traceback
+
 
 from behave.formatter.base import Formatter
 from behave.formatter.ansi_escapes import colors, escapes, up
@@ -227,6 +229,16 @@ class CucuFormatter(Formatter):
 
     def eof(self):
         self.stream.write("\n")
+
+        if self.current_scenario:
+            if self.current_scenario.status.name == "failed":
+                # we need to record the error_message and exc_traceback in the
+                # last executed step and mark it as failed so the reporting can
+                # show the result correctly
+                error_message = traceback.format_tb(
+                    self.current_scenario.exc_traceback
+                )
+                self.stream.write("\n".join(error_message))
 
     # -- MORE: Formatter helpers
     def doc_string(self, doc_string):
