@@ -134,7 +134,7 @@ Feature: Lint
       results/whitespace_lint/extraneous_whitespace.feature:3: W too many blank lines ✓
       results/whitespace_lint/extraneous_whitespace.feature:4: W line has extraneous whitespace at the end ✓
       results/whitespace_lint/extraneous_whitespace.feature:5: W line has extraneous whitespace at the end ✓
-     
+
       linting errors found and fixed, see above for details
 
       """
@@ -177,4 +177,96 @@ Feature: Lint
       And I should see "{STDERR}" contains the following:
       """
       Error: linting errors found, but not fixed, see above for details
+      """
+
+  Scenario: User gets a lint error when there are duplicate feature names
+    Given I create a file at "{CUCU_RESULTS_DIR}/unique_feature_lint/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/unique_feature_lint/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/unique_feature_lint/first_feature.feature" with the following:
+      """
+      Feature: Feature with non unique name
+
+        Scenario: Scenario that just passes
+          Given I echo "foo"
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature" with the following:
+      """
+      Feature: Feature with non unique name
+
+        Scenario: Another scenario that just passes
+          Given I echo "foo"
+      """
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/unique_feature_lint" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      {CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature:1: E feature name must be unique, "Feature with non unique name" used in "{CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature" and "{CUCU_RESULTS_DIR}/unique_feature_lint/first_feature.feature"
+
+      """
+      And I should see "{STDERR}" is equal to the following:
+      """
+      Error: linting errors found, but not fixed, see above for details
+
+      """
+     Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/unique_feature_lint" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      {CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature:1: E feature name must be unique, "Feature with non unique name" used in "{CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature" and "{CUCU_RESULTS_DIR}/unique_feature_lint/first_feature.feature" ✗ (must be fixed manually)
+
+      """
+      And I should see "{STDERR}" is equal to the following:
+      """
+      Error: linting errors found, but not fixed, see above for details
+
+      """
+
+  Scenario: User gets a lint error when there are duplicate scenario names
+    Given I create a file at "{CUCU_RESULTS_DIR}/unique_scenario_lint/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/unique_scenario_lint/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/unique_scenario_lint/first_feature.feature" with the following:
+      """
+      Feature: First Feature
+
+        Scenario: Scenario with non unique name
+          Given I echo "foo"
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature" with the following:
+      """
+      Feature: Second Feature
+
+        Scenario: Scenario with non unique name
+          Given I echo "foo"
+      """
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/unique_scenario_lint" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      {CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature:3: E scenario name must be unique, "Scenario with non unique name" used in "{CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature" and "{CUCU_RESULTS_DIR}/unique_scenario_lint/first_feature.feature"
+
+      """
+      And I should see "{STDERR}" is equal to the following:
+      """
+      Error: linting errors found, but not fixed, see above for details
+
+      """
+     Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/unique_scenario_lint" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      {CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature:3: E scenario name must be unique, "Scenario with non unique name" used in "{CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature" and "{CUCU_RESULTS_DIR}/unique_scenario_lint/first_feature.feature" ✗ (must be fixed manually)
+
+      """
+      And I should see "{STDERR}" is equal to the following:
+      """
+      Error: linting errors found, but not fixed, see above for details
+
       """

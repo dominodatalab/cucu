@@ -1,3 +1,20 @@
+# built in cucu linting rules
+---
+
+feature_name_must_be_unique:
+  message: feature name must be unique
+  type: error
+  current_line:
+    match: '^\s*Feature: (.*)'
+    unique_group_per_feature: true
+
+scenario_name_must_be_unique:
+  message: scenario name must be unique
+  type: error
+  current_line:
+    match: '^\s*Scenario: (.*)'
+    unique_group_per_feature: true
+
 feature_name_on_first_line:
   message: feature name should not have any indentation
   type: warning

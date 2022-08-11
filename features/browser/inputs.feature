@@ -162,16 +162,3 @@ Feature: Inputs
      When I wait up to "10" seconds to write "8675309" into the input "input type=tel"
      Then I should see the previous step took more than "9" seconds
       And I should see "8675309" in the input "input type=tel"
-
-  @wait
-  Scenario: User can wait to clear an input
-    Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"
-      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html?delay_page_load_ms=5000"
-     When I wait to clear the input "input with label for"
-     Then I should see the previous step took more than "4" seconds
-
-  @wait
-  Scenario: User can wait up to 10s to clear an input
-    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html?delay_page_load_ms=10000"
-     When I wait up to "10" seconds to clear the input "input with label for"
-     Then I should see the previous step took more than "9" seconds

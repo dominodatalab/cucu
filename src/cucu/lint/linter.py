@@ -32,16 +32,87 @@ def load_lint_rules(filepath):
             rules = yaml.safe_load(_input.read())
 
         for (rule_name, rule) in rules.items():
-            # XXX: check for duplicate rule names
+            if rule_name in all_rules:
+                raise RuntimeError(
+                    f"found duplicate rule names {rule_name}, please correct one of the locations."
+                )
+
             all_rules[rule_name] = rule
 
     return all_rules
 
 
-def lint_line(rules, steps, line_number, lines, filepath):
+def parse_matcher(name, rule_name, rule, line, state):
+    """
+    parses the "matcher" from the rule provided and then returns the tuple:
+    (matched, extra_matcher_message) where matched is a boolean indicating that
+    the rule name matcher name and rule matched on the line provided and the
+    extra_matcher_message is used when reporting the linting failure upstream.
+
+    name(string): name of the line to match on, ie current_line, previous_line,
+                  next_line are currently supported
+    rule_name(string): the actual name of the rule from the rules file, such as:
+                       when_keyword_indented_correctly
+    rule(dict): the rule dictionary object which contains the matcher, fix, etc.
+    line(string): actual line to parse the matcher against
+    state(dict): state object passed in which contains a few things such as:
+                 current_feature_filepath, current_feature_name, etc.
+
+    returns: a tuple where the first element is True if the matcher matches the
+             specified line. False if the matcher simply doesn't apply to this
+             line. The second part of the tuple is an string used to augment
+             the lint violation if the remainder of the matchers in a rule
+             matched their specific line (current_line, previous_line, etc).
+    """
+    if name not in rule:
+        # when the name provided isn't in the rule then we simply have a no-op
+        # where this specific matcher name wasn't even used.
+        return (True, "")
+
+    if "match" in rule[name]:
+        if line is None:
+            return (False, "")
+
+        match = re.match(rule[name]["match"], line)
+
+        if match is None:
+            # no match on the specified rule means there's not violation to
+            # report
+            return (False, "")
+
+        cwd = f"{os.getcwd()}/"
+        if "unique_group_per_feature" in rule[name]:
+            value = match.groups()[0]
+            feature_filepath = state["current_feature_filepath"]
+            # make the path relative to the current working directory
+            feature_filepath = feature_filepath.replace(cwd, "")
+
+            if rule_name not in state["unique_per_feature"]:
+                state["unique_per_feature"][rule_name] = {}
+
+            if value in state["unique_per_feature"][rule_name]:
+                # we have another feature which already has this value in use.
+                other_filepath = state["unique_per_feature"][rule_name][value]
+                # make the path relative to the current working directory
+                other_filepath = other_filepath.replace(cwd, "")
+                return (
+                    True,
+                    f', "{value}" used in "{feature_filepath}" and "{other_filepath}"',
+                )
+
+            state["unique_per_feature"][rule_name][value] = feature_filepath
+            return (False, "")
+
+        return (True, "")
+
+    raise RuntimeError(f"unsupported matcher for {name}")
+
+
+def lint_line(state, rules, steps, line_number, lines, filepath):
     """ """
     if line_number >= 1:
         previous_line = lines[line_number - 1]
+
     else:
         previous_line = None
 
@@ -58,32 +129,27 @@ def lint_line(rules, steps, line_number, lines, filepath):
     for rule_name in rules.keys():
         logger.debug(f' * checking against rule "{rule_name}"')
         rule = rules[rule_name]
-
-        current_matcher = True
-        previous_matcher = True
-        next_matcher = True
-
-        if "current_line" in rule:
-            if "match" in rule["current_line"]:
-                current_matcher = re.match(
-                    rule["current_line"]["match"], current_line
-                )
-            else:
-                raise RuntimeError("unsupported matcher for current_line")
-
-        if "previous_line" in rule and previous_line is not None:
-            if "match" in rule["previous_line"]:
-                previous_matcher = re.match(
-                    rule["previous_line"]["match"], previous_line
-                )
-            else:
-                raise RuntimeError("unsupported matcher for previous_line")
-
-        if "next_line" in rule and next_line is not None:
-            if "match" in rule["next_line"]:
-                next_matcher = re.match(rule["next_line"]["match"], next_line)
-            else:
-                raise RuntimeError("unsupported matcher for next_line")
+        (current_matcher, current_message) = parse_matcher(
+            "current_line",
+            rule_name,
+            rule,
+            current_line,
+            state,
+        )
+        (previous_matcher, previous_message) = parse_matcher(
+            "previous_line",
+            rule_name,
+            rule,
+            previous_line,
+            state,
+        )
+        (next_matcher, next_message) = parse_matcher(
+            "next_line",
+            rule_name,
+            rule,
+            next_line,
+            state,
+        )
 
         logger.debug(
             f"previous matcher {previous_matcher} current matcher {current_matcher} next matcher {next_matcher}"
@@ -105,7 +171,7 @@ def lint_line(rules, steps, line_number, lines, filepath):
                         "line": line_number,
                     },
                     "type": type,
-                    "message": message,
+                    "message": f"{message}{previous_message}{current_message}{next_message}",
                     "fix": fix,
                 }
             )
@@ -203,6 +269,10 @@ def lint(filepath):
     rules = load_builtin_lint_rules()
     steps, steps_error = load_cucu_steps(filepath=filepath)
 
+    # state object used to carry state from the top level linting function down
+    # to the functions handling the lint rules and reporting on lint failures
+    state = {"unique_per_feature": {}}
+
     if steps_error:
         yield [
             {
@@ -215,12 +285,16 @@ def lint(filepath):
 
     if os.path.isdir(filepath):
         basepath = os.path.join(filepath, "**/*.feature")
-        feature_filepaths = glob.iglob(basepath, recursive=True)
+        # XXX: for now sorted by name... we could expose some options for other
+        #      sorting orders if it makes sense
+        feature_filepaths = sorted(glob.iglob(basepath, recursive=True))
 
     else:
         feature_filepaths = [filepath]
 
     for feature_filepath in feature_filepaths:
+        state["current_feature_filepath"] = feature_filepath
+
         lines = open(feature_filepath).read().split("\n")
         line_number = 0
 
@@ -231,6 +305,14 @@ def lint(filepath):
         }
 
         for line in lines:
+            feature_match = re.match(".*Feature: (.*)", line)
+            if feature_match is not None:
+                state["current_feature_name"] = feature_match.groups(0)
+
+            scenario_match = re.match("  Scenario: (.*)", line)
+            if scenario_match is not None:
+                state["current_scenario_name"] = scenario_match.groups(0)
+
             # maintain state of if we're inside a docstring and if we are then
             # do not apply any linting rules as its a freeform space for text
             if line.strip() == '"""':
@@ -241,7 +323,7 @@ def lint(filepath):
 
             if not (in_docstring['"""'] or in_docstring["'''"]):
                 for violation in lint_line(
-                    rules, steps, line_number, lines, feature_filepath
+                    state, rules, steps, line_number, lines, feature_filepath
                 ):
                     violations.append(violation)
 
