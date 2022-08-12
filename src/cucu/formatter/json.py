@@ -35,6 +35,7 @@ class CucuJSONFormatter(Formatter):
         self.current_feature = None
         self.current_feature_data = None
         self.current_scenario = None
+        self.last_step = None
         self.steps = []
 
     def reset(self):
@@ -157,6 +158,9 @@ class CucuJSONFormatter(Formatter):
                 break
             step_index += 1
 
+        # keep the last step recorded result state
+        self.last_step = steps[step_index]
+
         steps[step_index]["result"] = {
             "stdout": stdout,
             "stderr": stderr,
@@ -237,8 +241,7 @@ class CucuJSONFormatter(Formatter):
                     self.current_scenario.exc_traceback
                 )
 
-                last_step = self.current_feature_element["steps"][-1]
-                last_step["result"]["error_message"] = error_message
+                self.last_step["result"]["error_message"] = error_message
 
     # -- JSON-WRITER:
     def write_json_header(self):
