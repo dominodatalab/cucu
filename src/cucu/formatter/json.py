@@ -241,7 +241,8 @@ class CucuJSONFormatter(Formatter):
                     self.current_scenario.exc_traceback
                 )
 
-                self.last_step["result"]["error_message"] = error_message
+                if "error_message" not in self.last_step["result"]:
+                    self.last_step["result"]["error_message"] = error_message
 
     # -- JSON-WRITER:
     def write_json_header(self):
