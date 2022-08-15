@@ -6,8 +6,15 @@ import urllib
 import json
 
 from ansi2html import Ansi2HTMLConverter
-from xml.sax.saxutils import escape
+from xml.sax.saxutils import escape as escape_
 from urllib.parse import quote
+
+
+def escape(data):
+    if data is None:
+        return None
+
+    return escape_(data)
 
 
 def generate(results, basepath):
