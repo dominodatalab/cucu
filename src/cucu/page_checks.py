@@ -24,12 +24,11 @@ def init_page_checks():
             broken_images = browser.execute(
                 """
             return (function() {
-                var images = Array.prototype.slice.call(document.querySelectorAll('img'));
+                var images = Array.prototype.slice.call(document.querySelectorAll('img:not([aria-hidden=true])'));
 
                 return images.filter(function(image){
-                    return !image.complete &&
-                           image.naturalHeight !== 0 &&
-                           image.getAttribute('aria-hidden') !== 'true';
+                    return !image.complete
+                           || image.naturalHeight === 0;
                 });
             })();
             """

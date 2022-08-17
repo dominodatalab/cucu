@@ -12,10 +12,30 @@ Feature: Page checks
       And I should see the previous step took more than "5" seconds
 
   Scenario: User will get an error from the broken image page checker if there are broken images
-    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
-     Then I expect the following step to fail with "broken images were found on the page"
+    Given I create a file at "{CUCU_RESULTS_DIR}/broken_image_checker/environment.py" with the following:
       """
-      When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/broken_images.html"
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/broken_image_checker/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/broken_image_checker/broken_images.feature.feature" with the following:
+      """
+      Feature: Feature loads page with broken images
+
+        Scenario: That loads a page with broken images
+          Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+           And I open a browser at the url "http://\{HOST_ADDRESS\}:\{PORT\}/broken_images.html"
+      """
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/broken_image_checker/broken_images.feature.feature --results {CUCU_RESULTS_DIR}/broken_image_checker_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+      And I should see "{STDOUT}" contains the following:
+      """
+      WARNING broken image found: <img src="broken_image.jpg" alt="Broken Image">
+      """
+      And I should see "{STDOUT}" does not contain the following:
+      """
+      WARNING broken image found: <img src="broken_image.jpg" alt="Aria Hidden Broken Image" aria-hidden="true">
       """
 
   Scenario: User can disable built in page checks
