@@ -56,7 +56,7 @@ Feature: Config
        [\s\S]*
        """
 
-  Scenario: User gets an appropriate error when cuucrc has invalid syntax
+  Scenario: User gets an appropriate error when cucurc has invalid syntax
     Given I create a file at "{CUCU_RESULTS_DIR}/load_bad_cucurc/environment.py" with the following:
       """
       from cucu.environment import *
