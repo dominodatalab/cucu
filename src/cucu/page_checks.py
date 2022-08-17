@@ -1,4 +1,4 @@
-from cucu import config, retry, register_page_check_hook
+from cucu import config, retry, register_page_check_hook, logger
 
 
 def init_page_checks():
@@ -27,13 +27,20 @@ def init_page_checks():
                 var images = Array.prototype.slice.call(document.querySelectorAll('img'));
 
                 return images.filter(function(image){
-                    return !(image.complete && image.naturalHeight !== 0);
+                    return !image.complete &&
+                           image.naturalHeight !== 0 &&
+                           image.getAttribute('aria-hidden') !== 'true';
                 });
             })();
             """
             )
 
             if len(broken_images) != 0:
+                # lets print the image outerHTML so its easier to identify
+                for broken_image in broken_images:
+                    html = broken_image.get_attribute("outerHTML")
+                    logger.warn(f"broken image found: {html}")
+
                 raise RuntimeError("broken images were found on the page")
 
         register_page_check_hook(
