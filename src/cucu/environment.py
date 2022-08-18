@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import shutil
@@ -156,6 +157,9 @@ def after_scenario(ctx, scenario):
 
 
 def before_step(ctx, step):
+    # trims the last 3 digits of the microseconds
+    step.start_timestamp = datetime.datetime.now().isoformat()[:-3]
+
     sys.stdout.captured()
     sys.stderr.captured()
 

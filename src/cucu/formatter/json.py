@@ -144,13 +144,14 @@ class CucuJSONFormatter(Formatter):
         steps = self.current_feature_element["steps"]
 
         if "stdout" in step.__dict__:
-            stdout = step.stdout
+            stdout = ["".join(step.stdout)]
         else:
-            stdout = ""
+            stdout = []
+
         if "stderr" in step.__dict__:
-            stderr = step.stderr
+            stderr = ["".join(step.stderr)]
         else:
-            stderr = ""
+            stderr = []
 
         step_index = 0
         for other_step in self.steps:
@@ -161,11 +162,16 @@ class CucuJSONFormatter(Formatter):
         # keep the last step recorded result state
         self.last_step = steps[step_index]
 
+        timestamp = None
+        if step.status.name in ["passed", "failed"]:
+            timestamp = step.start_timestamp
+
         steps[step_index]["result"] = {
             "stdout": stdout,
             "stderr": stderr,
             "status": step.status.name,
             "duration": step.duration,
+            "timestamp": timestamp,
         }
 
         if step.error_message and step.status == Status.failed:
