@@ -3,9 +3,14 @@ various cucu utilities can be placed here and then exposed publicly through
 the src/cucu/__init__.py
 """
 
-from cucu.config import CONFIG
 from tenacity import retry as retrying
-from tenacity import stop_after_delay, wait_fixed
+from tenacity import retry_if_not_exception_type, stop_after_delay, wait_fixed
+
+from cucu.config import CONFIG
+
+
+class StopRetryException(Exception):
+    pass
 
 
 #
@@ -75,7 +80,9 @@ def retry(func, wait_up_to_s=None, retry_after_s=None):
         retry_after_s = float(CONFIG["CUCU_STEP_RETRY_AFTER_S"])
 
     @retrying(
-        stop=stop_after_delay(wait_up_to_s), wait=wait_fixed(retry_after_s)
+        stop=stop_after_delay(wait_up_to_s),
+        wait=wait_fixed(retry_after_s),
+        retry=retry_if_not_exception_type(StopRetryException),
     )
     def new_decorator(*args, **kwargs):
         return func(*args, **kwargs)
