@@ -1,4 +1,4 @@
-from cucu import retry, run_steps, step
+from cucu import retry, run_steps, step, StopRetryException
 
 
 @step("I use a step with substeps that log")
@@ -78,3 +78,12 @@ def search_for_on_google(context, query):
 @step('I use a step with "{nth:nth}" usage')
 def uses_nth_step(ctx, nth):
     print("just a step that nth behave argument type")
+
+
+def stop_retry(ctx):
+    raise StopRetryException("Just cause I wanted to stop early")
+
+
+@step("I use retry but stop immediately")
+def use_retry_but_stop_immediately(ctx):
+    retry(stop_retry)(ctx)
