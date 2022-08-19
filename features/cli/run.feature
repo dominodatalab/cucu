@@ -26,10 +26,10 @@ Feature: Run
         Scenario: Scenario that passes
       passing
 
-          Given I echo "passing"     #  .*
+          Given I echo "passing"     # .*
 
         Scenario: Scenario that fails
-          Given I fail                             #  .*
+          Given I fail                             # .*
       [\s\S]*
       RuntimeError: step fails on purpose
       [\s]*
@@ -52,7 +52,7 @@ Feature: Run
         Scenario: Scenario that also passes
       passing
 
-          Given I echo "passing"     #  .*
+          Given I echo "passing"     # .*
       [\s]*
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 4 skipped

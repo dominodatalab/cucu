@@ -39,15 +39,15 @@ Feature: Config
          Scenario: This scenario prints a bunch of variables
        bar
 
-           Given I echo "\{FOO\}"      #  in .*
+           Given I echo "\{FOO\}"      # .*
            # FOO="bar"
        booze
 
-             And I echo "\{FIZZ\}"     #  in .*
+             And I echo "\{FIZZ\}"     # .*
              # FIZZ="booze"
        buzz
 
-             And I echo "\{BUZZ\}"     #  in .*
+             And I echo "\{BUZZ\}"     # .*
              # BUZZ="buzz"
 
        1 feature passed, 0 failed, 0 skipped
@@ -56,7 +56,7 @@ Feature: Config
        [\s\S]*
        """
 
-  Scenario: User gets an appropriate error when cuucrc has invalid syntax
+  Scenario: User gets an appropriate error when cucurc has invalid syntax
     Given I create a file at "{CUCU_RESULTS_DIR}/load_bad_cucurc/environment.py" with the following:
       """
       from cucu.environment import *

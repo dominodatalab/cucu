@@ -74,14 +74,14 @@ Feature: Run outputs
         Scenario: Scenario which now has a background using a step with substeps
       first line of the background
 
-          Given I echo "first line of the background"               #  in .*
-            ⤷ When I open a browser at the url "https://www.google.com/search"  #  in .*
-            ⤷  And I wait to write "define: kittens" into the input "Search"    #  in .*
-            ⤷  And I click the button "Google Search"                           #  in .*
-            And I search for "define: kittens" on google search                 #  in .*
+          Given I echo "first line of the background"               # .*
+            ⤷ When I open a browser at the url "https://www.google.com/search"  # .*
+            ⤷  And I wait to write "define: kittens" into the input "Search"    # .*
+            ⤷  And I click the button "Google Search"                           # .*
+            And I search for "define: kittens" on google search                 # .*
       This is from the scenario
 
-           When I echo "This is from the scenario"                              #  in .*
+           When I echo "This is from the scenario"                              # .*
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped

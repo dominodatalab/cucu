@@ -10,10 +10,10 @@ Feature: Run with logging
 
         Scenario: Logging at various levels
       .* INFO hello
-          Given I log "hello" at level "info"      #  in .*
-            And I log "cruel" at level "debug"     #  in .*
+          Given I log "hello" at level "info"      # .*
+            And I log "cruel" at level "debug"     # .*
       .* WARNING world
-            And I log "world" at level "warn"      #  in .*
+            And I log "world" at level "warn"      # .*
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
@@ -30,11 +30,11 @@ Feature: Run with logging
 
         Scenario: Logging at various levels
       .* INFO hello
-          Given I log "hello" at level "info"      #  in .*
+          Given I log "hello" at level "info"      # .*
       .* DEBUG cruel
-            And I log "cruel" at level "debug"     #  in .*
+            And I log "cruel" at level "debug"     # .*
       .* WARNING world
-            And I log "world" at level "warn"      #  in .*
+            And I log "world" at level "warn"      # .*
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped

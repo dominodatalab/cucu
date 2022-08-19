@@ -52,12 +52,12 @@ Feature: Run with hooks
       Hello
 
       .* DEBUG just logging some stuff from my after step hook
-          Given I echo "Hello"     #  in .*
+          Given I echo "Hello"     # .*
       .* DEBUG just logging some stuff from my before step hook
       World
 
       .* DEBUG just logging some stuff from my after step hook
-            And I echo "World"     #  in .*
+            And I echo "World"     # .*
       .* DEBUG just logging some stuff from my after scenario hook
 
       1 feature passed, 0 failed, 0 skipped
