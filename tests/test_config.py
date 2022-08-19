@@ -84,3 +84,29 @@ def test_config_custom_variable_resolution():
     # if the custom resolution takes precedence then we'll never see the
     # "wassup" value
     assert CONFIG.resolve("{FOO_BAR}") == "foo"
+
+
+def test_config_expand_variables_handles_existent_and_non_existent_variables():
+    CONFIG["var1"] = "value1"
+
+    assert CONFIG.expand("{var1} and {var2}") == {
+        "var1": "value1",
+        "var2": None,
+    }
+
+
+def test_config_expand_variables_handles_recursive_variable_resolution():
+    CONFIG["var1"] = "{var2}"
+    CONFIG["var2"] = "value2"
+
+    assert CONFIG.expand("{var1}") == {
+        "var1": "value2",
+    }
+
+
+def test_config_expand_with_custom_variable_handling():
+    cucu.register_custom_variable_handling("CUSTOM_.*", lambda x: "boom")
+    CONFIG["CUSTOM_BAR"] = "wassup"
+    # if the custom resolution takes precedence then we'll never see the
+    # "wassup" value
+    assert CONFIG.resolve("{CUSTOM_FOO}") == "boom"

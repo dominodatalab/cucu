@@ -13,7 +13,7 @@ Feature: Secrets
       """
       And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/cucurc.yml" with the following:
       """
-      CUCU_SECRETS: MY_SECRET
+      CUCU_SECRETS: MY_SECRET,ANOTHER_ONE
       MY_SECRET: 'super secret'
       """
       And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/features/feature_that_spills_the_beans.feature" with the following:

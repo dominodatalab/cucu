@@ -116,13 +116,18 @@ def init_step_hooks(stdout, stderr):
         behave.__dict__[decorator_name] = new_decorator
 
 
+_stdout = sys.stdout
+
+
 def hide_secrets(line):
     secrets = CONFIG["CUCU_SECRETS"]
 
     # here's where we can hide secrets
     for secret in secrets.split(","):
         if secret is not None:
-            value = CONFIG[secret]
+            secret = secret.strip()
+            value = CONFIG.get(secret)
+
             if value is not None:
                 replacement = "*" * len(value)
 

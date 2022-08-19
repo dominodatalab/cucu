@@ -10,6 +10,7 @@ from behave.model_describe import ModelPrinter
 from behave.model_core import Status
 from behave.textutil import make_indentation
 from cucu.config import CONFIG
+from cucu.behave_tweaks import hide_secrets
 
 
 class CucuFormatter(Formatter):
@@ -222,8 +223,9 @@ class CucuFormatter(Formatter):
                 )
 
                 padding = f"    {' '*(len('Given')-len(step.keyword))}"
-                variable_comment_line = f"{padding}# {expanded}\n"
-                self.stream.write(self.colorize(variable_comment_line, "grey"))
+                variable_line = f"{padding}# {expanded}\n"
+                colored_variable_line = self.colorize(variable_line, "grey")
+                self.stream.write(hide_secrets(colored_variable_line))
                 self.stream.flush()
 
         self.previous_step = step
