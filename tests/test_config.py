@@ -109,4 +109,4 @@ def test_config_expand_with_custom_variable_handling():
     CONFIG["CUSTOM_BAR"] = "wassup"
     # if the custom resolution takes precedence then we'll never see the
     # "wassup" value
-    assert CONFIG.resolve("{CUSTOM_FOO}") == "boom"
+    assert CONFIG.resolve("{CUSTOM_BAR}") == "boom"
