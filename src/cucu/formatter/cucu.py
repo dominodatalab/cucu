@@ -10,6 +10,7 @@ from behave.model_describe import ModelPrinter
 from behave.model_core import Status
 from behave.textutil import make_indentation
 from cucu.config import CONFIG
+from cucu.behave_tweaks import hide_secrets
 
 
 class CucuFormatter(Formatter):
@@ -222,8 +223,17 @@ class CucuFormatter(Formatter):
                 )
 
                 padding = f"    {' '*(len('Given')-len(step.keyword))}"
-                variable_comment_line = f"{padding}# {expanded}\n"
-                self.stream.write(self.colorize(variable_comment_line, "grey"))
+                variable_line = f"{padding}# {expanded}\n"
+                # hide secrets before we do anything to add color which could
+                # modify the output and result in not being able to correctly
+                # parse
+                # TODO: I'd like to move this out of here as we should be able
+                #       to intercept all of the stdout/stderr writes but seems
+                #       behaves underlying self.stream here is getting around
+                #       that by accessing stdout/stderr another way.
+                variable_line = hide_secrets(variable_line)
+                colored_variable_line = self.colorize(variable_line, "grey")
+                self.stream.write(colored_variable_line)
                 self.stream.flush()
 
         self.previous_step = step

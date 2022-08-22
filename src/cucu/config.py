@@ -61,6 +61,10 @@ class Config(dict):
 
     def get(self, key, default=None):
         try:
+            for regex, lookup in self.variable_lookups.items():
+                if regex.match(key):
+                    return lookup(key)
+
             return self[key]
         except KeyError:
             return default
@@ -134,12 +138,12 @@ class Config(dict):
         variables = re.findall("{([^{}]+)}", string)
 
         for variable in variables:
-            value = self[variable]
+            value = self.resolve(f"{{{variable}}}")
 
-            if value is not None:
-                value = str(self[variable])
-                value = value.replace("\n", "\\n")
-                value = value[:32] + "..." * (len(value) > 32)
+            # if it didn't resolve to anything then
+            if value:
+                value = str(value).replace("\n", "\\n")
+                value = value[:80] + "..." * (len(value) > 80)
             else:
                 value = None
 
@@ -166,13 +170,7 @@ class Config(dict):
                 previouses.append(string)
 
                 for var_name in Config.__VARIABLE_REGEX.findall(string):
-                    lookup_func = self.get
-
-                    for regex, lookup in self.variable_lookups.items():
-                        if regex.match(var_name):
-                            lookup_func = lookup
-
-                    value = lookup_func(var_name)
+                    value = self.get(var_name)
 
                     if value is None:
                         value = ""

@@ -16,7 +16,7 @@ Feature: Vars
       """
       And I create a file at "{CUCU_RESULTS_DIR}/cucu_vars_features/echo.feature" with the following:
       """
-      Feature: Feature with sceneario that echos
+      Feature: Feature with scenario that echos
 
         Scenario: This is a scenario that simply echos
           Given I echo "Hello There"
@@ -72,3 +72,64 @@ Feature: Vars
       """
       Then I search for the regex "boopity" in "{LOG}" and save the group "sha" to the variable "SHA"
       """
+
+  Scenario: User can use custom variable resolution and see expected logs
+    Given I create a file at "{CUCU_RESULTS_DIR}/custom_variables/environment.py" with the following:
+      """
+      import cucu
+      from cucu.environment import *
+
+      cucu.register_custom_variable_handling("CUSTOM_.*", lambda x: "booyah")
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/custom_variables/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/custom_variables/echo.feature" with the following:
+      """
+      Feature: Feature with custom variables
+
+        Scenario: That simply prints a custom variable
+          Given I echo "\{CUSTOM_VARIABLE\}"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/custom_variables/ --results {CUCU_RESULTS_DIR}/custom_variables_results/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      # can see a built in variable
+     Then I should see "{STDOUT}" matches the following
+      """
+      Feature: Feature with custom variables
+
+        Scenario: That simply prints a custom variable
+      booyah
+
+          Given I echo "\{CUSTOM_VARIABLE\}"     # .*
+          # CUSTOM_VARIABLE="booyah"
+
+      1 feature passed, 0 failed, 0 skipped
+      1 scenario passed, 0 failed, 0 skipped
+      1 step passed, 0 failed, 0 skipped, 0 undefined
+      [\s\S]+
+      """
+
+  Scenario: User can use custom variable resolution with secrets and see expected logs
+    Given I create a file at "{CUCU_RESULTS_DIR}/custom_variables_with_secrets/environment.py" with the following:
+      """
+      import cucu
+      from cucu.environment import *
+
+      CONFIG["CUCU_SECRETS"] = "CUSTOM_VARIABLE"
+      cucu.register_custom_variable_handling("CUSTOM_.*", lambda x: "booyah")
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/custom_variables_with_secrets/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/custom_variables_with_secrets/echo.feature" with the following:
+      """
+      Feature: Feature with custom variables
+
+        Scenario: That simply prints a custom variable
+          Given I echo "\{CUSTOM_VARIABLE\}"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/custom_variables_with_secrets/ --results {CUCU_RESULTS_DIR}/custom_variables_with_secrets_results/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      # can see a built in variable
+     Then I should see "{STDOUT}" does not contain "booyah"
