@@ -226,6 +226,7 @@ class CucuFormatter(Formatter):
                 variable_line = f"{padding}# {expanded}\n"
                 # hide secrets before we do anything to add color which could
                 # modify the output and result in not being able to correctly
+                # parse
                 # TODO: I'd like to move this out of here as we should be able
                 #       to intercept all of the stdout/stderr writes but seems
                 #       behaves underlying self.stream here is getting around
