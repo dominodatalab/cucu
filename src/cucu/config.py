@@ -138,7 +138,7 @@ class Config(dict):
         variables = re.findall("{([^{}]+)}", string)
 
         for variable in variables:
-            value = self.get(variable)
+            value = self.resolve(f"{{{variable}}}")
 
             # if it didn't resolve to anything then
             if value:

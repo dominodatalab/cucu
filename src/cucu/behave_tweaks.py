@@ -136,6 +136,7 @@ def hide_secrets(line):
                     replacement = bytes(replacement, "utf8")
 
                 line = line.replace(value, replacement)
+
     return line
 
 
