@@ -142,7 +142,7 @@ class Config(dict):
 
             # if it didn't resolve to anything then
             if value:
-                value = value.replace("\n", "\\n")
+                value = str(value).replace("\n", "\\n")
                 value = value[:80] + "..." * (len(value) > 80)
             else:
                 value = None

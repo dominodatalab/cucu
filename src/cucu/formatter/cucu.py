@@ -224,8 +224,15 @@ class CucuFormatter(Formatter):
 
                 padding = f"    {' '*(len('Given')-len(step.keyword))}"
                 variable_line = f"{padding}# {expanded}\n"
+                # hide secrets before we do anything to add color which could
+                # modify the output and result in not being able to correctly
+                # TODO: I'd like to move this out of here as we should be able
+                #       to intercept all of the stdout/stderr writes but seems
+                #       behaves underlying self.stream here is getting around
+                #       that by accessing stdout/stderr another way.
+                variable_line = hide_secrets(variable_line)
                 colored_variable_line = self.colorize(variable_line, "grey")
-                self.stream.write(hide_secrets(colored_variable_line))
+                self.stream.write(colored_variable_line)
                 self.stream.flush()
 
         self.previous_step = step
