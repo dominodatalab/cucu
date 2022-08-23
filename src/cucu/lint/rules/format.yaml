@@ -21,7 +21,7 @@ feature_name_on_first_line:
   current_line:
     match: '^\s+Feature: .*'
   fix:
-    match: '^\s+'
+    match: '^\s*'
     replace: ''
 
 scenario_name_with_appropriate_indentation:
@@ -31,7 +31,7 @@ scenario_name_with_appropriate_indentation:
   current_line:
     match: '^(\s{0,1}|\s{3,})Scenario: .*'
   fix:
-    match: '^\s+'
+    match: '^\s*'
     replace: '  '
 
 given_keyword_indented_correctly:
@@ -40,7 +40,7 @@ given_keyword_indented_correctly:
   current_line:
     match: '^(\s{0,3}|\s{5,})Given .*'
   fix:
-    match: '^\s+'
+    match: '^\s*'
     replace: '    '
 
 when_keyword_indented_correctly:
@@ -49,7 +49,7 @@ when_keyword_indented_correctly:
   current_line:
     match: '^(\s{0,4}|\s{6,})When .*'
   fix:
-    match: '^\s+'
+    match: '^\s*'
     replace: '     '
 
 then_keyword_indented_correctly:
@@ -58,7 +58,7 @@ then_keyword_indented_correctly:
   current_line:
     match: '^(\s{0,4}|\s{6,})Then .*'
   fix:
-    match: '^\s+'
+    match: '^\s*'
     replace: '     '
 
 and_keyword_indented_correctly:
@@ -67,7 +67,7 @@ and_keyword_indented_correctly:
   current_line:
     match: '^(\s{0,5}|\s{7,})And .*'
   fix:
-    match: '^\s+'
+    match: '^\s*'
     replace: '      '
 
 line_with_extraneous_whitespace:

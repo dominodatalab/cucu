@@ -270,3 +270,37 @@ Feature: Lint
       Error: linting errors found, but not fixed, see above for details
 
       """
+
+
+  @regression
+  Scenario: User can lint and fix a file with no indentation
+    Given I create a file at "{CUCU_RESULTS_DIR}/no_indent/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/no_indent/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/no_indent/bad_feature_indentation.feature" with the following:
+      """
+      Feature: Badly indented feature
+
+      Scenario: This is a scenario in a badly indented feature name line
+      Given I echo "foo"
+      When I echo "bar"
+      And I echo "fizz"
+      Then I echo "buzz"
+      """
+     Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/no_indent/bad_feature_indentation.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I should see the file at "{CUCU_RESULTS_DIR}/no_indent/bad_feature_indentation.feature" has the following:
+      """
+      Feature: Badly indented feature
+
+        Scenario: This is a scenario in a badly indented feature name line
+          Given I echo "foo"
+           When I echo "bar"
+            And I echo "fizz"
+           Then I echo "buzz"
+      """
+
