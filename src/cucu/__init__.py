@@ -17,6 +17,7 @@ from cucu.hooks import (
     register_after_step_hook,
     register_page_check_hook,
     register_custom_variable_handling,
+    register_custom_tags_in_report_handling,
 )
 
 from cucu.utils import (

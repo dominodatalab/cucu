@@ -65,6 +65,23 @@ def execute_javascript_and_save(ctx, variable):
     config.CONFIG[variable] = result
 
 
+def assert_url_is(ctx, value):
+    ctx.check_browser_initialized()
+    url = ctx.browser.get_current_url()
+    if value == url:
+        raise RuntimeError(f"current url is {url}, not {value}")
+
+
+@step('I should see the current url is equal to "{value}"')
+def should_see_the_current_url_is_equal_to(ctx, value):
+    assert_url_is(ctx, value)
+
+
+@step('I wait to see the current url is equal to "{value}"')
+def wait_to_see_the_current_url_is_equal_to(ctx, value):
+    retry(assert_url_is)(ctx, value)
+
+
 @step('I save the current url to the variable "{variable}"')
 def save_current_url_to_variable(ctx, variable):
     ctx.check_browser_initialized()

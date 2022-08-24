@@ -1,3 +1,5 @@
+import re
+
 from cucu.config import CONFIG
 
 CONFIG.define(
@@ -20,6 +22,8 @@ def init_global_hook_variables():
     CONFIG["__CUCU_AFTER_STEP_HOOKS"] = []
 
     CONFIG["__CUCU_PAGE_CHECK_HOOKS"] = {}
+
+    CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"] = {}
 
 
 def init_scenario_hook_variables():
@@ -102,3 +106,23 @@ def register_custom_variable_handling(regex, lookup):
                         return [value of the variable at runtime]
     """
     CONFIG.register_custom_variable_handling(regex, lookup)
+
+
+def register_custom_tags_in_report_handling(regex, handler):
+    """
+    register a regex to match tag names when generating the HTML test report
+    and the function provided will process the exact tag found and return
+    the HTML/text to place in the report when a tag that matches the provided
+    regex is found.
+
+    parameters:
+        regex(string): regular expression to match on any tag name in the HTML
+                       test report.
+        handler(func): a function that accepts the complete tag name (ie @foo)
+                       and returns the exact value to put in the HTMl test
+                       report (HTML/text).
+
+                      def handle(tag):
+                        return "<a href="...">{tag}</a>"
+    """
+    CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"][re.compile(regex)] = handler

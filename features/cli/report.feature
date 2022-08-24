@@ -127,3 +127,40 @@ Feature: Report
      Then I wait to see the text "@second"
       And I should not see the text "@all"
       And I should not see the text "@first"
+
+  Scenario: User gets error message when violation can not be fixed
+    Given I create a file at "{CUCU_RESULTS_DIR}/report_with_custom_tag_handling/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/report_with_custom_tag_handling/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      from cucu import register_custom_tags_in_report_handling
+
+      def link_to_something(tag):
+          term = tag.replace("@link", "").replace(")", "")
+          return f'<a href="https://\{term\}">\{tag\}</a>'
+
+      register_custom_tags_in_report_handling("@link\(.*\)", link_to_something)
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/report_with_custom_tag_handling/feature_with_custom_tag_handling.feature" with the following:
+      """
+      @link(google.com)
+      Feature: Feature with custom tag handling
+
+        @link(images.google.com)
+        Scenario: Scenario with a custom tag handler
+          Given I echo "nothing to see here"
+      """
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/report_with_custom_tag_handling --results {CUCU_RESULTS_DIR}/custom_tag_handling_results --generate-report --report {CUCU_RESULTS_DIR}/custom_tag_handling_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     When I start a webserver at directory "{CUCU_RESULTS_DIR}/custom_tag_handling_report" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+      And I wait to click the link "Feature with custom tag handling"
+      And I wait to click the link "@link(google.com)"
+     Then I wait to see the current url is equal to "google.com"
+     When I go back on the browser
+      And I wait to see the link "@link(google.com)"
+      And I click the link "Scenario with a custom tag handler"
+      And I wait to click the link "@link(images.google.com)"
+     Then I wait to see the current url is equal to "images.google.com"

@@ -6,6 +6,7 @@ import urllib
 import json
 
 from ansi2html import Ansi2HTMLConverter
+from cucu.config import CONFIG
 from xml.sax.saxutils import escape as escape_
 from urllib.parse import quote
 
@@ -25,7 +26,14 @@ def process_tags(element):
     prepared_tags = []
 
     for tag in element["tags"]:
-        prepared_tags.append(f"@{tag}")
+        tag = f"@{tag}"
+
+        # process custom tag handlers
+        for regex, handler in CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"].items():
+            if regex.match(tag):
+                tag = handler(tag)
+
+        prepared_tags.append(tag)
 
     element["tags"] = " ".join(prepared_tags)
 
