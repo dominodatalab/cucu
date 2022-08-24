@@ -17,6 +17,19 @@ def escape(data):
     return escape_(data)
 
 
+def process_tags(element):
+    """
+    process tags in the element provided (scenario or feature) and basically
+    convert the tags to a simple @xxx representation.
+    """
+    prepared_tags = []
+
+    for tag in element["tags"]:
+        prepared_tags.append(f"@{tag}")
+
+    element["tags"] = " ".join(prepared_tags)
+
+
 def generate(results, basepath):
     """
     generate an HTML report for the results provided.
@@ -45,6 +58,8 @@ def generate(results, basepath):
         total_scenarios_failed = 0
         total_scenarios_skipped = 0
 
+        process_tags(feature)
+
         if feature["status"] != "skipped":
             # copy each feature directories contents over to the report directory
             src_feature_filepath = os.path.join(results, feature["name"])
@@ -54,6 +69,8 @@ def generate(results, basepath):
             )
 
         for scenario in scenarios:
+            process_tags(scenario)
+
             scenario_duration = 0
             total_scenarios += 1
             total_steps = 0

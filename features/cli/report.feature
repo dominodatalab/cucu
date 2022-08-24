@@ -116,3 +116,14 @@ Feature: Report
       And I click the button "cucu.debug.console.log"
      Then I wait to see the text "DEBUG executing page check \"wait for document.readyState\""
       And I wait to see the text "DEBUG executing page check \"broken image checker\""
+
+  Scenario: User can run a scenario with tags and see them in the test report
+    Given I run the command "cucu run data/features/feature_with_tagging.feature --results {CUCU_RESULTS_DIR}/report_with_tags_results --generate-report --report {CUCU_RESULTS_DIR}/report_with_tags_report" and save stdout to "STDOUT" and expect exit code "0"
+     When I start a webserver at directory "{CUCU_RESULTS_DIR}/report_with_tags_report" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+      And I wait to click the link "Feature with tagging"
+     Then I wait to see the text "@all"
+     When I click the link "Scenario that is tagged with @second"
+     Then I wait to see the text "@second"
+      And I should not see the text "@all"
+      And I should not see the text "@first"

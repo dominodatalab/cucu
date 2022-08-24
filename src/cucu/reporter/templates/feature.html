@@ -20,6 +20,7 @@
             <th class="text-center">Status</th>
             <th class="text-center">Duration</th>
         </tr>
+        <tr class="remove-table-hover"><pre style="display: inline; color: mediumturquoise">{{ feature['tags'] }}</pre><br/></tr>
         <tr class="remove-table-hover"><pre style="display: inline; color: maroon">Feature: </pre><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></tr>
         {% for scenario in scenarios %}
             <!--- ignore Backgrounds for the time being -->
