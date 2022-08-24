@@ -25,6 +25,9 @@ def process_tags(element):
     """
     prepared_tags = []
 
+    if "tags" not in element:
+        return
+
     for tag in element["tags"]:
         tag = f"@{tag}"
 
