@@ -139,7 +139,7 @@ Feature: Report
       from cucu import register_custom_tags_in_report_handling
 
       def link_to_something(tag):
-          term = tag.replace("@link", "").replace(")", "")
+          term = tag.replace("@link(", "").replace(")", "")
           return f'<a href="https://\{term\}">\{tag\}</a>'
 
       register_custom_tags_in_report_handling("@link\(.*\)", link_to_something)
