@@ -72,13 +72,13 @@ def assert_url_is(ctx, value):
         raise RuntimeError(f"current url is {url}, not {value}")
 
 
-@step('I should see the current url is equal to "{value}"')
-def should_see_the_current_url_is_equal_to(ctx, value):
+@step('I should see the current url is "{value}"')
+def should_see_the_current_url_is(ctx, value):
     assert_url_is(ctx, value)
 
 
-@step('I wait to see the current url is equal to "{value}"')
-def wait_to_see_the_current_url_is_equal_to(ctx, value):
+@step('I wait to see the current url is "{value}"')
+def wait_to_see_the_current_url_is(ctx, value):
     retry(assert_url_is)(ctx, value)
 
 

@@ -128,7 +128,7 @@ Feature: Report
       And I should not see the text "@all"
       And I should not see the text "@first"
 
-  Scenario: User gets error message when violation can not be fixed
+  Scenario: User can register a custom tag handler for reporting
     Given I create a file at "{CUCU_RESULTS_DIR}/report_with_custom_tag_handling/environment.py" with the following:
       """
       from cucu.environment import *
@@ -158,9 +158,9 @@ Feature: Report
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
       And I wait to click the link "Feature with custom tag handling"
       And I wait to click the link "@link(google.com)"
-     Then I wait to see the current url is equal to "google.com"
+     Then I wait to see the current url is "google.com"
      When I go back on the browser
       And I wait to see the link "@link(google.com)"
       And I click the link "Scenario with a custom tag handler"
       And I wait to click the link "@link(images.google.com)"
-     Then I wait to see the current url is equal to "images.google.com"
+     Then I wait to see the current url is "images.google.com"
