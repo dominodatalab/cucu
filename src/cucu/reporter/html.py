@@ -6,6 +6,7 @@ import urllib
 import json
 
 from ansi2html import Ansi2HTMLConverter
+from cucu.config import CONFIG
 from xml.sax.saxutils import escape as escape_
 from urllib.parse import quote
 
@@ -15,6 +16,29 @@ def escape(data):
         return None
 
     return escape_(data)
+
+
+def process_tags(element):
+    """
+    process tags in the element provided (scenario or feature) and basically
+    convert the tags to a simple @xxx representation.
+    """
+    prepared_tags = []
+
+    if "tags" not in element:
+        return
+
+    for tag in element["tags"]:
+        tag = f"@{tag}"
+
+        # process custom tag handlers
+        for regex, handler in CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"].items():
+            if regex.match(tag):
+                tag = handler(tag)
+
+        prepared_tags.append(tag)
+
+    element["tags"] = " ".join(prepared_tags)
 
 
 def generate(results, basepath):
@@ -45,6 +69,8 @@ def generate(results, basepath):
         total_scenarios_failed = 0
         total_scenarios_skipped = 0
 
+        process_tags(feature)
+
         if feature["status"] != "skipped":
             # copy each feature directories contents over to the report directory
             src_feature_filepath = os.path.join(results, feature["name"])
@@ -54,6 +80,8 @@ def generate(results, basepath):
             )
 
         for scenario in scenarios:
+            process_tags(scenario)
+
             scenario_duration = 0
             total_scenarios += 1
             total_steps = 0
