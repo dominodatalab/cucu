@@ -36,7 +36,9 @@ def behave(
     log_start_n_stop=False,
     redirect_output=False,
 ):
-    write_run_details(results, filepath)
+
+    if not dry_run:
+        write_run_details(results, filepath)
 
     if color_output:
         os.environ["CUCU_COLOR_OUTPUT"] = str(color_output).lower()
