@@ -1,13 +1,14 @@
 import contextlib
+import json
 import os
-
 import sys
+
 from cucu import behave_tweaks
-
 from behave.__main__ import main as behave_main
+from datetime import datetime
 
 
-def behave_init(filepath):
+def behave_init(filepath="features"):
     """
     behave internal init method used to load the various parts of set of
     feature files and supporting code without executing any of it.
@@ -35,6 +36,10 @@ def behave(
     log_start_n_stop=False,
     redirect_output=False,
 ):
+
+    if not dry_run:
+        write_run_details(results, filepath)
+
     if color_output:
         os.environ["CUCU_COLOR_OUTPUT"] = str(color_output).lower()
 
@@ -140,3 +145,25 @@ def behave(
                 print(f"{filepath} has passed")
 
     return result
+
+
+def write_run_details(results, filepath):
+    """
+    writes a JSON file with run details to the results directory which can be
+    used to figure out any runtime details that would otherwise be lost and
+    difficult to figure out.
+    """
+    run_details_filepath = os.path.join(results, "run_details.json")
+
+    if os.path.exists(run_details_filepath):
+        return
+
+    run_details = {
+        "filepath": filepath,
+        "full_arguments": sys.argv,
+        "env": dict(os.environ),
+        "date": datetime.now().isoformat(),
+    }
+
+    with open(run_details_filepath, "w", encoding="utf8") as output:
+        output.write(json.dumps(run_details, indent=2, sort_keys=True))

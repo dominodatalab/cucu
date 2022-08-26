@@ -2,6 +2,7 @@
 import click
 import coverage
 import glob
+import json
 import multiprocessing
 import shutil
 import socket
@@ -333,6 +334,19 @@ def report(filepath, output):
     """
     generate a test report from a results directory
     """
+    run_details_filepath = os.path.join(filepath, "run_details.json")
+
+    if os.path.exists(run_details_filepath):
+        # load the run details at the time of execution for the provided results
+        # directory
+        run_details = {}
+
+        with open(run_details_filepath, encoding="utf8") as _input:
+            run_details = json.loads(_input.read())
+
+        # initialize any underlying custom step code things
+        behave_init(run_details["filepath"])
+
     _generate_report(filepath, output)
 
 
