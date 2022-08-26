@@ -143,15 +143,13 @@ class CucuJSONFormatter(Formatter):
     def result(self, step):
         steps = self.current_feature_element["steps"]
 
-        if "stdout" in step.__dict__:
+        stdout = None
+        if "stdout" in step.__dict__ and step.stdout != []:
             stdout = ["".join(step.stdout)]
-        else:
-            stdout = []
 
-        if "stderr" in step.__dict__:
+        stderr = None
+        if "stderr" in step.__dict__ and step.stderr != []:
             stderr = ["".join(step.stderr)]
-        else:
-            stderr = []
 
         step_index = 0
         for other_step in self.steps:
