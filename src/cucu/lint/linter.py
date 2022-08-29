@@ -5,17 +5,17 @@ import re
 import yaml
 
 from cucu import logger
+from cucu.config import CONFIG
 from cucu.cli.steps import load_cucu_steps
 
 
-def load_lint_rules(filepath):
+def load_lint_rules(rules, filepath):
     """
     load all of the lint rules from the filepath provided
 
     Returns:
         hashmap of of lint rules
     """
-    all_rules = {}
     filepath = os.path.abspath(filepath)
 
     if os.path.isdir(filepath):
@@ -29,17 +29,17 @@ def load_lint_rules(filepath):
         logger.debug(f"loading lint rules from {lint_rule_filepath}")
 
         with open(lint_rule_filepath, "r", encoding="utf8") as _input:
-            rules = yaml.safe_load(_input.read())
+            rules_loaded = yaml.safe_load(_input.read())
 
-        for (rule_name, rule) in rules.items():
-            if rule_name in all_rules:
+        for (rule_name, rule) in rules_loaded.items():
+            if rule_name in rules:
                 raise RuntimeError(
                     f"found duplicate rule names {rule_name}, please correct one of the locations."
                 )
 
-            all_rules[rule_name] = rule
+            rules[rule_name] = rule
 
-    return all_rules
+    return rules
 
 
 def parse_matcher(name, rule_name, rule, line, state):
@@ -214,6 +214,7 @@ def fix(violations):
             violation["fixed"] = False
 
         else:
+            fix = violation["fix"]
             line_number = violation["location"]["line"]
             line_to_fix = lines[line_number]
 
@@ -244,13 +245,13 @@ def fix(violations):
     return violations
 
 
-def load_builtin_lint_rules():
+def load_builtin_lint_rules(rules):
     """
     load internal builtin lint rules and used primarily for unit testing
     """
     cucu_path = os.path.dirname(importlib.util.find_spec("cucu").origin)
     lint_rules_path = os.path.join(cucu_path, "lint", "rules")
-    return load_lint_rules(lint_rules_path)
+    load_lint_rules(rules, lint_rules_path)
 
 
 def lint(filepath):
@@ -265,8 +266,21 @@ def lint(filepath):
         a generator of violations per file, so each value yielded to the
         generator is a list of violations within the same file
     """
+    rules = {}
+
+    logger.debug(f"linting {filepath}")
+
     # load the base lint rules
-    rules = load_builtin_lint_rules()
+    load_builtin_lint_rules(rules)
+
+    if CONFIG["CUCU_LINT_RULES_PATH"]:
+        # load any other rules paths linked via CUCU_LINT_RULES_PATH variable
+        lint_rule_paths = CONFIG["CUCU_LINT_RULES_PATH"].split(",")
+
+        for lint_rule_path in lint_rule_paths:
+            logger.debug(f"loading custom rules from: {lint_rule_path}")
+            load_lint_rules(rules, lint_rule_path)
+
     steps, steps_error = load_cucu_steps(filepath=filepath)
 
     # state object used to carry state from the top level linting function down

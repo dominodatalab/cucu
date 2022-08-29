@@ -129,6 +129,39 @@ CUCU_SELENIUM_REMOTE_URL: http://localhost:4444
 Then you can simply run `cucu run path/to/some.feature` and `cucu` would load
 the local `cucurc.yml` or `~/.cucurc.yml` settings and use those.
 
+# extending cucu
+
+## custom lint rules
+
+You can easily extend the `cucu lint` linting rules by setting the variable
+`CUCU_LINT_RULES_PATH` and pointing it to a directory in your features source
+that has `.yaml` files that are structured like so:
+
+```
+[unique_rule_identifier]:
+  message: [the message to provide the end user explaining the violation]
+  type: [warning|error] # I or W  will be printed when reporting the violation
+  current_line:
+    match: [regex]
+  previous_line:
+    match: [regex]
+  next_line:
+    match: [regex]
+  fix:
+    match: [regex]
+    replace: [regex]
+    -- or --
+    delete: true
+```
+
+The `current_line`, `previous_line` and `next_line` sections are used to match
+on a specific set of lines so that you can then "fix" the current line a way
+specified by the `fix` block. When there is no `fix` block provided then
+`cucu lint` will notify the end user it can not fix the violation.
+
+In the `fix` section one can choose to do `match` and `replace` or to simply
+`delete` the violating line.
+
 # more ways to install cucu
 
 ## from source
