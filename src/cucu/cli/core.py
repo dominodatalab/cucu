@@ -391,6 +391,9 @@ def lint(filepath, fix):
     violations_fixed = 0
 
     for filepath in filepaths:
+        # initialize any underlying custom step code things
+        behave_init(filepath)
+
         all_violations = linter.lint(filepath)
 
         for violations in all_violations:

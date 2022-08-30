@@ -300,6 +300,12 @@ CONFIG.define(
     "the exact image step at runtime.",
     default=None,
 )
+CONFIG.define(
+    "CUCU_LINT_RULES_PATH",
+    "comma separated list of paths to load cucu lint rules from .yaml files",
+    default="",
+)
+
 
 # cucu internals - we do not expose these as defined variables in `cucu vars`
 CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []

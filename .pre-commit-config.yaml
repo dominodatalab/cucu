@@ -28,6 +28,6 @@ repos:
   hooks:
     - id: cucu_lint
       name: lint feature files
-      entry: ./bin/cucu lint --fix
+      entry: ./bin/cucu lint
       language: script
       files: ^.*\.feature$
