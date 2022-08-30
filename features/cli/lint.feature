@@ -170,14 +170,6 @@ Feature: Lint
       """
       RuntimeError: boom
       """
-      And I should see "{STDOUT}" contains the following:
-      """
-      failure loading some steps, see above for details
-      """
-      And I should see "{STDERR}" contains the following:
-      """
-      Error: linting errors found, but not fixed, see above for details
-      """
 
   Scenario: User gets a lint error when there are duplicate feature names
     Given I create a file at "{CUCU_RESULTS_DIR}/unique_feature_lint/environment.py" with the following:
