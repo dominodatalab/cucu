@@ -209,10 +209,7 @@ class CucuJUnitFormatter(Formatter):
                 testcase.append(failure)
 
             if scenario["skipped"] is not None:
-                # skipped_message = "\n".join(scenario["skipped"])
-                skipped = bs4.Tag(name="skipped")
-                # skipped.append(bs4.CData(skipped_message))
-                testcase.append(skipped)
+                testcase.append(bs4.Tag(name="skipped"))
 
             testsuite.append(testcase)
 
