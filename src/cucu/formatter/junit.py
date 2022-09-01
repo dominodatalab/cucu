@@ -62,6 +62,9 @@ class CucuJUnitFormatter(Formatter):
                 failure = traceback.format_tb(self.current_scenario_traceback)
                 self.current_scenario_results["failure"] = failure
 
+            if status == "skipped":
+                self.current_scenario_results["skipped"] = True
+
     def scenario(self, scenario):
         self.update_scenario()
 
@@ -72,6 +75,7 @@ class CucuJUnitFormatter(Formatter):
             "status": "pending",
             "time": "n/a",
             "failure": None,
+            "skipped": None,
         }
         if scenario.tags:
             self.current_scenario_results["tags"] = ", ".join(scenario.tags)
@@ -203,6 +207,12 @@ class CucuJUnitFormatter(Formatter):
                 failure = bs4.Tag(name="failure")
                 failure.append(bs4.CData(failure_message))
                 testcase.append(failure)
+
+            if scenario["skipped"] is not None:
+                # skipped_message = "\n".join(scenario["skipped"])
+                skipped = bs4.Tag(name="skipped")
+                # skipped.append(bs4.CData(skipped_message))
+                testcase.append(skipped)
 
             testsuite.append(testcase)
 

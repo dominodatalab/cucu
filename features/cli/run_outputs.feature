@@ -149,6 +149,8 @@ Feature: Run outputs
        <testcase classname="Feature with mixed results" name="Scenario that has an undefined step" status=".*" time=".*">
        </testcase>
        <testcase classname="Feature with mixed results" name="Scenario that is skipped" status="skipped" time=".*" tags="disabled">
+        <skipped>
+        </skipped>
        </testcase>
       </testsuite>
       """
