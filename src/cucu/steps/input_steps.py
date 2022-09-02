@@ -60,6 +60,7 @@ def find_n_write(ctx, name, value, index=0):
     ctx.check_browser_initialized()
 
     input_ = find_input(ctx, name, index=index)
+    input_.clear()
     input_.send_keys(value)
 
 

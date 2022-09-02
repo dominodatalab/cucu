@@ -162,3 +162,9 @@ Feature: Inputs
      When I wait up to "10" seconds to write "8675309" into the input "input type=tel"
      Then I should see the previous step took more than "9" seconds
       And I should see "8675309" in the input "input type=tel"
+
+  @wip
+  Scenario: User can write into an input with an @value set and the input is cleared correctly
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
+     Then I write "bar" into the input "input with @value set"
+      And I should see "bar" in the input "input with @value set"
