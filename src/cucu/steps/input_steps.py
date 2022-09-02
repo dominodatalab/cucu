@@ -31,7 +31,9 @@ def find_input(ctx, name, index=0):
         ctx.browser,
         name,
         [
-            "input",
+            # we can only write into things that do not have the type:
+            # button, checkbox, radio, color, hidden, range, reset
+            "input[type!=button][type!=checkbox][type!=radio][button!=color][button!=hidden][button!=range][button!=reset]",
             "textarea",
         ],
         index=index,
