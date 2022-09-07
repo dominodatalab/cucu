@@ -343,3 +343,46 @@ Feature: Lint
       """
       Error: linting errors found, but not fixed, see above for details
       """
+
+  Scenario: User can exclude attribute when defining custom rules
+    Given I create a file at "{CUCU_RESULTS_DIR}/custom_linting_with_exclusions/environment.py" with the following:
+      """
+      from cucu.environment import *
+      from cucu.config import CONFIG
+      
+      CONFIG["CUCU_LINT_RULES_PATH"] = "{CUCU_RESULTS_DIR}/custom_linting_with_exclusions/lint_rules"
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/custom_linting_with_exclusions/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/custom_linting_with_exclusions/custom_linting_feature.feature" with the following:
+      """
+      Feature: Feature that will be excluded
+
+        Scenario: This is a scenario with a custom linting violation
+          Given I open a browser at the url "http://\{HOST_ADDRESS\}:\{PORT\}/buttons.html"
+            And I click the button "button"
+            And I click the button "button"
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/custom_linting_with_exclusions/lint_rules/custom_rules.yaml" with the following:
+      """
+      # custom cucu lint rules
+      ---
+
+      click_step_must_be_followed_by_wait_to:
+        message: a click step must be followed by a `wait to` step
+        type: error
+        exclude: .*/custom_linting_feature.feature
+        previous_line:
+          match: '.* I click the (.*)'
+        current_line:
+          # match if the next line does not contain `wait to` in it
+          match: '^((?!wait to).)*$'
+        fix:
+          match: 'I (.*)'
+          replace: 'I wait to \1'
+      """
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/custom_linting_with_exclusions/custom_linting_feature.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I should see "{STDOUT}" is empty
+      And I should see "{STDERR}" is empty
