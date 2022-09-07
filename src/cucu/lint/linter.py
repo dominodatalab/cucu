@@ -129,6 +129,11 @@ def lint_line(state, rules, steps, line_number, lines, filepath):
     for rule_name in rules.keys():
         logger.debug(f' * checking against rule "{rule_name}"')
         rule = rules[rule_name]
+
+        # skip paths that match the exclude regex
+        if "exclude" in rule and re.match(rule["exclude"], filepath):
+            continue
+
         (current_matcher, current_message) = parse_matcher(
             "current_line",
             rule_name,
