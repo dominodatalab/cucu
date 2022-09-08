@@ -126,22 +126,3 @@ def register_custom_tags_in_report_handling(regex, handler):
                         return "<a href="...">{tag}</a>"
     """
     CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"][re.compile(regex)] = handler
-
-
-def register_custom_failure_handler(handler):
-    """
-    register a callback function to call when there is a test failure and
-    we want to augment the failure output message in the junit and json results
-    files.
-
-    parameters:
-        handler(feature_name,
-                feature_tags,
-                scenario_name,
-                scenario_tags): a function that accepts the feature name,
-                                feature tags, scenario name and scenario tags
-                                in order to return a string that will be
-                                appended to the top of the failure message in
-                                the JSON and JUnit XML results files
-    """
-    CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"].append(handler)
