@@ -250,6 +250,10 @@ def define_action_on_thing_with_name_steps(
     def wait_to_action_the(ctx, name):
         retry(action_it)(ctx, thing, name)
 
+    @step(f'I wait to {action} the {thing} "{{name}}" if it exists')
+    def wait_to_action_the_if_it_exists(ctx, name):
+        retry(action_it)(ctx, thing, name, must_exist=False)
+
     @step(
         f'I wait up to "{{seconds}}" seconds to {action} the {thing} "{{name}}"'
     )
