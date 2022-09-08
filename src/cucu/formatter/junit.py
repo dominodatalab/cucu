@@ -58,8 +58,29 @@ class CucuJUnitFormatter(Formatter):
             status = self.current_scenario.compute_status().name
             self.current_scenario_results["status"] = status
 
+            failures = []
+
             if status == "failed" and self.current_scenario_traceback:
-                failure = traceback.format_tb(self.current_scenario_traceback)
+                failure_handlers = CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"]
+
+                feature_name = self.current_scenario.feature.name
+                feature_tags = self.current_scenario.feature.tags
+                scenario_name = self.current_scenario.name
+                scenario_tags = self.current_scenario.tags
+                for failure_handler in failure_handlers:
+                    failures.append(
+                        failure_handler(
+                            feature_name,
+                            feature_tags,
+                            scenario_name,
+                            scenario_tags,
+                        )
+                    )
+
+                failures.append(
+                    traceback.format_tb(self.current_scenario_traceback)
+                )
+
                 self.current_scenario_results["failure"] = failure
 
             if status == "skipped":
