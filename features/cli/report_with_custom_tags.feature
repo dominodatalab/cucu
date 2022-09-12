@@ -1,3 +1,4 @@
+@report
 Feature: Report with custom tags
   As a developer I want the user to be able to generate reports that contain
   custom tag handling

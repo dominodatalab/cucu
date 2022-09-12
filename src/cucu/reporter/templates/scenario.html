@@ -1,16 +1,19 @@
 {% extends "layout.html" %}
 {% block content %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
+    <nav class="navbar navbar-expand-sm sticky-top navbar-light bg-light">
+        <div class="container-fluid">
             <a class="navbar-brand" href="#">HTML Test Report</a>
 
             <div class="collapse navbar-collapse">
               <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                 <li class="nav-item active">
-                  <a class="nav-link" href="../../index.html">Top</a>
+                  <a class="nav-link" href="../../index.html" title="go to index report">Index</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="../../{{ feature['name'] }}.html" title="go to feature report">Feature</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="various log files">
                         Logs
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
@@ -18,9 +21,15 @@
                       <a class="dropdown-item" href="{{ log_file['filepath'] }}">{{ log_file['name'] }}</a>
                       {% endfor %}
                     </div>
-                  </li>
+                </li>
                 <li class="nav-item active">
-                    <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target=".multi-collapse" aria-expanded="false" aria-controls=".multi-collapse">toggle images</button>
+                    <button class="btn btn-light" title="show images" type="button" data-toggle="collapse" data-target=".multi-collapse" aria-expanded="false" aria-controls=".multi-collapse">🖼</button>
+                </li>
+                <li class="nav-item active">
+                    <button class="btn btn-light" title="scroll to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });" class="nav-link">⇑</a>
+                </li>
+                <li class="nav-item active">
+                    <button class="btn btn-light" title="scroll to bottom" onclick="window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });" class="nav-link">⇓</a>
                 </li>
               </ul>
             </div>

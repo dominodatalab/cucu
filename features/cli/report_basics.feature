@@ -1,3 +1,4 @@
+@report
 Feature: Report basics
   As a developer I want the user to be able to generate reports from tests runs
   in the most basic of situations
@@ -45,7 +46,7 @@ Feature: Report basics
       And I should not see the image with the alt text "Then I should see the text \"Cat\""
      When I click the button "When I open a browser at the url \"https://www.google.com/search\""
      Then I should see the image with the alt text "When I open a browser at the url \"https://www.google.com/search\""
-     When I click the link "Top"
+     When I click the link "Index"
       And I click the link "Multiple scenarios with browser steps"
       And I click the link "Search for dog on www.google.com"
      Then I should not see the image with the alt text "Given I search for \"define: dog\" on google search"
@@ -82,7 +83,7 @@ Feature: Report basics
        | Scenario that is skipped            | 1           | skipped | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
-     When I click the button "Top"
+     When I click the button "Index"
       And I click the button "Feature with mixed results"
       And I click the button "Scenario that has an undefined step"
      Then I should see the button "Given I attempt to use an undefined step"
