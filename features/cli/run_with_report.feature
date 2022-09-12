@@ -1,3 +1,4 @@
+@report
 Feature: Run with report
   As a developer I want the user to be able to run tests and automatically
   generate the HTML test report.
