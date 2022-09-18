@@ -27,3 +27,11 @@ Feature: Radio Buttons
      Then I should see the radio button "cat" is not selected
       And I should see the radio button "dog" is selected
       And I should see the radio button "rat" is not selected
+
+  @wip
+  Scenario: more stuff
+    Given I should see the radio button "Service Account" is not selected
+      And I should see the radio button "Individual" is selected
+     When I select the radio button "Service Account"
+     Then I should see the radio button "Service Account" is selected
+      And I should see the radio button "Individual" is not selected
