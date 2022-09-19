@@ -28,8 +28,7 @@ Feature: Radio Buttons
       And I should see the radio button "dog" is selected
       And I should see the radio button "rat" is not selected
 
-  @wip
-  Scenario: more stuff
+  Scenario: User can select radio button labelled by element with common grandparent
     Given I should see the radio button "Service Account" is not selected
       And I should see the radio button "Individual" is selected
      When I select the radio button "Service Account"
