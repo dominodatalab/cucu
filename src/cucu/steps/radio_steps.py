@@ -1,3 +1,4 @@
+from this import d
 from cucu import helpers, fuzzy, retry, step
 from . import base_steps
 
@@ -142,3 +143,10 @@ def select_the_radio_button_if_not_selected(ctx, name):
 @step('I wait to select the radio button "{name}" if it is not selected')
 def wait_to_select_the_radio_button_if_not_selected(ctx, name):
     retry(find_n_select_radio_button)(ctx, name, ignore_if_selected=True)
+
+
+@step(
+    'I select the "{nth:nth}" radio button with the name "{name}" if it is not selected'
+)
+def select_nth_radio_button(ctx, nth, name):
+    find_n_select_radio_button(ctx, name, nth, ignore_if_selected=True)
