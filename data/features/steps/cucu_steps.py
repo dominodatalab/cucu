@@ -63,18 +63,6 @@ def i_wait_to_fail(_):
     retry(fail)
 
 
-@step('I search for "{query}" on google search')
-def search_for_on_google(context, query):
-    run_steps(
-        context,
-        f"""
-    When I open a browser at the url "https://www.google.com/search"
-     And I wait to write "{query}" into the input "Search"
-     And I click the button "Google Search"
-    """,
-    )
-
-
 @step('I use a step with "{nth:nth}" usage')
 def uses_nth_step(ctx, nth):
     print("just a step that nth behave argument type")
