@@ -115,7 +115,7 @@ helpers.define_action_on_thing_with_name_steps(
     "radio button", "select", find_radio_button, select_radio_button
 )
 helpers.define_thing_with_name_in_state_steps(
-    "radio button", "selected", find_radio_button, is_selected
+    "radio button", "selected", find_radio_button, is_selected, with_nth=True
 )
 helpers.define_thing_with_name_in_state_steps(
     "radio button", "not selected", find_radio_button, is_not_selected
@@ -142,3 +142,8 @@ def select_the_radio_button_if_not_selected(ctx, name):
 @step('I wait to select the radio button "{name}" if it is not selected')
 def wait_to_select_the_radio_button_if_not_selected(ctx, name):
     retry(find_n_select_radio_button)(ctx, name, ignore_if_selected=True)
+
+
+@step('I select the "{nth:nth}" radio button "{name}" if it is not selected')
+def select_nth_radio_button(ctx, nth, name):
+    find_n_select_radio_button(ctx, name, nth, ignore_if_selected=True)

@@ -353,6 +353,25 @@ def define_thing_with_name_in_state_steps(
         seconds = float(seconds)
         retry(should_see_thing_in_state, wait_up_to_s=seconds)(ctx, thing, name)
 
+    if with_nth:
+
+        @step(f'I should see the "{{nth:nth}}" {thing} "{{name}}" is {state}')
+        def should_see_the_in_state(ctx, nth, name):
+            should_see_thing_in_state(ctx, thing, name, index=nth)
+
+        @step(f'I wait to see the "{{nth:nth}}" {thing} "{{name}}" is {state}')
+        def wait_to_see_the_in_state(ctx, nth, name):
+            retry(should_see_thing_in_state)(ctx, thing, name, index=nth)
+
+        @step(
+            f'I wait up to "{{seconds}}" seconds to see the "{{nth:nth}}" {thing} "{{name}}" is {state}'
+        )
+        def wait_up_to_seconds_to_see_the_in_state(ctx, seconds, nth, name):
+            seconds = float(seconds)
+            retry(should_see_thing_in_state, wait_up_to_s=seconds)(
+                ctx, thing, name, index=nth
+            )
+
 
 def define_run_steps_if_I_can_see_element_with_name_steps(thing, find_func):
     """
