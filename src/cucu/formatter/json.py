@@ -12,6 +12,7 @@ import uuid
 
 from behave.formatter.base import Formatter
 from behave.model_core import Status
+from cucu.config import CONFIG
 
 
 # -----------------------------------------------------------------------------
@@ -35,6 +36,7 @@ class CucuJSONFormatter(Formatter):
         self.current_feature = None
         self.current_feature_data = None
         self.current_scenario = None
+        self.current_step = None
         self.last_step = None
         self.steps = []
 
@@ -141,6 +143,7 @@ class CucuJSONFormatter(Formatter):
         pass
 
     def result(self, step):
+        self.current_step = step
         steps = self.current_feature_element["steps"]
 
         stdout = None
@@ -174,9 +177,22 @@ class CucuJSONFormatter(Formatter):
 
         if step.error_message and step.status == Status.failed:
             # -- OPTIONAL: Provided for failed steps.
-            error_message = step.error_message
+            error_message = ""
+
+            failure_handlers = CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"]
+            for failure_handler in failure_handlers:
+                error_message += failure_handler(
+                    self.current_feature, self.current_scenario
+                )
+
+            error_message += (
+                f"{self.current_step.keyword} {self.current_step.name}\n"
+            )
+            error_message += step.error_message
+
             if self.split_text_into_lines and "\n" in error_message:
                 error_message = error_message.splitlines()
+
             result_element = steps[step_index]["result"]
             result_element["error_message"] = error_message
 
@@ -240,7 +256,10 @@ class CucuJSONFormatter(Formatter):
                 # we need to record the error_message and exc_traceback in the
                 # last executed step and mark it as failed so the reporting can
                 # show the result correctly
-                error_message = [self.current_scenario.error_message]
+                error_message = []
+                if self.current_scenario.error_message is not None:
+                    error_message.append(self.current_scenario.error_message)
+
                 error_message += traceback.format_tb(
                     self.current_scenario.exc_traceback
                 )
