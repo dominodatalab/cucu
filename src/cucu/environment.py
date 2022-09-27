@@ -50,6 +50,7 @@ def check_browser_initialized(ctx):
 
 
 def before_all(ctx):
+    CONFIG["__CUCU_CTX"] = ctx
     CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
 
@@ -167,9 +168,10 @@ def before_step(ctx, step):
     ctx.current_step.has_substeps = False
     ctx.start_time = time.monotonic()
 
-    # run before all step hooks
-    for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
-        hook(ctx)
+    if not CONFIG["__CUCU_BEFORE_STEP_HOOKS_DISABLED"]:
+        # run before all step hooks
+        for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
+            hook(ctx)
 
 
 def after_step(ctx, step):
@@ -206,6 +208,7 @@ def after_step(ctx, step):
 
     CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
 
-    # run after all step hooks
-    for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
-        hook(ctx)
+    if not CONFIG["__CUCU_AFTER_STEP_HOOKS_DISABLED"]:
+        # run after all step hooks
+        for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
+            hook(ctx)

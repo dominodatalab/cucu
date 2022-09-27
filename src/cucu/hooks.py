@@ -19,11 +19,15 @@ def init_global_hook_variables():
     CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
 
     CONFIG["__CUCU_BEFORE_STEP_HOOKS"] = []
+    CONFIG["__CUCU_BEFORE_STEP_HOOKS_DISABLED"] = False
     CONFIG["__CUCU_AFTER_STEP_HOOKS"] = []
+    CONFIG["__CUCU_AFTER_STEP_HOOKS_DISABLED"] = False
 
     CONFIG["__CUCU_PAGE_CHECK_HOOKS"] = {}
 
     CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"] = {}
+
+    CONFIG["__CUCU_BEFORE_RETRY_HOOKS"] = []
 
 
 def init_scenario_hook_variables():
@@ -146,3 +150,20 @@ def register_custom_junit_failure_handler(handler):
           failure message in the JUnit XML results files.
     """
     CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"].append(handler)
+
+
+def register_before_retry_hook(hook_func):
+    """
+    register an before retry hook that will execute before retrying
+    cucu.utils.retry function call. The arguments passed to the provided hook
+    are only the current behave context object.
+
+    parameters:
+        handler(ctx): a method that accepts the current behave context and
+                      executes whatever it needs to before a retryable call is
+                      about to be retried.
+
+                      def handle(ctx):
+                        ctx.do_something()
+    """
+    CONFIG["__CUCU_BEFORE_RETRY_HOOKS"].append(hook_func)

@@ -3,7 +3,12 @@ import subprocess
 import time
 
 from cucu import logger, retry, run_steps, step
-from cucu.hooks import register_after_this_scenario_hook
+from cucu.hooks import (
+    register_after_this_scenario_hook,
+    register_before_step_hook,
+    register_after_step_hook,
+    register_before_retry_hook,
+)
 from cucu.config import CONFIG
 from cucu.cli.run import behave
 
@@ -180,3 +185,73 @@ def run_the_following_steps_at_end_of_scenario(ctx):
         run_steps(ctx, steps)
 
     register_after_this_scenario_hook(run_final_steps)
+
+
+def run_steps_silently(ctx, steps_text):
+    """
+    internal method used to run steps without producing any output about them
+    and also making sure that we do not trigger other after/before step calls
+    """
+    steps = ctx.feature.parser.parse_steps(steps_text)
+    with ctx._use_with_behave_mode():
+        CONFIG["__CUCU_BEFORE_STEP_HOOKS_DISABLED"] = True
+        CONFIG["__CUCU_AFTER_STEP_HOOKS_DISABLED"] = True
+        try:
+            for step in steps:
+                result = step.run(ctx._runner, quiet=True, capture=False)
+                if not result:
+                    raise RuntimeError(f"previous step failed")
+        finally:
+            CONFIG["__CUCU_BEFORE_STEP_HOOKS_DISABLED"] = False
+            CONFIG["__CUCU_AFTER_STEP_HOOKS_DISABLED"] = False
+
+
+@step('I create the before step handler "{name}" with the following steps')
+def create_before_step_handler(ctx, name):
+    steps_text = ctx.text
+
+    def before_step(ctx):
+        logger.debug(f'running before step handler "{name}"')
+        try:
+            run_steps_silently(ctx, steps_text)
+            logger.info(f'before step handler "{name}" ran successfully')
+        except Exception as exc:
+            # log the failure in info as a step handler isn't suppose to fail
+            # the test run but just handle some before step situations
+            logger.debug(f'before step handler "{name}" failed with "{exc}"')
+
+    register_before_step_hook(before_step)
+
+
+@step('I create the after step handler "{name}" with the following steps')
+def create_after_step_handler(ctx, name):
+    steps_text = ctx.text
+
+    def after_step(ctx):
+        logger.debug(f'running after step handler "{name}"')
+        try:
+            run_steps_silently(ctx, steps_text)
+            logger.info(f'after step handler "{name}" ran successfully')
+        except Exception as exc:
+            # log the failure in info as a step handler isn't suppose to fail
+            # the test run but just handle some after step situations
+            logger.debug(f'after step handler "{name}" failed with "{exc}"')
+
+    register_after_step_hook(after_step)
+
+
+@step('I create the before retry handler "{name}" with the following steps')
+def create_before_retry_handler(ctx, name):
+    steps_text = ctx.text
+
+    def before_retry(ctx):
+        logger.debug(f'running before retry handler "{name}"')
+        try:
+            run_steps_silently(ctx, steps_text)
+            logger.info(f'before retry handler "{name}" ran successfully')
+        except Exception as exc:
+            # log the failure in info as a step handler isn't suppose to fail
+            # the test run but just handle some after step situations
+            logger.debug(f'before retry handler "{name}" failed with "{exc}"')
+
+    register_before_retry_hook(before_retry)

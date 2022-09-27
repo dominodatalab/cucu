@@ -308,6 +308,7 @@ CONFIG.define(
 
 
 # cucu internals - we do not expose these as defined variables in `cucu vars`
+CONFIG["__CUCU_CTX"] = None
 CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
 CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"] = {}
 CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"] = []
