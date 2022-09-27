@@ -67,7 +67,9 @@
                 {% set step_prefix = "" %}
             {% endif %}
             {% if step['result'] is defined %}
-                {% set step_timing = "# started at {} took {:.3f}s".format(step["result"]["timestamp"], step["result"]["duration"]) %}
+                {% if step['result']['status'] == 'failed' or step['result']['status'] == 'passed' %}
+                    {% set step_timing = "# started at {} took {:.3f}s".format(step["result"]["timestamp"], step["result"]["duration"]) %}
+                {% endif %}
             {% else %}
                 {% set step_timing = "" %}
             {% endif %}

@@ -18,7 +18,9 @@ class CucuJUnitFormatter(Formatter):
     def __init__(self, stream_opener, config):
         super(CucuJUnitFormatter, self).__init__(stream_opener, config)
         self.xml_root = None
+        self.current_feature = None
         self.current_scenario = None
+        self.curent_step = None
         self.current_scenario_traceback = None
         self.current_scenario_duration = 0.0
         self.current_scenario_results = {}
@@ -30,6 +32,7 @@ class CucuJUnitFormatter(Formatter):
         pass
 
     def feature(self, feature):
+        self.current_feature = feature
         date_now = datetime.now()
         self.feature_results = {
             "name": escape(feature.name),
@@ -58,9 +61,23 @@ class CucuJUnitFormatter(Formatter):
             status = self.current_scenario.compute_status().name
             self.current_scenario_results["status"] = status
 
+            failures = []
+
             if status == "failed" and self.current_scenario_traceback:
-                failure = traceback.format_tb(self.current_scenario_traceback)
-                self.current_scenario_results["failure"] = failure
+                failure_handlers = CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"]
+
+                for failure_handler in failure_handlers:
+                    failures.append(
+                        failure_handler(
+                            self.current_feature, self.current_scenario
+                        )
+                    )
+
+                failures += [
+                    f"{self.current_step.keyword} {self.current_step.name}"
+                ]
+                failures += traceback.format_tb(self.current_scenario_traceback)
+                self.current_scenario_results["failure"] = failures
 
             if status == "skipped":
                 self.current_scenario_results["skipped"] = True
@@ -104,6 +121,7 @@ class CucuJUnitFormatter(Formatter):
             self.steps.insert(index, step)
 
     def result(self, step):
+        self.current_step = step
         if step.status == Status.failed:
             self.current_scenario_traceback = step.exc_traceback
 

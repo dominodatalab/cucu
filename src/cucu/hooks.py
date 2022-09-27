@@ -126,3 +126,23 @@ def register_custom_tags_in_report_handling(regex, handler):
                         return "<a href="...">{tag}</a>"
     """
     CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"][re.compile(regex)] = handler
+
+
+def register_custom_junit_failure_handler(handler):
+    """
+    register a callback function to call when there is a test failure and
+    we want to augment the failure output message in the junit results
+    files.
+
+    parameters:
+        handler(feature, scenario):
+          where feature and scenario are the following behave model
+          objects:
+
+            * https://behave.readthedocs.io/en/stable/api.html#behave.model.Feature
+            * https://behave.readthedocs.io/en/stable/api.html#behave.model.Scenario
+
+          You must return a string that will be appended to the top of the
+          failure message in the JUnit XML results files.
+    """
+    CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"].append(handler)
