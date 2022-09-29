@@ -33,8 +33,13 @@ def load_cucu_steps(filepath=None):
         args.append(filepath)
 
     process = subprocess.run(args, capture_output=True)
-
     steps_doc_output = process.stdout.decode("utf8")
+
+    if steps_doc_output.startswith("ParserError"):
+        raise RuntimeError(
+            "unable to parse feature files, see above for details"
+        )
+
     for cucu_step in steps_doc_output.split("@step"):
         # Each line of a step definition looks like so:
         #

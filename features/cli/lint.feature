@@ -386,3 +386,23 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/custom_linting_with_exclusions/custom_linting_feature.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is empty
       And I should see "{STDERR}" is empty
+
+
+  Scenario: User gets appropriate exit code when cucu can not parse the file
+    Given I create a file at "{CUCU_RESULTS_DIR}/broken_feature_file_lint/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/broken_feature_file_lint/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/broken_feature_file_lint/broken_feature.feature" with the following:
+      """
+      This is just garbage
+      """
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/broken_feature_file_lint/broken_feature.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+      And I should see "{STDOUT}" contains the following:
+      """
+      Parser failure in state init, at line 1: "This is just garbage"
+      """
