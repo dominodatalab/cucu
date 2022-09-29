@@ -22,8 +22,9 @@ def init_global_hook_variables():
     CONFIG["__CUCU_AFTER_STEP_HOOKS"] = []
 
     CONFIG["__CUCU_PAGE_CHECK_HOOKS"] = {}
-
     CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"] = {}
+
+    CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"] = []
 
 
 def init_scenario_hook_variables():

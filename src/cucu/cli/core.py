@@ -10,7 +10,13 @@ import time
 import os
 
 from click import ClickException
-from cucu import fuzzy, reporter, language_server, logger
+from cucu import (
+    fuzzy,
+    init_global_hook_variables,
+    reporter,
+    language_server,
+    logger,
+)
 from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.cli import thread_dumper
@@ -323,6 +329,7 @@ def _generate_report(filepath, output):
 
     os.makedirs(output)
 
+    init_global_hook_variables()
     report_location = reporter.generate(filepath, output)
     print(f"HTML test report at {report_location}")
 
