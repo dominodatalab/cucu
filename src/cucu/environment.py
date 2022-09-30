@@ -13,8 +13,6 @@ from cucu.page_checks import init_page_checks
 from functools import partial
 
 
-init_global_hook_variables()
-
 CONFIG.define(
     "FEATURE_RESULTS_DIR",
     "the results directory for the currently executing feature",
@@ -30,6 +28,8 @@ CONFIG.define(
     "the browser downloads directory for the currently " "executing scenario",
     default=None,
 )
+
+init_global_hook_variables()
 
 
 def escape_filename(string):

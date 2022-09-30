@@ -305,9 +305,3 @@ CONFIG.define(
     "comma separated list of paths to load cucu lint rules from .yaml files",
     default="",
 )
-
-
-# cucu internals - we do not expose these as defined variables in `cucu vars`
-CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
-CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"] = {}
-CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"] = []
