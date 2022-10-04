@@ -13,11 +13,11 @@ def test_find_completions_returns_prefix_matches_first():
 def test_find_completions_returns_something_when_prefix_does_not_match():
     matches = find_completions("click button")
 
-    # the completions are based on levenshtein distance so lets just assert
-    # that at least one of the words we included in our search are in the
-    # resulting matching step names
     for (step_name, _) in matches:
-        assert step_name.find("click") != -1 or step_name.find("button") != -1
+        if step_name.find("click") == -1 and step_name.find("button") == -1:
+            raise RuntimeError(
+                f"found step with neither click nor button in it: {step_name}"
+            )
 
 
 def test_load_cucu_steps_returns_valid_list_of_existing_steps():
