@@ -1,8 +1,8 @@
 import re
+import jellyfish
 import logging
 
 from cucu.cli.steps import load_cucu_steps
-from fuzzywuzzy import fuzz
 
 from pygls.capabilities import COMPLETION
 from pygls.server import LanguageServer
@@ -39,19 +39,18 @@ def find_completions(step_fragment, steps_cache=None):
             location = f"{location['filepath']}:{location['line']}"
             items.append((step, location))
 
-    # if there were 0 steps found then lets at least find some close based on
-    # the levenshtein distance
+    # if there were 0 steps found then lets at least find some that are close
+    # based on some string distance heuristic
     if len(items) == 0:
         for step in steps_cache.keys():
-            if fuzz.ratio(step_fragment, step) > 40:
+            if jellyfish.jaro_similarity(step_fragment, step) > 0.6:
                 step_details = steps_cache[step]
                 location = step_details["location"]
                 location = f"{location['filepath']}:{location['line']}"
                 items.append((step, location))
 
-        # sort by the levenshtein distance of the strings
         def compare_completion_item(completion_item):
-            return fuzz.ratio(completion_item[0], step_fragment)
+            return jellyfish.jaro_similarity(completion_item[0], step_fragment)
 
         items.sort(key=compare_completion_item, reverse=True)
 
