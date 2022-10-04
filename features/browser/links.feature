@@ -20,3 +20,10 @@ Feature: Links
      When I go back on the browser
       And I click the "2nd" link "duplicate link!"
      Then I should see the browser title is "Iframes!"
+
+  Scenario: User can not click a disabled link
+    Given I should see the link "disabled link" is disabled
+      And I expect the following step to fail with "unable to click the link, as it is disabled"
+      """
+      Then I click the link "disabled link"
+      """

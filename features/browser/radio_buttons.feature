@@ -38,3 +38,10 @@ Feature: Radio Buttons
   Scenario: User can select 2nd radio button with the same name
     Given I select the "2nd" radio button "blue" if it is not selected
      Then I should see the "2nd" radio button "blue" is selected
+
+  Scenario: User can not select a disabled radio button
+    Given I should see the radio button "red" is disabled
+      And I expect the following step to fail with "unable to select the radio button, as it is disabled"
+      """
+      Then I select the radio button "red"
+      """

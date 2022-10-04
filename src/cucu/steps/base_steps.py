@@ -31,7 +31,10 @@ def is_disabled(element):
     """
     internal method to check an element is disabled
     """
-    return element.get_attribute("disabled")
+    return (
+        element.get_attribute("disabled")
+        or element.get_attribute("aria-disabled") == "true"
+    )
 
 
 def is_not_disabled(element):

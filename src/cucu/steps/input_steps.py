@@ -62,6 +62,10 @@ def find_n_write(ctx, name, value, index=0):
     ctx.check_browser_initialized()
 
     input_ = find_input(ctx, name, index=index)
+
+    if base_steps.is_disabled(input_):
+        raise RuntimeError("unable to write into the input, as it is disabled")
+
     input_.clear()
     input_.send_keys(value)
 
@@ -81,6 +85,10 @@ def find_n_clear(ctx, name, index=0):
     ctx.check_browser_initialized()
 
     input_ = find_input(ctx, name, index=index)
+
+    if base_steps.is_disabled(input_):
+        raise RuntimeError("unable to clear the input, as it is disabled")
+
     input_.clear()
 
 
