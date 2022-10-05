@@ -57,6 +57,9 @@ def check_checkbox(ctx, checkbox):
     if is_checked(checkbox):
         raise Exception("checkbox already checked")
 
+    if base_steps.is_disabled(checkbox):
+        raise RuntimeError("unable to check the checkbox, as it is disabled")
+
     ctx.browser.click(checkbox)
 
 

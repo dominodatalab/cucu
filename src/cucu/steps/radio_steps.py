@@ -70,6 +70,11 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
     ctx.check_browser_initialized()
     radio = find_n_assert_radio_button(ctx, name, index=index)
 
+    if base_steps.is_disabled(radio):
+        raise RuntimeError(
+            "unable to select the radio button, as it is disabled"
+        )
+
     selected = radio.get_attribute("checked") == "true"
 
     if selected:
@@ -100,6 +105,12 @@ def select_radio_button(ctx, radiobox):
     internal method to select a radio button that isn't already selected
     """
     ctx.check_browser_initialized()
+
+    if base_steps.is_disabled(radiobox):
+        raise RuntimeError(
+            "unable to select the radio button, as it is disabled"
+        )
+
     selected = bool(radiobox.get_attribute("checked"))
 
     if selected:

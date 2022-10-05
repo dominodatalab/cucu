@@ -29,3 +29,10 @@ Feature: Checkboxes
      When I check the checkbox "checkbox wrapped with label"
      Then I should see the checkbox "checkbox wrapped with label" is checked
       And I should see "checkbox wrapped with label" in the input "last touched checkbox:"
+
+  Scenario: User can not check a disabled checkbox
+    Given I should see the checkbox "disabled checkbox" is disabled
+      And I expect the following step to fail with "unable to check the checkbox, as it is disabled"
+      """
+      Then I check the checkbox "disabled checkbox"
+      """

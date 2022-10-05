@@ -163,8 +163,23 @@ Feature: Inputs
      Then I should see the previous step took more than "9" seconds
       And I should see "8675309" in the input "input type=tel"
 
-  @wip
   Scenario: User can write into an input with an @value set and the input is cleared correctly
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
      Then I write "bar" into the input "input with @value set"
       And I should see "bar" in the input "input with @value set"
+
+  Scenario: User can write into a disabled input field
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
+     Then I should see the input "disabled input" is disabled
+      And I expect the following step to fail with "unable to write into the input, as it is disabled"
+      """
+      Then I write "foo" into the input "disabled input"
+      """
+
+  Scenario: User can not clear a disabled input field
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
+     Then I should see the input "disabled input" is disabled
+      And I expect the following step to fail with "unable to clear the input, as it is disabled"
+      """
+      Then I clear the input "disabled input"
+      """

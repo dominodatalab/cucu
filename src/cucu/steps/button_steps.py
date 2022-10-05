@@ -58,6 +58,11 @@ def click_button(ctx, button):
     """
     internal method used to simply click a button element
     """
+    ctx.check_browser_initialized()
+
+    if base_steps.is_disabled(button):
+        raise RuntimeError("unable to click the button, as it is disabled")
+
     ctx.browser.click(button)
 
 

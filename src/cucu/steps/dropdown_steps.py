@@ -93,6 +93,11 @@ def find_n_select_dropdown_option(ctx, dropdown, option):
 
     dropdown_element = find_dropdown(ctx, dropdown)
 
+    if base_steps.is_disabled(dropdown_element):
+        raise RuntimeError(
+            "unable to select from the dropdown, as it is disabled"
+        )
+
     if dropdown_element.tag_name == "select":
         select_element = Select(dropdown_element)
         select_element.select_by_visible_text(option)

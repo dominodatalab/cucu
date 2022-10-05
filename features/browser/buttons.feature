@@ -56,7 +56,7 @@ Feature: Buttons
 
   Scenario: User can wait the CUCU_STEP_WAIT_TIMEOUT_S to click a button
     Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"
-    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?delay_page_load_ms=5000"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?delay_page_load_ms=5000"
      When I wait to click the button "button"
      Then I should see the previous step took more than "4" seconds
 
@@ -101,4 +101,20 @@ Feature: Buttons
       And I expect the following step to fail with "button "disabled button" is not not disabled"
       """
       Then I should see the button "disabled button" is not disabled
+      """
+
+  Scenario: User can not click a disabled button
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
+      And I should see the button "disabled button" is disabled
+      And I expect the following step to fail with "unable to click the button, as it is disabled"
+      """
+      Then I click the button "disabled button"
+      """
+
+  Scenario: User can not click a aria-disabled button
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
+      And I should see the button "aria-disabled button" is disabled
+      And I expect the following step to fail with "unable to click the button, as it is disabled"
+      """
+      Then I click the button "aria-disabled button"
       """

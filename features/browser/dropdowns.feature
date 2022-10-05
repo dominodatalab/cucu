@@ -18,3 +18,10 @@ Feature: Dropdowns
      Then I should see the option "blue" is not selected on the dropdown "Pick a color"
       And I should see the option "green" is selected on the dropdown "Pick a color"
       And I should see the option "red" is not selected on the dropdown "Pick a color"
+
+  Scenario: User can not select from a disabled dropdown
+    Given I should see the dropdown "Pick a pet"
+      And I expect the following step to fail with "unable to select from the dropdown, as it is disabled"
+      """
+      Then I select the option "CheeseBall" from the dropdown "Pick a pet"
+      """
