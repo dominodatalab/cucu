@@ -188,6 +188,7 @@ def run(
     """
     run a set of feature files
     """
+    init_global_hook_variables()
     dumper = None
 
     # load all them configs
@@ -340,6 +341,7 @@ def report(filepath, output):
     """
     generate a test report from a results directory
     """
+    init_global_hook_variables()
     run_details_filepath = os.path.join(filepath, "run_details.json")
 
     if os.path.exists(run_details_filepath):
