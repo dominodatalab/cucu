@@ -513,19 +513,10 @@ def vars(filepath):
     help="when set to detach the browser will continue to run and "
     "the cucu process will exit",
 )
-@click.option(
-    "-l",
-    "--logging-level",
-    default="INFO",
-    help="set logging level to one of debug, warn or info (default)",
-)
-def debug(browser, url, detach, logging_level):
+def debug(browser, url, detach):
     """
     debug cucu library
     """
-    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
-    logger.init_logging(logging_level.upper())
-
     fuzzy_js = fuzzy.load_jquery_lib() + fuzzy.load_fuzzy_lib()
     # XXX: need to make this more generic once we make the underlying
     #      browser framework swappable.
