@@ -29,15 +29,79 @@
     <br/>
     <div>
         <div>
+            <label>button with common grandparent</label>
+        </div>
+        <div>
+            <button onclick="update('button with common grandparent');"></button>
+        </div>
+    </div>
+    <div>
+        <div>
             <div>
-                <label>button with previous nested sibling label</label>
+                <label>button with common great grandparent</label>
             </div>
         </div>
         <div>
             <div>
-                <button onclick="update('button with previous nested sibling label');"></button>
+                <button onclick="update('button with common great grandparent');"></button>
             </div>
         </div>
     </div>
+    <div>
+        <div>
+            <div>
+                <div>
+                    <label>button with common great great grandparent</label>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <button onclick="update('button with common great great grandparent');"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+
+    <div>
+        <div>
+            <div>
+                <div>
+                    <div>
+                        <input type="text" onkeypress="update('previous nested sibling input');">
+                    </div>
+                </div>
+                <div>nested sibling input</div>
+                <div>
+                    <div>
+                        <input type="text" onkeypress="update('next nested sibling input');">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+
+    <div>
+        <div>
+            <div>
+                <input type="radio" onclick="update('previous nested sibling radio button');">
+            </div>
+        </div>
+        <div>nested sibling radio</div>
+        <div>
+            <div>
+                <input type="radio" onclick="update('next nested sibling radio button');">
+            </div>
+        </div>
+    </div>
+    <br/>
+
+    <label>
+        <input type="radio" onclick="update('radio button wrapped with label');"></input>
+        radio button wrapped with label
+    </label>
+    <br/>
+
   </body>
 </html>
