@@ -329,7 +329,6 @@ def _generate_report(filepath, output):
 
     os.makedirs(output)
 
-    init_global_hook_variables()
     report_location = reporter.generate(filepath, output)
     print(f"HTML test report at {report_location}")
 
