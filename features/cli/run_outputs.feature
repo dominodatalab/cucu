@@ -66,7 +66,7 @@ Feature: Run outputs
       """
 
   Scenario: User can run a scenario with background which uses a step with substeps
-    Given I run the command "cucu run data/features/feature_with_background_using_substeps.feature --results {CUCU_RESULTS_DIR}/background-with-substeps-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+    Given I run the command "cucu run data/features/feature_with_background_using_substeps.feature --results {CUCU_RESULTS_DIR}/background-with-substeps-results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       Feature: Feature with background using substeps
