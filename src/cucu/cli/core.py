@@ -188,7 +188,6 @@ def run(
     """
     run a set of feature files
     """
-    init_global_hook_variables()
     dumper = None
 
     # load all them configs
@@ -330,6 +329,7 @@ def _generate_report(filepath, output):
 
     os.makedirs(output)
 
+    init_global_hook_variables()
     report_location = reporter.generate(filepath, output)
     print(f"HTML test report at {report_location}")
 
@@ -341,7 +341,6 @@ def report(filepath, output):
     """
     generate a test report from a results directory
     """
-    init_global_hook_variables()
     run_details_filepath = os.path.join(filepath, "run_details.json")
 
     if os.path.exists(run_details_filepath):
@@ -514,10 +513,19 @@ def vars(filepath):
     help="when set to detach the browser will continue to run and "
     "the cucu process will exit",
 )
-def debug(browser, url, detach):
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+def debug(browser, url, detach, logging_level):
     """
     debug cucu library
     """
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
+
     fuzzy_js = fuzzy.load_jquery_lib() + fuzzy.load_fuzzy_lib()
     # XXX: need to make this more generic once we make the underlying
     #      browser framework swappable.

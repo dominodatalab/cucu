@@ -29,13 +29,35 @@
     <br/>
     <div>
         <div>
+            <label>button with common grandparent</label>
+        </div>
+        <div>
+            <button onclick="update('button with common grandparent');"></button>
+        </div>
+    </div>
+    <div>
+        <div>
             <div>
-                <label>button with previous nested sibling label</label>
+                <label>button with common great grandparent</label>
             </div>
         </div>
         <div>
             <div>
-                <button onclick="update('button with previous nested sibling label');"></button>
+                <button onclick="update('button with common great grandparent');"></button>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div>
+            <div>
+                <div>
+                    <label>button with common great great grandparent</label>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <button onclick="update('button with common great great grandparent');"></button>
+                </div>
             </div>
         </div>
     </div>

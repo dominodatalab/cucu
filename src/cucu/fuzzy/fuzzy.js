@@ -17,10 +17,10 @@
         jQuery.expr[ ":" ],
         {
             has_text: function(elem, index, match) {
-                return (elem.textContent || elem.innerText || jQuery(elem).text() || '') === match[3].trim();
+                return (elem.textContent || elem.innerText || jQuery(elem).text() || '').trim() === match[3].trim();
             },
             vis: function (elem) {
-                return !(jQuery(elem).is(":hidden") || jQuery(elem).parents(":hidden").length);
+                return !(elem.tagName.toLowerCase() === "body" || jQuery(elem).is(":hidden") || jQuery(elem).parents(":hidden").length);
             }
         }
     );
@@ -194,49 +194,34 @@
                     var thing = things[tIndex];
 
                     // <thing/><*>name</*>
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prev(thing).toArray();
+                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prev(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<thing/><*>name</*>', results); }
                     elements = elements.concat(results);
                 }
             }
         }
 
+        // element labeled by an element with a common grandparent
         for(var mIndex=0; mIndex < matchers.length; mIndex++) {
-            var matcher = matchers[mIndex];
+            var matcher = "has_text"; // matchers[mIndex];
 
-            // element labeled with any previous sibling
-            if (direction === LEFT_TO_RIGHT) {
-                for(var tIndex = 0; tIndex < things.length; tIndex++) {
-                    var thing = things[tIndex];
+            for(var tIndex = 0; tIndex < things.length; tIndex++) {
+                var thing = things[tIndex];
 
-                    // <*>name</*>...<thing>...
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).nextAll(thing + ':vis').toArray();
-                    if (cucu.debug) { console.log('<*>name</*>...<thing>...', results); }
-                    elements = elements.concat(results);
+                // <...>...<name>...</...><...>...thing..</...>
+                var matched = jQuery('*:vis:' + matcher + '("' + name + '")');
 
-                    // <...><*>name</*></...>...<...><thing></...>
-                    // XXX: this rule is horribly complicated and I'd rather see it gone
-                    //      basically: common great grandpranet
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).nextAll().find(thing + ':vis').toArray();
-                    if (cucu.debug) { console.log('<...><*>name</*></...>...<...><thing></...>', results); }
-                    elements = elements.concat(results);
-                }
-            }
+                results = matched.find(thing + ':vis').toArray();
+                if (cucu.debug) { console.log('<...><name></...><...>...thing...</...>', results); }
+                elements = elements.concat(results);
 
-            // element labeled with any next sibling
-            if (direction === RIGHT_TO_LEFT) {
-                for(var tIndex = 0; tIndex < things.length; tIndex++) {
-                    var thing = things[tIndex];
+                // we'll do 3 levels of grand parents but no further back
+                for(var pIndex=0; pIndex < 3; pIndex++) {
+                    // move another parent level back
+                    matched = matched.parent();
 
-                    // next siblings: <thing>...<*>name</*>...
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prevAll(thing).toArray();
-                    if (cucu.debug) { console.log('<thing>...<*>name</*>...', results); }
-                    elements = elements.concat(results);
-
-                    // <...><thing></...>...<...><*>name</*></...>
-                    // XXX: this rule is horribly complicated and I'd rather see it gone
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prevAll().find(thing + ':vis').toArray();
-                    if (cucu.debug) { console.log('<...><thin></...>...<...><*>name</*></...>', results); }
+                    results = matched.find(thing + ':vis').toArray();
+                    if (cucu.debug) { console.log('<...><name></...><...>...thing...</...>', results); }
                     elements = elements.concat(results);
                 }
             }
