@@ -61,5 +61,63 @@
             </div>
         </div>
     </div>
+
+    <div>
+        <div>
+            <div>
+                <div>
+                    <div>
+                        <input type="text" onkeypress="update('previous nested sibling input');">
+                    </div>
+                </div>
+                <div>nested sibling input</div>
+                <div>
+                    <div>
+                        <input type="text" onkeypress="update('next nested sibling input');">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div>
+            <div>
+                <div>
+                    <div>
+                        <input type="radio" onclick="update('previous nested sibling radio button');">
+                    </div>
+                </div>
+                <div>nested sibling radio</div>
+                <div>
+                    <div>
+                        <input type="radio" onclick="update('next nested sibling radio button');">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+   <form>
+       <div>Common Grandparent</div>
+       <label>
+           <span>
+               <input type="radio" name="common-grandparent-radios" value="first radio button labeled by common grandparent" checked="">
+           </span>
+           <span>
+               <div>first radio button with common grandparent</div>
+           </span>
+       </label>
+       <label>
+           <span>
+               <input type="radio" name="common-grandparent-radios" value="second radio button labeled by common grandparent">
+           </span>
+           <span>
+               <div>second radio button with common grandparent</div>
+           </span>
+       </label>
+   </form>
+
   </body>
 </html>

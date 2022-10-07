@@ -17,7 +17,7 @@
         jQuery.expr[ ":" ],
         {
             has_text: function(elem, index, match) {
-                return (elem.textContent || elem.innerText || jQuery(elem).text() || '').trim() === match[3].trim();
+                return (elem.textContent || elem.innerText || jQuery(elem).text() || '') === match[3].trim();
             },
             vis: function (elem) {
                 return !(elem.tagName.toLowerCase() === "body" || jQuery(elem).is(":hidden") || jQuery(elem).parents(":hidden").length);
@@ -201,29 +201,51 @@
             }
         }
 
-        // element labeled by an element with a common grandparent
-        for(var mIndex=0; mIndex < matchers.length; mIndex++) {
-            var matcher = "has_text"; // matchers[mIndex];
-
+        // from here on only has_text as if we continue to allow for "contains"
+        // matching we'll up with way to broad of a matching scheme
+        // element labeled  with any next nested sibling
+        if (direction === LEFT_TO_RIGHT) {
             for(var tIndex = 0; tIndex < things.length; tIndex++) {
                 var thing = things[tIndex];
 
-                // <...>...<name>...</...><...>...thing..</...>
-                var matched = jQuery('*:vis:' + matcher + '("' + name + '")');
+                // <...><*>name</*></...>...<...><thing></...>
+                results = jQuery('*:vis:has_text("' + name + '")', document.body).next().find(thing + ':vis').toArray();
+                if (cucu.debug) { console.log('<...><*>name</*></...>...<...><thing></...>', results); }
+                elements = elements.concat(results);
+            }
+        }
+
+        // element labeled with any previous nested sibling
+        if (direction === RIGHT_TO_LEFT) {
+            for(var tIndex = 0; tIndex < things.length; tIndex++) {
+                var thing = things[tIndex];
+
+                // <...><thing></...>...<...><*>name</*></...>
+                results = jQuery('*:vis:has_text("' + name + '")', document.body).prev().find(thing + ':vis').toArray();
+                if (cucu.debug) { console.log('<...><thin></...>...<...><*>name</*></...>', results); }
+                elements = elements.concat(results);
+            }
+        }
+
+        // element labeled by an element with a common grandparent
+        for(var tIndex = 0; tIndex < things.length; tIndex++) {
+            var thing = things[tIndex];
+
+            // <...>...<name>...</...><...>...thing..</...>
+            var matched = jQuery('*:vis:has_text("' + name + '")');
+
+            results = matched.find(thing + ':vis').toArray();
+            if (cucu.debug) { console.log('<...><name></...><...>...thing...</...>', results); }
+            elements = elements.concat(results);
+
+            // we'll do 3 levels of grand parents but no further back
+            for(var pIndex=0; pIndex < 3; pIndex++) {
+                // move another parent level back
+                matched = matched.parent();
 
                 results = matched.find(thing + ':vis').toArray();
                 if (cucu.debug) { console.log('<...><name></...><...>...thing...</...>', results); }
                 elements = elements.concat(results);
-
-                // we'll do 3 levels of grand parents but no further back
-                for(var pIndex=0; pIndex < 3; pIndex++) {
-                    // move another parent level back
-                    matched = matched.parent();
-
-                    results = matched.find(thing + ':vis').toArray();
-                    if (cucu.debug) { console.log('<...><name></...><...>...thing...</...>', results); }
-                    elements = elements.concat(results);
-                }
             }
         }
 

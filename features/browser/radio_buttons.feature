@@ -28,13 +28,6 @@ Feature: Radio Buttons
       And I should see the radio button "dog" is selected
       And I should see the radio button "rat" is not selected
 
-  Scenario: User can select radio button labelled by element with common grandparent
-    Given I should see the radio button "Service Account" is not selected
-      And I should see the radio button "Individual" is selected
-     When I select the radio button "Service Account"
-     Then I should see the radio button "Service Account" is selected
-      And I should see the radio button "Individual" is not selected
-
   Scenario: User can select 2nd radio button with the same name
     Given I select the "2nd" radio button "blue" if it is not selected
      Then I should see the "2nd" radio button "blue" is selected
