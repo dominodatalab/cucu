@@ -162,6 +162,20 @@ jobs:
       - store_artifacts:
           path: report/
 
+  publish:
+    docker:
+      - image: cimg/python:3.9.7
+    steps:
+      - checkout
+      - install_cucu_dependencies
+      - build_cucu_python_package
+      - run:
+          name: Publish to private PyPI repository
+          command: |
+            poetry config repositories.private ${PUBLISH_REPOSITORY}
+            poetry config http-basic.private ${PUBLISH_USERNAME} ${PUBLISH_PASSWORD}
+            poetry publish -r private
+
 workflows:
   build-n-test:
     jobs:
@@ -175,3 +189,12 @@ workflows:
       - test:
           name: test-firefox
           browser: firefox
+      - publish:
+          filters:
+            branches:
+              only: main
+          requires:
+            - pre-commit
+            - test-chrome
+            - test-edge
+            - test-firefox
