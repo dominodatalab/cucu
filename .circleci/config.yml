@@ -93,8 +93,8 @@ executors:
         environment:
           SE_NODE_MAX_SESSIONS: 10
           SE_NODE_SESSION_TIMEOUT: 300
-          SCREEN_WIDTH: 1920
-          SCREEN_HEIGHT: 1080
+          SCREEN_WIDTH: 1366
+          SCREEN_HEIGHT: 768
     resource_class: xlarge
 
 jobs:
