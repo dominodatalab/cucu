@@ -2,6 +2,7 @@
 various cucu utilities can be placed here and then exposed publicly through
 the src/cucu/__init__.py
 """
+import time
 
 from tenacity import retry as retrying
 from tenacity import retry_if_not_exception_type, stop_after_delay, wait_fixed
@@ -85,6 +86,7 @@ def retry(func, wait_up_to_s=None, retry_after_s=None):
         retry=retry_if_not_exception_type(StopRetryException),
     )
     def new_decorator(*args, **kwargs):
+        time.sleep(int(CONFIG["CUCU_INTERACTION_DELAY_S"]))
         return func(*args, **kwargs)
 
     return new_decorator

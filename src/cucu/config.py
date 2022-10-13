@@ -265,6 +265,12 @@ CONFIG.define(
     default=0.5,
 )
 CONFIG.define(
+    "CUCU_INTERACTION_DELAY_S",
+    "the total number of seconds to wait between steps, retries, etc. so that "
+    "the tests run at a slower an easier to debug pace",
+    default=0.0,
+)
+CONFIG.define(
     "CUCU_KEEP_BROWSER_ALIVE",
     "when set to true we'll reuse the browser between scenario runs",
     default=False,

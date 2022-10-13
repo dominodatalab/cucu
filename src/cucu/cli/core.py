@@ -48,6 +48,12 @@ def main():
 @main.command()
 @click.argument("filepath")
 @click.option(
+    "--a11y-mode/--fuzzy-mode",
+    default=False,
+    help="when set cucu will only find and interact with elements in an "
+    "accessible manner.",
+)
+@click.option(
     "-b",
     "--browser",
     default=os.environ.get("CUCU_BROWSER") or "chrome",
@@ -164,6 +170,7 @@ def main():
 )
 def run(
     filepath,
+    a11y_mode,
     browser,
     color_output,
     dry_run,
@@ -193,6 +200,9 @@ def run(
 
     # load all them configs
     CONFIG.load_cucurc_files(filepath)
+
+    if a11y_mode:
+        CONFIG["__CUCU_A11Y_MODE_ENABLED"] = True
 
     if os.environ.get("CUCU") == "true":
         # when cucu is already running it means that we're running inside

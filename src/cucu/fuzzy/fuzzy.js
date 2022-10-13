@@ -1,7 +1,9 @@
 (function(){
-    window.cucu = {
-        debug: false
-    };
+    if (!window.cucu) {
+        window.cucu = {
+            debug: false
+        };
+    }
 
     /*
      * custom jquery matchers:

@@ -52,6 +52,7 @@ def check_browser_initialized(ctx):
 def before_all(ctx):
     CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
+    ctx.a11y_mode = CONFIG["__CUCU_A11Y_MODE_ENABLED"]
 
 
 def before_feature(ctx, feature):
@@ -76,6 +77,9 @@ def before_scenario(ctx, scenario):
     ctx.step_index = 0
     ctx.browsers = []
     ctx.browser = None
+
+    if "a11y-mode" in (scenario.tags + ctx.feature.tags):
+        ctx.a11y_mode = True
 
     # reset the step timer dictionary
     ctx.step_timers = {}
@@ -170,6 +174,8 @@ def before_step(ctx, step):
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
         hook(ctx)
+
+    time.sleep(int(CONFIG["CUCU_INTERACTION_DELAY_S"]))
 
 
 def after_step(ctx, step):

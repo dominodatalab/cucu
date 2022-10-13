@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <title>A11Y Buttons!</title>
+    <style>
+      .button { text-decoration: none; -webkit-appearance: button; color: #333333; display: inline; }
+    </style>
+    <script>
+    function update(value) {
+        document.querySelector("#input").value = value + " was clicked";
+    }
+    </script>
+  </head>
+  <body>
+    <label>value:</label><input id="input" type="text" placeholder="value:"></input>
+    <br/>
+    <label id="for-button">button with aria-labelledby</label><button onclick="update('button with aria-labelledby');" aria-labelledby="for-button">button that has an aria-labelledby</button>
+    <button onclick="update('button with aria-label');" aria-label="button with aria-label">button that has an aria-label</button>
+    <label>button wrapped with label<button onclick="update('button wrapped by label');"></button></label>
+    <button onclick="update('button with title');" title="button with title"></button>
+
+    <!-- load the utility library that can be used to delay the page loading -->
+    <script src="js/util.js"></script>
+  </body>
+</html>

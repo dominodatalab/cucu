@@ -22,8 +22,3 @@ Feature: Frames
 
   Scenario: User can see images in iframes
      Then I should see the image with the alt text "Stars"
-
-  Scenario: User can see multiple things across iframes
-     When I write "some text" into the input "input type=text"
-     Then I should see "some text" in the input "input type=text"
-      And I should see the image with the alt text "Stars"

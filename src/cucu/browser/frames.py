@@ -11,8 +11,6 @@ def search_in_all_frames(browser, search_function):
     result = search_function()
 
     if result is None:
-        # switch to default frame before getting the list of iframes
-        browser.switch_to_default_frame()
         frames = browser.execute('return document.querySelectorAll("iframe");')
         for frame in frames:
             #

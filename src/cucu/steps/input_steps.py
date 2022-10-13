@@ -1,6 +1,6 @@
 import humanize
 
-from cucu import helpers, fuzzy, retry, step
+from cucu import a11y, helpers, fuzzy, retry, step
 
 # XXX: this would have to be generalized to other browser abstractions
 from selenium.webdriver.common.keys import Keys
@@ -9,10 +9,7 @@ from . import base_steps
 
 def find_input(ctx, name, index=0):
     """
-    find an input on screen by fuzzy matching on the name and index provided.
-
-        * <input>
-        * <textarea>
+    find an input  on screen using fuzzy or a11y matching
 
     parameters:
       ctx(object): behave context object used to share data between steps
@@ -27,17 +24,32 @@ def find_input(ctx, name, index=0):
     """
     ctx.check_browser_initialized()
 
-    input_ = fuzzy.find(
-        ctx.browser,
-        name,
-        [
-            # we can only write into things that do not have the type:
-            # button, checkbox, radio, color, hidden, range, reset
-            "input[type!=button][type!=checkbox][type!=radio][button!=color][button!=hidden][button!=range][button!=reset]",
-            "textarea",
-        ],
-        index=index,
-    )
+    if ctx.a11y_mode:
+        input_ = a11y.find(
+            ctx.browser,
+            name,
+            [
+                # we can only write into things that do not have the type:
+                # button, checkbox, radio, color, hidden, range, reset
+                "input[type!=button][type!=checkbox][type!=radio][button!=color][button!=hidden][button!=range][button!=reset]",
+                "textarea",
+            ],
+            ["aria-label", "name", "placeholder"],
+            index=index,
+        )
+
+    else:
+        input_ = fuzzy.find(
+            ctx.browser,
+            name,
+            [
+                # we can only write into things that do not have the type:
+                # button, checkbox, radio, color, hidden, range, reset
+                "input[type!=button][type!=checkbox][type!=radio][button!=color][button!=hidden][button!=range][button!=reset]",
+                "textarea",
+            ],
+            index=index,
+        )
 
     prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
@@ -66,8 +78,13 @@ def find_n_write(ctx, name, value, index=0):
     if base_steps.is_disabled(input_):
         raise RuntimeError("unable to write into the input, as it is disabled")
 
-    input_.clear()
-    input_.send_keys(value)
+    if ctx.a11y_mode:
+        input_.clear()
+        a11y.write(ctx.browser, input_, value)
+
+    else:
+        input_.clear()
+        input_.send_keys(value)
 
 
 def find_n_clear(ctx, name, index=0):

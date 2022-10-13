@@ -1,28 +1,10 @@
-from cucu import helpers, fuzzy
+from cucu import a11y, helpers, fuzzy, logger
 from . import base_steps
 
 
 def find_button(ctx, name, index=0):
     """
-    find a button on screen by fuzzy matching on the name and index provided.
-
-        * <button>
-        * <input type="button">
-        * <input type="submit">
-        * <a>
-        * <* role="button">
-        * <* role="link">
-        * <* role="menuitem">
-        * <* role="treetem">
-        * <* role="option">
-        * <* role="radio">
-
-    note: the reason we're allowing other items such as menuitem, option, etc
-          is that on screen they can present themselves like "buttons". When
-          searching for more things to include use the following image
-          reference:
-
-          https://www.w3.org/TR/2009/WD-wai-aria-20091215/rdf_model.png
+    find a button on screen using fuzzy or a11y matching
 
     parameters:
       ctx(object): behave context object used to share data between steps
@@ -33,23 +15,45 @@ def find_button(ctx, name, index=0):
         the WebElement that matches the provided arguments.
     """
     ctx.check_browser_initialized()
-    button = fuzzy.find(
-        ctx.browser,
-        name,
-        [
-            "button",
-            'input[type="button"]',
-            'input[type="submit"]',
-            "a",
-            '*[role="button"]',
-            '*[role="link"]',
-            '*[role="menuitem"]',
-            '*[role="treeitem"]',
-            '*[role="option"]',
-            '*[role="radio"]',
-        ],
-        index=index,
-    )
+
+    if ctx.a11y_mode:
+        button = a11y.find(
+            ctx.browser,
+            name,
+            [
+                "button",
+                'input[type="button"]',
+                'input[type="submit"]',
+                "a",
+                '*[role="button"]',
+                '*[role="link"]',
+                '*[role="menuitem"]',
+                '*[role="treeitem"]',
+                '*[role="option"]',
+                '*[role="radio"]',
+            ],
+            ["aria-label", "title", "value"],
+            index=index,
+        )
+
+    else:
+        button = fuzzy.find(
+            ctx.browser,
+            name,
+            [
+                "button",
+                'input[type="button"]',
+                'input[type="submit"]',
+                "a",
+                '*[role="button"]',
+                '*[role="link"]',
+                '*[role="menuitem"]',
+                '*[role="treeitem"]',
+                '*[role="option"]',
+                '*[role="radio"]',
+            ],
+            index=index,
+        )
 
     return button
 
@@ -63,7 +67,11 @@ def click_button(ctx, button):
     if base_steps.is_disabled(button):
         raise RuntimeError("unable to click the button, as it is disabled")
 
-    ctx.browser.click(button)
+    if ctx.a11y_mode:
+        a11y.click(ctx.browser, button)
+
+    else:
+        ctx.browser.click(button)
 
 
 helpers.define_should_see_thing_with_name_steps(
