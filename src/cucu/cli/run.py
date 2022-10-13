@@ -5,6 +5,7 @@ import sys
 
 from cucu import behave_tweaks
 from cucu import init_global_hook_variables
+from cucu.page_checks import init_page_checks
 from behave.__main__ import main as behave_main
 from datetime import datetime
 
@@ -38,6 +39,7 @@ def behave(
     redirect_output=False,
 ):
     init_global_hook_variables()
+    init_page_checks()
 
     if not dry_run:
         write_run_details(results, filepath)

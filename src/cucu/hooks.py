@@ -1,5 +1,6 @@
 import re
 
+from collections import OrderedDict
 from cucu.config import CONFIG
 
 CONFIG.define(
@@ -21,7 +22,7 @@ def init_global_hook_variables():
     CONFIG["__CUCU_BEFORE_STEP_HOOKS"] = []
     CONFIG["__CUCU_AFTER_STEP_HOOKS"] = []
 
-    CONFIG["__CUCU_PAGE_CHECK_HOOKS"] = {}
+    CONFIG["__CUCU_PAGE_CHECK_HOOKS"] = OrderedDict()
     CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"] = {}
 
     CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"] = []

@@ -191,6 +191,7 @@ class Selenium(Browser):
             raise Exception(f"unknown browser {browser}")
 
         self.driver.set_window_size(width, height)
+        self.wait_for_page_to_load()
 
     def get_log(self):
         if config.CONFIG["CUCU_BROWSER"] == "firefox":
@@ -214,6 +215,7 @@ class Selenium(Browser):
             raise RuntimeError("no next browser tab available")
 
         self.driver.switch_to.window(window_handles[window_handle_index + 1])
+        self.wait_for_page_to_load()
 
     def switch_to_previous_tab(self):
         window_handles = self.driver.window_handles
@@ -224,6 +226,7 @@ class Selenium(Browser):
             raise RuntimeError("no previous browser tab available")
 
         self.driver.switch_to.window(window_handles[window_handle_index - 1])
+        self.wait_for_page_to_load()
 
     def back(self):
         self.driver.back()
