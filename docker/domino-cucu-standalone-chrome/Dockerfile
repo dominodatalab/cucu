@@ -25,8 +25,6 @@ ENV BASH_ENV=/etc/.bash_env
 
 USER root
 
-SHELL [ "/bin/bash", "-c"]
-
 #
 # Required: create a user and corresponding group account
 #
@@ -79,10 +77,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ############################################################
 #
-# Python
+# Core packages inlcuded for development
 #
 ############################################################
+# Just Python and the tools needed to build Python versions
+# Most of the packages included in even the Domino minimal enviornment are not needed and are excluded here
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
         python3 \
         python3-pip && \
 # cleanup
@@ -95,22 +96,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ln -sf /usr/bin/pip3 /usr/bin/pip; \
     fi
 
-# Container should run as user
+
+# Container should run as Ubuntu user
 USER ubuntu
+ENV HOME=/home/ubuntu
 
 # Pyenv
-RUN curl https://pyenv.run | bash
-ADD .bash_env /etc/.bash_env
-RUN echo source \${BASH_ENV} >> ~/.profile && \
-    echo source \${BASH_ENV} >> ~/.bashrc
+RUN git clone https://github.com/pyenv/pyenv.git ${HOME}/.pyenv
+
+ENV PYENV_ROOT=${HOME}/.pyenv
+ENV PATH=${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:${PATH}
 
 RUN pyenv install ${PYTHON_VERSION} && \
-    pyenv global ${PYTHON_VERSION}
+    pyenv global ${PYTHON_VERSION} && \
+    pyenv rehash
 
 # Install python packages
 ADD requirements.txt /
-RUN pip install -r requirements.txt
-RUN rm /requirements.txt
+# TODO: Put reader creds in CI configuration
+RUN pip install --extra-index-url \
+    https://ddl-pypi-reader:pey_ASM7gu1muh@domino.jfrog.io/domino/api/pypi/pypi-private/simple cucu
 
 ADD entry_point.sh /opt/bin/
 ENTRYPOINT ["/opt/bin/entry_point.sh"]
