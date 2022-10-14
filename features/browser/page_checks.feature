@@ -57,3 +57,8 @@ Feature: Page checks
       """
       executing page check "broken image checker"
       """
+
+  Scenario: User can disable the broken image checker at runtime
+    Given I start a webserver at directory "data/www/" and save the port to the variable "PORT"
+      And I set the variable "CUCU_BROKEN_IMAGES_PAGE_CHECK" to "disabled"
+     Then I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/broken_images.html"
