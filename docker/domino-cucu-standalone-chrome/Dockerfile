@@ -13,6 +13,7 @@ ARG ELANG=en_US.UTF-8
 ARG PIP_PATH=/opt/conda/bin/pip
 # use ARG to restrict noninteractive setting to build-time
 ARG DEBIAN_FRONTEND=noninteractive
+ARG PYTHON_VERSION=3.9.7
 
 ENV DOMINO_USER=$DUSER
 ENV DOMINO_GROUP=$DGROUP
@@ -20,8 +21,11 @@ ENV LANG=$ELANG
 ENV R_VERSION=$R_VER
 ENV PIP=$PIP_PATH
 ENV SHELL=/bin/bash
+ENV BASH_ENV=/etc/.bash_env
 
 USER root
+
+SHELL [ "/bin/bash", "-c"]
 
 #
 # Required: create a user and corresponding group account
@@ -93,5 +97,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Container should run as user
 USER ubuntu
-ADD entrypoint.sh /opt/bin/
+
+# Pyenv
+RUN curl https://pyenv.run | bash
+ADD .bash_env /etc/.bash_env
+RUN echo source \${BASH_ENV} >> ~/.profile && \
+    echo source \${BASH_ENV} >> ~/.bashrc
+
+RUN pyenv install ${PYTHON_VERSION} && \
+    pyenv global ${PYTHON_VERSION}
+
+# Install python packages
+ADD requirements.txt /
+RUN pip install -r requirements.txt
+RUN rm /requirements.txt
+
+ADD entry_point.sh /opt/bin/
 ENTRYPOINT ["/opt/bin/entry_point.sh"]

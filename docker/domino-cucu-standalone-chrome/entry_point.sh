@@ -11,9 +11,11 @@ function shutdown {
 }
 
 trap shutdown SIGTERM SIGINT
+
 if [ $# -gt 0 ]; then
   # retry connection every 5s x 60 which is a total of 5 minutes
   echo "Waiting for Selenium server to start...."
-  curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444 && bash -c "$@"
+  curl --ipv4 --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444 && bash -c "$@"
+else
+  wait ${SUPERVISOR_PID}
 fi
-wait ${SUPERVISOR_PID}
