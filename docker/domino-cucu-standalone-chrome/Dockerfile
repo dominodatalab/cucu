@@ -8,8 +8,8 @@ FROM selenium/standalone-chrome:latest
 # Disable VNC password
 ENV VNC_NO_PASSWORD=true
 # Enlarge view area
-ENV SE_SCREEN_WIDTH=1920
-ENV SE_SCREEN_HEIGHT=1080
+ENV SCREEN_WIDTH=1920
+ENV SCREEN_HEIGHT=1080
 
 ############################################################
 #
