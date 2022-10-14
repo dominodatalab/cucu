@@ -40,20 +40,26 @@ Feature: Page checks
 
   Scenario: User can disable built in page checks
     Given I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --logging-level debug --results {CUCU_RESULTS_DIR}/disabling_page_checks_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
-     Then I should see "{STDOUT}" contains the following
+     Then I should see "{STDOUT}" matches the following
       """
-      executing page check "wait for document.readyState"
-      """
-      And I should see "{STDOUT}" contains the following
-      """
-      executing page check "broken image checker"
+      [\s\S]*
+      .* executing page check "wait for document.readyState"
+      [\s\S]*
+      .* executing page check "broken image checker"
+      [\s\S]*
       """
      When I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --env CUCU_READY_STATE_PAGE_CHECK=false --logging-level debug --results {CUCU_RESULTS_DIR}/disabling_page_checks_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
-     Then I should see "{STDOUT}" does not contain the following
+     Then I should see "{STDOUT}" matches the following
       """
-      executing page check "wait for document.readyState"
+      [\s\S]*
+      .* executing page check "wait for document.readyState"
+      .* document.readyState check disabled
+      [\s\S]*
+      .* executing page check "broken image checker"
+      [\s\S]*
       """
-      And I should see "{STDOUT}" contains the following
-      """
-      executing page check "broken image checker"
-      """
+
+  Scenario: User can disable the broken image checker at runtime
+    Given I start a webserver at directory "data/www/" and save the port to the variable "PORT"
+      And I set the variable "CUCU_BROKEN_IMAGES_PAGE_CHECK" to "disabled"
+     Then I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/broken_images.html"
