@@ -2,6 +2,17 @@ FROM selenium/standalone-chrome:latest
 
 ############################################################
 #
+# VNC Settiings
+#
+############################################################
+# Disable VNC password
+ENV VNC_NO_PASSWORD=true
+# Enlarge view area
+ENV SE_SCREEN_WIDTH=1920
+ENV SE_SCREEN_HEIGHT=1080
+
+############################################################
+#
 # Core Requirements for Domino Data Lab environments
 #
 ############################################################
@@ -62,9 +73,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget && \
 # cleanup
     rm -rf /var/lib/apt/lists/* && \
-# Fix for sudo bug in 20.04 >>>is this valid?<<<
-#    echo "Set disable_coredump false" >> /etc/sudo.conf && \
-#
+
 # Recommended: Add domino user account to sudoers
 #
     echo "${DOMINO_USER}    ALL=NOPASSWD: ALL" >> /etc/sudoers && \
@@ -77,25 +86,31 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ############################################################
 #
-# Core packages inlcuded for development
+# Python and packages and build environment
 #
 ############################################################
-# Just Python and the tools needed to build Python versions
-# Most of the packages included in even the Domino minimal enviornment are not needed and are excluded here
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
         python3 \
-        python3-pip && \
+        python3-pip \
+        build-essential \
+        libssl-dev \
+        zlib1g-dev \
+        libbz2-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        wget \
+        curl \
+        llvm \
+        libncursesw5-dev \
+        xz-utils \
+        tk-dev \
+        libxml2-dev \
+        libxmlsec1-dev \
+        libffi-dev \
+        liblzma-dev && \
 # cleanup
     rm -rf /var/lib/apt/lists/* && \
-    rm -Rf /tmp/* && \
-# Default to python3 (Ubuntu only)
-    if [ -x /usr/bin/python3 ]; then \
-        ln -sf /usr/bin/python3 /usr/bin/python; \
-    fi && if [ -x /usr/bin/pip3 ]; then \
-        ln -sf /usr/bin/pip3 /usr/bin/pip; \
-    fi
-
+    rm -Rf /tmp/*
 
 # Container should run as Ubuntu user
 USER ubuntu
