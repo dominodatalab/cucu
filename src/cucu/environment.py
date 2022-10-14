@@ -30,6 +30,7 @@ CONFIG.define(
 )
 
 init_global_hook_variables()
+init_page_checks()
 
 
 def escape_filename(string):
@@ -70,7 +71,6 @@ def before_scenario(ctx, scenario):
     # values and not really bleed values between scenario runs
     CONFIG.restore()
     init_scenario_hook_variables()
-    init_page_checks()
 
     ctx.scenario = scenario
     ctx.step_index = 0

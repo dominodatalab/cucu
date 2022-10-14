@@ -5,6 +5,7 @@ Feature: Buttons
   Background: HTML page with buttons
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
 
+  @wip
   Scenario: User can click a <button>
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
      Then I should see no value in the input "value:"
