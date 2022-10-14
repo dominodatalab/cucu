@@ -1,0 +1,2 @@
+--extra-index-url https://ddl-pypi-reader:pey_ASM7gu1muh@domino.jfrog.io/domino/api/pypi/pypi-private/simple
+cucu
