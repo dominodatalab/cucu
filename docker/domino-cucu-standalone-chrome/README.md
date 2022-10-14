@@ -4,6 +4,14 @@ This directory contains the build scripts for a Domino-compatible docker contain
 running the Chrome browser. It can be used as a Domino environment, and provided with a fully set up feature file
 directory, it can run cucu tests as a Domino job. This container can be used outside of a Domino deployment.
 
+## Building the Container
+
+To build the container, use the following command:
+
+```bash
+docker/domino-cucu-standalone-chrome/build-docker.sh
+```
+
 ## Running Tests on the Command Line
 
 To run tests on the command line, first you will need to start the container with a test project directory mounted as a
@@ -27,10 +35,22 @@ ubuntu@e862a66b45e5:~$ cd /e2e-tests/
 ubuntu@e862a66b45e5:/e2e-tests$ pip install -r requirements.txt
 ```
 
-Finally you can run your tests:
+Finally, you can run your tests:
 
 ```bash
 ubuntu@e862a66b45e5:/e2e-tests$ cucu run --tags=@smoke features 
+```
+
+If you wish, generate a report:
+
+```bash
+ubuntu@e862a66b45e5:/e2e-tests$ cucu report 
+```
+
+Then copy the report to your host machine:
+
+```bash
+docker cp e862a66b45e5:/e2e-tests/report /mypath/report
 ```
 
 ## Watching the Tests Run
@@ -63,3 +83,10 @@ client. There is no VNC password.
 
 Note: The built-in Mac "Screen Sharing" VNC Client is broken and will not work with a VNC server that has no password.
 If you want to use this option, you will have to use another program like TigerVNC Viewer.
+
+## Running the Tests in a Domino Deployment
+
+To run the tests in a Domino deployment, you will have to use one of the images in quay.io as a custom image for an
+environment. Copy the test files into your project (in this example `e2e-tests`). You will need to write script that 
+automates the process of installing the python dependencies, running cucu, and generating a report (if desired). The
+results f
