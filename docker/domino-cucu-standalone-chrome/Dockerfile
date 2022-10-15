@@ -127,7 +127,6 @@ RUN pyenv install ${PYTHON_VERSION} && \
     pyenv rehash
 
 # Install python packages
-ADD requirements.txt /
 # TODO: Put reader creds in CI configuration
 RUN pip install --extra-index-url \
     https://ddl-pypi-reader:pey_ASM7gu1muh@domino.jfrog.io/domino/api/pypi/pypi-private/simple cucu
