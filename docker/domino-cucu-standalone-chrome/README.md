@@ -12,6 +12,13 @@ To build the container, use the following command:
 docker/domino-cucu-standalone-chrome/build-docker.sh
 ```
 
+## Hardware Requirements
+
+Based on experiments with the e2e-tests project, to run this container a MacBook with a 2.6 GHz 6-Core Intel Core i7,
+the Docker engine must be configured to use 12 CPUs. It will not consistently use all this CPU capacity, but there are
+spikes of activity, where it will result in "script timeout" errors, if the CPU capacity is insufficient. It is not
+clear which Domino hardware tier it requires, but most likely a fairly beefy one.
+
 ## Running Tests on the Command Line
 
 To run tests on the command line, first you will need to start the container with a test project directory mounted as a
@@ -89,4 +96,4 @@ If you want to use this option, you will have to use another program like TigerV
 To run the tests in a Domino deployment, you will have to use one of the images in quay.io as a custom image for an
 environment. Copy the test files into your project (in this example `e2e-tests`). You will need to write script that 
 automates the process of installing the python dependencies, running cucu, and generating a report (if desired). The
-results f
+results
