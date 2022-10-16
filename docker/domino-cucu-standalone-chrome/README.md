@@ -45,13 +45,13 @@ ubuntu@e862a66b45e5:/e2e-tests$ pip install -r requirements.txt
 Finally, you can run your tests:
 
 ```bash
-ubuntu@e862a66b45e5:/e2e-tests$ cucu run --tags=@smoke features 
+ubuntu@e862a66b45e5:/e2e-tests$ cucu run --tags=@smoke features
 ```
 
 If you wish, generate a report:
 
 ```bash
-ubuntu@e862a66b45e5:/e2e-tests$ cucu report 
+ubuntu@e862a66b45e5:/e2e-tests$ cucu report
 ```
 
 Then copy the report to your host machine:
@@ -94,6 +94,6 @@ If you want to use this option, you will have to use another program like TigerV
 ## Running the Tests in a Domino Deployment
 
 To run the tests in a Domino deployment, you will have to use one of the images in quay.io as a custom image for an
-environment. Copy the test files into your project (in this example `e2e-tests`). You will need to write script that 
+environment. Copy the test files into your project (in this example `e2e-tests`). You will need to write script that
 automates the process of installing the python dependencies, running cucu, and generating a report (if desired). The
 results
