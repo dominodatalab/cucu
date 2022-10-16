@@ -144,6 +144,7 @@ jobs:
       - run:
           name: Build docker container
           command: docker/domino-cucu-standalone-chrome/build-docker.sh
+      # TODO: Push docker container
 
   test:
     parameters:
