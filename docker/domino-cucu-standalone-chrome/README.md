@@ -57,7 +57,7 @@ does not have the ability to run kubectl or Teleport.
 Finally, you can run your tests:
 
 ```bash
-ubuntu@e862a66b45e5:/e2e-tests$ cucu run --tags=@smoke features
+ubuntu@e862a66b45e5:/e2e-tests$ cucu run --tags=@smoke features/domino
 ```
 
 If you wish, generate a report:
