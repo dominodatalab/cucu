@@ -106,8 +106,6 @@ executors:
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1920
           SCREEN_HEIGHT: 1080
-      - setup_remote_docker:
-        docker_layer_caching: true
     resource_class: xlarge
 
   docker-build-executor:
