@@ -214,7 +214,7 @@ workflows:
       - publish:
           filters:
             branches:
-              only: main
+              only: QE-9244-domino-cucu-chrome-docker-container # TODO: Change this back to main
           requires:
             - pre-commit
             - test-chrome
