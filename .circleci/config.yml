@@ -26,6 +26,7 @@ commands:
     steps:
       - setup_remote_docker:
           version: 20.10.14
+          docker_layer_caching: true
 
   wait_for_selenium: &wait_for_selenium
     steps:
@@ -112,8 +113,6 @@ executors:
   docker-build-executor:
     docker:
       - image: cimg/base:2022.06
-      - setup_remote_docker:
-          docker_layer_caching: true
 
 jobs:
   pre-commit:
@@ -138,9 +137,10 @@ jobs:
           command: pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
 
   build-docker-container:
-    executor: linux-vm-executor
+    executor: docker-build-executor
     steps:
       - checkout
+      - setup_remote_docker_env
       - run:
           name: Build docker container
           command: docker/domino-cucu-standalone-chrome/build-docker.sh
