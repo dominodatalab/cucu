@@ -27,7 +27,7 @@ volume.
 For example:
 
 ```bash
-docker run -it --rm -v $DOMINO/e2e-tests/:/e2e-tests domino-cucu-standalone-chrome:latest bash
+docker run -it -v $DOMINO/e2e-tests/:/e2e-tests domino-cucu-standalone-chrome:latest bash
 ```
 
 The Selenium server will start, and you will see some messages indicating it has.
@@ -35,12 +35,21 @@ The Selenium server will start, and you will see some messages indicating it has
 (Note: you can also start up the container in the background and open a shell with `docker exec` or you can automate
 process shown here by running a script instead of bash).
 
-Then you will need to install any Python dependencies:
+If your project is already set up, all you will need to do for setup is install any Python dependencies:
 
 ```bash
 ubuntu@e862a66b45e5:~$ cd /e2e-tests/
 ubuntu@e862a66b45e5:/e2e-tests$ pip install -r requirements.txt
 ```
+
+Otherwise, run the setup script:
+
+```bash
+ubuntu@e862a66b45e5:/e2e-tests$ ./bin/init_setup.sh [Base URL] [Admin username] [Admin password]
+````
+
+Note: you may also need to copy over things like your AWS credentials file into you docker container, if your test(s)
+require access to secrets.
 
 Finally, you can run your tests:
 
@@ -59,6 +68,9 @@ Then copy the report to your host machine:
 ```bash
 docker cp e862a66b45e5:/e2e-tests/report /mypath/report
 ```
+
+Note: In these examples, the `e2e-tests` directory may mount as root. You may need to change the ownership to `ubuntu`,
+before executing these commands or use `sudo`.
 
 ## Watching the Tests Run
 
