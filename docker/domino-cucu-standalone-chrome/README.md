@@ -51,6 +51,9 @@ ubuntu@e862a66b45e5:/e2e-tests$ ./bin/init_setup.sh [Base URL] [Admin username] 
 Note: you may also need to copy over things like your AWS credentials file into you docker container, if your test(s)
 require access to secrets.
 
+You will need to set the `DOMINO_KEYCLOAK_PASSWORD` variable, prior to running this command, as this Docker container
+does not have the ability to run kubectl or Teleport.
+
 Finally, you can run your tests:
 
 ```bash
