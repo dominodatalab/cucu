@@ -105,12 +105,15 @@ executors:
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1920
           SCREEN_HEIGHT: 1080
+      - setup_remote_docker:
+        docker_layer_caching: true
     resource_class: xlarge
 
-  linux-vm-executor:
-    machine: # executor type
-      image: ubuntu-2004:202010-01 # # recommended linux image - includes Ubuntu 20.04, docker 19.03.13, docker-compose 1.27.4
-    docker_layer_caching: true
+  docker-build-executor:
+    docker:
+      - image: cimg/base:2022.06
+      - setup_remote_docker:
+          docker_layer_caching: true
 
 jobs:
   pre-commit:
