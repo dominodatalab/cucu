@@ -97,6 +97,20 @@ executors:
           SCREEN_HEIGHT: 1080
     resource_class: xlarge
 
+  single-container-chrome-test-executor:
+    docker:
+      - image: domino-cucu-standalone-chrome
+        environment:
+          SE_NODE_MAX_SESSIONS: 10
+          SE_NODE_SESSION_TIMEOUT: 300
+          SCREEN_WIDTH: 1920
+          SCREEN_HEIGHT: 1080
+    resource_class: xlarge
+
+  linux-vm-executor:
+    machine: # executor type
+      image: ubuntu-2004:202010-01 # # recommended linux image - includes Ubuntu 20.04, docker 19.03.13, docker-compose 1.27.4
+
 jobs:
   pre-commit:
     docker:
@@ -118,6 +132,14 @@ jobs:
       - run:
           name: run pre-commit validations
           command: pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
+
+  build-docker-container:
+    executor: linux-vm-executor
+    steps:
+      - checkout
+      - run:
+          name: Build docker container
+          command: docker/domino-cucu-standalone-chrome/build-docker.sh
 
   test:
     parameters:
@@ -198,3 +220,11 @@ workflows:
             - test-chrome
             - test-edge
             - test-firefox
+      - build-docker-container:
+          requires:
+            - publish
+      - test:
+          name: test-docker-container
+          browser: single-container-chrome
+          requires:
+            - build-docker-container
