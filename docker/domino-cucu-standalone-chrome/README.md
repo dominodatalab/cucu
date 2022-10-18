@@ -14,10 +14,9 @@ docker/domino-cucu-standalone-chrome/build-docker.sh
 
 ## Hardware Requirements
 
-Based on experiments with the e2e-tests project, to run this container a MacBook with a 2.6 GHz 6-Core Intel Core i7,
-the Docker engine must be configured to use 12 CPUs. It will not consistently use all this CPU capacity, but there are
-spikes of activity, where it will result in "script timeout" errors, if the CPU capacity is insufficient. It is not
-clear which Domino hardware tier it requires, but most likely a fairly beefy one.
+Based on experiments with the e2e-tests project, this container requires an environment with hardware capacity
+equivalent to dev v2. On a MacBook, it hit "script timeout" errors, while running the fuzzy find script, due to
+insufficient CPU capacity.
 
 ## Running Tests on the Command Line
 

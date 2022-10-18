@@ -227,7 +227,10 @@ workflows:
           requires:
             - publish
       - test:
+          # TODO: Use second docker container to test this
           name: test-docker-container
           browser: single-container-chrome
           requires:
             - build-docker-container
+      - publish-docker-container
+          # TODO
