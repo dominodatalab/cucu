@@ -200,6 +200,12 @@ def wait_to_switch_to_next_browser_tab(ctx):
     retry(switch_to_next_tab)(ctx)
 
 
+@step('I wait up to "{seconds}" seconds to switch to the next browser tab')
+def wait_up_to_seconds_to_switch_to_next_browser_tab(ctx, seconds):
+    seconds = float(seconds)
+    retry(switch_to_next_tab, wait_up_to_s=seconds)(ctx)
+
+
 def switch_to_previous_tab(ctx):
     ctx.check_browser_initialized()
     ctx.browser.switch_to_previous_tab()

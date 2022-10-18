@@ -59,6 +59,16 @@ Feature: Browser management
      Then I should see the previous step took more than "3" seconds
       And I should see the browser title is "Buttons!"
 
+  Scenario: User can wait up to N seconds to switch to a new browser tab
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+     When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/links.html"
+     Then I should see the browser title is "Links!"
+     When I click the button "buttons! in a new tab with a 5s delay"
+     Then I expect the following step to fail with "no next browser tab available"
+      """
+      Then I wait up to "3" seconds to switch to the next browser tab
+      """
+
   Scenario: User gets appropriate error when checking browser title
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
      When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/links.html"
