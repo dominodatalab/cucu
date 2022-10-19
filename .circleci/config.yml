@@ -71,8 +71,8 @@ executors:
         environment:
           SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
-          SCREEN_WIDTH: 1920
-          SCREEN_HEIGHT: 1080
+          SCREEN_WIDTH: 1366
+          SCREEN_HEIGHT: 768
     resource_class: xlarge
 
   firefox-test-executor:
@@ -80,10 +80,10 @@ executors:
       - image: python:3.9.7
       - image: selenium/standalone-firefox:latest
         environment:
-          SE_NODE_MAX_SESSIONS: 10
+          SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
-          SCREEN_WIDTH: 1920
-          SCREEN_HEIGHT: 1080
+          SCREEN_WIDTH: 1366
+          SCREEN_HEIGHT: 768
     resource_class: xlarge
 
   edge-test-executor:
@@ -91,7 +91,7 @@ executors:
       - image: python:3.9.7
       - image: selenium/standalone-edge:latest
         environment:
-          SE_NODE_MAX_SESSIONS: 10
+          SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1366
           SCREEN_HEIGHT: 768
