@@ -40,7 +40,7 @@ commands:
         default: "chrome"
     steps:
       - run:
-          command: poetry run cucu run features --workers 4 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<< parameters.browser >>"
+          command: poetry run cucu run features --workers 8 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<< parameters.browser >>"
           environment:
             COVERAGE_PROCESS_START: .coveragerc
             CUCU_COLOR_OUTPUT: false
@@ -69,7 +69,7 @@ executors:
       - image: python:3.9.7
       - image: selenium/standalone-chrome:latest
         environment:
-          SE_NODE_MAX_SESSIONS: 10
+          SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1920
           SCREEN_HEIGHT: 1080
