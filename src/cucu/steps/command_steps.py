@@ -160,3 +160,11 @@ def run_script_and_check_exit_code(context, stdout_var, stderr_var, exit_code):
         stderr_var=stderr_var,
         check_exit_code=exit_code,
     )
+
+
+@step('I run the following script and expect exit code "{exit_code}"')
+def run_script_and_expect_exit_code(context, exit_code):
+    run_script(
+        context.text,
+        check_exit_code=exit_code,
+    )

@@ -67,7 +67,23 @@ def find_n_write(ctx, name, value, index=0):
         raise RuntimeError("unable to write into the input, as it is disabled")
 
     input_.clear()
-    input_.send_keys(value)
+
+    if len(value) > 512:
+        #
+        # to avoid various bugs with writing large chunks of text into
+        # inputs/textareas using send_keys we can just put the text into the
+        # @value attribute and simulate a keystroke so other UI related events
+        # fire, list of some bugs:
+        #
+        #  * https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4469
+        #  * various stackoverflow articles on this matter
+        #
+        ctx.browser.execute("arguments[0].value = arguments[1];", input_, value)
+        input_.send_keys(" ")
+        input_.send_keys(Keys.BACKSPACE)
+
+    else:
+        input_.send_keys(value)
 
 
 def find_n_clear(ctx, name, index=0):
