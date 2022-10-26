@@ -70,6 +70,15 @@ and_keyword_indented_correctly:
     match: '^\s*'
     replace: '      '
 
+tags_indented_correctly:
+  message: tags should be indented with 2 spaces
+  type: warning
+  current_line:
+    match: '^(\s{0,1}|\s{3,})@.*'
+  fix:
+    match: '^\s*'
+    replace: '  ' 
+
 line_with_extraneous_whitespace:
   message: line has extraneous whitespace at the end
   type: warning
