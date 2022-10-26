@@ -77,7 +77,7 @@ tags_indented_correctly:
     match: '^(\s{0,1}|\s{3,})@.*'
   fix:
     match: '^\s*'
-    replace: '  ' 
+    replace: '  '
 
 line_with_extraneous_whitespace:
   message: line has extraneous whitespace at the end
