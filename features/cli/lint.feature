@@ -44,6 +44,7 @@ Feature: Lint
       """
         Feature: Badly indented feature
 
+          @tag_badly_indented
           Scenario: This is a scenario in a badly indented feature name line
         Given I echo "foo"
         When I echo "bar"
@@ -54,11 +55,13 @@ Feature: Lint
       And I should see "{STDOUT}" is equal to the following:
       """
       results/indent_lint/bad_feature_indentation.feature:1: W feature name should not have any indentation
-      results/indent_lint/bad_feature_indentation.feature:3: W scenario name should be indented with 2 spaces
-      results/indent_lint/bad_feature_indentation.feature:4: W given keyword should be indented with 4 spaces
-      results/indent_lint/bad_feature_indentation.feature:5: W when keyword should be indented with 5 spaces
-      results/indent_lint/bad_feature_indentation.feature:6: W and keyword should be indented with 6 spaces
-      results/indent_lint/bad_feature_indentation.feature:7: W then keyword should be indented with 5 spaces
+      results/indent_lint/bad_feature_indentation.feature:3: W tags should be indented with 2 spaces
+      results/indent_lint/bad_feature_indentation.feature:4: W scenario name should be indented with 2 spaces
+      results/indent_lint/bad_feature_indentation.feature:5: W given keyword should be indented with 4 spaces
+      results/indent_lint/bad_feature_indentation.feature:6: W when keyword should be indented with 5 spaces
+      results/indent_lint/bad_feature_indentation.feature:7: W and keyword should be indented with 6 spaces
+      results/indent_lint/bad_feature_indentation.feature:8: W then keyword should be indented with 5 spaces
+      
 
       """
       And I should see "{STDERR}" is equal to the following:
@@ -70,11 +73,12 @@ Feature: Lint
       And I should see "{STDOUT}" is equal to the following:
       """
       results/indent_lint/bad_feature_indentation.feature:1: W feature name should not have any indentation ✓
-      results/indent_lint/bad_feature_indentation.feature:3: W scenario name should be indented with 2 spaces ✓
-      results/indent_lint/bad_feature_indentation.feature:4: W given keyword should be indented with 4 spaces ✓
-      results/indent_lint/bad_feature_indentation.feature:5: W when keyword should be indented with 5 spaces ✓
-      results/indent_lint/bad_feature_indentation.feature:6: W and keyword should be indented with 6 spaces ✓
-      results/indent_lint/bad_feature_indentation.feature:7: W then keyword should be indented with 5 spaces ✓
+      results/indent_lint/bad_feature_indentation.feature:3: W tags should be indented with 2 spaces ✓
+      results/indent_lint/bad_feature_indentation.feature:4: W scenario name should be indented with 2 spaces ✓
+      results/indent_lint/bad_feature_indentation.feature:5: W given keyword should be indented with 4 spaces ✓
+      results/indent_lint/bad_feature_indentation.feature:6: W when keyword should be indented with 5 spaces ✓
+      results/indent_lint/bad_feature_indentation.feature:7: W and keyword should be indented with 6 spaces ✓
+      results/indent_lint/bad_feature_indentation.feature:8: W then keyword should be indented with 5 spaces ✓
 
       linting errors found and fixed, see above for details
 
@@ -83,7 +87,8 @@ Feature: Lint
       And I should see the file at "{CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" has the following:
       """
       Feature: Badly indented feature
-
+        
+        @tag_badly_indented
         Scenario: This is a scenario in a badly indented feature name line
           Given I echo "foo"
            When I echo "bar"
@@ -278,6 +283,7 @@ Feature: Lint
       """
       Feature: Badly indented feature
 
+      @tag_badly_indented
       Scenario: This is a scenario in a badly indented feature name line
       Given I echo "foo"
       When I echo "bar"
@@ -289,6 +295,7 @@ Feature: Lint
       """
       Feature: Badly indented feature
 
+        @tag_badly_indented
         Scenario: This is a scenario in a badly indented feature name line
           Given I echo "foo"
            When I echo "bar"

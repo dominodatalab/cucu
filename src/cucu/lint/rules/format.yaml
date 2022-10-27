@@ -24,6 +24,16 @@ feature_name_on_first_line:
     match: '^\s*'
     replace: ''
 
+tags_with_appropriate_indentation:
+  message: tags should be indented with 2 spaces
+  type: warning
+  # any scenario line that has 0,1 or 3 or more spaces is a violation
+  current_line:
+    match: '^(\s{0,1}|\s{3,})@.*'
+  fix:
+    match: '^\s*'
+    replace: '  '
+
 scenario_name_with_appropriate_indentation:
   message: scenario name should be indented with 2 spaces
   type: warning
@@ -69,15 +79,6 @@ and_keyword_indented_correctly:
   fix:
     match: '^\s*'
     replace: '      '
-
-tags_indented_correctly:
-  message: tags should be indented with 2 spaces
-  type: warning
-  current_line:
-    match: '^(\s{0,1}|\s{3,})@.*'
-  fix:
-    match: '^\s*'
-    replace: '  '
 
 line_with_extraneous_whitespace:
   message: line has extraneous whitespace at the end
