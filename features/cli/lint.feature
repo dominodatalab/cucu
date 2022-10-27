@@ -86,7 +86,7 @@ Feature: Lint
       And I should see the file at "{CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" has the following:
       """
       Feature: Badly indented feature
-        
+
         @tag_badly_indented
         Scenario: This is a scenario in a badly indented feature name line
           Given I echo "foo"
