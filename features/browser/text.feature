@@ -48,3 +48,13 @@ Feature: Text
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
      Then I should see the text "just some text in a textarea"
+
+  Scenario: User can see text that matches a regex
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
+     Then I should see text matching the regex "just.*a.l[abcd]bel" on the current page
+
+  Scenario: User can see text that matches a regex with nested tags
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
+     Then I should see text matching the regex "text with n.st.d" on the current page
