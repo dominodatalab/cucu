@@ -263,7 +263,6 @@ Feature: Lint
 
       """
 
-
   @regression
   Scenario: User can lint and fix a file with no indentation
     Given I create a file at "{CUCU_RESULTS_DIR}/no_indent/environment.py" with the following:
@@ -386,7 +385,6 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/custom_linting_with_exclusions/custom_linting_feature.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is empty
       And I should see "{STDERR}" is empty
-
 
   Scenario: User gets appropriate exit code when cucu can not parse the file
     Given I create a file at "{CUCU_RESULTS_DIR}/broken_feature_file_lint/environment.py" with the following:

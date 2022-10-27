@@ -51,6 +51,7 @@ def check_browser_initialized(ctx):
 
 
 def before_all(ctx):
+    CONFIG["__CUCU_CTX"] = ctx
     CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
 

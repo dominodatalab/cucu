@@ -4,6 +4,7 @@ import logging
 import urllib3
 
 from cucu.browser.core import Browser
+from cucu.browser.frames import search_in_all_frames
 from cucu import config, logger
 from cucu import edgedriver_autoinstaller
 
@@ -238,12 +239,15 @@ class Selenium(Browser):
         return self.driver.title
 
     def css_find_elements(self, selector):
-        elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
+        def find_elements_in_frame():
+            elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
 
-        def visible(element):
-            return element.is_displayed()
+            def visible(element):
+                return element.is_displayed()
 
-        return list(filter(visible, elements))
+            return list(filter(visible, elements))
+
+        return search_in_all_frames(self, find_elements_in_frame)
 
     def execute(self, javascript, *args):
         return self.driver.execute_script(javascript, *args)

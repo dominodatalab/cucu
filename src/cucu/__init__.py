@@ -3,9 +3,11 @@ __version__ = "0.1.0"
 
 import sys
 from cucu import behave_tweaks
+from cucu.browser import selenium_tweaks
 
 # intercept the stdout/stderr so we can do things such as hiding secrets in logs
 behave_tweaks.init_step_hooks(sys.stdout, sys.stderr)
+selenium_tweaks.init()
 
 from cucu.hooks import (
     init_global_hook_variables,
