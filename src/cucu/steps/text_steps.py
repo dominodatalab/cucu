@@ -53,9 +53,7 @@ def match_for_regex_to_page_and_save(ctx, regex, name, variable):
     step_utils.match_and_save(regex, text, name, variable)
 
 
-@step(
-    'I should see text matching the regex "{regex}" on the current page'
-)
+@step('I should see text matching the regex "{regex}" on the current page')
 def search_for_regex_on_page(ctx, regex):
     ctx.check_browser_initialized()
     ctx.browser.execute(load_jquery_lib())
