@@ -51,3 +51,15 @@ def match_for_regex_to_page_and_save(ctx, regex, name, variable):
         'return jQuery("body").children(":visible").text();'
     )
     step_utils.match_and_save(regex, text, name, variable)
+
+
+@step(
+    'I should see the regex "{regex}" on the current page'
+)
+def search_for_regex_to_page_and_save(ctx, regex, name, variable):
+    ctx.check_browser_initialized()
+    ctx.browser.execute(load_jquery_lib())
+    text = ctx.browser.execute(
+        'return jQuery("body").children(":visible").text();'
+    )
+    step_utils.search(regex, text)
