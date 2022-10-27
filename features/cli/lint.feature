@@ -62,7 +62,6 @@ Feature: Lint
       results/indent_lint/bad_feature_indentation.feature:7: W and keyword should be indented with 6 spaces
       results/indent_lint/bad_feature_indentation.feature:8: W then keyword should be indented with 5 spaces
       
-
       """
       And I should see "{STDERR}" is equal to the following:
       """
