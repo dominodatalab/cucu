@@ -3,6 +3,16 @@ import re
 from cucu import config
 
 
+def search(regex, value):
+    """
+    search for a matching regex within the value provided.
+    """
+    match = re.search(regex, value)
+
+    if match is None:
+        raise RuntimeError(f'"{regex}" did not match anything in "{value}"')
+
+
 def search_and_save(regex, value, name, variable):
     """
     search for a matching regex within the value provided and then save the value
