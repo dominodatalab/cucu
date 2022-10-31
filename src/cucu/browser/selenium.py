@@ -61,6 +61,9 @@ class Selenium(Browser):
         height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
         width = config.CONFIG["CUCU_BROWSER_WINDOW_WIDTH"]
         cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
+        ignore_ssl_certificate_errors = config.CONFIG[
+            "CUCU_IGNORE_SSL_CERTIFICATE_ERRORS"
+        ]
 
         if browser.startswith("chrome"):
             options = Options()
@@ -74,6 +77,9 @@ class Selenium(Browser):
 
             if headless:
                 options.add_argument("--headless")
+
+            if ignore_ssl_certificate_errors:
+                options.add_argument("ignore-certificate-errors")
 
             desired_capabilities = DesiredCapabilities.CHROME
             desired_capabilities["goog:loggingPrefs"] = {"browser": "ALL"}
@@ -114,6 +120,9 @@ class Selenium(Browser):
                 "browser.helperApps.neverAsk.saveToDisk",
                 "images/jpeg, application/pdf, application/octet-stream, text/plain",
             )
+
+            if ignore_ssl_certificate_errors:
+                profile.accept_untrusted_certs = True
 
             options.add_argument(f"--width={width}")
             options.add_argument(f"--height={height}")
@@ -160,9 +169,13 @@ class Selenium(Browser):
                 options.use_chromium = True
                 options.add_argument("--headless")
 
+            desired_capabilities = DesiredCapabilities.EDGE
+
+            if ignore_ssl_certificate_errors:
+                desired_capabilities["acceptSslCerts"] = True
+
             if selenium_remote_url is not None:
                 logger.debug(f"webdriver.Remote init: {selenium_remote_url}")
-                desired_capabilities = DesiredCapabilities.EDGE
                 try:
                     self.driver = webdriver.Remote(
                         command_executor=selenium_remote_url,
@@ -184,7 +197,9 @@ class Selenium(Browser):
                     edgedriver_autoinstaller.utils.download_edgedriver()
                 )
                 self.driver = webdriver.Edge(
-                    executable_path=edgedriver_filepath, options=options
+                    executable_path=edgedriver_filepath,
+                    options=options,
+                    capabilities=desired_capabilities,
                 )
 
         else:
