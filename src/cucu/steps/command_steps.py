@@ -1,3 +1,4 @@
+import atexit
 import os
 import shlex
 import subprocess
@@ -47,9 +48,17 @@ def run_script(
     exit_code_var=None,
     check_exit_code=None,
 ):
-    shell_command = os.environ.get("SHELL", "/bin/sh")
+    script_filename = os.path.abspath(f".cucu_run_script.{os.getpid()}.sh")
+    atexit.register(os.remove, script_filename)
+
+    with open(script_filename, "wb") as script_file:
+        script_file.write(script.encode())
+
+    os.chmod(script_filename, 0o755)
     process = subprocess.run(
-        [shell_command], capture_output=True, shell=True, input=script.encode()
+        [script_filename],
+        capture_output=True,
+        shell=True,
     )
 
     if exit_code_var:

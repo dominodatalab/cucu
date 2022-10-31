@@ -10,6 +10,14 @@ commands:
           name: install cucu dependencies
           command: pip install poetry && poetry install
 
+  install_test_dependencies: &install_test_dependencies
+    steps:
+      - run:
+          name: install test dependencies
+          command: |
+            apt-get update
+            apt-get install -y expect
+
   build_cucu_python_package: &build_cucu_python_package
     steps:
       - run:
@@ -130,6 +138,7 @@ jobs:
     steps:
       - checkout
       - install_cucu_dependencies
+      - install_test_dependencies
       - build_cucu_python_package
       - install_cucu_globally
       - setup_remote_docker_env
