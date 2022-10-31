@@ -91,3 +91,15 @@ Feature: Internals
           Given I should see "\{FOO\}" is empty
       """
      Then I run the command "cucu run {CUCU_RESULTS_DIR}/variable_bleed/bleed.feature --results {CUCU_RESULTS_DIR}/variable_bleed_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+
+  @custom
+  Scenario: User can define a custom step which uses direct WebElement find methods
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
+     Then I should see the element with id "button-with-child" has a child
+
+  @custom
+  Scenario: User can define a custom step which uses direct WebElement find methods across iframes
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/frames.html"
+     Then I should see the element with id "button-with-child" has a child

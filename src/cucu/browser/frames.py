@@ -10,7 +10,7 @@ def search_in_all_frames(browser, search_function):
     """
     result = search_function()
 
-    if result is None:
+    if not result:
         # switch to default frame before getting the list of iframes
         browser.switch_to_default_frame()
         frames = browser.execute('return document.querySelectorAll("iframe");')
@@ -24,7 +24,7 @@ def search_in_all_frames(browser, search_function):
             browser.switch_to_frame(frame)
             result = search_function()
 
-            if result is not None:
+            if result:
                 return result
 
     return result
