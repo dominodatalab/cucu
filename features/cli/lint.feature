@@ -83,7 +83,7 @@ Feature: Lint
 
       """
 
-      And I should see the file at "{CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" has the following:
+      And I should see the file at "{CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" is equal to the following:
       """
       Feature: Badly indented feature
 
@@ -142,7 +142,7 @@ Feature: Lint
       linting errors found and fixed, see above for details
 
       """
-      And I should see the file at "{CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" has the following:
+      And I should see the file at "{CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" is equal to the following:
       """
       Feature: Feature with extraneous whitespace
 
@@ -289,7 +289,7 @@ Feature: Lint
       Then I echo "buzz"
       """
      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/no_indent/bad_feature_indentation.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
-      And I should see the file at "{CUCU_RESULTS_DIR}/no_indent/bad_feature_indentation.feature" has the following:
+      And I should see the file at "{CUCU_RESULTS_DIR}/no_indent/bad_feature_indentation.feature" is equal to the following:
       """
       Feature: Badly indented feature
 
