@@ -1,3 +1,6 @@
+from cucu import logger
+
+
 def search_in_all_frames(browser, search_function):
     """
     search all frames on the page for an element
@@ -11,8 +14,14 @@ def search_in_all_frames(browser, search_function):
     result = search_function()
 
     if not result:
-        # switch to default frame before getting the list of iframes
+        # switch to default frame and check for the desired element before
+        # proceeding to search for it in the available frames
         browser.switch_to_default_frame()
+
+        result = search_function()
+        if result:
+            return result
+
         frames = browser.execute('return document.querySelectorAll("iframe");')
         for frame in frames:
             #

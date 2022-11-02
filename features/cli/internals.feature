@@ -102,4 +102,12 @@ Feature: Internals
   Scenario: User can define a custom step which uses direct WebElement find methods across iframes
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/frames.html"
-     Then I should see the element with id "button-with-child" has a child
+     Then I should see the button "button"
+      And I should see the element with id "button-with-child" has a child
+
+  @custom
+  Scenario: User can define a custom step which uses direct WebElement and fins the elemnet on the default frame
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/frames.html"
+     Then I should see the button "button"
+      And I should see the element with id "button-on-default-frame" has a child
