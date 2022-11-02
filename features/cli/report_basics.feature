@@ -1,4 +1,4 @@
-@report
+  @report
 Feature: Report basics
   As a developer I want the user to be able to generate reports from tests runs
   in the most basic of situations

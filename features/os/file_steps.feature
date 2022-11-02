@@ -7,7 +7,7 @@ Feature: File steps
       """
       foobar
       """
-     Then I should see the file at "{CUCU_RESULTS_DIR}/create_file_test.txt" has the following
+     Then I should see the file at "{CUCU_RESULTS_DIR}/create_file_test.txt" is equal to the following
       """
       foobar
       """

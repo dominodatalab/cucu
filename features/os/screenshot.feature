@@ -7,4 +7,4 @@ Feature: Screenshot
      When I set the variable "CUCU_MONITOR_PNG" to ".monitor.png"
       And I delete the file at "{CUCU_MONITOR_PNG}" if it exists
       And I should see the text "just some text in a label"
-     Then I should see the file at "{CUCU_MONITOR_PNG}"
+     Then I should see a file at "{CUCU_MONITOR_PNG}"

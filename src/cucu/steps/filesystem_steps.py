@@ -50,23 +50,23 @@ def assert_file(ctx, filepath):
         raise RuntimeError(f"unable to see file at {filepath}")
 
 
-@step('I should see the file at "{filepath}"')
+@step('I should see a file at "{filepath}"')
 def should_see_file(ctx, filepath):
     assert_file(ctx, filepath)
 
 
-@step('I should not see the file at "{filepath}"')
+@step('I should not see a file at "{filepath}"')
 def should_not_see_file(ctx, filepath):
     if os.path.exists(filepath) and os.path.isfile(filepath):
         raise RuntimeError(f"able to see file at {filepath}")
 
 
-@step('I wait to see the file at "{filepath}"')
+@step('I wait to see a file at "{filepath}"')
 def wait_to_see_file(ctx, filepath):
     retry(assert_file)(ctx, filepath)
 
 
-@step('I wait up to "{seconds}" seconds to see the file at "{filepath}"')
+@step('I wait up to "{seconds}" seconds to see a file at "{filepath}"')
 def wait_up_to_see_file(ctx, seconds, filepath):
     seconds = float(seconds)
     retry(assert_file, wait_up_to_s=seconds)(ctx, filepath)
@@ -84,14 +84,25 @@ def should_not_see_directory(ctx, filepath):
         raise RuntimeError(f"able to see directory at {filepath}")
 
 
-@step('I should see the file at "{filepath}" has the following')
-def should_see_file_with_the_following(ctx, filepath):
+@step('I should see the file at "{filepath}" is equal to the following')
+def should_see_file_is_equal_to_the_following(ctx, filepath):
     with open(filepath, "rb") as input:
         file_contents = input.read().decode("utf8")
 
         if file_contents != ctx.text:
             raise RuntimeError(
-                f"expected:\n{ctx.text}\nbut got:\n{file_contents}\n"
+                f"\n{file_contents}\nis not equal to\n{ctx.text}\n"
+            )
+
+
+@step('I should see the file at "{filepath}" contains the following')
+def should_see_file_contains_the_following(ctx, filepath):
+    with open(filepath, "rb") as input:
+        file_contents = input.read().decode("utf8")
+
+        if not ctx.text in file_contents:
+            raise RuntimeError(
+                f"\n{file_contents}\ndoes not contain\n{ctx.text}\n"
             )
 
 
@@ -102,5 +113,32 @@ def should_see_file_matches_the_following(ctx, filepath):
 
         if not re.match(ctx.text, file_contents):
             raise RuntimeError(
-                f"expected:\n{ctx.text}\nbut got:\n{file_contents}\n"
+                f"\n{file_contents}\ndoes not match\n{ctx.text}\n"
             )
+
+
+@step('I should see the file at "{filepath}" is not equal to the following')
+def should_see_file_is_not_equal_to_the_following(ctx, filepath):
+    with open(filepath, "rb") as input:
+        file_contents = input.read().decode("utf8")
+
+        if file_contents != ctx.text:
+            raise RuntimeError(f"\n{file_contents}\nis equal to\n{ctx.text}\n")
+
+
+@step('I should see the file at "{filepath}" does not contain the following')
+def should_see_file_does_not_contain_the_following(ctx, filepath):
+    with open(filepath, "rb") as input:
+        file_contents = input.read().decode("utf8")
+
+        if ctx.text in file_contents:
+            raise RuntimeError(f"\n{file_contents}\ncontains\n{ctx.text}\n")
+
+
+@step('I should see the file at "{filepath}" does not match the following')
+def should_see_file_does_not_match_the_following(ctx, filepath):
+    with open(filepath, "rb") as input:
+        file_contents = input.read().decode("utf8")
+
+        if not re.match(ctx.text, file_contents):
+            raise RuntimeError(f"\n{file_contents}\nmatches\n{ctx.text}\n")

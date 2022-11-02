@@ -12,6 +12,7 @@ import uuid
 
 from behave.formatter.base import Formatter
 from behave.model_core import Status
+from cucu import behave_tweaks
 
 
 # -----------------------------------------------------------------------------
@@ -30,7 +31,7 @@ class CucuJSONFormatter(Formatter):
     def __init__(self, stream_opener, config):
         super(CucuJSONFormatter, self).__init__(stream_opener, config)
         # -- ENSURE: Output stream is open.
-        self.stream = self.open()
+        self.stream = behave_tweaks.CucuOutputStream(self.open())
         self.feature_count = 0
         self.current_feature = None
         self.current_feature_data = None
@@ -211,6 +212,11 @@ class CucuJSONFormatter(Formatter):
             # -- FIRST FEATURE: Corner case when no features are provided.
             self.write_json_header()
         self.write_json_footer()
+        #
+        # HACK: avoid failing the strange assert in the base formatter class:
+        # https://github.com/behave/behave/blob/v1.2.6/behave/formatter/base.py#L186
+        #
+        self.stream = self.stream.stream
         self.close_stream()
 
     # -- JSON-DATA COLLECTION:

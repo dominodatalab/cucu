@@ -17,6 +17,6 @@ Feature: Browser console logs
       .* "DEBUG", "message": ".*/console_logging.html 6:12 \\"this is a debug log\\"", .*
       .* "WARNING", "message": ".*/console_logging.html 7:12 \\"this is a warn log\\"", .*
       """
-      And I should see the file at "{CUCU_RESULTS_DIR}/console-logging/Feature with console logs/Scenario without console logs/logs/browser_console.log" has the following:
+      And I should see the file at "{CUCU_RESULTS_DIR}/console-logging/Feature with console logs/Scenario without console logs/logs/browser_console.log" is equal to the following:
       """
       """
