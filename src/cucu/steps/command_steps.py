@@ -2,6 +2,7 @@ import atexit
 import os
 import shlex
 import subprocess
+import tempfile
 
 from cucu import config, logger, step
 
@@ -48,7 +49,8 @@ def run_script(
     exit_code_var=None,
     check_exit_code=None,
 ):
-    script_filename = os.path.abspath(f".cucu_run_script.{os.getpid()}.sh")
+    script_fd, script_filename = tempfile.mkstemp()
+    os.close(script_fd)
     atexit.register(os.remove, script_filename)
 
     with open(script_filename, "wb") as script_file:
@@ -56,7 +58,7 @@ def run_script(
 
     os.chmod(script_filename, 0o755)
     process = subprocess.run(
-        [script_filename],
+        [script_file.name],
         capture_output=True,
         shell=True,
     )

@@ -2,7 +2,7 @@ Feature: Inputs Limits
   As a developer I want to make sure that inputs can be interacted with while
   pushing the limits of what the browser and framework can handle.
 
-  Scenario: User can write into an input
+  Scenario: User can write a large text into an input
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       # create a file with 4KB
       And I run the following script and expect exit code "0":
@@ -17,7 +17,7 @@ Feature: Inputs Limits
       And I should see "input type=text was modified" in the input "last touched input"
       And I should see "{DATA}" in the input "input type=text"
 
-  Scenario: User can write into a textarea
+  Scenario: User can write a large text into a textarea
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       # create a file with 4KB
       And I run the following script and expect exit code "0":
