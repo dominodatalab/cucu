@@ -28,3 +28,37 @@ Feature: Command steps
       send -- "purple\r"
       expect "Peter likes the color purple\r"
       """
+
+  @regression
+  Scenario: User can execute multiple scripts without any unexpected issues
+    Given I create a file at "{CUCU_RESULTS_DIR}/multiple_script_calls/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/multiple_script_calls/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/multiple_script_calls/multiple_script_steps.feature" with the following:
+      """
+      Feature: Feature with script steps
+
+        Scenario: Scenario with multiple script calls
+          Given I run the following script and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+            \"\"\"
+            ls
+            \"\"\"
+            And I run the following script and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+            \"\"\"
+            ls
+            \"\"\"
+      """
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/multiple_script_calls/multiple_script_steps.feature --results {CUCU_RESULTS_DIR}/multiple_script_calls_results/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I should see "{STDOUT}" does not contain the following:
+      """
+      FileNotFoundError: [Errno 2] No such file or directory:
+      """
+      And I should see "{STDERR}" does not contain the following:
+      """
+      FileNotFoundError: [Errno 2] No such file or directory:
+      """
