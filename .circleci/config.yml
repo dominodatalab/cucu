@@ -198,12 +198,13 @@ workflows:
       - test:
           name: test-firefox
           browser: firefox
-      - publish:
-          filters:
-            branches:
-              only: main
-          requires:
-            - pre-commit
-            - test-chrome
-            - test-edge
-            - test-firefox
+      # TODO: We should only publish when a git tag is pushed up
+      # - publish:
+      #     filters:
+      #       branches:
+      #         only: main
+      #     requires:
+      #       - pre-commit
+      #       - test-chrome
+      #       - test-edge
+      #       - test-firefox
