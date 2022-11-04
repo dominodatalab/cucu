@@ -23,14 +23,6 @@ Feature: Browser tab management
      Then I should see the previous step took more than "3" seconds
       And I should see the browser title is "Buttons!"
 
-  Scenario: User gets appropriate error when checking browser title
-    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
-     When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/links.html"
-     Then I expect the following step to fail with "unexpected browser title, got "Links!""
-     """
-     Then I should see the browser title is "foo"
-     """
-
   Scenario: User gets an error when switching to an inexistent browser tab
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
      When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/links.html"
