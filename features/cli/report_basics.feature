@@ -58,16 +58,16 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-       | Feauture                   | Total | Passed | Failed | Skipped | Status | Duration |
+       | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
        | Feature with mixed results | 5     | 2      | 2      | 1       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
-       | Scenario                            | Total Steps | Status  | Duration |
-       | Scenario that passes                | 1           | passed  | .*       |
-       | Scenario that fails                 | 2           | failed  | .*       |
-       | Scenario that also passes           | 1           | passed  | .*       |
-       | Scenario that has an undefined step | 1           | failed  | .*       |
-       | Scenario that is skipped            | 1           | skipped | .*       |
+      | Scenario                            | Total Steps | Status  | Duration |
+      | Scenario that fails                 | 2           | failed  | .*       |
+      | Scenario that has an undefined step | 1           | failed  | .*       |
+      | Scenario that passes                | 1           | passed  | .*       |
+      | Scenario that also passes           | 1           | passed  | .*       |
+      | Scenario that is skipped            | 1           | skipped | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"

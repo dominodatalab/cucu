@@ -5,18 +5,19 @@
           <a class="navbar-brand" href="#">HTML Test Report</a>
         </div>
     </nav>
-    <table class="table table-hover">
-        <tr>
-            <th>Feauture</th>
-            <th class="text-center">Total</th>
-            <th class="text-center">Passed</th>
-            <th class="text-center">Failed</th>
-            <th class="text-center">Skipped</th>
-            <th class="text-center">Status</th>
-            <th class="text-center">Duration</th>
-        </tr>
+    <table class="table table-hover datatable">
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th class="text-center">Total</th>
+                <th class="text-center">Passed</th>
+                <th class="text-center">Failed</th>
+                <th class="text-center">Skipped</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Duration</th>
+            </tr>
+        </thead>
         {% for feature in features %}
-
         <tr>
             <td><a href="{{ urlencode(escape(feature['name'])) }}.html"><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></a></td>
             <td class="text-center">{{ feature['total_scenarios'] }}</td>
@@ -34,4 +35,8 @@
         </tr>
         {% endfor %}
     </table>
+
+    <script>
+    setupReportTables([[5, 'asc']])
+    </script>
 {% endblock %}

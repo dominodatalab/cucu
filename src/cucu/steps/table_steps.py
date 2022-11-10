@@ -2,7 +2,7 @@ import pkgutil
 import re
 
 from behave.model_describe import ModelPrinter
-from cucu import retry, step
+from cucu import fuzzy, helpers, retry, step
 from io import StringIO
 from tabulate import tabulate, TableFormat, DataRow
 
@@ -241,3 +241,28 @@ for (thing, check_func) in {
     ):
         seconds = float(seconds)
         retry(find_table, wait_up_to_s=seconds)(ctx, check_func, nth=nth)
+
+
+def find_table_header(ctx, name, index=0):
+    """
+    find a table header with the provided name
+    """
+    ctx.check_browser_initialized()
+    return fuzzy.find(ctx.browser, name, ["th"], index=index)
+
+
+def click_table_header(ctx, header):
+    """
+    internal method used to simply click a table header element
+    """
+    ctx.check_browser_initialized()
+    ctx.browser.click(header)
+
+
+helpers.define_action_on_thing_with_name_steps(
+    "table header",
+    "click",
+    find_table_header,
+    click_table_header,
+    with_nth=True,
+)

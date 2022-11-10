@@ -7,21 +7,25 @@
             <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
               <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                 <li class="nav-item active">
-                  <a class="nav-link" href="../index.html" title="go to index report">Index</a>
+                  <a class="nav-link" href="index.html" title="go to index report">Index</a>
                 </li>
               </ul>
             </div>
         </div>
     </nav>
     <table class="table table-hover">
-        <tr>
-            <th>Scenario</th>
-            <th class="text-center">Total Steps</th>
-            <th class="text-center">Status</th>
-            <th class="text-center">Duration</th>
-        </tr>
         <tr class="remove-table-hover"><pre style="display: inline; color: mediumturquoise">{{ feature['tags'] }}</pre><br/></tr>
         <tr class="remove-table-hover"><pre style="display: inline; color: maroon">Feature: </pre><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></tr>
+    </table>
+    <table class="table table-hover datatable">
+        <thead>
+            <tr>
+                <th>Scenario</th>
+                <th class="text-center">Total Steps</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Duration</th>
+            </tr>
+        </thead>
         {% for scenario in scenarios %}
             <!--- ignore Backgrounds for the time being -->
             {% if scenario['keyword'] != 'Background' %}
@@ -40,4 +44,8 @@
             {%  endif %}
         {% endfor %}
     </table>
+
+    <script>
+    setupReportTables([[2, 'asc']])
+    </script>
 {% endblock %}

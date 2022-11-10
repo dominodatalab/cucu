@@ -4,6 +4,7 @@ import shutil
 import os
 import urllib
 import json
+import sys
 
 from ansi2html import Ansi2HTMLConverter
 from cucu.config import CONFIG
@@ -53,6 +54,11 @@ def generate(results, basepath):
     for run_json_filepath in run_json_filepaths:
         with open(run_json_filepath, "rb") as index_input:
             features += json.loads(index_input.read())
+
+    # copy the external dependencies to the reports destination directory
+    cucu_dir = os.path.dirname(sys.modules["cucu"].__file__)
+    external_dir = os.path.join(cucu_dir, "reporter", "external")
+    shutil.copytree(external_dir, os.path.join(basepath, "external"))
 
     #
     # augment existing test run data with:
@@ -190,7 +196,10 @@ def generate(results, basepath):
 
     index_template = templates.get_template("index.html")
     rendered_index_html = index_template.render(
-        features=features, title="Cucu HTML Test Report", basepath=basepath
+        features=features,
+        title="Cucu HTML Test Report",
+        basepath=basepath,
+        dir_depth="",
     )
 
     index_output_filepath = os.path.join(basepath, "index.html")
@@ -205,7 +214,9 @@ def generate(results, basepath):
 
         scenarios = feature["elements"]
         rendered_feature_html = feature_template.render(
-            feature=feature, scenarios=scenarios
+            feature=feature,
+            scenarios=scenarios,
+            dir_depth="",
         )
 
         feature_output_filepath = os.path.join(
@@ -232,6 +243,7 @@ def generate(results, basepath):
                 path_exists=os.path.exists,
                 scenario=scenario,
                 steps=steps,
+                dir_depth="../../",
             )
 
             with open(scenario_output_filepath, "wb") as output:
