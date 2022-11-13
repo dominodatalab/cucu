@@ -81,26 +81,34 @@ def parse_matcher(name, rule_name, rule, line, state):
             return (False, "")
 
         cwd = f"{os.getcwd()}/"
-        if "unique_group_per_feature" in rule[name]:
+
+        # unique across all feature files
+        if "unique_per_all_features" in rule[name]:
             value = match.groups()[0]
             feature_filepath = state["current_feature_filepath"]
             # make the path relative to the current working directory
             feature_filepath = feature_filepath.replace(cwd, "")
 
-            if rule_name not in state["unique_per_feature"]:
-                state["unique_per_feature"][rule_name] = {}
+            if rule_name not in state["unique_per_all_features"]:
+                state["unique_per_all_features"][rule_name] = {}
 
-            if value in state["unique_per_feature"][rule_name]:
+            if value in state["unique_per_all_features"][rule_name]:
                 # we have another feature which already has this value in use.
-                other_filepath = state["unique_per_feature"][rule_name][value]
+                other_filepath = state["unique_per_all_features"][rule_name][
+                    value
+                ]
                 # make the path relative to the current working directory
                 other_filepath = other_filepath.replace(cwd, "")
-                return (
-                    True,
-                    f', "{value}" used in "{feature_filepath}" and "{other_filepath}"',
-                )
 
-            state["unique_per_feature"][rule_name][value] = feature_filepath
+                if other_filepath != feature_filepath:
+                    return (
+                        True,
+                        f', "{value}" used in "{feature_filepath}" and "{other_filepath}"',
+                    )
+
+            state["unique_per_all_features"][rule_name][
+                value
+            ] = feature_filepath
             return (False, "")
 
         return (True, "")
@@ -290,7 +298,9 @@ def lint(filepath):
 
     # state object used to carry state from the top level linting function down
     # to the functions handling the lint rules and reporting on lint failures
-    state = {"unique_per_feature": {}}
+    state = {
+        "unique_per_all_features": {},
+    }
 
     if steps_error:
         yield [
