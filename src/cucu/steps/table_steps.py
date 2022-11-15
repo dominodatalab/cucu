@@ -4,7 +4,7 @@ import re
 from behave.model_describe import ModelPrinter
 from cucu import retry, step
 from io import StringIO
-from tabulate import tabulate, TableFormat, Line, DataRow
+from tabulate import tabulate, TableFormat, DataRow
 
 
 def find_tables(ctx):
