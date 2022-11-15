@@ -4,7 +4,7 @@ import re
 from behave.model_describe import ModelPrinter
 from cucu import retry, step
 from io import StringIO
-from tabulate import tabulate
+from tabulate import tabulate, TableFormat, Line, DataRow
 
 
 def find_tables(ctx):
@@ -103,10 +103,22 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     return False
 
 
+GHERKIN_TABLEFORMAT = TableFormat(
+    lineabove=None,
+    linebelowheader=None,
+    linebetweenrows=None,
+    linebelow=None,
+    headerrow=DataRow("|", "|", "|"),
+    datarow=DataRow("|", "|", "|"),
+    padding=1,
+    with_header_hide=["lineabove"],
+)
+
+
 def report_unable_to_find_table(tables):
     stream = StringIO()
     for table in tables:
-        stream.write(f"\n{tabulate(table, [], tablefmt='grid')}\n")
+        stream.write(f"\n{tabulate(table, [], tablefmt=GHERKIN_TABLEFORMAT)}\n")
 
     stream.seek(0)
     raise RuntimeError(f"unable to find desired table, found: {stream.read()}")
