@@ -156,7 +156,6 @@
         } else if (expandable_ids) {
             var ids = expandable_ids.split(',');
             for (var index = 0; index < ids.length; index++) {
-                console.log('looking up ' + ids[index]);
                 expandables.push(document.getElementById(ids[index]));
             }
         }
@@ -169,20 +168,20 @@
         // and then we take the URL parameter and figure out which rows to
         // expand and only then would it make sense to adjust for any anchors
         // mentioned in the URL
-        // window.location.href = window.location.href;
-
         $('document').ready(function() {
             MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
             var observer = new MutationObserver(function(mutations, observer) {
+                const params = new URLSearchParams(window.location.search)
+
                 // update any open/closed rows
-                var url = window.location.href.split('?')[0];
-                var anchor = '#' + (window.location.href.split('#')[1] || '');
                 var expanded = $('.collapse.show');
                 var expanded_ids = [];
                 for (var index=0; index < expanded.length; index++) {
                     expanded_ids.push(expanded[index].getAttribute('id'))
                 }
-                url = url + '?expand=' + expanded_ids.join(',') + anchor;
+                params.set('expand', expanded_ids.join(','));
+
+                var url = window.location.pathname + '?' + params.toString() + window.location.hash;
                 history.pushState(null, "", url);
             });
             observer.observe(document, {

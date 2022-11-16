@@ -1,3 +1,4 @@
+@mixed
 Feature: Feature with mixed results
 
   Scenario: Scenario that passes

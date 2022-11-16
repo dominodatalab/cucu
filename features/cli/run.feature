@@ -21,6 +21,7 @@ Feature: Run
      Then I should not see the directory at "{CUCU_RESULTS_DIR}/passing_feature_dry_run_results"
       And I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       Feature: Feature with mixed results
 
         Scenario: Scenario that passes
@@ -34,7 +35,7 @@ Feature: Run
       RuntimeError: step fails on purpose
       [\s]*
       Failing scenarios:
-        data/features/feature_with_mixed_results.feature:6  Scenario that fails
+        data/features/feature_with_mixed_results.feature:\d+  Scenario that fails
 
       0 features passed, 1 failed, 0 skipped
       1 scenario passed, 1 failed, 0 skipped, 3 untested
@@ -47,6 +48,7 @@ Feature: Run
      Then I should not see the directory at "{CUCU_RESULTS_DIR}/passing_feature_dry_run_results"
       And I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       Feature: Feature with mixed results
 
         Scenario: Scenario that also passes
