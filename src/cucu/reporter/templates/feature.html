@@ -39,13 +39,13 @@
                 {% elif scenario['status'] == 'skipped' %}
                     <td class="text-center"><pre style="display: inline; color: blue">{{ scenario['status'] }}</pre></td>
                 {% endif %}
-                <td class="text-center"><pre style="display: inline; color: grey">{{ '{:.3f}'.format(scenario['duration']) }}s</pre></td>
+                <td class="text-center">{{ '{:.3f}'.format(scenario['duration']) }}s</td>
             </tr>
             {%  endif %}
         {% endfor %}
     </table>
 
     <script>
-    setupReportTables([[2, 'asc']])
+    setupReportTables([[2, 'asc']], [{type: 'string'}, {type: 'num'}, {type: 'html'} , {type: 'timestamp'} ])
     </script>
 {% endblock %}

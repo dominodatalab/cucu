@@ -31,12 +31,12 @@
             {% elif feature['status'] == 'skipped' %}
                 <td class="text-center"><pre style="display: inline; color: blue">{{ feature['status'] }}</pre></td>
             {% endif %}
-            <td class="text-center"><pre style="display: inline; color: grey">{{ '{:.3f}'.format(feature['duration']) }}s</pre></td>
+            <td class="text-center">{{ '{:.3f}'.format(feature['duration']) }}s</td>
         </tr>
         {% endfor %}
     </table>
 
     <script>
-    setupReportTables([[5, 'asc']])
+    setupReportTables([[5, 'asc']], [{type: 'string'}, {type: 'num'}, {type: 'num'}, {type: 'num'}, {type: 'num'}, {type: 'html'} , {type: 'timestamp'} ])
     </script>
 {% endblock %}
