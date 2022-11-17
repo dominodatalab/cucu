@@ -16,21 +16,46 @@ CONFIG.define(
 
 
 def init_global_hook_variables():
-    CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"] = []
-    CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
+    if CONFIG["__CUCU_INIT_GLOBAL_HOOKS"] is None:
+        CONFIG["__CUCU_BEFORE_ALL_HOOKS"] = []
+        CONFIG["__CUCU_AFTER_ALL_HOOKS"] = []
 
-    CONFIG["__CUCU_BEFORE_STEP_HOOKS"] = []
-    CONFIG["__CUCU_AFTER_STEP_HOOKS"] = []
+        CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"] = []
+        CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
 
-    CONFIG["__CUCU_PAGE_CHECK_HOOKS"] = OrderedDict()
-    CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"] = {}
+        CONFIG["__CUCU_BEFORE_STEP_HOOKS"] = []
+        CONFIG["__CUCU_AFTER_STEP_HOOKS"] = []
 
-    CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"] = []
+        CONFIG["__CUCU_PAGE_CHECK_HOOKS"] = OrderedDict()
+        CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"] = {}
+
+        CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"] = []
+
+        # avoid rerunning the init
+        CONFIG["__CUCU_INIT_GLOBAL_HOOKS"] = True
 
 
 def init_scenario_hook_variables():
     CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
+
+
+def register_before_all_hook(hook_func):
+    """
+    register a before all hook that will execute once before anything is
+    executed and we will pass the current behave context object as the only
+    argument to the hook_func provided.
+    """
+    CONFIG["__CUCU_BEFORE_ALL_HOOKS"].append(hook_func)
+
+
+def register_after_all_hook(hook_func):
+    """
+    register an after all hook that will execute once after everything is
+    executed and we will pass the current behave context object as the only
+    argument to the hook_func provided.
+    """
+    CONFIG["__CUCU_AFTER_ALL_HOOKS"].append(hook_func)
 
 
 def register_before_scenario_hook(hook_func):

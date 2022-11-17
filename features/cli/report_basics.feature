@@ -116,3 +116,24 @@ Feature: Report basics
      Then I wait to see the text "@second"
       And I should not see the text "@all"
       And I should not see the text "@first"
+
+  @runtime-timeout
+  Scenario: User can run with a runtime timeout and still produce a valid report
+    Given I run the command "cucu run data/features/slow_features --runtime-timeout 7 --results {CUCU_RESULTS_DIR}/runtime_timeout_reporting_results" and expect exit code "1"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/runtime_timeout_reporting_results --output {CUCU_RESULTS_DIR}/runtime_timeout_reporting_report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/runtime_timeout_reporting_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     Then I should see a table that matches the following:
+      | Feature         | Total | Passed | Failed | Skipped | Status   | Duration |
+      | Slow feature #1 | 1     | 1      | 0      | 0       | passed   | .*       |
+      | Slow feature #2 | 1     | 1      | 0      | 0       | passed   | .*       |
+      | Slow feature #3 | 0     | 0      | 0      | 0       | untested | .*       |
+     When I click the button "Slow feature #1"
+     Then I should see a table that matches the following:
+      | Scenario      | Total Steps | Status | Duration |
+      | Slow scenario | 1           | passed |    >*    |
+     When I go back on the browser
+      And I click the button "Slow feature #3"
+     Then I should see a table that matches the following:
+      | Scenario                   | Total Steps | Status | Duration |
+      | No data available in table |             |        |          |

@@ -65,3 +65,21 @@ Feature: Run
   Scenario: User can run a simple test within a reasonable amount of time
     Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/simple_echo_runtime_results" and save stdout to "STDOUT" and expect exit code "0"
      Then I should see the previous step took less than "6" seconds
+
+  @runtime-timeout
+  Scenario: User can run with a runtime timeout to avoid running over a certain amount of time
+    Given I run the command "cucu run data/features/slow_features --runtime-timeout 5 --results {CUCU_RESULTS_DIR}/runtime_timeout_results" and save stdout to "STDOUT" and expect exit code "1"
+     Then I should see the previous step took less than "7" seconds
+      And I should see "{STDOUT}" contains the following:
+      """
+      runtime timeout reached, aborting run
+      """
+
+  @runtime-timeout
+  Scenario: User can run with a runtime timeout and still exit without having hit the timeout
+    Given I run the command "cucu run data/features/echo.feature --runtime-timeout 300 --results {CUCU_RESULTS_DIR}/runtime_timeout_results" and save stdout to "STDOUT" and expect exit code "0"
+     Then I should see the previous step took less than "5" seconds
+      And I should see "{STDOUT}" does not contain the following:
+      """
+      runtime timeout reached, aborting run
+      """

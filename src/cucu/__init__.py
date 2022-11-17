@@ -12,6 +12,8 @@ selenium_tweaks.init()
 from cucu.hooks import (
     init_global_hook_variables,
     init_scenario_hook_variables,
+    register_after_all_hook,
+    register_before_all_hook,
     register_after_this_scenario_hook,
     register_before_scenario_hook,
     register_after_scenario_hook,

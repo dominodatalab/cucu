@@ -29,6 +29,7 @@ CONFIG.define(
     default=None,
 )
 
+
 init_global_hook_variables()
 init_page_checks()
 
@@ -54,6 +55,12 @@ def before_all(ctx):
     CONFIG["__CUCU_CTX"] = ctx
     CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
+
+
+def after_all(ctx):
+    # run the after all hooks
+    for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
+        hook(ctx)
 
 
 def before_feature(ctx, feature):
