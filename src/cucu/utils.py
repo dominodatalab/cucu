@@ -85,6 +85,11 @@ def retry(func, wait_up_to_s=None, retry_after_s=None):
         retry=retry_if_not_exception_type(StopRetryException),
     )
     def new_decorator(*args, **kwargs):
+        ctx = CONFIG["__CUCU_CTX"]
+
+        for hook in CONFIG["__CUCU_BEFORE_RETRY_HOOKS"]:
+            hook(ctx)
+
         return func(*args, **kwargs)
 
     return new_decorator

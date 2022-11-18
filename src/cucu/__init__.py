@@ -23,6 +23,7 @@ from cucu.hooks import (
     register_custom_variable_handling,
     register_custom_tags_in_report_handling,
     register_custom_junit_failure_handler,
+    register_before_retry_hook,
 )
 
 from cucu.utils import (
