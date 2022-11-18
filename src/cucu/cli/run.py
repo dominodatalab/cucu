@@ -38,6 +38,10 @@ def behave(
     log_start_n_stop=False,
     redirect_output=False,
 ):
+    if os.path.exists(os.path.join(results, "runtime-timeout")):
+        return
+
+    init_global_hook_variables()
     init_page_checks()
 
     if not dry_run:

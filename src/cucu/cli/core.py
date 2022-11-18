@@ -249,8 +249,17 @@ def run(
         logger.debug("setting up runtime timeout timer")
 
         def runtime_exit():
-            logger.error("runtime timeout reached, aborting run")
-            CONFIG["__CUCU_CTX"]._runner._set_aborted("runtime timeout reached")
+            if workers:
+                # touch the runtime-timeout files in the results directory so
+                # other processes when running with workers can exit promptly
+                timeout_filepath = os.path.join(results, "runtime-timeout")
+                open(timeout_filepath, "w").close()
+
+            else:
+                logger.error("runtime timeout reached, aborting run")
+                CONFIG["__CUCU_CTX"]._runner._set_aborted(
+                    "runtime timeout reached"
+                )
 
         timer = Timer(runtime_timeout, runtime_exit)
         timer.start()
