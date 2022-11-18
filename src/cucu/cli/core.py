@@ -13,6 +13,7 @@ from click import ClickException
 from cucu import (
     fuzzy,
     init_global_hook_variables,
+    register_after_all_hook,
     reporter,
     language_server,
     logger,
@@ -25,6 +26,7 @@ from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.lint import linter
 from importlib.metadata import version
 from tabulate import tabulate
+from threading import Timer
 
 
 # general socket timeout instead of letting the framework ever get stuck on a
@@ -132,6 +134,12 @@ def main():
     help="the results directory used by cucu",
 )
 @click.option(
+    "--runtime-timeout",
+    default=-1,
+    type=int,
+    help="the runtime timeout in seconds after which the current run will terminate any running tests and exit",
+)
+@click.option(
     "--secrets",
     default=None,
     help="coma separated list of variable names that we should hide"
@@ -179,6 +187,7 @@ def run(
     preserve_results,
     report,
     results,
+    runtime_timeout,
     secrets,
     tags,
     selenium_remote_url,
@@ -235,6 +244,22 @@ def run(
 
     if junit is None:
         junit = results
+
+    if runtime_timeout != -1:
+        logger.debug("setting up runtime timeout timer")
+
+        def runtime_exit():
+            logger.error("runtime timeout reached, aborting run")
+            CONFIG["__CUCU_CTX"]._runner._set_aborted("runtime timeout reached")
+
+        timer = Timer(runtime_timeout, runtime_exit)
+        timer.start()
+
+        def cancel_timer(_):
+            logger.debug("cancelled runtime timeout timer")
+            timer.cancel()
+
+        register_after_all_hook(cancel_timer)
 
     try:
         if workers is None or workers == 1:

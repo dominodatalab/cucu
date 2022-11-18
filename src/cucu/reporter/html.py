@@ -68,7 +68,10 @@ def generate(results, basepath):
     #
     for index in range(0, len(features)):
         feature = features[index]
-        scenarios = feature["elements"]
+        scenarios = []
+        if feature["status"] != "untested":
+            scenarios = feature["elements"]
+
         feature_duration = 0
         total_scenarios = 0
         total_scenarios_passed = 0
@@ -77,7 +80,7 @@ def generate(results, basepath):
 
         process_tags(feature)
 
-        if feature["status"] != "skipped":
+        if feature["status"] not in ["skipped", "untested"]:
             # copy each feature directories contents over to the report directory
             src_feature_filepath = os.path.join(results, feature["name"])
             dst_feature_filepath = os.path.join(basepath, feature["name"])
@@ -212,7 +215,10 @@ def generate(results, basepath):
         feature_basepath = os.path.join(basepath, feature["name"])
         os.makedirs(feature_basepath, exist_ok=True)
 
-        scenarios = feature["elements"]
+        scenarios = []
+        if feature["status"] != "untested":
+            scenarios = feature["elements"]
+
         rendered_feature_html = feature_template.render(
             feature=feature,
             scenarios=scenarios,

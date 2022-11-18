@@ -30,6 +30,8 @@
                 <td class="text-center"><pre style="display: inline; color: red">{{ feature['status'] }}</pre></td>
             {% elif feature['status'] == 'skipped' %}
                 <td class="text-center"><pre style="display: inline; color: blue">{{ feature['status'] }}</pre></td>
+            {% elif feature['status'] == 'untested' %}
+                <td class="text-center"><pre style="display: inline; color: gray">{{ feature['status'] }}</pre></td>
             {% endif %}
             <td class="text-center">{{ '{:.3f}'.format(feature['duration']) }}s</td>
         </tr>
