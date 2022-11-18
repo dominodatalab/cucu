@@ -136,7 +136,7 @@ def main():
 )
 @click.option(
     "--runtime-timeout",
-    default=-1,
+    default=None,
     type=int,
     help="the runtime timeout in seconds after which the current run will terminate any running tests and exit",
 )
@@ -248,7 +248,7 @@ def run(
 
     try:
         if workers is None or workers == 1:
-            if runtime_timeout != -1:
+            if runtime_timeout:
                 logger.debug("setting up runtime timeout timer")
 
                 def runtime_exit():
@@ -293,7 +293,7 @@ def run(
                 feature_filepaths = [filepath]
 
             with multiprocessing.Pool(int(workers)) as pool:
-                if runtime_timeout != -1:
+                if runtime_timeout:
                     logger.debug("setting up runtime timeout timer")
 
                     def runtime_exit():
