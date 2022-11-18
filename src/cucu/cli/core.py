@@ -5,6 +5,7 @@ import glob
 import json
 import multiprocessing
 import shutil
+import signal
 import socket
 import time
 import os
@@ -245,33 +246,25 @@ def run(
     if junit is None:
         junit = results
 
-    if runtime_timeout != -1:
-        logger.debug("setting up runtime timeout timer")
-
-        def runtime_exit():
-            if workers:
-                # touch the runtime-timeout files in the results directory so
-                # other processes when running with workers can exit promptly
-                timeout_filepath = os.path.join(results, "runtime-timeout")
-                open(timeout_filepath, "w").close()
-
-            else:
-                logger.error("runtime timeout reached, aborting run")
-                CONFIG["__CUCU_CTX"]._runner._set_aborted(
-                    "runtime timeout reached"
-                )
-
-        timer = Timer(runtime_timeout, runtime_exit)
-        timer.start()
-
-        def cancel_timer(_):
-            logger.debug("cancelled runtime timeout timer")
-            timer.cancel()
-
-        register_after_all_hook(cancel_timer)
-
     try:
         if workers is None or workers == 1:
+            if runtime_timeout != -1:
+                logger.debug("setting up runtime timeout timer")
+
+                def runtime_exit():
+                    logger.error("runtime timeout reached, aborting run")
+                    CONFIG["__CUCU_CTX"]._runner.aborted = True
+                    os.kill(os.getpid(), signal.SIGINT)
+
+                timer = Timer(runtime_timeout, runtime_exit)
+                timer.start()
+
+                def cancel_timer(_):
+                    logger.debug("cancelled runtime timeout timer")
+                    timer.cancel()
+
+                register_after_all_hook(cancel_timer)
+
             exit_code = behave(
                 filepath,
                 color_output,
@@ -300,6 +293,28 @@ def run(
                 feature_filepaths = [filepath]
 
             with multiprocessing.Pool(int(workers)) as pool:
+                if runtime_timeout != -1:
+                    logger.debug("setting up runtime timeout timer")
+
+                    def runtime_exit():
+                        logger.error("runtime timeout reached, aborting run")
+                        timeout_filepath = os.path.join(
+                            results, "runtime-timeout"
+                        )
+                        open(timeout_filepath, "w").close()
+
+                        for child in multiprocessing.active_children():
+                            os.kill(child.pid, signal.SIGINT)
+
+                    timer = Timer(runtime_timeout, runtime_exit)
+                    timer.start()
+
+                    def cancel_timer(_):
+                        logger.debug("cancelled runtime timeout timer")
+                        timer.cancel()
+
+                    register_after_all_hook(cancel_timer)
+
                 async_results = []
                 for feature_filepath in feature_filepaths:
                     async_results.append(
@@ -329,8 +344,8 @@ def run(
 
                 workers_failed = False
                 for result in async_results:
-                    result.wait()
-                    exit_code = result.get()
+                    result.wait(runtime_timeout)
+                    exit_code = result.get(runtime_timeout)
                     if exit_code != 0:
                         workers_failed = True
 
