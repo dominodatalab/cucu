@@ -1,6 +1,9 @@
+import contextlib
+import io
 import json
 import re
-import subprocess
+
+from cucu import behave_tweaks
 
 
 def load_cucu_steps(filepath=None):
@@ -27,20 +30,29 @@ def load_cucu_steps(filepath=None):
         an array of hashmaps
     """
     steps_cache = {}
-    args = ["behave", "--dry-run", "--no-summary", "--format", "steps.doc"]
+    args = ["--dry-run", "--no-summary", "--format", "steps.doc"]
 
     if filepath is not None:
         args.append(filepath)
 
-    process = subprocess.run(args, capture_output=True)
-    steps_doc_output = process.stdout.decode("utf8")
+    error = None
 
-    if steps_doc_output.startswith("ParserError"):
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+
+    with contextlib.redirect_stderr(stderr):
+        with contextlib.redirect_stdout(stdout):
+            error = behave_tweaks.behave_main(args)
+
+    stdout = stdout.getvalue()
+    stderr = stderr.getvalue()
+
+    if stdout.startswith("ParserError"):
         raise RuntimeError(
             "unable to parse feature files, see above for details"
         )
 
-    for cucu_step in steps_doc_output.split("@step"):
+    for cucu_step in stdout.split("@step"):
         # Each line of a step definition looks like so:
         #
         #   @step('I should see "{this}" matches "{that}"')
@@ -87,20 +99,18 @@ def load_cucu_steps(filepath=None):
         }
 
     # collect any undefined steps
-    steps_err_output = process.stderr.decode("utf8")
-    for line in steps_err_output.split("\n"):
+    for line in stderr.split("\n"):
         # @when(u'I close the current browser caca')
         match = re.match(r"@[a-z]+\(u'([^']+)'\)", line)
         if match:
             step_name = match.group(1)
             steps_cache[step_name] = None
 
-    error = None
+    if error == 0:
+        return (steps_cache, None)
 
-    if process.returncode != 0:
-        error = process.stderr.decode("utf8")
-
-    return (steps_cache, error)
+    else:
+        return (steps_cache, stderr)
 
 
 def print_json_steps(filepath=None):

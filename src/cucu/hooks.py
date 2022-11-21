@@ -16,25 +16,21 @@ CONFIG.define(
 
 
 def init_global_hook_variables():
-    if CONFIG["__CUCU_INIT_GLOBAL_HOOKS"] is None:
-        CONFIG["__CUCU_BEFORE_ALL_HOOKS"] = []
-        CONFIG["__CUCU_AFTER_ALL_HOOKS"] = []
+    CONFIG["__CUCU_BEFORE_ALL_HOOKS"] = []
+    CONFIG["__CUCU_AFTER_ALL_HOOKS"] = []
 
-        CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"] = []
-        CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
+    CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"] = []
+    CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"] = []
 
-        CONFIG["__CUCU_BEFORE_STEP_HOOKS"] = []
-        CONFIG["__CUCU_AFTER_STEP_HOOKS"] = []
+    CONFIG["__CUCU_BEFORE_STEP_HOOKS"] = []
+    CONFIG["__CUCU_AFTER_STEP_HOOKS"] = []
 
-        CONFIG["__CUCU_PAGE_CHECK_HOOKS"] = OrderedDict()
-        CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"] = {}
+    CONFIG["__CUCU_PAGE_CHECK_HOOKS"] = OrderedDict()
+    CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"] = {}
 
-        CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"] = []
-        CONFIG["__CUCU_BEFORE_RETRY_HOOKS"] = []
-        CONFIG["__CUCU_CTX"] = None
-
-        # avoid rerunning the init
-        CONFIG["__CUCU_INIT_GLOBAL_HOOKS"] = True
+    CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"] = []
+    CONFIG["__CUCU_BEFORE_RETRY_HOOKS"] = []
+    CONFIG["__CUCU_CTX"] = None
 
 
 def init_scenario_hook_variables():

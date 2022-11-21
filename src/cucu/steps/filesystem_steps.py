@@ -140,5 +140,5 @@ def should_see_file_does_not_match_the_following(ctx, filepath):
     with open(filepath, "rb") as input:
         file_contents = input.read().decode("utf8")
 
-        if not re.match(ctx.text, file_contents):
+        if re.match(ctx.text, file_contents):
             raise RuntimeError(f"\n{file_contents}\nmatches\n{ctx.text}\n")

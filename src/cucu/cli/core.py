@@ -279,6 +279,7 @@ def run(
                 secrets,
                 tags,
                 verbose,
+                skip_init_global_hook_variables=True,
             )
 
             if exit_code != 0:
@@ -421,10 +422,14 @@ def steps(filepath, format):
     """
     print available cucu steps
     """
+    init_global_hook_variables()
+
     if format == "human":
         print_human_readable_steps(filepath=filepath)
+
     elif format == "json":
         print_json_steps(filepath=filepath)
+
     else:
         raise RuntimeError(f'unsupported format "{format}"')
 
@@ -438,6 +443,8 @@ def lint(filepath, fix):
     """
     lint feature files
     """
+    init_global_hook_variables()
+
     logger.init_logging("INFO")
     filepaths = list(filepath)
 
@@ -448,9 +455,6 @@ def lint(filepath, fix):
     violations_fixed = 0
 
     for filepath in filepaths:
-        # initialize any underlying custom step code things
-        behave_init(filepath)
-
         all_violations = linter.lint(filepath)
 
         for violations in all_violations:
