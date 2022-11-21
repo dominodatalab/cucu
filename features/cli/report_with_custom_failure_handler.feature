@@ -33,6 +33,7 @@ Feature: Report with custom JUnit failure handler
       [\s\S]*
       """
 
+  @workers
   Scenario: User sees custom handler is not duplicated when running in parallel
     Given I create a file at "{CUCU_RESULTS_DIR}/custom_failure_handling_and_workers/environment.py" with the following:
       """

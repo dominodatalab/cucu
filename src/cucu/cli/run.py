@@ -4,7 +4,8 @@ import os
 import sys
 
 from cucu import behave_tweaks
-from cucu import init_global_hook_variables
+from cucu import init_global_hook_variables, register_before_retry_hook
+from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
 from datetime import datetime
 
@@ -36,7 +37,6 @@ def behave(
     secrets,
     tags,
     verbose,
-    log_start_n_stop=False,
     redirect_output=False,
     skip_init_global_hook_variables=False,
 ):
@@ -125,13 +125,21 @@ def behave(
 
     result = 0
     try:
-        if log_start_n_stop:
-            print(f"{filepath} is running")
-
         if redirect_output:
             log_filename = os.path.basename(filepath)
             log_filename = log_filename.replace(".feature", ".log")
             log_filepath = os.path.join(results, log_filename)
+
+            CONFIG["__CUCU_PARENT_STDOUT"] = sys.stdout
+
+            def retry_progress(ctx):
+                CONFIG["__CUCU_PARENT_STDOUT"].write(".")
+                CONFIG["__CUCU_PARENT_STDOUT"].flush()
+
+            # this allows steps that are stuck in a retry to loop to still
+            # provide progress feedback on screen
+            register_before_retry_hook(retry_progress)
+
             with open(log_filepath, "w", encoding="utf8") as output:
                 with contextlib.redirect_stderr(output):
                     with contextlib.redirect_stdout(output):
@@ -147,13 +155,6 @@ def behave(
     except:
         result = -1
         raise
-
-    finally:
-        if log_start_n_stop:
-            if result != 0:
-                print(f"{filepath} has failed")
-            else:
-                print(f"{filepath} has passed")
 
     return result
 

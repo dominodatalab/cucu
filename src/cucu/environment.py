@@ -186,6 +186,12 @@ def after_step(ctx, step):
     ctx.end_time = time.monotonic()
     ctx.previous_step_duration = ctx.end_time - ctx.start_time
 
+    # when set this means we're running in parallel mode using --workers and
+    # we want to see progress reported using simply dots
+    if CONFIG["__CUCU_PARENT_STDOUT"]:
+        CONFIG["__CUCU_PARENT_STDOUT"].write(".")
+        CONFIG["__CUCU_PARENT_STDOUT"].flush()
+
     # we only take screenshots of steps where there's a browser currently open
     # and this step has no substeps as in the reporting the substeps that
     # may actually do something on the browser take their own screenshots
