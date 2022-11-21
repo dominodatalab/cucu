@@ -338,7 +338,6 @@ def run(
                             ],
                             {
                                 "redirect_output": True,
-                                "log_start_n_stop": True,
                             },
                         )
                     )
