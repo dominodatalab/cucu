@@ -439,10 +439,19 @@ def steps(filepath, format):
 @click.option(
     "--fix/--no-fix", default=False, help="fix lint violations, default: False"
 )
-def lint(filepath, fix):
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+def lint(filepath, fix, logging_level):
     """
     lint feature files
     """
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
+
     init_global_hook_variables()
 
     logger.init_logging("INFO")
@@ -455,6 +464,9 @@ def lint(filepath, fix):
     violations_fixed = 0
 
     for filepath in filepaths:
+        # initialize any underlying custom step code things
+        behave_init(filepath)
+
         all_violations = linter.lint(filepath)
 
         for violations in all_violations:
@@ -530,6 +542,8 @@ def vars(filepath):
     """
     print built-in cucu variables
     """
+    init_global_hook_variables()
+
     # loading the steps make it so the code that registers config variables
     # elsewhere get to execute
     behave_init(filepath)
