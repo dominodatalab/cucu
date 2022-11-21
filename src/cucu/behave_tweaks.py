@@ -8,8 +8,14 @@ import warnings
 import sys
 
 from behave.model import Table
+from behave.runner_util import reset_runtime
+from behave.__main__ import main as original_behave_main
 from cucu.config import CONFIG
 from functools import wraps
+
+
+def behave_main(args):
+    return original_behave_main(args)
 
 
 def init_outputs(stdout, stderr):

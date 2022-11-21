@@ -5,6 +5,7 @@ import glob
 import json
 import multiprocessing
 import shutil
+import signal
 import socket
 import time
 import os
@@ -135,7 +136,7 @@ def main():
 )
 @click.option(
     "--runtime-timeout",
-    default=-1,
+    default=None,
     type=int,
     help="the runtime timeout in seconds after which the current run will terminate any running tests and exit",
 )
@@ -245,24 +246,25 @@ def run(
     if junit is None:
         junit = results
 
-    if runtime_timeout != -1:
-        logger.debug("setting up runtime timeout timer")
-
-        def runtime_exit():
-            logger.error("runtime timeout reached, aborting run")
-            CONFIG["__CUCU_CTX"]._runner._set_aborted("runtime timeout reached")
-
-        timer = Timer(runtime_timeout, runtime_exit)
-        timer.start()
-
-        def cancel_timer(_):
-            logger.debug("cancelled runtime timeout timer")
-            timer.cancel()
-
-        register_after_all_hook(cancel_timer)
-
     try:
         if workers is None or workers == 1:
+            if runtime_timeout:
+                logger.debug("setting up runtime timeout timer")
+
+                def runtime_exit():
+                    logger.error("runtime timeout reached, aborting run")
+                    CONFIG["__CUCU_CTX"]._runner.aborted = True
+                    os.kill(os.getpid(), signal.SIGINT)
+
+                timer = Timer(runtime_timeout, runtime_exit)
+                timer.start()
+
+                def cancel_timer(_):
+                    logger.debug("cancelled runtime timeout timer")
+                    timer.cancel()
+
+                register_after_all_hook(cancel_timer)
+
             exit_code = behave(
                 filepath,
                 color_output,
@@ -277,6 +279,7 @@ def run(
                 secrets,
                 tags,
                 verbose,
+                skip_init_global_hook_variables=True,
             )
 
             if exit_code != 0:
@@ -291,6 +294,28 @@ def run(
                 feature_filepaths = [filepath]
 
             with multiprocessing.Pool(int(workers)) as pool:
+                if runtime_timeout:
+                    logger.debug("setting up runtime timeout timer")
+
+                    def runtime_exit():
+                        logger.error("runtime timeout reached, aborting run")
+                        timeout_filepath = os.path.join(
+                            results, "runtime-timeout"
+                        )
+                        open(timeout_filepath, "w").close()
+
+                        for child in multiprocessing.active_children():
+                            os.kill(child.pid, signal.SIGINT)
+
+                    timer = Timer(runtime_timeout, runtime_exit)
+                    timer.start()
+
+                    def cancel_timer(_):
+                        logger.debug("cancelled runtime timeout timer")
+                        timer.cancel()
+
+                    register_after_all_hook(cancel_timer)
+
                 async_results = []
                 for feature_filepath in feature_filepaths:
                     async_results.append(
@@ -320,8 +345,8 @@ def run(
 
                 workers_failed = False
                 for result in async_results:
-                    result.wait()
-                    exit_code = result.get()
+                    result.wait(runtime_timeout)
+                    exit_code = result.get(runtime_timeout)
                     if exit_code != 0:
                         workers_failed = True
 
@@ -397,10 +422,14 @@ def steps(filepath, format):
     """
     print available cucu steps
     """
+    init_global_hook_variables()
+
     if format == "human":
         print_human_readable_steps(filepath=filepath)
+
     elif format == "json":
         print_json_steps(filepath=filepath)
+
     else:
         raise RuntimeError(f'unsupported format "{format}"')
 
@@ -410,10 +439,21 @@ def steps(filepath, format):
 @click.option(
     "--fix/--no-fix", default=False, help="fix lint violations, default: False"
 )
-def lint(filepath, fix):
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+def lint(filepath, fix, logging_level):
     """
     lint feature files
     """
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
+
+    init_global_hook_variables()
+
     logger.init_logging("INFO")
     filepaths = list(filepath)
 
@@ -502,6 +542,8 @@ def vars(filepath):
     """
     print built-in cucu variables
     """
+    init_global_hook_variables()
+
     # loading the steps make it so the code that registers config variables
     # elsewhere get to execute
     behave_init(filepath)

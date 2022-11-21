@@ -170,7 +170,7 @@ Feature: Lint
       Feature: Just a place holder
       """
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/broken_step_lint/broken_step_feature.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
-      And I should see "{STDOUT}" contains the following:
+      And I should see "{STDERR}" contains the following:
       """
       RuntimeError: boom
       """

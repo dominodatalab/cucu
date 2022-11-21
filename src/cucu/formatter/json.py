@@ -176,7 +176,7 @@ class CucuJSONFormatter(Formatter):
         if step.error_message and step.status == Status.failed:
             # -- OPTIONAL: Provided for failed steps.
             error_message = step.error_message
-            if self.split_text_into_lines and "\n" in error_message:
+            if self.split_text_into_lines:
                 error_message = error_message.splitlines()
             result_element = steps[step_index]["result"]
             result_element["error_message"] = error_message

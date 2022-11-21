@@ -8,7 +8,7 @@ import uuid
 
 from cucu import config, logger
 from cucu.config import CONFIG
-from cucu import init_global_hook_variables, init_scenario_hook_variables
+from cucu import init_scenario_hook_variables
 from cucu.page_checks import init_page_checks
 from functools import partial
 
@@ -30,7 +30,6 @@ CONFIG.define(
 )
 
 
-init_global_hook_variables()
 init_page_checks()
 
 

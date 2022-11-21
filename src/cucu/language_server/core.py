@@ -3,6 +3,7 @@ import jellyfish
 import logging
 
 from cucu.cli.steps import load_cucu_steps
+from cucu import init_global_hook_variables
 
 from pygls.capabilities import COMPLETION
 from pygls.server import LanguageServer
@@ -12,6 +13,8 @@ from pygls.lsp.types import (
     CompletionOptions,
     CompletionParams,
 )
+
+init_global_hook_variables()
 
 
 def find_completions(step_fragment, steps_cache=None):

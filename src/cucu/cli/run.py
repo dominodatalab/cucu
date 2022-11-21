@@ -6,7 +6,6 @@ import sys
 from cucu import behave_tweaks
 from cucu import init_global_hook_variables
 from cucu.page_checks import init_page_checks
-from behave.__main__ import main as behave_main
 from datetime import datetime
 
 
@@ -18,7 +17,9 @@ def behave_init(filepath="features"):
     parameters:
         filepath(string): the file system path of the features directory to load
     """
-    behave_main(["--dry-run", "--format=null", "--no-summary", filepath])
+    behave_tweaks.behave_main(
+        ["--dry-run", "--format=null", "--no-summary", filepath]
+    )
 
 
 def behave(
@@ -37,7 +38,14 @@ def behave(
     verbose,
     log_start_n_stop=False,
     redirect_output=False,
+    skip_init_global_hook_variables=False,
 ):
+    if os.path.exists(os.path.join(results, "runtime-timeout")):
+        return
+
+    if not skip_init_global_hook_variables:
+        init_global_hook_variables()
+
     init_page_checks()
 
     if not dry_run:
@@ -130,12 +138,12 @@ def behave(
                         # intercept the stdout/stderr so we can do things such
                         # as hiding secrets in logs
                         behave_tweaks.init_outputs(sys.stdout, sys.stderr)
-                        result = behave_main(args)
+                        result = behave_tweaks.behave_main(args)
         else:
             # intercept the stdout/stderr so we can do things such
             # as hiding secrets in logs
             behave_tweaks.init_outputs(sys.stdout, sys.stderr)
-            result = behave_main(args)
+            result = behave_tweaks.behave_main(args)
     except:
         result = -1
         raise
