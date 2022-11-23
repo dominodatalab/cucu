@@ -272,12 +272,12 @@ CONFIG.define(
 CONFIG.define(
     "CUCU_BROWSER_WINDOW_HEIGHT",
     "the browser window height when running browser tests",
-    default=1080,
+    default=768,
 )
 CONFIG.define(
     "CUCU_BROWSER_WINDOW_WIDTH",
     "the browser window width when running browser tests",
-    default=1920,
+    default=1366,
 )
 CONFIG.define(
     "CUCU_BROWSER_DOWNLOADS_DIR",
