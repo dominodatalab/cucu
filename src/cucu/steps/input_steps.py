@@ -47,6 +47,30 @@ def find_input(ctx, name, index=0):
     return input_
 
 
+def click_input(ctx, input_):
+    """
+    internal method used to simply click a input element
+    """
+    ctx.check_browser_initialized()
+
+    if base_steps.is_disabled(input_):
+        raise RuntimeError("unable to click the input, as it is disabled")
+
+    ctx.browser.click(input_)
+
+
+def clear_input(input_):
+    """
+    internal method used to clear inputs and make sure they clear correctly
+    """
+    input_.clear()
+    # select all on mac
+    input_.send_keys(Keys.COMMAND, "a")
+    # select all on windows + linux
+    input_.send_keys(Keys.CONTROL, "a")
+    input_.send_keys(Keys.BACKSPACE)
+
+
 def find_n_write(ctx, name, value, index=0):
     """
     find the input with the name provided and write the value provided into it.
@@ -66,8 +90,7 @@ def find_n_write(ctx, name, value, index=0):
     if base_steps.is_disabled(input_):
         raise RuntimeError("unable to write into the input, as it is disabled")
 
-    input_.clear()
-
+    clear_input(input_)
     if len(value) > 512:
         #
         # to avoid various bugs with writing large chunks of text into
@@ -105,7 +128,7 @@ def find_n_clear(ctx, name, index=0):
     if base_steps.is_disabled(input_):
         raise RuntimeError("unable to clear the input, as it is disabled")
 
-    input_.clear()
+    clear_input(input_)
 
 
 def assert_input_value(ctx, name, value, index=0):
@@ -144,6 +167,9 @@ helpers.define_thing_with_name_in_state_steps(
 )
 helpers.define_run_steps_if_I_can_see_element_with_name_steps(
     "input", find_input
+)
+helpers.define_action_on_thing_with_name_steps(
+    "input", "click", find_input, click_input, with_nth=True
 )
 
 
@@ -185,7 +211,7 @@ def send_keys_to_input(ctx, key, name):
 
 
 @step('I clear the input "{name}"')
-def clear_input(ctx, name):
+def clear_the_input(ctx, name):
     find_n_clear(ctx, name)
 
 
