@@ -64,11 +64,13 @@ def clear_input(input_):
     internal method used to clear inputs and make sure they clear correctly
     """
     input_.clear()
-    # select all on mac
-    input_.send_keys(Keys.COMMAND, "a")
-    # select all on windows + linux
-    input_.send_keys(Keys.CONTROL, "a")
-    input_.send_keys(Keys.BACKSPACE)
+
+    if input_.get_attribute("value") != "":
+        # select all on mac
+        input_.send_keys(Keys.COMMAND, "a")
+        # select all on windows + linux
+        input_.send_keys(Keys.CONTROL, "a")
+        input_.send_keys(Keys.BACKSPACE)
 
 
 def find_n_write(ctx, name, value, index=0):
