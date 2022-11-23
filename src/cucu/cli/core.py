@@ -385,12 +385,22 @@ def _generate_report(filepath, output):
 
 @main.command()
 @click.argument("filepath", default="results")
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
 @click.option("-o", "--output", default="report")
-def report(filepath, output):
+def report(filepath, logging_level, output):
     """
     generate a test report from a results directory
     """
     init_global_hook_variables()
+
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
+
     run_details_filepath = os.path.join(filepath, "run_details.json")
 
     if os.path.exists(run_details_filepath):
