@@ -140,8 +140,8 @@
             {% endif %}
             {% if step['image'] is defined and step['result'] is defined %}
             <tr class="d-flex">
-                <td class="collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
-                    <img class="col-12 shadow bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img>
+                <td class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
+                    <img class="img-fluid shadow bg-white rounded w-100" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img>
                 </td>
             </tr>
             {% endif %}
