@@ -287,12 +287,12 @@ CONFIG.define(
 CONFIG.define(
     "CUCU_SOCKET_DEFAULT_TIMEOUT_S",
     "the default timeout (seconds) for socket connect/read in cucu",
-    default=60,
+    default=10,
 )
 CONFIG.define(
     "CUCU_SELENIUM_DEFAULT_TIMEOUT_S",
     "the default timeout (seconds) for selenium connect/read in selenium",
-    default=60,
+    default=10,
 )
 CONFIG.define(
     "CUCU_MONITOR_PNG",

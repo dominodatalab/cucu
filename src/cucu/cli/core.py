@@ -6,7 +6,6 @@ import json
 import multiprocessing
 import shutil
 import signal
-import socket
 import time
 import os
 
@@ -29,11 +28,6 @@ from importlib.metadata import version
 from tabulate import tabulate
 from threading import Timer
 
-
-# general socket timeout instead of letting the framework ever get stuck on a
-# socket connect/read call
-timeout = float(CONFIG["CUCU_SOCKET_DEFAULT_TIMEOUT_S"])
-socket.setdefaulttimeout(timeout)
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
