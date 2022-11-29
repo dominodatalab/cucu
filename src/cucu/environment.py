@@ -1,6 +1,8 @@
 import datetime
+import filelock
 import json
 import os
+import re
 import shutil
 import sys
 import time
@@ -54,6 +56,7 @@ def before_all(ctx):
     CONFIG["__CUCU_CTX"] = ctx
     CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
+    ctx.locks = {}
 
 
 def after_all(ctx):
@@ -62,7 +65,67 @@ def after_all(ctx):
         hook(ctx)
 
 
+def parse_lock_names(tags):
+    """
+    parse lock names and create required lock filenames
+    """
+    lock_names = []
+    lock_files_dir = os.path.join(CONFIG["CUCU_RESULTS_DIR"], ".locks")
+    os.makedirs(lock_files_dir, exist_ok=True)
+
+    for tag in tags:
+        if tag.startswith("cucu:lock"):
+            # default to global namespace if no name provided
+            lock_name = "global"
+
+            matcher = re.match(r"cucu:lock\((?P<name>[^)]+)\)", tag)
+            if matcher:
+                lock_name = matcher.group("name")
+
+            lock_names.append(lock_name)
+
+            # now create the lock file in the locks directory
+            lock_filepath = os.path.join(lock_files_dir, lock_name)
+            with open(lock_filepath, "w", encoding="utf8") as output:
+                output.close()
+
+    return lock_names
+
+
+def acquire_locks(ctx, tags):
+    """
+    acquire all of the locks associated with the locks associated with the tags
+    provided
+    """
+    lock_files_dir = os.path.join(CONFIG["CUCU_RESULTS_DIR"], ".locks")
+    lock_names = parse_lock_names(tags)
+
+    for lock_name in lock_names:
+        # attempt to lock every
+        lock = filelock.FileLock(os.path.join(lock_files_dir, lock_name))
+        ctx.locks[lock_name] = lock
+        lock.acquire()
+
+
+def release_locks(ctx, tags):
+    """
+    release all of the locks associated with the locks associated with the tags
+    provided
+    """
+    lock_names = parse_lock_names(tags)
+
+    for lock_name in lock_names:
+        # attempt to release every lock
+        if lock_name not in ctx.locks:
+            raise RuntimeError(f"error did not find test lock {lock_name}")
+
+        ctx.locks[lock_name].release()
+        del ctx.locks[lock_name]
+
+
 def before_feature(ctx, feature):
+    acquire_locks(ctx, feature.tags)
+
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         results_dir = config.CONFIG["CUCU_RESULTS_DIR"]
         ctx.feature_dir = os.path.join(results_dir, feature.name)
@@ -70,10 +133,12 @@ def before_feature(ctx, feature):
 
 
 def after_feature(ctx, feature):
-    pass
+    release_locks(ctx, feature.tags)
 
 
 def before_scenario(ctx, scenario):
+    acquire_locks(ctx, scenario.tags)
+
     # we want every scenario to start with the exact same reinitialized config
     # values and not really bleed values between scenario runs
     CONFIG.restore()
@@ -161,6 +226,8 @@ def after_scenario(ctx, scenario):
             browser.quit()
 
         ctx.browsers = []
+
+    release_locks(ctx, scenario.tags)
 
 
 def before_step(ctx, step):
