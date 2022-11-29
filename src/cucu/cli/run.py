@@ -1,6 +1,7 @@
 import contextlib
 import json
 import os
+import socket
 import sys
 
 from cucu import behave_tweaks
@@ -40,6 +41,11 @@ def behave(
     redirect_output=False,
     skip_init_global_hook_variables=False,
 ):
+    # general socket timeout instead of letting the framework ever get stuck on a
+    # socket connect/read call
+    timeout = float(CONFIG["CUCU_SOCKET_DEFAULT_TIMEOUT_S"])
+    socket.setdefaulttimeout(timeout)
+
     if os.path.exists(os.path.join(results, "runtime-timeout")):
         return
 

@@ -55,9 +55,8 @@ class Selenium(Browser):
         if selenium_remote_url is None:
             init()
 
-        else:
-            timeout = float(config.CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT_S"])
-            RemoteConnection.set_timeout(timeout)
+        timeout = float(config.CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT_S"])
+        RemoteConnection.set_timeout(timeout)
 
         height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
         width = config.CONFIG["CUCU_BROWSER_WINDOW_WIDTH"]
