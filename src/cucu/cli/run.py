@@ -54,9 +54,6 @@ def behave(
 
     init_page_checks()
 
-    if not dry_run:
-        write_run_details(results, filepath)
-
     if color_output:
         os.environ["CUCU_COLOR_OUTPUT"] = str(color_output).lower()
 

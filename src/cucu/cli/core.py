@@ -21,7 +21,7 @@ from cucu import (
 from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.cli import thread_dumper
-from cucu.cli.run import behave, behave_init
+from cucu.cli.run import behave, behave_init, write_run_details
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.lint import linter
 from importlib.metadata import version
@@ -239,6 +239,9 @@ def run(
 
     if junit is None:
         junit = results
+
+    if not dry_run:
+        write_run_details(results, filepath)
 
     try:
         if workers is None or workers == 1:

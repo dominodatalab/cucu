@@ -7,6 +7,7 @@ import json
 import sys
 
 from ansi2html import Ansi2HTMLConverter
+from cucu import logger
 from cucu.config import CONFIG
 from xml.sax.saxutils import escape as escape_
 from urllib.parse import quote
@@ -53,7 +54,12 @@ def generate(results, basepath):
 
     for run_json_filepath in run_json_filepaths:
         with open(run_json_filepath, "rb") as index_input:
-            features += json.loads(index_input.read())
+            try:
+                features += json.loads(index_input.read())
+            except Exception as exception:
+                logger.warn(
+                    f"unable to read file {run_json_filepath}, got error: {exception}"
+                )
 
     # copy the external dependencies to the reports destination directory
     cucu_dir = os.path.dirname(sys.modules["cucu"].__file__)
