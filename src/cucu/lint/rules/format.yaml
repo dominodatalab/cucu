@@ -1,6 +1,18 @@
 # built in cucu linting rules
 ---
 
+feature_name_must_not_contain_special_characters:
+  message: "feature name must not contain the characters '/\\:?'"
+  type: error
+  current_line:
+    match: '^\s*Feature: .*[/\:?].*'
+
+scenario_name_must_not_contain_special_characters:
+  message: "scenario name must not contain the characters '/\\:?'"
+  type: error
+  current_line:
+    match: '^\s*Scenario: .*[/\:?].*'
+
 feature_name_must_be_unique:
   message: feature name must be unique
   type: error
