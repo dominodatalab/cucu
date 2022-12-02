@@ -1,5 +1,5 @@
 Feature: Internals
-  As a developer I wan the user to see the right stacktrace when using steps
+  As a developer I want the user to see the right stacktrace when using steps
   that happen to use our src/cucu/helpers.py functions to define steps.
 
   Scenario: User gets the right stacktrace for steps using step helpers
