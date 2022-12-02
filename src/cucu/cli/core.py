@@ -303,6 +303,7 @@ def run(
 
                         for child in multiprocessing.active_children():
                             os.kill(child.pid, signal.SIGINT)
+                            os.kill(child.pid, signal.SIGTERM)
 
                     timer = Timer(runtime_timeout, runtime_exit)
                     timer.start()
@@ -341,7 +342,6 @@ def run(
 
                 workers_failed = False
                 for result in async_results:
-                    result.wait(runtime_timeout)
                     exit_code = result.get(runtime_timeout)
                     if exit_code != 0:
                         workers_failed = True
