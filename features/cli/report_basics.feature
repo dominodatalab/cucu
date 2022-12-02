@@ -133,3 +133,32 @@ Feature: Report basics
      Then I should see a table that matches the following:
       | Scenario      | Total Steps | Status | Duration |
       | Slow scenario | 1           | .*     |    >*    |
+
+  @report-without-skips
+  Scenario: User can run removed skipped test results from the HTML test report
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --report-without-skips --results {CUCU_RESULTS_DIR}/report_without_skips --generate-report --report {CUCU_RESULTS_DIR}/report_without_skips_report" and expect exit code "1"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     Then I should see a table that matches the following:
+       | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
+       | Feature with mixed results | 4     | 2      | 2      | 0       | failed | .*       |
+     When I click the button "Feature with mixed results"
+     Then I should see a table that matches the following:
+      | Scenario                            | Total Steps | Status  | Duration |
+      | Scenario that fails                 | 2           | failed  | .*       |
+      | Scenario that has an undefined step | 1           | failed  | .*       |
+      | Scenario that passes                | 1           | passed  | .*       |
+      | Scenario that also passes           | 1           | passed  | .*       |
+      And I click the button "Scenario that fails"
+     Then I should see the text "RuntimeError: step fails on purpose"
+     When I click the button "Index"
+      And I click the button "Feature with mixed results"
+      And I click the button "Scenario that has an undefined step"
+     Then I should see the button "Given I attempt to use an undefined step"
+
+  @junit-without-skips
+  Scenario: User can run removed skipped test results from the JUnit results
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --junit-without-skips --results {CUCU_RESULTS_DIR}/junit_without_skips" and expect exit code "1"
+      And I read the contents of the file at "{CUCU_RESULTS_DIR}/junit_without_skips/TESTS-Feature_with_mixed_results.xml" and save to the variable "JUNIT"
+     Then I should see "{JUNIT}" contains "skipped=\"0\""
+      And I should see "{JUNIT}" does not contain "<skipped>"

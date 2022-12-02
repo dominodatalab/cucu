@@ -187,7 +187,28 @@ class CucuJUnitFormatter(Formatter):
         testsuite["name"] = results["name"]
         testsuite["timestamp"] = results["timestamp"]
 
+        junit_dir = CONFIG["CUCU_JUNIT_DIR"]
+        os.makedirs(junit_dir, exist_ok=True)
+
+        feature_name = results["name"].replace(" ", "_")
+        output_filepath = os.path.join(junit_dir, f"TESTS-{feature_name}.xml")
+
         scenarios = results["scenarios"]
+
+        if CONFIG["CUCU_JUNIT_WITHOUT_SKIPS"]:
+            filtered_scenarios = {}
+
+            for name, scenario in scenarios.items():
+                if scenario["status"] != "skipped":
+                    filtered_scenarios[name] = scenario
+
+            scenarios = filtered_scenarios
+
+            if len(scenarios) == 0:
+                # we had a suite of just skipped results and should remove the
+                # results all together
+                os.remove(output_filepath)
+                return
 
         # calculate with the latest data
         testsuite["tests"] = len(scenarios)
@@ -230,9 +251,6 @@ class CucuJUnitFormatter(Formatter):
                 testcase.append(bs4.Tag(name="skipped"))
 
             testsuite.append(testcase)
-
-        junit_dir = CONFIG["CUCU_JUNIT_DIR"]
-        os.makedirs(junit_dir, exist_ok=True)
 
         feature_name = results["name"].replace(" ", "_")
         output_filepath = os.path.join(junit_dir, f"TESTS-{feature_name}.xml")

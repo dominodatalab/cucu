@@ -101,6 +101,12 @@ def main():
     "the same location as --results",
 )
 @click.option(
+    "--junit-without-skips",
+    is_flag=True,
+    default=False,
+    help="when set to true skipped results are removed from the JUnit results",
+)
+@click.option(
     "-l",
     "--logging-level",
     default="INFO",
@@ -121,6 +127,12 @@ def main():
     "--report",
     default="report",
     help="the location to put the test report when --generate-report is used",
+)
+@click.option(
+    "--report-without-skips",
+    is_flag=True,
+    default=False,
+    help="when set to true skipped results are removed from the tests report",
 )
 @click.option(
     "-r",
@@ -177,10 +189,12 @@ def run(
     name,
     ipdb_on_failure,
     junit,
+    junit_without_skips,
     logging_level,
     periodic_thread_dumper,
     preserve_results,
     report,
+    report_without_skips,
     results,
     runtime_timeout,
     secrets,
@@ -239,6 +253,12 @@ def run(
 
     if junit is None:
         junit = results
+
+    if junit_without_skips:
+        os.environ["CUCU_JUNIT_WITHOUT_SKIPS"] = "true"
+
+    if report_without_skips:
+        os.environ["CUCU_REPORT_WITHOUT_SKIPS"] = "true"
 
     if not dry_run:
         write_run_details(results, filepath)

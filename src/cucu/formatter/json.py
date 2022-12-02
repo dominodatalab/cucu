@@ -13,6 +13,7 @@ import uuid
 from behave.formatter.base import Formatter
 from behave.model_core import Status
 from cucu import behave_tweaks
+from cucu.config import CONFIG
 
 
 # -----------------------------------------------------------------------------
@@ -38,6 +39,7 @@ class CucuJSONFormatter(Formatter):
         self.current_scenario = None
         self.last_step = None
         self.steps = []
+        self.write_json_header()
 
     def reset(self):
         self.current_feature = None
@@ -196,21 +198,10 @@ class CucuJSONFormatter(Formatter):
         self.finish_current_scenario()
         self.update_status_data()
 
-        if self.feature_count == 0:
-            # -- FIRST FEATURE:
-            self.write_json_header()
-        else:
-            # -- NEXT FEATURE:
-            self.write_json_feature_separator()
-
         self.write_json_feature(self.current_feature_data)
         self.reset()
-        self.feature_count += 1
 
     def close(self):
-        if self.feature_count == 0:
-            # -- FIRST FEATURE: Corner case when no features are provided.
-            self.write_json_header()
         self.write_json_footer()
         #
         # HACK: avoid failing the strange assert in the base formatter class:
@@ -262,8 +253,29 @@ class CucuJSONFormatter(Formatter):
         self.stream.write("\n]\n")
 
     def write_json_feature(self, feature_data):
+        if CONFIG["CUCU_REPORT_WITHOUT_SKIPS"]:
+            filtered_scenarios = []
+            index = 0
+            for index in range(0, len(feature_data["elements"])):
+                scenario = feature_data["elements"][index]
+
+                if scenario["keyword"] == "Background":
+                    scenario = feature_data["elements"][index + 1]
+
+                if scenario["status"] != "skipped":
+                    filtered_scenarios.append(scenario)
+
+            if len(filtered_scenarios) == 0:
+                return
+
+            feature_data["elements"] = filtered_scenarios
+
+        if self.feature_count != 0:
+            self.write_json_feature_separator()
+
         self.stream.write(json.dumps(feature_data, **self.dumps_kwargs))
         self.stream.flush()
+        self.feature_count += 1
 
     def write_json_feature_separator(self):
         self.stream.write(",\n\n")
