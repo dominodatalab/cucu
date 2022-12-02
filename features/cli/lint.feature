@@ -410,3 +410,32 @@ Feature: Lint
       """
       Parser failure in state init, at line 1: "This is just garbage"
       """
+
+  Scenario: User gets an error when using invalid feature or scenario names
+    Given I create a file at "{CUCU_RESULTS_DIR}/invalid_names_lint/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/invalid_names_lint/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/invalid_names_lint/bad_name_usage.feature" with the following:
+      """
+      Feature: Feature with invalid characters /\:"'
+
+        Scenario: Scenario with invalid characters /\:"'
+          Given I echo "buzz"
+      """
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/invalid_names_lint/bad_name_usage.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      results/invalid_names_lint/bad_name_usage.feature:1: E feature name must not contain the characters '/\:?'
+      results/invalid_names_lint/bad_name_usage.feature:3: E scenario name must not contain the characters '/\:?'
+
+      """
+      And I should see "{STDERR}" is equal to the following:
+      """
+      Error: linting errors found, but not fixed, see above for details
+
+      """
