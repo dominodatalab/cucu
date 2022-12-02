@@ -12,7 +12,6 @@ def search_in_all_frames(browser, search_function):
         the WebElement that matches (if found)
     """
     result = search_function()
-
     if result:
         return
 
