@@ -21,6 +21,7 @@ def search_in_all_frames(browser, search_function):
 
     # we might have not been in the default frame so check again
     browser.switch_to_default_frame()
+    logger.debug("Switched browser to the default frame")
     result = search_function()
     if result:
         return result
@@ -34,4 +35,5 @@ def search_in_all_frames(browser, search_function):
         result = search_function()
 
         if result:
+            logger.debug("Switched browser to an iframe")
             return result
