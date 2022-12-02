@@ -5,7 +5,7 @@ def search_in_all_frames(browser, search_function):
     """
     search all frames on the page for an element
 
-    Warning: This leaves the browser in whatever frame was last searched so that 
+    Warning: This leaves the browser in whatever frame was last searched so that
     users of this method are in that frame.
 
     parameters:
