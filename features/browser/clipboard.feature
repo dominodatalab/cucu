@@ -8,5 +8,9 @@ Feature: Clipboard
       And I click the button "Copy to Clipboard"
       And I wait to see the button "Copied!"
       And I wait to see the button "Copy to Clipboard"
+
+     # Should still work even if brower is currently pointed to subframe
+      And I click the button "button"
+
      Then I save the contents of the clipboard to the variable "CLIPBOARD_CONTENTS"
       And I should see "{CLIPBOARD_CONTENTS}" is equal to "Hello World"
