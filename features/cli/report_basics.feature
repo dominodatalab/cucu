@@ -162,3 +162,30 @@ Feature: Report basics
       And I read the contents of the file at "{CUCU_RESULTS_DIR}/junit_without_skips/TESTS-Feature_with_mixed_results.xml" and save to the variable "JUNIT"
      Then I should see "{JUNIT}" contains "skipped=\"0\""
       And I should see "{JUNIT}" does not contain "<skipped>"
+
+  Scenario: User can run and generate reports from empty feature files
+    Given I create a file at "{CUCU_RESULTS_DIR}/empty_features/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/empty_features/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/empty_features/blank_feature.feature" with the following:
+      """
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/empty_features/no_scenario_feature.feature" with the following:
+      """
+      Feature: nothing to see here
+      """
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/empty_features --results {CUCU_RESULTS_DIR}/empty_features_results --generate-report --report {CUCU_RESULTS_DIR}/empty_features_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I should see "{STDOUT}" matches the following:
+      """
+      Feature: nothing to see here
+
+      0 features passed, 0 failed, 1 skipped
+      0 scenarios passed, 0 failed, 0 skipped
+      0 steps passed, 0 failed, 0 skipped, 0 undefined
+      [\s\S]+
+      """
