@@ -77,7 +77,7 @@ def generate(results, basepath, only_failures=False):
         feature = features[index]
         scenarios = []
 
-        if feature["status"] != "untested":
+        if feature["status"] != "untested" and "elements" in feature:
             scenarios = feature["elements"]
 
         if only_failures and feature["status"] != "failed":
@@ -232,7 +232,7 @@ def generate(results, basepath, only_failures=False):
         os.makedirs(feature_basepath, exist_ok=True)
 
         scenarios = []
-        if feature["status"] != "untested":
+        if feature["status"] != "untested" and "elements" in feature:
             scenarios = feature["elements"]
 
         rendered_feature_html = feature_template.render(
