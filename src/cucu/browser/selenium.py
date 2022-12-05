@@ -273,9 +273,11 @@ class Selenium(Browser):
 
     def switch_to_default_frame(self):
         self.driver.switch_to.default_content()
+        logger.debug("switched browser to the default frame")
 
     def switch_to_frame(self, frame):
         self.driver.switch_to.frame(frame)
+        logger.debug(f"switched browser to an iframe: {frame}")
 
     def screenshot(self, filepath):
         self.driver.get_screenshot_as_file(filepath)
