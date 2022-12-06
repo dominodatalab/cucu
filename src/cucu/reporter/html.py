@@ -92,11 +92,7 @@ def generate(results, basepath, only_failures=False):
         reported_features.append(feature)
         process_tags(feature)
 
-        skipped_statuses = ["skipped", "untested"]
-        if only_failures:
-            skipped_statuses.append("passed")
-
-        if feature["status"] not in skipped_statuses:
+        if feature["status"] not in ["skipped", "untested"]:
             # copy each feature directories contents over to the report directory
             src_feature_filepath = os.path.join(results, feature["name"])
             dst_feature_filepath = os.path.join(basepath, feature["name"])
