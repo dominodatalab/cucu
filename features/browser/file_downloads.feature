@@ -9,10 +9,8 @@ Feature: File downloads
      Then I wait to see the downloaded file "file.txt"
       And I wait to see a file at "{SCENARIO_DOWNLOADS_DIR}/file.txt"
 
+  @disabled @QE-10005
   Scenario: User can download a file through the browser even when frames are involved
-    For some unknown reason this always succeeds even though it should fail when
-    not using the fix in browser_steps
-
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/files.html"
      When I click the link "download this file"
