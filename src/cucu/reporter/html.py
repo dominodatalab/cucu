@@ -43,7 +43,7 @@ def process_tags(element):
     element["tags"] = " ".join(prepared_tags)
 
 
-def generate(results, basepath):
+def generate(results, basepath, only_failures=False):
     """
     generate an HTML report for the results provided.
     """
@@ -72,11 +72,16 @@ def generate(results, basepath):
     #    step durations.
     #  * add `image` attribute to a step if it has an underlying .png image.
     #
+    reported_features = []
     for index in range(0, len(features)):
         feature = features[index]
         scenarios = []
+
         if feature["status"] != "untested" and "elements" in feature:
             scenarios = feature["elements"]
+
+        if only_failures and feature["status"] != "failed":
+            continue
 
         feature_duration = 0
         total_scenarios = 0
@@ -84,6 +89,7 @@ def generate(results, basepath):
         total_scenarios_failed = 0
         total_scenarios_skipped = 0
 
+        reported_features.append(feature)
         process_tags(feature)
 
         if feature["status"] not in ["skipped", "untested"]:
@@ -205,7 +211,7 @@ def generate(results, basepath):
 
     index_template = templates.get_template("index.html")
     rendered_index_html = index_template.render(
-        features=features,
+        features=reported_features,
         title="Cucu HTML Test Report",
         basepath=basepath,
         dir_depth="",
@@ -217,7 +223,7 @@ def generate(results, basepath):
 
     feature_template = templates.get_template("feature.html")
 
-    for feature in features:
+    for feature in reported_features:
         feature_basepath = os.path.join(basepath, feature["name"])
         os.makedirs(feature_basepath, exist_ok=True)
 

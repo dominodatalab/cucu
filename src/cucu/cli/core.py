@@ -129,6 +129,12 @@ def main():
     help="the location to put the test report when --generate-report is used",
 )
 @click.option(
+    "--report-only-failures",
+    default=False,
+    is_flag=True,
+    help="when set the HTML test report will only contain the failed test results",
+)
+@click.option(
     "--report-without-skips",
     is_flag=True,
     default=False,
@@ -194,6 +200,7 @@ def run(
     periodic_thread_dumper,
     preserve_results,
     report,
+    report_only_failures,
     report_without_skips,
     results,
     runtime_timeout,
@@ -259,6 +266,9 @@ def run(
 
     if report_without_skips:
         os.environ["CUCU_REPORT_WITHOUT_SKIPS"] = "true"
+
+    if report_only_failures:
+        os.environ["CUCU_REPORT_ONLY_FAILURES"] = "true"
 
     if not dry_run:
         write_run_details(results, filepath)
@@ -378,10 +388,12 @@ def run(
             dumper.stop()
 
         if generate_report:
-            _generate_report(results, report)
+            _generate_report(
+                results, report, only_failures=report_only_failures
+            )
 
 
-def _generate_report(filepath, output):
+def _generate_report(filepath, output, only_failures: False):
     """
     helper method to handle report generation so it can be used by the `cucu report`
     command also the `cucu run` when told to generate a report.
@@ -396,12 +408,20 @@ def _generate_report(filepath, output):
 
     os.makedirs(output)
 
-    report_location = reporter.generate(filepath, output)
+    report_location = reporter.generate(
+        filepath, output, only_failures=only_failures
+    )
     print(f"HTML test report at {report_location}")
 
 
 @main.command()
 @click.argument("filepath", default="results")
+@click.option(
+    "--only-failures",
+    default=False,
+    is_flag=True,
+    help="when set the HTML test report will only contain the failed test results",
+)
 @click.option(
     "-l",
     "--logging-level",
@@ -409,7 +429,7 @@ def _generate_report(filepath, output):
     help="set logging level to one of debug, warn or info (default)",
 )
 @click.option("-o", "--output", default="report")
-def report(filepath, logging_level, output):
+def report(filepath, only_failures, logging_level, output):
     """
     generate a test report from a results directory
     """
@@ -431,7 +451,7 @@ def report(filepath, logging_level, output):
         # initialize any underlying custom step code things
         behave_init(run_details["filepath"])
 
-    _generate_report(filepath, output)
+    _generate_report(filepath, output, only_failures=only_failures)
 
 
 @main.command()

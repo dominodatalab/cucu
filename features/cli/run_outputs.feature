@@ -7,6 +7,7 @@ Feature: Run outputs
      Then I should not see the directory at "{CUCU_RESULTS_DIR}/passing_feature_dry_run_results"
       And I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       Feature: Feature with passing scenario
 
         Scenario: Just a scenario that passes
@@ -43,6 +44,7 @@ Feature: Run outputs
     Given I run the command "cucu run data/features/feature_with_failing_scenario.feature --results {CUCU_RESULTS_DIR}/failing-scenario-results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      Then I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       Feature: Feature with failing scenario
 
         Scenario: Just a scenario that fails
@@ -52,7 +54,7 @@ Feature: Run outputs
       RuntimeError: step fails on purpose
       [\s\S]*
       Failing scenarios:
-        data/features/feature_with_failing_scenario.feature:3  Just a scenario that fails
+        data/features/feature_with_failing_scenario.feature:\d+  Just a scenario that fails
       [\s\S]*
       0 features passed, 1 failed, 0 skipped
       0 scenarios passed, 1 failed, 0 skipped

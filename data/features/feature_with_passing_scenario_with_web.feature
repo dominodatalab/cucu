@@ -1,3 +1,4 @@
+@passing
 Feature: Feature with passing scenario with web
 
   Scenario: Just a scenario that opens a web page

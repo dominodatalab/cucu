@@ -189,3 +189,20 @@ Feature: Report basics
       0 steps passed, 0 failed, 0 skipped, 0 undefined
       [\s\S]+
       """
+
+  @report-only-failures
+  Scenario: User can generate a report with only failures
+    Given I run the command "cucu run data/features --tags @passing,@failing --report-only-failures --results {CUCU_RESULTS_DIR}/report_only_failures --generate-report --report {CUCU_RESULTS_DIR}/report_only_failures_report" and expect exit code "1"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_only_failures_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     Then I should see a table that matches the following:
+       | Feature                                | Total | Passed | Failed | Skipped | Status | Duration |
+       | Feature with failing scenario          | 1     | 0      | 1      | 0       | failed | .*       |
+       | Feature with failing scenario with web | 1     | 0      | 1      | 0       | failed | .*       |
+     When I click the button "Feature with failing scenario with web"
+     Then I should see a table that matches the following:
+       | Scenario                              | Total Steps | Status | Duration |
+       | Just a scenario that opens a web page | 3           | failed | .*       |
+     When I click the button "Just a scenario that opens a web page"
+      And I wait to click the button "show images"
+      And I should see the image with the alt text "And I should see the text "inexistent""
