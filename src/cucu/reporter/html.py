@@ -94,7 +94,7 @@ def generate(results, basepath, only_failures=False):
 
         skipped_statuses = ["skipped", "untested"]
         if only_failures:
-            skipped_statuses.append("failed")
+            skipped_statuses.append("passed")
 
         if feature["status"] not in skipped_statuses:
             # copy each feature directories contents over to the report directory

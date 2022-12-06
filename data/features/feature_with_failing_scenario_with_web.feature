@@ -1,3 +1,4 @@
+@failing
 Feature: Feature with failing scenario with web
 
   Scenario: Just a scenario that opens a web page

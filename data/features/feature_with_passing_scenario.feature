@@ -1,3 +1,4 @@
+@passing
 Feature: Feature with passing scenario
 
   Scenario: Just a scenario that passes
