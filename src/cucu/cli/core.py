@@ -321,6 +321,7 @@ def run(
                 feature_filepaths = [filepath]
 
             with multiprocessing.Pool(int(workers)) as pool:
+                timer = None
                 if runtime_timeout:
                     logger.debug("setting up runtime timeout timer")
 
@@ -375,6 +376,9 @@ def run(
                     exit_code = result.get(runtime_timeout)
                     if exit_code != 0:
                         workers_failed = True
+
+                if timer:
+                    timer.cancel()
 
                 pool.close()
                 pool.join()
