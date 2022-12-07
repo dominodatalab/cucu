@@ -216,9 +216,6 @@ def run(
     init_global_hook_variables()
     dumper = None
 
-    # load all them configs
-    CONFIG.load_cucurc_files(filepath)
-
     if os.environ.get("CUCU") == "true":
         # when cucu is already running it means that we're running inside
         # another cucu process and therefore we should make sure the results

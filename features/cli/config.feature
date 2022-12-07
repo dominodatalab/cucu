@@ -2,7 +2,7 @@ Feature: Config
   As a developer I want the user to get the expected variable and config
   behavior when using cucu
 
-  Scenario: User can load cucurc values from a cucucrc file in
+  Scenario: User can load cucurc values from cucurc files at various levels
     Given I create a file at "{CUCU_RESULTS_DIR}/load_nested_cucurc/environment.py" with the following:
       """
       from cucu.environment import *
@@ -33,6 +33,60 @@ Feature: Config
       """
      When I run the command "cucu run {CUCU_RESULTS_DIR}/load_nested_cucurc --results={CUCU_RESULTS_DIR}/nested_cucurc_results --env BUZZ=buzz" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following:
+       """
+       Feature: Feature file that prints some variables
+
+         Scenario: This scenario prints a bunch of variables
+       bar
+
+           Given I echo "\{FOO\}"      # .*
+           # FOO="bar"
+       booze
+
+             And I echo "\{FIZZ\}"     # .*
+             # FIZZ="booze"
+       buzz
+
+             And I echo "\{BUZZ\}"     # .*
+             # BUZZ="buzz"
+
+       1 feature passed, 0 failed, 0 skipped
+       1 scenario passed, 0 failed, 0 skipped
+       3 steps passed, 0 failed, 0 skipped, 0 undefined
+       [\s\S]*
+       """
+
+  Scenario: User can load cucurc values from cucurc files at various levels when using workers
+    Given I create a file at "{CUCU_RESULTS_DIR}/load_nested_cucurc_with_workers/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/load_nested_cucurc_with_workers/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/load_nested_cucurc_with_workers/cucurc.yml" with the following:
+      """
+      FOO: bar
+      FIZZ: booze
+      BUZZ: wah
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/load_nested_cucurc_with_workers/directory/cucurc.yml" with the following:
+      """
+      FIZZ: buzz
+      BUZZ: wat
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/load_nested_cucurc_with_workers/directory/feature_that_prints.feature" with the following:
+      """
+      Feature: Feature file that prints some variables
+
+        Scenario: This scenario prints a bunch of variables
+         Given I echo "\{FOO\}"
+           And I echo "\{FIZZ\}"
+           And I echo "\{BUZZ\}"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/load_nested_cucurc_with_workers --results={CUCU_RESULTS_DIR}/nested_cucurc_with_workers_results --env BUZZ=buzz --workers 2" and expect exit code "0"
+     Then I should see the file at "{CUCU_RESULTS_DIR}/nested_cucurc_with_workers_results/feature_that_prints.log" matches the following:
        """
        Feature: Feature file that prints some variables
 
