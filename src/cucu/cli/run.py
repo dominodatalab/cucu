@@ -41,6 +41,9 @@ def behave(
     redirect_output=False,
     skip_init_global_hook_variables=False,
 ):
+    # load all them configs
+    CONFIG.load_cucurc_files(filepath)
+
     # general socket timeout instead of letting the framework ever get stuck on a
     # socket connect/read call
     timeout = float(CONFIG["CUCU_SOCKET_DEFAULT_TIMEOUT_S"])
