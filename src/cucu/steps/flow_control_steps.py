@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import time
 
@@ -180,3 +181,19 @@ def run_the_following_steps_at_end_of_scenario(ctx):
         run_steps(ctx, steps)
 
     register_after_this_scenario_hook(run_final_steps)
+
+
+for operation, operator in {
+    "is equal to": lambda x, y: x == y,
+    "is not equal to": lambda x, y: x != y,
+    "contains": lambda x, y: y in x,
+    "does not contain": lambda x, y: y not in x,
+    "matches": lambda x, y: re.match(y, x),
+    "does not match": lambda x, y: not (re.match(y, x)),
+}.items():
+    # the operator keyword below is used to scope the value of the operator
+    # value to the correct value at runtime when creating the various steps
+    @step('I run the following steps if "{this}" ' + operation + ' "{that}"')
+    def run_steps_if_this_operator_that(ctx, this, that, operator=operator):
+        if operator(this, that):
+            run_steps(ctx, ctx.text)
