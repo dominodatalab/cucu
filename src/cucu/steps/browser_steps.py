@@ -103,6 +103,11 @@ def go_back_on_browser(ctx):
 @step('I save the contents of the clipboard to the variable "{variable}"')
 def save_clipboard_value_to_variable(ctx, variable):
     ctx.check_browser_initialized()
+
+    # use default frame when adding elements to the document to avoid this errro on access:
+    # "selenium.common.exceptions.ElementNotInteractableException: Message: element not interactable"
+    ctx.browser.switch_to_default_frame()
+
     # create the hidden textarea so we can paste clipboard contents in
     textarea = ctx.browser.execute(
         """
@@ -241,6 +246,11 @@ def find_file_input(ctx, name, index=0):
 
 def save_downloaded_file(ctx, filename):
     ctx.check_browser_initialized()
+
+    # use default frame when adding elements to the document to avoid this errro on access:
+    # "selenium.common.exceptions.ElementNotInteractableException: Message: element not interactable"
+    ctx.browser.switch_to_default_frame()
+
     elem = ctx.browser.execute(
         """
         var input = window.document.createElement('INPUT');
