@@ -18,7 +18,6 @@ from cucu import (
     language_server,
     logger,
 )
-from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.cli import thread_dumper
 from cucu.cli.run import behave, behave_init, write_run_details
@@ -251,9 +250,6 @@ def run(
 
     # need to set this before initializing any browsers below
     os.environ["CUCU_BROWSER"] = browser.lower()
-
-    if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
-        selenium.init()
 
     if junit is None:
         junit = results
