@@ -305,3 +305,8 @@ CONFIG.define(
     "comma separated list of paths to load cucu lint rules from .yaml files",
     default="",
 )
+CONFIG.define(
+    "CUCU_JUNIT_WITH_STACKTRACE",
+    "when set to 'true' results in stacktraces showing in the JUnit XML failure output",
+    default="false",
+)

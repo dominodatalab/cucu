@@ -76,7 +76,12 @@ class CucuJUnitFormatter(Formatter):
                 failures += [
                     f"{self.current_step.keyword} {self.current_step.name}"
                 ]
-                failures += traceback.format_tb(self.current_scenario_traceback)
+
+                if CONFIG["CUCU_JUNIT_WITH_STACKTRACE"] == "true":
+                    failures += traceback.format_tb(
+                        self.current_scenario_traceback
+                    )
+
                 self.current_scenario_results["failure"] = failures
 
             if status == "skipped":

@@ -106,6 +106,12 @@ def main():
     help="when set to true skipped results are removed from the JUnit results",
 )
 @click.option(
+    "--junit-with-stacktrace",
+    is_flag=True,
+    default=False,
+    help="when set to true the JUnit XML output will contain the stacktrace",
+)
+@click.option(
     "-l",
     "--logging-level",
     default="INFO",
@@ -195,6 +201,7 @@ def run(
     ipdb_on_failure,
     junit,
     junit_without_skips,
+    junit_with_stacktrace,
     logging_level,
     periodic_thread_dumper,
     preserve_results,
@@ -256,6 +263,9 @@ def run(
 
     if junit_without_skips:
         os.environ["CUCU_JUNIT_WITHOUT_SKIPS"] = "true"
+
+    if junit_with_stacktrace:
+        os.environ["CUCU_JUNIT_WITH_STACKTRACE"] = "true"
 
     if report_without_skips:
         os.environ["CUCU_REPORT_WITHOUT_SKIPS"] = "true"
