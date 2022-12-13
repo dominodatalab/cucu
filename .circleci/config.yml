@@ -10,10 +10,8 @@ commands:
           name: install cucu dependencies
           command: |
             set -exuo pipefail
-            echo `pwd`
             pip install poetry
-            echo `pwd`
-            poetry install --verbose --no-interaction
+            poetry install --verbose --no-interaction --no-ansi
 
   install_test_dependencies: &install_test_dependencies
     steps:
