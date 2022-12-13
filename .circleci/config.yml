@@ -8,7 +8,10 @@ commands:
     steps:
       - run:
           name: install cucu dependencies
-          command: pip install poetry && poetry install
+          command: |
+            pip install poetry
+            poetry install
+            echo "wtfudge"
 
   install_test_dependencies: &install_test_dependencies
     steps:
