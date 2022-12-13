@@ -11,7 +11,7 @@ commands:
           command: |
             set +eo pipefail
             pip install poetry
-            poetry install
+            poetry install --no-ansi
 
   install_test_dependencies: &install_test_dependencies
     steps:
