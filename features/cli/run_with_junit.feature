@@ -10,3 +10,15 @@ Feature: Run with JUnit
     Given I run the command "cucu run data/features/echo.feature --junit {CUCU_RESULTS_DIR}/junit_files --results {CUCU_RESULTS_DIR}/run_with_custom_junit_results --generate-report --report {CUCU_RESULTS_DIR}/run_with_custom_junit_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should not see a file at "{CUCU_RESULTS_DIR}/run_with_custom_junit_results/TESTS-Echo.xml"
       And I should see a file at "{CUCU_RESULTS_DIR}/junit_files/TESTS-Echo.xml"
+
+  Scenario: User can choose to include or exclude stacktraces from the JUnit XML results
+    Given I run the command "cucu run data/features/feature_with_failing_scenario.feature --results {CUCU_RESULTS_DIR}/junit_without_stacktraces_results" and expect exit code "1"
+     Then I should see the file at "{CUCU_RESULTS_DIR}/junit_without_stacktraces_results/TESTS-Feature_with_failing_scenario.xml" does not contain the following:
+      """
+      raise RuntimeError("step fails on purpose")
+      """
+     When I run the command "cucu run data/features/feature_with_failing_scenario.feature --junit-with-stacktrace --results {CUCU_RESULTS_DIR}/junit_with_stacktraces_results" and expect exit code "1"
+     Then I should see the file at "{CUCU_RESULTS_DIR}/junit_with_stacktraces_results/TESTS-Feature_with_failing_scenario.xml" contains the following:
+      """
+      raise RuntimeError("step fails on purpose")
+      """
