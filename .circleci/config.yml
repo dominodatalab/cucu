@@ -11,6 +11,7 @@ commands:
           command: |
             set -exuo pipefail
             pip install poetry
+            pwd
             poetry install --verbose --no-interaction
 
   install_test_dependencies: &install_test_dependencies
