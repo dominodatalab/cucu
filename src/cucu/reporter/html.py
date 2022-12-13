@@ -235,6 +235,7 @@ def generate(results, basepath, only_failures=False):
             feature=feature,
             scenarios=scenarios,
             dir_depth="",
+            title=feature.get("name", "Cucu results"),
         )
 
         feature_output_filepath = os.path.join(
@@ -261,6 +262,7 @@ def generate(results, basepath, only_failures=False):
                 path_exists=os.path.exists,
                 scenario=scenario,
                 steps=steps,
+                title=scenario.get("name", "Cucu results"),
                 dir_depth="../../",
             )
 
