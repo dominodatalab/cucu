@@ -128,7 +128,17 @@
                     </tr>
                     {% endfor %}
                 {% endif %}
+            {% endif %}
 
+            {% if step['image'] is defined and step['result'] is defined %}
+            <tr class="d-flex">
+                <td class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
+                    <img class="img-fluid shadow bg-white rounded w-75" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img>
+                </td>
+            </tr>
+            {% endif %}
+
+            {% if step['result'] is defined %}
                 {% if step['result']['error_message'] %}
                     {% for line in step['result']['error_message'] %}
                     <tr class="d-flex">
@@ -137,13 +147,6 @@
                     {% endfor %}
                 {% endif %}
 
-            {% endif %}
-            {% if step['image'] is defined and step['result'] is defined %}
-            <tr class="d-flex">
-                <td class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
-                    <img class="img-fluid shadow bg-white rounded w-100" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img>
-                </td>
-            </tr>
             {% endif %}
         {% endfor %}
     </table>
