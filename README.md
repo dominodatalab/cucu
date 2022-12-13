@@ -81,7 +81,7 @@ finished executing you can use the `cucu report` command to generate an easy
 to navigate and read HTML test report which includes the steps and screenshots
 from that previous test run.
 
-To run with tags specified, run ```cucu run features/domino —tags=<name of tag 1> --tags=<name of tag 2> ...```
+To run with tags specified, run ```cucu run <test folder name> —tags=<name of tag 1> --tags=<name of tag 2> ...```
 If you want to run with a testrail tag, you will need to add quotes around the tag name, e.g. ```--tags="testrail(1234)"```.
 
 For more options, run ```cucu run --help```.
