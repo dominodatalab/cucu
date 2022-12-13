@@ -9,15 +9,16 @@ commands:
       - run:
           name: install cucu dependencies
           command: |
+            set -exuo pipefail
             pip install poetry
             poetry install
-            echo "wtfudge"
 
   install_test_dependencies: &install_test_dependencies
     steps:
       - run:
           name: install test dependencies
           command: |
+            set -exuo pipefail
             apt-get update
             apt-get install -y expect
 
