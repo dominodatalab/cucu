@@ -77,6 +77,12 @@ def before_scenario(ctx, scenario):
     # we want every scenario to start with the exact same reinitialized config
     # values and not really bleed values between scenario runs
     CONFIG.restore()
+
+    # we should load any cucurc.yml files in the path to the feature file
+    # we are about to run so that the config values set for this feature are
+    # correctly loaded.
+    CONFIG.load_cucurc_files(ctx.feature.filename)
+
     init_scenario_hook_variables()
 
     ctx.scenario = scenario

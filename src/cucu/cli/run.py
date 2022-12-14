@@ -6,6 +6,7 @@ import sys
 
 from cucu import behave_tweaks
 from cucu import init_global_hook_variables, register_before_retry_hook
+from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
 from datetime import datetime
@@ -43,6 +44,9 @@ def behave(
 ):
     # load all them configs
     CONFIG.load_cucurc_files(filepath)
+
+    if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
+        selenium.init()
 
     # general socket timeout instead of letting the framework ever get stuck on a
     # socket connect/read call
