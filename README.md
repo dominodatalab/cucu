@@ -204,7 +204,6 @@ also check the code coverage by running `make coverage`.
 ## tagging a new release
 
 To tag a new release of cucu, first create a branch. On your new branch you can
-simply run `make release` and it'll update the package version and create a new
-git tag. Add those changes to a git commit and run
-`git push origin --tags [your branch name here]` to push the new tag up to
-git. Then, you can create a PR for the new release.
+simply run `make release` and it'll create a commit with the updated package version.
+Then, you can create a PR for the new release. When the PR is merged, *GitHub Actions* will
+tag a new release and *CircleCI* will publish the release to the internal pypi (JFrog).
