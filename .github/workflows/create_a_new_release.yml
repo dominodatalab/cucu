@@ -23,12 +23,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.DOMINO_BUILDS_TOKEN }}
         run: |
           version=$(sed -n "s/^version *= *\"\(.*\)\"/\1/p" pyproject.toml)
-          latest_release=$(gh api /repos/cerebrotech/domino-testrail/releases/latest --jq '.tag_name')
+          latest_release=$(gh api /repos/cerebrotech/cucu/releases/latest --jq '.tag_name')
           if [[ $version != $latest_release ]]; then
             gh api \
               --method POST \
               -H "Accept: application/vnd.github+json" \
-              /repos/cerebrotech/domino-testrail/releases \
+              /repos/cerebrotech/cucu/releases \
               -f tag_name=$version \
               -f name="v$version" \
               -F draft=false \
