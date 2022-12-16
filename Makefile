@@ -21,7 +21,6 @@ release:
 	poetry version minor
 	git add pyproject.toml
 	git commit -m "tagged release `poetry version -s`"
-	git tag `poetry version -s`
 
 dist: build
 	pip install dist/cucu-*.tar.gz

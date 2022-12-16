@@ -193,7 +193,7 @@ jobs:
             poetry publish -r private
 
 workflows:
-  build-n-test:
+  build-test-publish:
     jobs:
       - pre-commit
       - test:
@@ -205,13 +205,9 @@ workflows:
       - test:
           name: test-firefox
           browser: firefox
-      # TODO: We should only publish when a git tag is pushed up
-      # - publish:
-      #     filters:
-      #       branches:
-      #         only: main
-      #     requires:
-      #       - pre-commit
-      #       - test-chrome
-      #       - test-edge
-      #       - test-firefox
+      - publish:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^\d+\.\d+\.\d+

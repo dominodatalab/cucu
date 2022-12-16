@@ -1,0 +1,37 @@
+name: Create a New Release
+# The following job is run when a commit changes pyproject.toml file:
+#   * Checks if the version of the project is the same of the latest release
+#   * If not, create a new release
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'pyproject.toml'
+
+jobs:
+  create-release-if-new-version:
+    runs-on: "ubuntu-latest"
+    steps:
+      - id: check_out
+        name: Check out code
+        uses: actions/checkout@v3
+      - id: release_if_needed
+        name: Release on version change merged
+        env:
+          GITHUB_TOKEN: ${{ secrets.DOMINO_BUILDS_TOKEN }}
+        run: |
+          version=$(sed -n "s/^version *= *\"\(.*\)\"/\1/p" pyproject.toml)
+          latest_release=$(gh api /repos/cerebrotech/cucu/releases/latest --jq '.tag_name')
+          if [[ $version != $latest_release ]]; then
+            gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              /repos/cerebrotech/cucu/releases \
+              -f tag_name=$version \
+              -f name="v$version" \
+              -F draft=false \
+              -F prerelease=false \
+              -F generate_release_notes=true
+          fi
