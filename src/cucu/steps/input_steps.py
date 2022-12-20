@@ -65,12 +65,12 @@ def clear_input(input_):
     """
     input_.clear()
 
-    if input_.get_attribute("value") != "":
-        # select all on mac
-        input_.send_keys(Keys.COMMAND, "a")
-        # select all on windows + linux
-        input_.send_keys(Keys.CONTROL, "a")
-        input_.send_keys(Keys.BACKSPACE)
+    # Some specialized text inputs don't respond to the .clear() method,
+    # so we have to check if the input was properly cleared, and if there's
+    # anything left anything left, we delete it explicitly.
+    value_after_clear = input_.get_attribute("value")
+    if value_after_clear != "":
+        input_.send_keys(Keys.BACKSPACE * len(value_after_clear))
 
 
 def find_n_write(ctx, name, value, index=0):
