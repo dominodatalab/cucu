@@ -20,6 +20,9 @@ def init_logging(logging_level):
     # INFO by default
     logging.getLogger().setLevel(logging.DEBUG)
 
+    if len(logging.getLogger().handlers) > 1:
+        logging.getLogger().removeHandler(logging.getLogger().handlers[1])
+
     logging.debug("logger initialized")
 
     logging.getLogger("parse").setLevel(logging.WARNING)

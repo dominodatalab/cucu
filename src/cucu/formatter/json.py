@@ -242,7 +242,10 @@ class CucuJSONFormatter(Formatter):
                     self.current_scenario.exc_traceback
                 )
 
-                if "error_message" not in self.last_step["result"]:
+                if (
+                    self.last_step
+                    and "error_message" not in self.last_step["result"]
+                ):
                     self.last_step["result"]["error_message"] = error_message
 
     # -- JSON-WRITER:

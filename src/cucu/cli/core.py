@@ -507,7 +507,6 @@ def lint(filepath, fix, logging_level):
 
     init_global_hook_variables()
 
-    logger.init_logging("INFO")
     filepaths = list(filepath)
 
     if filepaths == []:

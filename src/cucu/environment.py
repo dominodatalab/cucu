@@ -13,6 +13,11 @@ from cucu.page_checks import init_page_checks
 from functools import partial
 
 
+# when behave loads this we should reinitialize the logger within the behave
+# process specially if we're running with multiple workers
+logger.init_logging(os.environ.get("CUCU_LOGGING_LEVEL", "info").upper())
+
+
 CONFIG.define(
     "FEATURE_RESULTS_DIR",
     "the results directory for the currently executing feature",
@@ -55,6 +60,10 @@ def before_all(ctx):
     CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
 
+    # run the before all hooks
+    for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
+        hook(ctx)
+
 
 def after_all(ctx):
     # run the after all hooks
@@ -63,6 +72,8 @@ def after_all(ctx):
 
 
 def before_feature(ctx, feature):
+    logger.debug(f"before_feature: {feature}")
+
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         results_dir = config.CONFIG["CUCU_RESULTS_DIR"]
         ctx.feature_dir = os.path.join(results_dir, feature.name)
@@ -70,10 +81,12 @@ def before_feature(ctx, feature):
 
 
 def after_feature(ctx, feature):
-    pass
+    logger.debug(f"after_feature: {feature}")
 
 
 def before_scenario(ctx, scenario):
+    logger.debug(f"before_scenario: {scenario}")
+
     # we want every scenario to start with the exact same reinitialized config
     # values and not really bleed values between scenario runs
     CONFIG.restore()
@@ -130,6 +143,7 @@ def before_scenario(ctx, scenario):
 
 
 def after_scenario(ctx, scenario):
+    logger.debug(f"after_scenario: {scenario}")
     for timer_name in ctx.step_timers:
         logger.warn(f'timer "{timer_name}" was never stopped/recorded')
 
