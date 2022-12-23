@@ -66,9 +66,10 @@ def clear_input(input_):
     input_.clear()
 
     if input_.get_attribute("value") != "":
-        # select all on mac
-        input_.send_keys(Keys.COMMAND, "a")
-        # select all on windows + linux
+        # Keys.CONTROL works on both laptops and through the Selenium grid;
+        # Keys.COMMAND works on laptop, but not on Selenium grid,
+        # and actually causes an active session on the grid to hang,
+        # so we can safely use only the Keys.CONTROL sequence.
         input_.send_keys(Keys.CONTROL, "a")
         input_.send_keys(Keys.BACKSPACE)
 
