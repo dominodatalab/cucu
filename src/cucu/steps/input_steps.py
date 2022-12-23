@@ -65,12 +65,13 @@ def clear_input(input_):
     """
     input_.clear()
 
-    # Some specialized text inputs don't respond to the .clear() method,
-    # so we have to check if the input was properly cleared, and if there's
-    # anything left anything left, we delete it explicitly.
-    value_after_clear = input_.get_attribute("value")
-    if value_after_clear != "":
-        input_.send_keys(Keys.BACKSPACE * len(value_after_clear))
+    if input_.get_attribute("value") != "":
+        # Keys.CONTROL works on both laptops and through the Selenium grid;
+        # Keys.COMMAND works on laptop, but not on Selenium grid,
+        # and actually causes an active session on the grid to hang,
+        # so we can safely use only the Keys.CONTROL sequence.
+        input_.send_keys(Keys.CONTROL, "a")
+        input_.send_keys(Keys.BACKSPACE)
 
 
 def find_n_write(ctx, name, value, index=0):
