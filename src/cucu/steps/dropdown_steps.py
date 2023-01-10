@@ -80,7 +80,7 @@ def find_dropdown_option(ctx, name, index=0):
     return option
 
 
-def find_n_select_dropdown_option(ctx, dropdown, option):
+def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
     """
     find and select dropdown option
 
@@ -91,7 +91,7 @@ def find_n_select_dropdown_option(ctx, dropdown, option):
     """
     ctx.check_browser_initialized()
 
-    dropdown_element = find_dropdown(ctx, dropdown)
+    dropdown_element = find_dropdown(ctx, dropdown, index)
 
     if base_steps.is_disabled(dropdown_element):
         raise RuntimeError(
@@ -185,6 +185,13 @@ helpers.define_run_steps_if_I_can_see_element_with_name_steps(
 @step('I select the option "{option}" from the dropdown "{dropdown}"')
 def select_option_from_dropdown(ctx, option, dropdown):
     find_n_select_dropdown_option(ctx, dropdown, option)
+
+
+@step(
+    'I select the option "{option}" from the "{index:nth}" dropdown "{dropdown}"'
+)
+def select_option_from_dropdown(ctx, option, dropdown, index):
+    find_n_select_dropdown_option(ctx, dropdown, option, index)
 
 
 @step('I wait to select the option "{option}" from the dropdown "{dropdown}"')
