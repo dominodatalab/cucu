@@ -25,3 +25,10 @@ Feature: Dropdowns
       """
       Then I select the option "CheeseBall" from the dropdown "Pick a pet"
       """
+
+  Scenario: User can select from the second dropdown with the same name
+    Given I should see the dropdown "Pick a color"
+      And I select the option "ruby" from the "2nd" dropdown "Pick a color"
+     Then I should see the option "navy" is not selected on the "2nd" dropdown "Pick a color"
+      And I should see the option "forrest" is not selected on the "2nd" dropdown "Pick a color"
+      And I should see the option "ruby" is selected on the "2nd" dropdown "Pick a color"

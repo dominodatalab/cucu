@@ -117,7 +117,9 @@ def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
         ctx.browser.click(option_element)
 
 
-def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
+def assert_dropdown_option_selected(
+    ctx, dropdown, option, index=0, is_selected=True
+):
     """
     assert dropdown option is selected
 
@@ -128,7 +130,7 @@ def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
     """
     ctx.check_browser_initialized()
 
-    dropdown_element = find_dropdown(ctx, dropdown)
+    dropdown_element = find_dropdown(ctx, dropdown, index)
     selected_option = None
 
     if dropdown_element.tag_name == "select":
@@ -207,11 +209,29 @@ def should_see_option_is_selected(ctx, option, dropdown):
 
 
 @step(
+    'I should see the option "{option}" is selected on the "{index:nth}" dropdown "{dropdown}"'
+)
+def should_see_option_is_selected(ctx, option, dropdown, index):
+    assert_dropdown_option_selected(
+        ctx, dropdown, option, index, is_selected=True
+    )
+
+
+@step(
     'I wait to see the option "{option}" is selected on the dropdown "{dropdown}"'
 )
 def wait_to_see_option_is_selected(ctx, option, dropdown):
     retry(assert_dropdown_option_selected)(
         ctx, dropdown, option, is_selected=True
+    )
+
+
+@step(
+    'I should see the option "{option}" is not selected on the "{index:nth}" dropdown "{dropdown}"'
+)
+def should_see_option_is_not_selected(ctx, option, dropdown, index):
+    assert_dropdown_option_selected(
+        ctx, dropdown, option, index, is_selected=False
     )
 
 
