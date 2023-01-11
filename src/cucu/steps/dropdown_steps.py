@@ -80,7 +80,7 @@ def find_dropdown_option(ctx, name, index=0):
     return option
 
 
-def find_n_select_dropdown_option(ctx, dropdown, option):
+def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
     """
     find and select dropdown option
 
@@ -88,10 +88,11 @@ def find_n_select_dropdown_option(ctx, dropdown, option):
       ctx(object): behave context object used to share data between steps
       name(str):   name that identifies the desired dropdown on screen
       option(str): name of the option to select
+      index(str):  the index of the dropdown if there are duplicates
     """
     ctx.check_browser_initialized()
 
-    dropdown_element = find_dropdown(ctx, dropdown)
+    dropdown_element = find_dropdown(ctx, dropdown, index)
 
     if base_steps.is_disabled(dropdown_element):
         raise RuntimeError(
@@ -117,7 +118,9 @@ def find_n_select_dropdown_option(ctx, dropdown, option):
         ctx.browser.click(option_element)
 
 
-def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
+def assert_dropdown_option_selected(
+    ctx, dropdown, option, index=0, is_selected=True
+):
     """
     assert dropdown option is selected
 
@@ -125,10 +128,11 @@ def assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True):
       ctx(object): behave context object used to share data between steps
       name(str):   name that identifies the desired dropdown on screen
       option(str): name of the option to select
+      index(str):  the index of the dropdown if there are duplicates
     """
     ctx.check_browser_initialized()
 
-    dropdown_element = find_dropdown(ctx, dropdown)
+    dropdown_element = find_dropdown(ctx, dropdown, index)
     selected_option = None
 
     if dropdown_element.tag_name == "select":
@@ -187,6 +191,13 @@ def select_option_from_dropdown(ctx, option, dropdown):
     find_n_select_dropdown_option(ctx, dropdown, option)
 
 
+@step(
+    'I select the option "{option}" from the "{index:nth}" dropdown "{dropdown}"'
+)
+def select_option_from_dropdown(ctx, option, dropdown, index):
+    find_n_select_dropdown_option(ctx, dropdown, option, index)
+
+
 @step('I wait to select the option "{option}" from the dropdown "{dropdown}"')
 def wait_to_select_option_from_dropdown(ctx, option, dropdown):
     retry(find_n_select_dropdown_option)(ctx, dropdown, option)
@@ -200,11 +211,29 @@ def should_see_option_is_selected(ctx, option, dropdown):
 
 
 @step(
+    'I should see the option "{option}" is selected on the "{index:nth}" dropdown "{dropdown}"'
+)
+def should_see_option_is_selected(ctx, option, dropdown, index):
+    assert_dropdown_option_selected(
+        ctx, dropdown, option, index, is_selected=True
+    )
+
+
+@step(
     'I wait to see the option "{option}" is selected on the dropdown "{dropdown}"'
 )
 def wait_to_see_option_is_selected(ctx, option, dropdown):
     retry(assert_dropdown_option_selected)(
         ctx, dropdown, option, is_selected=True
+    )
+
+
+@step(
+    'I should see the option "{option}" is not selected on the "{index:nth}" dropdown "{dropdown}"'
+)
+def should_see_option_is_not_selected(ctx, option, dropdown, index):
+    assert_dropdown_option_selected(
+        ctx, dropdown, option, index, is_selected=False
     )
 
 
