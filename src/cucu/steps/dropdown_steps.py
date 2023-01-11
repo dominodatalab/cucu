@@ -88,6 +88,7 @@ def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
       ctx(object): behave context object used to share data between steps
       name(str):   name that identifies the desired dropdown on screen
       option(str): name of the option to select
+      index(str):  the index of the dropdown if there are duplicates
     """
     ctx.check_browser_initialized()
 
@@ -127,6 +128,7 @@ def assert_dropdown_option_selected(
       ctx(object): behave context object used to share data between steps
       name(str):   name that identifies the desired dropdown on screen
       option(str): name of the option to select
+      index(str):  the index of the dropdown if there are duplicates
     """
     ctx.check_browser_initialized()
 
