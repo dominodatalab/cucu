@@ -27,3 +27,12 @@ Feature: Frames
      When I write "some text" into the input "input type=text"
      Then I should see "some text" in the input "input type=text"
       And I should see the image with the alt text "Stars"
+
+  Scenario: User can see tables across iframes
+     When I write "some text" into the input "input type=text"
+      And I should see "some text" in the input "input type=text"
+     Then I should see a table that is the following:
+        | Name   | City          | Country       |
+        | Alfred | Berlin        | Germany       |
+        | Joe    | San Francisco | United States |
+        | Maria  | Cancun        | Mexico        |

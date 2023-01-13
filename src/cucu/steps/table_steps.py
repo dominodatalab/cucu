@@ -3,6 +3,7 @@ import re
 
 from behave.model_describe import ModelPrinter
 from cucu import fuzzy, helpers, retry, step
+from cucu.browser.frames import run_in_all_frames
 from io import StringIO
 from tabulate import tabulate, TableFormat, DataRow
 
@@ -20,8 +21,12 @@ def find_tables(ctx):
     ctx.check_browser_initialized()
     tables_lib = pkgutil.get_data("cucu", "steps/tables.js")
     tables_lib = tables_lib.decode("utf8")
-    ctx.browser.execute(tables_lib)
-    return ctx.browser.execute("return findAllTables();")
+
+    def search_for_tables():
+        ctx.browser.execute(tables_lib)
+        return ctx.browser.execute("return findAllTables();")
+
+    return run_in_all_frames(ctx.browser, search_for_tables)
 
 
 def behave_table_to_array(table):

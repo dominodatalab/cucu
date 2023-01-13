@@ -37,3 +37,33 @@ def search_in_all_frames(browser, search_function):
                 return result
 
     return result
+
+
+def run_in_all_frames(browser, search_function):
+    """
+    run the search function on all of the available frames and return the
+    appending of all the arrays.
+
+    Warning: This leaves the browser in whatever frame was last searched so that
+    users of this method are in that frame.
+
+    parameters:
+      browser           - the cucu.browser.Browser object
+      search_function   - function that returns an array of WebElements
+    returns:
+        the array of all of the WebElemnts found.
+    """
+    result = []
+
+    browser.switch_to_default_frame()
+    result += search_function()
+
+    frames = browser.execute('return document.querySelectorAll("iframe");')
+    for frame in frames:
+        # need to be in the default frame in order to switch to a child
+        # frame w/o getting a stale element exception
+        browser.switch_to_default_frame()
+        browser.switch_to_frame(frame)
+        result += search_function()
+
+    return result
