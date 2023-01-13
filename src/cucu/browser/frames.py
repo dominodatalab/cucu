@@ -51,7 +51,7 @@ def run_in_all_frames(browser, search_function):
       browser           - the cucu.browser.Browser object
       search_function   - function that returns an array of WebElements
     returns:
-        the array of all of the WebElemnts found.
+        the array of all of the WebElements found.
     """
     result = []
 
