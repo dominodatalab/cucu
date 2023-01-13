@@ -120,7 +120,9 @@ def before_scenario(ctx, scenario):
         logger.init_debug_logger(ctx.scenario_debug_log_file)
 
     # internal cucu config variables
-    CONFIG["SCENARIO_RUN_ID"] = hashlib.sha256().hexdigest()[:7]
+    CONFIG["SCENARIO_RUN_ID"] = hashlib.sha256(
+        str(time.perf_counter()).encode("utf-8")
+    ).hexdigest()[:7]
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
