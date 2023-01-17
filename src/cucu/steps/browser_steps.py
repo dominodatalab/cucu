@@ -347,4 +347,6 @@ def skip_if_not_browser(ctx, name):
 @step('I save the browser cookie "{cookie_name}" to the variable "{variable}"')
 def save_browser_cookie(ctx, cookie_name, variable):
     ctx.check_browser_initialized()
-    config.CONFIG[variable] = ctx.browser.driver.get_cookie(cookie_name)
+    config.CONFIG[variable] = ctx.browser.driver.get_cookie(cookie_name)[
+        "value"
+    ]
