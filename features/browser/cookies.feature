@@ -10,3 +10,9 @@ Feature: Cookies
       And I save the browser cookie "token" to the variable "TOKEN"
      Then I should see "{USERNAME}" is equal to "JohnDoe"
       And I should see "{TOKEN}" is equal to "xyz"
+
+  Scenario: User can set the cookies on a page
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/cookies.html"
+     When I set the browser cookie "new_cookie" a value of "snickerdoodle"
+     Then I save the browser cookie "new_cookie" to the variable "NEW_COOKIE"
+      And I should see "{NEW_COOKIE}" is equal to "snickerdoodle"

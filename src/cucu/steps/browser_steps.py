@@ -350,3 +350,9 @@ def save_browser_cookie(ctx, cookie_name, variable):
     config.CONFIG[variable] = ctx.browser.driver.get_cookie(cookie_name)[
         "value"
     ]
+
+
+@step('I set the browser cookie "{name}" a value of "{value}"')
+def add_browser_cookie(ctx, name, value):
+    ctx.check_browser_initialized()
+    ctx.browser.driver.add_cookie({"name": name, "value": value})
