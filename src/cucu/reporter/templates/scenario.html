@@ -57,7 +57,7 @@
             <td class="col-8 text-truncate">
                 <pre style="display: inline; color: maroon;">Scenario:</pre> {{ escape(scenario['name']) }}
             </td>
-            <td class="col-8 text-truncate" style="color: gray;"></td>
+            <td class="col-4 text-truncate" style="color: gray;"></td>
         </tr>
         {% for step in steps %}
             {% set step_name = step['keyword'] + ' ' + escape(step['name']) %}
@@ -124,7 +124,9 @@
                 {% if step['result']['stdout'] %}
                     {% for line in step['result']['stdout'] %}
                     <tr class="d-flex">
-                        <td class="col-8" colspan="2" class="text-truncate"><pre style="color: darkgray">{{ escape(line) }}</pre></td>
+                        <td class="col-8" colspan="2" class="text-truncate">
+                            <pre style="color: darkgray;">{{ escape(line) }}</pre>
+                        </td>
                     </tr>
                     {% endfor %}
                 {% endif %}
@@ -132,7 +134,7 @@
 
             {% if step['image'] is defined and step['result'] is defined %}
             <tr class="d-flex">
-                <td class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
+                <td class="col-8 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
                     <img class="col-11 mx-auto d-block img-fluid shadow bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img>
                 </td>
             </tr>
