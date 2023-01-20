@@ -342,3 +342,17 @@ def skip_if_browser(ctx, name):
 def skip_if_not_browser(ctx, name):
     if config.CONFIG["CUCU_BROWSER"].lower() != name.lower():
         ctx.scenario.skip(reason=f"skipping scenario since we're not on {name}")
+
+
+@step('I save the browser cookie "{cookie_name}" to the variable "{variable}"')
+def save_browser_cookie(ctx, cookie_name, variable):
+    ctx.check_browser_initialized()
+    config.CONFIG[variable] = ctx.browser.driver.get_cookie(cookie_name)[
+        "value"
+    ]
+
+
+@step('I set the browser cookie "{name}" a value of "{value}"')
+def add_browser_cookie(ctx, name, value):
+    ctx.check_browser_initialized()
+    ctx.browser.driver.add_cookie({"name": name, "value": value})
