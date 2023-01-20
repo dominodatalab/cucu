@@ -179,7 +179,7 @@ def generate(results, basepath, only_failures=False):
                     )
 
                     input_data = None
-                    with (  # Stream input to output to avoid
+                    with (
                         open(
                             log_file_filepath, "r", encoding="utf8"
                         ) as log_file_input,
@@ -188,6 +188,7 @@ def generate(results, basepath, only_failures=False):
                         ) as log_file_output,
                     ):
                         log_file_output.write(
+                            # Process whole file to avoid performance issue
                             converter.convert(log_file_input.read())
                         )
 
