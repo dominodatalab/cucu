@@ -111,6 +111,39 @@ def parse_matcher(name, rule_name, rule, line, state):
             ] = feature_filepath
             return (False, "")
 
+        # unique across all scenarios
+        if "unique_per_all_scenarios" in rule[name]:
+            value = match.groups()[0]
+            feature_filepath = state["current_feature_filepath"]
+            # make the path relative to the current working directory
+            feature_filepath = feature_filepath.replace(cwd, "")
+            scenario_name = state["current_scenario_name"]
+
+            if rule_name not in state["unique_per_all_scenarios"]:
+                state["unique_per_all_scenarios"][rule_name] = {}
+
+            if value in state["unique_per_all_scenarios"][rule_name]:
+                # we have another feature which already has this value in use.
+                other_filepath = state["unique_per_all_features"][rule_name][
+                    value
+                ]
+                # make the path relative to the current working directory
+                other_filepath = other_filepath.replace(cwd, "")
+                other_scenario_name = state["unique_per_all_scenarios"][rule_name][
+                    value
+                ]
+
+                if scenario_name != other_scenario_name:
+                    return (
+                        True,
+                        f', "{value}" used in "{feature_filepath}" "{scenario_name}"  and "{other_filepath}" "{other_scenario_name}"',
+                    )
+
+            state["unique_per_all_scenarios"][rule_name][
+                value
+            ] = scenario_name
+            return (False, "")
+
         return (True, "")
 
     raise RuntimeError(f"unsupported matcher for {name}")
@@ -300,6 +333,7 @@ def lint(filepath):
     # to the functions handling the lint rules and reporting on lint failures
     state = {
         "unique_per_all_features": {},
+        "unique_per_all_scenarios": {},
     }
 
     if steps_error:
