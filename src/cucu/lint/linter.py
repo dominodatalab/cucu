@@ -111,7 +111,7 @@ def parse_matcher(name, rule_name, rule, line, state):
             ] = feature_filepath
             return (False, "")
 
-        # unique across all scenarios
+        # unique across all scenarios across all features
         if "unique_per_all_scenarios" in rule[name]:
             value = match.groups()[0]
             feature_filepath = state["current_feature_filepath"]
@@ -120,28 +120,29 @@ def parse_matcher(name, rule_name, rule, line, state):
             scenario_name = state["current_scenario_name"]
 
             if rule_name not in state["unique_per_all_scenarios"]:
-                state["unique_per_all_scenarios"][rule_name] = {}
+                state["unique_per_all_scenarios"][rule_name] = {}  
 
             if value in state["unique_per_all_scenarios"][rule_name]:
-                # we have another feature which already has this value in use.
-                other_filepath = state["unique_per_all_features"][rule_name][
-                    value
-                ]
-                # make the path relative to the current working directory
-                other_filepath = other_filepath.replace(cwd, "")
+                # we have another scenario which already has this value in use.
                 other_scenario_name = state["unique_per_all_scenarios"][rule_name][
                     value
                 ]
 
+                # this will be relevant when values are not unique in different features
+                other_file_path = state["unique_per_all_scenarios"]["feature_file_path"]
+
                 if scenario_name != other_scenario_name:
                     return (
                         True,
-                        f', "{value}" used in "{feature_filepath}" "{scenario_name}"  and "{other_filepath}" "{other_scenario_name}"',
+                        f', "{value}" used in "{feature_filepath}" scenario name:"{scenario_name}" and "{other_file_path}" scenario name:"{other_scenario_name}"',
                     )
 
             state["unique_per_all_scenarios"][rule_name][
                 value
             ] = scenario_name
+
+            state["unique_per_all_scenarios"]["feature_file_path"] = feature_filepath
+
             return (False, "")
 
         return (True, "")
