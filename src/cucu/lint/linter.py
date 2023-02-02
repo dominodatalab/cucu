@@ -43,6 +43,7 @@ def load_lint_rules(rules, filepath):
 
 
 def parse_matcher(name, rule_name, rule, line, state):
+
     """
     parses the "matcher" from the rule provided and then returns the tuple:
     (matched, extra_matcher_message) where matched is a boolean indicating that
@@ -126,24 +127,40 @@ def parse_matcher(name, rule_name, rule, line, state):
                 # we have another scenario which already has this value in use.
                 other_scenario_name = state["unique_per_all_scenarios"][
                     rule_name
-                ][value]
+                ][value][0]
 
-                # this will be relevant when values are not unique in different features
-                other_file_path = state["unique_per_all_scenarios"][
-                    "feature_file_path"
-                ]
+                other_file_path = state["unique_per_all_scenarios"][rule_name][
+                    value
+                ][1]
 
-                if scenario_name != other_scenario_name:
-                    return (
-                        True,
-                        f', "{value}" used in "{feature_filepath}" scenario name:"{scenario_name}" and "{other_file_path}" scenario name:"{other_scenario_name}"',
-                    )
+                if other_file_path == feature_filepath:
+                    if scenario_name != other_scenario_name:
+                        return (
+                            True,
+                            f', "{value}" used in "{feature_filepath}" scenario name:"{scenario_name}" and scenario name:"{other_scenario_name}"',
+                        )
+                    elif scenario_name == other_scenario_name:
+                        return (
+                            True,
+                            f', "{value}" duplicated in "{feature_filepath}"',
+                        )
 
-            state["unique_per_all_scenarios"][rule_name][value] = scenario_name
+                elif other_file_path != feature_filepath:
+                    if scenario_name != other_scenario_name:
+                        return (
+                            True,
+                            f', "{value}" used in "{feature_filepath}" scenario name:"{scenario_name}" and "{other_file_path}" scenario name:"{other_scenario_name}"',
+                        )
+                    elif scenario_name == other_scenario_name:
+                        return (
+                            True,
+                            f', "{value}" used in "{feature_filepath}" and "{other_file_path}"',
+                        )
 
-            state["unique_per_all_scenarios"][
-                "feature_file_path"
-            ] = feature_filepath
+            state["unique_per_all_scenarios"][rule_name][value] = [
+                scenario_name,
+                feature_filepath,
+            ]
 
             return (False, "")
 
@@ -373,11 +390,14 @@ def lint(filepath):
         for line in lines:
             feature_match = re.match(".*Feature: (.*)", line)
             if feature_match is not None:
-                state["current_feature_name"] = feature_match.groups(0)
+                state["current_feature_name"] = feature_match.group(1)
 
             scenario_match = re.match("  Scenario: (.*)", line)
+
             if scenario_match is not None:
-                state["current_scenario_name"] = scenario_match.groups(0)
+                state["current_scenario_name"] = scenario_match.group(1)
+            else:
+                state["current_scenario_name"] = ""
 
             # maintain state of if we're inside a docstring and if we are then
             # do not apply any linting rules as its a freeform space for text
