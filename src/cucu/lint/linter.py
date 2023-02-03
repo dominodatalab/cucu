@@ -134,27 +134,26 @@ def parse_matcher(name, rule_name, rule, line, state):
                 ][1]
 
                 if other_file_path == feature_filepath:
-                    if scenario_name != other_scenario_name:
-                        return (
-                            True,
-                            f', "{value}" used in "{feature_filepath}" scenario name:"{scenario_name}" and scenario name:"{other_scenario_name}"',
-                        )
-                    elif scenario_name == other_scenario_name:
+                    if scenario_name == other_scenario_name:
                         return (
                             True,
                             f', "{value}" duplicated in "{feature_filepath}"',
                         )
-
-                elif other_file_path != feature_filepath:
-                    if scenario_name != other_scenario_name:
+                    else:
                         return (
                             True,
-                            f', "{value}" used in "{feature_filepath}" scenario name:"{scenario_name}" and "{other_file_path}" scenario name:"{other_scenario_name}"',
+                            f', "{value}" used in "{feature_filepath}" scenario name:"{scenario_name}" and scenario name:"{other_scenario_name}"',
                         )
-                    elif scenario_name == other_scenario_name:
+                else:
+                    if scenario_name == other_scenario_name:
                         return (
                             True,
                             f', "{value}" used in "{feature_filepath}" and "{other_file_path}"',
+                        )
+                    else:
+                        return (
+                            True,
+                            f', "{value}" used in "{feature_filepath}" scenario name:"{scenario_name}" and "{other_file_path}" scenario name:"{other_scenario_name}"',
                         )
 
             state["unique_per_all_scenarios"][rule_name][value] = [
