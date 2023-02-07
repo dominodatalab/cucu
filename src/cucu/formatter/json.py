@@ -257,13 +257,13 @@ class CucuJSONFormatter(Formatter):
             filtered_scenarios = []
             index = 0
             for index in range(0, len(feature_data["elements"])):
-                scenario = feature_data["elements"][index]
+                scenario_details = feature_data["elements"][index]
 
-                if scenario["keyword"] == "Background":
-                    scenario = feature_data["elements"][index + 1]
+                if scenario_details["keyword"] == "Scenario":
+                    scenario = feature_data["elements"][index]
 
-                if scenario["status"] != "skipped":
-                    filtered_scenarios.append(scenario)
+                    if scenario["status"] != "skipped":
+                        filtered_scenarios.append(scenario)
 
             if len(filtered_scenarios) == 0:
                 return
