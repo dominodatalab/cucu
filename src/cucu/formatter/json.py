@@ -253,28 +253,33 @@ class CucuJSONFormatter(Formatter):
         self.stream.write("\n]\n")
 
     def write_json_feature(self, feature_data):
-        if CONFIG["CUCU_REPORT_WITHOUT_SKIPS"]:
-            filtered_scenarios = [
-                x
-                for x in feature_data["elements"]
-                if x["keyword"] == "Scenario" and x["status"] != "skipped"
-            ]
+        # if CONFIG["CUCU_REPORT_WITHOUT_SKIPS"]:
+        #     filtered_scenarios = [
+        #         x
+        #         for x in feature_data["elements"]
+        #         if x["keyword"] == "Scenario" and x["status"] != "skipped"
+        #     ]
 
-            if len(filtered_scenarios) == 0:
-                return
+        # else:
+        #     filtered_scenarios = [
+        #         x
+        #         for x in feature_data["elements"]
+        #         if x["keyword"] == "Scenario"
+        #     ]
+        filtered_scenarios = [
+            x
+            for x in feature_data["elements"]
+            if x["keyword"] == "Scenario"
+            and (
+                not (CONFIG["CUCU_REPORT_WITHOUT_SKIPS"])
+                or x["status"] != "skipped"
+            )
+        ]
 
-            feature_data["elements"] = filtered_scenarios
-        else:
-            filtered_scenarios = [
-                x
-                for x in feature_data["elements"]
-                if x["keyword"] == "Scenario"
-            ]
+        if len(filtered_scenarios) == 0:
+            return
 
-            if len(filtered_scenarios) == 0:
-                return
-
-            feature_data["elements"] = filtered_scenarios
+        feature_data["elements"] = filtered_scenarios
 
         if self.feature_count != 0:
             self.write_json_feature_separator()
