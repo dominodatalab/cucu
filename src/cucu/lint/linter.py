@@ -222,21 +222,21 @@ def lint_line(state, rules, steps, line_number, lines, filepath):
 
     # find any undefined steps and mark them as an unfixable violation
     current_line = current_line.strip()
-    for step_name in steps:
+    undefined_steps = [
+        {
+            "location": {
+                "filepath": os.path.relpath(filepath),
+                "line": line_number,
+            },
+            "type": "error",
+            "message": f'undefined step "{step_name}"',
+            "fix": None,
+        }
+        for step_name in steps
         # step with no location/type/etc is an undefined step
-        if steps[step_name] is None:
-            if current_line.find(step_name) != -1:
-                violations.append(
-                    {
-                        "location": {
-                            "filepath": os.path.relpath(filepath),
-                            "line": line_number,
-                        },
-                        "type": "error",
-                        "message": f'undefined step "{step_name}"',
-                        "fix": None,
-                    }
-                )
+        if steps[step_name] is None and current_line.find(step_name) != -1
+    ]
+    violations.extend(undefined_steps)
 
     return violations
 
