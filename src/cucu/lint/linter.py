@@ -104,7 +104,7 @@ def parse_matcher(name, rule_name, rule, line, state):
                 if other_filepath != feature_filepath:
                     return (
                         True,
-                        f', "{value}" used in "{feature_filepath}" and "{other_filepath}"',
+                        f', "{value}" also used in "{other_filepath}"',
                     )
 
             state["unique_per_all_features"][rule_name][
@@ -125,40 +125,19 @@ def parse_matcher(name, rule_name, rule, line, state):
 
             if value in state["unique_per_all_scenarios"][rule_name]:
                 # we have another scenario which already has this value in use.
-                other_scenario_name = state["unique_per_all_scenarios"][
-                    rule_name
-                ][value][0]
+                other_file_path, other_line_number, other_scenario_name = state[
+                    "unique_per_all_scenarios"
+                ][rule_name][value]
 
-                other_file_path = state["unique_per_all_scenarios"][rule_name][
-                    value
-                ][1]
-
-                if other_file_path == feature_filepath:
-                    if scenario_name == other_scenario_name:
-                        return (
-                            True,
-                            f', "{value}" duplicated in "{feature_filepath}"',
-                        )
-                    else:
-                        return (
-                            True,
-                            f', "{value}" used in "{feature_filepath}" scenario name:"{scenario_name}" and scenario name:"{other_scenario_name}"',
-                        )
-                else:
-                    if scenario_name == other_scenario_name:
-                        return (
-                            True,
-                            f', "{value}" used in "{feature_filepath}" and "{other_file_path}"',
-                        )
-                    else:
-                        return (
-                            True,
-                            f', "{value}" used in "{feature_filepath}" scenario name:"{scenario_name}" and "{other_file_path}" scenario name:"{other_scenario_name}"',
-                        )
+                return (
+                    True,
+                    f', "{value}" also used in "{other_file_path}:{other_line_number}" Scenario: "{other_scenario_name}"',
+                )
 
             state["unique_per_all_scenarios"][rule_name][value] = [
-                scenario_name,
                 feature_filepath,
+                state["current_line_number"],
+                scenario_name,
             ]
 
             return (False, "")
@@ -243,21 +222,21 @@ def lint_line(state, rules, steps, line_number, lines, filepath):
 
     # find any undefined steps and mark them as an unfixable violation
     current_line = current_line.strip()
-    for step_name in steps:
+    undefined_steps = [
+        {
+            "location": {
+                "filepath": os.path.relpath(filepath),
+                "line": line_number,
+            },
+            "type": "error",
+            "message": f'undefined step "{step_name}"',
+            "fix": None,
+        }
+        for step_name in steps
         # step with no location/type/etc is an undefined step
-        if steps[step_name] is None:
-            if current_line.find(step_name) != -1:
-                violations.append(
-                    {
-                        "location": {
-                            "filepath": os.path.relpath(filepath),
-                            "line": line_number,
-                        },
-                        "type": "error",
-                        "message": f'undefined step "{step_name}"',
-                        "fix": None,
-                    }
-                )
+        if steps[step_name] is None and current_line.find(step_name) != -1
+    ]
+    violations.extend(undefined_steps)
 
     return violations
 
@@ -387,6 +366,8 @@ def lint(filepath):
         }
 
         for line in lines:
+            state["current_line_number"] = line_number
+
             feature_match = re.match(".*Feature: (.*)", line)
             if feature_match is not None:
                 state["current_feature_name"] = feature_match.group(1)
