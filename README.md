@@ -1,6 +1,6 @@
 # cucu
 
-[![CircleCI](https://circleci.com/gh/cerebrotech/cucu/tree/main.svg?style=svg&circle-token=8ad8867cae9cd93ece480ab64236c08307a4df35)](https://circleci.com/gh/cerebrotech/cucu/tree/main)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/cerebrotech/cucu/tree/main.svg?style=svg&circle-token=81eb2db26e4d6529e8cbb1319fe0f50a992bb50e)](https://dl.circleci.com/status-badge/redirect/gh/cerebrotech/cucu/tree/main)
 
 End to end testing framework that uses [cucumber](https://cucumber.io/) to
 validate a product behaves as expected.
@@ -194,6 +194,8 @@ run.
 [install that, first](https://brew.sh/).
 * From the top-level director of the `cucu` repository,
 run `pre-commit install`.
+* Install `poetry` (for pipx `pipx install poetry`)
+* Reccomend to install the poetry plugin `poetry self add poetry-dotenv-plugin` (for pipx `pipx inject poetry  poetry-dotenv-plugin`)
 
 ## running built in tests
 
