@@ -75,6 +75,20 @@ Feature: Report basics
       And I click the button "Scenario that has an undefined step"
      Then I should see the button "Given I attempt to use an undefined step"
 
+  Scenario: User can run feature with background and has all results reported correctly
+    Given I run the command "cucu run data/features/feature_with_background.feature --results {CUCU_RESULTS_DIR}/feature_with_background" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/feature_with_background --output {CUCU_RESULTS_DIR}/feature_with_background-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     Then I should see a table that matches the following:
+       | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
+       | Feature with background    | 2     | 1      | 0      | 1       | passed | .*       |
+     When I click the button "Feature with background"
+     Then I should see a table that matches the following:
+      | Scenario                            | Total Steps | Status  | Duration |
+      | Scenario which now has a background | 2           | passed  | .*       |
+      | Scenario that is skipped            | 2           | skipped | .*       |
+
   @workaround @QE-7075
   @disabled
   Scenario: User can run a scenario with console logs and see those logs linked in the report
@@ -156,10 +170,28 @@ Feature: Report basics
       And I click the button "Scenario that has an undefined step"
      Then I should see the button "Given I attempt to use an undefined step"
 
+  Scenario: User can run removed skipped test results from the HTML test report on a feature with background
+    Given I run the command "cucu run data/features/feature_with_background.feature --report-without-skips --results {CUCU_RESULTS_DIR}/report_without_skips_background --generate-report --report {CUCU_RESULTS_DIR}/report_without_skips_background_report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_background_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     Then I should see a table that matches the following:
+      | Feature                 | Total | Passed | Failed | Skipped | Status | Duration |
+      | Feature with background | 1     | 1      | 0      | 0       | passed | .*       |
+     When I click the button "Feature with background"
+     Then I should see a table that matches the following:
+      | Scenario                            | Total Steps | Status  | Duration |
+      | Scenario which now has a background | 2           | passed  | .*       |
+
   @junit-without-skips
   Scenario: User can run removed skipped test results from the JUnit results
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --junit-without-skips --results {CUCU_RESULTS_DIR}/junit_without_skips" and expect exit code "1"
       And I read the contents of the file at "{CUCU_RESULTS_DIR}/junit_without_skips/TESTS-Feature_with_mixed_results.xml" and save to the variable "JUNIT"
+     Then I should see "{JUNIT}" contains "skipped=\"0\""
+      And I should see "{JUNIT}" does not contain "<skipped>"
+
+  Scenario: User can run removed skipped test results from the JUnit results when feature has background
+    Given I run the command "cucu run data/features/feature_with_background.feature --junit-without-skips --results {CUCU_RESULTS_DIR}/junit_without_skips_background" and expect exit code "0"
+      And I read the contents of the file at "{CUCU_RESULTS_DIR}/junit_without_skips_background/TESTS-Feature_with_background.xml" and save to the variable "JUNIT"
      Then I should see "{JUNIT}" contains "skipped=\"0\""
       And I should see "{JUNIT}" does not contain "<skipped>"
 
@@ -179,16 +211,10 @@ Feature: Report basics
       """
       Feature: nothing to see here
       """
-     Then I run the command "cucu run {CUCU_RESULTS_DIR}/empty_features --results {CUCU_RESULTS_DIR}/empty_features_results --generate-report --report {CUCU_RESULTS_DIR}/empty_features_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
-      And I should see "{STDOUT}" matches the following:
-      """
-      Feature: nothing to see here
-
-      0 features passed, 0 failed, 1 skipped
-      0 scenarios passed, 0 failed, 0 skipped
-      0 steps passed, 0 failed, 0 skipped, 0 undefined
-      [\s\S]+
-      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/empty_features --results {CUCU_RESULTS_DIR}/empty_features_results --generate-report --report {CUCU_RESULTS_DIR}/empty_features_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/empty_features_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     Then I should see the text "No data available in table"
 
   @report-only-failures
   Scenario: User can generate a report with only failures
