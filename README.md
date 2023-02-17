@@ -53,7 +53,9 @@ _Get your repo setup using cucu as a test framework_
    ```
    pip install -r requirements.txt
    ```
-4. create the folder structure and files with content: [^1] [^2]
+4. create the folder structure and files with content:
+
+    _Cucu uses the [behave framework](https://github.com/behave/behave) which expects the `features/steps` directories_
    - features/
       - steps/
       - `__init__.py` # enables cucu and custom steps
@@ -72,7 +74,7 @@ _Get your repo setup using cucu as a test framework_
 
      # Define custom before/after hooks here
      ```
-5. list available cucu steps
+1. list available cucu steps
    ```
    cucu steps
    ```
@@ -81,7 +83,7 @@ _Get your repo setup using cucu as a test framework_
      cucu steps | fzf
      # start typing for search
      ```
-6. **create your first cucu test**
+2. **create your first cucu test**
    - features/my_first_test.feature
      ```gherkin
      Feature: My First Cucu Test
@@ -93,14 +95,10 @@ _Get your repo setup using cucu as a test framework_
            And I click the button "Google Search"
           Then I wait to see the text "results"
      ```
-7. **run it**
+3. **run it**
    ```
    cucu run features/my_first_test.feature
    ```
-
-[^1]: Cucu uses the [behave framework](https://github.com/behave/behave) which expects the `features/steps` directories
-
-[^2]: You can write your own steps! Just remember to include them in: `features/steps/__init__.py`
 
 # Running Tests
 _Technically it should be running Scenarios (tests) or running Feature (.feature files)_
