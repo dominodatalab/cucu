@@ -98,8 +98,9 @@ _Get your repo setup using cucu as a test framework_
    cucu run features/my_first_test.feature
    ```
 
-* [^1]: Cucu uses the [behave framework](https://github.com/behave/behave) which expects the `features/steps` directories
-* [^2]: You can write your own steps! Just remember to include them in: `features/steps/__init__.py`
+[^1]: Cucu uses the [behave framework](https://github.com/behave/behave) which expects the `features/steps` directories
+
+[^2]: You can write your own steps! Just remember to include them in: `features/steps/__init__.py`
 
 # Running Tests
 _Technically it should be running Scenarios (tests) or running Feature (.feature files)_
