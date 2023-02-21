@@ -88,7 +88,7 @@ def main():
 @click.option("-n", "--name", help="used to specify the exact scenario to run")
 @click.option(
     "-i",
-    "--ipdb-on-failure/--no-ipdb-oo-failure",
+    "--ipdb-on-failure/--no-ipdb-on-failure",
     default=False,
     help="on failure drop into the ipdb debug shell",
 )
