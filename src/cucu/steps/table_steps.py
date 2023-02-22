@@ -2,7 +2,7 @@ import pkgutil
 import re
 
 from behave.model_describe import ModelPrinter
-from cucu import fuzzy, helpers, retry, step
+from cucu import fuzzy, helpers, retry, step, config
 from cucu.browser.frames import run_in_all_frames
 from io import StringIO
 from tabulate import tabulate, TableFormat, DataRow
@@ -271,3 +271,30 @@ helpers.define_action_on_thing_with_name_steps(
     click_table_header,
     with_nth=True,
 )
+
+
+@step(
+    f'I save "{{table:nth}}" table "{{row:nth}}" row , "{{column:nth}}" column  value to a variable "{{variable_name}}"'
+)
+def get_table_cell_value(ctx, table, row, column, variable_name):
+    tables = find_tables(ctx)
+
+    try:
+        cell_value = tables[table][row][column]
+    except IndexError:
+        raise RuntimeError(
+            f"Cannot find table:{table+1},row:{row+1},column:{column+1}. Please check your table data."
+        )
+    config.CONFIG[variable_name] = cell_value
+
+
+@step(f"I can view all the tables on the webpage as identified by cucu")
+def view_webpage_tables(ctx):
+    tables = find_tables(ctx)
+    print(tables)
+    for i in range(len(tables)):
+        print("Table: ", i + 1)
+        print("No of rows:", len(tables[i]))
+        print("No of columns:", len(tables[i][0]))
+        print(tables[i])
+        print(" ")
