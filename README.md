@@ -47,7 +47,7 @@ _Get your repo setup using cucu as a test framework_
 1. install and start Docker if you haven't already
 2. add cucu your `requirements.txt` to get from GH by label (use current label number)
    ```
-   git+ssh://git@github.com/cerebrotech/cucu@0.116.0#egg=cucu
+   git+ssh://git@github.com/cerebrotech/cucu@0.117.0#egg=cucu
    ```
 3. install it
    ```
