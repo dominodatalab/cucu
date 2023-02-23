@@ -286,15 +286,3 @@ def get_table_cell_value(ctx, table, row, column, variable_name):
             f"Cannot find table:{table+1},row:{row+1},column:{column+1}. Please check your table data."
         )
     config.CONFIG[variable_name] = cell_value
-
-
-@step(f"I can view all the tables on the webpage as identified by cucu")
-def view_webpage_tables(ctx):
-    tables = find_tables(ctx)
-    print(tables)
-    for i in range(len(tables)):
-        print("Table: ", i + 1)
-        print("No of rows:", len(tables[i]))
-        print("No of columns:", len(tables[i][0]))
-        print(tables[i])
-        print(" ")
