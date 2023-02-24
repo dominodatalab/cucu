@@ -1,4 +1,5 @@
 import humanize
+import sys
 
 from cucu import helpers, fuzzy, retry, step
 
@@ -69,9 +70,10 @@ def clear_input(input_):
     #  - it stopped working on laptop after the upgrade in antd version (Feb 2023)
     # Keys.COMMAND works on laptop, but not on Selenium grid,
     # and actually causes an active session on the grid to hang.
-    # NOTE: If you're having problems running this locally, temporarily change to
-    # Keys.COMMAND to get this working.
-    input_.send_keys(Keys.CONTROL, "a")
+    if "darwin" in sys.platform:
+        input_.send_keys(Keys.COMMAND, "a")
+    else:
+        input_.send_keys(Keys.CONTROL, "a")
     input_.send_keys(Keys.BACKSPACE)
 
 
