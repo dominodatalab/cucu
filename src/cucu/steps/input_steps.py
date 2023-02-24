@@ -70,7 +70,7 @@ def clear_input(input_):
     # Keys.COMMAND works on laptop, but not on Selenium grid,
     # and actually causes an active session on the grid to hang.
     # NOTE: If you're having problems running this locally, temporarily change to
-    # Key.COMMAND to get this working.
+    # Keys.COMMAND to get this working.
     input_.send_keys(Keys.CONTROL, "a")
     input_.send_keys(Keys.BACKSPACE)
 
