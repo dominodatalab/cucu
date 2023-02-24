@@ -65,10 +65,12 @@ def clear_input(input_):
     """
     input_.clear()
 
-    # Keys.CONTROL works on both laptops and through the Selenium grid;
+    # Keys.CONTROL works on the Selenium grid (when running in CI)
+    #  - it stopped working on laptop after the upgrade in antd version (Feb 2023)
     # Keys.COMMAND works on laptop, but not on Selenium grid,
-    # and actually causes an active session on the grid to hang,
-    # so we can safely use only the Keys.CONTROL sequence.
+    # and actually causes an active session on the grid to hang.
+    # NOTE: If you're having problems running this locally, temporarily change to
+    # Key.COMMAND to get this working.
     input_.send_keys(Keys.CONTROL, "a")
     input_.send_keys(Keys.BACKSPACE)
 
