@@ -258,6 +258,19 @@ def generate(results, basepath, only_failures=False):
     with open(index_output_filepath, "wb") as output:
         output.write(rendered_index_html.encode("utf8"))
 
+    flat_template = templates.get_template("flat.html")
+    rendered_flat_html = flat_template.render(
+        features=reported_features,
+        grand_totals=grand_totals,
+        title="Flat HTML Test Report",
+        basepath=basepath,
+        dir_depth="",
+    )
+
+    flat_output_filepath = os.path.join(basepath, "flat.html")
+    with open(flat_output_filepath, "wb") as output:
+        output.write(rendered_flat_html.encode("utf8"))
+
     feature_template = templates.get_template("feature.html")
 
     for feature in reported_features:
