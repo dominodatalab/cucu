@@ -7,7 +7,8 @@
     </nav>
     <table class="table table-hover datatable">
         <thead>
-            <tr>
+            <tr class="align-text-top">
+                <th class="text-center">Started at</th>
                 <th>Feature</th>
                 <th class="text-center">Total<br/>{{ grand_totals['total_scenarios'] }}</th>
                 <th class="text-center">Passed<br/>{{ grand_totals['total_scenarios_passed'] }}</th>
@@ -19,6 +20,7 @@
         </thead>
         {% for feature in features %}
         <tr>
+            <td class="text-center">{{ feature['started_at'] }}</td>
             <td><a href="{{ urlencode(escape(feature['name'])) }}.html"><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></a></td>
             <td class="text-center">{{ feature['total_scenarios'] }}</td>
             <td class="text-center">{{ feature['total_scenarios_passed'] }}</td>
@@ -39,6 +41,6 @@
     </table>
 
     <script>
-    setupReportTables([[5, 'asc']], [{type: 'string'}, {type: 'num'}, {type: 'num'}, {type: 'num'}, {type: 'num'}, {type: 'html'} , {type: 'timestamp'} ])
+    setupReportTables([[6, 'asc']], [{type: 'timestamp', searchable: false}, {type: 'string'}, {type: 'num', searchable: false}, {type: 'num', searchable: false}, {type: 'num', searchable: false}, {type: 'num', searchable: false}, {type: 'html'} , {type: 'timestamp', searchable: false} ])
     </script>
 {% endblock %}

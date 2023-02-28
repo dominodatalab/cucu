@@ -203,10 +203,12 @@ def generate(results, basepath, only_failures=False):
                         )
 
             scenario["total_steps"] = total_steps
+            scenario["started_at"] = scenario["steps"][0]["result"]["timestamp"]
             scenario["duration"] = scenario_duration
             feature_duration += scenario_duration
 
         feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
+        feature["started_at"] = min([x["started_at"] for x in scenarios])
         feature["duration"] = sum([x["duration"] for x in scenarios])
 
         feature["total_scenarios"] = total_scenarios

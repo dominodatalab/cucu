@@ -31,6 +31,9 @@
                 <li class="nav-item active">
                     <button class="btn btn-md btn-light" title="scroll to bottom" onclick="window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });" class="nav-link">⬇️ </button>
                 </li>
+                <li class="align-middle">
+                    <span style="vertical-align: -webkit-baseline-middle;">Started at: {{ scenario["started_at"] }}, Duration: {{ '{:.3f}'.format(scenario['duration']) }}s</span>
+                </li>
               </ul>
             </div>
         </div>
