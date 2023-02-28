@@ -53,7 +53,7 @@ Feature: Report basics
       And I should not see the image with the alt text "And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html""
 
   Scenario: User can run a feature with mixed results and has all results reported correctly
-    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/mixed-results" and expect exit code "1"
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --show-skips --results {CUCU_RESULTS_DIR}/mixed-results" and expect exit code "1"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/mixed-results --show-skips --output {CUCU_RESULTS_DIR}/mixed-results-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
@@ -76,7 +76,7 @@ Feature: Report basics
      Then I should see the button "Given I attempt to use an undefined step"
 
   Scenario: User can run feature with background and has all results reported correctly
-    Given I run the command "cucu run data/features/feature_with_background.feature --results {CUCU_RESULTS_DIR}/feature_with_background" and expect exit code "0"
+    Given I run the command "cucu run data/features/feature_with_background.feature --show-skips --results {CUCU_RESULTS_DIR}/feature_with_background" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/feature_with_background --show-skips --output {CUCU_RESULTS_DIR}/feature_with_background-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"

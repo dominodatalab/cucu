@@ -438,13 +438,21 @@ def _generate_report(filepath, output, only_failures: False):
     help="set logging level to one of debug, warn or info (default)",
 )
 @click.option(
+    "--show-skips",
+    default=False,
+    is_flag=True,
+    help="when set skips are shown",
+)
+@click.option(
     "--show-status",
     default=False,
     is_flag=True,
     help="when set status output is shown (helpful for CI that wants stdout updates)",
 )
 @click.option("-o", "--output", default="report")
-def report(filepath, only_failures, logging_level, show_status, output):
+def report(
+    filepath, only_failures, logging_level, show_skips, show_status, output
+):
     """
     generate a test report from a results directory
     """
@@ -452,6 +460,9 @@ def report(filepath, only_failures, logging_level, show_status, output):
 
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())
+
+    if show_skips:
+        os.environ["CUCU_SHOW_SKIPS"] = "true"
 
     if show_status:
         os.environ["CUCU_SHOW_STATUS"] = "true"

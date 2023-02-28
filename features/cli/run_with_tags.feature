@@ -3,7 +3,7 @@ Feature: Run with tags
   run.
 
   Scenario: User can run a specific feature using a tag
-    Given I run the command "cucu run data/features/feature_with_tagging.feature --tags '@second' --results {CUCU_RESULTS_DIR}/scenario_with_tag_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+    Given I run the command "cucu run data/features/feature_with_tagging.feature --tags '@second' --show-skips --results {CUCU_RESULTS_DIR}/scenario_with_tag_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       @all
@@ -29,7 +29,7 @@ Feature: Run with tags
       And I should see "{STDERR}" is empty
 
   Scenario: User can exclude a specific feature using a tag
-    Given I run the command "cucu run data/features/feature_with_tagging.feature --tags '~@second' --results {CUCU_RESULTS_DIR}/scenario_without_tag_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+    Given I run the command "cucu run data/features/feature_with_tagging.feature --tags '~@second' --show-skips --results {CUCU_RESULTS_DIR}/scenario_without_tag_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       @all
