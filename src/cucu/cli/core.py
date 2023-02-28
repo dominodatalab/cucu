@@ -118,6 +118,12 @@ def main():
     help="when set skips are shown",
 )
 @click.option(
+    "--show-status",
+    default=False,
+    is_flag=True,
+    help="when set status output is shown (helpful for CI that wants stdout updates)",
+)
+@click.option(
     "--periodic-thread-dumper",
     default=None,
     help="sets the interval in minutes of when to run the periodic thread dumper",
@@ -196,7 +202,6 @@ def run(
     junit,
     junit_with_stacktrace,
     logging_level,
-    show_skips,
     periodic_thread_dumper,
     preserve_results,
     report,
@@ -204,6 +209,8 @@ def run(
     results,
     runtime_timeout,
     secrets,
+    show_skips,
+    show_status,
     tags,
     selenium_remote_url,
     workers,
@@ -256,6 +263,9 @@ def run(
 
     if show_skips:
         os.environ["CUCU_SHOW_SKIPS"] = "true"
+
+    if show_status:
+        os.environ["CUCU_SHOW_STATUS"] = "true"
 
     if junit_with_stacktrace:
         os.environ["CUCU_JUNIT_WITH_STACKTRACE"] = "true"
@@ -427,8 +437,14 @@ def _generate_report(filepath, output, only_failures: False):
     default="INFO",
     help="set logging level to one of debug, warn or info (default)",
 )
+@click.option(
+    "--show-status",
+    default=False,
+    is_flag=True,
+    help="when set status output is shown (helpful for CI that wants stdout updates)",
+)
 @click.option("-o", "--output", default="report")
-def report(filepath, only_failures, logging_level, output):
+def report(filepath, only_failures, logging_level, show_status, output):
     """
     generate a test report from a results directory
     """
@@ -436,6 +452,9 @@ def report(filepath, only_failures, logging_level, output):
 
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())
+
+    if show_status:
+        os.environ["CUCU_SHOW_STATUS"] = "true"
 
     run_details_filepath = os.path.join(filepath, "run_details.json")
 

@@ -48,6 +48,8 @@ def generate(results, basepath, only_failures=False):
     generate an HTML report for the results provided.
     """
 
+    show_status = CONFIG["CUCU_SHOW_STATUS"] == "true"
+
     features = []
 
     run_json_filepaths = list(glob.iglob(os.path.join(results, "*run.json")))
@@ -59,8 +61,11 @@ def generate(results, basepath, only_failures=False):
         with open(run_json_filepath, "rb") as index_input:
             try:
                 features += json.loads(index_input.read())
-                print("r", end="", flush=True)
+                if show_status:
+                    print("r", end="", flush=True)
             except Exception as exception:
+                if show_status:
+                    print("")  # add a newline before logger
                 logger.warn(
                     f"unable to read file {run_json_filepath}, got error: {exception}"
                 )
@@ -78,7 +83,8 @@ def generate(results, basepath, only_failures=False):
     #
     reported_features = []
     for feature in features:
-        print("F", end="", flush=True)
+        if show_status:
+            print("F", end="", flush=True)
         scenarios = []
 
         if feature["status"] != "untested" and "elements" in feature:
@@ -105,7 +111,8 @@ def generate(results, basepath, only_failures=False):
             )
 
         for scenario in scenarios:
-            print("S", end="", flush=True)
+            if show_status:
+                print("S", end="", flush=True)
             process_tags(scenario)
 
             scenario_duration = 0
@@ -127,7 +134,8 @@ def generate(results, basepath, only_failures=False):
 
             step_index = 0
             for step in scenario["steps"]:
-                print("s", end="", flush=True)
+                if show_status:
+                    print("s", end="", flush=True)
                 total_steps += 1
                 image_filename = (
                     f"{step_index} - {step['name'].replace('/', '_')}.png"
@@ -150,7 +158,8 @@ def generate(results, basepath, only_failures=False):
                 log_files = []
 
                 for log_file in glob.iglob(os.path.join(logs_dir, "*.*")):
-                    print("l", end="", flush=True)
+                    if show_status:
+                        print("l", end="", flush=True)
 
                     log_filepath = log_file.removeprefix(
                         f"{scenario_filepath}/"
@@ -171,7 +180,8 @@ def generate(results, basepath, only_failures=False):
                 only_console_logs = lambda log: ".console." in log["name"]
 
                 for log_file in filter(only_console_logs, log_files):
-                    print("c", end="", flush=True)
+                    if show_status:
+                        print("c", end="", flush=True)
 
                     converter = Ansi2HTMLConverter(dark_bg=False)
                     log_file_filepath = os.path.join(
@@ -204,6 +214,8 @@ def generate(results, basepath, only_failures=False):
 
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)
+    if show_status:
+        print("")  # add a newline to end status
 
     def urlencode(string):
         """
