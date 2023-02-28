@@ -203,7 +203,12 @@ def generate(results, basepath, only_failures=False):
                         )
 
             scenario["total_steps"] = total_steps
-            scenario["started_at"] = scenario["steps"][0]["result"]["timestamp"]
+            if len(scenario["steps"]) > 0 and "result" in scenario["steps"][0]:
+                scenario["started_at"] = scenario["steps"][0]["result"][
+                    "timestamp"
+                ]
+            else:
+                scenario["started_at"] = ""
             scenario["duration"] = scenario_duration
             feature_duration += scenario_duration
 
