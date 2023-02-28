@@ -140,7 +140,7 @@ Feature: Run outputs
       And I should see "{STDERR}" is empty
 
   Scenario: User gets JUnit XML results file as expected
-    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/validate_junit_xml_results" and save stdout to "STDOUT" and expect exit code "1"
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --show-skips --results {CUCU_RESULTS_DIR}/validate_junit_xml_results" and save stdout to "STDOUT" and expect exit code "1"
      Then I should see a file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Feature_with_mixed_results.xml"
       And I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Feature_with_mixed_results.xml" matches the following:
       """
