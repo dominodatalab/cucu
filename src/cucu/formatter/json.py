@@ -257,10 +257,7 @@ class CucuJSONFormatter(Formatter):
             x
             for x in feature_data["elements"]
             if x["keyword"] == "Scenario"
-            and (
-                not (CONFIG["CUCU_REPORT_WITHOUT_SKIPS"])
-                or x["status"] != "skipped"
-            )
+            and (CONFIG["CUCU_SHOW_SKIPS"] or x["status"] != "skipped")
         ]
 
         if len(filtered_scenarios) == 0:

@@ -200,7 +200,7 @@ class CucuJUnitFormatter(Formatter):
 
         scenarios = results["scenarios"]
 
-        if CONFIG["CUCU_JUNIT_WITHOUT_SKIPS"]:
+        if CONFIG["CUCU_SHOW_SKIPS"] != "true":
             filtered_scenarios = {}
 
             for name, scenario in scenarios.items():

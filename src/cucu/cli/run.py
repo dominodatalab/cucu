@@ -37,6 +37,7 @@ def behave(
     junit,
     results,
     secrets,
+    show_skips,
     tags,
     verbose,
     redirect_output=False,
@@ -130,6 +131,9 @@ def behave(
 
     if fail_fast:
         args.append("--stop")
+
+    if not show_skips:
+        args.append("--no-skipped")
 
     args.append(filepath)
 

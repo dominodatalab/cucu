@@ -100,12 +100,6 @@ def main():
     "the same location as --results",
 )
 @click.option(
-    "--junit-without-skips",
-    is_flag=True,
-    default=False,
-    help="when set to true skipped results are removed from the JUnit results",
-)
-@click.option(
     "--junit-with-stacktrace",
     is_flag=True,
     default=False,
@@ -116,6 +110,12 @@ def main():
     "--logging-level",
     default="INFO",
     help="set logging level to one of debug, warn or info (default)",
+)
+@click.option(
+    "--show-skips",
+    default=False,
+    is_flag=True,
+    help="when set skips are shown",
 )
 @click.option(
     "--periodic-thread-dumper",
@@ -138,12 +138,6 @@ def main():
     default=False,
     is_flag=True,
     help="when set the HTML test report will only contain the failed test results",
-)
-@click.option(
-    "--report-without-skips",
-    is_flag=True,
-    default=False,
-    help="when set to true skipped results are removed from the tests report",
 )
 @click.option(
     "-r",
@@ -200,14 +194,13 @@ def run(
     name,
     ipdb_on_failure,
     junit,
-    junit_without_skips,
     junit_with_stacktrace,
     logging_level,
+    show_skips,
     periodic_thread_dumper,
     preserve_results,
     report,
     report_only_failures,
-    report_without_skips,
     results,
     runtime_timeout,
     secrets,
@@ -261,14 +254,11 @@ def run(
     if junit is None:
         junit = results
 
-    if junit_without_skips:
-        os.environ["CUCU_JUNIT_WITHOUT_SKIPS"] = "true"
+    if show_skips:
+        os.environ["CUCU_SHOW_SKIPS"] = "true"
 
     if junit_with_stacktrace:
         os.environ["CUCU_JUNIT_WITH_STACKTRACE"] = "true"
-
-    if report_without_skips:
-        os.environ["CUCU_REPORT_WITHOUT_SKIPS"] = "true"
 
     if report_only_failures:
         os.environ["CUCU_REPORT_ONLY_FAILURES"] = "true"
@@ -307,6 +297,7 @@ def run(
                 junit,
                 results,
                 secrets,
+                show_skips,
                 tags,
                 verbose,
                 skip_init_global_hook_variables=True,
@@ -365,6 +356,7 @@ def run(
                                 junit,
                                 results,
                                 secrets,
+                                show_skips,
                                 tags,
                                 verbose,
                             ],

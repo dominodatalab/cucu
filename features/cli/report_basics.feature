@@ -148,14 +148,14 @@ Feature: Report basics
       | Scenario      | Total Steps | Status | Duration |
       | Slow scenario | 1           | .*     |    >*    |
 
-  @report-without-skips
-  Scenario: User can run removed skipped test results from the HTML test report
-    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --report-without-skips --results {CUCU_RESULTS_DIR}/report_without_skips --generate-report --report {CUCU_RESULTS_DIR}/report_without_skips_report" and expect exit code "1"
+  @show-skips
+  Scenario: User can run results without skips in the HTML test report
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --show-skips --results {CUCU_RESULTS_DIR}/report_without_skips --generate-report --report {CUCU_RESULTS_DIR}/report_without_skips_report" and expect exit code "1"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
        | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
-       | Feature with mixed results | 4     | 2      | 2      | 0       | failed | .*       |
+       | Feature with mixed results | 5     | 2      | 2      | 1       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
       | Scenario                            | Total Steps | Status  | Duration |
@@ -163,6 +163,7 @@ Feature: Report basics
       | Scenario that has an undefined step | 1           | failed  | .*       |
       | Scenario that passes                | 1           | passed  | .*       |
       | Scenario that also passes           | 1           | passed  | .*       |
+      | Scenario that is skipped            | 1           | skipped | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -170,30 +171,33 @@ Feature: Report basics
       And I click the button "Scenario that has an undefined step"
      Then I should see the button "Given I attempt to use an undefined step"
 
-  Scenario: User can run removed skipped test results from the HTML test report on a feature with background
-    Given I run the command "cucu run data/features/feature_with_background.feature --report-without-skips --results {CUCU_RESULTS_DIR}/report_without_skips_background --generate-report --report {CUCU_RESULTS_DIR}/report_without_skips_background_report" and expect exit code "0"
+  @show-skips
+  Scenario: User can run results without skips in the HTML test report on a feature with background
+    Given I run the command "cucu run data/features/feature_with_background.feature --show-skips --results {CUCU_RESULTS_DIR}/report_without_skips_background --generate-report --report {CUCU_RESULTS_DIR}/report_without_skips_background_report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_background_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
       | Feature                 | Total | Passed | Failed | Skipped | Status | Duration |
-      | Feature with background | 1     | 1      | 0      | 0       | passed | .*       |
+      | Feature with background | 2     | 1      | 0      | 1       | passed | .*       |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
       | Scenario                            | Total Steps | Status  | Duration |
       | Scenario which now has a background | 2           | passed  | .*       |
+      | Scenario that is skipped            | 2           | skipped | .*       |
 
-  @junit-without-skips
-  Scenario: User can run removed skipped test results from the JUnit results
-    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --junit-without-skips --results {CUCU_RESULTS_DIR}/junit_without_skips" and expect exit code "1"
+  @show-skips
+  Scenario: User can run results without skips in the JUnit results
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --show-skips --results {CUCU_RESULTS_DIR}/junit_without_skips" and expect exit code "1"
       And I read the contents of the file at "{CUCU_RESULTS_DIR}/junit_without_skips/TESTS-Feature_with_mixed_results.xml" and save to the variable "JUNIT"
-     Then I should see "{JUNIT}" contains "skipped=\"0\""
-      And I should see "{JUNIT}" does not contain "<skipped>"
+     Then I should see "{JUNIT}" contains "skipped=\"1\""
+      And I should see "{JUNIT}" contains "<skipped>"
 
-  Scenario: User can run removed skipped test results from the JUnit results when feature has background
-    Given I run the command "cucu run data/features/feature_with_background.feature --junit-without-skips --results {CUCU_RESULTS_DIR}/junit_without_skips_background" and expect exit code "0"
+  @show-skips
+  Scenario: User can run results without skips in the JUnit results when feature has background
+    Given I run the command "cucu run data/features/feature_with_background.feature --show-skips --results {CUCU_RESULTS_DIR}/junit_without_skips_background" and expect exit code "0"
       And I read the contents of the file at "{CUCU_RESULTS_DIR}/junit_without_skips_background/TESTS-Feature_with_background.xml" and save to the variable "JUNIT"
-     Then I should see "{JUNIT}" contains "skipped=\"0\""
-      And I should see "{JUNIT}" does not contain "<skipped>"
+     Then I should see "{JUNIT}" contains "skipped=\"1\""
+      And I should see "{JUNIT}" contains "<skipped>"
 
   Scenario: User can run and generate reports from empty feature files
     Given I create a file at "{CUCU_RESULTS_DIR}/empty_features/environment.py" with the following:
