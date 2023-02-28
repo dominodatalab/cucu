@@ -202,15 +202,28 @@ def generate(results, basepath, only_failures=False):
                             converter.convert(log_file_input.read())
                         )
 
-            scenario["duration"] = scenario_duration
             scenario["total_steps"] = total_steps
+            scenario["duration"] = scenario_duration
             feature_duration += scenario_duration
+
+        feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
+        feature["duration"] = sum([x["duration"] for x in scenarios])
 
         feature["total_scenarios"] = total_scenarios
         feature["total_scenarios_passed"] = total_scenarios_passed
         feature["total_scenarios_failed"] = total_scenarios_failed
         feature["total_scenarios_skipped"] = total_scenarios_skipped
-        feature["duration"] = feature_duration
+
+    keys = [
+        "total_scenarios",
+        "total_scenarios_passed",
+        "total_scenarios_failed",
+        "total_scenarios_skipped",
+        "duration",
+    ]
+    grand_totals = {}
+    for k in keys:
+        grand_totals[k] = sum([x[k] for x in reported_features])
 
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)
@@ -233,6 +246,7 @@ def generate(results, basepath, only_failures=False):
     index_template = templates.get_template("index.html")
     rendered_index_html = index_template.render(
         features=reported_features,
+        grand_totals=grand_totals,
         title="Cucu HTML Test Report",
         basepath=basepath,
         dir_depth="",
