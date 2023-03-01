@@ -105,7 +105,7 @@
 
             {% if step['image'] is defined and step['result'] is defined %}
             <tr class="d-flex">
-                <td class="col-8 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
+                <td class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
                     <img class="col-11 mx-auto d-block img-fluid shadow bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img>
                 </td>
             </tr>
