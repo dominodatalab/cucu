@@ -148,6 +148,11 @@ def generate(results, basepath, only_failures=False):
                 if "result" in step:
                     scenario_duration += step["result"]["duration"]
 
+                    if "error_message" in step["result"] and step["result"][
+                        "error_message"
+                    ] == [None]:
+                        step["result"]["error_message"] = [""]
+
                 if "text" in step and not isinstance(step["text"], list):
                     step["text"] = [step["text"]]
 
@@ -173,6 +178,7 @@ def generate(results, basepath, only_failures=False):
                             for row in step["table"]["rows"]
                         ]
                     )
+
                 step_index += 1
             logs_dir = os.path.join(scenario_filepath, "logs")
 
@@ -235,7 +241,7 @@ def generate(results, basepath, only_failures=False):
             feature_duration += scenario_duration
 
         feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
-        feature["started_at"] = min([x["started_at"] for x in scenarios])
+        feature["started_at"] = scenarios[0]["started_at"]
         feature["duration"] = sum([x["duration"] for x in scenarios])
 
         feature["total_scenarios"] = total_scenarios

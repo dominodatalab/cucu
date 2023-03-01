@@ -116,13 +116,13 @@
             {% endif %}
 
             {% if step['result'] is defined %}
-                {% if step['result']['error_message'] %}
+                {% if step['result']['error_message'] is defined %}
                     <tr class="d-flex"><td class="col-8" colspan="2" style="margin: 0">
                         <pre style="color: gray; margin: 0">{{ escape("\n".join(step['result']['error_message'])) }}</pre><br/>
                     </td></tr>
                 {% endif %}
-
             {% endif %}
+
         {% endfor %}
     </table>
     <script>

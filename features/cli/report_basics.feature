@@ -63,11 +63,11 @@ Feature: Report basics
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
       | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario that also passes           | 1           | passed  | .*       |
       | .*         | Scenario that fails                 | 2           | failed  | .*       |
       | .*         | Scenario that has an undefined step | 1           | failed  | .*       |
-      | .*         | Scenario that passes                | 1           | passed  | .*       |
-      | .*         | Scenario that also passes           | 1           | passed  | .*       |
       | .*         | Scenario that is skipped            | 1           | skipped | .*       |
+      | .*         | Scenario that passes                | 1           | passed  | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -86,8 +86,8 @@ Feature: Report basics
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
       | Started at | Scenario                            | Total Steps | Status  | Duration |
-      | .*         | Scenario which now has a background | 2           | passed  | .*       |
       | .*         | Scenario that is skipped            | 2           | skipped | .*       |
+      | .*         | Scenario which now has a background | 2           | passed  | .*       |
 
   @workaround @QE-7075
   @disabled
@@ -159,11 +159,11 @@ Feature: Report basics
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
       | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario that also passes           | 1           | passed  | .*       |
       | .*         | Scenario that fails                 | 2           | failed  | .*       |
       | .*         | Scenario that has an undefined step | 1           | failed  | .*       |
-      | .*         | Scenario that passes                | 1           | passed  | .*       |
-      | .*         | Scenario that also passes           | 1           | passed  | .*       |
       | .*         | Scenario that is skipped            | 1           | skipped | .*       |
+      | .*         | Scenario that passes                | 1           | passed  | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
