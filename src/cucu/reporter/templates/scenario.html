@@ -92,16 +92,18 @@
                     <br/>
                     <pre style="color: black; margin: 0">{{ escape(step['table']) }}</pre>
             {% endif %}
+                </td>
+                <td style="min-width: 0;" class="col-4"><span style="display: inline; color: gray;">{{ step_timing }}</span></td>
+            </tr>
             {% if step['result'] is defined %}
                 {% if step['result']['stdout'] %}
-                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['stdout'])) }}</pre>
+                    <tr class="d-flex"><td style="min-width: 0;" class="col-12" colspan="2" style="margin: 0">
+                        <pre style="color: darkgray;">{{ escape("\n".join(step['result']['stdout'])) }}</pre>
+                    </td></tr>
                     {% for line in step['result']['stdout'] %}
                     {% endfor %}
                 {% endif %}
             {% endif %}
-                </td>
-                <td style="min-width: 0;" class="col-4"><span style="display: inline; color: gray;">{{ step_timing }}</span></td>
-            </tr>
 
             {% if step['image'] is defined and step['result'] is defined %}
             <tr class="d-flex">
@@ -113,7 +115,7 @@
 
             {% if step['result'] is defined %}
                 {% if step['result']['error_message'] is defined %}
-                    <tr class="d-flex"><td style="min-width: 0;" class="col-8" colspan="2" style="margin: 0">
+                    <tr class="d-flex"><td style="min-width: 0;" class="col-12" colspan="2" style="margin: 0">
                         <pre style="color: gray; margin: 0">{{ escape("\n".join(step['result']['error_message'])) }}</pre><br/>
                     </td></tr>
                 {% endif %}
