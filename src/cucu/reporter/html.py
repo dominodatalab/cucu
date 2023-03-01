@@ -151,6 +151,28 @@ def generate(results, basepath, only_failures=False):
                 if "text" in step and not isinstance(step["text"], list):
                     step["text"] = [step["text"]]
 
+                if "text" in step:
+                    text_indent = "       "
+                    step["text"] = "\n".join(
+                        [text_indent + '"""']
+                        + [f"{text_indent}{x}" for x in step["text"]]
+                        + [text_indent + '"""']
+                    )
+
+                if "table" in step:
+                    text_indent = "       "
+                    step["table"] = "\n".join(
+                        [
+                            text_indent
+                            + "| "
+                            + " | ".join(step["table"]["headings"])
+                            + " |"
+                        ]
+                        + [
+                            text_indent + "| " + " | ".join(row) + " |"
+                            for row in step["table"]["rows"]
+                        ]
+                    )
                 step_index += 1
             logs_dir = os.path.join(scenario_filepath, "logs")
 

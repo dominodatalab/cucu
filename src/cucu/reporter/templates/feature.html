@@ -14,8 +14,8 @@
         </div>
     </nav>
     <table class="table table-hover">
-        <tr class="remove-table-hover"><pre style="display: inline; color: mediumturquoise">{{ feature['tags'] }}</pre><br/></tr>
-        <tr class="remove-table-hover"><pre style="display: inline; color: maroon">Feature: </pre><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></tr>
+        <tr class="remove-table-hover"><span style="display: inline; color: mediumturquoise">{{ feature['tags'] }}</span><br/></tr>
+        <tr class="remove-table-hover"><span style="display: inline; color: maroon">Feature: </span><span style="display: inline; color: grey">{{ escape(feature['name']) }}</span></tr>
     </table>
     <table class="table table-hover datatable">
         <thead>
@@ -42,15 +42,9 @@
             {% if scenario['keyword'] != 'Background' %}
             <tr>
                 <td class="text-center">{{ scenario['started_at'] }}</td>
-                <td><a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><pre style="display: inline; color: grey">{{ escape(scenario['name']) }}</pre></a></td>
+                <td><a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><span style="display: inline; color: grey">{{ escape(scenario['name']) }}</span></a></td>
                 <td class="text-center">{{ scenario['total_steps'] }}</td>
-                {% if scenario['status'] == 'passed' %}
-                    <td class="text-center"><pre style="display: inline; color: green">{{ scenario['status'] }}</pre></td>
-                {% elif scenario['status'] == 'failed' %}
-                    <td class="text-center"><pre style="display: inline; color: red">{{ scenario['status'] }}</pre></td>
-                {% elif scenario['status'] == 'skipped' %}
-                    <td class="text-center"><pre style="display: inline; color: blue">{{ scenario['status'] }}</pre></td>
-                {% endif %}
+                <td class="text-center"><span class="status-{{ scenario['status'] }}">{{ scenario['status'] }}</span></td>
                 <td class="text-center">{{ '{:.3f}'.format(scenario['duration']) }}s</td>
             </tr>
             {%  endif %}

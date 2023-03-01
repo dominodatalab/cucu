@@ -55,11 +55,11 @@
     }
     </style>
     <table class="table table-borderless">
-        <tr class="remove-table-hover"><pre style="display: inline; color: mediumturquoise">{{ feature['tags'] }} {{ scenario['tags'] }}</pre><br/></tr>
+        <tr class="remove-table-hover"><span style="display: inline; color: mediumturquoise">{{ feature['tags'] }} {{ scenario['tags'] }}</span><br/></tr>
         <tr class="d-flex">
             <td class="col-8 text-truncate">
-                <pre style="display: inline; color: maroon;">Feature: </pre> {{ escape(feature['name']) }}<br/>
-                <pre style="display: inline; color: maroon;">Scenario:</pre> {{ escape(scenario['name']) }}
+                <span style="display: inline; color: maroon;">Feature: </span> {{ escape(feature['name']) }}<br/>
+                <span style="display: inline; color: maroon;">Scenario:</span> {{ escape(scenario['name']) }}
             </td>
             <td class="col-4 text-truncate" style="color: gray;"></td>
         </tr>
@@ -71,65 +71,36 @@
                 {% set step_prefix = "" %}
             {% endif %}
             {% if step['result'] is defined %}
+                {% set step_status = step['result']['status'] %}
                 {% if step['result']['status'] == 'failed' or step['result']['status'] == 'passed' %}
                     {% set step_timing = "# started at {} took {:.3f}s".format(step["result"]["timestamp"], step["result"]["duration"]) %}
                 {% endif %}
             {% else %}
+                {% set step_status = 'untested' %}
                 {% set step_timing = "" %}
             {% endif %}
             {% set step_keyword = step_prefix + step['keyword'].rjust(6, ' ') %}
             <tr class="d-flex">
                 <td class="anchor-toggle text-truncate col-8" data-toggle="collapse" href="#collapsable-row-{{ loop.index }}" role="button" aria-expanded="false" aria-controls="collapsable-row-{{ loop.index }}">
                     <a class="anchor" id="step_{{ loop.index}}" href="#step_{{ loop.index }}">🔗</a>
-                {% if step['result'] is not defined %}
-                    <pre style="display: inline; color: blue">{{ step_keyword }}</pre><pre style="color: blue; display: inline"> {{ escape(step['name']) }}</pre>
-                {% elif step['result']['status'] == 'passed' %}
-                    <pre style="display: inline; color: green">{{ step_keyword }}</pre><pre style="display: inline; text-overflow: ellipsis; overflow: hidden;"> {{ escape(step['name']) }}</pre>
-                {% elif step['result']['status'] == 'failed' %}
-                    <pre style="display: inline; color: red">{{ step_keyword }}</pre><pre style="color: red; display: inline"> {{ escape(step['name']) }}</pre>
-                {% elif step['result']['status'] == 'skipped' %}
-                    <pre style="display: inline; color: blue">{{ step_keyword }}</pre><pre style="color: blue; display: inline"> {{ escape(step['name']) }}</pre>
-                {% elif step['result']['status'] == 'undefined' %}
-                    <pre style="display: inline; color: orange">{{ step_keyword }}</pre><pre style="color: orange; display: inline"> {{ escape(step['name']) }}</pre>
-                {% endif %}
-                </td>
-                <td><pre style="display: inline; color: gray;">{{ step_timing }}</pre></td>
-            </tr>
+                    <pre class="status-{{ step_status }}">{{ step_keyword }}</pre><span class="status-{{ step['result'] }}"> {{ escape(step['name']) }}</span>
             {% if step['text'] %}
-            <tr class="d-flex">
-                <td class="col-8" colspan="2">
-                    <pre style="color: black; margin: 0">       """</pre>
-                    {% for line in step['text'] %}
-                        <pre style="color: black; margin: 0">       {{ line }}</pre>
-                    {% endfor %}
-                    <pre style="color: black; margin: 0">       """</pre>
-                </td>
-            </tr>
+                    <br/>
+                    <pre style="color: black; margin: 0">{{ escape(step['text']) }}</pre>
             {% endif %}
             {% if step['table'] %}
-            <tr class="d-flex">
-                <td class="col-8" colspan="2">
-                    <pre style="color: black; margin: 0; display: inline">       |</pre>
-                    {% for heading in step['table']['headings'] %}
-                    <pre style="color: black; margin: 0; display: inline">{{ heading }} |</pre>
-                    {% endfor %}
-                    </br>
-                    {% for row in step['table']['rows'] %}
-                        <pre style="color: black; margin: 0; display: inline">       |</pre>
-                        {% for value in row %}
-                        <pre class="text-wrap" style="color: black; margin: 0; display: inline"> {{ value }} |</pre>
-                        {% endfor %}
-                        </br>
-                    {% endfor %}
-                </td>
-            </tr>
+                    <br/>
+                    <pre style="color: black; margin: 0">{{ escape(step['table']) }}</pre>
             {% endif %}
+                </td>
+                <td><span style="display: inline; color: gray;">{{ step_timing }}</span></td>
+            </tr>
             {% if step['result'] is defined %}
                 {% if step['result']['stdout'] %}
                     {% for line in step['result']['stdout'] %}
                     <tr class="d-flex">
                         <td class="col-8" colspan="2" class="text-truncate">
-                            <pre style="color: darkgray;">{{ escape(line) }}</pre>
+                            <span style="color: darkgray;">{{ escape(line) }}</span>
                         </td>
                     </tr>
                     {% endfor %}
@@ -146,11 +117,9 @@
 
             {% if step['result'] is defined %}
                 {% if step['result']['error_message'] %}
-                    {% for line in step['result']['error_message'] %}
-                    <tr class="d-flex">
-                        <td class="col-8" colspan="2" style="margin: 0"><pre style="color: gray; margin: 0">{{ escape(line) }}</pre></td>
-                    </tr>
-                    {% endfor %}
+                    <tr class="d-flex"><td class="col-8" colspan="2" style="margin: 0">
+                        <pre style="color: gray; margin: 0">{{ escape("\n".join(step['result']['error_message'])) }}</pre><br/>
+                    </td></tr>
                 {% endif %}
 
             {% endif %}

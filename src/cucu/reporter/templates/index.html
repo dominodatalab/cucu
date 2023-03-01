@@ -28,20 +28,12 @@
         {% for feature in features %}
         <tr>
             <td class="text-center">{{ feature['started_at'] }}</td>
-            <td><a href="{{ urlencode(escape(feature['name'])) }}.html"><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></a></td>
+            <td><a href="{{ urlencode(escape(feature['name'])) }}.html">{{ escape(feature['name']) }}</a></td>
             <td class="text-center">{{ feature['total_scenarios'] }}</td>
             <td class="text-center">{{ feature['total_scenarios_passed'] }}</td>
             <td class="text-center">{{ feature['total_scenarios_failed'] }}</td>
             <td class="text-center">{{ feature['total_scenarios_skipped'] }}</td>
-            {% if feature['status'] == 'passed' %}
-                <td class="text-center"><pre style="display: inline; color: green">{{ feature['status'] }}</pre></td>
-            {% elif feature['status'] == 'failed' %}
-                <td class="text-center"><pre style="display: inline; color: red">{{ feature['status'] }}</pre></td>
-            {% elif feature['status'] == 'skipped' %}
-                <td class="text-center"><pre style="display: inline; color: blue">{{ feature['status'] }}</pre></td>
-            {% elif feature['status'] == 'untested' %}
-                <td class="text-center"><pre style="display: inline; color: gray">{{ feature['status'] }}</pre></td>
-            {% endif %}
+            <td class="text-center"><span class="status-{{ feature['status'] }}">{{ feature['status'] }}</span></td>
             <td class="text-center">{{ '{:.3f}'.format(feature['duration']) }}s</td>
         </tr>
         {% endfor %}
