@@ -62,12 +62,12 @@ Feature: Report basics
        | .*         | Feature with mixed results | 5     | 2      | 2      | 1       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
-      | Scenario                            | Total Steps | Status  | Duration |
-      | Scenario that fails                 | 2           | failed  | .*       |
-      | Scenario that has an undefined step | 1           | failed  | .*       |
-      | Scenario that passes                | 1           | passed  | .*       |
-      | Scenario that also passes           | 1           | passed  | .*       |
-      | Scenario that is skipped            | 1           | skipped | .*       |
+      | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario that fails                 | 2           | failed  | .*       |
+      | .*         | Scenario that has an undefined step | 1           | failed  | .*       |
+      | .*         | Scenario that passes                | 1           | passed  | .*       |
+      | .*         | Scenario that also passes           | 1           | passed  | .*       |
+      | .*         | Scenario that is skipped            | 1           | skipped | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -85,9 +85,9 @@ Feature: Report basics
        | .*         | Feature with background    | 2     | 1      | 0      | 1       | passed | .*       |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
-      | Scenario                            | Total Steps | Status  | Duration |
-      | Scenario which now has a background | 2           | passed  | .*       |
-      | Scenario that is skipped            | 2           | skipped | .*       |
+      | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario which now has a background | 2           | passed  | .*       |
+      | .*         | Scenario that is skipped            | 2           | skipped | .*       |
 
   @workaround @QE-7075
   @disabled
@@ -140,13 +140,13 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      When I click the button "Slow feature #1"
      Then I should see a table that matches the following:
-      | Scenario      | Total Steps | Status | Duration |
-      | Slow scenario | 1           | .*     |    >*    |
+      | Started at | Scenario      | Total Steps | Status | Duration |
+      | .*         | Slow scenario | 1           | .*     |    >*    |
      When I go back on the browser
       And I click the button "Slow feature #2"
      Then I should see a table that matches the following:
-      | Scenario      | Total Steps | Status | Duration |
-      | Slow scenario | 1           | .*     |    >*    |
+      | Started at | Scenario      | Total Steps | Status | Duration |
+      | .*         | Slow scenario | 1           | .*     |    >*    |
 
   @show-skips
   Scenario: User can run results without skips in the HTML test report
@@ -158,12 +158,12 @@ Feature: Report basics
       | .*         | Feature with mixed results | 5     | 2      | 2      | 1       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
-      | Scenario                            | Total Steps | Status  | Duration |
-      | Scenario that fails                 | 2           | failed  | .*       |
-      | Scenario that has an undefined step | 1           | failed  | .*       |
-      | Scenario that passes                | 1           | passed  | .*       |
-      | Scenario that also passes           | 1           | passed  | .*       |
-      | Scenario that is skipped            | 1           | skipped | .*       |
+      | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario that fails                 | 2           | failed  | .*       |
+      | .*         | Scenario that has an undefined step | 1           | failed  | .*       |
+      | .*         | Scenario that passes                | 1           | passed  | .*       |
+      | .*         | Scenario that also passes           | 1           | passed  | .*       |
+      | .*         | Scenario that is skipped            | 1           | skipped | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -181,9 +181,9 @@ Feature: Report basics
       | .*         | Feature with background | 2     | 1      | 0      | 1       | passed | .*       |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
-      | Scenario                            | Total Steps | Status  | Duration |
-      | Scenario which now has a background | 2           | passed  | .*       |
-      | Scenario that is skipped            | 2           | skipped | .*       |
+      | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario which now has a background | 2           | passed  | .*       |
+      | .*         | Scenario that is skipped            | 2           | skipped | .*       |
 
   @show-skips
   Scenario: User can run results without skips in the JUnit results
@@ -226,13 +226,13 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_only_failures_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-       | Started at  | Feature                                | Total | Passed | Failed | Skipped | Status | Duration |
-       | .*          | Feature with failing scenario          | 1     | 0      | 1      | 0       | failed | .*       |
-       | .*          | Feature with failing scenario with web | 1     | 0      | 1      | 0       | failed | .*       |
+       | Started at | Feature                                | Total | Passed | Failed | Skipped | Status | Duration |
+       | .*         | Feature with failing scenario          | 1     | 0      | 1      | 0       | failed | .*       |
+       | .*         | Feature with failing scenario with web | 1     | 0      | 1      | 0       | failed | .*       |
      When I click the button "Feature with failing scenario with web"
      Then I should see a table that matches the following:
-       | Scenario                              | Total Steps | Status | Duration |
-       | Just a scenario that opens a web page | 3           | failed | .*       |
+       | Started at | Scenario                              | Total Steps | Status | Duration |
+       | .*         | Just a scenario that opens a web page | 3           | failed | .*       |
      When I click the button "Just a scenario that opens a web page"
       And I wait to click the button "show images"
       And I should see the image with the alt text "And I should see the text "inexistent""
