@@ -83,7 +83,7 @@
             <tr class="d-flex">
                 <td class="anchor-toggle text-truncate col-8" data-toggle="collapse" href="#collapsable-row-{{ loop.index }}" role="button" aria-expanded="false" aria-controls="collapsable-row-{{ loop.index }}">
                     <a class="anchor" id="step_{{ loop.index}}" href="#step_{{ loop.index }}">🔗</a>
-                    <pre class="status-{{ step_status }}">{{ step_keyword }}</pre><span> {{ escape(step['name']) }}</span>
+                    <pre class="status-{{ step_status }}">{{ step_keyword }}</pre><span style="display: contents;"> {{ escape(step['name']) }}</span>
             {% if step['text'] %}
                     <br/>
                     <pre style="color: black; margin: 0">{{ escape(step['text']) }}</pre>
@@ -100,7 +100,7 @@
                 {% endif %}
             {% endif %}
                 </td>
-                <td><span style="display: inline; color: gray;">{{ step_timing }}</span></td>
+                <td class="col-4"><span style="display: inline; color: gray;">{{ step_timing }}</span></td>
             </tr>
 
             {% if step['image'] is defined and step['result'] is defined %}
