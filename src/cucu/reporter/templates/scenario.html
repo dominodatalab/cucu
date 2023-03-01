@@ -83,7 +83,7 @@
             <tr class="d-flex">
                 <td class="anchor-toggle text-truncate col-8" data-toggle="collapse" href="#collapsable-row-{{ loop.index }}" role="button" aria-expanded="false" aria-controls="collapsable-row-{{ loop.index }}">
                     <a class="anchor" id="step_{{ loop.index}}" href="#step_{{ loop.index }}">🔗</a>
-                    <pre class="status-{{ step_status }}">{{ step_keyword }}</pre><span class="status-{{ step['result'] }}"> {{ escape(step['name']) }}</span>
+                    <pre class="status-{{ step_status }}">{{ step_keyword }}</pre><span> {{ escape(step['name']) }}</span>
             {% if step['text'] %}
                     <br/>
                     <pre style="color: black; margin: 0">{{ escape(step['text']) }}</pre>
