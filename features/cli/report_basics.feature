@@ -128,7 +128,7 @@ Feature: Report basics
      Then I wait to see the text "@all"
      When I click the link "Scenario that is tagged with @second"
      Then I wait to see the text "@second"
-      And I should not see the text "@all"
+      And I should see the text "@all"
       And I should not see the text "@first"
 
   @runtime-timeout
@@ -182,8 +182,8 @@ Feature: Report basics
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
       | Started at | Scenario                            | Total Steps | Status  | Duration |
-      | .*         | Scenario which now has a background | 2           | passed  | .*       |
       | .*         | Scenario that is skipped            | 2           | skipped | .*       |
+      | .*         | Scenario which now has a background | 2           | passed  | .*       |
 
   @show-skips
   Scenario: User can run results without skips in the JUnit results
