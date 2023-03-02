@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block content %}
+{% block nav %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Feature HTML Test Report</a>
@@ -13,6 +13,8 @@
             </div>
         </div>
     </nav>
+{% endblock %}
+{% block content %}
     <table class="table table-hover">
         <tr class="remove-table-hover"><span style="display: inline; color: mediumturquoise">{{ feature['tags'] }}</span><br/></tr>
         <tr class="remove-table-hover"><span style="display: inline; color: maroon">Feature: </span><span style="display: inline; color: grey">{{ escape(feature['name']) }}</span></tr>
