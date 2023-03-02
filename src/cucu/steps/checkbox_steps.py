@@ -25,6 +25,7 @@ def find_checkbox(ctx, name, index=0):
         [
             'input[type="checkbox"]',
             '*[role="checkbox"]',
+            ".ant-checkbox",
         ],
         index=index,
         direction=fuzzy.Direction.RIGHT_TO_LEFT,
@@ -38,6 +39,7 @@ def is_checked(checkbox):
     return (
         checkbox.get_attribute("checked")
         or checkbox.get_attribute("aria-checked") == "true"
+        or "ant-checkbox-checked" in checkbox.get_attribute("class")
     )
 
 
