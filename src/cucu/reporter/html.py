@@ -156,6 +156,7 @@ def generate(results, basepath, only_failures=False):
                 if "text" in step and not isinstance(step["text"], list):
                     step["text"] = [step["text"]]
 
+                # prepare by joining into one big chunk here since we can't do it in the Jinja template
                 if "text" in step:
                     text_indent = "       "
                     step["text"] = "\n".join(
@@ -164,6 +165,7 @@ def generate(results, basepath, only_failures=False):
                         + [text_indent + '"""']
                     )
 
+                # prepare by joining into one big chunk here since we can't do it in the Jinja template
                 if "table" in step:
                     text_indent = "       "
                     step["table"] = "\n".join(
