@@ -210,9 +210,7 @@ class CucuJUnitFormatter(Formatter):
             scenarios = filtered_scenarios
 
             if len(scenarios) == 0:
-                # we had a suite of just skipped results and should remove the
-                # results all together
-                os.remove(output_filepath)
+                # we had a suite of just skipped results
                 return
 
         # calculate with the latest data
