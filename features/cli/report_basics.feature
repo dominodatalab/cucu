@@ -246,7 +246,7 @@ Feature: Report basics
       """
       Feature: nothing to see here
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/empty_features --results {CUCU_RESULTS_DIR}/empty_features_results --generate-report --report {CUCU_RESULTS_DIR}/empty_features_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/empty_features --results {CUCU_RESULTS_DIR}/empty_features_results --generate-report --report {CUCU_RESULTS_DIR}/empty_features_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/empty_features_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see the text "No data available in table"
