@@ -17,6 +17,35 @@
     .remove-table-hover tr:hover{
        background-color: unset !important;
     }
+    @link-color:       @brand-primary;
+    @link-hover-color: darken(@link-color, 15%);
+
+    a {
+        color: @link-color;
+        text-decoration: none;
+
+        &:hover {
+            color: @link-hover-color;
+            text-decoration: underline;
+        }
+    }
+
+    .status-passed {
+        display: inline;
+        color: green;
+    }
+    .status-failed {
+        display: inline;
+        color: red;
+    }
+    .status-skipped {
+        display: inline;
+        color: blue;
+    }
+    .status-untested {
+        display: inline;
+        color: gray;
+    }
     </style>
     <script>
         function setupReportTables(defaultOrder, columns) {
@@ -69,8 +98,11 @@
   <body>
     <div class="row justify-content-md-center">
         <div class="col-10">
-            {% block content %}{% endblock %}
+            {% block nav %}{% endblock %}
         </div>
+    </div>
+    <div class="container">
+        {% block content %}{% endblock %}
     </div>
   </body>
 </html>

@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block nav %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Flat HTML Test Report</a>
+            <div class="collapse navbar-collapse">
+              <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item active">
+                  <a class="nav-link" href="index.html" title="go to all report">Index</a>
+                </li>
+              </ul>
+            </div>
+        </div>
+    </nav>
+{% endblock %}
+{% block content %}
+    <table class="table table-hover datatable">
+        <thead>
+            <tr class="align-text-top">
+                <th class="text-center">Started at</th>
+                <th>Feature</th>
+                <th>Scenario</th>
+                <th class="text-center">Total Steps</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Duration</th>
+            </tr>
+        </thead>
+        {% for feature in features %}
+            {% for scenario in feature["elements"] %}
+                <!--- ignore Backgrounds for the time being -->
+                {% if scenario['keyword'] != 'Background' %}
+                <tr>
+                    <td class="text-center">{{ scenario['started_at'] }}</td>
+                    <td><a href="{{ urlencode(escape(feature['name'])) }}.html"><span>{{ escape(feature['name']) }}</span></a></td>
+                    <td><a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><span>{{ escape(scenario['name']) }}</span></a></td>
+                    <td class="text-center">{{ scenario['total_steps'] }}</td>
+                    <td class="text-center"><span class="status-{{ scenario['status'] }}">{{ scenario['status'] }}</span></td>
+                    <td class="text-center">{{ '{:.3f}'.format(scenario['duration']) }}s</td>
+                </tr>
+                {%  endif %}
+            {% endfor %}
+        {% endfor %}
+    </table>
+
+    <script>
+    setupReportTables([[2, 'asc']], [{type: 'timestamp', searchable: false}, {type: 'string'}, {type: 'string'}, {type: 'num', searchable: false}, {type: 'html'} , {type: 'timestamp', searchable: false} ])
+    </script>
+{% endblock %}

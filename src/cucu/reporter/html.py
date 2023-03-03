@@ -48,6 +48,8 @@ def generate(results, basepath, only_failures=False):
     generate an HTML report for the results provided.
     """
 
+    show_status = CONFIG["CUCU_SHOW_STATUS"] == "true"
+
     features = []
 
     run_json_filepaths = list(glob.iglob(os.path.join(results, "*run.json")))
@@ -59,8 +61,11 @@ def generate(results, basepath, only_failures=False):
         with open(run_json_filepath, "rb") as index_input:
             try:
                 features += json.loads(index_input.read())
-                print("r", end="", flush=True)
+                if show_status:
+                    print("r", end="", flush=True)
             except Exception as exception:
+                if show_status:
+                    print("")  # add a newline before logger
                 logger.warn(
                     f"unable to read file {run_json_filepath}, got error: {exception}"
                 )
@@ -78,7 +83,8 @@ def generate(results, basepath, only_failures=False):
     #
     reported_features = []
     for feature in features:
-        print("F", end="", flush=True)
+        if show_status:
+            print("F", end="", flush=True)
         scenarios = []
 
         if feature["status"] != "untested" and "elements" in feature:
@@ -105,7 +111,8 @@ def generate(results, basepath, only_failures=False):
             )
 
         for scenario in scenarios:
-            print("S", end="", flush=True)
+            if show_status:
+                print("S", end="", flush=True)
             process_tags(scenario)
 
             scenario_duration = 0
@@ -127,7 +134,8 @@ def generate(results, basepath, only_failures=False):
 
             step_index = 0
             for step in scenario["steps"]:
-                print("s", end="", flush=True)
+                if show_status:
+                    print("s", end="", flush=True)
                 total_steps += 1
                 image_filename = (
                     f"{step_index} - {step['name'].replace('/', '_')}.png"
@@ -140,8 +148,38 @@ def generate(results, basepath, only_failures=False):
                 if "result" in step:
                     scenario_duration += step["result"]["duration"]
 
+                    if "error_message" in step["result"] and step["result"][
+                        "error_message"
+                    ] == [None]:
+                        step["result"]["error_message"] = [""]
+
                 if "text" in step and not isinstance(step["text"], list):
                     step["text"] = [step["text"]]
+
+                # prepare by joining into one big chunk here since we can't do it in the Jinja template
+                if "text" in step:
+                    text_indent = "       "
+                    step["text"] = "\n".join(
+                        [text_indent + '"""']
+                        + [f"{text_indent}{x}" for x in step["text"]]
+                        + [text_indent + '"""']
+                    )
+
+                # prepare by joining into one big chunk here since we can't do it in the Jinja template
+                if "table" in step:
+                    text_indent = "       "
+                    step["table"] = "\n".join(
+                        [
+                            text_indent
+                            + "| "
+                            + " | ".join(step["table"]["headings"])
+                            + " |"
+                        ]
+                        + [
+                            text_indent + "| " + " | ".join(row) + " |"
+                            for row in step["table"]["rows"]
+                        ]
+                    )
 
                 step_index += 1
             logs_dir = os.path.join(scenario_filepath, "logs")
@@ -150,7 +188,8 @@ def generate(results, basepath, only_failures=False):
                 log_files = []
 
                 for log_file in glob.iglob(os.path.join(logs_dir, "*.*")):
-                    print("l", end="", flush=True)
+                    if show_status:
+                        print("l", end="", flush=True)
 
                     log_filepath = log_file.removeprefix(
                         f"{scenario_filepath}/"
@@ -171,7 +210,8 @@ def generate(results, basepath, only_failures=False):
                 only_console_logs = lambda log: ".console." in log["name"]
 
                 for log_file in filter(only_console_logs, log_files):
-                    print("c", end="", flush=True)
+                    if show_status:
+                        print("c", end="", flush=True)
 
                     converter = Ansi2HTMLConverter(dark_bg=False)
                     log_file_filepath = os.path.join(
@@ -192,18 +232,40 @@ def generate(results, basepath, only_failures=False):
                             converter.convert(log_file_input.read())
                         )
 
-            scenario["duration"] = scenario_duration
             scenario["total_steps"] = total_steps
+            if len(scenario["steps"]) > 0 and "result" in scenario["steps"][0]:
+                scenario["started_at"] = scenario["steps"][0]["result"][
+                    "timestamp"
+                ]
+            else:
+                scenario["started_at"] = ""
+            scenario["duration"] = scenario_duration
             feature_duration += scenario_duration
+
+        feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
+        feature["started_at"] = scenarios[0]["started_at"]
+        feature["duration"] = sum([x["duration"] for x in scenarios])
 
         feature["total_scenarios"] = total_scenarios
         feature["total_scenarios_passed"] = total_scenarios_passed
         feature["total_scenarios_failed"] = total_scenarios_failed
         feature["total_scenarios_skipped"] = total_scenarios_skipped
-        feature["duration"] = feature_duration
+
+    keys = [
+        "total_scenarios",
+        "total_scenarios_passed",
+        "total_scenarios_failed",
+        "total_scenarios_skipped",
+        "duration",
+    ]
+    grand_totals = {}
+    for k in keys:
+        grand_totals[k] = sum([x[k] for x in reported_features])
 
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)
+    if show_status:
+        print("")  # add a newline to end status
 
     def urlencode(string):
         """
@@ -221,6 +283,7 @@ def generate(results, basepath, only_failures=False):
     index_template = templates.get_template("index.html")
     rendered_index_html = index_template.render(
         features=reported_features,
+        grand_totals=grand_totals,
         title="Cucu HTML Test Report",
         basepath=basepath,
         dir_depth="",
@@ -229,6 +292,19 @@ def generate(results, basepath, only_failures=False):
     index_output_filepath = os.path.join(basepath, "index.html")
     with open(index_output_filepath, "wb") as output:
         output.write(rendered_index_html.encode("utf8"))
+
+    flat_template = templates.get_template("flat.html")
+    rendered_flat_html = flat_template.render(
+        features=reported_features,
+        grand_totals=grand_totals,
+        title="Flat HTML Test Report",
+        basepath=basepath,
+        dir_depth="",
+    )
+
+    flat_output_filepath = os.path.join(basepath, "flat.html")
+    with open(flat_output_filepath, "wb") as output:
+        output.write(rendered_flat_html.encode("utf8"))
 
     feature_template = templates.get_template("feature.html")
 

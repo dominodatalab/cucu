@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
-{% block content %}
+{% block nav %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">HTML Test Report</a>
+            <a class="navbar-brand" href="#">Feature HTML Test Report</a>
 
             <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
               <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
@@ -13,32 +13,40 @@
             </div>
         </div>
     </nav>
+{% endblock %}
+{% block content %}
     <table class="table table-hover">
-        <tr class="remove-table-hover"><pre style="display: inline; color: mediumturquoise">{{ feature['tags'] }}</pre><br/></tr>
-        <tr class="remove-table-hover"><pre style="display: inline; color: maroon">Feature: </pre><pre style="display: inline; color: grey">{{ escape(feature['name']) }}</pre></tr>
+        <tr class="remove-table-hover"><span style="display: inline; color: mediumturquoise">{{ feature['tags'] }}</span><br/></tr>
+        <tr class="remove-table-hover"><span style="display: inline; color: maroon">Feature: </span><span style="display: inline; color: grey">{{ escape(feature['name']) }}</span></tr>
     </table>
     <table class="table table-hover datatable">
         <thead>
-            <tr>
+            <tr class="align-text-top">
+                <th class="text-center">Started at<br/>{{ feature['started_at'] }}</th>
                 <th>Scenario</th>
-                <th class="text-center">Total Steps</th>
-                <th class="text-center">Status</th>
-                <th class="text-center">Duration</th>
+                <th class="text-center">Total Steps<br/>{{ feature['total_steps'] }}</th>
+                <th class="text-center">Status<br/>
+                    {% if feature['status'] == 'passed' %}
+                        <span style="display: inline; color: green">{{ feature['status'] }}</span>
+                    {% elif feature['status'] == 'failed' %}
+                        <span style="display: inline; color: red">{{ feature['status'] }}</span>
+                    {% elif feature['status'] == 'skipped' %}
+                        <span style="display: inline; color: blue">{{ feature['status'] }}</span>
+                    {% elif feature['status'] == 'untested' %}
+                        <span style="display: inline; color: gray">{{ feature['status'] }}</span>
+                    {% endif %}
+                </th>
+                <th class="text-center">Duration<br/>{{ '{:.3f}'.format(feature['duration']) }}s</th>
             </tr>
         </thead>
         {% for scenario in scenarios %}
             <!--- ignore Backgrounds for the time being -->
             {% if scenario['keyword'] != 'Background' %}
             <tr>
-                <td><a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><pre style="display: inline; color: grey">{{ escape(scenario['name']) }}</pre></a></td>
+                <td class="text-center">{{ scenario['started_at'] }}</td>
+                <td><a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><span style="display: inline; color: grey">{{ escape(scenario['name']) }}</span></a></td>
                 <td class="text-center">{{ scenario['total_steps'] }}</td>
-                {% if scenario['status'] == 'passed' %}
-                    <td class="text-center"><pre style="display: inline; color: green">{{ scenario['status'] }}</pre></td>
-                {% elif scenario['status'] == 'failed' %}
-                    <td class="text-center"><pre style="display: inline; color: red">{{ scenario['status'] }}</pre></td>
-                {% elif scenario['status'] == 'skipped' %}
-                    <td class="text-center"><pre style="display: inline; color: blue">{{ scenario['status'] }}</pre></td>
-                {% endif %}
+                <td class="text-center"><span class="status-{{ scenario['status'] }}">{{ scenario['status'] }}</span></td>
                 <td class="text-center">{{ '{:.3f}'.format(scenario['duration']) }}s</td>
             </tr>
             {%  endif %}
@@ -46,6 +54,6 @@
     </table>
 
     <script>
-    setupReportTables([[2, 'asc']], [{type: 'string'}, {type: 'num'}, {type: 'html'} , {type: 'timestamp'} ])
+    setupReportTables([[1, 'asc']], [{type: 'timestamp', searchable: false}, {type: 'string'}, {type: 'num', searchable: false}, {type: 'html'} , {type: 'timestamp', searchable: false} ])
     </script>
 {% endblock %}

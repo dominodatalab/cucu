@@ -100,12 +100,6 @@ def main():
     "the same location as --results",
 )
 @click.option(
-    "--junit-without-skips",
-    is_flag=True,
-    default=False,
-    help="when set to true skipped results are removed from the JUnit results",
-)
-@click.option(
     "--junit-with-stacktrace",
     is_flag=True,
     default=False,
@@ -116,6 +110,18 @@ def main():
     "--logging-level",
     default="INFO",
     help="set logging level to one of debug, warn or info (default)",
+)
+@click.option(
+    "--show-skips",
+    default=False,
+    is_flag=True,
+    help="when set skips are shown",
+)
+@click.option(
+    "--show-status",
+    default=False,
+    is_flag=True,
+    help="when set status output is shown (helpful for CI that wants stdout updates)",
 )
 @click.option(
     "--periodic-thread-dumper",
@@ -138,12 +144,6 @@ def main():
     default=False,
     is_flag=True,
     help="when set the HTML test report will only contain the failed test results",
-)
-@click.option(
-    "--report-without-skips",
-    is_flag=True,
-    default=False,
-    help="when set to true skipped results are removed from the tests report",
 )
 @click.option(
     "-r",
@@ -200,17 +200,17 @@ def run(
     name,
     ipdb_on_failure,
     junit,
-    junit_without_skips,
     junit_with_stacktrace,
     logging_level,
     periodic_thread_dumper,
     preserve_results,
     report,
     report_only_failures,
-    report_without_skips,
     results,
     runtime_timeout,
     secrets,
+    show_skips,
+    show_status,
     tags,
     selenium_remote_url,
     workers,
@@ -261,14 +261,14 @@ def run(
     if junit is None:
         junit = results
 
-    if junit_without_skips:
-        os.environ["CUCU_JUNIT_WITHOUT_SKIPS"] = "true"
+    if show_skips:
+        os.environ["CUCU_SHOW_SKIPS"] = "true"
+
+    if show_status:
+        os.environ["CUCU_SHOW_STATUS"] = "true"
 
     if junit_with_stacktrace:
         os.environ["CUCU_JUNIT_WITH_STACKTRACE"] = "true"
-
-    if report_without_skips:
-        os.environ["CUCU_REPORT_WITHOUT_SKIPS"] = "true"
 
     if report_only_failures:
         os.environ["CUCU_REPORT_ONLY_FAILURES"] = "true"
@@ -307,6 +307,7 @@ def run(
                 junit,
                 results,
                 secrets,
+                show_skips,
                 tags,
                 verbose,
                 skip_init_global_hook_variables=True,
@@ -365,6 +366,7 @@ def run(
                                 junit,
                                 results,
                                 secrets,
+                                show_skips,
                                 tags,
                                 verbose,
                             ],
@@ -435,8 +437,22 @@ def _generate_report(filepath, output, only_failures: False):
     default="INFO",
     help="set logging level to one of debug, warn or info (default)",
 )
+@click.option(
+    "--show-skips",
+    default=False,
+    is_flag=True,
+    help="when set skips are shown",
+)
+@click.option(
+    "--show-status",
+    default=False,
+    is_flag=True,
+    help="when set status output is shown (helpful for CI that wants stdout updates)",
+)
 @click.option("-o", "--output", default="report")
-def report(filepath, only_failures, logging_level, output):
+def report(
+    filepath, only_failures, logging_level, show_skips, show_status, output
+):
     """
     generate a test report from a results directory
     """
@@ -444,6 +460,12 @@ def report(filepath, only_failures, logging_level, output):
 
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())
+
+    if show_skips:
+        os.environ["CUCU_SHOW_SKIPS"] = "true"
+
+    if show_status:
+        os.environ["CUCU_SHOW_STATUS"] = "true"
 
     run_details_filepath = os.path.join(filepath, "run_details.json")
 
@@ -634,10 +656,19 @@ def vars(filepath):
     help="when set to detach the browser will continue to run and "
     "the cucu process will exit",
 )
-def debug(browser, url, detach):
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+def debug(browser, url, detach, logging_level):
     """
     debug cucu library
     """
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
+
     fuzzy_js = fuzzy.load_jquery_lib() + fuzzy.load_fuzzy_lib()
     # XXX: need to make this more generic once we make the underlying
     #      browser framework swappable.

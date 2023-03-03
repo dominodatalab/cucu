@@ -52,22 +52,21 @@ Feature: Report basics
       And I should not see the image with the alt text "Given I start a webserver at directory "data/www" and save the port to the variable "PORT""
       And I should not see the image with the alt text "And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html""
 
-  Scenario: User can run a feature with mixed results and has all results reported correctly
+  Scenario: User can run a feature with mixed results and has all results reported correctly without skips
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/mixed-results" and expect exit code "1"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/mixed-results --output {CUCU_RESULTS_DIR}/mixed-results-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-       | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
-       | Feature with mixed results | 5     | 2      | 2      | 1       | failed | .*       |
+       | Started at | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
+       | .*         | Feature with mixed results | 4     | 2      | 2      | 0       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
-      | Scenario                            | Total Steps | Status  | Duration |
-      | Scenario that fails                 | 2           | failed  | .*       |
-      | Scenario that has an undefined step | 1           | failed  | .*       |
-      | Scenario that passes                | 1           | passed  | .*       |
-      | Scenario that also passes           | 1           | passed  | .*       |
-      | Scenario that is skipped            | 1           | skipped | .*       |
+      | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario that also passes           | 1           | passed  | .*       |
+      | .*         | Scenario that fails                 | 2           | failed  | .*       |
+      | .*         | Scenario that has an undefined step | 1           | failed  | .*       |
+      | .*         | Scenario that passes                | 1           | passed  | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -75,19 +74,57 @@ Feature: Report basics
       And I click the button "Scenario that has an undefined step"
      Then I should see the button "Given I attempt to use an undefined step"
 
-  Scenario: User can run feature with background and has all results reported correctly
+  @show-skips
+  Scenario: User can run a feature with mixed results and has all results reported correctly
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --show-skips --results {CUCU_RESULTS_DIR}/mixed-results" and expect exit code "1"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/mixed-results --show-skips --output {CUCU_RESULTS_DIR}/mixed-results-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     Then I should see a table that matches the following:
+       | Started at | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
+       | .*         | Feature with mixed results | 5     | 2      | 2      | 1       | failed | .*       |
+     When I click the button "Feature with mixed results"
+     Then I should see a table that matches the following:
+      | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario that also passes           | 1           | passed  | .*       |
+      | .*         | Scenario that fails                 | 2           | failed  | .*       |
+      | .*         | Scenario that has an undefined step | 1           | failed  | .*       |
+      | .*         | Scenario that is skipped            | 1           | skipped | .*       |
+      | .*         | Scenario that passes                | 1           | passed  | .*       |
+      And I click the button "Scenario that fails"
+     Then I should see the text "RuntimeError: step fails on purpose"
+     When I click the button "Index"
+      And I click the button "Feature with mixed results"
+      And I click the button "Scenario that has an undefined step"
+     Then I should see the button "Given I attempt to use an undefined step"
+
+  Scenario: User can run feature with background and has all results reported correctly without skips
     Given I run the command "cucu run data/features/feature_with_background.feature --results {CUCU_RESULTS_DIR}/feature_with_background" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/feature_with_background --output {CUCU_RESULTS_DIR}/feature_with_background-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-       | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
-       | Feature with background    | 2     | 1      | 0      | 1       | passed | .*       |
+       | Started at | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
+       | .*         | Feature with background    | 1     | 1      | 0      | 0       | passed | .*       |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
-      | Scenario                            | Total Steps | Status  | Duration |
-      | Scenario which now has a background | 2           | passed  | .*       |
-      | Scenario that is skipped            | 2           | skipped | .*       |
+      | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario which now has a background | 2           | passed  | .*       |
+
+  @show-skips
+  Scenario: User can run feature with background and has all results reported correctly
+    Given I run the command "cucu run data/features/feature_with_background.feature --show-skips --results {CUCU_RESULTS_DIR}/feature_with_background" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/feature_with_background --show-skips --output {CUCU_RESULTS_DIR}/feature_with_background-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     Then I should see a table that matches the following:
+       | Started at | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
+       | .*         | Feature with background    | 2     | 1      | 0      | 1       | passed | .*       |
+     When I click the button "Feature with background"
+     Then I should see a table that matches the following:
+      | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario that is skipped            | 2           | skipped | .*       |
+      | .*         | Scenario which now has a background | 2           | passed  | .*       |
 
   @workaround @QE-7075
   @disabled
@@ -128,7 +165,7 @@ Feature: Report basics
      Then I wait to see the text "@all"
      When I click the link "Scenario that is tagged with @second"
      Then I wait to see the text "@second"
-      And I should not see the text "@all"
+      And I should see the text "@all"
       And I should not see the text "@first"
 
   @runtime-timeout
@@ -140,29 +177,28 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      When I click the button "Slow feature #1"
      Then I should see a table that matches the following:
-      | Scenario      | Total Steps | Status | Duration |
-      | Slow scenario | 1           | .*     |    >*    |
+      | Started at | Scenario      | Total Steps | Status | Duration |
+      | .*         | Slow scenario | 1           | .*     |    >*    |
      When I go back on the browser
       And I click the button "Slow feature #2"
      Then I should see a table that matches the following:
-      | Scenario      | Total Steps | Status | Duration |
-      | Slow scenario | 1           | .*     |    >*    |
+      | Started at | Scenario      | Total Steps | Status | Duration |
+      | .*         | Slow scenario | 1           | .*     |    >*    |
 
-  @report-without-skips
-  Scenario: User can run removed skipped test results from the HTML test report
-    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --report-without-skips --results {CUCU_RESULTS_DIR}/report_without_skips --generate-report --report {CUCU_RESULTS_DIR}/report_without_skips_report" and expect exit code "1"
+  Scenario: User can run results without skips in the HTML test report
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/report_without_skips --generate-report --report {CUCU_RESULTS_DIR}/report_without_skips_report" and expect exit code "1"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-       | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
-       | Feature with mixed results | 4     | 2      | 2      | 0       | failed | .*       |
+      | Started at | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
+      | .*         | Feature with mixed results | 4     | 2      | 2      | 0       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
-      | Scenario                            | Total Steps | Status  | Duration |
-      | Scenario that fails                 | 2           | failed  | .*       |
-      | Scenario that has an undefined step | 1           | failed  | .*       |
-      | Scenario that passes                | 1           | passed  | .*       |
-      | Scenario that also passes           | 1           | passed  | .*       |
+      | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario that also passes           | 1           | passed  | .*       |
+      | .*         | Scenario that fails                 | 2           | failed  | .*       |
+      | .*         | Scenario that has an undefined step | 1           | failed  | .*       |
+      | .*         | Scenario that passes                | 1           | passed  | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -170,27 +206,26 @@ Feature: Report basics
       And I click the button "Scenario that has an undefined step"
      Then I should see the button "Given I attempt to use an undefined step"
 
-  Scenario: User can run removed skipped test results from the HTML test report on a feature with background
-    Given I run the command "cucu run data/features/feature_with_background.feature --report-without-skips --results {CUCU_RESULTS_DIR}/report_without_skips_background --generate-report --report {CUCU_RESULTS_DIR}/report_without_skips_background_report" and expect exit code "0"
+  Scenario: User can run results without skips in the HTML test report on a feature with background
+    Given I run the command "cucu run data/features/feature_with_background.feature --results {CUCU_RESULTS_DIR}/report_without_skips_background --generate-report --report {CUCU_RESULTS_DIR}/report_without_skips_background_report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_background_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-      | Feature                 | Total | Passed | Failed | Skipped | Status | Duration |
-      | Feature with background | 1     | 1      | 0      | 0       | passed | .*       |
+      | Started at | Feature                 | Total | Passed | Failed | Skipped | Status | Duration |
+      | .*         | Feature with background | 1     | 1      | 0      | 0       | passed | .*       |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
-      | Scenario                            | Total Steps | Status  | Duration |
-      | Scenario which now has a background | 2           | passed  | .*       |
+      | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario which now has a background | 2           | passed  | .*       |
 
-  @junit-without-skips
-  Scenario: User can run removed skipped test results from the JUnit results
-    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --junit-without-skips --results {CUCU_RESULTS_DIR}/junit_without_skips" and expect exit code "1"
+  Scenario: User can run results without skips in the JUnit results
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/junit_without_skips" and expect exit code "1"
       And I read the contents of the file at "{CUCU_RESULTS_DIR}/junit_without_skips/TESTS-Feature_with_mixed_results.xml" and save to the variable "JUNIT"
      Then I should see "{JUNIT}" contains "skipped=\"0\""
       And I should see "{JUNIT}" does not contain "<skipped>"
 
-  Scenario: User can run removed skipped test results from the JUnit results when feature has background
-    Given I run the command "cucu run data/features/feature_with_background.feature --junit-without-skips --results {CUCU_RESULTS_DIR}/junit_without_skips_background" and expect exit code "0"
+  Scenario: User can run results without skips in the JUnit results when feature has background
+    Given I run the command "cucu run data/features/feature_with_background.feature --results {CUCU_RESULTS_DIR}/junit_without_skips_background" and expect exit code "0"
       And I read the contents of the file at "{CUCU_RESULTS_DIR}/junit_without_skips_background/TESTS-Feature_with_background.xml" and save to the variable "JUNIT"
      Then I should see "{JUNIT}" contains "skipped=\"0\""
       And I should see "{JUNIT}" does not contain "<skipped>"
@@ -222,13 +257,13 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_only_failures_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-       | Feature                                | Total | Passed | Failed | Skipped | Status | Duration |
-       | Feature with failing scenario          | 1     | 0      | 1      | 0       | failed | .*       |
-       | Feature with failing scenario with web | 1     | 0      | 1      | 0       | failed | .*       |
+       | Started at | Feature                                | Total | Passed | Failed | Skipped | Status | Duration |
+       | .*         | Feature with failing scenario          | 1     | 0      | 1      | 0       | failed | .*       |
+       | .*         | Feature with failing scenario with web | 1     | 0      | 1      | 0       | failed | .*       |
      When I click the button "Feature with failing scenario with web"
      Then I should see a table that matches the following:
-       | Scenario                              | Total Steps | Status | Duration |
-       | Just a scenario that opens a web page | 3           | failed | .*       |
+       | Started at | Scenario                              | Total Steps | Status | Duration |
+       | .*         | Just a scenario that opens a web page | 3           | failed | .*       |
      When I click the button "Just a scenario that opens a web page"
       And I wait to click the button "show images"
       And I should see the image with the alt text "And I should see the text "inexistent""
