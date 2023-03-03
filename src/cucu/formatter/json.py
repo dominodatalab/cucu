@@ -253,6 +253,9 @@ class CucuJSONFormatter(Formatter):
         self.stream.write("\n]\n")
 
     def write_json_feature(self, feature_data):
+        if "elements" not in feature_data:
+            return
+
         filtered_scenarios = [
             x
             for x in feature_data["elements"]
