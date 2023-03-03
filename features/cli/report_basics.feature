@@ -52,6 +52,28 @@ Feature: Report basics
       And I should not see the image with the alt text "Given I start a webserver at directory "data/www" and save the port to the variable "PORT""
       And I should not see the image with the alt text "And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html""
 
+  Scenario: User can run a feature with mixed results and has all results reported correctly without skips
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/mixed-results" and expect exit code "1"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/mixed-results --output {CUCU_RESULTS_DIR}/mixed-results-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     Then I should see a table that matches the following:
+       | Started at | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
+       | .*         | Feature with mixed results | 4     | 2      | 2      | 0       | failed | .*       |
+     When I click the button "Feature with mixed results"
+     Then I should see a table that matches the following:
+      | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario that also passes           | 1           | passed  | .*       |
+      | .*         | Scenario that fails                 | 2           | failed  | .*       |
+      | .*         | Scenario that has an undefined step | 1           | failed  | .*       |
+      | .*         | Scenario that passes                | 1           | passed  | .*       |
+      And I click the button "Scenario that fails"
+     Then I should see the text "RuntimeError: step fails on purpose"
+     When I click the button "Index"
+      And I click the button "Feature with mixed results"
+      And I click the button "Scenario that has an undefined step"
+     Then I should see the button "Given I attempt to use an undefined step"
+
   @show-skips
   Scenario: User can run a feature with mixed results and has all results reported correctly
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --show-skips --results {CUCU_RESULTS_DIR}/mixed-results" and expect exit code "1"
@@ -75,6 +97,19 @@ Feature: Report basics
       And I click the button "Feature with mixed results"
       And I click the button "Scenario that has an undefined step"
      Then I should see the button "Given I attempt to use an undefined step"
+
+  Scenario: User can run feature with background and has all results reported correctly without skips
+    Given I run the command "cucu run data/features/feature_with_background.feature --results {CUCU_RESULTS_DIR}/feature_with_background" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/feature_with_background --output {CUCU_RESULTS_DIR}/feature_with_background-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     Then I should see a table that matches the following:
+       | Started at | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
+       | .*         | Feature with background    | 1     | 1      | 0      | 0       | passed | .*       |
+     When I click the button "Feature with background"
+     Then I should see a table that matches the following:
+      | Started at | Scenario                            | Total Steps | Status  | Duration |
+      | .*         | Scenario which now has a background | 2           | passed  | .*       |
 
   @show-skips
   Scenario: User can run feature with background and has all results reported correctly
