@@ -324,7 +324,9 @@ def run(
             else:
                 feature_filepaths = [filepath]
 
-            with multiprocessing.Pool(int(workers)) as pool:
+            with multiprocessing.get_context("spawn").Pool(
+                int(workers)
+            ) as pool:
                 timer = None
                 if runtime_timeout:
                     logger.debug("setting up runtime timeout timer")
