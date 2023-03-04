@@ -380,8 +380,12 @@ def run(
 
                 workers_failed = False
                 for result in async_results:
-                    exit_code = result.get(runtime_timeout)
-                    if exit_code != 0:
+                    try:
+                        exit_code = result.get(runtime_timeout)
+                        if exit_code != 0:
+                            workers_failed = True
+                    except:
+                        logger.exception("an exception is raised during test")
                         workers_failed = True
 
                 if timer:
