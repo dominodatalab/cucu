@@ -43,3 +43,43 @@ Feature: Run with workers
       """
       ............
       """
+
+  Scenario: User gets final results even when a test throws an exception
+    Given I create a file at "{CUCU_RESULTS_DIR}/exception_with_workers/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/exception_with_workers/steps/__init__.py" with the following:
+      """
+      from cucu import step
+      from cucu.steps import *
+
+      @step('I throw an exception')
+      def throw_an_exception(ctx):
+          raise RuntimeError("something bad happened")
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/exception_with_workers/feature_with_exception.feature" with the following:
+      """
+      Feature: Feature with an exception
+
+        Scenario: Scenario that throws an exception
+          Given I throw an exception
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/exception_with_workers/feature_with_success.feature" with the following:
+      """
+      Feature: Feature with success
+
+        Scenario: Scenario that succeeds
+          Given I Sleep for "5" seconds
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/exception_with_workers --workers 2 --runtime-timeout 30 --results {CUCU_RESULTS_DIR}/progress_when_in_retry_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     Then I should see "{STDOUT}" matches the following
+      """
+      ..
+      """
+      And I should see "{STDERR}" matches the following
+      """
+      [\s\S]*
+      RuntimeError: there are failures, see above for details
+      [\s\S]*
+      """
