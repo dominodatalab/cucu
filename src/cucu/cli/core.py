@@ -10,6 +10,7 @@ import time
 import os
 
 from click import ClickException
+from collections import namedtuple
 from cucu import (
     fuzzy,
     init_global_hook_variables,
@@ -351,41 +352,46 @@ def run(
 
                     register_after_all_hook(cancel_timer)
 
+                async_result = namedtuple("async_result", ["feature", "result"])
                 async_results = []
                 for feature_filepath in feature_filepaths:
-                    async_results.append(
-                        pool.apply_async(
-                            behave,
-                            [
-                                feature_filepath,
-                                color_output,
-                                dry_run,
-                                env,
-                                fail_fast,
-                                headless,
-                                name,
-                                ipdb_on_failure,
-                                junit,
-                                results,
-                                secrets,
-                                show_skips,
-                                tags,
-                                verbose,
-                            ],
-                            {
-                                "redirect_output": True,
-                            },
-                        )
+                    result = pool.apply_async(
+                        behave,
+                        [
+                            feature_filepath,
+                            color_output,
+                            dry_run,
+                            env,
+                            fail_fast,
+                            headless,
+                            name,
+                            ipdb_on_failure,
+                            junit,
+                            results,
+                            secrets,
+                            show_skips,
+                            tags,
+                            verbose,
+                        ],
+                        {
+                            "redirect_output": True,
+                        },
                     )
+                    async_results.append(async_result(feature_filepath, result))
 
                 workers_failed = False
-                for result in async_results:
+                for feature, result in async_results:
                     try:
                         exit_code = result.get(runtime_timeout)
                         if exit_code != 0:
                             workers_failed = True
+                    except multiprocessing.TimeoutError:
+                        logger.error(f"feature {feature} timed out")
+                        workers_failed = True
                     except:
-                        logger.exception("an exception is raised during test")
+                        logger.exception(
+                            "an exception is raised during feature {feature}"
+                        )
                         workers_failed = True
 
                 pool.close()
