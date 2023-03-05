@@ -388,11 +388,11 @@ def run(
                         logger.exception("an exception is raised during test")
                         workers_failed = True
 
-                if timer:
-                    timer.cancel()
-
                 pool.close()
                 pool.join()
+
+                if timer:
+                    timer.cancel()
 
                 if workers_failed:
                     raise RuntimeError(
