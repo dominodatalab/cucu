@@ -325,9 +325,7 @@ def run(
             else:
                 feature_filepaths = [filepath]
 
-            with multiprocessing.get_context("spawn").Pool(
-                int(workers)
-            ) as pool:
+            with multiprocessing.Pool(int(workers)) as pool:
                 timer = None
                 if runtime_timeout:
                     logger.debug("setting up runtime timeout timer")
@@ -338,10 +336,7 @@ def run(
                             results, "runtime-timeout"
                         )
                         open(timeout_filepath, "w").close()
-
-                        for child in multiprocessing.active_children():
-                            os.kill(child.pid, signal.SIGINT)
-                            os.kill(child.pid, signal.SIGTERM)
+                        pool.terminate()
 
                     timer = Timer(runtime_timeout, runtime_exit)
                     timer.start()
@@ -382,7 +377,7 @@ def run(
                 workers_failed = False
                 for feature, result in async_results:
                     try:
-                        exit_code = result.get(1800)
+                        exit_code = result.get(runtime_timeout)
                         if exit_code != 0:
                             workers_failed = True
                     except multiprocessing.TimeoutError:
@@ -394,11 +389,11 @@ def run(
                         )
                         workers_failed = True
 
-                pool.terminate()
-                pool.join()
-
                 if timer:
                     timer.cancel()
+
+                pool.terminate()
+                pool.join()
 
                 if workers_failed:
                     raise RuntimeError(
