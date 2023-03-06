@@ -255,6 +255,11 @@ CONFIG.define(
     default="",
 )
 CONFIG.define(
+    "CUCU_SHORT_UI_WAIT_TIMEOUT_S",
+    "the total amount of wait time in seconds `wait for` ui steps",
+    default=2.0,
+)
+CONFIG.define(
     "CUCU_STEP_WAIT_TIMEOUT_S",
     "the total amount of wait time in seconds `wait for` steps",
     default=20.0,
