@@ -388,13 +388,13 @@ def run(
                     except multiprocessing.TimeoutError:
                         logger.error(f"feature {feature} timed out")
                         workers_failed = True
-                    except:
+                    except Exception:
                         logger.exception(
-                            "an exception is raised during feature {feature}"
+                            f"an exception is raised during feature {feature}"
                         )
                         workers_failed = True
 
-                pool.close()
+                pool.terminate()
                 pool.join()
 
                 if timer:
