@@ -382,7 +382,7 @@ def run(
                 workers_failed = False
                 for feature, result in async_results:
                     try:
-                        exit_code = result.get(runtime_timeout)
+                        exit_code = result.get(1800)
                         if exit_code != 0:
                             workers_failed = True
                     except multiprocessing.TimeoutError:
