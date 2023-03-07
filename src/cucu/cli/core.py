@@ -336,7 +336,9 @@ def run(
                             results, "runtime-timeout"
                         )
                         open(timeout_filepath, "w").close()
+                        logger.info("terminating the pool")
                         pool.terminate()
+                        logger.info("pool is terminated")
 
                     timer = Timer(runtime_timeout, runtime_exit)
                     timer.start()
@@ -399,6 +401,8 @@ def run(
                     raise RuntimeError(
                         "there are failures, see above for details"
                     )
+    except Exception:
+        logger.exception("something unexpected has happened")
     finally:
         if dumper is not None:
             dumper.stop()
