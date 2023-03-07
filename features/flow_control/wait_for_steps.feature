@@ -41,3 +41,36 @@ Feature: Wait for steps
       '''
      """
      Then I should see the previous step took more than "3" seconds
+
+  Scenario: User can click a button immediately
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?delay_page_load_ms=100"
+     When I immediately click the button "button with child"
+     Then I should see the previous step took less than "0.250" seconds
+
+  Scenario: User can click a button with a short delay
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?delay_page_load_ms=1500"
+     When I click the button "button with child"
+     Then I should see the previous step took more than "1" seconds
+
+  Scenario: User can click a button after a long delay
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?delay_page_load_ms=2500"
+     When I wait to click the button "button with child"
+     Then I should see the previous step took more than "2" seconds
+
+  Scenario: User can click a button after a set time
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?delay_page_load_ms=3500"
+     When I wait up to "4" seconds to click the button "button with child"
+     Then I should see the previous step took more than "3" seconds
+
+  Scenario: User can run steps if a button is visible with a short delay
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?delay_page_load_ms=0"
+     When I run the following steps if I can see the button "button with child"
+     """
+     Then I immediately click the button "button with child"
+     """
+     Then I should see "button with child was clicked" in the input "value:"
