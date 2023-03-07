@@ -3,13 +3,14 @@ import click
 import coverage
 import glob
 import json
-import multiprocessing
 import shutil
 import signal
 import time
 import os
 
 from click import ClickException
+from collections import namedtuple
+from concurrent.futures import TimeoutError
 from cucu import (
     fuzzy,
     init_global_hook_variables,
@@ -24,6 +25,7 @@ from cucu.cli.run import behave, behave_init, write_run_details
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.lint import linter
 from importlib.metadata import version
+from pebble import ProcessPool
 from tabulate import tabulate
 from threading import Timer
 
@@ -324,69 +326,86 @@ def run(
             else:
                 feature_filepaths = [filepath]
 
-            with multiprocessing.Pool(int(workers)) as pool:
+            with ProcessPool(max_workers=int(workers)) as pool:
                 timer = None
+                timeout_reached = False
                 if runtime_timeout:
                     logger.debug("setting up runtime timeout timer")
 
                     def runtime_exit():
+                        global timeout_reached
                         logger.error("runtime timeout reached, aborting run")
                         timeout_filepath = os.path.join(
                             results, "runtime-timeout"
                         )
                         open(timeout_filepath, "w").close()
+                        timeout_reached = True
 
-                        for child in multiprocessing.active_children():
-                            os.kill(child.pid, signal.SIGINT)
-                            os.kill(child.pid, signal.SIGTERM)
+                feature_result = namedtuple(
+                    "feature_result", ["feature", "result"]
+                )
+                feature_results = []
+                workers_failed = False
 
-                    timer = Timer(runtime_timeout, runtime_exit)
-                    timer.start()
-
-                    def cancel_timer(_):
-                        logger.debug("cancelled runtime timeout timer")
-                        timer.cancel()
-
-                    register_after_all_hook(cancel_timer)
-
-                async_results = []
                 for feature_filepath in feature_filepaths:
-                    async_results.append(
-                        pool.apply_async(
-                            behave,
-                            [
-                                feature_filepath,
-                                color_output,
-                                dry_run,
-                                env,
-                                fail_fast,
-                                headless,
-                                name,
-                                ipdb_on_failure,
-                                junit,
-                                results,
-                                secrets,
-                                show_skips,
-                                tags,
-                                verbose,
-                            ],
-                            {
-                                "redirect_output": True,
-                            },
-                        )
+                    future = pool.schedule(
+                        behave,
+                        [
+                            feature_filepath,
+                            color_output,
+                            dry_run,
+                            env,
+                            fail_fast,
+                            headless,
+                            name,
+                            ipdb_on_failure,
+                            junit,
+                            results,
+                            secrets,
+                            show_skips,
+                            tags,
+                            verbose,
+                        ],
+                        {
+                            "redirect_output": True,
+                        },
+                        timeout=float(30 * 60),
+                    )
+                    feature_results.append(
+                        feature_result(feature_filepath, future)
                     )
 
-                workers_failed = False
-                for result in async_results:
-                    exit_code = result.get(runtime_timeout)
-                    if exit_code != 0:
-                        workers_failed = True
-
-                if timer:
-                    timer.cancel()
-
-                pool.close()
-                pool.join()
+                while not timeout_reached:
+                    remaining = []
+                    for feature, future in feature_results:
+                        if future.done():
+                            try:
+                                exit_code = future.result()
+                                if exit_code != 0:
+                                    workers_failed = True
+                            except Exception as error:
+                                logger.exception(
+                                    f"an exception is raised when running {feature}"
+                                )
+                                workers_failed = True
+                        else:
+                            remaining.append(
+                                feature_result(feature_filepath, future)
+                            )
+                    if len(remaining) == 0:
+                        if timer:
+                            timer.cancel()
+                        break
+                    feature_results = remaining
+                    time.sleep(1)
+                else:
+                    remaining = []
+                    for feature, future in feature_results:
+                        future.cancel()
+                        remaining.append("    " + feature)
+                    logger.error(
+                        "features not finished:\n" + "\n".join(remaining)
+                    )
 
                 if workers_failed:
                     raise RuntimeError(
