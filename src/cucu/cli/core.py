@@ -327,27 +327,21 @@ def run(
 
             with multiprocessing.Pool(int(workers)) as pool:
                 timer = None
+                timeout_reached = False
                 if runtime_timeout:
                     logger.debug("setting up runtime timeout timer")
 
                     def runtime_exit():
+                        global timeout_reached
                         logger.error("runtime timeout reached, aborting run")
                         timeout_filepath = os.path.join(
                             results, "runtime-timeout"
                         )
                         open(timeout_filepath, "w").close()
-                        logger.info("terminating the pool")
-                        pool.terminate()
-                        logger.info("pool is terminated")
+                        timeout_reached = True
 
                     timer = Timer(runtime_timeout, runtime_exit)
                     timer.start()
-
-                    def cancel_timer(_):
-                        logger.debug("cancelled runtime timeout timer")
-                        timer.cancel()
-
-                    register_after_all_hook(cancel_timer)
 
                 async_result = namedtuple("async_result", ["feature", "result"])
                 async_results = []
@@ -377,32 +371,46 @@ def run(
                     async_results.append(async_result(feature_filepath, result))
 
                 workers_failed = False
-                for feature, result in async_results:
-                    try:
-                        exit_code = result.get(runtime_timeout)
-                        if exit_code != 0:
-                            workers_failed = True
-                    except multiprocessing.TimeoutError:
-                        logger.error(f"feature {feature} timed out")
-                        workers_failed = True
-                    except Exception:
-                        logger.exception(
-                            f"an exception is raised during feature {feature}"
-                        )
-                        workers_failed = True
+                while not timeout_reached:
+                    remaining = []
+                    for feature_result in async_results:
+                        feature, result = feature_result
+                        if result.ready():
+                            try:
+                                exit_code = result.get()
+                                if exit_code != 0:
+                                    workers_failed = True
+                            except Exception:
+                                logger.exception(
+                                    f"an exception is raised during feature {feature}"
+                                )
+                                workers_failed = True
+                        else:
+                            remaining.append(feature_result)
 
-                if timer:
-                    timer.cancel()
+                    if len(remaining) == 0:
+                        if timer:
+                            timer.cancel()
+                        break
 
-                pool.terminate()
-                pool.join()
+                    async_results = remaining
+                    time.sleep(1)
+                else:
+                    logger.error(
+                        "features not finished:\n",
+                        "\n".join(
+                            [
+                                "    " + feature_result.feature
+                                for feature_result in async_results
+                            ]
+                        ),
+                    )
+                    workers_failed = True
 
                 if workers_failed:
                     raise RuntimeError(
                         "there are failures, see above for details"
                     )
-    except Exception:
-        logger.exception("something unexpected has happened")
     finally:
         if dumper is not None:
             dumper.stop()
