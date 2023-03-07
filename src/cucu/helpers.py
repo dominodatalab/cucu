@@ -122,14 +122,16 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
     def should_see_the(ctx, name):
         retry(
             should_see,
-            retry_after_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+            retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+            wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
         )(ctx, thing, name)
 
     @step(f'I should not see the {thing} "{{name}}"')
     def should_not_see_the(ctx, name):
         retry(
             should_not_see,
-            retry_after_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+            retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+            wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
         )(ctx, thing, name)
 
     @step(f'I wait to see the {thing} "{{name}}"')
@@ -158,14 +160,16 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
         def should_see_the_nth(ctx, nth, name):
             retry(
                 should_see,
-                retry_after_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+                retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+                wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
             )(ctx, thing, name, index=nth)
 
         @step(f'I should not see the "{{nth:nth}}" {thing} "{{name}}"')
         def should_not_see_the_nth(ctx, nth, name):
             retry(
                 should_not_see,
-                retry_after_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+                retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+                wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
             )(ctx, thing, name, index=nth)
 
         @step(f'I wait to see the "{{nth:nth}}" {thing} "{{name}}"')
@@ -255,14 +259,16 @@ def define_action_on_thing_with_name_steps(
     def action_the(ctx, name):
         retry(
             action_it,
-            retry_after_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+            retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+            wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
         )(ctx, thing, name)
 
     @step(f'I {action} the {thing} "{{name}}" if it exists')
     def action_the_if_it_exists(ctx, name):
         retry(
             action_it,
-            retry_after_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+            retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+            wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
         )(ctx, thing, name, must_exist=False)
 
     @step(f'I wait to {action} the {thing} "{{name}}"')
@@ -286,14 +292,16 @@ def define_action_on_thing_with_name_steps(
         def action_the_nth(ctx, nth, name):
             retry(
                 action_it,
-                retry_after_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+                retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+                wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
             )(ctx, thing, name, index=nth)
 
         @step(f'I {action} the "{{nth:nth}}" {thing} "{{name}}" if it exists')
         def action_the_nth_if_it_exists(ctx, nth, name):
             retry(
                 action_it,
-                retry_after_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+                retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+                wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
             )(ctx, thing, name, index=nth, must_exist=False)
 
         @step(f'I wait to {action} the "{{nth:nth}}" {thing} "{{name}}"')
@@ -367,7 +375,8 @@ def define_thing_with_name_in_state_steps(
     def should_see_the_in_state(ctx, name):
         retry(
             should_see_thing_in_state,
-            retry_after_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+            retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+            wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
         )(ctx, thing, name)
 
     @step(f'I wait to see the {thing} "{{name}}" is {state}')
@@ -387,7 +396,8 @@ def define_thing_with_name_in_state_steps(
         def should_see_the_in_state(ctx, nth, name):
             retry(
                 should_see_thing_in_state,
-                retry_after_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+                retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+                wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
             )(ctx, thing, name, index=nth)
 
         @step(f'I wait to see the "{{nth:nth}}" {thing} "{{name}}" is {state}')
@@ -434,7 +444,8 @@ def define_run_steps_if_I_can_see_element_with_name_steps(thing, find_func):
     def should_see_after(ctx, name):
         retry(
             run_if_visibile,
-            retry_after_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+            retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+            wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
         )(ctx, name)
 
     def run_if_not_visibile(ctx, name):
@@ -447,5 +458,6 @@ def define_run_steps_if_I_can_see_element_with_name_steps(thing, find_func):
     def should_not_see_after(ctx, name):
         retry(
             run_if_not_visibile,
-            retry_after_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+            retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+            wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
         )(ctx, name)
