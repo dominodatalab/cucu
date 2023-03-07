@@ -54,9 +54,6 @@ def behave(
     timeout = float(CONFIG["CUCU_SOCKET_DEFAULT_TIMEOUT_S"])
     socket.setdefaulttimeout(timeout)
 
-    if os.path.exists(os.path.join(results, "runtime-timeout")):
-        return
-
     if not skip_init_global_hook_variables:
         init_global_hook_variables()
 
