@@ -255,13 +255,23 @@ CONFIG.define(
     default="",
 )
 CONFIG.define(
+    "CUCU_SHORT_UI_RETRY_AFTER_S",
+    "the amount of time to wait between retries in seconds for non-wait ui steps",
+    default=0.25,
+)
+CONFIG.define(
+    "CUCU_SHORT_UI_WAIT_TIMEOUT_S",
+    "the total amount of wait time in seconds for non-wait ui steps",
+    default=2.25,
+)
+CONFIG.define(
     "CUCU_STEP_WAIT_TIMEOUT_S",
-    "the total amount of wait time in seconds `wait for` steps",
+    "the total amount of wait time in seconds for `wait for` steps",
     default=20.0,
 )
 CONFIG.define(
     "CUCU_STEP_RETRY_AFTER_S",
-    "the amount of time to wait between retries in `wait for` steps",
+    "the amount of time to wait between retries in seconds for `wait for` steps",
     default=0.5,
 )
 CONFIG.define(
