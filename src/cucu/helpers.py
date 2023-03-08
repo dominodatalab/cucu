@@ -290,7 +290,7 @@ def define_action_on_thing_with_name_steps(
         else:
             action_func(ctx, element)
 
-    @step(f'I {action} the {thing} "{{name immediately}}"')
+    @step(f'I immediately {action} the {thing} "{{name}}"')
     def immediately_action_the(ctx, name):
         base_action_the(ctx, thing, name)
 
@@ -302,7 +302,7 @@ def define_action_on_thing_with_name_steps(
             wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
         )(ctx, thing, name)
 
-    @step(f'I {action} the {thing} "{{name immediately}}" if it exists')
+    @step(f'I immediately {action} the {thing} "{{name}}" if it exists')
     def immediately_action_the_if_it_exists(ctx, name):
         base_action_the(ctx, thing, name, must_exist=False)
 
@@ -331,7 +331,7 @@ def define_action_on_thing_with_name_steps(
 
     if with_nth:
 
-        @step(f'I {action} the "{{nth:nth}}" immediately {thing} "{{name}}"')
+        @step(f'I immediately {action} the "{{nth:nth}}" {thing} "{{name}}"')
         def immediately_action_the_nth(ctx, nth, name):
             base_action_the(ctx, thing, name, index=nth)
 
@@ -344,7 +344,7 @@ def define_action_on_thing_with_name_steps(
             )(ctx, thing, name, index=nth)
 
         @step(
-            f'I {action} the "{{nth:nth}}" immediately {thing} "{{name}}" if it exists'
+            f'I immediately {action} the "{{nth:nth}}" {thing} "{{name}}" if it exists'
         )
         def immediately_action_the_nth_if_it_exists(ctx, nth, name):
             base_action_the(ctx, thing, name, index=nth, must_exist=False)
@@ -535,9 +535,9 @@ def define_run_steps_if_I_can_see_element_with_name_steps(thing, find_func):
             run_steps(ctx, ctx.text)
 
     @step(
-        f'I run the following steps if I can immediately not see the {thing} "{{name}}"'
+        f'I immediately run the following steps if I can not see the {thing} "{{name}}"'
     )
-    def run_if_immediately_not_visibile(ctx, name):
+    def immediately_run_if_not_visibile(ctx, name):
         base_run_if_not_visibile(ctx, name)
 
     @step(f'I run the following steps if I can not see the {thing} "{{name}}"')
