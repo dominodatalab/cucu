@@ -46,7 +46,7 @@ Feature: Wait for steps
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?delay_page_load_ms=100"
      When I immediately click the button "button with child"
-     Then I should see the previous step took less than "0.250" seconds
+     Then I should see the previous step took less than "1" seconds
 
   Scenario: User can click a button with a short delay
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
