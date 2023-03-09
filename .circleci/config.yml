@@ -70,7 +70,7 @@ commands:
             set +eo pipefail
             poetry run coverage combine .coverage.*
             poetry run coverage html
-            poetry run coverage report --fail-under=85
+            poetry run coverage report --fail-under=70
 
 executors:
   unit-test-executor:

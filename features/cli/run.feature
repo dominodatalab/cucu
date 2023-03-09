@@ -92,3 +92,11 @@ Feature: Run
       """
       runtime timeout reached, aborting run
       """
+  @runtime-timeout @workers
+  Scenario: User can run with a runtime timeout and workers to avoid running over a certain amount of time
+    Given I run the command "cucu run data/features/slow_features --workers 2 --runtime-timeout 10 --results {CUCU_RESULTS_DIR}/runtime_timeout_with_workers_timed_out_results" and save stdout to "STDOUT" and expect exit code "1"
+     Then I should see the previous step took less than "11" seconds
+      And I should see "{STDOUT}" contains the following:
+      """
+      runtime timeout reached, aborting run
+      """

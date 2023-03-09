@@ -326,6 +326,14 @@ def run(
                 feature_filepaths = [filepath]
 
             with multiprocessing.Pool(int(workers)) as pool:
+                # Each feature file is applied to the pool as an async task.
+                # It then polls the async result of each task. It the result
+                # is ready, it removes the result from the list of results that
+                # need to be checked again until all the results are checked.
+                # If the timer is triggered, it stops the while loop and
+                # logs all the unfinished features.
+                # The pool is terminated automatically when it exits the
+                # context.
                 timer = None
                 timeout_reached = False
                 if runtime_timeout:
@@ -339,7 +347,7 @@ def run(
                     timer = Timer(runtime_timeout, runtime_exit)
                     timer.start()
 
-                async_result = namedtuple("async_result", ["feature", "result"])
+                AsyncResult = namedtuple("AsyncResult", ["feature", "result"])
                 async_results = []
                 for feature_filepath in feature_filepaths:
                     result = pool.apply_async(
@@ -364,7 +372,7 @@ def run(
                             "redirect_output": True,
                         },
                     )
-                    async_results.append(async_result(feature_filepath, result))
+                    async_results.append(AsyncResult(feature_filepath, result))
 
                 workers_failed = False
                 while not timeout_reached:
@@ -393,7 +401,7 @@ def run(
                     time.sleep(1)
                 else:
                     logger.error(
-                        "features not finished:\n",
+                        "features not finished:\n"
                         "\n".join(
                             [
                                 "    " + feature_result.feature
