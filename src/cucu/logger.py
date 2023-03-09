@@ -88,3 +88,14 @@ def error(*args, **kwargs):
         CONFIG["__CUCU_WROTE_TO_OUTPUT"] = True
 
     logging.getLogger().error(*args, **kwargs)
+
+
+@wraps(logging.exception)
+def exception(*args, **kwargs):
+    console_handler = logging.getLogger().handlers[0]
+    logging_level = console_handler.level
+
+    if logging_level <= logging.ERROR:
+        CONFIG["__CUCU_WROTE_TO_OUTPUT"] = True
+
+    logging.getLogger().exception(*args, **kwargs)
