@@ -96,12 +96,8 @@
     </script>
   </head>
   <body>
-    <div class="row justify-content-md-center">
-        <div class="col-10">
-            {% block nav %}{% endblock %}
-        </div>
-    </div>
     <div class="container">
+        {% block nav %}{% endblock %}
         {% block content %}{% endblock %}
     </div>
   </body>
