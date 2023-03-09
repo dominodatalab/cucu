@@ -61,9 +61,11 @@
         <tr class="row">
             <td style="min-width: 0;" class="col-8 text-truncate">
                 <span style="display: inline; color: maroon;">Feature: </span> {{ escape(feature['name']) }}<br/>
-                <span style="display: inline; color: mediumturquoise">{{ feature['tags'] }}</span><br/>
+                {% if feature['tags'] %}
+                <span style="display: inline; color: darkslateblue">{{ feature['tags'] }}</span><br/>
+                {% endif %}
                 <span style="display: inline; color: maroon;">Scenario:</span> {{ escape(scenario['name']) }}<br/>
-                <span style="display: inline; color: mediumturquoise">{{ scenario['tags'] }}</span><br/>
+                <span style="display: inline; color: darkslateblue">{{ scenario['tags'] }}</span><br/>
             </td>
             <td style="min-width: 0;" class="col-4 text-truncate" style="color: gray;"></td>
         </tr>
@@ -88,41 +90,36 @@
                 <td style="min-width: 0;" class="anchor-toggle text-truncate col-8" data-toggle="collapse" href="#collapsable-row-{{ loop.index }}" role="button" aria-expanded="false" aria-controls="collapsable-row-{{ loop.index }}">
                     <a class="anchor" id="step_{{ loop.index}}" href="#step_{{ loop.index }}">🔗</a>
                     <pre class="status-{{ step_status }}">{{ step_keyword }}</pre><span style="display: contents;"> {{ escape(step['name']) }}</span>
-            {% if step['text'] %}
-                    <br/>
-                    <pre style="color: black; margin: 0">{{ escape(step['text']) }}</pre>
-            {% endif %}
-            {% if step['table'] %}
-                    <br/>
-                    <pre style="color: black; margin: 0">{{ escape(step['table']) }}</pre>
-            {% endif %}
                 </td>
                 <td style="min-width: 0;" class="col-4"><span style="display: inline; color: gray;">{{ step_timing }}</span></td>
             </tr>
+
+            {% if step['text'] or step['table'] %}
+                <tr class="row"><td style="min-width: 0;" class="col-12" colspan="2">
+                {% if step['text'] %}
+                        <pre>{{ escape(step['text']) }}</pre>
+                {% endif %}
+                {% if step['table'] %}
+                        <pre>{{ escape(step['table']) }}</pre>
+                {% endif %}
+                </td></tr>
+            {% endif %}
+
             {% if step['result'] is defined %}
+                <tr class="row"><td style="min-width: 0;" class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
+
                 {% if step['result']['stdout'] %}
-                    <tr class="row"><td style="min-width: 0;" class="col-12" colspan="2" style="margin: 0">
-                        <pre style="color: darkgray;">{{ escape("\n".join(step['result']['stdout'])) }}</pre>
-                    </td></tr>
-                    {% for line in step['result']['stdout'] %}
-                    {% endfor %}
+                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['stdout'])) }}</pre><br/>
                 {% endif %}
-            {% endif %}
 
-            {% if step['image'] is defined and step['result'] is defined %}
-            <tr class="row">
-                <td style="min-width: 0;" class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
-                    <img class="mx-auto d-block img-fluid shadow bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img>
-                </td>
-            </tr>
-            {% endif %}
+                {% if step['image'] is defined %}
+                    <img class="mx-auto d-block img-fluid shadow bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img><br/>
+                {% endif %}
 
-            {% if step['result'] is defined %}
                 {% if step['result']['error_message'] is defined %}
-                    <tr class="row"><td style="min-width: 0;" class="col-12" colspan="2" style="margin: 0">
-                        <pre style="color: gray; margin: 0">{{ escape("\n".join(step['result']['error_message'])) }}</pre><br/>
-                    </td></tr>
+                    <pre style="color: gray; margin: 0">{{ escape("\n".join(step['result']['error_message'])) }}</pre><br/>
                 {% endif %}
+                </td></tr>
             {% endif %}
 
         {% endfor %}
