@@ -29,6 +29,7 @@ from tabulate import tabulate
 from threading import Timer
 
 
+# QE-10912 Remove Pebble before distributing cucu
 # Since Pebble is less likely to be included in cucu in the future,
 # for now, this is not exposed as an option.
 TASK_TIMEOUT = 30 * 60
