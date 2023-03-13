@@ -3,7 +3,6 @@ import click
 import coverage
 import glob
 import json
-import multiprocessing
 import shutil
 import signal
 import time
@@ -25,8 +24,15 @@ from cucu.cli.run import behave, behave_init, write_run_details
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.lint import linter
 from importlib.metadata import version
+from pebble import ProcessPool
 from tabulate import tabulate
 from threading import Timer
+
+
+# QE-10912 Remove Pebble before distributing cucu
+# Since Pebble is less likely to be included in cucu in the future,
+# for now, this is not exposed as an option.
+TASK_TIMEOUT = 30 * 60
 
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
@@ -325,7 +331,7 @@ def run(
             else:
                 feature_filepaths = [filepath]
 
-            with multiprocessing.Pool(int(workers)) as pool:
+            with ProcessPool(max_workers=int(workers)) as pool:
                 # Each feature file is applied to the pool as an async task.
                 # It then polls the async result of each task. It the result
                 # is ready, it removes the result from the list of results that
@@ -350,7 +356,7 @@ def run(
                 AsyncResult = namedtuple("AsyncResult", ["feature", "result"])
                 async_results = []
                 for feature_filepath in feature_filepaths:
-                    result = pool.apply_async(
+                    result = pool.schedule(
                         behave,
                         [
                             feature_filepath,
@@ -371,6 +377,7 @@ def run(
                         {
                             "redirect_output": True,
                         },
+                        timeout=float(TASK_TIMEOUT),
                     )
                     async_results.append(AsyncResult(feature_filepath, result))
 
@@ -379,9 +386,9 @@ def run(
                     remaining = []
                     for feature_result in async_results:
                         feature, result = feature_result
-                        if result.ready():
+                        if result.done():
                             try:
-                                exit_code = result.get()
+                                exit_code = result.result()
                                 if exit_code != 0:
                                     workers_failed = True
                             except Exception:
@@ -409,6 +416,8 @@ def run(
                             ]
                         ),
                     )
+                    for _, result in async_results:
+                        result.cancel()
                     workers_failed = True
 
                 if workers_failed:
