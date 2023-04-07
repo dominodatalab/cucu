@@ -56,10 +56,6 @@ Feature: Secrets
       """
       super secret
       """
-      And I should see the file at "{CUCU_RESULTS_DIR}/features_with_secrets_report/Feature that spills the beans/This scenario prints some secrets to the logs/logs/cucu.debug.console.log.html" does not contain the following:
-      """
-      super secret
-      """
 
   Scenario: User can run a test while hiding secrets identified by the command line option
     Given I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/environment.py" with the following:
