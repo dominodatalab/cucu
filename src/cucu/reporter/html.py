@@ -1,16 +1,17 @@
 import glob
-import jinja2
-import shutil
-import os
-import urllib
 import json
+import os
+import shutil
 import sys
-
-from ansi2html import Ansi2HTMLConverter
-from cucu import logger
-from cucu.config import CONFIG
-from xml.sax.saxutils import escape as escape_
+import urllib
 from urllib.parse import quote
+from xml.sax.saxutils import escape as escape_
+
+import jinja2
+from ansi2html import Ansi2HTMLConverter
+
+from cucu import format_gherkin_table, logger
+from cucu.config import CONFIG
 
 
 def escape(data):
@@ -167,18 +168,8 @@ def generate(results, basepath, only_failures=False):
 
                 # prepare by joining into one big chunk here since we can't do it in the Jinja template
                 if "table" in step:
-                    text_indent = "       "
-                    step["table"] = "\n".join(
-                        [
-                            text_indent
-                            + "| "
-                            + " | ".join(step["table"]["headings"])
-                            + " |"
-                        ]
-                        + [
-                            text_indent + "| " + " | ".join(row) + " |"
-                            for row in step["table"]["rows"]
-                        ]
+                    step["table"] = format_gherkin_table(
+                        step["table"]["rows"], step["table"]["headings"]
                     )
 
                 step_index += 1
