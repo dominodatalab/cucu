@@ -8,7 +8,6 @@ from urllib.parse import quote
 from xml.sax.saxutils import escape as escape_
 
 import jinja2
-from ansi2html import Ansi2HTMLConverter
 
 from cucu import format_gherkin_table, logger
 from cucu.config import CONFIG
@@ -186,9 +185,6 @@ def generate(results, basepath, only_failures=False):
                         f"{scenario_filepath}/"
                     )
 
-                    if ".console." in log_filepath:
-                        log_filepath += ".html"
-
                     log_files.append(
                         {
                             "filepath": log_filepath,
@@ -197,31 +193,6 @@ def generate(results, basepath, only_failures=False):
                     )
 
                 scenario["logs"] = log_files
-
-                only_console_logs = lambda log: ".console." in log["name"]
-
-                for log_file in filter(only_console_logs, log_files):
-                    if show_status:
-                        print("c", end="", flush=True)
-
-                    converter = Ansi2HTMLConverter(dark_bg=False)
-                    log_file_filepath = os.path.join(
-                        scenario_filepath, "logs", log_file["name"]
-                    )
-
-                    input_data = None
-                    with (
-                        open(
-                            log_file_filepath, "r", encoding="utf8"
-                        ) as log_file_input,
-                        open(
-                            log_file_filepath + ".html", "w", encoding="utf8"
-                        ) as log_file_output,
-                    ):
-                        log_file_output.write(
-                            # Process whole file to avoid performance issue
-                            converter.convert(log_file_input.read())
-                        )
 
             scenario["total_steps"] = total_steps
             if len(scenario["steps"]) > 0 and "result" in scenario["steps"][0]:
