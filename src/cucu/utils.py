@@ -25,8 +25,12 @@ class StopRetryException(Exception):
     pass
 
 
-def format_gherkin_table(table, headings=[]):
-    return tabulate(table, headings, tablefmt=GHERKIN_TABLEFORMAT)
+def format_gherkin_table(table, headings=[], prefix=""):
+    formatted = tabulate(table, headings, tablefmt=GHERKIN_TABLEFORMAT)
+    if prefix == "":
+        return formatted
+
+    return prefix + formatted.replace("\n", f"\n{prefix}")
 
 
 #

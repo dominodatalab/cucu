@@ -181,7 +181,9 @@ def generate(results, basepath, only_failures=False):
                 # prepare by joining into one big chunk here since we can't do it in the Jinja template
                 if "table" in step:
                     step["table"] = format_gherkin_table(
-                        step["table"]["rows"], step["table"]["headings"]
+                        step["table"]["rows"],
+                        step["table"]["headings"],
+                        "       ",
                     )
 
                 step_index += 1
