@@ -32,7 +32,7 @@
                     <button class="btn btn-md btn-light" title="scroll to bottom" onclick="window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });" class="nav-link">⬇️ </button>
                 </li>
                 <li class="align-middle">
-                    <span style="vertical-align: -webkit-baseline-middle;">Started at: {{ scenario["started_at"] }}, Duration: {{ '{:.3f}'.format(scenario['duration']) }}s</span>
+                    <span style="vertical-align: -webkit-baseline-middle;">Started {{ scenario["started_at"] }} for {{ '{:.3f}'.format(scenario['duration']) }}s</span>
                 </li>
               </ul>
             </div>
@@ -59,13 +59,16 @@
     <table class="table table-borderless container row">
 
         <tr class="row">
-            <td style="min-width: 0;" class="col-12 text-truncate" colspan="2">
+            <td style="min-width: 0;" class="col-10 text-truncate">
                 <span style="display: inline; color: maroon;">Feature: </span> {{ escape(feature['name']) }}<br/>
                 {% if feature['tags'] %}
                 <span style="display: inline; color: darkslateblue">{{ feature['tags'] }}</span><br/>
                 {% endif %}
                 <span style="display: inline; color: maroon;">Scenario:</span> {{ escape(scenario['name']) }}<br/>
                 <span style="display: inline; color: darkslateblue">{{ scenario['tags'] }}</span><br/>
+            </td>
+            <td style="text-align: right; margin-top: auto;" class="col-2">
+                <pre style="display: inline; color: gray;">Offset and Duration</pre>
             </td>
         </tr>
         {% for step in steps %}
@@ -78,7 +81,7 @@
             {% if step['result'] is defined %}
                 {% set step_status = step['result']['status'] %}
                 {% if step['result']['status'] == 'failed' or step['result']['status'] == 'passed' %}
-                    {% set step_timing = "{} for {:.3f}s".format(step["result"]["timestamp"].strftime("%H:%M:%S.%f"), step["result"]["duration"]) %}
+                    {% set step_timing = "{} for {:.3f}s".format(step["result"]["time_offset"].strftime("%H:%M:%S"), step["result"]["duration"]) %}
                 {% endif %}
             {% else %}
                 {% set step_status = 'untested' %}

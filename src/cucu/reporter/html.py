@@ -134,6 +134,7 @@ def generate(results, basepath, only_failures=False):
             )
 
             step_index = 0
+            first_timestamp = None
             for step in scenario["steps"]:
                 if show_status:
                     print("s", end="", flush=True)
@@ -147,8 +148,15 @@ def generate(results, basepath, only_failures=False):
                     step["image"] = urllib.parse.quote(image_filename)
 
                 if "result" in step:
-                    step["result"]["timestamp"] = datetime.fromisoformat(
+                    timestamp = datetime.fromisoformat(
                         step["result"]["timestamp"]
+                    )
+                    step["result"]["timestamp"] = timestamp
+
+                    if first_timestamp == None:
+                        first_timestamp = timestamp
+                    step["result"]["time_offset"] = datetime.utcfromtimestamp(
+                        (timestamp - first_timestamp).total_seconds()
                     )
 
                     scenario_duration += step["result"]["duration"]
