@@ -1,11 +1,11 @@
 import pkgutil
 import re
+from io import StringIO
 
 from behave.model_describe import ModelPrinter
-from cucu import fuzzy, helpers, retry, step, config
+
+from cucu import config, format_gherkin_table, fuzzy, helpers, retry, step
 from cucu.browser.frames import run_in_all_frames
-from io import StringIO
-from tabulate import tabulate, TableFormat, DataRow
 
 
 def find_tables(ctx):
@@ -108,22 +108,10 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     return False
 
 
-GHERKIN_TABLEFORMAT = TableFormat(
-    lineabove=None,
-    linebelowheader=None,
-    linebetweenrows=None,
-    linebelow=None,
-    headerrow=DataRow("|", "|", "|"),
-    datarow=DataRow("|", "|", "|"),
-    padding=1,
-    with_header_hide=["lineabove"],
-)
-
-
 def report_unable_to_find_table(tables):
     stream = StringIO()
     for table in tables:
-        stream.write(f"\n{tabulate(table, [], tablefmt=GHERKIN_TABLEFORMAT)}\n")
+        stream.write(f"\n{format_gherkin_table(table)}\n")
 
     stream.seek(0)
     raise RuntimeError(f"unable to find desired table, found: {stream.read()}")
