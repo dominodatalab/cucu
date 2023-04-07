@@ -6,6 +6,7 @@ import sys
 import urllib
 from urllib.parse import quote
 from xml.sax.saxutils import escape as escape_
+from datetime import datetime
 
 import jinja2
 
@@ -146,6 +147,10 @@ def generate(results, basepath, only_failures=False):
                     step["image"] = urllib.parse.quote(image_filename)
 
                 if "result" in step:
+                    step["result"]["timestamp"] = datetime.fromisoformat(
+                        step["result"]["timestamp"]
+                    )
+
                     scenario_duration += step["result"]["duration"]
 
                     if "error_message" in step["result"] and step["result"][
