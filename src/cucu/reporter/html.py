@@ -18,7 +18,7 @@ def escape(data):
     if data is None:
         return None
 
-    return escape_(data)
+    return escape_(data, {'"': "&quot;"})
 
 
 def process_tags(element):
