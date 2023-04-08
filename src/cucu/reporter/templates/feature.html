@@ -51,9 +51,8 @@
             <tr>
                 <td class="text-center">{{ scenario['time_offset'].strftime("%H:%M:%S") }}</td>
                 <td>
-                    <a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><span style="display: inline; color: grey">{{ escape(scenario['name']) }}</span></a>
-                    <br/>
-                    {{ scenario['tags'] }}
+                    <a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><span style="display: inline; color: grey">{{ escape(scenario['name']) }}</span></a><br/>
+                    <span style="display: inline; color: darkslateblue">{{ scenario['tags'] }}</span>
                 </td>
                 <td class="text-center">{{ scenario['total_steps'] }}</td>
                 <td class="text-center"><span class="status-{{ scenario['status'] }}">{{ scenario['status'] }}</span></td>
