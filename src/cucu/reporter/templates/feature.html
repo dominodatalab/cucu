@@ -49,7 +49,11 @@
             <!--- ignore Backgrounds for the time being -->
             {% if scenario['keyword'] != 'Background' %}
             <tr>
-                <td class="text-center">{{ scenario['time_offset'].strftime("%H:%M:%S") }}</td>
+                <td class="text-center">
+                {% if scenario['time_offset'] %}
+                    {{ scenario['time_offset'].strftime("%H:%M:%S") }}
+                {% endif %}
+                </td>
                 <td>
                     <a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><span style="display: inline; color: grey">{{ escape(scenario['name']) }}</span></a><br/>
                     <span style="display: inline; color: darkslateblue">{{ scenario['tags'] }}</span>
