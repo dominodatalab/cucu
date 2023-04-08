@@ -99,6 +99,7 @@ def generate(results, basepath, only_failures=False):
         total_scenarios_passed = 0
         total_scenarios_failed = 0
         total_scenarios_skipped = 0
+        feature_started_at = None
 
         reported_features.append(feature)
         process_tags(feature)
@@ -134,7 +135,7 @@ def generate(results, basepath, only_failures=False):
             )
 
             step_index = 0
-            first_timestamp = None
+            scenario_started_at = None
             for step in scenario["steps"]:
                 if show_status:
                     print("s", end="", flush=True)
@@ -154,12 +155,13 @@ def generate(results, basepath, only_failures=False):
                         )
                         step["result"]["timestamp"] = timestamp
 
-                        if first_timestamp == None:
-                            first_timestamp = timestamp
+                        if scenario_started_at == None:
+                            scenario_started_at = timestamp
+                            scenario["started_at"] = timestamp
                         step["result"][
                             "time_offset"
                         ] = datetime.utcfromtimestamp(
-                            (timestamp - first_timestamp).total_seconds()
+                            (timestamp - scenario_started_at).total_seconds()
                         )
 
                     scenario_duration += step["result"]["duration"]
@@ -213,17 +215,24 @@ def generate(results, basepath, only_failures=False):
                 scenario["logs"] = log_files
 
             scenario["total_steps"] = total_steps
-            if len(scenario["steps"]) > 0 and "result" in scenario["steps"][0]:
-                scenario["started_at"] = scenario["steps"][0]["result"][
-                    "timestamp"
-                ]
-            else:
+            if scenario_started_at == None:
                 scenario["started_at"] = ""
+            else:
+                if feature_started_at == None:
+                    feature_started_at = scenario_started_at
+                    feature["started_at"] = feature_started_at
+
+                scenario["time_offset"] = datetime.utcfromtimestamp(
+                    (scenario_started_at - feature_started_at).total_seconds()
+                )
+
             scenario["duration"] = scenario_duration
             feature_duration += scenario_duration
 
+        if feature_started_at == None:
+            feature["started_at"] = ""
+
         feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
-        feature["started_at"] = scenarios[0]["started_at"]
         feature["duration"] = sum([x["duration"] for x in scenarios])
 
         feature["total_scenarios"] = total_scenarios
