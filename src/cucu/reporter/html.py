@@ -4,14 +4,16 @@ import os
 import shutil
 import sys
 import urllib
+from datetime import datetime
+from pathlib import Path
 from urllib.parse import quote
 from xml.sax.saxutils import escape as escape_
-from datetime import datetime
 
 import jinja2
 
 from cucu import format_gherkin_table, logger
 from cucu.config import CONFIG
+from cucu.reporter.parser import parse_log_to_html
 
 
 def escape(data):
@@ -205,6 +207,9 @@ def generate(results, basepath, only_failures=False):
                         f"{scenario_filepath}/"
                     )
 
+                    if ".console." in log_filepath:
+                        log_filepath += ".html"
+
                     log_files.append(
                         {
                             "filepath": log_filepath,
@@ -214,17 +219,21 @@ def generate(results, basepath, only_failures=False):
 
                 scenario["logs"] = log_files
 
-            scenario["total_steps"] = total_steps
-            if scenario_started_at == None:
-                scenario["started_at"] = ""
-            else:
-                if feature_started_at == None:
-                    feature_started_at = scenario_started_at
-                    feature["started_at"] = feature_started_at
+                only_console_logs = lambda log: ".console." in log["name"]
 
-                scenario["time_offset"] = datetime.utcfromtimestamp(
-                    (scenario_started_at - feature_started_at).total_seconds()
-                )
+                for log_file in filter(only_console_logs, log_files):
+                    if show_status:
+                        print("c", end="", flush=True)
+
+                    log_file_filepath = os.path.join(
+                        scenario_filepath, "logs", log_file["name"]
+                    )
+
+                    input_file = Path(log_file_filepath)
+                    output_file = Path(log_file_filepath + ".html")
+                    output_file.write_text(
+                        parse_log_to_html(input_file.read_text())
+                    )
 
             scenario["duration"] = scenario_duration
             feature_duration += scenario_duration
@@ -232,8 +241,12 @@ def generate(results, basepath, only_failures=False):
         if feature_started_at == None:
             feature["started_at"] = ""
 
-        feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
-        feature["duration"] = sum([x["duration"] for x in scenarios])
+        feature["total_steps"] = sum(
+            [x["total_steps"] for x in scenarios if "total_steps" in x]
+        )
+        feature["duration"] = sum(
+            [x["duration"] for x in scenarios if "duration" in x]
+        )
 
         feature["total_scenarios"] = total_scenarios
         feature["total_scenarios_passed"] = total_scenarios_passed
