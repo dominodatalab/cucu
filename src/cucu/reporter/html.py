@@ -219,6 +219,20 @@ def generate(results, basepath, only_failures=False):
 
                 scenario["logs"] = log_files
 
+                scenario["total_steps"] = total_steps
+                if scenario_started_at == None:
+                    scenario["started_at"] = ""
+                else:
+                    if feature_started_at == None:
+                        feature_started_at = scenario_started_at
+                        feature["started_at"] = feature_started_at
+
+                    scenario["time_offset"] = datetime.utcfromtimestamp(
+                        (
+                            scenario_started_at - feature_started_at
+                        ).total_seconds()
+                    )
+
                 only_console_logs = lambda log: ".console." in log["name"]
 
                 for log_file in filter(only_console_logs, log_files):
