@@ -1,0 +1,39 @@
+
+  [35mScenario[0m: Just a scenario that opens a web page
+[90m    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+[0m[1A
+    [32mGiven[0m I start a webserver at directory "data/www" and save the port to the variable "PORT"[90m     # started at 2023-04-10T15:59:01.540 took 0.013s[0m
+[90m      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
+[0m2023-04-10 15:59:01,555 DEBUG opening browser chrome
+2023-04-10 15:59:01,956 DEBUG webdriver.Chrome init
+2023-04-10 15:59:03,568 DEBUG executing page check "wait for document.readyState"
+2023-04-10 15:59:03,572 DEBUG executed page check "wait for document.readyState" in 0.004s
+2023-04-10 15:59:03,572 DEBUG executing page check "broken image checker"
+2023-04-10 15:59:03,576 DEBUG executed page check "broken image checker" in 0.003s
+2023-04-10 15:59:03,576 DEBUG navigating to url #http://192.168.86.23:52639/buttons.html
+2023-04-10 15:59:03,709 DEBUG executing page check "wait for document.readyState"
+2023-04-10 15:59:03,713 DEBUG executed page check "wait for document.readyState" in 0.004s
+2023-04-10 15:59:03,713 DEBUG executing page check "broken image checker"
+2023-04-10 15:59:03,718 DEBUG executed page check "broken image checker" in 0.004s
+[1A
+    [32m  And[0m I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"[90m                  # started at 2023-04-10T15:59:01.554 took 2.194s[0m
+[90m      # HOST_ADDRESS="192.168.86.23" PORT="52639"
+[0m[90m      And I should see the text "inexistent"
+[0m2023-04-10 15:59:04,035 DEBUG switched browser to the default frame
+2023-04-10 15:59:06,549 DEBUG switched browser to the default frame
+[1A
+[31m      And I should see the text "inexistent"[0m[90m                                                       # started at 2023-04-10T15:59:04.033 took 2.566s[0m
+
+... <removed stacktrace> ...
+
+2023-04-10 15:59:07,190 DEBUG quitting browser between sessions
+
+
+Failing scenarios:
+  data/features/feature_with_failing_scenario_with_web.feature:4  Just a scenario that opens a web page
+
+0 features passed, 1 failed, 0 skipped
+0 scenarios passed, 1 failed, 0 skipped
+2 steps passed, 1 failed, 0 skipped, 0 undefined
+Took 0m4.773s
+Error: test run failed, see above for details
