@@ -241,12 +241,8 @@ def generate(results, basepath, only_failures=False):
         if feature_started_at == None:
             feature["started_at"] = ""
 
-        feature["total_steps"] = sum(
-            [x["total_steps"] for x in scenarios if "total_steps" in x]
-        )
-        feature["duration"] = sum(
-            [x["duration"] for x in scenarios if "duration" in x]
-        )
+        feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
+        feature["duration"] = sum([x["duration"] for x in scenarios])
 
         feature["total_scenarios"] = total_scenarios
         feature["total_scenarios_passed"] = total_scenarios_passed
