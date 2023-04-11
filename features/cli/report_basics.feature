@@ -37,6 +37,7 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/multi-scenario-browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
 
+     # Verify HTML report
      When I click the link "Multiple scenarios with browser steps"
       And I click the link "Open our test checkboxes page"
       And I should not see the image with the alt text "Given I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
@@ -267,4 +268,4 @@ Feature: Report basics
        | .*     | Just a scenario that opens a web page | 3           | failed | .*       |
      When I click the button "Just a scenario that opens a web page"
       And I wait to click the button "show images"
-      And I should see the image with the alt text "And I should see the text "inexistent"
+      And I should see the image with the alt text "And I should see the text \"inexistent\""
