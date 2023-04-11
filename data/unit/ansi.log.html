@@ -1,10 +1,10 @@
 <pre>
 
-  <span style="color: magenta">Scenario</span>: Just a scenario that opens a web page
-<span style="color: darkgrey;">    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+  <span style="color: magenta;">Scenario</span>: Just a scenario that opens a web page
+<span style="color: grey;">    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
 </span>
-    <span style="color: green;">Given</span> I start a webserver at directory "data/www" and save the port to the variable "PORT"<span style="color: darkgrey;">     # started at 2023-04-10T15:59:01.540 took 0.013s</span>
-<span style="color: darkgrey;">      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
+    <span style="color: green;">Given</span> I start a webserver at directory "data/www" and save the port to the variable "PORT"<span style="color: grey;">     # started at 2023-04-10T15:59:01.540 took 0.013s</span>
+<span style="color: grey;">      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
 </span>2023-04-10 15:59:01,555 DEBUG opening browser chrome
 2023-04-10 15:59:01,956 DEBUG webdriver.Chrome init
 2023-04-10 15:59:03,568 DEBUG executing page check "wait for document.readyState"
@@ -17,13 +17,13 @@
 2023-04-10 15:59:03,713 DEBUG executing page check "broken image checker"
 2023-04-10 15:59:03,718 DEBUG executed page check "broken image checker" in 0.004s
 
-    <span style="color: green;">  And</span> I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"<span style="color: darkgrey;">                  # started at 2023-04-10T15:59:01.554 took 2.194s</span>
-<span style="color: darkgrey;">      # HOST_ADDRESS="192.168.86.23" PORT="52639"
-</span><span style="color: darkgrey;">      And I should see the text "inexistent"
+    <span style="color: green;">  And</span> I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"<span style="color: grey;">                  # started at 2023-04-10T15:59:01.554 took 2.194s</span>
+<span style="color: grey;">      # HOST_ADDRESS="192.168.86.23" PORT="52639"
+</span><span style="color: grey;">      And I should see the text "inexistent"
 </span>2023-04-10 15:59:04,035 DEBUG switched browser to the default frame
 2023-04-10 15:59:06,549 DEBUG switched browser to the default frame
 
-<span style="color: red;">      And I should see the text "inexistent"</span><span style="color: darkgrey;">                                                       # started at 2023-04-10T15:59:04.033 took 2.566s</span>
+<span style="color: red;">      And I should see the text "inexistent"</span><span style="color: grey;">                                                       # started at 2023-04-10T15:59:04.033 took 2.566s</span>
 
 ... &lt;removed stacktrace&gt; ...
 

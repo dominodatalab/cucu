@@ -1,18 +1,14 @@
 import html
 import re
 
+from behave.formatter.ansi_escapes import colors, escapes
+
 from cucu import logger
 
-ESC_SEQ = "["
-TRANSLATION = {
-    ESC_SEQ + "1A": "",  # throw away "move cursor up 1"
-    ESC_SEQ + "0m": "</span>",
-    ESC_SEQ + "31m": '<span style="color: red;">',
-    ESC_SEQ + "32m": '<span style="color: green;">',
-    ESC_SEQ + "33m": '<span style="color: yellow;">',
-    ESC_SEQ + "35m": '<span style="color: magenta">',
-    ESC_SEQ + "36m": '<span style="color: cyan">',
-    ESC_SEQ + "90m": '<span style="color: darkgrey;">',
+ESC_SEQ = "\x1b["
+TRANSLATION = {v: f'<span style="color: {k};">' for k, v in colors.items()} | {
+    escapes["reset"]: "</span>",
+    escapes["up"]: "",  # throw away move cursor up 1
 }
 REGEX = re.compile("|".join(map(re.escape, TRANSLATION)))
 
