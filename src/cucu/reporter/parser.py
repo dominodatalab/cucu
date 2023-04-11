@@ -17,4 +17,4 @@ def parse_log_to_html(input: str) -> str:
     """ "
     Parse an ansi color log to html
     """
-    return f"<pre>\n{REGEX.sub(lambda match: TRANSLATION[match.group(0)], html.escape(input, quote=False))}\n</pre>"
+    return f"<pre>\n{REGEX.sub(lambda match: TRANSLATION[match.group(0)], html.escape(input, quote=False))}\n</pre>\n"

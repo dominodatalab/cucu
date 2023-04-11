@@ -132,6 +132,9 @@ jobs:
       - run:
           name: run pre-commit validations
           command: pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
+      - run:
+          name: run unit tests
+          command: pytest tests -vv
 
   test:
     parameters:
