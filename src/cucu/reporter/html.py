@@ -198,11 +198,9 @@ def generate(results, basepath, only_failures=False):
 
             if os.path.exists(logs_dir):
                 log_files = []
-
                 for log_file in glob.iglob(os.path.join(logs_dir, "*.*")):
                     if show_status:
                         print("l", end="", flush=True)
-
                     log_filepath = log_file.removeprefix(
                         f"{scenario_filepath}/"
                     )
@@ -219,23 +217,21 @@ def generate(results, basepath, only_failures=False):
 
                 scenario["logs"] = log_files
 
-                scenario["total_steps"] = total_steps
-                if scenario_started_at == None:
-                    scenario["started_at"] = ""
-                else:
-                    if feature_started_at == None:
-                        feature_started_at = scenario_started_at
-                        feature["started_at"] = feature_started_at
+            scenario["total_steps"] = total_steps
+            if scenario_started_at == None:
+                scenario["started_at"] = ""
+            else:
+                if feature_started_at == None:
+                    feature_started_at = scenario_started_at
+                    feature["started_at"] = feature_started_at
 
-                    scenario["time_offset"] = datetime.utcfromtimestamp(
-                        (
-                            scenario_started_at - feature_started_at
-                        ).total_seconds()
-                    )
+                scenario["time_offset"] = datetime.utcfromtimestamp(
+                    (scenario_started_at - feature_started_at).total_seconds()
+                )
 
-                only_console_logs = lambda log: ".console." in log["name"]
-
-                for log_file in filter(only_console_logs, log_files):
+                for log_file in [
+                    x for x in log_files if ".console." in x["name"]
+                ]:
                     if show_status:
                         print("c", end="", flush=True)
 

@@ -11,6 +11,7 @@ TRANSLATION = {
     ESC_SEQ + "32m": '<span style="color: green;">',
     ESC_SEQ + "33m": '<span style="color: yellow;">',
     ESC_SEQ + "35m": '<span style="color: magenta">',
+    ESC_SEQ + "36m": '<span style="color: cyan">',
     ESC_SEQ + "90m": '<span style="color: darkgrey;">',
 }
 REGEX = re.compile("|".join(map(re.escape, TRANSLATION)))
@@ -22,6 +23,7 @@ def parse_log_to_html(input: str) -> str:
     """
     result = f"<pre>\n{REGEX.sub(lambda match: TRANSLATION[match.group(0)], html.escape(input, quote=False))}\n</pre>\n"
     if ESC_SEQ in result:
-        logger.warn("Detected unmapped ansi escape code!")
+        lines = "\n".join([x for x in result.split("\n") if ESC_SEQ in x])
+        logger.warn(f"Detected unmapped ansi escape code!:\n{lines}")
 
     return result
