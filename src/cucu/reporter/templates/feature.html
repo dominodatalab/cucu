@@ -9,6 +9,9 @@
                 <li class="nav-item active">
                   <a class="nav-link" href="index.html" title="go to index report">Index</a>
                 </li>
+                <li class="align-middle">
+                  <div style="padding: 8px">Started {{ feature['started_at'] }} for {{ '{:.3f}'.format(feature['duration']) }}s</div>
+                </li>
               </ul>
             </div>
         </div>
@@ -17,34 +20,44 @@
 {% block content %}
     <table class="table table-hover">
         <tr class="remove-table-hover"><span style="display: inline; color: mediumturquoise">{{ feature['tags'] }}</span><br/></tr>
-        <tr class="remove-table-hover"><span style="display: inline; color: maroon">Feature: </span><span style="display: inline; color: grey">{{ escape(feature['name']) }}</span></tr>
+        <tr class="remove-table-hover">
+            <span style="display: inline; color: maroon">Feature: </span><span style="display: inline; color: grey" title="{{ escape(feature['name']) }}">{{ escape(feature['name']) }}</span>
+            <br/>
+            <span>Status: </span>
+            {% if feature['status'] == 'passed' %}
+                <span style="display: inline; color: green">{{ feature['status'] }}</span>
+            {% elif feature['status'] == 'failed' %}
+                <span style="display: inline; color: red">{{ feature['status'] }}</span>
+            {% elif feature['status'] == 'skipped' %}
+                <span style="display: inline; color: blue">{{ feature['status'] }}</span>
+            {% elif feature['status'] == 'untested' %}
+                <span style="display: inline; color: gray">{{ feature['status'] }}</span>
+            {% endif %}
+        </tr>
     </table>
     <table class="table table-hover datatable">
         <thead>
             <tr class="align-text-top">
-                <th class="text-center">Started at<br/>{{ feature['started_at'] }}</th>
+                <th class="text-center">Offset</th>
                 <th>Scenario</th>
-                <th class="text-center">Total Steps<br/>{{ feature['total_steps'] }}</th>
-                <th class="text-center">Status<br/>
-                    {% if feature['status'] == 'passed' %}
-                        <span style="display: inline; color: green">{{ feature['status'] }}</span>
-                    {% elif feature['status'] == 'failed' %}
-                        <span style="display: inline; color: red">{{ feature['status'] }}</span>
-                    {% elif feature['status'] == 'skipped' %}
-                        <span style="display: inline; color: blue">{{ feature['status'] }}</span>
-                    {% elif feature['status'] == 'untested' %}
-                        <span style="display: inline; color: gray">{{ feature['status'] }}</span>
-                    {% endif %}
-                </th>
-                <th class="text-center">Duration<br/>{{ '{:.3f}'.format(feature['duration']) }}s</th>
+                <th class="text-center">Steps</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Duration</th>
             </tr>
         </thead>
         {% for scenario in scenarios %}
             <!--- ignore Backgrounds for the time being -->
             {% if scenario['keyword'] != 'Background' %}
             <tr>
-                <td class="text-center">{{ scenario['started_at'] }}</td>
-                <td><a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><span style="display: inline; color: grey">{{ escape(scenario['name']) }}</span></a></td>
+                <td class="text-center">
+                {% if scenario['time_offset'] %}
+                    {{ scenario['time_offset'].strftime("%H:%M:%S") }}
+                {% endif %}
+                </td>
+                <td>
+                    <a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><span style="display: inline; color: grey">{{ escape(scenario['name']) }}</span></a><br/>
+                    <span style="display: inline; color: darkslateblue">{{ scenario['tags'] }}</span>
+                </td>
                 <td class="text-center">{{ scenario['total_steps'] }}</td>
                 <td class="text-center"><span class="status-{{ scenario['status'] }}">{{ scenario['status'] }}</span></td>
                 <td class="text-center">{{ '{:.3f}'.format(scenario['duration']) }}s</td>

@@ -27,6 +27,7 @@ from cucu.hooks import (
 )
 
 from cucu.utils import (
+    format_gherkin_table,
     run_steps,
     retry,
     StopRetryException,
