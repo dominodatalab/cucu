@@ -40,9 +40,9 @@ Feature: Before retry handlers
 
         Scenario: Scenario with an before retry handler
           Given I start a webserver at directory "data/www" and save the port to the variable "PORT" .*
-      .* INFO handled the pesky button buttons!
             And I open a browser at the url "http://\{HOST_ADDRESS\}:\{PORT\}/links.html" .*
             [\s\S]*
+      .* INFO handled the pesky button buttons!
            Then I wait to see the button "button with child" .*
 
       1 feature passed, 0 failed, 0 skipped

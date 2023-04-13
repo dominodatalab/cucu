@@ -1,4 +1,6 @@
-from cucu import config, retry, register_page_check_hook, logger
+from tenacity import retry, stop_after_delay, wait_fixed
+
+from cucu import config, logger, register_page_check_hook
 
 
 def init_page_checks():
@@ -6,6 +8,10 @@ def init_page_checks():
     initialize cucu built in page checks
     """
 
+    @retry(
+        stop=stop_after_delay(float(config.CONFIG["CUCU_STEP_WAIT_TIMEOUT_S"])),
+        wait=wait_fixed(float(config.CONFIG["CUCU_STEP_RETRY_AFTER_S"])),
+    )
     def wait_for_document_to_be_ready(browser):
         if config.CONFIG["CUCU_READY_STATE_PAGE_CHECK"] == "enabled":
             state = browser.execute("return document.readyState;")
@@ -16,9 +22,13 @@ def init_page_checks():
             logger.debug("document.readyState check disabled")
 
     register_page_check_hook(
-        "wait for document.readyState", retry(wait_for_document_to_be_ready)
+        "wait for document.readyState", wait_for_document_to_be_ready
     )
 
+    @retry(
+        stop=stop_after_delay(float(config.CONFIG["CUCU_STEP_WAIT_TIMEOUT_S"])),
+        wait=wait_fixed(float(config.CONFIG["CUCU_STEP_RETRY_AFTER_S"])),
+    )
     def wait_for_all_images_to_be_loaded(browser):
         if config.CONFIG["CUCU_BROKEN_IMAGES_PAGE_CHECK"] == "enabled":
             broken_images = browser.execute(
@@ -45,5 +55,5 @@ def init_page_checks():
             logger.debug("broken image check disabled")
 
     register_page_check_hook(
-        "broken image checker", retry(wait_for_all_images_to_be_loaded)
+        "broken image checker", wait_for_all_images_to_be_loaded
     )
