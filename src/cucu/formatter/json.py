@@ -145,15 +145,6 @@ class CucuJSONFormatter(Formatter):
 
     def result(self, step):
         steps = self.current_feature_element["steps"]
-
-        stdout = None
-        if "stdout" in step.__dict__ and step.stdout != []:
-            stdout = ["".join(step.stdout)]
-
-        stderr = None
-        if "stderr" in step.__dict__ and step.stderr != []:
-            stderr = ["".join(step.stderr)]
-
         step_index = 0
         for other_step in self.steps:
             if other_step.unique_id == step.unique_id:
@@ -166,6 +157,34 @@ class CucuJSONFormatter(Formatter):
         timestamp = None
         if step.status.name in ["passed", "failed"]:
             timestamp = step.start_timestamp
+
+            step_variables = CONFIG.expand(step.name)
+
+            # if step.text:
+            #     step_variables.update(CONFIG.expand(step.text))
+
+            # if step.table:
+            #     for row in step.table.original.rows:
+            #         for value in row:
+            #             step_variables.update(CONFIG.expand(value))
+
+            # if step_variables:
+            #     expanded = " ".join(
+            #         [
+            #             f'{key}="{behave_tweaks.hide_secrets(value)}"'
+            #             for (key, value) in step_variables.items()
+            #         ]
+            #     )
+            #     padding = f"    {' '*(len('Given')-len(step.keyword))}"
+            #     step.stdout.insert(0, f"{padding}# {expanded}\n\n")
+
+        stdout = None
+        if "stdout" in step.__dict__ and step.stdout != []:
+            stdout = ["".join(step.stdout).rstrip()]
+
+        stderr = None
+        if "stderr" in step.__dict__ and step.stderr != []:
+            stderr = ["".join(step.stderr).rstrip()]
 
         steps[step_index]["result"] = {
             "stdout": stdout,

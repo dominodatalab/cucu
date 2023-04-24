@@ -30,6 +30,28 @@ Feature: Report basics
       [\s\S]*
       """
 
+  Scenario: User can run a test and see output including variable resolution
+    Given I run the command "cucu run data/features/feature_with_multilines_and_tables.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+      And I wait to click the link "Feature with multilines and tables"
+      And I wait to click the link "Scenario with a step that has a multiline argument"
+     When I wait to click the button "Then I echo the following"
+     Then I wait to see the text "# FOO=\"bar\""
+      And I should see the text "and print variables like FOO=bar"
+
+  Scenario: User can run a test and see output including comments
+    Given I run the command "cucu run data/features/scenario_with_comments.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+      And I wait to click the link "Feature with comments"
+     When I wait to click the link "Scenario with comments"
+     Then I wait to see the text "# First comment"
+      And I should see the text "# Second comment"
+      And I should see the text "# Comment about {FIZZ}"
+
   @QE-6852
   Scenario: User can run a multi scenario test with web steps and generate report with a shareable url
     Given I run the command "cucu run data/features/multiple_scenarios_with_browser_steps.feature --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled --results {CUCU_RESULTS_DIR}/multi-scenario-browser-results" and expect exit code "0"
@@ -265,7 +287,7 @@ Feature: Report basics
      When I click the button "Feature with failing scenario with web"
      Then I should see a table that matches the following:
        | Offset | Scenario                              | Steps | Status | Duration |
-       | .*     | Just a scenario that opens a web page | 3           | failed | .*       |
+       | .*     | Just a scenario that opens a web page | 3     | failed | .*       |
      When I click the button "Just a scenario that opens a web page"
       And I wait to click the button "show images"
       And I should see the image with the alt text "And I should see the text \"inexistent\""
