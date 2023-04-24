@@ -20,7 +20,7 @@ def escape(data):
     if data is None:
         return None
 
-    return escape_(data, {'"': "&quot;"})
+    return escape_(data, {'"': "&quot;"}).rstrip()
 
 
 def process_tags(element):

@@ -7,7 +7,7 @@
             <div class="collapse navbar-collapse">
               <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                 <li class="nav-item active">
-                  <a class="nav-link" href="../../index.html" title="go to index report">Index</a>
+                  <a class="nav-link" href="../../Flat.html" title="go to Flat report">Flat</a>
                 </li>
                 <li class="nav-item active">
                     <a class="nav-link" href="../../{{ feature['name'] }}.html" title="go to feature report">Feature</a>
@@ -99,10 +99,10 @@
             {% if step['text'] or step['table'] %}
                 <tr class="row"><td style="min-width: 0;" class="col-12" colspan="2">
                 {% if step['text'] %}
-                        <pre>{{ escape(step['text']) }}</pre>
+                        <pre style="margin: 0;">{{ escape(step['text']) }}</pre>
                 {% endif %}
                 {% if step['table'] %}
-                        <pre>{{ escape(step['table']) }}</pre>
+                        <pre style="margin: 0;">{{ escape(step['table']) }}</pre>
                 {% endif %}
                 </td></tr>
             {% endif %}
@@ -111,15 +111,21 @@
                 <tr class="row"><td style="min-width: 0;" class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
 
                 {% if step['result']['stdout'] %}
-                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['stdout'])) }}</pre><br/>
+                    <pre style="color: darkgray; margin: 0;">{{ escape("\n".join(step['result']['stdout'])) }}</pre>
                 {% endif %}
 
                 {% if step['image'] is defined %}
-                    <img class="mx-auto d-block img-fluid shadow bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img><br/>
+                    {% if step['result']['stdout'] %}
+                        <br/>
+                    {% endif %}
+                    <img class="mx-auto d-block img-fluid shadow bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img>
                 {% endif %}
 
                 {% if step['result']['error_message'] is defined %}
-                    <pre style="color: gray; margin: 0">{{ escape("\n".join(step['result']['error_message'])) }}</pre><br/>
+                    {% if step['image'] is defined %}
+                        <br/>
+                    {% endif %}
+                    <pre style="color: gray; margin: 0">{{ escape("\n".join(step['result']['error_message'])) }}</pre>
                 {% endif %}
                 </td></tr>
             {% endif %}

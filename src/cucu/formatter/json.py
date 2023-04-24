@@ -180,11 +180,11 @@ class CucuJSONFormatter(Formatter):
 
         stdout = None
         if "stdout" in step.__dict__ and step.stdout != []:
-            stdout = ["".join(step.stdout)]
+            stdout = ["".join(step.stdout).rstrip()]
 
         stderr = None
         if "stderr" in step.__dict__ and step.stderr != []:
-            stderr = ["".join(step.stderr)]
+            stderr = ["".join(step.stderr).rstrip()]
 
         steps[step_index]["result"] = {
             "stdout": stdout,
