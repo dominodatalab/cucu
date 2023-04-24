@@ -160,13 +160,13 @@ class CucuJSONFormatter(Formatter):
 
             step_variables = CONFIG.expand(step.name)
 
-            # if step.text:
-            #     step_variables.update(CONFIG.expand(step.text))
+            if step.text:
+                step_variables.update(CONFIG.expand(step.text))
 
-            # if step.table:
-            #     for row in step.table.original.rows:
-            #         for value in row:
-            #             step_variables.update(CONFIG.expand(value))
+            if step.table:
+                for row in step.table.original.rows:
+                    for value in row:
+                        step_variables.update(CONFIG.expand(value))
 
             # if step_variables:
             #     expanded = " ".join(
