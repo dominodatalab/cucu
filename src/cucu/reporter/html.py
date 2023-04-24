@@ -147,6 +147,9 @@ def generate(results, basepath, only_failures=False):
                 )
                 image_filepath = os.path.join(scenario_filepath, image_filename)
 
+                if step["name"].startswith("#"):
+                    step["heading_level"] = "h4"
+
                 if os.path.exists(image_filepath):
                     step["image"] = urllib.parse.quote(image_filename)
 
