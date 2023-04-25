@@ -171,12 +171,14 @@ class CucuJSONFormatter(Formatter):
             if step_variables:
                 expanded = " ".join(
                     [
-                        f'{behave_tweaks.hide_secrets(key)}="{behave_tweaks.hide_secrets(value)}"'
+                        f'{key}="{value}"'
                         for (key, value) in step_variables.items()
                     ]
                 )
                 padding = f"    {' '*(len('Given')-len(step.keyword))}"
-                step.stdout.insert(0, f"{padding}# {expanded}\n\n")
+                step.stdout.insert(
+                    0, f"{padding}# {behave_tweaks.hide_secrets(expanded)}"
+                )
 
         stdout = None
         if "stdout" in step.__dict__ and step.stdout != []:
