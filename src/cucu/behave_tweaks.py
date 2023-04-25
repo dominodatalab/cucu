@@ -127,21 +127,27 @@ _stdout = sys.stdout
 
 def hide_secrets(line):
     secrets = CONFIG["CUCU_SECRETS"]
+    if secrets is None:
+        return line
 
     # here's where we can hide secrets
     for secret in secrets.split(","):
-        if secret is not None:
-            secret = secret.strip()
-            value = CONFIG.get(secret)
+        secret = secret.strip()
+        if not secret:
+            continue
 
-            if value is not None:
-                replacement = "*" * len(value)
+        value = CONFIG.get(secret)
 
-                if isinstance(line, bytes):
-                    value = bytes(value, "utf8")
-                    replacement = bytes(replacement, "utf8")
+        if value is None:
+            continue
 
-                line = line.replace(value, replacement)
+        replacement = "*" * len(value)
+
+        if isinstance(line, bytes):
+            value = bytes(value, "utf8")
+            replacement = bytes(replacement, "utf8")
+
+        line = line.replace(value, replacement)
 
     return line
 
