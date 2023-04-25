@@ -29,7 +29,7 @@ def parse_log_to_html(input: str) -> str:
     """
 
     body_start = '<body style="color: white; background-color: 333;">'  # use dark bg since colors are from behave
-    body_end = "</body>"
+    body_end = "</body>\n"
     result = f"{body_start}<pre>\n{REGEX.sub(lambda match: TRANSLATION[match.group(0)], html.escape(input, quote=False))}\n</pre>{body_end}"
     if ESC_SEQ in result:
         lines = "\n".join([x for x in result.split("\n") if ESC_SEQ in x])
