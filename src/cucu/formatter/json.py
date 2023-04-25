@@ -168,15 +168,15 @@ class CucuJSONFormatter(Formatter):
                     for value in row:
                         step_variables.update(CONFIG.expand(value))
 
-            # if step_variables:
-            #     expanded = " ".join(
-            #         [
-            #             f'{key}="{behave_tweaks.hide_secrets(value)}"'
-            #             for (key, value) in step_variables.items()
-            #         ]
-            #     )
-            #     padding = f"    {' '*(len('Given')-len(step.keyword))}"
-            #     step.stdout.insert(0, f"{padding}# {expanded}\n\n")
+            if step_variables:
+                expanded = " ".join(
+                    [
+                        f'{behave_tweaks.hide_secrets(key)}="{behave_tweaks.hide_secrets(value)}"'
+                        for (key, value) in step_variables.items()
+                    ]
+                )
+                padding = f"    {' '*(len('Given')-len(step.keyword))}"
+                step.stdout.insert(0, f"{padding}# {expanded}\n\n")
 
         stdout = None
         if "stdout" in step.__dict__ and step.stdout != []:
