@@ -181,10 +181,15 @@ def write_run_details(results, filepath):
     if os.path.exists(run_details_filepath):
         return
 
+    if CONFIG["CUCU_RECORD_ENV_VARS"]:
+        env_values = dict(os.environ)
+    else:
+        env_values = "To enable use the --record-env-vars flag"
+
     run_details = {
         "filepath": filepath,
         "full_arguments": sys.argv,
-        "env": dict(os.environ),
+        "env": env_values,
         "date": datetime.now().isoformat(),
     }
 

@@ -142,6 +142,12 @@ def main():
     help="when set we will not remove any existing results directory",
 )
 @click.option(
+    "--record-env-vars",
+    default=False,
+    is_flag=True,
+    help="when set will record shell environment variables to debug file: run_details.json",
+)
+@click.option(
     "--report",
     default="report",
     help="the location to put the test report when --generate-report is used",
@@ -211,6 +217,7 @@ def run(
     logging_level,
     periodic_thread_dumper,
     preserve_results,
+    record_env_vars,
     report,
     report_only_failures,
     results,
@@ -279,6 +286,9 @@ def run(
 
     if report_only_failures:
         os.environ["CUCU_REPORT_ONLY_FAILURES"] = "true"
+
+    if record_env_vars:
+        os.environ["CUCU_RECORD_ENV_VARS"] = "true"
 
     if not dry_run:
         write_run_details(results, filepath)
