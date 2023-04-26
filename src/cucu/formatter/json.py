@@ -177,7 +177,7 @@ class CucuJSONFormatter(Formatter):
                 )
                 padding = f"    {' '*(len('Given')-len(step.keyword))}"
                 step.stdout.insert(
-                    0, f"{padding}# {behave_tweaks.hide_secrets(expanded)}"
+                    0, f"{padding}# {behave_tweaks.hide_secrets(expanded)}\n"
                 )
 
         stdout = None
