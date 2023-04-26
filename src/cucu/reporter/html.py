@@ -20,7 +20,7 @@ def escape(data):
     if data is None:
         return None
 
-    return escape_(data, {'"': "&quot;"})
+    return escape_(data, {'"': "&quot;"}).rstrip()
 
 
 def process_tags(element):
@@ -146,6 +146,9 @@ def generate(results, basepath, only_failures=False):
                     f"{step_index} - {step['name'].replace('/', '_')}.png"
                 )
                 image_filepath = os.path.join(scenario_filepath, image_filename)
+
+                if step["name"].startswith("#"):
+                    step["heading_level"] = "h4"
 
                 if os.path.exists(image_filepath):
                     step["image"] = urllib.parse.quote(image_filename)

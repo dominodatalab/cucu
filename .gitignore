@@ -3,7 +3,6 @@ dist
 .coverage.*
 .DS_Store
 *.egg-info
-cucurc.yml
 htmlcov
 .nox
 terraform.tfstate
