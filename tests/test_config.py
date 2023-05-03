@@ -50,7 +50,7 @@ def test_config_snapshot_and_restore_works():
     CONFIG["FOO"] = "bar"
     assert CONFIG["FOO"] == "bar"
     CONFIG.restore()
-    assert CONFIG["FOO"] == None
+    assert CONFIG["FOO"] is None
 
 
 def test_config_can_load_an_empty_config():

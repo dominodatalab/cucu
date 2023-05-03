@@ -8,7 +8,7 @@ from behave import register_type
 from behave.model_describe import ModelPrinter
 from strip_ansi import strip_ansi
 
-from cucu import logger, run_steps, step
+from cucu import logger, step
 from cucu.config import CONFIG
 
 NTH_REGEX = r"(\d+)(nd|th|rd|st)"

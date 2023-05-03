@@ -280,7 +280,7 @@ def save_downloaded_file(ctx, filename):
     )
 
     def wait_for_file():
-        if ctx.browser.execute("return window.__cucu_downloaded_file;") == None:
+        if ctx.browser.execute("return window.__cucu_downloaded_file;") is None:
             raise RuntimeError(f"waiting on file {filename}")
 
     retry(wait_for_file)()

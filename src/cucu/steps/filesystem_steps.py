@@ -100,7 +100,7 @@ def should_see_file_contains_the_following(ctx, filepath):
     with open(filepath, "rb") as input:
         file_contents = input.read().decode("utf8")
 
-        if not ctx.text in file_contents:
+        if ctx.text not in file_contents:
             raise RuntimeError(
                 f"\n{file_contents}\ndoes not contain\n{ctx.text}\n"
             )

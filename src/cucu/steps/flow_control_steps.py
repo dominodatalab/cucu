@@ -4,7 +4,6 @@ import subprocess
 import time
 
 from cucu import logger, retry, run_steps, step
-from cucu.cli.run import behave
 from cucu.config import CONFIG
 from cucu.hooks import register_after_this_scenario_hook
 

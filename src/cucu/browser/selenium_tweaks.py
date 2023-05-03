@@ -1,4 +1,3 @@
-from selenium.webdriver.common.by import By
 from selenium.webdriver.remote import webelement
 
 from cucu.browser.frames import search_in_all_frames

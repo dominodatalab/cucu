@@ -2,7 +2,6 @@ import pkgutil
 import re
 from io import StringIO
 
-from behave.model_describe import ModelPrinter
 
 from cucu import config, format_gherkin_table, fuzzy, helpers, retry, step
 from cucu.browser.frames import run_in_all_frames
@@ -262,7 +261,7 @@ helpers.define_action_on_thing_with_name_steps(
 
 
 @step(
-    f'I save "{{table:nth}}" table "{{row:nth}}" row , "{{column:nth}}" column  value to a variable "{{variable_name}}"'
+    'I save "{table:nth}" table "{row:nth}" row , "{column:nth}" column  value to a variable "{variable_name}"'
 )
 def get_table_cell_value(ctx, table, row, column, variable_name):
     tables = find_tables(ctx)

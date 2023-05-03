@@ -1,6 +1,3 @@
-from cucu import logger
-
-
 def search_in_all_frames(browser, search_function):
     """
     search all frames on the page for an element

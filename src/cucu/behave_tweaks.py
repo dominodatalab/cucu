@@ -10,7 +10,6 @@ from functools import wraps
 import behave
 from behave.__main__ import main as original_behave_main
 from behave.model import Table
-from behave.runner_util import reset_runtime
 
 from cucu.config import CONFIG
 
