@@ -1,10 +1,10 @@
 # nopycln: file
 import urllib
+from textwrap import dedent
 
 from cucu import register_custom_junit_failure_handler
 from cucu.config import CONFIG
 from cucu.environment import *
-from textwrap import dedent
 
 
 def circle_ci_direct_links_to_reports(feature, scenario):

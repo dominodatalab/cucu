@@ -5,8 +5,8 @@
 #
 import time
 
-from cucu.config import CONFIG
 from cucu import logger
+from cucu.config import CONFIG
 
 
 class Browser:

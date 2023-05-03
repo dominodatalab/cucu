@@ -1,7 +1,8 @@
 # coding: utf-8
 
-import os
 import logging
+import os
+
 from . import utils
 
 

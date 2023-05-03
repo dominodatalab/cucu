@@ -3,13 +3,16 @@ import json
 import os
 import socket
 import sys
+from datetime import datetime
 
-from cucu import behave_tweaks
-from cucu import init_global_hook_variables, register_before_retry_hook
+from cucu import (
+    behave_tweaks,
+    init_global_hook_variables,
+    register_before_retry_hook,
+)
 from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
-from datetime import datetime
 
 
 def behave_init(filepath="features"):

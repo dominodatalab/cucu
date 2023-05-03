@@ -1,20 +1,18 @@
 # flake8: noqa
 # nopycln: file
 import cucu.hooks
-
-import cucu.steps.comment_steps
 import cucu.steps.base_steps
-
 import cucu.steps.browser_steps
 import cucu.steps.button_steps
-import cucu.steps.command_steps
 import cucu.steps.checkbox_steps
+import cucu.steps.command_steps
+import cucu.steps.comment_steps
 import cucu.steps.dropdown_steps
 import cucu.steps.filesystem_steps
+import cucu.steps.flow_control_steps
 import cucu.steps.image_steps
 import cucu.steps.input_steps
 import cucu.steps.link_steps
-import cucu.steps.flow_control_steps
 import cucu.steps.menuitem_steps
 import cucu.steps.platform_steps
 import cucu.steps.radio_steps

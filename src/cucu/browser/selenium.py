@@ -1,19 +1,17 @@
+import logging
+
 import chromedriver_autoinstaller
 import geckodriver_autoinstaller
-import logging
 import urllib3
-
-from cucu.browser.core import Browser
-from cucu.browser.frames import search_in_all_frames
-from cucu import config, logger
-from cucu import edgedriver_autoinstaller
-
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.chrome.options import Options
-
 from selenium.webdriver.remote.remote_connection import RemoteConnection
+
+from cucu import config, edgedriver_autoinstaller, logger
+from cucu.browser.core import Browser
+from cucu.browser.frames import search_in_all_frames
 
 
 class DisableLogger:

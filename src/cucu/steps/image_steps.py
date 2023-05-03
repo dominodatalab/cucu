@@ -1,4 +1,4 @@
-from cucu import helpers, retry, step, fuzzy
+from cucu import fuzzy, helpers, retry, step
 
 
 def find_image(ctx, name, index=0):

@@ -1,6 +1,6 @@
 import pkgutil
-
 from enum import Enum
+
 from cucu.browser.frames import search_in_all_frames
 
 

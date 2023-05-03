@@ -1,7 +1,8 @@
 import humanize
-
 from selenium.webdriver.support.ui import Select
-from cucu import helpers, fuzzy, retry, step
+
+from cucu import fuzzy, helpers, retry, step
+
 from . import base_steps
 
 

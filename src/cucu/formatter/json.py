@@ -6,12 +6,13 @@
 from __future__ import absolute_import
 
 import json
-import six
 import traceback
 import uuid
 
+import six
 from behave.formatter.base import Formatter
 from behave.model_core import Status
+
 from cucu import behave_tweaks
 from cucu.config import CONFIG
 

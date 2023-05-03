@@ -2,11 +2,12 @@ import glob
 import importlib
 import os
 import re
+
 import yaml
 
 from cucu import logger
-from cucu.config import CONFIG
 from cucu.cli.steps import load_cucu_steps
+from cucu.config import CONFIG
 
 
 def load_lint_rules(rules, filepath):
