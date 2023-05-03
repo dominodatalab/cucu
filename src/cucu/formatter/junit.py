@@ -47,7 +47,6 @@ class CucuJUnitFormatter(Formatter):
             self.feature_results["tags"] = ", ".join(feature.tags)
 
     def background(self, background):
-
         # -- ADD BACKGROUND STEPS: Support *.feature file regeneration.
         for step_ in background.steps:
             self.step(step_)

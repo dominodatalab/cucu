@@ -5,7 +5,6 @@ import yaml
 
 
 class Config(dict):
-
     # only match variables {...}
     __VARIABLE_REGEX = re.compile(r"\{(?<!\\{)([^{}]+)\}(?<!\\})")
 

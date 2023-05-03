@@ -65,8 +65,8 @@ def check_table_matches_table(table, expected_table):
     if len(table) == len(expected_table):
         table_matched = True
 
-        for (expected_row, row) in zip(expected_table, table):
-            for (expected_value, value) in zip(expected_row, row):
+        for expected_row, row in zip(expected_table, table):
+            for expected_value, value in zip(expected_row, row):
                 if not re.match(expected_value, value):
                     table_matched = False
 
@@ -92,7 +92,7 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     for expected_row in expected_table:
         for row in table:
             found_row = True
-            for (expected_value, value) in zip(expected_row, row):
+            for expected_value, value in zip(expected_row, row):
                 if not re.match(expected_value, value):
                     found_row = False
             if found_row:
@@ -177,7 +177,7 @@ def do_not_find_table(ctx, assert_func, nth=None):
     report_unable_to_find_table(tables)
 
 
-for (thing, check_func) in {
+for thing, check_func in {
     "is": check_table_equals_table,
     "matches": check_table_matches_table,
     "contains": check_table_contains_table,

@@ -71,7 +71,7 @@ class Browser:
 
         # run the page checks
         if CONFIG["__CUCU_PAGE_CHECK_HOOKS"]:
-            for (name, hook) in CONFIG["__CUCU_PAGE_CHECK_HOOKS"].items():
+            for name, hook in CONFIG["__CUCU_PAGE_CHECK_HOOKS"].items():
                 logger.debug(f'executing page check "{name}"')
                 start = time.time()
                 hook(self)

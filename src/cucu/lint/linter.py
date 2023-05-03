@@ -31,7 +31,7 @@ def load_lint_rules(rules, filepath):
         with open(lint_rule_filepath, "r", encoding="utf8") as _input:
             rules_loaded = yaml.safe_load(_input.read())
 
-        for (rule_name, rule) in rules_loaded.items():
+        for rule_name, rule in rules_loaded.items():
             if rule_name in rules:
                 raise RuntimeError(
                     f"found duplicate rule names {rule_name}, please correct one of the locations."
@@ -43,7 +43,6 @@ def load_lint_rules(rules, filepath):
 
 
 def parse_matcher(name, rule_name, rule, line, state):
-
     """
     parses the "matcher" from the rule provided and then returns the tuple:
     (matched, extra_matcher_message) where matched is a boolean indicating that

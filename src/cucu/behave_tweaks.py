@@ -135,7 +135,6 @@ def hide_secrets(line):
 
     # here's where we can hide secrets
     for value in secret_values:
-
         replacement = "*" * len(value)
 
         if isinstance(line, bytes):
