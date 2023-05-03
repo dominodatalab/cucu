@@ -195,7 +195,7 @@ def select_option_from_dropdown(ctx, option, dropdown):
 @step(
     'I select the option "{option}" from the "{index:nth}" dropdown "{dropdown}"'
 )
-def select_option_from_dropdown(ctx, option, dropdown, index):
+def select_option_from_the_nth_dropdown(ctx, option, dropdown, index):
     find_n_select_dropdown_option(ctx, dropdown, option, index)
 
 
@@ -214,7 +214,7 @@ def should_see_option_is_selected(ctx, option, dropdown):
 @step(
     'I should see the option "{option}" is selected on the "{index:nth}" dropdown "{dropdown}"'
 )
-def should_see_option_is_selected(ctx, option, dropdown, index):
+def should_see_option_on_the_nth_is_selected(ctx, option, dropdown, index):
     assert_dropdown_option_selected(
         ctx, dropdown, option, index, is_selected=True
     )
@@ -232,7 +232,7 @@ def wait_to_see_option_is_selected(ctx, option, dropdown):
 @step(
     'I should see the option "{option}" is not selected on the "{index:nth}" dropdown "{dropdown}"'
 )
-def should_see_option_is_not_selected(ctx, option, dropdown, index):
+def should_see_option_on_the_nth_is_not_selected(ctx, option, dropdown, index):
     assert_dropdown_option_selected(
         ctx, dropdown, option, index, is_selected=False
     )
