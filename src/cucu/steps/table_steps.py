@@ -2,7 +2,6 @@ import pkgutil
 import re
 from io import StringIO
 
-
 from cucu import config, format_gherkin_table, fuzzy, helpers, retry, step
 from cucu.browser.frames import run_in_all_frames
 

@@ -60,7 +60,7 @@ def wait_for_steps_to_fail(ctx, steps, timeout=None):
     def steps_should_fail():
         try:
             run_steps(ctx, steps)
-        except:
+        except:  # noqa: E722
             return
 
         raise RuntimeError("underlying steps did not fail")

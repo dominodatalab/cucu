@@ -31,7 +31,7 @@ def init():
             with DisableLogger():
                 # auto install chromedriver if not present
                 chromedriver_autoinstaller.install()
-        except:
+        except:  # noqa: E722
             logging.debug("unable to auto install chromedriver")
 
     if config.CONFIG["CUCU_BROWSER"] == "firefox":
