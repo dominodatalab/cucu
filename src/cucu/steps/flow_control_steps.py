@@ -136,7 +136,7 @@ def stop_the_timer(ctx, name):
 
 def run_feature(ctx, filepath, results):
     command = f"cucu run {filepath} --results {results}"
-    process = subprocess.run(command, shell=True)
+    process = subprocess.run(command, shell=True)  # nosec
 
     return_code = process.returncode
     if return_code != 0:

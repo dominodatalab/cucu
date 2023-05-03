@@ -273,7 +273,7 @@ def generate(results, basepath, only_failures=False):
         grand_totals[k] = sum([x[k] for x in reported_features])
 
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
-    templates = jinja2.Environment(loader=package_loader)
+    templates = jinja2.Environment(loader=package_loader, autoescape=True)
     if show_status:
         print("")  # add a newline to end status
 
