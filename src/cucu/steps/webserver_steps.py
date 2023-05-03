@@ -1,11 +1,9 @@
+from behave import step
+from cucu import register_after_this_scenario_hook
+from cucu.config import CONFIG
 from functools import partial
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
-
-from behave import step
-
-from cucu import register_after_this_scenario_hook
-from cucu.config import CONFIG
 
 
 class QuietHTTPRequestHandler(SimpleHTTPRequestHandler):

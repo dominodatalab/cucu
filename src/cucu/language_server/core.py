@@ -1,18 +1,18 @@
-import logging
 import re
-
 import jellyfish
+import logging
+
+from cucu.cli.steps import load_cucu_steps
+from cucu import init_global_hook_variables
+
 from pygls.capabilities import COMPLETION
+from pygls.server import LanguageServer
 from pygls.lsp.types import (
     CompletionItem,
     CompletionList,
     CompletionOptions,
     CompletionParams,
 )
-from pygls.server import LanguageServer
-
-from cucu import init_global_hook_variables
-from cucu.cli.steps import load_cucu_steps
 
 init_global_hook_variables()
 

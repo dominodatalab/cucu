@@ -1,8 +1,8 @@
 import logging
 import sys
-from functools import wraps
 
 from cucu.config import CONFIG
+from functools import wraps
 
 
 def init_logging(logging_level):

@@ -1,4 +1,4 @@
-from cucu import StopRetryException, retry, run_steps, step
+from cucu import retry, run_steps, step, StopRetryException
 
 
 @step("I use a step with substeps that log")

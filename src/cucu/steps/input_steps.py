@@ -1,12 +1,10 @@
+import humanize
 import sys
 
-import humanize
+from cucu import helpers, fuzzy, retry, step
 
 # XXX: this would have to be generalized to other browser abstractions
 from selenium.webdriver.common.keys import Keys
-
-from cucu import fuzzy, helpers, retry, step
-
 from . import base_steps
 
 

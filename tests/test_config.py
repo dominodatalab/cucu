@@ -1,8 +1,7 @@
+import cucu
+import pytest
 import tempfile
 
-import pytest
-
-import cucu
 from cucu.config import CONFIG
 
 

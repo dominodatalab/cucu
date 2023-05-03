@@ -1,11 +1,11 @@
 import base64
+import humanize
 import os
 
-import humanize
-from selenium.webdriver.common.keys import Keys
-
-from cucu import config, fuzzy, logger, retry, run_steps, step
+from cucu import config, logger, fuzzy, retry, run_steps, step
 from cucu.browser.selenium import Selenium
+
+from selenium.webdriver.common.keys import Keys
 
 
 def open_browser(ctx):

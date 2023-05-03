@@ -1,33 +1,33 @@
 # -*- coding: utf-8 -*-
+import click
+import coverage
 import glob
 import json
-import os
 import shutil
 import signal
 import time
-from collections import namedtuple
-from importlib.metadata import version
-from threading import Timer
+import os
 
-import click
-import coverage
 from click import ClickException
-from pebble import ProcessPool
-from tabulate import tabulate
-
+from collections import namedtuple
 from cucu import (
     fuzzy,
     init_global_hook_variables,
-    language_server,
-    logger,
     register_after_all_hook,
     reporter,
+    language_server,
+    logger,
 )
+from cucu.config import CONFIG
 from cucu.cli import thread_dumper
 from cucu.cli.run import behave, behave_init, write_run_details
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
-from cucu.config import CONFIG
 from cucu.lint import linter
+from importlib.metadata import version
+from pebble import ProcessPool
+from tabulate import tabulate
+from threading import Timer
+
 
 # QE-10912 Remove Pebble before distributing cucu
 # Since Pebble is less likely to be included in cucu in the future,

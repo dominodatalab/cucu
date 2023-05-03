@@ -3,16 +3,15 @@
 #      writing while not interfering with the way behave does its own log
 #      capturing
 #
-import sys
-import warnings
-from functools import wraps
-
 import behave
-from behave.__main__ import main as original_behave_main
+import warnings
+import sys
+
 from behave.model import Table
 from behave.runner_util import reset_runtime
-
+from behave.__main__ import main as original_behave_main
 from cucu.config import CONFIG
+from functools import wraps
 
 
 def behave_main(args):

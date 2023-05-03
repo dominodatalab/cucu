@@ -1,5 +1,4 @@
-from cucu import fuzzy, helpers, retry, step
-
+from cucu import helpers, fuzzy, retry, step
 from . import base_steps
 
 

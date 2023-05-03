@@ -1,4 +1,4 @@
-from cucu import config, fuzzy, helpers, retry, step
+from cucu import config, helpers, fuzzy, retry, step
 from cucu.fuzzy.core import load_jquery_lib
 from cucu.steps import step_utils
 

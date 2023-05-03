@@ -1,6 +1,5 @@
-import sys
-
 import humanize
+import sys
 
 from cucu import retry, run_steps
 from cucu.config import CONFIG
