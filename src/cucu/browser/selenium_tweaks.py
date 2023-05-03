@@ -1,7 +1,8 @@
-from cucu.config import CONFIG
-from cucu.browser.frames import search_in_all_frames
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote import webelement
+
+from cucu.browser.frames import search_in_all_frames
+from cucu.config import CONFIG
 
 # monkey patch some methods at the WebElement level
 __ORIGINAL_FIND_ELEMENTS = webelement.WebElement.find_elements

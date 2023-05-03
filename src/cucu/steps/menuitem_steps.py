@@ -2,7 +2,8 @@
 # menuitem steps
 # https://www.w3.org/TR/wai-aria-1.1/#menuitem
 #
-from cucu import helpers, fuzzy
+from cucu import fuzzy, helpers
+
 from . import base_steps
 
 

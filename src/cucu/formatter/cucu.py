@@ -3,14 +3,14 @@ from __future__ import absolute_import
 
 import traceback
 
-
-from behave.formatter.base import Formatter
 from behave.formatter.ansi_escapes import colors, escapes, up
-from behave.model_describe import ModelPrinter
+from behave.formatter.base import Formatter
 from behave.model_core import Status
+from behave.model_describe import ModelPrinter
 from behave.textutil import make_indentation
-from cucu.config import CONFIG
+
 from cucu.behave_tweaks import hide_secrets
+from cucu.config import CONFIG
 
 
 class CucuFormatter(Formatter):

@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-import bs4
 import os
 import traceback
+from datetime import datetime
+from xml.sax.saxutils import escape
 
+import bs4
 from behave.formatter.base import Formatter
 from behave.model_core import Status
 from bs4.formatter import XMLFormatter
+
 from cucu.config import CONFIG
-from datetime import datetime
-from xml.sax.saxutils import escape
 
 
 class CucuJUnitFormatter(Formatter):
