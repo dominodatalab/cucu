@@ -1,6 +1,7 @@
 from cucu import config, helpers, fuzzy, retry, step
 from cucu.fuzzy.core import load_jquery_lib
 from cucu.steps import step_utils
+from cucu.browser.frames import search_in_all_frames
 
 
 def find_text(ctx, name, index=0):
@@ -34,11 +35,32 @@ helpers.define_run_steps_if_I_can_see_element_with_name_steps("text", find_text)
 )
 def search_for_regex_to_page_and_save(ctx, regex, name, variable):
     ctx.check_browser_initialized()
+    ctx.browser.switch_to_default_frame()
     ctx.browser.execute(load_jquery_lib())
     text = ctx.browser.execute(
         'return jQuery("body").children(":visible").text();'
     )
-    step_utils.search_and_save(regex, text, name, variable)
+    try:
+        step_utils.search_and_save(regex, text, name, variable)
+    except RuntimeError:
+        frames = ctx.browser.execute(
+            'return document.querySelectorAll("iframe");'
+        )
+        for frame in frames:
+            # need to be in the default frame in order to switch to a child
+            # frame w/o getting a stale element exception
+            ctx.browser.switch_to_default_frame()
+            ctx.browser.switch_to_frame(frame)
+            ctx.browser.execute(load_jquery_lib())
+            text = ctx.browser.execute(
+                'return jQuery("body").children(":visible").text();'
+            )
+            try:
+                step_utils.search_and_save(regex, text, name, variable)
+            except RuntimeError:
+                continue
+
+            return
 
 
 @step(

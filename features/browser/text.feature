@@ -37,6 +37,14 @@ Feature: Text
      Then I search for the regex "some text with (?P<word>[^ ]+)" on the current page and save the group "word" to the variable "WORD"
      Then I should see "{WORD}" is equal to "nested"
 
+  Scenario: User can find and save text from all the frames in the current page
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
+     Then I search for the regex "(?P<word>[^ ]+) some files" on the current page and save the group "word" to the variable "WORD1"
+     Then I should see "{WORD1}" is equal to "upload"
+     Then I search for the regex "Copy to (?P<word>[^ ]+)" on the current page and save the group "word" to the variable "WORD2"
+     Then I should see "{WORD2}" is equal to "Clipboard"
+
   Scenario: User can see text within an input that was changed at runtime
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
