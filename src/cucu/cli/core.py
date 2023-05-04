@@ -30,7 +30,6 @@ from threading import Timer
 
 
 # QE-10912 Remove Pebble before distributing cucu
-DEFAULT_FEATURE_TIMEOUT = 30 * 60
 
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
@@ -170,7 +169,7 @@ def main():
 )
 @click.option(
     "--feature-timeout",
-    default=DEFAULT_FEATURE_TIMEOUT,
+    default=1800,
     help="When run tests in parallel, the maximum amount of time (seconds) a feature can run",
 )
 @click.option(
