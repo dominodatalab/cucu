@@ -199,7 +199,7 @@ class CucuFormatter(Formatter):
             self.doc_string(step.text)
 
         if step.table:
-            self.table(step.table.original)
+            self.table(getattr(step.table, "original", step.table))
 
         if step.status in (Status.passed, Status.failed):
             # print the variable values in step name, multiline/table arguments
