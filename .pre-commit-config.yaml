@@ -9,21 +9,25 @@ repos:
     - id: check-xml
     - id: end-of-file-fixer
     - id: trailing-whitespace
--   repo: https://github.com/PyCQA/flake8
-    rev: 4.0.1
-    hooks:
-    - id: flake8
--   repo: https://github.com/hadialqattan/pycln
-    rev: v1.3.2
-    hooks:
-    - id: pycln
--   repo: https://github.com/ambv/black
-    rev: 22.3.0
+-   repo: https://github.com/psf/black
+    rev: 23.3.0
     hooks:
       - id: black
-        name: format python code using black
-        language_version: python3
-        args: [ --line-length=80 ]
+        # It is recommended to specify the latest version of Python
+        # supported by your project here, or alternatively use
+        # pre-commit's default_language_version, see
+        # https://pre-commit.com/#top_level-default_language_version
+        language_version: python3.9
+-   repo: https://github.com/pycqa/isort
+    rev: 5.11.2
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: [ "--check", "src features data"]
+-   repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: "v0.0.264"
+    hooks:
+      - id: ruff
 - repo: local
   hooks:
     - id: cucu_lint

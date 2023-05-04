@@ -5,6 +5,7 @@ dist
 *.egg-info
 htmlcov
 .nox
+.ruff_cache
 terraform.tfstate
 terraform.tfstate.backup
 .terraform

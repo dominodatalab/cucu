@@ -2,12 +2,33 @@
 name = "cucu"
 version = "0.127.0"
 license = "MIT"
-description = ""
-authors = ["Rodney Gomes <rodneygomes@gmail.com>"]
+description = "Non-painful BDD web testing"
+authors = ["Rodney Gomes <rodneygomes@gmail.com>", "Cedric Young <Cedric.Young@dominodatalab.com>"]
 readme = "README.md"
 homepage = ""
 repository = ""
 keywords = ["cucumber", "selenium"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Testing :: BDD",
+]
+include = [
+    { path = "CHANGELOG.md", format = "sdist" },
+    { path = "LICENSE", format = "sdist" },
+]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
@@ -37,10 +58,57 @@ cucu = "cucu.cli:main"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.2"
-nox = "^2020.5.24"
 flake8 = "^4.0.1"
 ipdb = "^0.13.9"
+ruff = "^0.0.264"
+bandit = "^1.7.5"
+safety = "^2.3.5"
+nox = "^2023.4.22"
+isort = "^5.12.0"
 
 [build-system]
 requires = ["poetry-core>=1.3.2"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 80
+
+[tool.isort]
+profile = "black"
+line_length = 80
+skip = ["__init__.py"]
+
+[tool.ruff]
+exclude = [".env", ".venv", "venv", "__init__.py"]
+ignore = ["E501", "F403"]
+line-length = 80
+
+[tool.bandit]
+exclude_dirs = [".env", ".venv", "venv"]
+
+[tool.pytest]
+# junit_family = "xunit2"
+
+[tool.coverage.paths]
+source = ["src"]
+
+[tool.coverage.run]
+branch = true
+relative_files = true
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 70
+
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    min_version = 4.5.1
+    env_list =
+        py310
+        py39
+        py38
+
+    [testenv]
+    commands = cucu run features --tags=report --tags=show-skips
+"""
