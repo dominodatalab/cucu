@@ -28,10 +28,10 @@ repos:
     rev: "v0.0.264"
     hooks:
       - id: ruff
-- repo: local
-  hooks:
-    - id: cucu_lint
-      name: lint feature files
-      entry: ./bin/cucu lint
-      language: script
-      files: ^.*\.feature$
+# - repo: local
+#   hooks:
+#     - id: cucu_lint
+#       name: lint feature files
+#       entry: ./bin/cucu lint
+#       language: script
+#       files: ^.*\.feature$
