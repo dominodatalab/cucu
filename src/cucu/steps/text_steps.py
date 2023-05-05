@@ -1,7 +1,6 @@
 from cucu import config, helpers, fuzzy, retry, step
 from cucu.fuzzy.core import load_jquery_lib
 from cucu.steps import step_utils
-from cucu.browser.frames import search_in_all_frames
 
 
 def find_text(ctx, name, index=0):
