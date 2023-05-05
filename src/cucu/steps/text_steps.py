@@ -58,8 +58,11 @@ def search_for_regex_to_page_and_save(ctx, regex, name, variable):
             )
             try:
                 step_utils.search_and_save(regex, text, name, variable)
-            except RuntimeError:
-                continue
+            except RuntimeError as e:
+                if frames.index(frame) < len(frames) - 1:
+                    continue
+                else:
+                    raise RuntimeError(e)
 
             return
 
