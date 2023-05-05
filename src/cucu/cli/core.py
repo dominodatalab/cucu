@@ -30,9 +30,6 @@ from cucu.config import CONFIG
 from cucu.lint import linter
 
 # QE-10912 Remove Pebble before distributing cucu
-# Since Pebble is less likely to be included in cucu in the future,
-# for now, this is not exposed as an option.
-TASK_TIMEOUT = 30 * 60
 
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
@@ -171,6 +168,11 @@ def main():
     help="the runtime timeout in seconds after which the current run will terminate any running tests and exit",
 )
 @click.option(
+    "--feature-timeout",
+    default=1800,
+    help="When run tests in parallel, the maximum amount of time (seconds) a feature can run",
+)
+@click.option(
     "--secrets",
     default=None,
     help="coma separated list of variable names that we should hide"
@@ -222,6 +224,7 @@ def run(
     report_only_failures,
     results,
     runtime_timeout,
+    feature_timeout,
     secrets,
     show_skips,
     show_status,
@@ -387,7 +390,7 @@ def run(
                         {
                             "redirect_output": True,
                         },
-                        timeout=float(TASK_TIMEOUT),
+                        timeout=float(feature_timeout),
                     )
                     async_results.append(AsyncResult(feature_filepath, result))
 
