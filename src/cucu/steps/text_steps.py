@@ -25,6 +25,8 @@ def find_text(ctx, name, index=0):
     )
 
 
+# https://github.com/cerebrotech/cucu/blob/fccae47d06abcc2e6528ef698c478ab52a97c754/features/cli/internals.feature#L5
+# Above scenario depends on the line number of below statement. Adjust the above scenario accordingly if any changes to the  line number of the below statement.
 helpers.define_should_see_thing_with_name_steps("text", find_text)
 helpers.define_run_steps_if_I_can_see_element_with_name_steps("text", find_text)
 
