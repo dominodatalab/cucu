@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Add
 
 - Everything - see README.md
 
@@ -18,9 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # Template
 ## [{version}] - [{Date}]
 
-### Added
-### Changed
-### Deprecated
-### Removed
-### Fixed
-### Security
+### Add
+### Change
+### Deprecate
+### Remove
+### Fix
+### Secure
