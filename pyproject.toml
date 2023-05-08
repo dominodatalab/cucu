@@ -2,7 +2,7 @@
 name = "cucu"
 version = "0.128.0"
 license = "MIT"
-description = "Non-painful BDD web testing"
+description = "Easy BDD web testing"
 authors = ["Rodney Gomes <rodneygomes@gmail.com>", "Cedric Young <Cedric.Young@dominodatalab.com>"]
 readme = "README.md"
 homepage = ""
