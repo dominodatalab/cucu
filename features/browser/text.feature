@@ -62,7 +62,24 @@ Feature: Text
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
      Then I should see text matching the regex "just.*a.l[abcd]bel" on the current page
 
+  Scenario: User can see text that matches a regex in all frames of the current page
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
+     Then I should see text matching the regex "d*load th.s f.l." on the current page
+
   Scenario: User can see text that matches a regex with nested tags
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
      Then I should see text matching the regex "text with n.st.d" on the current page
+
+  Scenario: User can match and save text from the current page
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
+     Then I match the regex "(?P<word>[^ ]*)\s*some text in a label" on the current page and save the group "word" to the variable "WORD"
+     Then I should see "{WORD}" is equal to "just"
+
+  Scenario: User can match and save text from all the frames in the current page
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
+     Then I match the regex "(?P<word>[^ ]*)\s*to Clipboard" on the current page and save the group "word" to the variable "WORD"
+     Then I should see "{WORD}" is equal to "Copy"
