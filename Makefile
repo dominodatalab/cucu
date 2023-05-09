@@ -1,5 +1,6 @@
 # help menu when you run just `make`
 help:
+	#   Warning: Use make only outside of poetry shell or virtualenvs
 	#   install  - installs the necessary development dependencies.
 	#   format   - formats the code
 	#   check    - checks the code
