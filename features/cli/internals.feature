@@ -7,7 +7,7 @@ Feature: Internals
      Then I should see "{STDOUT}" matches the following:
       """
       [\s\S]*
-      .*File ".*\/src\/cucu\/steps\/text_steps.py", line 29, in \<module\>
+      .*File ".*\/src\/cucu\/steps\/text_steps.py", line 31, in \<module\>
       [\s\S]*
       """
 
