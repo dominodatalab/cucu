@@ -1,6 +1,8 @@
 from cucu import config, helpers, fuzzy, retry, step
 from cucu.fuzzy.core import load_jquery_lib
 from cucu.steps import step_utils
+from functools import partial
+from cucu.browser.frames import search_text_in_all_frames
 
 
 def find_text(ctx, name, index=0):
@@ -39,37 +41,10 @@ def search_for_regex_to_page_and_save(ctx, regex, name, variable):
     text = ctx.browser.execute(
         'return jQuery("body").children(":visible").text();'
     )
-    try:
-        step_utils.search_and_save(regex, text, name, variable)
-    except RuntimeError:
-        # we might have not been in the default frame so check again
-        ctx.browser.switch_to_default_frame()
-        text = ctx.browser.execute(
-            'return jQuery("body").children(":visible").text();'
-        )
-        try:
-            step_utils.search_and_save(regex, text, name, variable)
-        except RuntimeError:
-            frames = ctx.browser.execute(
-                'return document.querySelectorAll("iframe");'
-            )
-            for frame in frames:
-                # need to be in the default frame in order to switch to a child
-                # frame w/o getting a stale element exception
-                ctx.browser.switch_to_default_frame()
-                ctx.browser.switch_to_frame(frame)
-                ctx.browser.execute(load_jquery_lib())
-                text = ctx.browser.execute(
-                    'return jQuery("body").children(":visible").text();'
-                )
-                try:
-                    step_utils.search_and_save(regex, text, name, variable)
-                except RuntimeError as e:
-                    if frames.index(frame) < len(frames) - 1:
-                        continue
-                    else:
-                        raise RuntimeError(e)
-                return
+    search_function = partial(
+        step_utils.search_and_save, regex=regex, name=name, variable=variable
+    )
+    search_text_in_all_frames(ctx.browser, search_function, value=text)
 
 
 @step(
@@ -81,37 +56,10 @@ def match_for_regex_to_page_and_save(ctx, regex, name, variable):
     text = ctx.browser.execute(
         'return jQuery("body").children(":visible").text();'
     )
-    try:
-        step_utils.match_and_save(regex, text, name, variable)
-    except RuntimeError:
-        # we might have not been in the default frame so check again
-        ctx.browser.switch_to_default_frame()
-        text = ctx.browser.execute(
-            'return jQuery("body").children(":visible").text();'
-        )
-        try:
-            step_utils.match_and_save(regex, text, name, variable)
-        except RuntimeError:
-            frames = ctx.browser.execute(
-                'return document.querySelectorAll("iframe");'
-            )
-            for frame in frames:
-                # need to be in the default frame in order to switch to a child
-                # frame w/o getting a stale element exception
-                ctx.browser.switch_to_default_frame()
-                ctx.browser.switch_to_frame(frame)
-                ctx.browser.execute(load_jquery_lib())
-                text = ctx.browser.execute(
-                    'return jQuery("body").children(":visible").text();'
-                )
-                try:
-                    step_utils.match_and_save(regex, text, name, variable)
-                except RuntimeError as e:
-                    if frames.index(frame) < len(frames) - 1:
-                        continue
-                    else:
-                        raise RuntimeError(e)
-                return
+    search_function = partial(
+        step_utils.match_and_save, regex=regex, name=name, variable=variable
+    )
+    search_text_in_all_frames(ctx.browser, search_function, value=text)
 
 
 @step('I should see text matching the regex "{regex}" on the current page')
@@ -121,34 +69,5 @@ def search_for_regex_on_page(ctx, regex):
     text = ctx.browser.execute(
         'return jQuery("body").children(":visible").text();'
     )
-    try:
-        step_utils.search(regex, text)
-    except RuntimeError:
-        # we might have not been in the default frame so check again
-        ctx.browser.switch_to_default_frame()
-        text = ctx.browser.execute(
-            'return jQuery("body").children(":visible").text();'
-        )
-        try:
-            step_utils.search(regex, text)
-        except RuntimeError:
-            frames = ctx.browser.execute(
-                'return document.querySelectorAll("iframe");'
-            )
-            for frame in frames:
-                # need to be in the default frame in order to switch to a child
-                # frame w/o getting a stale element exception
-                ctx.browser.switch_to_default_frame()
-                ctx.browser.switch_to_frame(frame)
-                ctx.browser.execute(load_jquery_lib())
-                text = ctx.browser.execute(
-                    'return jQuery("body").children(":visible").text();'
-                )
-                try:
-                    step_utils.search(regex, text)
-                except RuntimeError as e:
-                    if frames.index(frame) < len(frames) - 1:
-                        continue
-                    else:
-                        raise RuntimeError(e)
-                return
+    search_function = partial(step_utils.search, regex=regex)
+    search_text_in_all_frames(ctx.browser, search_function, value=text)
