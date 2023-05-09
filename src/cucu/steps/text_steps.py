@@ -1,6 +1,8 @@
 from cucu import config, helpers, fuzzy, retry, step
 from cucu.fuzzy.core import load_jquery_lib
 from cucu.steps import step_utils
+from functools import partial
+from cucu.browser.frames import search_text_in_all_frames
 
 
 def find_text(ctx, name, index=0):
@@ -25,6 +27,7 @@ def find_text(ctx, name, index=0):
     )
 
 
+# Also update the line number in the  scenario: `User gets the right stacktrace for steps using step helpers` when changing the code below.
 helpers.define_should_see_thing_with_name_steps("text", find_text)
 helpers.define_run_steps_if_I_can_see_element_with_name_steps("text", find_text)
 
@@ -38,7 +41,10 @@ def search_for_regex_to_page_and_save(ctx, regex, name, variable):
     text = ctx.browser.execute(
         'return jQuery("body").children(":visible").text();'
     )
-    step_utils.search_and_save(regex, text, name, variable)
+    search_function = partial(
+        step_utils.search_and_save, regex=regex, name=name, variable=variable
+    )
+    search_text_in_all_frames(ctx.browser, search_function, value=text)
 
 
 @step(
@@ -50,7 +56,10 @@ def match_for_regex_to_page_and_save(ctx, regex, name, variable):
     text = ctx.browser.execute(
         'return jQuery("body").children(":visible").text();'
     )
-    step_utils.match_and_save(regex, text, name, variable)
+    search_function = partial(
+        step_utils.match_and_save, regex=regex, name=name, variable=variable
+    )
+    search_text_in_all_frames(ctx.browser, search_function, value=text)
 
 
 @step('I should see text matching the regex "{regex}" on the current page')
@@ -60,4 +69,5 @@ def search_for_regex_on_page(ctx, regex):
     text = ctx.browser.execute(
         'return jQuery("body").children(":visible").text();'
     )
-    step_utils.search(regex, text)
+    search_function = partial(step_utils.search, regex=regex)
+    search_text_in_all_frames(ctx.browser, search_function, value=text)
