@@ -35,5 +35,5 @@ We encourage all communities to resolve issues on their own whenever possible. I
 
 Your report will be handled in accordance with the issue resolution process described in the Code of Conduct FAQ. All project and community leaders are obligated to respect the privacy and security of the reporter of any incident.
 
-Attribution
+# Attribution
 This Code of Conduct is adapted from the Microsoft Code of Conduct, available at https://opensource.microsoft.com/codeofconduct/, which in turn is adapted from the Contributor Covenant, version 2.0, available at https://www.contributor-covenant.org/version/2/0/code_of_conduct.html.
