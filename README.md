@@ -1,10 +1,12 @@
-# cucu
-
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/cerebrotech/cucu/tree/main.svg?style=svg&circle-token=81eb2db26e4d6529e8cbb1319fe0f50a992bb50e)](https://dl.circleci.com/status-badge/redirect/gh/cerebrotech/cucu/tree/main)
+# ![Cucu Logo|100x100](cucu%20logo%20small.png) **CUCU** - Easy BDD web testing
 
 End-to-end testing framework that uses [gherkin](https://cucumber.io/docs/gherkin/)
 to drive various underlying tools/frameworks to create real world testing scenarios.
-# Why cucu?
+
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/cerebrotech/cucu/tree/main.svg?style=svg&circle-token=81eb2db26e4d6529e8cbb1319fe0f50a992bb50e)](https://dl.circleci.com/status-badge/redirect/gh/cerebrotech/cucu/tree/main)
+
+
+## Why cucu?
 1. Cucu avoids unnecessary abstractions (i.e. no Page Objects!) while keeping scenarios readable.
     ```gherkin
     Feature: My First Cucu Test
@@ -27,8 +29,8 @@ to drive various underlying tools/frameworks to create real world testing scenar
 
 # Table of Contents
 
-- [cucu](#cucu)
-- [Why cucu?](#why-cucu)
+- [ **CUCU** - Easy BDD web testing](#-cucu---easy-bdd-web-testing)
+  - [Why cucu?](#why-cucu)
 - [Table of Contents](#table-of-contents)
 - [Installation](#installation)
   - [Requirements](#requirements)
