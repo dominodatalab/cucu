@@ -30,6 +30,20 @@ Feature: Helpers
       Then I should see the checkbox "checkbox with inner label" is checked
       """
 
+  Scenario: User can ensure a checkbox is in a desired state
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html"
+     When I ensure the checkbox "default checked checkbox" is checked
+     Then I should see the checkbox "default checked checkbox" is checked
+     When I uncheck the checkbox "default checked checkbox"
+      And I ensure the checkbox "default checked checkbox" is checked
+     Then I should see the checkbox "default checked checkbox" is checked
+     When I ensure the checkbox "default unchecked checkbox" is not checked
+     Then I should see the checkbox "default unchecked checkbox" is not checked
+     When I check the checkbox "default unchecked checkbox"
+      And I ensure the checkbox "default unchecked checkbox" is not checked
+     Then I should see the checkbox "default unchecked checkbox" is not checked
+
   Scenario: User gets appropriate error when waiting to see a checkbox is not in the expected state
     Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"
       And I start a webserver at directory "data/www" and save the port to the variable "PORT"

@@ -1,4 +1,4 @@
-from cucu import helpers, fuzzy
+from cucu import helpers, fuzzy, step
 from . import base_steps
 
 
@@ -96,4 +96,10 @@ helpers.define_thing_with_name_in_state_steps(
 )
 helpers.define_run_steps_if_I_can_see_element_with_name_steps(
     "checkbox", find_checkbox
+)
+helpers.define_ensure_state_on_thing_with_name_steps(
+    "checkbox", "checked", find_checkbox, is_checked, check_checkbox
+)
+helpers.define_ensure_state_on_thing_with_name_steps(
+    "checkbox", "not checked", find_checkbox, is_not_checked, uncheck_checkbox
 )
