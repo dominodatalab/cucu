@@ -69,6 +69,10 @@
                 {% endif %}
                 <span style="display: inline; color: maroon;">Scenario:</span> <span title="{{ escape(scenario['name']) }}">{{ escape(scenario['name']) }}</span><br/>
                 <span style="display: inline; color: darkslateblue">{{ scenario['tags'] }}</span>
+                {% if scenario['sub_headers'] %}
+                <br/>
+                {{ scenario['sub_headers'] }}
+                {% endif %}
             </td>
             <td style="text-align: right; margin-top: auto;" class="col-2">
                 <pre style="display: inline; color: gray;">Offset and Duration</pre>
