@@ -259,6 +259,7 @@ register_before_retry_hook,
 register_before_scenario_hook,
 register_custom_junit_failure_handler,
 register_custom_tags_in_report_handling,
+register_custom_scenario_subheader_in_report_handling,
 register_custom_variable_handling,
 register_page_check_hook,
 ```

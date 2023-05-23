@@ -117,7 +117,15 @@ def generate(results, basepath, only_failures=False):
         for scenario in scenarios:
             if show_status:
                 print("S", end="", flush=True)
+
             process_tags(scenario)
+
+            sub_headers = []
+            for handler in CONFIG[
+                "__CUCU_HTML_REPORT_SCENARIO_SUBHEADER_HANDLER"
+            ]:
+                sub_headers.append(handler(scenario))
+            scenario["sub_headers"] = "<br/>".join(sub_headers)
 
             scenario_duration = 0
             total_scenarios += 1
