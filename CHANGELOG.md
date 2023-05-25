@@ -26,7 +26,7 @@ Prep for packaging
 - change tooling and pyproject.toml
 
 ### Remove
-- remove unused nox
+- remove unused libs (nox, retrying, strip-ansi, flake8)
 
 ### Fix
 - fix many import sorts
