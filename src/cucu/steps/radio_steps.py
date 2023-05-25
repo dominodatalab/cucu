@@ -1,4 +1,5 @@
 from cucu import fuzzy, helpers, retry, step
+from cucu.config import CONFIG
 
 from . import base_steps
 
@@ -146,9 +147,18 @@ helpers.define_run_steps_if_I_can_see_element_with_name_steps(
 )
 
 
+@step('I immediately select the radio button "{name}" if it is not selected')
+def immediately_select_the_radio_button_if_not_selected(ctx, name):
+    find_n_select_radio_button(ctx, name, ignore_if_selected=True)
+
+
 @step('I select the radio button "{name}" if it is not selected')
 def select_the_radio_button_if_not_selected(ctx, name):
-    find_n_select_radio_button(ctx, name, ignore_if_selected=True)
+    retry(
+        find_n_select_radio_button,
+        retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+        wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+    )(ctx, name, ignore_if_selected=True)
 
 
 @step('I wait to select the radio button "{name}" if it is not selected')
@@ -156,6 +166,17 @@ def wait_to_select_the_radio_button_if_not_selected(ctx, name):
     retry(find_n_select_radio_button)(ctx, name, ignore_if_selected=True)
 
 
+@step(
+    'I immediately select the "{nth:nth}" radio button "{name}" if it is not selected'
+)
+def immediately_select_nth_radio_button_if_not_selected(ctx, nth, name):
+    find_n_select_radio_button(ctx, name, nth, ignore_if_selected=True)
+
+
 @step('I select the "{nth:nth}" radio button "{name}" if it is not selected')
 def select_nth_radio_button(ctx, nth, name):
-    find_n_select_radio_button(ctx, name, nth, ignore_if_selected=True)
+    retry(
+        find_n_select_radio_button,
+        retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+        wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+    )(ctx, name, nth, ignore_if_selected=True)
