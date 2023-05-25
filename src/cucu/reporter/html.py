@@ -11,8 +11,8 @@ from xml.sax.saxutils import escape as escape_
 import jinja2
 
 from cucu import format_gherkin_table, logger
+from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
-from cucu.reporter.parser import parse_log_to_html
 
 
 def escape(data):

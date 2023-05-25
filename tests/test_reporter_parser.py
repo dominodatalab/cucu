@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cucu.reporter.parser import parse_log_to_html
+from cucu.ansi_parser import parse_log_to_html
 
 
 def test_parse_log():
