@@ -11,28 +11,34 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 Prep for packaging
 
 ### Add
-- add bandit secure patterns
-- add CHANGELOG.md
-- add CODE_OF_CONDUCT.md
-- add CONTRIBUTING.md
-- add isort linter
-- add LICENSE
-- add project classifiers
-- add ruff linter
-- add safety deps checker
+- add various project files
+  - CHANGELOG.md
+  - CODE_OF_CONDUCT.md
+  - CONTRIBUTING.md - content moved from README.md
+  - LICENSE
+  - logo.png
+- add dev tools
+  - bandit secure patterns
+  - isort linter
+  - ruff linter
+  - safety deps checker
 
 ### Change
 - change makefile
 - change tooling and pyproject.toml
+  - add project classifiers
 
 ### Remove
 - remove unused libs (nox, retrying, strip-ansi, flake8)
+  - remove noxfile.py
+- remove unused DESIGN.md
 
 ### Fix
 - fix many import sorts
 
 ### Secure
-- secure ignore with noseq for subprocess and html
+- add bandit and safety
+  - ignore with noseq for subprocess and html
 
 ----
 # Template

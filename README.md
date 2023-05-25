@@ -1,4 +1,4 @@
-# ![Cucu Logo|100x100](cucu%20logo%20small.png) **CUCU** - Easy BDD web testing
+# ![Cucu Logo](logo.png) **CUCU** - Easy BDD web testing
 
 End-to-end testing framework that uses [gherkin](https://cucumber.io/docs/gherkin/)
 to drive various underlying tools/frameworks to create real world testing scenarios.
