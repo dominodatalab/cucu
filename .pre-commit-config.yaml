@@ -1,15 +1,20 @@
-exclude: '^features/cli/lint.feature|^data/features/feature_with_mixed_results.feature'
+exclude: "^features/cli/lint.feature|^data/features/feature_with_mixed_results.feature"
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0
     hooks:
-    - id: check-merge-conflict
-    - id: check-toml
-    - id: check-yaml
-    - id: check-xml
-    - id: end-of-file-fixer
-    - id: trailing-whitespace
--   repo: https://github.com/psf/black
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: check-xml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: detect-private-key
+  - repo: https://github.com/python-poetry/poetry
+    rev: "1.4.1"
+    hooks:
+      - id: poetry-check
+  - repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
       - id: black
@@ -18,20 +23,20 @@ repos:
         # pre-commit's default_language_version, see
         # https://pre-commit.com/#top_level-default_language_version
         language_version: python3.9
-# -   repo: https://github.com/pycqa/isort
-#     rev: 5.11.2
-#     hooks:
-#       - id: isort
-#         name: isort (python)
-#         args: [ "--check", "src features data"]
--   repo: https://github.com/charliermarsh/ruff-pre-commit
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: isort (python)
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: "v0.0.264"
     hooks:
       - id: ruff
-# - repo: local
-#   hooks:
-#     - id: cucu_lint
-#       name: lint feature files
-#       entry: ./bin/cucu lint
-#       language: script
-#       files: ^.*\.feature$
+  - repo: local
+    hooks:
+      - id: cucu_lint
+        name: lint feature files
+        entry: ./bin/cucu lint features
+        language: script
+        files: ^.*\.feature$
+        pass_filenames: false
