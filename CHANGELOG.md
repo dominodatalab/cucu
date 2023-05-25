@@ -18,6 +18,7 @@ Prep for packaging
   - LICENSE
   - logo.png
 - add dev tools
+  - detect private keys in pre-commit
   - bandit secure patterns
   - isort linter
   - ruff linter
