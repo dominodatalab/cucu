@@ -29,8 +29,6 @@ check:
 	poetry run bandit src features data -r -c pyproject.toml -q --severity high
 	# check deps against known security issues
 	poetry run safety check
-	# prevent secrets
-	# TODO
 
 test:
 	poetry run pytest tests --cov=src
@@ -39,8 +37,6 @@ test:
 build:
 	rm -f dist/*.tar.gz
 	rm -f dist/*.whl
-	# build changelog
-	# TDDO
 	poetry build
 
 qualify:
