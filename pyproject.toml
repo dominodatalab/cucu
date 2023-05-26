@@ -58,7 +58,6 @@ cucu = "cucu.cli:main"
 ipdb = "^0.13.9"
 pytest = "^7.2.2"
 black = "^23.3.0"
-isort = "^5.12.0"
 ruff = "^0.0.264"
 bandit = "^1.7.5"
 safety = "^2.3.5"
@@ -70,14 +69,10 @@ build-backend = "poetry.core.masonry.api"
 [tool.black]
 line-length = 80
 
-[tool.isort]
-profile = "black"
-line_length = 80
-skip = ["__init__.py"]
-
 [tool.ruff]
+select = ["E", "F", "I"]  # default options + isort
 exclude = [".env", ".venv", "venv", "__init__.py"]
-ignore = ["E501", "F403"]
+ignore = ["E501", "F403"]  # line_length, import *
 line-length = 80
 
 [tool.bandit]

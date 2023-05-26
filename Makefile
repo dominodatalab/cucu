@@ -12,15 +12,12 @@ install: src/*
 
 format:
 	poetry run black .
-	poetry run isort src features data
 	poetry run ruff . --fix
 	poetry run cucu lint features
 
 check:
 	# format code
 	poetry run black . --check
-	# format imports
-	poetry run isort --check src features data
 	# lint code
 	poetry run ruff .
 	# lint .feature files
