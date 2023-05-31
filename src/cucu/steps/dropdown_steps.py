@@ -184,7 +184,7 @@ def select_option_from_dropdown(ctx, option, dropdown):
 
 
 @step('I select the option "{option}" from the "{index:nth}" dropdown "{dropdown}"')
-def select_option_from_dropdown(ctx, option, dropdown, index):
+def select_option_from_nth_dropdown(ctx, option, dropdown, index):
     find_n_select_dropdown_option(ctx, dropdown, option, index)
 
 
@@ -201,36 +201,38 @@ def wait_to_select_option_from_dropdown(ctx, option, dropdown):
 
 
 @step('I should see the option "{option}" is selected on the dropdown "{dropdown}"')
-def should_see_option_is_selected(ctx, option, dropdown):
+def should_see_option_is_selected_from_dropdown(ctx, option, dropdown):
     assert_dropdown_option_selected(ctx, dropdown, option, is_selected=True)
 
 
 @step(
     'I should see the option "{option}" is selected on the "{index:nth}" dropdown "{dropdown}"'
 )
-def should_see_option_is_selected(ctx, option, dropdown, index):
+def should_see_option_is_selected_from_nth_dropdown(ctx, option, dropdown, index):
     assert_dropdown_option_selected(ctx, dropdown, option, index, is_selected=True)
 
 
 @step('I wait to see the option "{option}" is selected on the dropdown "{dropdown}"')
-def wait_to_see_option_is_selected(ctx, option, dropdown):
+def wait_to_see_option_is_selected_from_dropdown(ctx, option, dropdown):
     retry(assert_dropdown_option_selected)(ctx, dropdown, option, is_selected=True)
 
 
 @step(
     'I should see the option "{option}" is not selected on the "{index:nth}" dropdown "{dropdown}"'
 )
-def should_see_option_is_not_selected(ctx, option, dropdown, index):
+def should_see_option_is_not_selected_from_nth_dropdown(ctx, option, dropdown, index):
     assert_dropdown_option_selected(ctx, dropdown, option, index, is_selected=False)
 
 
 @step('I should see the option "{option}" is not selected on the dropdown "{dropdown}"')
-def should_see_option_is_not_selected(ctx, option, dropdown):
+def should_see_option_is_not_selected_from_dropdown(ctx, option, dropdown):
     assert_dropdown_option_selected(ctx, dropdown, option, is_selected=False)
 
 
 @step(
     'I wait to see the option "{option}" is not selected on the dropdown "{dropdown}"'
 )
-def wait_to_see_option_is_not_selected(ctx, option, dropdown, is_selected=False):
+def wait_to_see_option_is_not_selected_from_dropdown(
+    ctx, option, dropdown, is_selected=False
+):
     retry(assert_dropdown_option_selected)(ctx, dropdown, option)
