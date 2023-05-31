@@ -33,7 +33,6 @@ Feature: Dropdowns
       And I should see the option "forrest" is not selected on the "2nd" dropdown "Pick a color"
       And I should see the option "ruby" is selected on the "2nd" dropdown "Pick a color"
 
-
   Scenario: User can wait to select from the second dropdown with the same name
     Given I should see the dropdown "Pick a color"
       And I wait to select the option "ruby" from the "2nd" dropdown "Pick a color"
