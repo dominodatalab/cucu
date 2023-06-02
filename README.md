@@ -26,11 +26,18 @@ to drive various underlying tools/frameworks to create real world testing scenar
 7. Enables heirarchal configuration and env var **and CLI arg overrides**
 8. Comes with a linter that is **customizable**
 
+## Supporting docs
+1. [CHANGELOG.md](CHANGELOG.md) - for latest news
+2. [CONTRIBUTING.md](CONTRIBUTING.md) - how we develop and test the library
+3. [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+4. [CONTRIBUTORS.md](CONTRIBUTORS.md)
+5. [LICENSE](LICENSE)
 
 # Table of Contents
 
 - [ **CUCU** - Easy BDD web testing](#-cucu---easy-bdd-web-testing)
   - [Why cucu?](#why-cucu)
+  - [Supporting docs](#supporting-docs)
 - [Table of Contents](#table-of-contents)
 - [Installation](#installation)
   - [Requirements](#requirements)
@@ -46,7 +53,6 @@ to drive various underlying tools/frameworks to create real world testing scenar
 - [More Ways To Install Cucu](#more-ways-to-install-cucu)
   - [Install From Source](#install-from-source)
   - [Install From Build](#install-from-build)
-
 
 # Installation
 ## Requirements
