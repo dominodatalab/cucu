@@ -15,6 +15,7 @@ Prep for packaging
   - CHANGELOG.md
   - CODE_OF_CONDUCT.md
   - CONTRIBUTING.md - content moved from README.md
+  - CONTRIBUTORS.md
   - LICENSE
   - logo.png
 - add dev tools
