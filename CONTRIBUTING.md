@@ -201,7 +201,7 @@ make coverage
 # Backstory
 Cucu was originally developed primarly by Rodney Gomes, leveraging his
 years of experience in test automation across multiple programming languages.
-Getting tired of rebuilding the same framework every time he switched jobs, 
+Getting tired of rebuilding the same framework every time he switched jobs,
 it was his wish to be able to take his toolbox with him. Honoring this desire,
 Cedric Young put in the work to make the framework's code open source.
 The hope of this project is to be of mutual benefit, that both you and the
