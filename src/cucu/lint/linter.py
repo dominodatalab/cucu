@@ -258,7 +258,6 @@ def fix(violations):
             violation["fixed"] = False
 
         else:
-            violation["fix"]
             line_number = violation["location"]["line"]
             line_to_fix = lines[line_number]
 
