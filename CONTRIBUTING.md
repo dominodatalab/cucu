@@ -60,16 +60,16 @@ aim to support running the tests through other selenium testing frameworks.
 ## Why Gherkin (i.e. BDD-style tests)
 There are a few reasons for writing the actual tests in `gherkin` including:
 
- * tests are readable by anyone in the organization, since they're just plain
-   English that describe interactions and validations.
+ * tests are readable by anyone in the organization, since the
+   interactions and validations are described in plain English.
  * steps within a `gherkin` test can do actions on the browser, hit an API or
    anything else you can do programatically to simulate various other testing
    needs (ie use *iptables* to limit bandwidth, use *docker/kubectl* to
    pause/stop/restart containers, etc.)
- * there's only one implementation per "step" and this makes for better reusing
-   of existing test code which can be maintained in the long term.
- * clear separate of the intent from the code implementation, enforced by the framework,
-   avoids spegatti code of other frameworks
+ * there's only one implementation per "step," which makes for better reuse
+   of existing test code and smoother long-term maintenance.
+ * there's a clear separation of intent and implementation that's enforced by the framework,
+   which helps avoids the spaghetti code other frameworks tend towards
 
 ## Notable libraries used
 1. [behave](https://behave.readthedocs.io/en/stable/) - drives the tests
@@ -82,7 +82,6 @@ There are a few reasons for writing the actual tests in `gherkin` including:
 8. [jellyfish]() / [humanize]() / [tabulate]() - easier human readablilty
 
 TODO remove:
-strip-ansi = "^0.1.1"
 pebble = "^5.0.3"
 
 # Dev Setup
@@ -106,6 +105,7 @@ The short list
    ```
 
 ### Fancier Dev Setup
+Disclaimer: Tested only on MacOS
 1. use `pipx` to install `poetry` in a separate python virtual environment
    ```bash
    brew install pipx
@@ -132,7 +132,7 @@ The short list
       ```
    _required for VSCode debugging below_
 
-## Cucu Run
+## Running cucu
 1. drop into a poetry shell environment
    ```bash
    poetry shell
@@ -152,8 +152,8 @@ The short list
    ls report/index.html
    ```
 
-## Cucu Debugging
-Here's some options
+## Debugging cucu
+Here's some options:
 1. drop into an ipdb debugger on failure using the cucu run `-i` argument
 2. add a `breakpoint()` call to python code to drop into an ipdb debugger
 3. configure VSCode secret sauce
@@ -199,6 +199,12 @@ make coverage
 
 
 # Backstory
-Cucu was developed as a framework primarly by Rodney Gomes through his experience over years of test automation utilizing multiple programming languages. Recognizing careers in the tech industry invlove stints at various companies we wanted to build take our toolbox with us, so Cedric Young ported this to the Open Source community. The hope of this project is to be of mutual benefit, that both you and the project get enriched by each other.
+Cucu was originally developed primarly by Rodney Gomes, leveraging his
+years of experience in test automation across multiple programming languages.
+Getting tired of rebuilding the same framework every time he switched jobs, 
+it was his wish to be able to take his toolbox with him. Honoring this desire,
+Cedric Young put in the work to make the framework's code open source.
+The hope of this project is to be of mutual benefit, that both you and the
+project be enriched by each other.
 
 Thank you for reading this :)
