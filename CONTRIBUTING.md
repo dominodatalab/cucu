@@ -54,8 +54,14 @@ By making a contribution to this project, I certify that:
 ```
 
 # Design
-Currently `cucu` uses selenium to interact with a browser but we
-aim to support running the tests through other selenium testing frameworks.
+`cucu` is a "batteries-included" approach to testing
+1. Automatically stand up or connect to a selenium container
+2. Does fuzzy matching on DOM elements
+3. Implements a large set of standard steps
+4. Enables customization of steps & linter rules
+5. Has enchanced HTML reports
+6. Designed for both local and CI use
+7. Supports Chrome, Firefox, and Edge browsers
 
 ## Why Gherkin (i.e. BDD-style tests)
 There are a few reasons for writing the actual tests in `gherkin` including:
