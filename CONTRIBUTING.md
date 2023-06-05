@@ -156,7 +156,7 @@ Disclaimer: Tested only on MacOS
 Here's some options:
 1. drop into an ipdb debugger on failure using the cucu run `-i` argument
 2. add a `breakpoint()` call to python code to drop into an ipdb debugger
-3. configure VSCode secret sauce
+3. configure VSCode to launch and connect in debug mode
    1. setup poetry's directory to use the project's directory - see [Fancier Dev Setup](#fancier-dev-setup)
    2. in VSCode **`Python: Select Interpreter`** as `./.venv/bin/python`
    3. add a launch`.vscode/launch.json` and **change the `args`**
@@ -177,7 +177,7 @@ Here's some options:
       ```
    4. add a VSCode breakpoint to python code
    5. run the VSCode debugger as normal
-4. if you want to test your changes to cucu while using it as a framework in another project then install it in `--editable` mode
+4. if are developing cucu and want to test it as a framework in another project then install it in `--editable` mode
    ```bash
    # change to your project
    cd ~/code/boo
