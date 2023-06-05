@@ -105,7 +105,8 @@ The short list
    ```
 
 ### Fancier Dev Setup
-Disclaimer: Tested only on MacOS
+Disclaimer: Tested only on MacOS, and needed for VSCode debugging
+
 1. use `pipx` to install `poetry` in a separate python virtual environment
    ```bash
    brew install pipx
