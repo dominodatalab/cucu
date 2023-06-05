@@ -177,7 +177,7 @@ Here's some options:
       ```
    4. add a VSCode breakpoint to python code
    5. run the VSCode debugger as normal
-4. pip install it in `--editable` mode to test in your own project
+4. if you want to test your changes to cucu while using it as a framework in another project then install it in `--editable` mode
    ```bash
    # change to your project
    cd ~/code/boo
