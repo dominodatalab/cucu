@@ -1,23 +1,25 @@
 import glob
-import jinja2
-import shutil
-import os
-import urllib
 import json
+import os
+import shutil
 import sys
-
-from ansi2html import Ansi2HTMLConverter
-from cucu import logger
-from cucu.config import CONFIG
+import urllib
+from datetime import datetime
+from pathlib import Path
 from xml.sax.saxutils import escape as escape_
-from urllib.parse import quote
+
+import jinja2
+
+from cucu import format_gherkin_table, logger
+from cucu.ansi_parser import parse_log_to_html
+from cucu.config import CONFIG
 
 
 def escape(data):
     if data is None:
         return None
 
-    return escape_(data)
+    return escape_(data, {'"': "&quot;"}).rstrip()
 
 
 def process_tags(element):
@@ -98,6 +100,7 @@ def generate(results, basepath, only_failures=False):
         total_scenarios_passed = 0
         total_scenarios_failed = 0
         total_scenarios_skipped = 0
+        feature_started_at = None
 
         reported_features.append(feature)
         process_tags(feature)
@@ -113,7 +116,15 @@ def generate(results, basepath, only_failures=False):
         for scenario in scenarios:
             if show_status:
                 print("S", end="", flush=True)
+
             process_tags(scenario)
+
+            sub_headers = []
+            for handler in CONFIG[
+                "__CUCU_HTML_REPORT_SCENARIO_SUBHEADER_HANDLER"
+            ]:
+                sub_headers.append(handler(scenario))
+            scenario["sub_headers"] = "<br/>".join(sub_headers)
 
             scenario_duration = 0
             total_scenarios += 1
@@ -133,6 +144,7 @@ def generate(results, basepath, only_failures=False):
             )
 
             step_index = 0
+            scenario_started_at = None
             for step in scenario["steps"]:
                 if show_status:
                     print("s", end="", flush=True)
@@ -142,10 +154,28 @@ def generate(results, basepath, only_failures=False):
                 )
                 image_filepath = os.path.join(scenario_filepath, image_filename)
 
+                if step["name"].startswith("#"):
+                    step["heading_level"] = "h4"
+
                 if os.path.exists(image_filepath):
                     step["image"] = urllib.parse.quote(image_filename)
 
                 if "result" in step:
+                    if step["result"]["status"] in ["failed", "passed"]:
+                        timestamp = datetime.fromisoformat(
+                            step["result"]["timestamp"]
+                        )
+                        step["result"]["timestamp"] = timestamp
+
+                        if scenario_started_at is None:
+                            scenario_started_at = timestamp
+                            scenario["started_at"] = timestamp
+                        step["result"][
+                            "time_offset"
+                        ] = datetime.utcfromtimestamp(
+                            (timestamp - scenario_started_at).total_seconds()
+                        )
+
                     scenario_duration += step["result"]["duration"]
 
                     if "error_message" in step["result"] and step["result"][
@@ -167,18 +197,10 @@ def generate(results, basepath, only_failures=False):
 
                 # prepare by joining into one big chunk here since we can't do it in the Jinja template
                 if "table" in step:
-                    text_indent = "       "
-                    step["table"] = "\n".join(
-                        [
-                            text_indent
-                            + "| "
-                            + " | ".join(step["table"]["headings"])
-                            + " |"
-                        ]
-                        + [
-                            text_indent + "| " + " | ".join(row) + " |"
-                            for row in step["table"]["rows"]
-                        ]
+                    step["table"] = format_gherkin_table(
+                        step["table"]["rows"],
+                        step["table"]["headings"],
+                        "       ",
                     )
 
                 step_index += 1
@@ -186,11 +208,9 @@ def generate(results, basepath, only_failures=False):
 
             if os.path.exists(logs_dir):
                 log_files = []
-
                 for log_file in glob.iglob(os.path.join(logs_dir, "*.*")):
                     if show_status:
                         print("l", end="", flush=True)
-
                     log_filepath = log_file.removeprefix(
                         f"{scenario_filepath}/"
                     )
@@ -207,43 +227,41 @@ def generate(results, basepath, only_failures=False):
 
                 scenario["logs"] = log_files
 
-                only_console_logs = lambda log: ".console." in log["name"]
+            scenario["total_steps"] = total_steps
+            if scenario_started_at is None:
+                scenario["started_at"] = ""
+            else:
+                if feature_started_at is None:
+                    feature_started_at = scenario_started_at
+                    feature["started_at"] = feature_started_at
 
-                for log_file in filter(only_console_logs, log_files):
+                scenario["time_offset"] = datetime.utcfromtimestamp(
+                    (scenario_started_at - feature_started_at).total_seconds()
+                )
+
+                for log_file in [
+                    x for x in log_files if ".console." in x["name"]
+                ]:
                     if show_status:
                         print("c", end="", flush=True)
 
-                    converter = Ansi2HTMLConverter(dark_bg=False)
                     log_file_filepath = os.path.join(
                         scenario_filepath, "logs", log_file["name"]
                     )
 
-                    input_data = None
-                    with (
-                        open(
-                            log_file_filepath, "r", encoding="utf8"
-                        ) as log_file_input,
-                        open(
-                            log_file_filepath + ".html", "w", encoding="utf8"
-                        ) as log_file_output,
-                    ):
-                        log_file_output.write(
-                            # Process whole file to avoid performance issue
-                            converter.convert(log_file_input.read())
-                        )
+                    input_file = Path(log_file_filepath)
+                    output_file = Path(log_file_filepath + ".html")
+                    output_file.write_text(
+                        parse_log_to_html(input_file.read_text())
+                    )
 
-            scenario["total_steps"] = total_steps
-            if len(scenario["steps"]) > 0 and "result" in scenario["steps"][0]:
-                scenario["started_at"] = scenario["steps"][0]["result"][
-                    "timestamp"
-                ]
-            else:
-                scenario["started_at"] = ""
             scenario["duration"] = scenario_duration
             feature_duration += scenario_duration
 
+        if feature_started_at is None:
+            feature["started_at"] = ""
+
         feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
-        feature["started_at"] = scenarios[0]["started_at"]
         feature["duration"] = sum([x["duration"] for x in scenarios])
 
         feature["total_scenarios"] = total_scenarios
@@ -263,7 +281,7 @@ def generate(results, basepath, only_failures=False):
         grand_totals[k] = sum([x[k] for x in reported_features])
 
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
-    templates = jinja2.Environment(loader=package_loader)
+    templates = jinja2.Environment(loader=package_loader)  # nosec
     if show_status:
         print("")  # add a newline to end status
 

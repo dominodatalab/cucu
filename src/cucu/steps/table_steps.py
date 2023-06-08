@@ -1,11 +1,9 @@
 import pkgutil
 import re
-
-from behave.model_describe import ModelPrinter
-from cucu import fuzzy, helpers, retry, step, config
-from cucu.browser.frames import run_in_all_frames
 from io import StringIO
-from tabulate import tabulate, TableFormat, DataRow
+
+from cucu import config, format_gherkin_table, fuzzy, helpers, retry, step
+from cucu.browser.frames import run_in_all_frames
 
 
 def find_tables(ctx):
@@ -65,8 +63,8 @@ def check_table_matches_table(table, expected_table):
     if len(table) == len(expected_table):
         table_matched = True
 
-        for (expected_row, row) in zip(expected_table, table):
-            for (expected_value, value) in zip(expected_row, row):
+        for expected_row, row in zip(expected_table, table):
+            for expected_value, value in zip(expected_row, row):
                 if not re.match(expected_value, value):
                     table_matched = False
 
@@ -92,7 +90,7 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     for expected_row in expected_table:
         for row in table:
             found_row = True
-            for (expected_value, value) in zip(expected_row, row):
+            for expected_value, value in zip(expected_row, row):
                 if not re.match(expected_value, value):
                     found_row = False
             if found_row:
@@ -108,22 +106,10 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     return False
 
 
-GHERKIN_TABLEFORMAT = TableFormat(
-    lineabove=None,
-    linebelowheader=None,
-    linebetweenrows=None,
-    linebelow=None,
-    headerrow=DataRow("|", "|", "|"),
-    datarow=DataRow("|", "|", "|"),
-    padding=1,
-    with_header_hide=["lineabove"],
-)
-
-
 def report_unable_to_find_table(tables):
     stream = StringIO()
     for table in tables:
-        stream.write(f"\n{tabulate(table, [], tablefmt=GHERKIN_TABLEFORMAT)}\n")
+        stream.write(f"\n{format_gherkin_table(table)}\n")
 
     stream.seek(0)
     raise RuntimeError(f"unable to find desired table, found: {stream.read()}")
@@ -189,7 +175,7 @@ def do_not_find_table(ctx, assert_func, nth=None):
     report_unable_to_find_table(tables)
 
 
-for (thing, check_func) in {
+for thing, check_func in {
     "is": check_table_equals_table,
     "matches": check_table_matches_table,
     "contains": check_table_contains_table,
@@ -274,7 +260,7 @@ helpers.define_action_on_thing_with_name_steps(
 
 
 @step(
-    f'I save "{{table:nth}}" table "{{row:nth}}" row , "{{column:nth}}" column  value to a variable "{{variable_name}}"'
+    'I save "{table:nth}" table "{row:nth}" row , "{column:nth}" column  value to a variable "{variable_name}"'
 )
 def get_table_cell_value(ctx, table, row, column, variable_name):
     tables = find_tables(ctx)

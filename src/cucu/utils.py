@@ -3,14 +3,34 @@ various cucu utilities can be placed here and then exposed publicly through
 the src/cucu/__init__.py
 """
 
+from tabulate import DataRow, TableFormat, tabulate
 from tenacity import retry as retrying
 from tenacity import retry_if_not_exception_type, stop_after_delay, wait_fixed
 
 from cucu.config import CONFIG
 
+GHERKIN_TABLEFORMAT = TableFormat(
+    lineabove=None,
+    linebelowheader=None,
+    linebetweenrows=None,
+    linebelow=None,
+    headerrow=DataRow("|", "|", "|"),
+    datarow=DataRow("|", "|", "|"),
+    padding=1,
+    with_header_hide=["lineabove"],
+)
+
 
 class StopRetryException(Exception):
     pass
+
+
+def format_gherkin_table(table, headings=[], prefix=""):
+    formatted = tabulate(table, headings, tablefmt=GHERKIN_TABLEFORMAT)
+    if prefix == "":
+        return formatted
+
+    return prefix + formatted.replace("\n", f"\n{prefix}")
 
 
 #

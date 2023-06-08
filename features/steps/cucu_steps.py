@@ -1,6 +1,4 @@
 # only thing your project requires to load cucu steps
-import cucu.steps
-
 from cucu import step
 from selenium.webdriver.common.by import By
 

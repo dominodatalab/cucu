@@ -21,8 +21,8 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I wait to click the link "Feature with passing scenario with web"
      When I wait to click the link "Just a scenario that opens a web page"
-     Then I wait to see the button "Given I start a webserver at directory "data/www" and save the port to the variable "PORT""
-      And I should see the button "And I open a browser at the url "http://\{HOST_ADDRESS\}:\{PORT\}/buttons.html""
+     Then I wait to see the button "Given I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
+      And I should see the button "And I open a browser at the url \"http://\{HOST_ADDRESS\}:\{PORT\}/buttons.html\""
      When I run the command "ls "{SCENARIO_RESULTS_DIR}/"" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
@@ -30,27 +30,48 @@ Feature: Report basics
       [\s\S]*
       """
 
+  Scenario: User can run a test and see extended output
+    Given I run the command "cucu run data/features/with_secret/scenario_with_comments.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
+      And I wait to click the link "Scenario with comments"
+      And I wait to click the button "show images"
+
+        * # Can see inline comments
+     Then I wait to see the text "# First comment"
+      And I should see the text "# Second comment"
+      And I should see the text "# Comment about \{MY_SECRET\}"
+
+        * # Can see variable interpolation
+     Then I wait to see the text "# FOO=\"bar\""
+
+        * # Cannot see secrets in variable interpolation
+     Then I wait to see the text "# MY_SECRET=\"****\""
+
   @QE-6852
   Scenario: User can run a multi scenario test with web steps and generate report with a shareable url
     Given I run the command "cucu run data/features/multiple_scenarios_with_browser_steps.feature --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled --results {CUCU_RESULTS_DIR}/multi-scenario-browser-results" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/multi-scenario-browser-results --output {CUCU_RESULTS_DIR}/multi-scenario-browser-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/multi-scenario-browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+
+     # Verify HTML report
      When I click the link "Multiple scenarios with browser steps"
       And I click the link "Open our test checkboxes page"
-      And I should not see the image with the alt text "Given I start a webserver at directory "data/www" and save the port to the variable "PORT""
-      And I should not see the image with the alt text "And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html""
-      And I should not see the image with the alt text "Then I should see the checkbox "checkbox with inner label""
-     Then I click the button "Then I should see the checkbox "checkbox with inner label""
-      And I should see the image with the alt text "Then I should see the checkbox "checkbox with inner label""
-      And I should not see the image with the alt text "Given I start a webserver at directory "data/www" and save the port to the variable "PORT""
-      And I should not see the image with the alt text "And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html""
+      And I should not see the image with the alt text "Given I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
+      And I should not see the image with the alt text "And I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html\""
+      And I should not see the image with the alt text "Then I should see the checkbox \"checkbox with inner label\""
+     Then I click the button "Then I should see the checkbox \"checkbox with inner label\""
+      And I should see the image with the alt text "Then I should see the checkbox \"checkbox with inner label\""
+      And I should not see the image with the alt text "Given I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
+      And I should not see the image with the alt text "And I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html""
      When I save the current url to the variable "CURRENT_URL"
       And I click the link "Index"
      Then I navigate to the url "{CURRENT_URL}"
-      And I wait to see the image with the alt text "Then I should see the checkbox "checkbox with inner label""
-      And I should not see the image with the alt text "Given I start a webserver at directory "data/www" and save the port to the variable "PORT""
-      And I should not see the image with the alt text "And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html""
+      And I wait to see the image with the alt text "Then I should see the checkbox \"checkbox with inner label\""
+      And I should not see the image with the alt text "Given I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
+      And I should not see the image with the alt text "And I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html\""
 
   Scenario: User can run a feature with mixed results and has all results reported correctly without skips
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/mixed-results" and expect exit code "1"
@@ -62,11 +83,11 @@ Feature: Report basics
        | .*         | Feature with mixed results | 4     | 2      | 2      | 0       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
-      | Started at | Scenario                            | Total Steps | Status  | Duration |
-      | .*         | Scenario that also passes           | 1           | passed  | .*       |
-      | .*         | Scenario that fails                 | 2           | failed  | .*       |
-      | .*         | Scenario that has an undefined step | 1           | failed  | .*       |
-      | .*         | Scenario that passes                | 1           | passed  | .*       |
+      | Offset | Scenario                            | Steps | Status  | Duration |
+      | .*     | Scenario that also passes           | 1     | passed  | .*       |
+      | .*     | Scenario that fails                 | 2     | failed  | .*       |
+      | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
+      | .*     | Scenario that passes                | 1     | passed  | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -85,12 +106,12 @@ Feature: Report basics
        | .*         | Feature with mixed results | 5     | 2      | 2      | 1       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
-      | Started at | Scenario                            | Total Steps | Status  | Duration |
-      | .*         | Scenario that also passes           | 1           | passed  | .*       |
-      | .*         | Scenario that fails                 | 2           | failed  | .*       |
-      | .*         | Scenario that has an undefined step | 1           | failed  | .*       |
-      | .*         | Scenario that is skipped            | 1           | skipped | .*       |
-      | .*         | Scenario that passes                | 1           | passed  | .*       |
+      | Offset | Scenario                            | Steps | Status  | Duration |
+      | .*     | Scenario that also passes           | 1     | passed  | .*       |
+      | .*     | Scenario that fails                 | 2     | failed  | .*       |
+      | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
+      | .*     | Scenario that is skipped            | 1     | skipped | .*       |
+      | .*     | Scenario that passes                | 1     | passed  | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -108,8 +129,8 @@ Feature: Report basics
        | .*         | Feature with background    | 1     | 1      | 0      | 0       | passed | .*       |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
-      | Started at | Scenario                            | Total Steps | Status  | Duration |
-      | .*         | Scenario which now has a background | 2           | passed  | .*       |
+      | Offset | Scenario                            | Steps | Status  | Duration |
+      | .*     | Scenario which now has a background | 2     | passed  | .*       |
 
   @show-skips
   Scenario: User can run feature with background and has all results reported correctly
@@ -122,9 +143,9 @@ Feature: Report basics
        | .*         | Feature with background    | 2     | 1      | 0      | 1       | passed | .*       |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
-      | Started at | Scenario                            | Total Steps | Status  | Duration |
-      | .*         | Scenario that is skipped            | 2           | skipped | .*       |
-      | .*         | Scenario which now has a background | 2           | passed  | .*       |
+      | Offset | Scenario                            | Steps | Status  | Duration |
+      | .*     | Scenario that is skipped            | 2     | skipped | .*       |
+      | .*     | Scenario which now has a background | 2     | passed  | .*       |
 
   @workaround @QE-7075
   @disabled
@@ -177,13 +198,13 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      When I click the button "Slow feature #1"
      Then I should see a table that matches the following:
-      | Started at | Scenario      | Total Steps | Status | Duration |
-      | .*         | Slow scenario | 1           | .*     |    >*    |
+      | Offset | Scenario      | Steps | Status | Duration |
+      | .*     | Slow scenario | 1     | .*     |    >*    |
      When I go back on the browser
       And I click the button "Slow feature #2"
      Then I should see a table that matches the following:
-      | Started at | Scenario      | Total Steps | Status | Duration |
-      | .*         | Slow scenario | 1           | .*     |    >*    |
+      | Offset | Scenario      | Steps | Status | Duration |
+      | .*     | Slow scenario | 1     | .*     |    >*    |
 
   Scenario: User can run results without skips in the HTML test report
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/report_without_skips --generate-report --report {CUCU_RESULTS_DIR}/report_without_skips_report" and expect exit code "1"
@@ -194,11 +215,11 @@ Feature: Report basics
       | .*         | Feature with mixed results | 4     | 2      | 2      | 0       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
-      | Started at | Scenario                            | Total Steps | Status  | Duration |
-      | .*         | Scenario that also passes           | 1           | passed  | .*       |
-      | .*         | Scenario that fails                 | 2           | failed  | .*       |
-      | .*         | Scenario that has an undefined step | 1           | failed  | .*       |
-      | .*         | Scenario that passes                | 1           | passed  | .*       |
+      | Offset | Scenario                            | Steps | Status  | Duration |
+      | .*     | Scenario that also passes           | 1     | passed  | .*       |
+      | .*     | Scenario that fails                 | 2     | failed  | .*       |
+      | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
+      | .*     | Scenario that passes                | 1     | passed  | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -215,8 +236,8 @@ Feature: Report basics
       | .*         | Feature with background | 1     | 1      | 0      | 0       | passed | .*       |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
-      | Started at | Scenario                            | Total Steps | Status  | Duration |
-      | .*         | Scenario which now has a background | 2           | passed  | .*       |
+      | Offset | Scenario                            | Steps | Status  | Duration |
+      | .*     | Scenario which now has a background | 2     | passed  | .*       |
 
   Scenario: User can run results without skips in the JUnit results
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/junit_without_skips" and expect exit code "1"
@@ -262,8 +283,8 @@ Feature: Report basics
        | .*         | Feature with failing scenario with web | 1     | 0      | 1      | 0       | failed | .*       |
      When I click the button "Feature with failing scenario with web"
      Then I should see a table that matches the following:
-       | Started at | Scenario                              | Total Steps | Status | Duration |
-       | .*         | Just a scenario that opens a web page | 3           | failed | .*       |
+       | Offset | Scenario                              | Steps | Status | Duration |
+       | .*     | Just a scenario that opens a web page | 3     | failed | .*       |
      When I click the button "Just a scenario that opens a web page"
       And I wait to click the button "show images"
-      And I should see the image with the alt text "And I should see the text "inexistent""
+      And I should see the image with the alt text "And I should see the text \"inexistent\""

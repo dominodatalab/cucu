@@ -100,3 +100,12 @@ Feature: Run
       """
       runtime timeout reached, aborting run
       """
+  @feature-timeout @workers
+  Scenario: When using workers, user can run with a feature timeout to avoid a feature running over a certain amount of time
+    Given I run the command "cucu run data/features/slow_features --workers 2 --feature-timeout 3 --results {CUCU_RESULTS_DIR}/runtime_timeout_results" and save stdout to "STDOUT" and expect exit code "1"
+     Then I should see "{STDOUT}" matches the following
+      """
+      [\s\S]*
+      .*Task timeout.*3.0.*
+      [\s\S]*
+      """

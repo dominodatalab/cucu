@@ -1,6 +1,6 @@
 import re
-
 from collections import OrderedDict
+
 from cucu.config import CONFIG
 
 CONFIG.define(
@@ -27,6 +27,7 @@ def init_global_hook_variables():
 
     CONFIG["__CUCU_PAGE_CHECK_HOOKS"] = OrderedDict()
     CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"] = {}
+    CONFIG["__CUCU_HTML_REPORT_SCENARIO_SUBHEADER_HANDLER"] = []
 
     CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"] = []
     CONFIG["__CUCU_BEFORE_RETRY_HOOKS"] = []
@@ -151,6 +152,20 @@ def register_custom_tags_in_report_handling(regex, handler):
                         return "<a href="...">{tag}</a>"
     """
     CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"][re.compile(regex)] = handler
+
+
+def register_custom_scenario_subheader_in_report_handling(handler):
+    """
+    register a handler to add HTML content under the scenario header.
+
+    parameters:
+        handler(func): a function that accepts the scenario and returns a HTML to
+                       go below the scenario header
+
+                      def handle(scenario):
+                        return f"<div>this is below the {scenario['name']}'s header</div>"
+    """
+    CONFIG["__CUCU_HTML_REPORT_SCENARIO_SUBHEADER_HANDLER"].append(handler)
 
 
 def register_custom_junit_failure_handler(handler):

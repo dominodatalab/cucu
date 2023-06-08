@@ -27,7 +27,7 @@ def should_see_is_equal(_, this, that):
 
 
 @step('I should see "{this}" is not equal to "{that}"')
-def should_see_is_equal(_, this, that):
+def should_see_is_not_equal(_, this, that):
     if this == that:
         raise RuntimeError(f"{this} is equal to {that}")
 

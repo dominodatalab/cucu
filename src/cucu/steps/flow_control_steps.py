@@ -4,9 +4,8 @@ import subprocess
 import time
 
 from cucu import logger, retry, run_steps, step
-from cucu.hooks import register_after_this_scenario_hook
 from cucu.config import CONFIG
-from cucu.cli.run import behave
+from cucu.hooks import register_after_this_scenario_hook
 
 
 @step('I skip this scenario if the file at "{filepath}" exists')
@@ -61,7 +60,7 @@ def wait_for_steps_to_fail(ctx, steps, timeout=None):
     def steps_should_fail():
         try:
             run_steps(ctx, steps)
-        except:
+        except:  # noqa: E722
             return
 
         raise RuntimeError("underlying steps did not fail")
@@ -137,7 +136,7 @@ def stop_the_timer(ctx, name):
 
 def run_feature(ctx, filepath, results):
     command = f"cucu run {filepath} --results {results}"
-    process = subprocess.run(command, shell=True)
+    process = subprocess.run(command, shell=True)  # nosec
 
     return_code = process.returncode
     if return_code != 0:

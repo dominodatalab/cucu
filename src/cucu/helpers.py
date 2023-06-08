@@ -1,5 +1,6 @@
-import humanize
 import sys
+
+import humanize
 
 from cucu import retry, run_steps
 from cucu.config import CONFIG
@@ -358,15 +359,130 @@ def define_action_on_thing_with_name_steps(
             )(ctx, thing, name, index=nth, must_exist=False)
 
         @step(f'I wait to {action} the "{{nth:nth}}" {thing} "{{name}}"')
-        def action_the_nth(ctx, nth, name):
+        def wait_to_action_the_nth(ctx, nth, name):
             retry(base_action_the)(ctx, thing, name, index=nth)
 
         @step(
             f'I wait up to "{{seconds}}" seconds to {action} the "{{nth:nth}}" {thing} "{{name}}"'
         )
-        def action_the_nth(ctx, seconds, nth, name):
+        def wait_up_to_action_the_nth(ctx, seconds, nth, name):
             seconds = float(seconds)
             retry(base_action_the, wait_up_to_s=seconds)(
+                ctx, thing, name, index=nth
+            )
+
+
+def define_ensure_state_on_thing_with_name_steps(
+    thing, state, find_func, state_func, action_func, with_nth=False
+):
+    """
+    defines steps with with the following signatures:
+
+      I ensure the {thing} "{name}" is {state}
+      I wait to ensure the {thing} "{name}" is {state}
+      I wait up to "{seconds}" seconds to ensure the {thing} "{name}" is {state}
+
+      when with_nth=True we also define:
+
+      I ensure the "{nth}" {thing} "{name}" is {state}
+      I wait to ensure the "{nth}" {thing} "{name}" is {state}
+      I wait up to "{seconds}" seconds to ensure the "{nth}" {thing} "{name}" is {state}
+
+    parameters:
+        thing(string):       name of the thing we're creating the steps for such
+                             as button, dialog, etc.
+        state(stirng):       the name of the state we want to ensure, such as:
+                             filled, checked, empty, not empty, etc.
+        find_func(function): function that returns the desired element:
+
+                             def find_func(ctx, name, index=):
+                                '''
+                                ctx(object):  behave context object
+                                name(string): name of the thing to find
+                                index(int):   when there are multiple elements
+                                              with the same name and you've
+                                              specified with_nth=True
+                                '''
+        state_func(function): function that returns True if the element is in
+                              the desired state and False otherwise:
+
+                               def state_func(element):
+                                  '''
+                                  element(object): the element found
+                                  '''
+        action_func(function): action that will set the desired state on the
+                               element if state_func returns False:
+                               def action_func(ctx, element):
+                                  '''
+                                  ctx(object):  behave context object
+                                  element(object): the element found
+                                  '''
+        with_nth(bool):     when set to True we'll define the expanded set of
+                            "nth" steps. default: False
+    """
+
+    # undecorated def for reference below
+    def base_ensure_the(ctx, thing, name, index=0):
+        prefix = nth_to_ordinal(index)
+        element = find_func(ctx, name, index=index)
+
+        if element is None:
+            raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
+
+        if not state_func(element):
+            action_func(ctx, element)
+
+    @step(f'I immediately ensure the {thing} "{{name}}" is {state}')
+    def immediately_ensure_the(ctx, name, state):
+        base_ensure_the(ctx, thing, name)
+
+    @step(f'I ensure the {thing} "{{name}}" is {state}')
+    def ensure_the(ctx, name):
+        retry(
+            base_ensure_the,
+            retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+            wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+        )(ctx, thing, name)
+
+    @step(f'I wait to ensure the {thing} "{{name}}" is {state}')
+    def wait_to_ensure_the(ctx, name):
+        retry(base_ensure_the)(ctx, thing, name)
+
+    @step(
+        f'I wait up to "{{seconds}}" seconds to ensure the {thing} "{{name}}" is {state}'
+    )
+    def wait_up_to_seconds_to_ensure_the(ctx, seconds, name):
+        seconds = float(seconds)
+        retry(base_ensure_the, wait_up_to_s=seconds)(ctx, thing, name)
+
+    if with_nth:
+
+        @step(
+            f'I immediately ensure the "{{nth:nth}}" {thing} "{{name}}" is {state}'
+        )
+        def immediately_ensure_the_nth(ctx, nth, name):
+            base_ensure_the(ctx, thing, name, index=nth)
+
+        @step(f'I ensure the "{{nth:nth}}" {thing} "{{name}}"')
+        def ensure_the_nth(ctx, nth, name):
+            retry(
+                base_ensure_the,
+                retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+                wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+            )(ctx, thing, name, index=nth)
+
+        @step(
+            f'I wait to ensure the "{{nth:nth}}" {thing} "{{name}}" is {state}'
+        )
+        def wait_to_ensure_the_nth(ctx, nth, name):
+            retry(base_ensure_the)(ctx, thing, name, index=nth)
+
+        @step(
+            f'I wait up to "{{seconds}}" seconds to ensure the "{{nth:nth}}" {thing} "{{name}}" is {state}'
+        )
+        def wait_up_to_ensure_the_nth(ctx, seconds, nth, name):
+            seconds = float(seconds)
+            retry(base_ensure_the, wait_up_to_s=seconds)(
                 ctx, thing, name, index=nth
             )
 
@@ -471,13 +587,13 @@ def define_thing_with_name_in_state_steps(
             )(ctx, thing, name, index=nth)
 
         @step(f'I wait to see the "{{nth:nth}}" {thing} "{{name}}" is {state}')
-        def wait_to_see_the_in_state(ctx, nth, name):
+        def wait_to_see_the_nth_in_state(ctx, nth, name):
             retry(base_should_see_the_in_state)(ctx, thing, name, index=nth)
 
         @step(
             f'I wait up to "{{seconds}}" seconds to see the "{{nth:nth}}" {thing} "{{name}}" is {state}'
         )
-        def wait_up_to_seconds_to_see_the_in_state(ctx, seconds, nth, name):
+        def wait_up_to_seconds_to_see_the_nth_in_state(ctx, seconds, nth, name):
             seconds = float(seconds)
             retry(base_should_see_the_in_state, wait_up_to_s=seconds)(
                 ctx, thing, name, index=nth

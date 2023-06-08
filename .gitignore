@@ -3,9 +3,9 @@ dist
 .coverage.*
 .DS_Store
 *.egg-info
-cucurc.yml
 htmlcov
 .nox
+.ruff_cache
 terraform.tfstate
 terraform.tfstate.backup
 .terraform
@@ -76,7 +76,6 @@ cover/
 *.pot
 
 # Django stuff:
-*.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal

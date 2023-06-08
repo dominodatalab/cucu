@@ -1,38 +1,35 @@
 # -*- coding: utf-8 -*-
-import click
-import coverage
 import glob
 import json
+import os
 import shutil
 import signal
 import time
-import os
-
-from click import ClickException
 from collections import namedtuple
+from importlib.metadata import version
+from threading import Timer
+
+import click
+import coverage
+from click import ClickException
+from pebble import ProcessPool
+from tabulate import tabulate
+
 from cucu import (
     fuzzy,
     init_global_hook_variables,
-    register_after_all_hook,
-    reporter,
     language_server,
     logger,
+    register_after_all_hook,
+    reporter,
 )
-from cucu.config import CONFIG
 from cucu.cli import thread_dumper
 from cucu.cli.run import behave, behave_init, write_run_details
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
+from cucu.config import CONFIG
 from cucu.lint import linter
-from importlib.metadata import version
-from pebble import ProcessPool
-from tabulate import tabulate
-from threading import Timer
-
 
 # QE-10912 Remove Pebble before distributing cucu
-# Since Pebble is less likely to be included in cucu in the future,
-# for now, this is not exposed as an option.
-TASK_TIMEOUT = 30 * 60
 
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
@@ -142,6 +139,12 @@ def main():
     help="when set we will not remove any existing results directory",
 )
 @click.option(
+    "--record-env-vars",
+    default=False,
+    is_flag=True,
+    help="when set will record shell environment variables to debug file: run_details.json",
+)
+@click.option(
     "--report",
     default="report",
     help="the location to put the test report when --generate-report is used",
@@ -163,6 +166,11 @@ def main():
     default=None,
     type=int,
     help="the runtime timeout in seconds after which the current run will terminate any running tests and exit",
+)
+@click.option(
+    "--feature-timeout",
+    default=1800,
+    help="When run tests in parallel, the maximum amount of time (seconds) a feature can run",
 )
 @click.option(
     "--secrets",
@@ -211,10 +219,12 @@ def run(
     logging_level,
     periodic_thread_dumper,
     preserve_results,
+    record_env_vars,
     report,
     report_only_failures,
     results,
     runtime_timeout,
+    feature_timeout,
     secrets,
     show_skips,
     show_status,
@@ -279,6 +289,9 @@ def run(
 
     if report_only_failures:
         os.environ["CUCU_REPORT_ONLY_FAILURES"] = "true"
+
+    if record_env_vars:
+        os.environ["CUCU_RECORD_ENV_VARS"] = "true"
 
     if not dry_run:
         write_run_details(results, filepath)
@@ -377,7 +390,7 @@ def run(
                         {
                             "redirect_output": True,
                         },
-                        timeout=float(TASK_TIMEOUT),
+                        timeout=float(feature_timeout),
                     )
                     async_results.append(AsyncResult(feature_filepath, result))
 

@@ -1,11 +1,11 @@
 import os
 import re
 import socket
+
 import yaml
 
 
 class Config(dict):
-
     # only match variables {...}
     __VARIABLE_REGEX = re.compile(r"\{(?<!\\{)([^{}]+)\}(?<!\\})")
 
@@ -174,6 +174,7 @@ class Config(dict):
 
                     if value is None:
                         value = ""
+                        # print directly to the output stream, which was taken over in behave_tweaks
                         print(f'WARNING variable "{var_name}" is undefined')
 
                     string = string.replace("{" + var_name + "}", str(value))

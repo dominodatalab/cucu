@@ -6,14 +6,14 @@ def test_find_completions_returns_prefix_matches_first():
 
     # the completions should only contain matches that are prefixed by the
     # `I click the ` text
-    for (step_name, _) in matches:
+    for step_name, _ in matches:
         assert step_name.startswith("I click the ")
 
 
 def test_find_completions_returns_something_when_prefix_does_not_match():
     matches = find_completions("click button")
 
-    for (step_name, _) in matches:
+    for step_name, _ in matches:
         if step_name.find("click") == -1 and step_name.find("button") == -1:
             raise RuntimeError(
                 f"found step with neither click nor button in it: {step_name}"

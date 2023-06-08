@@ -61,7 +61,7 @@ def run_script(
         [script_file.name],
         capture_output=True,
         shell=True,
-    )
+    )  # nosec
 
     if exit_code_var:
         config.CONFIG[exit_code_var] = str(process.returncode)

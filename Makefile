@@ -1,30 +1,53 @@
 # help menu when you run just `make`
 help:
+	#   Provided as a convience to run commands with poetry
 	#   install  - installs the necessary development dependencies.
-	#   build    - rebuilds the existing installation and pushes any local code to the
-	#              current python environment.
-	#   test     - runs all of the cucu tests.
-	#   lint     - lints all of the source and test code.
-	#   nox      - runs all of the tests against supported python versions using nox.
-	#   coverage - work in progress...
+	#   format   - formats the code
+	#   check    - checks the code
+	#   test     - tests the code
+	#   build    - build the dist
 
 install: src/*
-	pip install poetry
 	poetry install
+
+format:
+	poetry run black .
+	poetry run ruff . --fix
+	poetry run cucu lint features
+
+check:
+	# format code
+	poetry run black . --check
+	# lint code
+	poetry run ruff .
+	# lint .feature files
+	poetry run cucu lint features
+	# lint code for security mistakes
+	poetry run bandit src features data -r -c pyproject.toml -q --severity high
+	# check deps against known security issues
+	poetry run safety check
+
+test:
+	poetry run pytest tests --cov=src
+	poetry run cucu features --workers=4
 
 build:
 	rm -f dist/*.tar.gz
+	rm -f dist/*.whl
 	poetry build
 
+qualify:
+	tox
+
 release:
-	echo "tag a new release of cucu"
+	# version and commit
 	poetry version minor
 	git add pyproject.toml
 	git commit -m "tagged release `poetry version -s`"
 
-dist: build
-	pip install dist/cucu-*.tar.gz
-
+	# publish to test pypi
+	# publish to pypi
+	# publish to read the docs
 
 coverage: src/* tests/*
 	rm -fr .coverage .coverage.*
