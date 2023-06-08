@@ -2,11 +2,20 @@
 various cucu utilities can be placed here and then exposed publicly through
 the src/cucu/__init__.py
 """
+import logging
 
 from tabulate import DataRow, TableFormat, tabulate
-from tenacity import retry as retrying
-from tenacity import retry_if_not_exception_type, stop_after_delay, wait_fixed
+from tenacity import (
+    before_sleep_log,
+    retry_if_not_exception_type,
+    stop_after_delay,
+    wait_fixed,
+)
+from tenacity import (
+    retry as retrying,
+)
 
+from cucu import logger
 from cucu.config import CONFIG
 
 GHERKIN_TABLEFORMAT = TableFormat(
@@ -103,6 +112,7 @@ def retry(func, wait_up_to_s=None, retry_after_s=None):
         stop=stop_after_delay(wait_up_to_s),
         wait=wait_fixed(retry_after_s),
         retry=retry_if_not_exception_type(StopRetryException),
+        before_sleep=before_sleep_log(logger, logging.DEBUG),
     )
     def new_decorator(*args, **kwargs):
         ctx = CONFIG["__CUCU_CTX"]
