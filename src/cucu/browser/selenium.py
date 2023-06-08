@@ -124,7 +124,7 @@ class Selenium(Browser):
             options.add_argument(f"--width={width}")
             options.add_argument(f"--height={height}")
 
-            options.set_capability("loggingPrefs", {"browser": "ALL"})
+            # options.set_capability("loggingPrefs", {"browser": "ALL"})
 
             if headless:
                 options.add_argument("--headless")
