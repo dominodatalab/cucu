@@ -1,10 +1,12 @@
-# cucu
-
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/cerebrotech/cucu/tree/main.svg?style=svg&circle-token=81eb2db26e4d6529e8cbb1319fe0f50a992bb50e)](https://dl.circleci.com/status-badge/redirect/gh/cerebrotech/cucu/tree/main)
+# ![Cucu Logo](logo.png) **CUCU** - Easy BDD web testing
 
 End-to-end testing framework that uses [gherkin](https://cucumber.io/docs/gherkin/)
 to drive various underlying tools/frameworks to create real world testing scenarios.
-# Why cucu?
+
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/cerebrotech/cucu/tree/main.svg?style=svg&circle-token=81eb2db26e4d6529e8cbb1319fe0f50a992bb50e)](https://dl.circleci.com/status-badge/redirect/gh/cerebrotech/cucu/tree/main)
+
+
+## Why cucu?
 1. Cucu avoids unnecessary abstractions (i.e. no Page Objects!) while keeping scenarios readable.
     ```gherkin
     Feature: My First Cucu Test
@@ -24,11 +26,18 @@ to drive various underlying tools/frameworks to create real world testing scenar
 7. Enables heirarchal configuration and env var **and CLI arg overrides**
 8. Comes with a linter that is **customizable**
 
+## Supporting docs
+1. [CHANGELOG.md](CHANGELOG.md) - for latest news
+2. [CONTRIBUTING.md](CONTRIBUTING.md) - how we develop and test the library
+3. [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+4. [CONTRIBUTORS.md](CONTRIBUTORS.md)
+5. [LICENSE](LICENSE)
 
 # Table of Contents
 
-- [cucu](#cucu)
-- [Why cucu?](#why-cucu)
+- [ **CUCU** - Easy BDD web testing](#-cucu---easy-bdd-web-testing)
+  - [Why cucu?](#why-cucu)
+  - [Supporting docs](#supporting-docs)
 - [Table of Contents](#table-of-contents)
 - [Installation](#installation)
   - [Requirements](#requirements)
@@ -44,17 +53,6 @@ to drive various underlying tools/frameworks to create real world testing scenar
 - [More Ways To Install Cucu](#more-ways-to-install-cucu)
   - [Install From Source](#install-from-source)
   - [Install From Build](#install-from-build)
-- [Cucu Development](#cucu-development)
-  - [Design](#design)
-    - [Why Gherkin (i.e. BDD-style tests)](#why-gherkin-ie-bdd-style-tests)
-    - [Notable libraries used](#notable-libraries-used)
-  - [Dev Setup](#dev-setup)
-    - [Fancier Dev Setup](#fancier-dev-setup)
-  - [Dev Run](#dev-run)
-  - [Dev Debugging](#dev-debugging)
-  - [Running Built In Tests](#running-built-in-tests)
-  - [Tagging A New Release](#tagging-a-new-release)
-
 
 # Installation
 ## Requirements
@@ -377,132 +375,3 @@ Building cucu (0.1.0)
 At this point you can install the file `dist/cucu-0.1.0.tar.gz` using
 `pip install ....tar.gz` anywhere you'd like and have the `cucu` tool ready to
 run.
-
-# Cucu Development
-## Design
-Currently `cucu` uses selenium to interact with a browser but we
-aim to support running the tests through other selenium testing frameworks.
-
-### Why Gherkin (i.e. BDD-style tests)
-There are a few reasons for writing the actual tests in `gherkin` including:
-
- * tests are readable by anyone in the organization, since they're just plain
-   English that describe interactions and validations.
- * steps within a `gherkin` test can do actions on the browser, hit an API or
-   anything else you can do programatically to simulate various other testing
-   needs (ie use *iptables* to limit bandwidth, use *docker/kubectl* to
-   pause/stop/restart containers, etc.)
- * there's only one implementation per "step" and this makes for better reusing
-   of existing test code which can be maintained in the long term.
-
-### Notable libraries used
-1. [behave](https://behave.readthedocs.io/en/stable/) - drives the tests
-2. [tenacity](https://github.com/jd/tenacity) - used for retries
-
-## Dev Setup
-The short list
-1. install `brew` - see [brew](https://brew.sh/)
-2. bash
-   ```bash
-   brew install fzf
-   brew install pyenv
-   brew install pre-commit
-   pyenv install 3.7
-
-   pip install poetry
-   poetry self add poetry-dotenv-plugin
-
-   # from top-level of cucu directory
-   pre-commit install
-   poetry install
-   ```
-
-### Fancier Dev Setup
-1. use `pipx` to install `poetry` in a separate python virtual environment
-   ```bash
-   brew install pipx
-   pipx install poetry
-   # inject the extension into poetry's virtualenv
-   pipx inject poetry poetry-dotenv-plugin
-   ```
-   _now the poetry app and dependencies won't be in your main python install_
-2. setup poetry's directory to use the project's directory (THIS IS A GLOBAL CHANGE)
-   1. exit poetry shell if you're in it
-   2. delete all existing poetry virtualenv directories
-      ```bash
-      rm -rf ~/.cache/pypoetry
-      ```
-   3. change poetry's global config
-      ```bash
-      poetry config virtualenvs.in-project true
-      ```
-   4. re-install cucu's poetry
-      ```bash
-      poetry install
-      # you should see the newly created virtualenv directory under the cucu top-level directory
-      ls .venv/
-      ```
-   _required for VSCode debugging below_
-
-## Dev Run
-1. drop into a poetry shell environment
-   ```bash
-   poetry shell
-   ```
-2. once in the poetry shell use the `cucu` command like normal
-   ```bash
-   cucu
-   ```
-3. you can run a test and see the generated **results/** directory
-   ```bash
-   cucu run features/browser/links.feature
-   ls results
-   ```
-4. and even generate an html report
-   ```bash
-   cucu report
-   ls report/index.html
-   ```
-
-## Dev Debugging
-Here's some options
-1. drop into an ipdb debugger on failure using the cucu run `-i` argument
-2. add a `breakpoint()` call to python code to drop into an ipdb debugger
-3. configure VSCode secret sauce
-   1. setup poetry's directory to use the project's directory - see [Fancier Dev Setup](#fancier-dev-setup)
-   2. in VSCode **`Python: Select Interpreter`** as `./.venv/bin/python`
-   3. add a launch`.vscode/launch.json` and **change the `args`**
-      ```json
-      {
-          "version": "0.2.0",
-          "configurations": [
-              {
-                  "name": "cucu run",
-                  "type": "python",
-                  "request": "launch",
-                  "cwd": "${workspaceFolder}",
-                  "program": "src/cucu/cli/core.py",
-                  "args": ["run", "features/cli/lint.feature"]
-              }
-          ]
-      }
-      ```
-   4. add a VSCode breakpoint to python code
-   5. run the VSCode debugger as normal
-4. pip install it in `--editable` mode to test in your own project
-   ```bash
-   # change to your project
-   cd ~/code/boo
-   # install your local cucu in editable mode
-   pip install -e ~/code/cucu
-   ```
-
-## Running Built In Tests
-You can run the existing `cucu` tests by simply executing `make test` and can
-also check the code coverage by running `make coverage`.
-
-## Tagging A New Release
-To tag a new release of cucu, first create a branch. On your new branch you can
-simply run `make release` and it'll create a commit with the updated package version.
-Then, you can create a PR for the new release. When the PR is merged, *GitHub Actions* will
-tag a new release and *CircleCI* will publish the release to the internal pypi (JFrog).

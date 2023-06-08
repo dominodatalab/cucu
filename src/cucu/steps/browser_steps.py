@@ -1,11 +1,11 @@
 import base64
-import humanize
 import os
 
-from cucu import config, logger, fuzzy, retry, run_steps, step
-from cucu.browser.selenium import Selenium
-
+import humanize
 from selenium.webdriver.common.keys import Keys
+
+from cucu import config, fuzzy, logger, retry, run_steps, step
+from cucu.browser.selenium import Selenium
 
 
 def open_browser(ctx):
@@ -280,7 +280,7 @@ def save_downloaded_file(ctx, filename):
     )
 
     def wait_for_file():
-        if ctx.browser.execute("return window.__cucu_downloaded_file;") == None:
+        if ctx.browser.execute("return window.__cucu_downloaded_file;") is None:
             raise RuntimeError(f"waiting on file {filename}")
 
     retry(wait_for_file)()

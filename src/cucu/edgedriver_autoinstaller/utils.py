@@ -3,18 +3,16 @@
 Helper functions for filename and URL generation.
 """
 
-import sys
-import os
-import subprocess
-import requests
-
-import zipfile
-import xml.etree.ElementTree as elemTree
 import logging
+import os
 import re
-
+import subprocess
+import sys
+import xml.etree.ElementTree as elemTree
+import zipfile
 from io import BytesIO
 
+import requests
 
 __author__ = "Yeongbin Jo <iam.yeongbin.jo@gmail.com>"
 

@@ -1,5 +1,6 @@
-import humanize
 import sys
+
+import humanize
 
 from cucu import retry, run_steps
 from cucu.config import CONFIG
@@ -358,13 +359,13 @@ def define_action_on_thing_with_name_steps(
             )(ctx, thing, name, index=nth, must_exist=False)
 
         @step(f'I wait to {action} the "{{nth:nth}}" {thing} "{{name}}"')
-        def action_the_nth(ctx, nth, name):
+        def wait_to_action_the_nth(ctx, nth, name):
             retry(base_action_the)(ctx, thing, name, index=nth)
 
         @step(
             f'I wait up to "{{seconds}}" seconds to {action} the "{{nth:nth}}" {thing} "{{name}}"'
         )
-        def action_the_nth(ctx, seconds, nth, name):
+        def wait_up_to_action_the_nth(ctx, seconds, nth, name):
             seconds = float(seconds)
             retry(base_action_the, wait_up_to_s=seconds)(
                 ctx, thing, name, index=nth
@@ -473,13 +474,13 @@ def define_ensure_state_on_thing_with_name_steps(
         @step(
             f'I wait to ensure the "{{nth:nth}}" {thing} "{{name}}" is {state}'
         )
-        def ensure_the_nth(ctx, nth, name):
+        def wait_to_ensure_the_nth(ctx, nth, name):
             retry(base_ensure_the)(ctx, thing, name, index=nth)
 
         @step(
             f'I wait up to "{{seconds}}" seconds to ensure the "{{nth:nth}}" {thing} "{{name}}" is {state}'
         )
-        def ensure_the_nth(ctx, seconds, nth, name):
+        def wait_up_to_ensure_the_nth(ctx, seconds, nth, name):
             seconds = float(seconds)
             retry(base_ensure_the, wait_up_to_s=seconds)(
                 ctx, thing, name, index=nth
@@ -586,13 +587,13 @@ def define_thing_with_name_in_state_steps(
             )(ctx, thing, name, index=nth)
 
         @step(f'I wait to see the "{{nth:nth}}" {thing} "{{name}}" is {state}')
-        def wait_to_see_the_in_state(ctx, nth, name):
+        def wait_to_see_the_nth_in_state(ctx, nth, name):
             retry(base_should_see_the_in_state)(ctx, thing, name, index=nth)
 
         @step(
             f'I wait up to "{{seconds}}" seconds to see the "{{nth:nth}}" {thing} "{{name}}" is {state}'
         )
-        def wait_up_to_seconds_to_see_the_in_state(ctx, seconds, nth, name):
+        def wait_up_to_seconds_to_see_the_nth_in_state(ctx, seconds, nth, name):
             seconds = float(seconds)
             retry(base_should_see_the_in_state, wait_up_to_s=seconds)(
                 ctx, thing, name, index=nth

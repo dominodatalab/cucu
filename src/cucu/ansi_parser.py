@@ -5,7 +5,7 @@ from behave.formatter.ansi_escapes import colors, escapes
 
 from cucu import logger
 
-ESC_SEQ = "\x1b["
+ESC_SEQ = r"\x1b["
 TRANSLATION = {v: f'<span style="color: {k};">' for k, v in colors.items()} | {
     escapes["reset"]: "</span>",
     escapes["up"]: "",  # ignore away move cursor up 1
@@ -20,7 +20,13 @@ TRANSLATION = {v: f'<span style="color: {k};">' for k, v in colors.items()} | {
     ESC_SEQ + "56": "",  # ignore UP ARROW (num keypad)
     ESC_SEQ + "57": "",  # ignore PAGE UP (num keypad)
 }
-REGEX = re.compile("|".join(map(re.escape, TRANSLATION)))
+RE_TO_HTML = re.compile("|".join(map(re.escape, TRANSLATION)))
+
+RE_TO_REMOVE = re.compile(r"\x1b\[0m|\x1b\[0;\d\dm")
+
+
+def remove_ansi(input: str) -> str:
+    return RE_TO_REMOVE.sub("", input)
 
 
 def parse_log_to_html(input: str) -> str:
@@ -30,7 +36,7 @@ def parse_log_to_html(input: str) -> str:
 
     body_start = '<body style="color: white; background-color: 333;">'  # use dark bg since colors are from behave
     body_end = "</body>\n"
-    result = f"{body_start}<pre>\n{REGEX.sub(lambda match: TRANSLATION[match.group(0)], html.escape(input, quote=False))}\n</pre>{body_end}"
+    result = f"{body_start}<pre>\n{RE_TO_HTML.sub(lambda match: TRANSLATION[match.group(0)], html.escape(input, quote=False))}\n</pre>{body_end}"
     if ESC_SEQ in result:
         lines = "\n".join([x for x in result.split("\n") if ESC_SEQ in x])
         logger.info(f"Detected unmapped ansi escape code!:\n{lines}")

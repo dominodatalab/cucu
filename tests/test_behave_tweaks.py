@@ -1,6 +1,4 @@
 import cucu
-import pytest
-
 from cucu import behave_tweaks
 from cucu.config import CONFIG
 

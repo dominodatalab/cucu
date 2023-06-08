@@ -1,6 +1,6 @@
 import re
-
 from collections import OrderedDict
+
 from cucu.config import CONFIG
 
 CONFIG.define(

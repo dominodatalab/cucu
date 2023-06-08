@@ -3,14 +3,14 @@ from __future__ import absolute_import
 
 import traceback
 
-
-from behave.formatter.base import Formatter
 from behave.formatter.ansi_escapes import colors, escapes, up
-from behave.model_describe import ModelPrinter
+from behave.formatter.base import Formatter
 from behave.model_core import Status
+from behave.model_describe import ModelPrinter
 from behave.textutil import make_indentation
-from cucu.config import CONFIG
+
 from cucu.behave_tweaks import hide_secrets
+from cucu.config import CONFIG
 
 
 class CucuFormatter(Formatter):
@@ -199,7 +199,7 @@ class CucuFormatter(Formatter):
             self.doc_string(step.text)
 
         if step.table:
-            self.table(step.table.original)
+            self.table(getattr(step.table, "original", step.table))
 
         if step.status in (Status.passed, Status.failed):
             # print the variable values in step name, multiline/table arguments

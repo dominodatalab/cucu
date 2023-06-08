@@ -1,20 +1,18 @@
+import logging
+
 import chromedriver_autoinstaller
 import geckodriver_autoinstaller
-import logging
 import urllib3
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.common.by import By
+from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.remote.remote_connection import RemoteConnection
 
+from cucu import config, edgedriver_autoinstaller, logger
 from cucu.browser.core import Browser
 from cucu.browser.frames import search_in_all_frames
-from cucu import config, logger
-from cucu import edgedriver_autoinstaller
-
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options as ChromeOptions
-from selenium.webdriver.firefox.options import Options as FirefoxOptions
-from selenium.webdriver.edge.options import Options as EdgeOptions
-
-from selenium.webdriver.remote.remote_connection import RemoteConnection
 
 
 class DisableLogger:
@@ -34,7 +32,7 @@ def init():
             with DisableLogger():
                 # auto install chromedriver if not present
                 chromedriver_autoinstaller.install()
-        except:
+        except:  # noqa: E722
             logging.debug("unable to auto install chromedriver")
 
     if config.CONFIG["CUCU_BROWSER"] == "firefox":

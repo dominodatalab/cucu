@@ -1,4 +1,3 @@
-from cucu import logger
 import pkgutil
 
 
@@ -79,7 +78,6 @@ def run_in_all_frames(browser, search_function):
 
 
 def search_text_in_all_frames(browser, search_function, value):
-
     try:
         search_function(value=value)
     except RuntimeError:

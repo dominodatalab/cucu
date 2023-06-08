@@ -6,14 +6,13 @@ import sys
 import urllib
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import quote
 from xml.sax.saxutils import escape as escape_
 
 import jinja2
 
 from cucu import format_gherkin_table, logger
+from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
-from cucu.reporter.parser import parse_log_to_html
 
 
 def escape(data):
@@ -168,7 +167,7 @@ def generate(results, basepath, only_failures=False):
                         )
                         step["result"]["timestamp"] = timestamp
 
-                        if scenario_started_at == None:
+                        if scenario_started_at is None:
                             scenario_started_at = timestamp
                             scenario["started_at"] = timestamp
                         step["result"][
@@ -229,10 +228,10 @@ def generate(results, basepath, only_failures=False):
                 scenario["logs"] = log_files
 
             scenario["total_steps"] = total_steps
-            if scenario_started_at == None:
+            if scenario_started_at is None:
                 scenario["started_at"] = ""
             else:
-                if feature_started_at == None:
+                if feature_started_at is None:
                     feature_started_at = scenario_started_at
                     feature["started_at"] = feature_started_at
 
@@ -259,7 +258,7 @@ def generate(results, basepath, only_failures=False):
             scenario["duration"] = scenario_duration
             feature_duration += scenario_duration
 
-        if feature_started_at == None:
+        if feature_started_at is None:
             feature["started_at"] = ""
 
         feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
@@ -282,7 +281,7 @@ def generate(results, basepath, only_failures=False):
         grand_totals[k] = sum([x[k] for x in reported_features])
 
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
-    templates = jinja2.Environment(loader=package_loader)
+    templates = jinja2.Environment(loader=package_loader)  # nosec
     if show_status:
         print("")  # add a newline to end status
 

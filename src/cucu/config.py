@@ -1,11 +1,11 @@
 import os
 import re
 import socket
+
 import yaml
 
 
 class Config(dict):
-
     # only match variables {...}
     __VARIABLE_REGEX = re.compile(r"\{(?<!\\{)([^{}]+)\}(?<!\\})")
 

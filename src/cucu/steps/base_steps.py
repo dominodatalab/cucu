@@ -1,14 +1,15 @@
-import parse
 import operator
 import re
 import sys
 import time
 
+import parse
 from behave import register_type
 from behave.model_describe import ModelPrinter
-from cucu import logger, run_steps, step
+
+from cucu import logger, step
+from cucu.ansi_parser import remove_ansi
 from cucu.config import CONFIG
-from strip_ansi import strip_ansi
 
 NTH_REGEX = r"(\d+)(nd|th|rd|st)"
 
@@ -82,4 +83,4 @@ def i_log_following(ctx, level):
 
 @step('I strip ansi codes from "{value}" and save to the variable "{variable}"')
 def strip_ansi_codes_and_save(ctx, value, variable):
-    CONFIG[variable] = strip_ansi(value)
+    CONFIG[variable] = remove_ansi(value)
