@@ -10,8 +10,9 @@ from cucu import edgedriver_autoinstaller
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.edge.options import Options as EdgeOptions
 
 from selenium.webdriver.remote.remote_connection import RemoteConnection
 
@@ -66,7 +67,7 @@ class Selenium(Browser):
         ]
 
         if browser.startswith("chrome"):
-            options = Options()
+            options = ChromeOptions()
             options.add_experimental_option("detach", detach)
 
             prefs = {"download.default_directory": cucu_downloads_dir}
@@ -80,17 +81,14 @@ class Selenium(Browser):
 
             if ignore_ssl_certificate_errors:
                 options.add_argument("ignore-certificate-errors")
-
-            desired_capabilities = DesiredCapabilities.CHROME
-            desired_capabilities["goog:loggingPrefs"] = {"browser": "ALL"}
+            options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
 
             if selenium_remote_url is not None:
                 logger.debug(f"webdriver.Remote init: {selenium_remote_url}")
                 try:
                     self.driver = webdriver.Remote(
-                        options=options,
                         command_executor=selenium_remote_url,
-                        desired_capabilities=desired_capabilities,
+                        options=options,
                     )
                 except urllib3.exceptions.ReadTimeoutError:
                     print("*" * 80)
@@ -104,31 +102,29 @@ class Selenium(Browser):
             else:
                 logger.debug("webdriver.Chrome init")
                 self.driver = webdriver.Chrome(
-                    chrome_options=options,
-                    desired_capabilities=desired_capabilities,
+                    options=options,
                 )
 
         elif browser.startswith("firefox"):
-            options = webdriver.FirefoxOptions()
-            profile = webdriver.FirefoxProfile()
-            profile.set_preference("browser.download.folderList", 2)
-            profile.set_preference(
+            options = FirefoxOptions()
+
+            options.set_preference("browser.download.folderList", 2)
+            options.set_preference(
                 "browser.download.manager.showWhenStarting", False
             )
-            profile.set_preference("browser.download.dir", cucu_downloads_dir)
-            profile.set_preference(
+            options.set_preference("browser.download.dir", cucu_downloads_dir)
+            options.set_preference(
                 "browser.helperApps.neverAsk.saveToDisk",
                 "images/jpeg, application/pdf, application/octet-stream, text/plain",
             )
 
             if ignore_ssl_certificate_errors:
-                profile.accept_untrusted_certs = True
+                options.accept_insecure_certs = True
 
             options.add_argument(f"--width={width}")
             options.add_argument(f"--height={height}")
 
-            desired_capabilities = DesiredCapabilities.FIREFOX
-            desired_capabilities["loggingPrefs"] = {"browser": "ALL"}
+            # options.set_capability("loggingPrefs", {"browser": "ALL"})
 
             if headless:
                 options.add_argument("--headless")
@@ -138,8 +134,7 @@ class Selenium(Browser):
                 try:
                     self.driver = webdriver.Remote(
                         command_executor=selenium_remote_url,
-                        desired_capabilities=desired_capabilities,
-                        browser_profile=profile,
+                        options=options,
                     )
                 except urllib3.exceptions.ReadTimeoutError:
                     print("*" * 80)
@@ -153,13 +148,11 @@ class Selenium(Browser):
             else:
                 logger.debug("webdriver.Firefox init")
                 self.driver = webdriver.Firefox(
-                    firefox_profile=profile,
                     options=options,
-                    desired_capabilities=desired_capabilities,
                 )
 
         elif browser.startswith("edge"):
-            options = webdriver.EdgeOptions()
+            options = EdgeOptions()
 
             options.add_experimental_option(
                 "prefs", {"download.default_directory": cucu_downloads_dir}
@@ -169,17 +162,14 @@ class Selenium(Browser):
                 options.use_chromium = True
                 options.add_argument("--headless")
 
-            desired_capabilities = DesiredCapabilities.EDGE
-
             if ignore_ssl_certificate_errors:
-                desired_capabilities["acceptSslCerts"] = True
+                options.set_capability("acceptSslCerts", True)
 
             if selenium_remote_url is not None:
                 logger.debug(f"webdriver.Remote init: {selenium_remote_url}")
                 try:
                     self.driver = webdriver.Remote(
                         command_executor=selenium_remote_url,
-                        desired_capabilities=desired_capabilities,
                         options=options,
                     )
                 except urllib3.exceptions.ReadTimeoutError:
@@ -199,7 +189,6 @@ class Selenium(Browser):
                 self.driver = webdriver.Edge(
                     executable_path=edgedriver_filepath,
                     options=options,
-                    capabilities=desired_capabilities,
                 )
 
         else:
