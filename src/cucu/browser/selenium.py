@@ -182,7 +182,7 @@ class Selenium(Browser):
                     print("")
                     raise
             else:
-                logger.debug("webdriver.Firefox init")
+                logger.debug("webdriver.Edge init")
                 edgedriver_filepath = (
                     edgedriver_autoinstaller.utils.download_edgedriver()
                 )
