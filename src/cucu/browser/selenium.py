@@ -124,6 +124,7 @@ class Selenium(Browser):
             options.add_argument(f"--width={width}")
             options.add_argument(f"--height={height}")
 
+            # TODO: re-enable once Firefox supports this
             # options.set_capability("loggingPrefs", {"browser": "ALL"})
 
             if headless:
