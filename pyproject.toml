@@ -82,7 +82,7 @@ docstring-quotes = "double"
 exclude_dirs = [".env", ".venv", "venv"]
 
 [tool.pytest]
-# junit_family = "xunit2"
+junit_family = "xunit2"
 
 [tool.coverage.paths]
 source = ["src"]
