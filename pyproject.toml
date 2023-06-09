@@ -70,10 +70,13 @@ build-backend = "poetry.core.masonry.api"
 line-length = 80
 
 [tool.ruff]
-select = ["E", "F", "I"]  # default options + isort
+select = ["E", "F", "I", "Q0"]  # default options + isort
 exclude = [".env", ".venv", "venv", "__init__.py"]
 ignore = ["E501", "F403"]  # line_length, import *
 line-length = 80
+
+[tool.ruff.flake8-quotes]
+docstring-quotes = "double"
 
 [tool.bandit]
 exclude_dirs = [".env", ".venv", "venv"]
