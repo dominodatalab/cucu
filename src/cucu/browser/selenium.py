@@ -278,5 +278,25 @@ class Selenium(Browser):
         self.driver.close()
         self.driver.switch_to.window(window_handles[window_handle_index - 1])
 
+    def download_mht(self, target_filepath):
+        if self.driver is None:
+            logger.warn(
+                "No active browser; will not attempt to download .mht file."
+            )
+            return
+
+        browser_name = self.driver.name.lower()
+        if "chrome" not in browser_name:
+            logger.warn(
+                "The web driver is not using Chrome as a web browser"
+                f", but {browser_name}. This browser does not support"
+                "dowloading .mht files; will not attempt to download one."
+            )
+            return
+
+        mht_response = self.driver.execute_cdp_cmd("Page.captureSnapshot", {})
+        with open(target_filepath, "w") as mht_file:
+            mht_file.write(mht_response["data"])
+
     def quit(self):
         self.driver.quit()

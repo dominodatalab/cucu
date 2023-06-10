@@ -320,6 +320,11 @@ def upload_file_to_input(ctx, filepath, name):
     _input.send_keys(os.path.abspath(filepath))
 
 
+@step('I download an mht archive of the current page to "{file_path}"')
+def download_mht_archive(ctx, file_path):
+    ctx.browser.download_mht(file_path)
+
+
 @step('I run the following steps if the current browser is "{name}"')
 def run_if_browser(ctx, name):
     if config.CONFIG["CUCU_BROWSER"].lower() == name.lower():

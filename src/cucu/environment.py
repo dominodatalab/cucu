@@ -133,6 +133,14 @@ def after_scenario(ctx, scenario):
     for timer_name in ctx.step_timers:
         logger.warn(f'timer "{timer_name}" was never stopped/recorded')
 
+    if scenario.status == "failed":
+        for browser_index, browser in enumerate(ctx.browsers):
+            mht_filename = os.path.join(
+                CONFIG["SCENARIO_LOGS_DIR"],
+                f"{escape_filename(scenario.name)}_browser{browser_index}.mht",
+            )
+            ctx.browser.download_mht(mht_filename)
+
     # run after all scenario hooks
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"]:
         hook(ctx)
@@ -145,7 +153,6 @@ def after_scenario(ctx, scenario):
 
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
-
     else:
         if len(ctx.browsers) != 0:
             logger.debug("quitting browser between sessions")
