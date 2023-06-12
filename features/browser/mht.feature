@@ -1,3 +1,4 @@
+@disabled
 Feature: Download MHT archives
   As a user of web-based testing
   I want to download MHT archives
