@@ -134,12 +134,12 @@ def after_scenario(ctx, scenario):
         logger.warn(f'timer "{timer_name}" was never stopped/recorded')
 
     if scenario.status == "failed":
-        for browser_index, browser in enumerate(ctx.browsers):
+        for index, browser in enumerate(ctx.browsers):
             mht_filename = os.path.join(
                 CONFIG["SCENARIO_LOGS_DIR"],
-                f"{escape_filename(scenario.name)}_browser{browser_index}.mht",
+                f"browser{index if len(ctx.browsers) > 1 else ''}_snapshot.mht",
             )
-            ctx.browser.download_mht(mht_filename)
+            browser.download_mht(mht_filename)
 
     # run after all scenario hooks
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"]:
