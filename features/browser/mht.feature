@@ -4,13 +4,15 @@ Feature: Download MHT archives
   So that I can bebug DOM-based failures more easily
 
   Scenario: Download an MHT file during a test
-    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+    Given I skip this scenario if the current browser is not "chrome"
+      And I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/files.html"
      When I download an mht archive of the current page to "{SCENARIO_DOWNLOADS_DIR}/test_archive_{SCENARIO_RUN_ID}.mht"
      Then I should see a file at "{SCENARIO_DOWNLOADS_DIR}/test_archive_{SCENARIO_RUN_ID}.mht"
 
   Scenario: Download an MHT file automatically on Scenario failure
-    Given I create a file at "{CUCU_RESULTS_DIR}/mht/steps/__init__.py" with the following:
+    Given I skip this scenario if the current browser is not "chrome"
+      And I create a file at "{CUCU_RESULTS_DIR}/mht/steps/__init__.py" with the following:
       """
       from cucu.steps import *
       """
@@ -31,7 +33,8 @@ Feature: Download MHT archives
      Then I should see a file at "{CUCU_RESULTS_DIR}/mht_results/Download MHT on failure/Open a browser and then fail/logs/browser_snapshot.mht"
 
   Scenario: Download multiple MHT files automatically on Scenario failure
-    Given I create a file at "{CUCU_RESULTS_DIR}/mht/steps/__init__.py" with the following:
+    Given I skip this scenario if the current browser is not "chrome"
+      And I create a file at "{CUCU_RESULTS_DIR}/mht/steps/__init__.py" with the following:
       """
       from cucu.steps import *
       """
