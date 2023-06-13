@@ -1,4 +1,3 @@
-@disabled
 Feature: Download MHT archives
   As a user of web-based testing
   I want to download MHT archives
@@ -27,7 +26,7 @@ Feature: Download MHT archives
       Feature: Download MHT on failure
 
         Scenario: Open a browser and then fail
-           When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/mages.html"
+           When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/images.html"
            Then I should see "4" is equal to "5"
       """
      When I run the command "cucu run {CUCU_RESULTS_DIR}/mht/fail.feature --results {CUCU_RESULTS_DIR}/mht_results/ -l debug" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"

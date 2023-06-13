@@ -294,9 +294,28 @@ class Selenium(Browser):
             )
             return
 
-        mht_response = self.driver.execute_cdp_cmd("Page.captureSnapshot", {})
+        mht_data = None
+        if self.driver._is_remote:
+            cdp_url = f"{self.driver.command_executor._url}/session/{self.driver.session_id}/chromium/send_command_and_get_result"
+            cdp_request_body = '{"cmd": "Page.captureSnapshot", "params": {}}'
+            cdp_response = self.driver.command_executor._request(
+                "POST", cdp_url, cdp_request_body
+            )
+            mht_data = cdp_response.get("value")["data"]
+        else:
+            mht_response = self.driver.execute_cdp_cmd(
+                "Page.captureSnapshot", {}
+            )
+            mht_data = mht_response["data"]
+
+        if mht_data is None:
+            logger.warn(
+                "Something unexpected has happened: fetched MHT data, but that data was empty. Not writing MHT file."
+            )
+            return
+
         with open(target_filepath, "w") as mht_file:
-            mht_file.write(mht_response["data"])
+            mht_file.write(mht_data)
 
     def quit(self):
         self.driver.quit()
