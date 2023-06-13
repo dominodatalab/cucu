@@ -278,5 +278,44 @@ class Selenium(Browser):
         self.driver.close()
         self.driver.switch_to.window(window_handles[window_handle_index - 1])
 
+    def download_mht(self, target_filepath):
+        if self.driver is None:
+            logger.warn(
+                "No active browser; will not attempt to download .mht file."
+            )
+            return
+
+        browser_name = self.driver.name.lower()
+        if "chrome" not in browser_name:
+            logger.warn(
+                "The web driver is not using Chrome as a web browser"
+                f", but {browser_name}. This browser does not support"
+                "dowloading .mht files; will not attempt to download one."
+            )
+            return
+
+        mht_data = None
+        if self.driver._is_remote:
+            cdp_url = f"{self.driver.command_executor._url}/session/{self.driver.session_id}/chromium/send_command_and_get_result"
+            cdp_request_body = '{"cmd": "Page.captureSnapshot", "params": {}}'
+            cdp_response = self.driver.command_executor._request(
+                "POST", cdp_url, cdp_request_body
+            )
+            mht_data = cdp_response.get("value")["data"]
+        else:
+            mht_response = self.driver.execute_cdp_cmd(
+                "Page.captureSnapshot", {}
+            )
+            mht_data = mht_response["data"]
+
+        if mht_data is None:
+            logger.warn(
+                "Something unexpected has happened: fetched MHT data, but that data was empty. Not writing MHT file."
+            )
+            return
+
+        with open(target_filepath, "w") as mht_file:
+            mht_file.write(mht_data)
+
     def quit(self):
         self.driver.quit()
