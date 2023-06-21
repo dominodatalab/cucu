@@ -1,9 +1,7 @@
-from functools import partial
-
 from cucu import fuzzy, helpers, step
-from cucu.browser.frames import search_text_in_all_frames
-from cucu.fuzzy.core import load_jquery_lib
+from cucu.browser.frames import try_in_frames_until_success
 from cucu.steps import step_utils
+from cucu.utils import text_in_current_frame
 
 
 def find_text(ctx, name, index=0):
@@ -38,14 +36,14 @@ helpers.define_run_steps_if_I_can_see_element_with_name_steps("text", find_text)
 )
 def search_for_regex_to_page_and_save(ctx, regex, name, variable):
     ctx.check_browser_initialized()
-    ctx.browser.execute(load_jquery_lib())
-    text = ctx.browser.execute(
-        'return jQuery("body").children(":visible").text();'
-    )
-    search_function = partial(
-        step_utils.search_and_save, regex=regex, name=name, variable=variable
-    )
-    search_text_in_all_frames(ctx.browser, search_function, value=text)
+
+    def search_for_regex_in_frame():
+        text = text_in_current_frame(ctx.browser)
+        step_utils.search_and_save(
+            regex=regex, value=text, name=name, variable=variable
+        )
+
+    try_in_frames_until_success(ctx.browser, search_for_regex_in_frame)
 
 
 @step(
@@ -53,22 +51,22 @@ def search_for_regex_to_page_and_save(ctx, regex, name, variable):
 )
 def match_for_regex_to_page_and_save(ctx, regex, name, variable):
     ctx.check_browser_initialized()
-    ctx.browser.execute(load_jquery_lib())
-    text = ctx.browser.execute(
-        'return jQuery("body").children(":visible").text();'
-    )
-    search_function = partial(
-        step_utils.match_and_save, regex=regex, name=name, variable=variable
-    )
-    search_text_in_all_frames(ctx.browser, search_function, value=text)
+
+    def match_for_regex_in_frame():
+        text = text_in_current_frame(ctx.browser)
+        step_utils.match_and_save(
+            regex=regex, value=text, name=name, variable=variable
+        )
+
+    try_in_frames_until_success(ctx.browser, match_for_regex_in_frame)
 
 
 @step('I should see text matching the regex "{regex}" on the current page')
 def search_for_regex_on_page(ctx, regex):
     ctx.check_browser_initialized()
-    ctx.browser.execute(load_jquery_lib())
-    text = ctx.browser.execute(
-        'return jQuery("body").children(":visible").text();'
-    )
-    search_function = partial(step_utils.search, regex=regex)
-    search_text_in_all_frames(ctx.browser, search_function, value=text)
+
+    def search_for_regex_in_frame():
+        text = text_in_current_frame(ctx.browser)
+        step_utils.search(regex=regex, value=text)
+
+    try_in_frames_until_success(ctx.browser, search_for_regex_in_frame)

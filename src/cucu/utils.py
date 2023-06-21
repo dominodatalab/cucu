@@ -3,6 +3,7 @@ various cucu utilities can be placed here and then exposed publicly through
 the src/cucu/__init__.py
 """
 import logging
+import pkgutil
 
 from tabulate import DataRow, TableFormat, tabulate
 from tenacity import (
@@ -11,11 +12,10 @@ from tenacity import (
     stop_after_delay,
     wait_fixed,
 )
-from tenacity import (
-    retry as retrying,
-)
+from tenacity import retry as retrying
 
 from cucu import logger
+from cucu.browser.core import Browser
 from cucu.config import CONFIG
 
 GHERKIN_TABLEFORMAT = TableFormat(
@@ -123,3 +123,24 @@ def retry(func, wait_up_to_s=None, retry_after_s=None):
         return func(*args, **kwargs)
 
     return new_decorator
+
+
+def load_jquery_lib():
+    """
+    load jquery library
+    """
+    jquery_lib = pkgutil.get_data("cucu", "external/jquery/jquery-3.5.1.min.js")
+    return jquery_lib.decode("utf8")
+
+
+def text_in_current_frame(browser: Browser) -> str:
+    """
+    Utility to get all the visible text of the current frame.
+
+    Args:
+        browser (Browser): the browser session switched to the desired frame
+    """
+    browser.execute(load_jquery_lib())
+    browser.execute("jqCucu = jQuery.noConflict(true);")
+    text = browser.execute('return jqCucu("body").children(":visible").text();')
+    return text
