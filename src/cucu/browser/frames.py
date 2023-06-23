@@ -72,7 +72,7 @@ def run_in_all_frames(browser, search_function):
 def try_in_frames_until_success(browser: Browser, function_to_run) -> None:
     """
     Run the function on all of the possible frames one by one. It terminates
-    if the function doesn't raise RuntimeError on a frame.
+    if the function doesn't raise an exception on a frame.
 
     Warning: This leaves the browser in whatever frame the function is run successfully
     so that users of the this method are in that frame.
