@@ -141,6 +141,6 @@ def text_in_current_frame(browser: Browser) -> str:
         browser (Browser): the browser session switched to the desired frame
     """
     browser.execute(load_jquery_lib())
-    browser.execute("jqCucu = jQuery.noConflict(true);")
+    browser.execute("window.jqCucu = jQuery.noConflict(true);")
     text = browser.execute('return jqCucu("body").children(":visible").text();')
     return text
