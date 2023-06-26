@@ -38,7 +38,6 @@ selenium = "^4.10.0"
 chromedriver-autoinstaller = "^0.3.1"
 PyYAML = "^6.0"
 flake8-quotes = "^3.3.1"
-coverage = { version = "*", extras = ["toml"] }
 Jinja2 = "^3.0.3"
 tenacity = "^8.0.1"
 pygls = "^0.13.1"
@@ -56,8 +55,9 @@ cucu = "cucu.cli:main"
 
 [tool.poetry.group.dev.dependencies]
 ipdb = "^0.13.9"
-pytest = "^7.2.2"
-black = "^23.3.0"
+pytest = "^7.4"
+coverage = { version = "^7.2", extras = ["toml"] }
+black = "*"
 ruff = "^0.0.264"
 bandit = "^1.7.5"
 safety = "^2.3.5"
