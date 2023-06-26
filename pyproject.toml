@@ -84,18 +84,17 @@ exclude_dirs = [".env", ".venv", "venv"]
 [tool.pytest]
 junit_family = "xunit2"
 
-[tool.coverage.paths]
-source = ["src"]
-
 [tool.coverage.run]
 branch = true
-relative_files = true
-parallel = true
 concurrency = ["multiprocessing"]
+omit = ["results"]
+parallel = true
+relative_files = true
+source = ["src"]
 
 [tool.coverage.report]
-show_missing = true
 fail_under = 70
+show_missing = true
 
 [tool.tox]
 legacy_tox_ini = """
