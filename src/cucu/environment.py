@@ -141,12 +141,12 @@ def after_scenario(ctx, scenario):
             )
             browser.download_mht(mht_filename)
 
-    # run after all scenario hooks
-    for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"]:
+    # run after all scenario hooks.Executing the hooks in lifo order.
+    for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"][::-1]:
         hook(ctx)
 
-    # run after this scenario hooks
-    for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"]:
+    # run after this scenario hooks.Executing the hooks in lifo order.
+    for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"][::-1]:
         hook(ctx)
 
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
