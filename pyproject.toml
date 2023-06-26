@@ -30,6 +30,13 @@ include = [
     { path = "LICENSE", format = "sdist" },
 ]
 
+[tool.poetry.scripts]
+cucu = "cucu.cli:main"
+
+[build-system]
+requires = ["poetry-core>=1.3.2"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
 click = "^8.1.3"
@@ -49,9 +56,6 @@ beautifulsoup4 = "^4.11.1"
 jellyfish = "^0.9.0"
 pebble = "^5.0.3"
 
-[tool.poetry.scripts]
-cucu = "cucu.cli:main"
-
 [tool.poetry.group.dev.dependencies]
 ipdb = "^0.13.9"
 pytest = "^7.4"
@@ -60,10 +64,6 @@ black = "^23.3"
 ruff = "^0.0.264"
 bandit = "^1.7.5"
 safety = "^2.3.5"
-
-[build-system]
-requires = ["poetry-core>=1.3.2"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 80
