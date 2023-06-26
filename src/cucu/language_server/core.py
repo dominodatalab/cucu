@@ -2,12 +2,12 @@ import logging
 import re
 
 import jellyfish
-from pygls.lsp.methods import TEXT_DOCUMENT_COMPLETION
-from pygls.lsp.types import (
+from lsprotocol.types import (
     CompletionItem,
     CompletionList,
     CompletionOptions,
     CompletionParams,
+    TEXT_DOCUMENT_COMPLETION,
 )
 from pygls.server import LanguageServer
 
