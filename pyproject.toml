@@ -63,7 +63,7 @@ coverage = { version = "^7.2", extras = ["toml"] }
 black = "^23.3"
 ruff = "^0.0"
 bandit = "^1.7.5"
-safety = "^2.4"
+safety = "^2.4.0b1"
 
 [tool.black]
 line-length = 80
