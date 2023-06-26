@@ -54,7 +54,7 @@ commands:
       - run:
           command: poetry run cucu run features --workers 8 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<< parameters.browser >>"
           environment:
-            COVERAGE_PROCESS_START: .coveragerc
+            COVERAGE_PROCESS_START: pytproject.toml  # set to config file
             CUCU_COLOR_OUTPUT: false
 
   run_unit_tests: &run_unit_tests
