@@ -91,7 +91,7 @@ source = ["src"]
 branch = true
 relative_files = true
 parallel = true
-concurrency = "multiprocessing"
+concurrency = ["multiprocessing"]
 
 [tool.coverage.report]
 show_missing = true
