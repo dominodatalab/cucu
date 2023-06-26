@@ -38,7 +38,7 @@ selenium = "^4.10.0"
 chromedriver-autoinstaller = "^0.3.1"
 PyYAML = "^6.0"
 flake8-quotes = "^3.3.1"
-coverage = "4.5.4"
+coverage = { version = "*", extras = ["toml"] }
 Jinja2 = "^3.0.3"
 tenacity = "^8.0.1"
 pygls = "^0.13.1"
