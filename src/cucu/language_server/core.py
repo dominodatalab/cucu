@@ -2,7 +2,7 @@ import logging
 import re
 
 import jellyfish
-from pygls.capabilities import COMPLETION
+from pygls.completion import COMPLETION
 from pygls.lsp.types import (
     CompletionItem,
     CompletionList,
