@@ -57,7 +57,7 @@ cucu = "cucu.cli:main"
 ipdb = "^0.13.9"
 pytest = "^7.4"
 coverage = { version = "^7.2", extras = ["toml"] }
-black = "*"
+black = "^23.3"
 ruff = "^0.0.264"
 bandit = "^1.7.5"
 safety = "^2.3.5"
