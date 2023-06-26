@@ -1,14 +1,14 @@
 import logging
 import re
-import toml
 
 import jellyfish
+import toml
 from lsprotocol.types import (
+    TEXT_DOCUMENT_COMPLETION,
     CompletionItem,
     CompletionList,
     CompletionOptions,
     CompletionParams,
-    TEXT_DOCUMENT_COMPLETION,
 )
 from pygls.server import LanguageServer
 
@@ -67,7 +67,9 @@ def start(port=None):
     steps_cache, _ = load_cucu_steps()
     logging.basicConfig(filename="pygls.log", filemode="w", level=logging.DEBUG)
 
-    @server.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[","]))
+    @server.feature(
+        TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[","])
+    )
     def completions(ls: LanguageServer, params: CompletionParams):
         logging.warn(f"{TEXT_DOCUMENT_COMPLETION}: {params}")
 
