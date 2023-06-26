@@ -13,14 +13,14 @@
      *             one visible parent.
      *
      */
-    jQuery.extend(
-        jQuery.expr[ ":" ],
+    jqCucu.extend(
+        jqCucu.expr[ ":" ],
         {
             has_text: function(elem, index, match) {
-                return (elem.textContent || elem.innerText || jQuery(elem).text() || '') === match[3].trim();
+                return (elem.textContent || elem.innerText || jqCucu(elem).text() || '') === match[3].trim();
             },
             vis: function (elem) {
-                return !(jQuery(elem).is(":hidden") || jQuery(elem).parents(":hidden").length);
+                return !(jqCucu(elem).is(":hidden") || jqCucu(elem).parents(":hidden").length);
             }
         }
     );
@@ -76,7 +76,7 @@
                 /*
                  * <thing>name</thing>
                  */
-                results = jQuery(thing + ':vis:' + matcher + '("' + name + '")', document.body).toArray();
+                results = jqCucu(thing + ':vis:' + matcher + '("' + name + '")', document.body).toArray();
                 if (cucu.debug) { console.log('<thing>name</thing>', results); }
                 elements = elements.concat(results);
 
@@ -84,10 +84,10 @@
                 for(var aIndex=0; aIndex < attributes.length; aIndex++) {
                     var attribute_name = attributes[aIndex];
                     if (matcher == 'has_text') {
-                        results = jQuery(thing + '[' + attribute_name + '="' + name + '"]:vis', document.body).toArray();
+                        results = jqCucu(thing + '[' + attribute_name + '="' + name + '"]:vis', document.body).toArray();
                         if (cucu.debug) { console.log('<thing attibute="name"></thing>', results); }
                     } else if (matcher == 'contains') {
-                        results = jQuery(thing + '[' + attribute_name + '*="' + name + '"]:vis', document.body).toArray();
+                        results = jqCucu(thing + '[' + attribute_name + '*="' + name + '"]:vis', document.body).toArray();
                         if (cucu.debug) { console.log('<thing attibute*="name"></thing>', results); }
                     }
                     elements = elements.concat(results);
@@ -107,12 +107,12 @@
 
                 // <thing value="name"></thing>
                 if (matcher == 'has_text') {
-                    results = jQuery(thing + ':vis', document.body).filter(function(){
+                    results = jqCucu(thing + ':vis', document.body).filter(function(){
                         return this.value == name;
                     }).toArray();
                     if (cucu.debug) { console.log('<thing value="name"></thing>', results); }
                 } else if (matcher == 'contains') {
-                    results = jQuery(thing + ':vis', document.body).filter(function(){
+                    results = jqCucu(thing + ':vis', document.body).filter(function(){
                         return this.value !== undefined && String(this.value).indexOf(name) != -1;
                     }).toArray();
                     if (cucu.debug) { console.log('<thing value*="name"></thing>', results); }
@@ -123,7 +123,7 @@
             /*
              * element labeled by another using the for/id attributes
              */
-            var labels = jQuery('*[for]:vis:' + matcher + '("' + name + '")', document.body).toArray();
+            var labels = jqCucu('*[for]:vis:' + matcher + '("' + name + '")', document.body).toArray();
             for(var tIndex = 0; tIndex < things.length; tIndex++) {
                 var thing = things[tIndex];
                 results = [];
@@ -134,7 +134,7 @@
                 for(var lIndex=0; lIndex < labels.length; lIndex++) {
                     var label = labels[lIndex];
                     var id = label.getAttribute('for');
-                    results = jQuery(thing + '[id="' + id + '"]:vis', document.body).toArray();
+                    results = jqCucu(thing + '[id="' + id + '"]:vis', document.body).toArray();
                     if (cucu.debug) { console.log('<* for=...>name</*>...<thing id=...></thing>', results); }
                     elements = elements.concat(results);
                 }
@@ -149,14 +149,14 @@
                 /*
                  * <thing><*>...name...</*></thing>
                  */
-                results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).parents(thing).toArray();
+                results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).parents(thing).toArray();
                 if (cucu.debug) { console.log('<thing><*>...name...</*></thing>', results); }
                 elements = elements.concat(results);
 
                 // <thing><* attribute="name"></*></thing>
                 for(var aIndex=0; aIndex < attributes.length; aIndex++) {
                     var attribute_name = attributes[aIndex];
-                    results = jQuery('*:vis[' + attribute_name + '="' + name + '"]', document.body).parents(thing).toArray();
+                    results = jqCucu('*:vis[' + attribute_name + '="' + name + '"]', document.body).parents(thing).toArray();
                     if (cucu.debug) { console.log('<thing><* attibute="name"></*></thing>', results); }
                     elements = elements.concat(results);
                 }
@@ -171,7 +171,7 @@
                 /*
                  * <*><thing></thing>name</*>
                  */
-                results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).children(thing + ':vis').toArray();
+                results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).children(thing + ':vis').toArray();
                 if (cucu.debug) { console.log('<*><thing></thing>name</*>', results); }
                 elements = elements.concat(results);
             }
@@ -182,7 +182,7 @@
                     var thing = things[tIndex];
 
                     // <*>name</*><thing/>
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).next(thing + ':vis').toArray();
+                    results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).next(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<*>name</*><thing/>', results); }
                     elements = elements.concat(results);
                 }
@@ -194,7 +194,7 @@
                     var thing = things[tIndex];
 
                     // <thing/><*>name</*>
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prev(thing).toArray();
+                    results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).prev(thing).toArray();
                     if (cucu.debug) { console.log('<thing/><*>name</*>', results); }
                     elements = elements.concat(results);
                 }
@@ -210,14 +210,14 @@
                     var thing = things[tIndex];
 
                     // <*>name</*>...<thing>...
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).nextAll(thing + ':vis').toArray();
+                    results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).nextAll(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<*>name</*>...<thing>...', results); }
                     elements = elements.concat(results);
 
                     // <...><*>name</*></...>...<...><thing></...>
                     // XXX: this rule is horribly complicated and I'd rather see it gone
                     //      basically: common great grandpranet
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).nextAll().find(thing + ':vis').toArray();
+                    results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).nextAll().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<...><*>name</*></...>...<...><thing></...>', results); }
                     elements = elements.concat(results);
                 }
@@ -229,13 +229,13 @@
                     var thing = things[tIndex];
 
                     // next siblings: <thing>...<*>name</*>...
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prevAll(thing).toArray();
+                    results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).prevAll(thing).toArray();
                     if (cucu.debug) { console.log('<thing>...<*>name</*>...', results); }
                     elements = elements.concat(results);
 
                     // <...><thing></...>...<...><*>name</*></...>
                     // XXX: this rule is horribly complicated and I'd rather see it gone
-                    results = jQuery('*:vis:' + matcher + '("' + name + '")', document.body).prevAll().find(thing + ':vis').toArray();
+                    results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).prevAll().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<...><thin></...>...<...><*>name</*></...>', results); }
                     elements = elements.concat(results);
                 }

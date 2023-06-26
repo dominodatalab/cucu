@@ -28,7 +28,10 @@ def init(browser):
         browser - ...
     """
     browser.execute(load_jquery_lib())
-    script = "return window.jQuery && jQuery.fn.jquery;"
+
+    # to prevent interference with the jQuery used on the web page
+    browser.execute("window.jqCucu = jQuery.noConflict(true);")
+    script = "return window.jqCucu && jqCucu.fn.jquery;"
     jquery_version = browser.execute(script)
 
     while jquery_version is None or not jquery_version.startswith("3.5.1"):
