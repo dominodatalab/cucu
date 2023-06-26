@@ -84,13 +84,15 @@ exclude_dirs = [".env", ".venv", "venv"]
 [tool.pytest]
 junit_family = "xunit2"
 
+[tool.coverage.paths]
+source = ["src"]
+
 [tool.coverage.run]
 branch = true
 concurrency = ["multiprocessing"]
 omit = ["results"]
 parallel = true
 relative_files = true
-source = ["src"]
 
 [tool.coverage.report]
 fail_under = 70
