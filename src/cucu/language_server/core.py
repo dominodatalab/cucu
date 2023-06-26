@@ -1,5 +1,6 @@
 import logging
 import re
+import toml
 
 import jellyfish
 from lsprotocol.types import (
@@ -61,7 +62,8 @@ def find_completions(step_fragment, steps_cache=None):
 
 
 def start(port=None):
-    server = LanguageServer()
+    version = toml.load("pyproject.toml")["tool"]["poetry"]["version"]
+    server = LanguageServer(name="cucu", version=version)
     steps_cache, _ = load_cucu_steps()
     logging.basicConfig(filename="pygls.log", filemode="w", level=logging.DEBUG)
 
