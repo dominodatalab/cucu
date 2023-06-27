@@ -28,7 +28,6 @@ Feature: Radio Buttons
       And I should see the radio button "dog" is selected
       And I should see the radio button "rat" is not selected
 
-  @current
   Scenario: User can select a radio button with leading and trailing spaces in name
     Given I should see the radio button "Chicago" is not selected
       And I should see the radio button "Newyork" is not selected

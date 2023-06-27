@@ -180,7 +180,6 @@
                 /*
                  * <*><thing></thing>name</*>
                  */
-                //results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).children(thing + ':vis').toArray();
                 results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).children(thing + ':vis').toArray();
                 if (cucu.debug) { console.log('<*><thing></thing>name</*>', results); }
                 elements = elements.concat(results);
@@ -223,7 +222,6 @@
                     results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).nextAll(thing + ':vis').toArray();
                     if (cucu.debug) { console.log('<*>name</*>...<thing>...', results); }
                     elements = elements.concat(results);
-                    console.log('element 9:',  elements.length)
 
                     // <...><*>name</*></...>...<...><thing></...>
                     // XXX: this rule is horribly complicated and I'd rather see it gone
