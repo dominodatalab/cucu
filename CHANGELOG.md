@@ -10,7 +10,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - migrate to pygls 1.x
 - Change - move configs into pyproject.toml
 - Fix - makefile test command
-- Change - pyproject.toml author to ddl only
+- Change - pyproject.toml author to ddl
 
 ## 0.138.0
 - Change - cucu to load unique named jQuery

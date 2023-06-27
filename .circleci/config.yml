@@ -174,9 +174,6 @@ jobs:
       - store_test_results:
           path: junit_results
 
-      - store_artifacts:
-          path: report/
-
   publish:
     docker:
       - image: cimg/python:3.9.7
