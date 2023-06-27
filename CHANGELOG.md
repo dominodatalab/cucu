@@ -7,7 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 0.140.0
 - Dev - update CI to use python 3.11
-- Dev - update CI to use selenium docker latest
+- Dev - update CI to use selenium-standalone 114.0
 
 ## 0.139.0
 - Change - migrate to pygls 1.x
