@@ -1,8 +1,13 @@
 import logging
 import re
+import sys
+
+if sys.version_info[:2] >= (3, 8):
+    from importlib import metadata
+else:
+    import importlib_metadata as metadata
 
 import jellyfish
-import toml
 from lsprotocol.types import (
     TEXT_DOCUMENT_COMPLETION,
     CompletionItem,
@@ -62,7 +67,7 @@ def find_completions(step_fragment, steps_cache=None):
 
 
 def start(port=None):
-    version = toml.load("pyproject.toml")["tool"]["poetry"]["version"]
+    version = metadata.version(__package__.split(".")[0])
     server = LanguageServer(name="cucu", version=version)
     steps_cache, _ = load_cucu_steps()
     logging.basicConfig(filename="pygls.log", filemode="w", level=logging.DEBUG)
