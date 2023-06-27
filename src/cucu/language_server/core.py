@@ -1,11 +1,6 @@
 import logging
 import re
-import sys
-
-if sys.version_info[:2] >= (3, 8):
-    from importlib import metadata
-else:
-    import importlib_metadata as metadata
+from importlib import metadata
 
 import jellyfish
 from lsprotocol.types import (
