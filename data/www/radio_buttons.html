@@ -8,15 +8,32 @@
    <input type="radio" id="cat" name="favorite_animal" value="cat"><label>cat</label>
    <input type="radio" id="dog" name="favorite_animal" value="dog"><label>dog</label>
    <input type="radio" id="rat" name="favorite_animal" value="rat"><label>rat</label>
-  </body>
 
+   <div>value as text sibling with leading and trailing spaces</div>
+   <div class="radio">
+    <label>
+      <input type="radio" id="stateChicago" name="text_sibling">
+        Chicago
+    </label>
+  </div>
+  <div class="radio">
+    <label>
+      <input type="radio" id="stateNewyork" name="text_sibling">
+        Newyork
+    </label>
+  </div>
+
+  </body>
 
   <div>Same name</div>
   <input type="radio" id="blue" name="color" value="blue"><label>blue</label>
   <input type="radio" id="blue" name="color" value="blue"><label>blue</label>
 
+  <div>
   <label>pick an color</label>
   <input disabled type="radio" id="red" name="favorite_color" value="red"><label>red</label>
   <input disabled type="radio" id="green" name="favorite_color" value="green"><label>green</label>
   <input disabled type="radio" id="blue" name="favorite_color" value="blue"><label>blue</label>
+  </div>
+
 </html>

@@ -27,3 +27,14 @@ Feature: Radio Buttons
      Then I should see the radio button "cat" is not selected
       And I should see the radio button "dog" is selected
       And I should see the radio button "rat" is not selected
+
+  @current
+  Scenario: User can select a radio button with leading and trailing spaces in name
+    Given I should see the radio button "Chicago" is not selected
+      And I should see the radio button "Newyork" is not selected
+     When I select the radio button "Chicago" if it is not selected
+     Then I should see the radio button "Newyork" is not selected
+      And I should see the radio button "Chicago" is selected
+     When I select the radio button "Newyork" if it is not selected
+     Then I should see the radio button "Chicago" is not selected
+      And I should see the radio button "Newyork" is selected
