@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "cucu"
-version = "0.135.0"
+version = "0.139.0"
 license = "MIT"
 description = "Easy BDD web testing"
-authors = ["Rodney Gomes <rodneygomes@gmail.com>", "Cedric Young <Cedric.Young@dominodatalab.com>"]
+authors = ["Domino Data Lab <open-source@dominodatalab.com>"]
 readme = "README.md"
 homepage = ""
 repository = ""
@@ -30,67 +30,71 @@ include = [
     { path = "LICENSE", format = "sdist" },
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.8,<3.12"
-click = "^8.0.0"
-behave = "^1.2.6"
-selenium = "^4.10.0"
-chromedriver-autoinstaller = "^0.3.1"
-PyYAML = "^6.0"
-flake8-quotes = "^3.3.1"
-coverage = "4.5.4"
-Jinja2 = "^3.0.3"
-tenacity = "^8.0.1"
-pygls = "^0.13.1"
-humanize = "^4.0.0"
-tabulate = "^0.8.9"
-ipdb = "^0.13.9"
-geckodriver-autoinstaller = "^0.1.0"
-requests = "^2.27.1"
-beautifulsoup4 = "^4.11.1"
-jellyfish = "^0.9.0"
-pebble = "^5.0.3"
-
 [tool.poetry.scripts]
 cucu = "cucu.cli:main"
-
-[tool.poetry.group.dev.dependencies]
-ipdb = "^0.13.9"
-pytest = "^7.2.2"
-black = "^23.3.0"
-ruff = "^0.0.264"
-bandit = "^1.7.5"
-safety = "^2.3.5"
 
 [build-system]
 requires = ["poetry-core>=1.3.2"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.poetry.dependencies]
+python = ">=3.8,<3.12"
+beautifulsoup4 = "^4.11.1"
+behave = "^1.2.6"
+chromedriver-autoinstaller = "^0.4"
+click = "^8.1.3"
+geckodriver-autoinstaller = "^0.1.0"
+humanize = "^4.0.0"
+importlib-metadata = "^6.7"
+ipdb = "^0.13.9"
+jellyfish = "^1.0"
+Jinja2 = "^3.0.3"
+pebble = "^5.0.3"
+pygls = "^1.0"
+PyYAML = "^6.0"
+requests = "^2.27.1"
+selenium = "^4.10.0"
+tabulate = "^0.9"
+tenacity = "^8.0.1"
+
+[tool.poetry.group.dev.dependencies]
+bandit = "^1.7.5"
+black = "^23.3"
+coverage = { version = "^7.2", extras = ["toml"] }
+ipdb = "^0.13.9"
+pytest = "^7.4"
+ruff = "^0.0"
+safety = "^2.4.0b1"
+
 [tool.black]
 line-length = 80
 
 [tool.ruff]
-select = ["E", "F", "I"]  # default options + isort
+select = ["E", "F", "I", "Q0"]  # default options + isort
 exclude = [".env", ".venv", "venv", "__init__.py"]
 ignore = ["E501", "F403"]  # line_length, import *
 line-length = 80
+
+[tool.ruff.flake8-quotes]
+docstring-quotes = "double"
 
 [tool.bandit]
 exclude_dirs = [".env", ".venv", "venv"]
 
 [tool.pytest]
-# junit_family = "xunit2"
-
-[tool.coverage.paths]
-source = ["src"]
+junit_family = "xunit2"
 
 [tool.coverage.run]
 branch = true
+concurrency = ["multiprocessing"]
+omit = ["results"]
+parallel = true
 relative_files = true
+source = ["src"]
 
 [tool.coverage.report]
-show_missing = true
 fail_under = 70
+show_missing = true
 
 [tool.tox]
 legacy_tox_ini = """

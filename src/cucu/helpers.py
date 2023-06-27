@@ -2,7 +2,7 @@ import sys
 
 import humanize
 
-from cucu import retry, run_steps
+from cucu import logger, retry, run_steps
 from cucu.config import CONFIG
 
 
@@ -119,6 +119,7 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
 
         if element is None:
             raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
+        logger.debug(f'Success: saw {prefix}{thing} "{name}"')
 
     @step(f'I should immediately see the {thing} "{{name}}"')
     def should_immediately_see_the(ctx, thing, name):
@@ -176,6 +177,7 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
 
         if element is not None:
             raise RuntimeError(f'able to find the {prefix}{thing} "{name}"')
+        logger.debug(f'Success: did not see {prefix}{thing} "{name}"')
 
     @step(f'I should immediately not see the {thing} "{{name}}"')
     def should_immediately_not_see_the(ctx, thing, name):
@@ -290,6 +292,9 @@ def define_action_on_thing_with_name_steps(
                 )
         else:
             action_func(ctx, element)
+            logger.debug(
+                f'Successfully executed {action} {prefix}{thing} "{name}"'
+            )
 
     @step(f'I immediately {action} the {thing} "{{name}}"')
     def immediately_action_the(ctx, name):
@@ -544,6 +549,7 @@ def define_thing_with_name_in_state_steps(
 
         if not is_in_state_func(element):
             raise RuntimeError(f'{thing} "{name}" is not {state}')
+        logger.debug(f'{thing} {name} was in desired state "{state}"')
 
     @step(f'I should immediately see the {thing} "{{name}}" is {state}')
     def should_immedieately_see_the_in_state(ctx, thing, name, state, index=0):

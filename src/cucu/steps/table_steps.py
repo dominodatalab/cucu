@@ -108,8 +108,10 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
 
 def report_unable_to_find_table(tables):
     stream = StringIO()
-    for table in tables:
-        stream.write(f"\n{format_gherkin_table(table)}\n")
+    stream.write("\n")
+    for index, table in enumerate(tables):
+        print_index = helpers.nth_to_ordinal(index) or '"1st" '
+        stream.write(f"{print_index}table:\n{format_gherkin_table(table)}\n")
 
     stream.seek(0)
     raise RuntimeError(f"unable to find desired table, found: {stream.read()}")

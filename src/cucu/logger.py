@@ -46,6 +46,18 @@ def init_debug_logger(output_file):
     logging.getLogger().addHandler(handler)
 
 
+@wraps(logging.log)
+def log(*args, **kwargs):
+    console_handler = logging.getLogger().handlers[0]
+    logging_level = console_handler.level
+
+    msg_level = args[0]
+    if logging_level <= msg_level:
+        CONFIG["__CUCU_WROTE_TO_OUTPUT"] = True
+
+    logging.getLogger().log(*args, **kwargs)
+
+
 @wraps(logging.debug)
 def debug(*args, **kwargs):
     console_handler = logging.getLogger().handlers[0]
