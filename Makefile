@@ -26,10 +26,12 @@ check:
 	poetry run bandit src features data -r -c pyproject.toml -q --severity high
 	# check deps against known security issues
 	poetry run safety check
+	# check project config
+	poetry check
 
 test:
-	poetry run pytest tests --cov=src
-	poetry run cucu features --workers=4
+	poetry run pytest tests
+	poetry run cucu run features --workers=4
 
 build:
 	rm -f dist/*.tar.gz
