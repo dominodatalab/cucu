@@ -8,7 +8,6 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 0.140.0
 - Fix - runtime dependency
 
-
 ## 0.140.0
 - Add - favicon to HTML report
 - Add - save config per scenario
