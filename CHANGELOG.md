@@ -9,7 +9,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Add - favicon to HTML report
 - Add - save config per scenario
 - Change - enable MHT web page snapshot for all chrome scenarios
-- Change - move hide_secrets into Config
+- Dev - move hide_secrets into Config
 - Dev - update CI to use python 3.11
 - Dev - update CI to use selenium-standalone 114.0
 
