@@ -35,6 +35,7 @@ Feature: Run with logging
             And I log "cruel" at level "debug"     # .*
       .* WARNING world
             And I log "world" at level "warn"      # .*
+      .* DEBUG No browsers - skipping MHT webpage snapshot
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
