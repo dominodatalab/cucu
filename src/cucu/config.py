@@ -151,7 +151,6 @@ class Config(dict):
 
         return references
 
-
     def hide_secrets(self, line):
         secret_keys = [
             x.strip()
@@ -171,7 +170,6 @@ class Config(dict):
             line = line.replace(value, replacement)
 
         return line
-
 
     def resolve(self, string):
         """
@@ -248,7 +246,9 @@ class Config(dict):
         self.variable_lookups[re.compile(regex)] = lookup
 
     def to_yaml_without_secrets(self):
-        return CONFIG.hide_secrets(yaml.dump(self))
+        keys = sorted([k for k in self.keys() if not k.startswith("__")])
+        config = {k: self[k] for k in keys}
+        return self.hide_secrets(yaml.dump(config))
 
 
 # global config object

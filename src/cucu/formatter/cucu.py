@@ -9,7 +9,6 @@ from behave.model_core import Status
 from behave.model_describe import ModelPrinter
 from behave.textutil import make_indentation
 
-from cucu.behave_tweaks import hide_secrets
 from cucu.config import CONFIG
 
 
@@ -231,7 +230,7 @@ class CucuFormatter(Formatter):
                 #       to intercept all of the stdout/stderr writes but seems
                 #       behaves underlying self.stream here is getting around
                 #       that by accessing stdout/stderr another way.
-                variable_line = hide_secrets(variable_line)
+                variable_line = CONFIG.hide_secrets(variable_line)
                 colored_variable_line = self.colorize(variable_line, "grey")
                 self.stream.write(colored_variable_line)
                 self.stream.flush()

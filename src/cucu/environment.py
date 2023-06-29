@@ -6,7 +6,6 @@ import shutil
 import sys
 import time
 from functools import partial
-import yaml
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
@@ -180,7 +179,7 @@ def after_scenario(ctx, scenario):
         ctx.scenario_logs_dir, "cucu.config.yaml"
     )
     with open(cucu_config_filepath, "w") as config_file:
-        config_file.write(CONFIG.hide_secrets(yaml.dump(CONFIG)))
+        config_file.write(CONFIG.to_yaml_without_secrets())
 
 
 def before_step(ctx, step):
