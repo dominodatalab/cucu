@@ -58,6 +58,7 @@ Feature: Run with hooks
 
       .* DEBUG just logging some stuff from my after step hook
             And I echo "World"     # .*
+      .* DEBUG No browsers - skipping MHT webpage snapshot
       .* DEBUG just logging some stuff from my after scenario hook
 
       1 feature passed, 0 failed, 0 skipped

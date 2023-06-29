@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 0.140.0
+- Add - favicon to HTML report
+- Add - save config per scenario
+- Change - enable MHT web page snapshot for all chrome scenarios
+- Dev - move hide_secrets into Config
 - Dev - update CI to use python 3.11
 - Dev - update CI to use selenium-standalone 114.0
 

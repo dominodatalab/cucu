@@ -125,27 +125,6 @@ def init_step_hooks(stdout, stderr):
 _stdout = sys.stdout
 
 
-def hide_secrets(line):
-    secret_keys = [
-        x.strip()
-        for x in CONFIG.get("CUCU_SECRETS", "").split(",")
-        if x.strip()
-    ]
-    secret_values = [CONFIG.get(x) for x in secret_keys if CONFIG.get(x)]
-
-    # here's where we can hide secrets
-    for value in secret_values:
-        replacement = "*" * len(value)
-
-        if isinstance(line, bytes):
-            value = bytes(value, "utf8")
-            replacement = bytes(replacement, "utf8")
-
-        line = line.replace(value, replacement)
-
-    return line
-
-
 class CucuOutputStream:
     """
     encapsulates a lot of the logic to handle capturing step by step console
@@ -182,7 +161,7 @@ class CucuOutputStream:
             self.other_stream.flush()
 
     def write(self, byte):
-        byte = hide_secrets(byte)
+        byte = CONFIG.hide_secrets(byte)
 
         self.captured_data.append(byte)
 
@@ -198,7 +177,7 @@ class CucuOutputStream:
                 self.other_stream.write(byte)
 
     def writelines(self, lines):
-        lines = [hide_secrets(line) for line in lines]
+        lines = [CONFIG.hide_secrets(line) for line in lines]
 
         for line in lines:
             self.captured_data.append(line)

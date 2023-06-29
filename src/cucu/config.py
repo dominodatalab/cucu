@@ -151,6 +151,26 @@ class Config(dict):
 
         return references
 
+    def hide_secrets(self, line):
+        secret_keys = [
+            x.strip()
+            for x in self.get("CUCU_SECRETS", "").split(",")
+            if x.strip()
+        ]
+        secret_values = [self.get(x) for x in secret_keys if self.get(x)]
+
+        # here's where we can hide secrets
+        for value in secret_values:
+            replacement = "*" * len(value)
+
+            if isinstance(line, bytes):
+                value = bytes(value, "utf8")
+                replacement = bytes(replacement, "utf8")
+
+            line = line.replace(value, replacement)
+
+        return line
+
     def resolve(self, string):
         """
         resolve any variable references {...} in the string provided using
@@ -225,12 +245,17 @@ class Config(dict):
         """
         self.variable_lookups[re.compile(regex)] = lookup
 
+    def to_yaml_without_secrets(self):
+        keys = sorted([k for k in self.keys() if not k.startswith("__")])
+        config = {k: self[k] for k in keys}
+        return self.hide_secrets(yaml.dump(config))
+
 
 # global config object
 CONFIG = Config()
 
 
-def get_local_address():
+def _get_local_address():
     """
     internal method to get the current host address
     """
@@ -242,7 +267,7 @@ def get_local_address():
 CONFIG.define(
     "HOST_ADDRESS",
     "host address of the current machine cucu is running on",
-    default=get_local_address(),
+    default=_get_local_address(),
 )
 CONFIG.define(
     "CWD",

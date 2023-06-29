@@ -76,6 +76,10 @@ def generate(results, basepath, only_failures=False):
     cucu_dir = os.path.dirname(sys.modules["cucu"].__file__)
     external_dir = os.path.join(cucu_dir, "reporter", "external")
     shutil.copytree(external_dir, os.path.join(basepath, "external"))
+    shutil.copyfile(
+        os.path.join(cucu_dir, "reporter", "favicon.png"),
+        os.path.join(basepath, "favicon.png"),
+    )
 
     #
     # augment existing test run data with:
