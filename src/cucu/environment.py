@@ -133,13 +133,12 @@ def after_scenario(ctx, scenario):
     for timer_name in ctx.step_timers:
         logger.warn(f'timer "{timer_name}" was never stopped/recorded')
 
-    if scenario.status == "failed":
-        for index, browser in enumerate(ctx.browsers):
-            mht_filename = os.path.join(
-                CONFIG["SCENARIO_LOGS_DIR"],
-                f"browser{index if len(ctx.browsers) > 1 else ''}_snapshot.mht",
-            )
-            browser.download_mht(mht_filename)
+    for index, browser in enumerate(ctx.browsers):
+        mht_filename = os.path.join(
+            CONFIG["SCENARIO_LOGS_DIR"],
+            f"browser{index if len(ctx.browsers) > 1 else ''}_snapshot.mht",
+        )
+        browser.download_mht(mht_filename)
 
     # run after all scenario hooks
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"]:
@@ -176,7 +175,7 @@ def after_scenario(ctx, scenario):
         ctx.browsers = []
 
     cucu_config_filepath = os.path.join(
-        ctx.scenario_logs_dir, "cucu.config.yaml"
+        ctx.scenario_logs_dir, "cucu.config.yaml.txt"
     )
     with open(cucu_config_filepath, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
