@@ -43,17 +43,17 @@ Feature: Download MHT archives
       from cucu.environment import *
       """
       And I start a webserver at directory "data/www" and save the port to the variable "PORT"
-      And I create a file at "{CUCU_RESULTS_DIR}/mht/one_browsers.feature" with the following:
+      And I create a file at "{CUCU_RESULTS_DIR}/mht/two_browsers.feature" with the following:
       """
       Feature: Download MHT automatically
 
-        Scenario: Open some browsers
+        Scenario: Open two browsers
            When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
             And I should see the browser title is "Buttons!"
             # Open a second browser
             And I open a new browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
            Then I should see the browser title is "Inputs!"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/mht/one_browsers.feature --results {CUCU_RESULTS_DIR}/mht_results/ -l debug" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
-     Then I should see a file at "{CUCU_RESULTS_DIR}/mht_results/Download MHT automatically/Open some browsers/logs/browser0_snapshot.mht"
-      And I should see a file at "{CUCU_RESULTS_DIR}/mht_results/Download MHT automatically/Open some browsers/logs/browser1_snapshot.mht"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/mht/two_browsers.feature --results {CUCU_RESULTS_DIR}/mht_results/ -l debug" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see a file at "{CUCU_RESULTS_DIR}/mht_results/Download MHT automatically/Open two browsers/logs/browser0_snapshot.mht"
+      And I should see a file at "{CUCU_RESULTS_DIR}/mht_results/Download MHT automatically/Open two browsers/logs/browser1_snapshot.mht"
