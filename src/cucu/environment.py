@@ -133,7 +133,11 @@ def after_scenario(ctx, scenario):
     for timer_name in ctx.step_timers:
         logger.warn(f'timer "{timer_name}" was never stopped/recorded')
 
-    if ctx.browsers and config.CONFIG["CUCU_BROWSER"].lower() == "chrome":
+    if not ctx.browsers:
+        logger.debug("No browsers - skipping MHT webpage snapshot")
+    elif config.CONFIG["CUCU_BROWSER"].lower() != "chrome":
+        logger.debug("Browser not Chrome - skipping MHT webpage snapshot")
+    else:
         for index, browser in enumerate(ctx.browsers):
             mht_filename = (
                 f"browser{index if len(ctx.browsers) > 1 else ''}_snapshot.mht"
@@ -142,7 +146,7 @@ def after_scenario(ctx, scenario):
                 CONFIG["SCENARIO_LOGS_DIR"],
                 mht_filename,
             )
-            logger.debug(f"saving MHT file: {mht_filename}")
+            logger.debug(f"Saving MHT webpage snapshot: {mht_filename}")
             browser.download_mht(mht_pathname)
 
     # run after all scenario hooks
