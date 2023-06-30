@@ -176,7 +176,6 @@
                 elements = elements.concat(results);
             }
 
-
             // element labeled with direct previous sibling
             if (direction === LEFT_TO_RIGHT) {
                 for(var tIndex = 0; tIndex < things.length; tIndex++) {
@@ -247,6 +246,5 @@
             console.log(elements);
         }
         return elements[index];
-
     };
 })();
