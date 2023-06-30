@@ -66,8 +66,8 @@ Feature: Run with hooks
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
-
-  Scenario: User can run after this scenario hook and verify hooks are excuted in lifo order
+  @current
+  Scenario: User can run after this scenario hook and verify hooks are executed in LIFO order
     Given I create a file at "{CUCU_RESULTS_DIR}/custom_hooks/environment.py" with the following:
       """
       from cucu.environment import *
@@ -76,14 +76,14 @@ Feature: Run with hooks
       @step("I run the following steps after the current scenario-1")
       def after_scenario_log(ctx):
         def after_this_scenario_1(ctx):
-            logger.debug("just logging some stuff from my after this scenario hook-1")
+            logger.debug("just logging some stuff from first_after_this_scenario_hook_1")
 
         register_after_this_scenario_hook(after_this_scenario_1)
 
       @step("I run the following steps after the current scenario-2")
       def after_scenario_log(ctx):
         def after_this_scenario_2(ctx):
-            logger.debug("just logging some stuff from my after this scenario hook-2")
+            logger.debug("just logging some stuff from second_after_this_scenario_hook_2")
 
         register_after_this_scenario_hook(after_this_scenario_2)
 
@@ -94,9 +94,9 @@ Feature: Run with hooks
       """
       And I create a file at "{CUCU_RESULTS_DIR}/custom_hooks/echo.feature" with the following:
       """
-      Feature: Feature that simply echo's "Hello World"
+      Feature: Feature that runs after this scenario hooks in LIFO order.
 
-        Scenario: This is a scenario that simply echo's hello world
+        Scenario: This is a scenario that runs after this scenario hooks in LIFO order
           Given I run the following steps after the current scenario-1
             And I run the following steps after the current scenario-2
       """
@@ -104,13 +104,13 @@ Feature: Run with hooks
       And I should see "{STDOUT}" matches the following
       """
       [\s\S]*
-      Feature: Feature that simply echo's "Hello World"
+      Feature: Feature that runs after this scenario hooks in LIFO order.
 
-        Scenario: This is a scenario that simply echo's hello world
+        Scenario: This is a scenario that runs after this scenario hooks in LIFO order
           Given I run the following steps after the current scenario-1     # .*
             And I run the following steps after the current scenario-2     # .*
-      .* DEBUG just logging some stuff from my after this scenario hook-2
-      .* DEBUG just logging some stuff from my after this scenario hook-1
+      .* DEBUG just logging some stuff from second_after_this_scenario_hook_2
+      .* DEBUG just logging some stuff from first_after_this_scenario_hook_1
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
