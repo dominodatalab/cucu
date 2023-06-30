@@ -173,7 +173,17 @@
                  */
                 if (matcher == 'contains') {
                     results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).children(thing + ':vis').filter(function(){
-                        return this.nextSibling.textContent.indexOf(name) !=-1 &&  jqCucu(this.nextSibling).text().indexOf(name) !=-1
+
+             if (typeof this.nextSibling.textContent === 'string') {
+                    var this_nextSibling_textContent = this.nextSibling.textContent;
+                  }
+                if (typeof this.nextSibling.innerText === 'string') {
+                   var this_nextSibling_innerText = this.nextSibling.innerText;
+                 }
+               if (typeof jqCucu(this.nextSibling).text() === 'string') {
+                   var jqCucu_nextSibling_text = jqCucu(this.nextSibling).text();
+                 }
+                        return this_nextSibling_textContent.indexOf(name) !=-1 && this_nextSibling_innerText.indexOf(name) !=-1 &&  jqCucu_nextSibling_text.indexOf(name) !=-1
                     }).toArray();
                     if (cucu.debug) { console.log('<*><thing></thing>name</*>', results); }
                 }
