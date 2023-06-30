@@ -110,6 +110,7 @@ Feature: Run with hooks
         Scenario: This is a scenario that runs after this scenario hooks in LIFO order
           Given I run the following steps after the current scenario-1     # .*
             And I run the following steps after the current scenario-2     # .*
+      .* DEBUG No browsers - skipping MHT webpage snapshot
       .* DEBUG just logging some stuff from second_after_this_scenario_hook_2
       .* DEBUG just logging some stuff from first_after_this_scenario_hook_1
 
