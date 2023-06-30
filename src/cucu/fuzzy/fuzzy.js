@@ -17,16 +17,7 @@
         jqCucu.expr[ ":" ],
         {
             has_text: function(elem, index, match) {
-                if (typeof elem.textContent === 'string') {
-                    var elem_textContent = elem.textContent.trim();
-                  }
-                if (typeof elem.innerText === 'string') {
-                    var elem_innerText = elem.innerText.trim();
-                  }
-                if (typeof jqCucu(elem).text() === 'string') {
-                    var jqCucu_text = jqCucu(elem).text().trim();
-                  }
-                return (elem_textContent || elem_innerText || jqCucu_text || '') === match[3].trim();
+                return (elem.textContent || elem.innerText || jqCucu(elem).text() || '') === match[3].trim();
             },
             vis: function (elem) {
                 return !(jqCucu(elem).is(":hidden") || jqCucu(elem).parents(":hidden").length);
@@ -180,8 +171,16 @@
                 /*
                  * <*><thing></thing>name</*>
                  */
-                results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).children(thing + ':vis').toArray();
-                if (cucu.debug) { console.log('<*><thing></thing>name</*>', results); }
+                if (matcher == 'contains') {
+                    results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).children(thing + ':vis').filter(function(){
+                        return this.nextSibling.textContent.indexOf(name) !=-1 &&  jqCucu(this.nextSibling).text().indexOf(name) !=-1
+                    }).toArray();
+                    if (cucu.debug) { console.log('<*><thing></thing>name</*>', results); }
+                }
+                else{
+                    results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).children(thing + ':vis').toArray();
+                    if (cucu.debug) { console.log('<*><thing></thing>name</*>', results); }
+                }
                 elements = elements.concat(results);
             }
 
@@ -255,5 +254,6 @@
             console.log(elements);
         }
         return elements[index];
+
     };
 })();
