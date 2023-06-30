@@ -171,7 +171,7 @@
                 /*
                  * <*><thing></thing>name</*>
                  */
-                results = jqCucu('*:vis:has_text("' + name + '")', document.body).children(thing + ':vis').toArray();
+                results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).children(thing + ':vis').toArray();
                 if (cucu.debug) { console.log('<*><thing></thing>name</*>', results); }
                 elements = elements.concat(results);
             }
