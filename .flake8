@@ -1,7 +1,0 @@
-[flake8]
-
-select = Q0
-inline-quotes = "
-
-ignore = E501,W503
-docstring-convention = pep257

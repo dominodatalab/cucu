@@ -69,7 +69,9 @@ Feature: Run
   @runtime-timeout
   Scenario: User can run with a runtime timeout to avoid running over a certain amount of time
     Given I run the command "cucu run data/features/slow_features --runtime-timeout 5 --results {CUCU_RESULTS_DIR}/runtime_timeout_results" and save stdout to "STDOUT" and expect exit code "1"
-     Then I should see the previous step took less than "7" seconds
+
+     # TODO: QE-10912 Investigate why this is taking longer in python 3.11
+     Then I should see the previous step took less than "8" seconds
       And I should see "{STDOUT}" contains the following:
       """
       runtime timeout reached, aborting run

@@ -133,13 +133,21 @@ def after_scenario(ctx, scenario):
     for timer_name in ctx.step_timers:
         logger.warn(f'timer "{timer_name}" was never stopped/recorded')
 
-    if scenario.status == "failed":
+    if not ctx.browsers:
+        logger.debug("No browsers - skipping MHT webpage snapshot")
+    elif config.CONFIG["CUCU_BROWSER"].lower() != "chrome":
+        logger.debug("Browser not Chrome - skipping MHT webpage snapshot")
+    else:
         for index, browser in enumerate(ctx.browsers):
-            mht_filename = os.path.join(
-                CONFIG["SCENARIO_LOGS_DIR"],
-                f"browser{index if len(ctx.browsers) > 1 else ''}_snapshot.mht",
+            mht_filename = (
+                f"browser{index if len(ctx.browsers) > 1 else ''}_snapshot.mht"
             )
-            browser.download_mht(mht_filename)
+            mht_pathname = os.path.join(
+                CONFIG["SCENARIO_LOGS_DIR"],
+                mht_filename,
+            )
+            logger.debug(f"Saving MHT webpage snapshot: {mht_filename}")
+            browser.download_mht(mht_pathname)
 
     # run after all scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"][::-1]:
@@ -174,6 +182,12 @@ def after_scenario(ctx, scenario):
             browser.quit()
 
         ctx.browsers = []
+
+    cucu_config_filepath = os.path.join(
+        ctx.scenario_logs_dir, "cucu.config.yaml.txt"
+    )
+    with open(cucu_config_filepath, "w") as config_file:
+        config_file.write(CONFIG.to_yaml_without_secrets())
 
 
 def before_step(ctx, step):

@@ -1,7 +1,0 @@
-[run]
-source = src
-parallel = true
-concurrency = multiprocessing
-
-[report]
-show_missing = True
