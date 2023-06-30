@@ -58,7 +58,61 @@ Feature: Run with hooks
 
       .* DEBUG just logging some stuff from my after step hook
             And I echo "World"     # .*
+      .* DEBUG No browsers - skipping MHT webpage snapshot
       .* DEBUG just logging some stuff from my after scenario hook
+
+      1 feature passed, 0 failed, 0 skipped
+      1 scenario passed, 0 failed, 0 skipped
+      2 steps passed, 0 failed, 0 skipped, 0 undefined
+      [\s\S]*
+      """
+      And I should see "{STDERR}" is empty
+  @current
+  Scenario: User can run after this scenario hook and verify hooks are executed in LIFO order
+    Given I create a file at "{CUCU_RESULTS_DIR}/custom_hooks/environment.py" with the following:
+      """
+      from cucu.environment import *
+      from cucu import logger, step, register_after_this_scenario_hook
+
+      @step("I run the following steps after the current scenario-1")
+      def after_scenario_log(ctx):
+        def after_this_scenario_1(ctx):
+            logger.debug("just logging some stuff from first_after_this_scenario_hook_1")
+
+        register_after_this_scenario_hook(after_this_scenario_1)
+
+      @step("I run the following steps after the current scenario-2")
+      def after_scenario_log(ctx):
+        def after_this_scenario_2(ctx):
+            logger.debug("just logging some stuff from second_after_this_scenario_hook_2")
+
+        register_after_this_scenario_hook(after_this_scenario_2)
+
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/custom_hooks/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/custom_hooks/echo.feature" with the following:
+      """
+      Feature: Feature that runs after this scenario hooks in LIFO order.
+
+        Scenario: This is a scenario that runs after this scenario hooks in LIFO order
+          Given I run the following steps after the current scenario-1
+            And I run the following steps after the current scenario-2
+      """
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/custom_hooks_results/ -l debug" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I should see "{STDOUT}" matches the following
+      """
+      [\s\S]*
+      Feature: Feature that runs after this scenario hooks in LIFO order.
+
+        Scenario: This is a scenario that runs after this scenario hooks in LIFO order
+          Given I run the following steps after the current scenario-1     # .*
+            And I run the following steps after the current scenario-2     # .*
+      .* DEBUG No browsers - skipping MHT webpage snapshot
+      .* DEBUG just logging some stuff from second_after_this_scenario_hook_2
+      .* DEBUG just logging some stuff from first_after_this_scenario_hook_1
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped

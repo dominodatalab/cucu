@@ -1,9 +1,10 @@
 import logging
 import re
+from importlib import metadata
 
 import jellyfish
-from pygls.capabilities import COMPLETION
-from pygls.lsp.types import (
+from lsprotocol.types import (
+    TEXT_DOCUMENT_COMPLETION,
     CompletionItem,
     CompletionList,
     CompletionOptions,
@@ -61,13 +62,16 @@ def find_completions(step_fragment, steps_cache=None):
 
 
 def start(port=None):
-    server = LanguageServer()
+    version = metadata.version(__package__.split(".")[0])
+    server = LanguageServer(name="cucu", version=version)
     steps_cache, _ = load_cucu_steps()
     logging.basicConfig(filename="pygls.log", filemode="w", level=logging.DEBUG)
 
-    @server.feature(COMPLETION, CompletionOptions(trigger_characters=[","]))
+    @server.feature(
+        TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[","])
+    )
     def completions(ls: LanguageServer, params: CompletionParams):
-        logging.warn(f"{COMPLETION}: {params}")
+        logging.warn(f"{TEXT_DOCUMENT_COMPLETION}: {params}")
 
         document_uri = params.text_document.uri
         document = document_lines = ls.workspace.get_document(document_uri)
