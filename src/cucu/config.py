@@ -90,7 +90,11 @@ class Config(dict):
 
         if config:
             for key in config.keys():
-                self[key] = config[key]
+                if key == "CUCU_SECRETS":  # security: only add restrictions instead of overriding
+                    vals = self.get(key, "").split(',') + config[key].split(',')
+                    self[key] = ','.join(set(vals) ^ {''})
+                else:
+                    self[key] = config[key]
 
     def load_cucurc_files(self, filepath):
         """
@@ -153,9 +157,9 @@ class Config(dict):
 
     def hide_secrets(self, line):
         secret_keys = [
-            x.strip()
+            x
             for x in self.get("CUCU_SECRETS", "").split(",")
-            if x.strip()
+            if x
         ]
         secret_values = [self.get(x) for x in secret_keys if self.get(x)]
 
