@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.144.0
+- Fix - preserve parent security CUCU_SECRETS setting
+- Change - ignore objects in hide_secrets
+- Change - skip secrets in config dump
+
+## 0.143.0
+- Fix - fuzzy find detect text with padding for radio buttons
+
+## 0.142.0
+- Change - hooks to LIFO order
+
 ## 0.141.0
 - Fix - runtime dependency
 

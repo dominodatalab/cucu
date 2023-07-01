@@ -90,7 +90,11 @@ class Config(dict):
 
         if config:
             for key in config.keys():
-                self[key] = config[key]
+                if key == "CUCU_SECRETS":  # security: only add restrictions
+                    vals = self.get(key, "").split(",") + config[key].split(",")
+                    self[key] = ",".join(set(vals) ^ {""})
+                else:
+                    self[key] = config[key]
 
     def load_cucurc_files(self, filepath):
         """
@@ -152,12 +156,9 @@ class Config(dict):
         return references
 
     def hide_secrets(self, line):
-        secret_keys = [
-            x.strip()
-            for x in self.get("CUCU_SECRETS", "").split(",")
-            if x.strip()
-        ]
+        secret_keys = [x for x in self.get("CUCU_SECRETS", "").split(",") if x]
         secret_values = [self.get(x) for x in secret_keys if self.get(x)]
+        secret_values = [x for x in secret_values if isinstance(x, str)]
 
         # here's where we can hide secrets
         for value in secret_values:
@@ -246,8 +247,11 @@ class Config(dict):
         self.variable_lookups[re.compile(regex)] = lookup
 
     def to_yaml_without_secrets(self):
-        keys = sorted([k for k in self.keys() if not k.startswith("__")])
-        config = {k: self[k] for k in keys}
+        secret_keys = [x for x in self.get("CUCU_SECRETS", "").split(",") if x]
+        keys = [k for k in self.keys() if not k.startswith("__")]
+        keys = [k for k in keys if k not in secret_keys]
+
+        config = {k: self[k] for k in sorted(keys)}
         return self.hide_secrets(yaml.dump(config))
 
 
