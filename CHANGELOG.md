@@ -7,6 +7,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 0.144.0
 - Fix - preserve parent security CUCU_SECRETS setting
+- Change - ignore objects in hide_secrets
+- Change - skip secrets in config dump
 
 ## 0.143.0
 - Fix - fuzzy find detect text with padding for radio buttons
