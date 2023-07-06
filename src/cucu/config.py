@@ -155,7 +155,7 @@ class Config(dict):
 
         return references
 
-    def hide_secrets(self, line):
+    def hide_secrets(self, text):
         secret_keys = [x for x in self.get("CUCU_SECRETS", "").split(",") if x]
         secret_values = [self.get(x) for x in secret_keys if self.get(x)]
         secret_values = [x for x in secret_values if isinstance(x, str)]
