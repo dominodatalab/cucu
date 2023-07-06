@@ -160,17 +160,26 @@ class Config(dict):
         secret_values = [self.get(x) for x in secret_keys if self.get(x)]
         secret_values = [x for x in secret_values if isinstance(x, str)]
 
-        # here's where we can hide secrets
-        for value in secret_values:
-            replacement = "*" * len(value)
+        is_bytes = isinstance(text, bytes)
+        if is_bytes:
+            text = text.decode()
 
-            if isinstance(line, bytes):
-                value = bytes(value, "utf8")
-                replacement = bytes(replacement, "utf8")
+        lines = text.split("\n")
+        for x, line in enumerate(lines):
+            if (
+                text.startswith("{") and '"name":' in line
+            ):  # skip what could be Feature or Scenario names in json
+                continue
 
-            line = line.replace(value, replacement)
+            # here's where we can hide secrets
+            for value in secret_values:
+                lines[x] = line.replace(value, "*" * len(value))
 
-        return line
+        result = "\n".join(lines)
+        if is_bytes:
+            result = result.encode()
+
+        return result
 
     def resolve(self, string):
         """
