@@ -22,7 +22,7 @@ TRANSLATION = {v: f'<span style="color: {k};">' for k, v in colors.items()} | {
 }
 RE_TO_HTML = re.compile("|".join(map(re.escape, TRANSLATION)))
 
-RE_TO_REMOVE = re.compile(r"\x1b\[0m|\x1b\[0;\d\dm")
+RE_TO_REMOVE = re.compile(r"\x1b\[(0;)?[0-9A-F]{1,2}m")
 
 
 def remove_ansi(input: str) -> str:
