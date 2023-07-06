@@ -3,8 +3,6 @@ import re
 
 from behave.formatter.ansi_escapes import colors, escapes
 
-from cucu import logger
-
 ESC_SEQ = r"\x1b["
 TRANSLATION = {v: f'<span style="color: {k};">' for k, v in colors.items()} | {
     escapes["reset"]: "</span>",
@@ -39,6 +37,6 @@ def parse_log_to_html(input: str) -> str:
     result = f"{body_start}<pre>\n{RE_TO_HTML.sub(lambda match: TRANSLATION[match.group(0)], html.escape(input, quote=False))}\n</pre>{body_end}"
     if ESC_SEQ in result:
         lines = "\n".join([x for x in result.split("\n") if ESC_SEQ in x])
-        logger.info(f"Detected unmapped ansi escape code!:\n{lines}")
+        print(f"Detected unmapped ansi escape code!:\n{lines}")
 
     return result
