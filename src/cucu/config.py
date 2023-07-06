@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import socket
@@ -164,22 +165,51 @@ class Config(dict):
         if is_bytes:
             text = text.decode()
 
-        lines = text.split("\n")
-        for x, line in enumerate(lines):
-            if (
-                text.startswith("{") and '"name":' in line
-            ):  # skip what could be Feature or Scenario names in json
-                continue
+        result = None
+        if text.startswith("{"):
+            try:
+                result = self._hide_secrets_json(secret_values, text)
+            except Exception as e:
+                print(
+                    f"Couldn't parse json, falling back to text processing: {e}"
+                )
 
-            # here's where we can hide secrets
-            for value in secret_values:
-                lines[x] = line.replace(value, "*" * len(value))
+        if result is None:
+            result = self._hide_secrets_text(secret_values, text)
 
-        result = "\n".join(lines)
         if is_bytes:
             result = result.encode()
 
         return result
+
+    def _hide_secrets_json(self, secret_values, text):
+        data = json.loads(text)
+
+        def hide_node(value, parent, key):
+            if not isinstance(value, str):
+                return value
+
+            if (
+                key == "name"
+                and isinstance(parent, dict)
+                and parent.get("keyword", "") in ["Feature", "Scenario"]
+            ):
+                return value
+
+            return self._hide_secrets_text(secret_values, value)
+
+        re_map(data, hide_node)
+        return json.dumps(data, indent=2, sort_keys=True)
+
+    def _hide_secrets_text(self, secret_values, text):
+        lines = text.split("\n")
+
+        for x in range(len(lines)):
+            # here's where we can hide secrets
+            for value in secret_values:
+                lines[x] = lines[x].replace(value, "*" * len(value))
+
+        return "\n".join(lines)
 
     def resolve(self, string):
         """
@@ -359,3 +389,24 @@ CONFIG.define(
     "when set to 'true' results in stacktraces showing in the JUnit XML failure output",
     default="false",
 )
+
+
+def re_map(data, value_func, parent=None, key=None):
+    """
+    Utility to apply a map function recursively to a dict or list.
+
+    Args:
+        data: The dict or list or value to use
+        value_func: Callable function that accepts data and parent
+        parent: The parent object (or None)
+    """
+    if isinstance(data, dict):
+        for key, value in data.items():
+            data[key] = re_map(value, value_func, data, key)
+        return data
+    elif isinstance(data, list):
+        for x, value in enumerate(data):
+            data[x] = re_map(value, value_func, data, key)
+        return data
+    else:
+        return value_func(data, parent, key)
