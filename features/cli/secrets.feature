@@ -86,6 +86,32 @@ Feature: Secrets
      When I run the command "cucu run {CUCU_RESULTS_DIR}/features_with_secrets --secrets MY_SECRET --results={CUCU_RESULTS_DIR}/features_with_secrets_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" does not contain "super secret"
 
+  Scenario: User can run a test that has the secret value in its scenario name
+    Given I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/cucurc.yml" with the following:
+      """
+      CUCU_SECRETS: MY_SECRET
+      MY_SECRET: 'secret-value'
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/features/feature_that_spills_the_beans.feature" with the following:
+      """
+      Feature: Feature that spills the beans
+
+        Scenario: This scenario has the secret-value in its name
+         Given I echo "the current user is \{USER\}"
+           And I echo "\{MY_SECRET\}"
+           And I echo "your home directory is at \{HOME\}"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/features_with_secrets --results={CUCU_RESULTS_DIR}/features_with_secrets_results -g" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see "{STDOUT}" does not contain "secret-value"
+
   Scenario: User gets expected behavior when not using variable passthru
     Given I create a file at "{CUCU_RESULTS_DIR}/substeps_without_variable_passthru/environment.py" with the following:
       """
