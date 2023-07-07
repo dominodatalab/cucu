@@ -39,6 +39,9 @@ def parse_log_to_html(input: str) -> str:
     result = f"{body_start}<pre>\n{RE_TO_HTML.sub(lambda match: TRANSLATION[match.group(0)], html.escape(input, quote=False))}\n</pre>{body_end}"
     if ESC_SEQ in result:
         lines = "\n".join([x for x in result.split("\n") if ESC_SEQ in x])
-        print(f"Detected unmapped ansi escape code!:\n{lines}")
+
+        print(
+            f"Detected unmapped ansi escape code!:\n{lines}"
+        )  # use print instead of logger to avoid circular depedencies
 
     return result
