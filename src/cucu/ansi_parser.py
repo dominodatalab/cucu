@@ -42,6 +42,6 @@ def parse_log_to_html(input: str) -> str:
 
         print(
             f"Detected unmapped ansi escape code!:\n{lines}"
-        )  # use print instead of logger to avoid circular depedencies
+        )  # use print instead of logger to avoid circular import
 
     return result

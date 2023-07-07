@@ -391,6 +391,7 @@ CONFIG.define(
 )
 
 
+# define re_map here instead of in utils.py to avoid circular import
 def re_map(data, value_func, parent=None, key=None):
     """
     Utility to apply a map function recursively to a dict or list.
