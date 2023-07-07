@@ -198,7 +198,7 @@ class Config(dict):
 
             return self._hide_secrets_text(secret_values, value)
 
-        re_map(data, hide_node)
+        leaf_map(data, hide_node)
         return json.dumps(data, indent=2, sort_keys=True)
 
     def _hide_secrets_text(self, secret_values, text):
@@ -392,7 +392,7 @@ CONFIG.define(
 
 
 # define re_map here instead of in utils.py to avoid circular import
-def re_map(data, value_func, parent=None, key=None):
+def leaf_map(data, value_func, parent=None, key=None):
     """
     Utility to apply a map function recursively to a dict or list.
 
@@ -403,11 +403,11 @@ def re_map(data, value_func, parent=None, key=None):
     """
     if isinstance(data, dict):
         for key, value in data.items():
-            data[key] = re_map(value, value_func, data, key)
+            data[key] = leaf_map(value, value_func, data, key)
         return data
     elif isinstance(data, list):
         for x, value in enumerate(data):
-            data[x] = re_map(value, value_func, data, key)
+            data[x] = leaf_map(value, value_func, data, key)
         return data
     else:
         return value_func(data, parent, key)

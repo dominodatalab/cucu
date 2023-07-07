@@ -2,7 +2,7 @@ import tempfile
 
 import cucu
 import pytest
-from cucu.config import CONFIG
+from cucu.config import CONFIG, leaf_map
 
 
 def test_config_lookup_for_inexistent_is_none():
@@ -110,3 +110,20 @@ def test_config_expand_with_custom_variable_handling():
     # if the custom resolution takes precedence then we'll never see the
     # "wassup" value
     assert CONFIG.resolve("{CUSTOM_BAR}") == "boom"
+
+
+def test_leaf_map():
+    data = {
+        "a": 1,
+        "b": ["x", "k", "c", "d", {"one": "bee", "two": "straws"}],
+    }
+
+    def something(value, parent, key):
+        if key in ["a", 3, "two"]:
+            return "z"
+
+        return value
+
+    expected = {"a": "z", "b": ["x", "k", "c", "d", {"one": "bee", "two": "z"}]}
+    actual = leaf_map(data, something)
+    assert actual == expected
