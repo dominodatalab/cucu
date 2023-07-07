@@ -55,7 +55,7 @@ By making a contribution to this project, I certify that:
 
 # Design
 `cucu` is a "batteries-included" approach to testing
-1. Automatically stand up or connect to a selenium container
+1. Connect to local browser or docker container
 2. Does fuzzy matching on DOM elements
 3. Implements a large set of standard steps
 4. Enables customization of steps & linter rules

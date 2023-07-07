@@ -164,7 +164,7 @@ Feature: Run outputs
       """
 
   Scenario: User gets exact expected output from various console outputs
-    Given I run the command "cucu run data/features/echo.feature --env SHELL=/foo/bar/zsh --env USER=that_guy --env PWD=/some/place/nice --results {CUCU_RESULTS_DIR}/validate_junit_xml_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+    Given I run the command "cucu run data/features/echo.feature --env SHELL=/foo/bar/zsh --env USER=that_guy --env PWD=/some/place/nice --results {CUCU_RESULTS_DIR}/validate_junit_xml_results  --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       # {SHELL} and {PWD} contain slashes which we don't have a good way of
       # escaping in the tests yet so we'll just .* to match them and for the
       # crazy looking 4 backslashes its because the original test has 2
@@ -189,11 +189,10 @@ Feature: Run outputs
       current working directory is '/some/place/nice'
 
             And I echo "current working directory is '\{PWD\}'" .*
-            # PWD="/some/place/nice*"
+            # PWD="/some/place/nice"
       \{
         "user": "that_guy"
       \}
-
             And I echo the following .*
               \"\"\"
               \\\\{
