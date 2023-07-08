@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 0.146.0
 - Add - reload saved scenario config in reporting
+- Change - report shows "flat.html" link in stdout
 
 ## 0.145.0
 - Fix - reporting when file names have secrets

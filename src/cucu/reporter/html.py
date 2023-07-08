@@ -387,4 +387,4 @@ def generate(results, basepath, only_failures=False):
             with open(scenario_output_filepath, "wb") as output:
                 output.write(rendered_scenario_html.encode("utf8"))
 
-    return os.path.join(basepath, "index.html")
+    return os.path.join(basepath, "flat.html")
