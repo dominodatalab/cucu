@@ -286,12 +286,45 @@ class Config(dict):
         self.variable_lookups[re.compile(regex)] = lookup
 
     def to_yaml_without_secrets(self):
+        omit_keys = [
+            "CWD",
+            "STDOUT",
+            "STDERR",
+            "SCENARIO_DOWNLOADS_DIR",
+            "SCENARIO_LOGS_DIR",
+            "SCENARIO_RESULTS_DIR",
+        ]
         secret_keys = [x for x in self.get("CUCU_SECRETS", "").split(",") if x]
-        keys = [k for k in self.keys() if not k.startswith("__")]
-        keys = [k for k in keys if k not in secret_keys]
+        keys = [
+            k
+            for k in self.keys()
+            if not k.startswith("__")
+            and k not in secret_keys
+            and k not in omit_keys
+        ]
 
         config = {k: self[k] for k in sorted(keys)}
-        return self.hide_secrets(yaml.dump(config))
+        results = self.hide_secrets(yaml.dump(config))
+        # fix leading '*' issue
+        is_bytes = isinstance(results, bytes)
+        if is_bytes:
+            results = results.decode()
+
+        lines = results.split("\n")
+        for x in range(len(lines)):
+            parts = lines[x].split(": ", 1)
+            if len(parts) != 2:
+                continue
+
+            key, value = parts[0], parts[1]
+            if value.startswith("*"):
+                lines[x] = f"{key}: '{value}'"
+        results = "\n".join(lines)
+
+        if is_bytes:
+            results = results.encode()
+
+        return results
 
 
 # global config object
