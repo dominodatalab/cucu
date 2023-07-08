@@ -148,13 +148,17 @@ def generate(results, basepath, only_failures=False):
             scenario_filepath = os.path.join(
                 basepath, feature["name"], scenario["name"]
             )
-            
-            scenario_configpath = os.path.join(scenario_filepath, "logs", "cucu.config.yaml.txt")
+
+            scenario_configpath = os.path.join(
+                scenario_filepath, "logs", "cucu.config.yaml.txt"
+            )
             if os.path.exists(scenario_configpath):
                 try:
                     CONFIG.load(scenario_configpath)
                 except Exception as e:
-                    logger.warn(f"Could not reload config: {scenario_configpath}: {e}")
+                    logger.warn(
+                        f"Could not reload config: {scenario_configpath}: {e}"
+                    )
             else:
                 logger.info(f"No config to reload: {scenario_configpath}")
 

@@ -286,9 +286,22 @@ class Config(dict):
         self.variable_lookups[re.compile(regex)] = lookup
 
     def to_yaml_without_secrets(self):
-        omit_keys = ["CWD", "STDOUT", "STDERR", "SCENARIO_DOWNLOADS_DIR", "SCENARIO_LOGS_DIR", "SCENARIO_RESULTS_DIR"]
+        omit_keys = [
+            "CWD",
+            "STDOUT",
+            "STDERR",
+            "SCENARIO_DOWNLOADS_DIR",
+            "SCENARIO_LOGS_DIR",
+            "SCENARIO_RESULTS_DIR",
+        ]
         secret_keys = [x for x in self.get("CUCU_SECRETS", "").split(",") if x]
-        keys = [k for k in self.keys() if not k.startswith("__") and k not in secret_keys and k not in omit_keys]
+        keys = [
+            k
+            for k in self.keys()
+            if not k.startswith("__")
+            and k not in secret_keys
+            and k not in omit_keys
+        ]
 
         config = {k: self[k] for k in sorted(keys)}
         results = self.hide_secrets(yaml.dump(config))
@@ -296,7 +309,7 @@ class Config(dict):
         is_bytes = isinstance(results, bytes)
         if is_bytes:
             results = results.decode()
-        
+
         lines = results.split("\n")
         for x in range(len(lines)):
             parts = lines[x].split(": ", 1)
