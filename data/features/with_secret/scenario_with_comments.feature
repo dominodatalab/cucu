@@ -5,7 +5,7 @@ Feature: Feature with comments
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
 
     * # First comment
-      And I set the variable "FOO" to "bar"
+     When I set the variable "FOO" to "bar"
       And I echo "{FOO}"
      Then I echo the following
           """
