@@ -2,7 +2,7 @@ Feature: Inputs
   As a developer I want to make sure the test writer can interact with different
   input elements
 
-  Background: HTML page with buttons
+  Background: HTML page with inputs
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
 
   @disabled @QE-7005
