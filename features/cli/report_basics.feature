@@ -36,7 +36,6 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
       And I wait to click the link "Scenario with comments"
-      And I wait to click the button "show images"
 
         * # Can see inline comments
      Then I wait to see the text "# First comment"
@@ -44,10 +43,14 @@ Feature: Report basics
       And I should see the text "# Comment about \{MY_SECRET\}"
 
         * # Can see variable interpolation
-     Then I wait to see the text "# FOO=\"bar\""
+      And I wait to see the text "# FOO=\"bar\""
 
         * # Cannot see secrets in variable interpolation
-     Then I wait to see the text "# MY_SECRET=\"****\""
+      And I wait to see the text "# MY_SECRET="****""
+
+        * # Can see image for step with secret in name
+     When I click the button "I should see the text "****""
+     Then I should see the image with the alt text "Then I should see the text "****""
 
   @QE-6852
   Scenario: User can run a multi scenario test with web steps and generate report with a shareable url
