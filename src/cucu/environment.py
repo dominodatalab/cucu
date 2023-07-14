@@ -223,7 +223,7 @@ def after_step(ctx, step):
     # and this step has no substeps as in the reporting the substeps that
     # may actually do something on the browser take their own screenshots
     if ctx.browser is not None and ctx.current_step.has_substeps is False:
-        step_name = escape_filename(step.name)
+        step_name = escape_filename(CONFIG.hide_secrets(step.name))
         filepath = os.path.join(
             ctx.scenario_dir, f"{ctx.step_index} - {step_name}.png"
         )
