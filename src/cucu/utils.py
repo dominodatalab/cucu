@@ -84,7 +84,10 @@ def run_steps(ctx, steps_text):
                 passed = step.run(ctx._runner, quiet=False, capture=False)
 
                 if not passed:
-                    raise RuntimeError(step.error_message)
+                    if "StopRetryException" in step.error_message:
+                        raise StopRetryException(step.error_message)
+                    else:
+                        raise RuntimeError(step.error_message)
 
             # -- FINALLY: Restore original ctx data for current step.
             ctx.table = original_table
