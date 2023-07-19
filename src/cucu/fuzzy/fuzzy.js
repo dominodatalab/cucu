@@ -17,7 +17,7 @@
         jqCucu.expr[ ":" ],
         {
             has_text: function(elem, index, match) {
-                return (elem.textContent || elem.innerText || jqCucu(elem).text() || '') === match[3].trim();
+                return (elem.textContent.trim() || elem.innerText.trim() || jqCucu(elem).text().trim() || '') === match[3].trim();
             },
             vis: function (elem) {
                 return !(jqCucu(elem).is(":hidden") || jqCucu(elem).parents(":hidden").length);
@@ -162,20 +162,6 @@
                 }
             }
 
-            /*
-             * element labeled by a text sibling
-             */
-            for(var tIndex = 0; tIndex < things.length; tIndex++) {
-                var thing = things[tIndex];
-
-                /*
-                 * <*><thing></thing>name</*>
-                 */
-                results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).children(thing + ':vis').toArray();
-                if (cucu.debug) { console.log('<*><thing></thing>name</*>', results); }
-                elements = elements.concat(results);
-            }
-
             // element labeled with direct previous sibling
             if (direction === LEFT_TO_RIGHT) {
                 for(var tIndex = 0; tIndex < things.length; tIndex++) {
@@ -199,10 +185,20 @@
                     elements = elements.concat(results);
                 }
             }
-        }
 
-        for(var mIndex=0; mIndex < matchers.length; mIndex++) {
-            var matcher = matchers[mIndex];
+            /*
+             * element labeled by a text sibling
+             */
+            for(var tIndex = 0; tIndex < things.length; tIndex++) {
+                var thing = things[tIndex];
+
+                /*
+                 * <*><thing></thing>name</*>
+                 */
+                results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).children(thing + ':vis').toArray();
+                if (cucu.debug) { console.log('<*><thing></thing>name</*>', results); }
+                elements = elements.concat(results);
+            }
 
             // element labeled with any previous sibling
             if (direction === LEFT_TO_RIGHT) {
