@@ -15,6 +15,16 @@ from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
 
 
+def get_feature_name(file_path):
+    with open(file_path, "r") as file:
+        text = file.read()
+        lines = text.split("\n")
+        for line in lines:
+            if "Feature:" in line:
+                feature_name = line.replace("Feature:", "").strip()
+                return feature_name
+
+
 def behave_init(filepath="features"):
     """
     behave internal init method used to load the various parts of set of
@@ -94,10 +104,8 @@ def behave(
 
     run_json_filename = "run.json"
     if redirect_output:
-        feature_filename = os.path.basename(filepath).replace(
-            ".feature", "-run"
-        )
-        run_json_filename = f"{feature_filename}.json"
+        feature_name = get_feature_name(filepath)
+        run_json_filename = f"{feature_name + '-run.json'}"
 
     if dry_run:
         args += [
@@ -140,8 +148,8 @@ def behave(
     result = 0
     try:
         if redirect_output:
-            log_filename = os.path.basename(filepath)
-            log_filename = log_filename.replace(".feature", ".log")
+            feature_name = get_feature_name(filepath)
+            log_filename = f"{feature_name + '.log'}"
             log_filepath = os.path.join(results, log_filename)
 
             CONFIG["__CUCU_PARENT_STDOUT"] = sys.stdout
