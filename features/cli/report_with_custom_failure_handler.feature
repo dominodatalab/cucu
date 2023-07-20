@@ -26,7 +26,7 @@ Feature: Report with custom JUnit failure handler
           Given I click the button "not there"
       """
      Then I run the command "cucu run {CUCU_RESULTS_DIR}/report_with_custom_failure_handling --results {CUCU_RESULTS_DIR}/custom_failure_handler_results --generate-report --report {CUCU_RESULTS_DIR}/custom_failure_handler_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
-      And I should see the file at "{CUCU_RESULTS_DIR}/custom_failure_handler_results/TESTS-Feature_with_a_failure.xml" matches the following:
+      And I should see the file at "{CUCU_RESULTS_DIR}/custom_failure_handler_results/Feature with a failure.xml" matches the following:
       """
       [\s\S]*
       look ma: Feature with a failure
@@ -72,7 +72,7 @@ Feature: Report with custom JUnit failure handler
       """
 
      Then I run the command "cucu run {CUCU_RESULTS_DIR}/custom_failure_handling_and_workers --workers 2 --results {CUCU_RESULTS_DIR}/custom_failure_handler_results --generate-report --report {CUCU_RESULTS_DIR}/custom_failure_handler_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
-      And I should see the file at "{CUCU_RESULTS_DIR}/custom_failure_handler_results/TESTS-Feature_01_with_a_failure.xml" does not match the following:
+      And I should see the file at "{CUCU_RESULTS_DIR}/custom_failure_handler_results/Feature 01 with a failure.xml" does not match the following:
       """
       [\s\S]*
       look ma: Feature 01 with a failure
@@ -80,7 +80,7 @@ Feature: Report with custom JUnit failure handler
       look ma: Feature 01 with a failure
       [\s\S]*
       """
-      And I should see the file at "{CUCU_RESULTS_DIR}/custom_failure_handler_results/TESTS-Feature_02_with_a_failure.xml" does not match the following:
+      And I should see the file at "{CUCU_RESULTS_DIR}/custom_failure_handler_results/Feature 02 with a failure.xml" does not match the following:
       """
       [\s\S]*
       look ma: Feature 02 with a failure
@@ -88,7 +88,7 @@ Feature: Report with custom JUnit failure handler
       look ma: Feature 02 with a failure
       [\s\S]*
       """
-      And I should see the file at "{CUCU_RESULTS_DIR}/custom_failure_handler_results/TESTS-Feature_03_with_a_failure.xml" does not match the following:
+      And I should see the file at "{CUCU_RESULTS_DIR}/custom_failure_handler_results/Feature 03 with a failure.xml" does not match the following:
       """
       [\s\S]*
       look ma: Feature 03 with a failure
