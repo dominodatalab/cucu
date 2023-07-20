@@ -244,13 +244,13 @@ Feature: Report basics
 
   Scenario: User can run results without skips in the JUnit results
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/junit_without_skips" and expect exit code "1"
-      And I read the contents of the file at "{CUCU_RESULTS_DIR}/junit_without_skips/TESTS-Feature_with_mixed_results.xml" and save to the variable "JUNIT"
+      And I read the contents of the file at "{CUCU_RESULTS_DIR}/junit_without_skips/Feature with mixed results.xml" and save to the variable "JUNIT"
      Then I should see "{JUNIT}" contains "skipped=\"0\""
       And I should see "{JUNIT}" does not contain "<skipped>"
 
   Scenario: User can run results without skips in the JUnit results when feature has background
     Given I run the command "cucu run data/features/feature_with_background.feature --results {CUCU_RESULTS_DIR}/junit_without_skips_background" and expect exit code "0"
-      And I read the contents of the file at "{CUCU_RESULTS_DIR}/junit_without_skips_background/TESTS-Feature_with_background.xml" and save to the variable "JUNIT"
+      And I read the contents of the file at "{CUCU_RESULTS_DIR}/junit_without_skips_background/Feature with background.xml" and save to the variable "JUNIT"
      Then I should see "{JUNIT}" contains "skipped=\"0\""
       And I should see "{JUNIT}" does not contain "<skipped>"
 

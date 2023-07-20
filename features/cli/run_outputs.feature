@@ -141,8 +141,8 @@ Feature: Run outputs
 
   Scenario: User gets JUnit XML results file as expected
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --show-skips --results {CUCU_RESULTS_DIR}/validate_junit_xml_results" and save stdout to "STDOUT" and expect exit code "1"
-     Then I should see a file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Feature_with_mixed_results.xml"
-      And I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/TESTS-Feature_with_mixed_results.xml" matches the following:
+     Then I should see a file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/Feature with mixed results.xml"
+      And I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/Feature with mixed results.xml" matches the following:
       """
       <testsuite name="Feature with mixed results" tests="5" errors="0" failures="2" skipped="1" timestamp=".*">
        <testcase classname="Feature with mixed results" name="Scenario that passes" status="passed" time=".*">

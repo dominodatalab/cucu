@@ -195,8 +195,8 @@ class CucuJUnitFormatter(Formatter):
         junit_dir = CONFIG["CUCU_JUNIT_DIR"]
         os.makedirs(junit_dir, exist_ok=True)
 
-        feature_name = results["name"].replace(" ", "_")
-        output_filepath = os.path.join(junit_dir, f"TESTS-{feature_name}.xml")
+        feature_name = results["name"]
+        output_filepath = os.path.join(junit_dir, f"{feature_name}.xml")
 
         scenarios = results["scenarios"]
 
@@ -255,7 +255,7 @@ class CucuJUnitFormatter(Formatter):
 
             testsuite.append(testcase)
 
-        feature_name = results["name"].replace(" ", "_")
-        output_filepath = os.path.join(junit_dir, f"TESTS-{feature_name}.xml")
+        feature_name = results["name"]
+        output_filepath = os.path.join(junit_dir, f"{feature_name}.xml")
         with open(output_filepath, "w", encoding="utf-8") as output:
             output.write(soup.prettify(formatter=SortAttributes()))
