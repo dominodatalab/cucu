@@ -114,7 +114,7 @@ Feature: Config
            And I echo "\{BUZZ\}"
       """
      When I run the command "cucu run {CUCU_RESULTS_DIR}/load_nested_cucurc_with_workers --results={CUCU_RESULTS_DIR}/nested_cucurc_with_workers_results --env BUZZ=buzz --workers 2" and expect exit code "0"
-     Then I should see the file at "{CUCU_RESULTS_DIR}/nested_cucurc_with_workers_results/Feature_file_that_prints_some_variables.log" matches the following:
+     Then I should see the file at "{CUCU_RESULTS_DIR}/nested_cucurc_with_workers_results/Feature file that prints some variables.log" matches the following:
        """
        Feature: Feature file that prints some variables
 
