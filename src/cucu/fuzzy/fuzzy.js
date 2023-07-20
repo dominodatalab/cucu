@@ -17,7 +17,7 @@
         jqCucu.expr[ ":" ],
         {
             has_text: function(elem, index, match) {
-                return (elem.textContent.trim() || elem.innerText.trim() || jqCucu(elem).text().trim() || '') === match[3].trim();
+                return (elem.textContent || elem.innerText || jqCucu(elem).text() || '').trim() === match[3].trim();
             },
             vis: function (elem) {
                 return !(jqCucu(elem).is(":hidden") || jqCucu(elem).parents(":hidden").length);
