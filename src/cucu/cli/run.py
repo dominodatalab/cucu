@@ -105,7 +105,7 @@ def behave(
     run_json_filename = "run.json"
     if redirect_output:
         feature_name = get_feature_name(filepath)
-        run_json_filename = f"{feature_name.replace(' ', '_') + '-run.json'}"
+        run_json_filename = f"{feature_name + '-run.json'}"
 
     if dry_run:
         args += [
@@ -149,7 +149,7 @@ def behave(
     try:
         if redirect_output:
             feature_name = get_feature_name(filepath)
-            log_filename = f"{feature_name.replace(' ', '_') +'.log'}"
+            log_filename = f"{feature_name + '.log'}"
             log_filepath = os.path.join(results, log_filename)
 
             CONFIG["__CUCU_PARENT_STDOUT"] = sys.stdout
