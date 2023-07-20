@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## 0.150.0
+- Fix - standardize json and log file names to match with feature names
 
 ## 0.149.0
 - Fix - run_steps re-raise StopRetryException
