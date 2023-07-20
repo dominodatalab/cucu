@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## 0.151.0
+- Change - exact text match has higher priority in fuzzy find
+- Change - immediate sibling has higher priority in fuzzy find
+
+## 0.151.0
 - Fix - standardize junit.xml names to match with feature names
 
 ## 0.150.0
