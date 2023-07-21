@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## 0.154.0
+- Add - steps to check if the nth button is disabled
+
 ## 0.153.0
 - Fix - js function fails because element text is undefined
 
