@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-## 0.151.0
+## 0.153.0
+- Fix - js function fails because element text is undefined
+
+## 0.152.0
 - Change - exact text match has higher priority in fuzzy find
 - Change - immediate sibling has higher priority in fuzzy find
 
