@@ -74,10 +74,14 @@ helpers.define_action_on_thing_with_name_steps(
     "button", "click", find_button, click_button, with_nth=True
 )
 helpers.define_thing_with_name_in_state_steps(
-    "button", "disabled", find_button, base_steps.is_disabled
+    "button", "disabled", find_button, base_steps.is_disabled, with_nth=True
 )
 helpers.define_thing_with_name_in_state_steps(
-    "button", "not disabled", find_button, base_steps.is_not_disabled
+    "button",
+    "not disabled",
+    find_button,
+    base_steps.is_not_disabled,
+    with_nth=True,
 )
 helpers.define_run_steps_if_I_can_see_element_with_name_steps(
     "button", find_button
