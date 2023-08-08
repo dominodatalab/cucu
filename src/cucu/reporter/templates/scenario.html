@@ -89,10 +89,12 @@
                 {% set step_status = step['result']['status'] %}
                 {% if step['result']['status'] == 'failed' or step['result']['status'] == 'passed' %}
                     {% set step_timing = "{} for {:.3f}s".format(step["result"]["time_offset"].strftime("%H:%M:%S"), step["result"]["duration"]) %}
+                    {% set step_start = step["result"]["timestamp"] %}
                 {% endif %}
             {% else %}
                 {% set step_status = 'untested' %}
                 {% set step_timing = "" %}
+                {% set step_start = "" %}
             {% endif %}
             {% set step_keyword = step_prefix + step['keyword'].rjust(6, ' ') %}
 
@@ -110,7 +112,7 @@
                     <a class="anchor" id="step_{{ loop.index}}" href="#step_{{ loop.index }}">🔗</a>
                     <pre class="status-{{ step_status }}">{{ step_keyword }}</pre><span style="display: contents;" title="{{ escape(step['name']) }}"> {{ escape(step['name']) }}</span>
                 </td>
-                <td style="min-width: 0; text-align: right;" class="col-2"><pre style="display: inline; color: gray;">{{ step_timing }}</pre></td>
+                <td style="min-width: 0; text-align: right;" class="col-2"><pre style="display: inline; color: gray;" title="{{ step_start }}">{{ step_timing }}</pre></td>
             </tr>
             {% endif %}
 
