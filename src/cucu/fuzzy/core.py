@@ -49,7 +49,14 @@ class Direction(Enum):
     RIGHT_TO_LEFT = 2
 
 
-def find(browser, name, things, index=0, direction=Direction.LEFT_TO_RIGHT):
+def find(
+    browser,
+    name,
+    things,
+    index=0,
+    direction=Direction.LEFT_TO_RIGHT,
+    name_within_thing=False,
+):
     """
     find an element by applying the fuzzy finding rules when given the name
     that identifies the element on screen and a list of possible `things` that
@@ -61,15 +68,16 @@ def find(browser, name, things, index=0, direction=Direction.LEFT_TO_RIGHT):
     input[type='button'], etc.
 
     parameters:
-      browser   - the cucu.browser.Browser object
-      name      - name that identifies the element you are trying to find
-      things    - array of CSS fragments that specify the kind of elements you
-                  want to match on
-      index     - which of the many matches to return
-      direction - the text to element direction to apply fuzzy in. Default we
-                  apply right to left but for checkboxes or certain languages
-                  this direction can be used to find things by prioritizing
-                  matching from "left to right"
+      browser           - the cucu.browser.Browser object
+      name              - name that identifies the element you are trying to find
+      things            - array of CSS fragments that specify the kind of elements you
+                          want to match on
+      index             - which of the many matches to return
+      direction         - the text to element direction to apply fuzzy in. Default we
+                          apply right to left but for checkboxes or certain languages
+                          this direction can be used to find things by prioritizing
+                          matching from "left to right"
+      name_within_thing - to determine if the name has to be within the web element
 
     returns:
         the WebElement that matches the provided arguments.
@@ -80,12 +88,14 @@ def find(browser, name, things, index=0, direction=Direction.LEFT_TO_RIGHT):
     # we pass arguments to the fuzzy_find javascript function wrapped in double
     # quotes
     name = name.replace('"', '\\"')
+    name_within_thing = "true" if name_within_thing else "false"
 
     args = [
         f'"{name}"',
         str(things),
         str(index),
         str(direction.value),
+        name_within_thing,
     ]
 
     def execute_fuzzy_find():

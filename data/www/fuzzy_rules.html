@@ -42,5 +42,22 @@
             </div>
         </div>
     </div>
+    <div>
+      <ul>
+        <li>Grape</li>
+        <li>Apple</li>
+      </ul>
+    </div>
+    <label for="colors">Pick a color</label>
+    <div class="combo-wrap">
+      <input type="text" id="colors" role="combobox" aria-controls="color-names" aria-autocomplete="list" aria-expanded="false"
+        data-active-option="item1" aria-activedescendant="" />
+      <span aria-hidden="true" data-trigger="multiselect"></span>
+      <ul id="color-names" role="listbox" aria-label="colors">
+        <li class="active" role="option" id="item1">Red</li>
+        <li class="option" role="option" id="item2">Blue</li>
+        <li class="option" role="option" id="item3">Orange</li>
+      </ul>
+    </div>
   </body>
 </html>

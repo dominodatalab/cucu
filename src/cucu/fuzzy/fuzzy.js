@@ -40,19 +40,21 @@
      * input[type='button'], etc.
      *
      * parameters:
-     *   name           - name that identifies the element you are trying to find
-     *   things         - array of CSS fragments that specify the kind of elements
-     *                    you want to match on
-     *   index          - which of the many matches to return
-     *   direction      - the text to element direction to apply fuzzy in. Default
-     *                    we apply right to left but for checkboxes or certain
-     *                    languages this direction can be used to find things by
-     *                    prioritizing matching from "left to right"
+     *   name              - name that identifies the element you are trying to find
+     *   things            - array of CSS fragments that specify the kind of elements
+     *                       you want to match on
+     *   index             - which of the many matches to return
+     *   direction         - the text to element direction to apply fuzzy in. Default
+     *                       we apply right to left but for checkboxes or certain
+     *                       languages this direction can be used to find things by
+     *                       prioritizing matching from "left to right"
+     *   name_within_thing - to determine if the name has to be within the web element
      */
     cucu.fuzzy_find = function(name,
                                things,
                                index=0,
-                               direction=LEFT_TO_RIGHT) {
+                               direction=LEFT_TO_RIGHT,
+                               name_within_thing=false) {
         var elements = [];
         var results = null;
         var attributes = ['aria-label', 'title', 'placeholder', 'value'];
@@ -160,6 +162,11 @@
                     if (cucu.debug) { console.log('<thing><* attibute="name"></*></thing>', results); }
                     elements = elements.concat(results);
                 }
+            }
+
+            // if the name has to be within the element, the following rules are not considered
+            if (name_within_thing) {
+                continue;
             }
 
             // element labeled with direct previous sibling
