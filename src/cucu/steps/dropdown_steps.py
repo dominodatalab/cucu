@@ -42,7 +42,8 @@ def find_dropdown(ctx, name, index=0):
 
 def find_dropdown_option(ctx, name, index=0):
     """
-    find a dropdown option with the provided name
+    find a dropdown option with the provided name. It only considers
+    the web element with the name inside the element.
 
         * <option>
         * <* role="option">
