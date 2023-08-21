@@ -37,17 +37,13 @@ def find_dropdown(ctx, name, index=0):
         direction=fuzzy.Direction.LEFT_TO_RIGHT,
     )
 
-    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
-
-    if dropdown is None:
-        raise RuntimeError(f"unable to find the {prefix}dropdown {name}")
-
     return dropdown
 
 
 def find_dropdown_option(ctx, name, index=0):
     """
-    find a dropdown option with the provided name
+    find a dropdown option with the provided name. It only considers
+    the web element with the name inside the element.
 
         * <option>
         * <* role="option">
@@ -71,6 +67,7 @@ def find_dropdown_option(ctx, name, index=0):
         ],
         index=index,
         direction=fuzzy.Direction.LEFT_TO_RIGHT,
+        name_within_thing=True,
     )
 
     prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
@@ -94,6 +91,10 @@ def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
     ctx.check_browser_initialized()
 
     dropdown_element = find_dropdown(ctx, dropdown, index)
+
+    if dropdown_element is None:
+        prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+        raise RuntimeError(f"unable to find the {prefix}dropdown {dropdown}")
 
     if base_steps.is_disabled(dropdown_element):
         raise RuntimeError(

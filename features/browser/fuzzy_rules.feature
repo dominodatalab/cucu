@@ -18,3 +18,8 @@ Feature: Fuzzy rules
      Then I should see "button with placeholder" in the input "value:"
      When I click the button "button with previous nested sibling label"
      Then I should see "button with previous nested sibling label" in the input "value:"
+     When I should see the dropdown "Pick a color"
+     Then I wait up to "1" seconds to see the following steps fail
+       """
+       When I select the option "Apple" from the dropdown "Pick a color"
+       """
