@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.157.0
+- Add - differentiate between cucu builtin and custom steps
 ## 0.156.0
 - Add - option to only find web elements with the name inside in fuzzy find
 - Change - when finding dropdown options when the dropdown is not a select element, only considers name inside option
