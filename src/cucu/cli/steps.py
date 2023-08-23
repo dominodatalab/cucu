@@ -127,7 +127,10 @@ def print_human_readable_steps(filepath=None):
 
     for step_name in steps:
         if steps[step_name] is not None:
-            print(f"{step_name}")
+            if filepath in steps[step_name]["location"]["filepath"]:
+                print(f"custom: {step_name}")
+            else:
+                print(f"cucu:   {step_name}")
 
     if steps_error is not None:
         print(steps_error)

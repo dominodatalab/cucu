@@ -45,3 +45,15 @@ Feature: Steps
       """
       Failure loading some steps, see above for details
       """
+
+  Scenario: User can use `cucu steps` to differentiate between cucu built-in and custom steps
+    Given I run the command "cucu steps data/features/custom_step_test" and save stdout to "STDOUT" and expect exit code "0"
+      # just validate some built-in steps show up
+     Then I should see "{STDOUT}" contains the following:
+      """
+      cucu:   I open a browser at the url "\{url\}"
+      """
+      And I should see "{STDOUT}" contains the following:
+      """
+      custom: This is a custom step
+      """
