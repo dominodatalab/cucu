@@ -51,9 +51,9 @@ Feature: Steps
       # just validate some built-in steps show up
      Then I should see "{STDOUT}" contains the following:
       """
-      cucu:I open a browser at the url "\{url\}"
+      cucu:   I open a browser at the url "\{url\}"
       """
       And I should see "{STDOUT}" contains the following:
       """
-      custom:This is a custom step
+      custom: This is a custom step
       """
