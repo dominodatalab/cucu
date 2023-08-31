@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.158.0
+- Add - steps to handle dynamic dropdown
+- Change - improve the robustness of selecting options in a dropdown
+- Change - fuzzy find won't consider elements with either 0 width or 0 height
+
 ## 0.157.0
 - Add - differentiate between cucu built-in and custom steps
 ## 0.156.0

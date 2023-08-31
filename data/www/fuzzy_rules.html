@@ -11,24 +11,24 @@
     <label>value:</label><input id="input" type="text"></input>
     <br/>
     <button onclick="update('button with inner text');">button with inner text</button>
-    <button onclick="update('button with aria-label');" aria-label="button with aria-label"></button>
+    <button onclick="update('button with aria-label');" aria-label="button with aria-label">a button</button>
     <button onclick="update('button with child that has aria-label');"><b aria-label="button with child that has aria-label">child with aria-label</b></button>
-    <button onclick="update('button with title');" title="button with title"></button>
-    <button onclick="update('button with placeholder');" placeholder="button with placeholder"></button>
-    <button onclick="update('button with value');" value="button with value"></button>
+    <button onclick="update('button with title');" title="button with title">a button</button>
+    <button onclick="update('button with placeholder');" placeholder="button with placeholder">a button</button>
+    <button onclick="update('button with value');" value="button with value">a button</button>
     <div>
         <label for="button-with-label">button with for/id label</label>
-        <div><button onclick="update('button with for/id label');" id="button-with-label"></button></div>
+        <div><button onclick="update('button with for/id label');" id="button-with-label">a button</button></div>
     </div>
     <br/>
     <button onclick="update('button with nested label');"><label>button with nested label</label></button>
     <br/>
-    <label>button with immediate previous sibling label</label><button onclick="update('button with immediate previous sibling label');"></button>
+    <label>button with immediate previous sibling label</label><button onclick="update('button with immediate previous sibling label');">a button</button>
     <br/>
-    <label>button with any previous sibling label</label><div></div><div></div><button onclick="update('button with any previous sibling label');"></button>
+    <label>button with any previous sibling label</label><div></div><div></div><button onclick="update('button with any previous sibling label');">a button</button>
     <br/>
     <div>
-      <label>button with previous nested sibling label fake</label><button onclick="update('button with previous nested sibling label fake');"></button>
+      <label>button with previous nested sibling label fake</label><button onclick="update('button with previous nested sibling label fake');">a button</button>
     </div>
     <div>
         <div>
@@ -38,7 +38,7 @@
         </div>
         <div>
             <div>
-                <button onclick="update('button with previous nested sibling label');"></button>
+                <button onclick="update('button with previous nested sibling label');">a button</button>
             </div>
         </div>
     </div>

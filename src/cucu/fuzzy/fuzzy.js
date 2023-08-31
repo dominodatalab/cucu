@@ -20,7 +20,7 @@
                 return (elem.textContent || elem.innerText || jqCucu(elem).text() || '').trim() === match[3].trim();
             },
             vis: function (elem) {
-                return !(jqCucu(elem).is(":hidden") || jqCucu(elem).parents(":hidden").length);
+                return !(jqCucu(elem).is(":hidden") || jqCucu(elem).width() == 0 || jqCucu(elem).height == 0 || jqCucu(elem).parents(":hidden").length);
             }
         }
     );
@@ -87,10 +87,10 @@
                     var attribute_name = attributes[aIndex];
                     if (matcher == 'has_text') {
                         results = jqCucu(thing + '[' + attribute_name + '="' + name + '"]:vis', document.body).toArray();
-                        if (cucu.debug) { console.log('<thing attibute="name"></thing>', results); }
+                        if (cucu.debug) { console.log('<thing attribute="name"></thing>', results); }
                     } else if (matcher == 'contains') {
                         results = jqCucu(thing + '[' + attribute_name + '*="' + name + '"]:vis', document.body).toArray();
-                        if (cucu.debug) { console.log('<thing attibute*="name"></thing>', results); }
+                        if (cucu.debug) { console.log('<thing attribute*="name"></thing>', results); }
                     }
                     elements = elements.concat(results);
                 }
