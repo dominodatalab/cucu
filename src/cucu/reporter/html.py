@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 import sys
+import traceback
 import urllib
 from datetime import datetime
 from pathlib import Path
@@ -149,9 +150,9 @@ def generate(results, basepath, only_failures=False):
             ]:
                 try:
                     sub_headers.append(handler(scenario))
-                except Exception as e:
+                except Exception:
                     logger.warn(
-                        f"Exception while trying to run sub_headers hook for {scenario['name']}: {e}"
+                        f"Exception while trying to run sub_headers hook for scenario: \"{scenario['name']}\"\n{traceback.format_exc()}"
                     )
             scenario["sub_headers"] = "<br/>".join(sub_headers)
 
