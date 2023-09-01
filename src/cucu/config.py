@@ -39,7 +39,7 @@ class Config(dict):
         utility method used to escape strings that would be otherwise problematic
         if the values were passed around as is in cucu steps.
         """
-        if type(string) == str:
+        if isinstance(string, str):
             string = string.replace("{", "\\{")
             string = string.replace("}", "\\}")
 

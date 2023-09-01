@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.159.0
+- Change - ignore exceptions from sub_headers hook
+- Security - update Certifi to remove e-Tugra root certificate
+- Change - use isinstance instead of direct type compare
+
 ## 0.158.0
 - Add - steps to handle dynamic dropdown
 - Change - improve the robustness of selecting options in a dropdown

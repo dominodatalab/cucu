@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 import sys
+import traceback
 import urllib
 from datetime import datetime
 from pathlib import Path
@@ -147,7 +148,12 @@ def generate(results, basepath, only_failures=False):
             for handler in CONFIG[
                 "__CUCU_HTML_REPORT_SCENARIO_SUBHEADER_HANDLER"
             ]:
-                sub_headers.append(handler(scenario))
+                try:
+                    sub_headers.append(handler(scenario))
+                except Exception:
+                    logger.warn(
+                        f"Exception while trying to run sub_headers hook for scenario: \"{scenario['name']}\"\n{traceback.format_exc()}"
+                    )
             scenario["sub_headers"] = "<br/>".join(sub_headers)
 
             scenario_duration = 0
