@@ -147,7 +147,12 @@ def generate(results, basepath, only_failures=False):
             for handler in CONFIG[
                 "__CUCU_HTML_REPORT_SCENARIO_SUBHEADER_HANDLER"
             ]:
-                sub_headers.append(handler(scenario))
+                try:
+                    sub_headers.append(handler(scenario))
+                except Exception as e:
+                    logger.warn(
+                        f"Exception while trying to run sub_headers hook for {scenario['name']}: {e}"
+                    )
             scenario["sub_headers"] = "<br/>".join(sub_headers)
 
             scenario_duration = 0
