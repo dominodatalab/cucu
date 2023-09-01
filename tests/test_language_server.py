@@ -26,7 +26,7 @@ def test_load_cucu_steps_returns_valid_list_of_existing_steps():
     for step_name in steps.keys():
         step_details = steps[step_name]
 
-        assert type(step_name) == str
+        assert isinstance(step_name, str)
         assert "location" in step_details
         assert "filepath" in step_details["location"]
         assert "line" in step_details["location"]

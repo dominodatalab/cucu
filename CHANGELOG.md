@@ -7,6 +7,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 0.159.0
 - Change - ignore exceptions from sub_headers hook
+- Security - update Certifi to remove e-Tugra root certificate
+- Change - use isinstance instead of direct type compare
 
 ## 0.158.0
 - Add - steps to handle dynamic dropdown

@@ -165,7 +165,7 @@ class CucuOutputStream:
 
         self.captured_data.append(byte)
 
-        if type(byte) == bytes:
+        if isinstance(byte, bytes):
             self.stream.write(byte.decode("utf8"))
 
             if self.other_stream:
