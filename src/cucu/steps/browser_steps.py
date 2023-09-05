@@ -1,7 +1,6 @@
 import base64
 import os
 
-import humanize
 from selenium.webdriver.common.keys import Keys
 
 from cucu import config, fuzzy, logger, retry, run_steps, step
@@ -220,30 +219,6 @@ def wait_to_switch_to_previous_browser_tab(ctx):
     retry(switch_to_previous_tab)(ctx)
 
 
-def find_file_input(ctx, name, index=0):
-    """
-
-        * <input type="file">
-
-    parameters:
-      ctx(object): behave context object used to share data between steps
-      name(str):   name that identifies the desired button on screen
-      index(str):  the index of the button if there are duplicates
-
-    returns:
-        the WebElement that matches the provided arguments.
-    """
-    ctx.check_browser_initialized()
-    _input = fuzzy.find(ctx.browser, name, ['input[type="file"]'], index=index)
-
-    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
-
-    if _input is None:
-        raise RuntimeError(f'unable to find the {prefix}file input "{name}"')
-
-    return _input
-
-
 def save_downloaded_file(ctx, filename):
     ctx.check_browser_initialized()
 
@@ -312,12 +287,6 @@ def wait_to_see_downloaded_file(ctx, filename):
 def wait_up_to_seconds_to_see_downloaded_file(ctx, seconds, filename):
     seconds = float(seconds)
     retry(save_downloaded_file, wait_up_to_s=seconds)(ctx, filename)
-
-
-@step('I upload the file "{filepath}" to the file input "{name}"')
-def upload_file_to_input(ctx, filepath, name):
-    _input = find_file_input(ctx, name)
-    _input.send_keys(os.path.abspath(filepath))
 
 
 @step('I download an mht archive of the current page to "{file_path}"')
