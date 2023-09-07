@@ -171,7 +171,7 @@ def after_scenario(ctx, scenario):
         for browser in ctx.browsers:
             # save the browser logs to the current scenarios results directory
             browser_log_filepath = os.path.join(
-                ctx.scenario_logs_dir, "browser_console.log"
+                ctx.scenario_logs_dir, "browser_console.log.txt"
             )
 
             os.makedirs(os.path.dirname(browser_log_filepath), exist_ok=True)
