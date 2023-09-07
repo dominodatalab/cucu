@@ -35,7 +35,7 @@ class CucuFormatter(Formatter):
         self._multiline_indentation = None
 
         color_output = CONFIG["CUCU_COLOR_OUTPUT"]
-        self.monochrome = not self.stream.isatty() or color_output != "true"
+        self.monochrome = color_output != "true"
 
     @property
     def multiline_indentation(self):

@@ -6,7 +6,7 @@ Feature: Run scenarios conditionally
       And I delete the file at "./skip_second_scenario.txt" if it exists
 
   Scenario: User can run scenarios conditionally based on presence of a file
-    Given I run the command "cucu run data/features/feature_skipping_scenarios_by_file_presence.feature --results {CUCU_RESULTS_DIR}/skip_scenarios_conditionally_results" and save stdout to "STDOUT" and expect exit code "0"
+    Given I run the command "cucu run data/features/feature_skipping_scenarios_by_file_presence.feature --results {CUCU_RESULTS_DIR}/skip_scenarios_conditionally_results --no-color-output" and save stdout to "STDOUT" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       Feature: Feature with skipping scenarios by file presence
@@ -33,7 +33,7 @@ Feature: Run scenarios conditionally
       """
       bananas
       """
-      And I run the command "cucu run data/features/feature_skipping_scenarios_by_file_presence.feature --results {CUCU_RESULTS_DIR}/skip_first_scenario_results" and save stdout to "STDOUT" and expect exit code "0"
+      And I run the command "cucu run data/features/feature_skipping_scenarios_by_file_presence.feature --results {CUCU_RESULTS_DIR}/skip_first_scenario_results --no-color-output" and save stdout to "STDOUT" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       Feature: Feature with skipping scenarios by file presence
