@@ -72,8 +72,7 @@ def behave(
 
     init_page_checks()
 
-    if color_output:
-        os.environ["CUCU_COLOR_OUTPUT"] = str(color_output).lower()
+    os.environ["CUCU_COLOR_OUTPUT"] = str(color_output).lower()
 
     if headless:
         os.environ["CUCU_BROWSER_HEADLESS"] = "True"

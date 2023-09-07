@@ -3,7 +3,7 @@ Feature: Run outputs
   when running with certain flags/feature files.
 
   Scenario: User can --dry-run a passing scenario
-    Given I run the command "cucu run data/features/feature_with_passing_scenario.feature --dry-run --results {CUCU_RESULTS_DIR}/passing_feature_dry_run_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+    Given I run the command "cucu run data/features/feature_with_passing_scenario.feature --dry-run --results {CUCU_RESULTS_DIR}/passing_feature_dry_run_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should not see the directory at "{CUCU_RESULTS_DIR}/passing_feature_dry_run_results"
       And I should see "{STDOUT}" matches the following
       """
@@ -21,7 +21,7 @@ Feature: Run outputs
       And I should see "{STDERR}" is empty
 
   Scenario: User gets expected output when running steps with substeps
-    Given I run the command "cucu run data/features/scenario_with_substeps.feature --results {CUCU_RESULTS_DIR}/substeps-results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+    Given I run the command "cucu run data/features/scenario_with_substeps.feature --results {CUCU_RESULTS_DIR}/substeps-results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*
@@ -41,7 +41,7 @@ Feature: Run outputs
       And I should see "{STDERR}" is empty
 
   Scenario: User gets expected non zero exit code when a scenario fails
-    Given I run the command "cucu run data/features/feature_with_failing_scenario.feature --results {CUCU_RESULTS_DIR}/failing-scenario-results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+    Given I run the command "cucu run data/features/feature_with_failing_scenario.feature --results {CUCU_RESULTS_DIR}/failing-scenario-results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*
@@ -68,7 +68,7 @@ Feature: Run outputs
       """
 
   Scenario: User can run a scenario with background which uses a step with substeps
-    Given I run the command "cucu run data/features/feature_with_background_using_substeps.feature --results {CUCU_RESULTS_DIR}/background-with-substeps-results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+    Given I run the command "cucu run data/features/feature_with_background_using_substeps.feature --results {CUCU_RESULTS_DIR}/background-with-substeps-results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       Feature: Feature with background using substeps
@@ -99,7 +99,7 @@ Feature: Run outputs
       And I should see "{STDERR}" is empty
 
   Scenario: User can run a scenario with various types of output and see the variable values expanded at runtime
-    Given I run the command "cucu run data/features/feature_with_multilines_and_tables.feature --results {CUCU_RESULTS_DIR}/variable_values_expanded_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+    Given I run the command "cucu run data/features/feature_with_multilines_and_tables.feature --results {CUCU_RESULTS_DIR}/variable_values_expanded_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" matches the following
       """
       Feature: Feature with multilines and tables

@@ -33,7 +33,7 @@ Feature: Before retry handlers
             # the before retry handler will be the one to click and switch to the next tab
            Then I wait to see the button "button with child"
       """
-     Then I run the command "cucu run {CUCU_RESULTS_DIR}/before_retry_handlers --results {CUCU_RESULTS_DIR}/before_retry_handlers_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/before_retry_handlers --results {CUCU_RESULTS_DIR}/before_retry_handlers_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" matches the following
       """
       Feature: Feature with scenarios using before retry handlers
