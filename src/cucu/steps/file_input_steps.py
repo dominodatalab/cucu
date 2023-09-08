@@ -72,4 +72,4 @@ def drag_and_drop_file(ctx, name, filepath):
         f'looked for drag & drop target "{name}" and found "{drop_target_html}"'
     )
     file_input = ctx.browser.execute(JS_DROP_FILE, drop_target, 0, 0)
-    file_input.send_keys(filepath)
+    file_input.send_keys(os.path.abspath(filepath))
