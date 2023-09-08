@@ -40,7 +40,7 @@ Feature: Run with hooks
           Given I echo "Hello"
             And I echo "World"
       """
-     Then I run the command "cucu run {CUCU_RESULTS_DIR}/custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/custom_hooks_results/ -l debug" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/custom_hooks_results/ -l debug --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" matches the following
       """
       [\s\S]*
@@ -101,7 +101,7 @@ Feature: Run with hooks
           Given I run the following steps after the current scenario-1
             And I run the following steps after the current scenario-2
       """
-     Then I run the command "cucu run {CUCU_RESULTS_DIR}/custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/custom_hooks_results/ -l debug" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/custom_hooks_results/ -l debug --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" matches the following
       """
       [\s\S]*

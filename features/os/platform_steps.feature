@@ -3,7 +3,7 @@ Feature: Platform steps
   filesystem
 
   Scenario: User can use platform skipping steps to skip tests correctly
-    Given I run the command "cucu run data/features/feature_with_platform_specific_scenarios.feature --results {CUCU_RESULTS_DIR}/platform_specific_results" and save stdout to "STDOUT" and expect exit code "0"
+    Given I run the command "cucu run data/features/feature_with_platform_specific_scenarios.feature --results {CUCU_RESULTS_DIR}/platform_specific_results --no-color-output" and save stdout to "STDOUT" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       Feature: Feature with passing scenario

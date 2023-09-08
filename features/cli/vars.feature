@@ -92,7 +92,7 @@ Feature: Vars
         Scenario: That simply prints a custom variable
           Given I echo "\{CUSTOM_VARIABLE\}"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/custom_variables/ --results {CUCU_RESULTS_DIR}/custom_variables_results/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/custom_variables/ --results {CUCU_RESULTS_DIR}/custom_variables_results/ --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       # can see a built in variable
      Then I should see "{STDOUT}" matches the following
       """

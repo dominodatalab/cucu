@@ -22,7 +22,7 @@ Feature: Run and measure
              And I should see the directory at "\{SCENARIO_RESULTS_DIR\}/files/iter-1"
             \"\"\"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/measuring_following_steps/measuring_feature.feature --results {CUCU_RESULTS_DIR}/measuring_following_steps_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/measuring_following_steps/measuring_feature.feature --results {CUCU_RESULTS_DIR}/measuring_following_steps_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following:
       """
       Feature: Feature that measures a set of steps
@@ -64,7 +64,7 @@ Feature: Run and measure
            Then I should see the directory at "\{SCENARIO_RESULTS_DIR\}/files/iter-1"
             And I stop the timer "Create and Verify Directory"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/measuring_between_steps/measuring_feature.feature --results {CUCU_RESULTS_DIR}/measuring_between_steps_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/measuring_between_steps/measuring_feature.feature --results {CUCU_RESULTS_DIR}/measuring_between_steps_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following:
       """
       Feature: Feature that measures a set of steps
