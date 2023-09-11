@@ -188,7 +188,7 @@ class CucuFormatter(Formatter):
                 max_line_length - len(current_step_text) - len(prefix)
             )
             status_text = f'{" " * status_text_padding}{status_text}'
-            status_text = self.colorize(status_text, "grey")
+            status_text = self.colorize(status_text, "yellow")
 
             self.stream.write(f"{status_text}\n")
             if step.error_message:
@@ -231,7 +231,7 @@ class CucuFormatter(Formatter):
                 #       behaves underlying self.stream here is getting around
                 #       that by accessing stdout/stderr another way.
                 variable_line = CONFIG.hide_secrets(variable_line)
-                colored_variable_line = self.colorize(variable_line, "grey")
+                colored_variable_line = self.colorize(variable_line, "blue")
                 self.stream.write(colored_variable_line)
                 self.stream.flush()
 

@@ -278,7 +278,10 @@ def generate(results, basepath, only_failures=False):
                     input_file = Path(log_file_filepath)
                     output_file = Path(log_file_filepath + ".html")
                     output_file.write_text(
-                        parse_log_to_html(input_file.read_text())
+                        parse_log_to_html(
+                            input_file.read_text(encoding="utf-8")
+                        ),
+                        encoding="utf-8",
                     )
 
             scenario["duration"] = scenario_duration

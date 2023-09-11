@@ -1,33 +1,78 @@
-<body style="color: white; background-color: 333;"><pre>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body style="color: white; background-color: #100c08;"><pre>
 
   <span style="color: magenta;">Scenario</span>: Just a scenario that opens a web page
-<span style="color: grey;">    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
-</span>
-    <span style="color: green;">Given</span> I start a webserver at directory "data/www" and save the port to the variable "PORT"<span style="color: grey;">     # started at 2023-04-10T15:59:01.540 took 0.013s</span>
-<span style="color: grey;">      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
-</span>2023-04-10 15:59:01,555 DEBUG opening browser chrome
-2023-04-10 15:59:01,956 DEBUG webdriver.Chrome init
-2023-04-10 15:59:03,568 DEBUG executing page check "wait for document.readyState"
-2023-04-10 15:59:03,572 DEBUG executed page check "wait for document.readyState" in 0.004s
-2023-04-10 15:59:03,572 DEBUG executing page check "broken image checker"
-2023-04-10 15:59:03,576 DEBUG executed page check "broken image checker" in 0.003s
-2023-04-10 15:59:03,576 DEBUG navigating to url #http://192.168.86.23:52639/buttons.html
-2023-04-10 15:59:03,709 DEBUG executing page check "wait for document.readyState"
-2023-04-10 15:59:03,713 DEBUG executed page check "wait for document.readyState" in 0.004s
-2023-04-10 15:59:03,713 DEBUG executing page check "broken image checker"
-2023-04-10 15:59:03,718 DEBUG executed page check "broken image checker" in 0.004s
+<span style="color: grey;">
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+</span>    <span style="color: green;">Given</span> I start a webserver at directory "data/www" and save the port to the variable "PORT"<span style="color: yellow;">     # started at 2023-09-11T10:38:27.776 took 0.206s</span>
+<span style="color: grey;">
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
+</span>2023-09-11 10:38:27,983 DEBUG opening browser chrome
+2023-09-11 10:38:28,384 DEBUG webdriver.Chrome init
+2023-09-11 10:38:29,919 DEBUG executing page check "wait for document.readyState"
+2023-09-11 10:38:29,923 DEBUG executed page check "wait for document.readyState" in 0.004s
+2023-09-11 10:38:29,923 DEBUG executing page check "broken image checker"
+2023-09-11 10:38:29,928 DEBUG executed page check "broken image checker" in 0.005s
+2023-09-11 10:38:29,929 DEBUG navigating to url #http://10.0.0.55:56368/buttons.html
+2023-09-11 10:38:30,034 DEBUG executing page check "wait for document.readyState"
+2023-09-11 10:38:30,038 DEBUG executed page check "wait for document.readyState" in 0.004s
+2023-09-11 10:38:30,039 DEBUG executing page check "broken image checker"
+2023-09-11 10:38:30,042 DEBUG executed page check "broken image checker" in 0.003s
+    <span style="color: green;">  And</span> I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"<span style="color: yellow;">                  # started at 2023-09-11T10:38:27.983 took 2.100s</span>
+<span style="color: blue;">      # HOST_ADDRESS="10.0.0.55" PORT="56368"
+</span><span style="color: grey;">
+      And I should see the text "inexistent"
+</span>2023-09-11 10:38:30,450 DEBUG Retrying cucu.utils.retry.&lt;locals&gt;.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
+2023-09-11 10:38:30,763 DEBUG Retrying cucu.utils.retry.&lt;locals&gt;.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
+2023-09-11 10:38:31,075 DEBUG Retrying cucu.utils.retry.&lt;locals&gt;.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
+2023-09-11 10:38:31,394 DEBUG Retrying cucu.utils.retry.&lt;locals&gt;.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
+2023-09-11 10:38:31,705 DEBUG Retrying cucu.utils.retry.&lt;locals&gt;.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
+2023-09-11 10:38:32,011 DEBUG Retrying cucu.utils.retry.&lt;locals&gt;.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
+2023-09-11 10:38:32,328 DEBUG Retrying cucu.utils.retry.&lt;locals&gt;.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
+<span style="color: red;">      And I should see the text "inexistent"</span><span style="color: yellow;">                                                       # started at 2023-09-11T10:38:30.372 took 2.281s</span>
+Traceback (most recent call last):
+  File "/Users/xindong/Library/Caches/pypoetry/virtualenvs/cucu-M6jSuFdm-py3.11/lib/python3.11/site-packages/tenacity/__init__.py", line 382, in __call__
+    result = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/Users/xindong/Work/cucu/src/cucu/utils.py", line 126, in new_decorator
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/xindong/Work/cucu/src/cucu/helpers.py", line 121, in base_should_see_the
+    raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
+RuntimeError: unable to find the text "inexistent"
 
-    <span style="color: green;">  And</span> I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"<span style="color: grey;">                  # started at 2023-04-10T15:59:01.554 took 2.194s</span>
-<span style="color: grey;">      # HOST_ADDRESS="192.168.86.23" PORT="52639"
-</span><span style="color: grey;">      And I should see the text "inexistent"
-</span>2023-04-10 15:59:04,035 DEBUG switched browser to the default frame
-2023-04-10 15:59:06,549 DEBUG switched browser to the default frame
+The above exception was the direct cause of the following exception:
 
-<span style="color: red;">      And I should see the text "inexistent"</span><span style="color: grey;">                                                       # started at 2023-04-10T15:59:04.033 took 2.566s</span>
+Traceback (most recent call last):
+  File "/Users/xindong/Library/Caches/pypoetry/virtualenvs/cucu-M6jSuFdm-py3.11/lib/python3.11/site-packages/behave/model.py", line 1329, in run
+    match.run(runner.context)
+  File "/Users/xindong/Library/Caches/pypoetry/virtualenvs/cucu-M6jSuFdm-py3.11/lib/python3.11/site-packages/behave/matchers.py", line 98, in run
+    self.func(context, *args, **kwargs)
+  File "/Users/xindong/Work/cucu/src/cucu/steps/text_steps.py", line 30, in &lt;module&gt;
+    helpers.define_should_see_thing_with_name_steps("text", find_text)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/xindong/Work/cucu/src/cucu/behave_tweaks.py", line 78, in inner_step_func
+    func(*args, **kwargs)
+  File "/Users/xindong/Work/cucu/src/cucu/helpers.py", line 62, in wrapper
+    func(*args, **kwargs)
+  File "/Users/xindong/Work/cucu/src/cucu/helpers.py", line 130, in should_see_the
+    retry(
+  File "/Users/xindong/Library/Caches/pypoetry/virtualenvs/cucu-M6jSuFdm-py3.11/lib/python3.11/site-packages/tenacity/__init__.py", line 289, in wrapped_f
+    return self(f, *args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/xindong/Library/Caches/pypoetry/virtualenvs/cucu-M6jSuFdm-py3.11/lib/python3.11/site-packages/tenacity/__init__.py", line 379, in __call__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/xindong/Library/Caches/pypoetry/virtualenvs/cucu-M6jSuFdm-py3.11/lib/python3.11/site-packages/tenacity/__init__.py", line 326, in iter
+    raise retry_exc from fut.exception()
+tenacity.RetryError: RetryError[&lt;Future at 0x10bedf490 state=finished raised RuntimeError&gt;]
 
-... &lt;removed stacktrace&gt; ...
-
-2023-04-10 15:59:07,190 DEBUG quitting browser between sessions
+2023-09-11 10:38:32,947 DEBUG Saving MHT webpage snapshot: browser_snapshot.mht
+2023-09-11 10:38:33,006 DEBUG quitting browser between sessions
 
 
 Failing scenarios:
@@ -36,7 +81,8 @@ Failing scenarios:
 0 features passed, 1 failed, 0 skipped
 0 scenarios passed, 1 failed, 0 skipped
 2 steps passed, 1 failed, 0 skipped, 0 undefined
-Took 0m4.773s
+Took 0m4.586s
 Error: test run failed, see above for details
 
 </pre></body>
+</html>
