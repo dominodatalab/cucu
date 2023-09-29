@@ -1,6 +1,21 @@
 Feature: Images
   As a developer I want the test writer to be able to verify images on screen
 
+  Scenario: User can compare the two images and get results
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/images.html"
+      And I wait to see the source image "data/www/stars.png" and the displayed image "Stars" are same
+      And I wait to see the image "data/www/stars.png" and the image "data/www/stars_800x800.png" are same
+      And I wait to see the image "data/www/stars.png" and the image "data/www/stars.jpeg" are same
+     Then I wait to see the following steps fail
+       """
+       When I wait to see the image "data/www/stars.png" and the image "data/www/stars_partial.png" are same
+       """
+     Then I wait to see the following steps fail
+       """
+       When I wait to see the image "data/www/stars.png" and the image "data/www/moon.png" are same
+       """
+
   Scenario: User can verify the state of images on screen
     Given I run the command "cucu run data/features/multiple_scenarios_with_browser_steps.feature --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled --results {CUCU_RESULTS_DIR}/multi-scenario-browser-results" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/multi-scenario-browser-results --output {CUCU_RESULTS_DIR}/multi-scenario-browser-report" and expect exit code "0"
