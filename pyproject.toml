@@ -57,8 +57,8 @@ requests = "^2.27.1"
 selenium = "^4.10"
 tabulate = "^0.9"
 tenacity = "^8.0.1"
-opencv-python = "^4.8.0.76"
-numpy = "^1.26.0"
+opencv-python = "<4.5.0"
+numpy = "^1.19.3"
 scikit-image = "^0.19.0"
 
 [tool.poetry.group.dev.dependencies]
