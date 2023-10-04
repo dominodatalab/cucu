@@ -47,7 +47,9 @@ def get_image_screenshot(ctx, display_image_name):
     return image_screenshot_location
 
 
-def compare_two_images(ctx, image1_filepath, image2_filepath):
+def compare_two_images(
+    ctx, image1_filepath, image2_filepath, min_similarity_percent
+):
     # load the input images
     # The cv2.imread() function return a NumPy array if the image is loaded successfully.
     image1 = cv2.imread(os.path.abspath(image1_filepath))
@@ -67,20 +69,24 @@ def compare_two_images(ctx, image1_filepath, image2_filepath):
     similarity_score, diff = structural_similarity(image1, image2, full=True)
     logger.debug("Similarity Score: {:.2f}%".format(similarity_score * 100))
 
-    if similarity_score * 100 < 90.00:
+    if similarity_score * 100 < float(min_similarity_percent):
         raise StopRetryException("Images are not same.")
 
 
 @step(
-    'I wait to see the source image "{image_filepath}" and the displayed image "{display_name}" are same'
+    'I wait to see the source image "{image_filepath}" and the displayed image "{display_name}" are at least "{percentage}" percent similar'
 )
-def wait_to_compare_source_displayed_images(ctx, image_filepath, display_name):
+def wait_to_compare_source_displayed_images(
+    ctx, image_filepath, display_name, percentage
+):
     display_image_filepath = retry(get_image_screenshot)(ctx, display_name)
-    compare_two_images(ctx, image_filepath, display_image_filepath)
+    compare_two_images(ctx, image_filepath, display_image_filepath, percentage)
 
 
 @step(
-    'I wait to see the image "{image1_filepath}" and the image "{image2_filepath}" are same'
+    'I wait to see the image "{image1_filepath}" and the image "{image2_filepath}" are at least "{percentage}" percent similar'
 )
-def wait_to_compare_two_images(ctx, image1_filepath, image2_filepath):
-    retry(compare_two_images)(ctx, image1_filepath, image2_filepath)
+def wait_to_compare_two_images(
+    ctx, image1_filepath, image2_filepath, percentage
+):
+    retry(compare_two_images)(ctx, image1_filepath, image2_filepath, percentage)

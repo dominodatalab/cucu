@@ -4,16 +4,16 @@ Feature: Images
   Scenario: User can compare the two images and get results
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/images.html"
-      And I wait to see the source image "data/www/stars.png" and the displayed image "Stars" are same
-      And I wait to see the image "data/www/stars.png" and the image "data/www/stars_800x800.png" are same
-      And I wait to see the image "data/www/stars.png" and the image "data/www/stars.jpeg" are same
+      And I wait to see the source image "data/www/stars.png" and the displayed image "Stars" are at least "90" percent similar
+      And I wait to see the image "data/www/stars.png" and the image "data/www/stars_800x800.png" are at least "90" percent similar
+      And I wait to see the image "data/www/stars.png" and the image "data/www/stars.jpeg" are at least "90" percent similar
      Then I wait to see the following steps fail
        """
-       When I wait to see the image "data/www/stars.png" and the image "data/www/stars_partial.png" are same
+       When I wait to see the image "data/www/stars.png" and the image "data/www/stars_partial.png" are at least "90" percent similar
        """
      Then I wait to see the following steps fail
        """
-       When I wait to see the image "data/www/stars.png" and the image "data/www/moon.png" are same
+       When I wait to see the image "data/www/stars.png" and the image "data/www/moon.png" are at least "90" percent similar
        """
 
   Scenario: User can verify the state of images on screen
