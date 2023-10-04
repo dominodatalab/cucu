@@ -70,7 +70,9 @@ def compare_two_images(
     logger.debug("Similarity Score: {:.2f}%".format(similarity_score * 100))
 
     if similarity_score * 100 < float(min_similarity_percent):
-        raise StopRetryException("Images are not same.")
+        raise StopRetryException(
+            f"Images are not {min_similarity_percent} percent similar"
+        )
 
 
 @step(
