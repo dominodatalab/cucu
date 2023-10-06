@@ -283,8 +283,8 @@ def find_table_element(ctx, nth=1):
 
     parameters:
       ctx(object): behave context object used to share data between steps
-      nth(int): when set to an int specifies the exact table within the list
-                of available tables to match against. Defaults to 1st table.
+      nth(int): specifies the exact table within the list of available tables to match against.
+                Defaults to 1st table.
 
     returns:
       A selenium WebElement associated with the table that was specified
@@ -299,24 +299,34 @@ def find_table_element(ctx, nth=1):
         )
 
 
+def click_table_cell(ctx, row, column, table):
+    """
+    Clicks the cell corresponding to the given row and column
+
+    parameters:
+      ctx(object): behave context object used to share data between steps
+      row(int): the row of the table to click
+      column(int): the column of the table to click
+      table(int): specifies the exact table within the list of available tables to match against.
+    """
+    table_element = find_table_element(ctx, table)
+
+    try:
+        row = table_element.find_elements(By.CSS_SELECTOR, "tbody tr")[row]
+        cell = row.find_elements(By.CSS_SELECTOR, "td")[column]
+    except IndexError:
+        raise RuntimeError(
+            f"Cannot find table:{table+1},row:{row+1},column:{column+1}. Please check your table data."
+        )
+    ctx.browser.click(cell)
+
+
 @step('I wait to click the "{row:nth}" row in the "{table:nth}" table')
 def wait_click_table_row(ctx, row, table):
     """
     Add 1 to the row number if the table has a header row.
     """
-
-    def wait_click_table_row(ctx, row, table):
-        table_element = find_table_element(ctx, table)
-
-        try:
-            row = table_element.find_elements(By.CSS_SELECTOR, "tbody tr")[row]
-        except IndexError:
-            raise RuntimeError(
-                f"Cannot find table:{table+1},row:{row+1}. Please check your table data."
-            )
-        ctx.browser.click(row)
-
-    retry(wait_click_table_row)(ctx, row, table)
+    retry(click_table_cell)(ctx, row, 1, table)
 
 
 @step(
@@ -326,17 +336,4 @@ def wait_click_table_cell(ctx, row, column, table):
     """
     Add 1 to the row number if the table has a header row.
     """
-
-    def click_table_cell(ctx, row, column, table):
-        table_element = find_table_element(ctx, table)
-
-        try:
-            row = table_element.find_elements(By.CSS_SELECTOR, "tbody tr")[row]
-            cell = row.find_elements(By.CSS_SELECTOR, "td")[column]
-        except IndexError:
-            raise RuntimeError(
-                f"Cannot find table:{table+1},row:{row+1},column:{column+1}. Please check your table data."
-            )
-        ctx.browser.click(cell)
-
     retry(click_table_cell)(ctx, row, column, table)
