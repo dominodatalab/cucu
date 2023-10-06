@@ -1,4 +1,9 @@
 <html>
+  <script>
+    function update(value) {
+      document.querySelector("#input").value = value;
+    }
+  </script>
   <head>
     <title>Tables!</title>
     <style>
@@ -64,11 +69,54 @@
         <th>Yearly<br/>
         Salary</th>
       </tr>
+    </table>
+
+    <!-- table with clickable rows --->
+    <label>Clicked:</label><input id="input" type="text"></input>
+    <table>
       <tr>
-          <td>Alfred<br/> <br/>White</td><td>120,000</td>
+        <th>Color</th>
+        <th>Font</th>
+        <th>Style</th>
       </tr>
+      <tr role="button" aria-describedby="clickable-cell" onclick="update('Row 2 clicked');">
+        <td>Red</td>
+        <td>Arial</td>
+        <td>Bold</td>
+      </tr>
+      <tr role="button" aria-describedby="clickable-row" onclick="update('Row 3 clicked');">
+        <td>Blue</td>
+        <td>Helvetica</td>
+        <td>Underline</td>
+      </tr>
+      <tr role="button" aria-describedby="clickable-row" onclick="update('Row 4 clicked');">
+        <td>Green</td>
+        <td>Times New Roman</td>
+        <td>Italic</td>
+      </tr>
+    </table>
+
+    <!-- table with clickable cells --->
+    <table>
       <tr>
-          <td>Maria<br/>Lopez</td><td>133,000</td>
+        <th>City</th>
+        <th>Country</th>
+        <th>Continent</th>
+      </tr>
+      <tr >
+        <td role="button" aria-describedby="clickable-cell" onclick="update('Paris clicked');">Paris</td>
+        <td role="button" aria-describedby="clickable-cell" onclick="update('France clicked');">France</td>
+        <td role="button" aria-describedby="clickable-cell" onclick="update('Europe clicked');">Europe</td>
+      </tr>
+      <tr role="button" aria-describedby="clickable-row">
+        <td role="button" aria-describedby="clickable-cell" onclick="update('Cairo clicked');">Cairo</td>
+        <td role="button" aria-describedby="clickable-cell" onclick="update('Egypt clicked');">Egypt</td>
+        <td role="button" aria-describedby="clickable-cell" onclick="update('Africa clicked');">Africa</td>
+      </tr>
+      <tr role="button" aria-describedby="clickable-row">
+        <td role="button" aria-describedby="clickable-cell" onclick="update('Tokyo clicked');">Tokyo</td>
+        <td role="button" aria-describedby="clickable-cell" onclick="update('Japan clicked');">Japan</td>
+        <td role="button" aria-describedby="clickable-cell" onclick="update('Asia clicked');">Asia</td>
       </tr>
     </table>
 

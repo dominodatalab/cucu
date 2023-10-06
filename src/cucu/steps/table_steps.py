@@ -1,9 +1,10 @@
-import pkgutil
+import pkgutil  # noqa
 import re
 from io import StringIO
 
 from cucu import config, format_gherkin_table, fuzzy, helpers, retry, step
 from cucu.browser.frames import run_in_all_frames
+from selenium.webdriver.common.by import By
 
 
 def find_tables(ctx):
@@ -274,3 +275,55 @@ def get_table_cell_value(ctx, table, row, column, variable_name):
             f"Cannot find table:{table+1},row:{row+1},column:{column+1}. Please check your table data."
         )
     config.CONFIG[variable_name] = cell_value
+
+
+def find_table_unchanged(ctx, nth=None):
+    """
+    find the nth table without converting table to list
+    """
+    ctx.check_browser_initialized()
+
+    if nth is not None:
+        return ctx.browser.css_find_elements("table")[nth]
+
+
+@step('I wait to click the "{row:nth}" row in the "{table:nth}" table')
+def wait_click_table_row(ctx, row, table):
+    """
+    The rows include the header of the table if it exists.
+    """
+
+    def wait_click_table_row(ctx, row, table):
+        table_element = find_table_unchanged(ctx, table)
+        row = table_element.find_elements(By.CSS_SELECTOR, "tbody tr")[row]
+        try:
+            ctx.browser.click(row)
+        except IndexError:
+            raise RuntimeError(
+                f"Cannot find table:{table+1},row:{row+1}. Please check your table data."
+            )
+
+    retry(wait_click_table_row)(ctx, row, table)
+
+
+@step(
+    'I wait to click the cell corresponding to the "{row:nth}" row and "{column:nth}" column in the "{table:nth}" table'
+)
+def wait_click_table_cell(ctx, row, column, table):
+    """
+    The rows include the header of the table if it exists.
+    """
+
+    def click_table_cell(ctx, row, column, table):
+        table_element = find_table_unchanged(ctx, table)
+        row = table_element.find_elements(By.CSS_SELECTOR, "tbody tr")[row]
+        cell = row.find_elements(By.CSS_SELECTOR, "td")[column]
+
+        try:
+            ctx.browser.click(cell)
+        except IndexError:
+            raise RuntimeError(
+                f"Cannot find table:{table+1},row:{row+1},column:{column+1}. Please check your table data."
+            )
+
+    retry(click_table_cell)(ctx, row, column, table)
