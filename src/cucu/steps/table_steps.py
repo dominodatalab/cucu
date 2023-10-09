@@ -326,6 +326,10 @@ def click_table_cell(ctx, row, column, table):
 def wait_click_table_row(ctx, row, table):
     """
     Add 1 to the row number if the table has a header row.
+
+    Note: Firefox is unable to click directly on a row <tr> if it has child columns <td>.
+    In order to workaround this, the step just clicks the first column <td> of the row <tr>.
+    Bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1448825
     """
     retry(click_table_cell)(ctx, row, 1, table)
 
