@@ -1080,31 +1080,6 @@ files = [
 ]
 
 [[package]]
-name = "opencv-python"
-version = "3.4.18.65"
-description = "Wrapper package for OpenCV python bindings."
-category = "main"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "opencv-python-3.4.18.65.tar.gz", hash = "sha256:0c2d5ebd08420079d6ebdec7a247f0284d403edd87647e9fbcc474c5adcb310b"},
-    {file = "opencv_python-3.4.18.65-cp36-abi3-macosx_10_15_x86_64.whl", hash = "sha256:0630dfa57dbadd63f62eae6758c743ab7c18358940f34e8b9ee666c00d2e74fb"},
-    {file = "opencv_python-3.4.18.65-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:447c5d9172713e026d4a742c5d3c167913dff133949ffc62fec5b6d1cb081b0b"},
-    {file = "opencv_python-3.4.18.65-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:27cc4a3a4dc2d73c76374c636985ce45a8e40e79d015fb0e69677ff4547edd9c"},
-    {file = "opencv_python-3.4.18.65-cp36-abi3-win32.whl", hash = "sha256:3484618b7cda6b94939f475342ff100455b863d2bb7a81ac8d2b1965c4e983b6"},
-    {file = "opencv_python-3.4.18.65-cp36-abi3-win_amd64.whl", hash = "sha256:9aecb4544d2e863f2fb9acffc47005f9c9733a307cdbca80babbef027c04e207"},
-    {file = "opencv_python-3.4.18.65-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:784acb4c6c1880e0b8fb124f2b79e10838f1c244b0220f812d2852c91bc80ae9"},
-]
-
-[package.dependencies]
-numpy = [
-    {version = ">=1.21.2", markers = "python_version >= \"3.10\" or python_version >= \"3.6\" and platform_system == \"Darwin\" and platform_machine == \"arm64\""},
-    {version = ">=1.19.3", markers = "python_version >= \"3.6\" and platform_system == \"Linux\" and platform_machine == \"aarch64\" or python_version >= \"3.9\""},
-    {version = ">=1.14.5", markers = "python_version >= \"3.7\""},
-    {version = ">=1.17.3", markers = "python_version >= \"3.8\""},
-]
-
-[[package]]
 name = "outcome"
 version = "1.2.0"
 description = "Capture the outcome of Python function calls."
@@ -1399,14 +1374,14 @@ files = [
 
 [[package]]
 name = "pygls"
-version = "1.1.0"
+version = "1.1.1"
 description = "A pythonic generic language server (pronounced like 'pie glass')"
 category = "main"
 optional = false
 python-versions = ">=3.7.9,<4"
 files = [
-    {file = "pygls-1.1.0-py3-none-any.whl", hash = "sha256:70acb6fe0df1c8a17b7ce08daa0afdb4aedc6913a6a6696003e1434fda80a06e"},
-    {file = "pygls-1.1.0.tar.gz", hash = "sha256:eb19b818039d3d705ec8adbcdf5809a93af925f30cd7a3f3b7573479079ba00e"},
+    {file = "pygls-1.1.1-py3-none-any.whl", hash = "sha256:330704551a335b443bf1cdfb0507f121608591095898d451f0007eeb1510067c"},
+    {file = "pygls-1.1.1.tar.gz", hash = "sha256:b1b4ddd6f800a5573f61f0ec2cd3bc7a859d171f48142b46e1de35a1357c00fe"},
 ]
 
 [package.dependencies]
@@ -1813,14 +1788,14 @@ test = ["asv", "gmpy2", "mpmath", "pooch", "pytest", "pytest-cov", "pytest-timeo
 
 [[package]]
 name = "selenium"
-version = "4.13.0"
+version = "4.14.0"
 description = ""
 category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "selenium-4.13.0-py3-none-any.whl", hash = "sha256:f0f9185c01ae249a321529c4e3aa0edc2a900642e61fdbb76988cd72d2762ece"},
-    {file = "selenium-4.13.0.tar.gz", hash = "sha256:3c413a4f1b8af67824703195e3b1c19cfb1c3186c799efa035d55fd59d6dd59f"},
+    {file = "selenium-4.14.0-py3-none-any.whl", hash = "sha256:be9824a9354a7fe288e3fad9ceb6a9c65ddc7c44545d23ad0ebf4ce202b19893"},
+    {file = "selenium-4.14.0.tar.gz", hash = "sha256:0d14b0d9842366f38fb5f8f842cf7c042bcfa062affc6a0a86e4d634bdd0fe54"},
 ]
 
 [package.dependencies]
@@ -2154,4 +2129,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "6cca685f6b3757445f39f83a20e868499dd40f281b2927d71d8f94cdb5f3e242"
+content-hash = "41811ffa025d740eb17e6044c7cfafaebf03f9ee5dbcf8ccfc3a383959141e5e"
