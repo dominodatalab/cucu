@@ -3,84 +3,6 @@
 ---
 version: 2.1
 
-commands:
-  install_cucu_dependencies: &install_cucu_dependencies
-    steps:
-      - restore_cache:
-          keys:
-            - cucu-deps-{{ checksum "poetry.lock" }}
-      - run:
-          name: install cucu dependencies
-          no_output_timeout: 15m
-          command: |
-            set +eo pipefail
-            pip install poetry
-            poetry config installer.max-workers 10
-            poetry config virtualenvs.in-project true
-            poetry install --no-ansi
-      - save_cache:
-          paths:
-            - ./.venv
-          key: cucu-deps-{{ checksum "poetry.lock" }}
-
-  install_test_dependencies: &install_test_dependencies
-    steps:
-      - run:
-          name: install test dependencies
-          command: |
-            set +eo pipefail
-            apt-get update
-            apt-get install -y expect
-
-  build_cucu_python_package: &build_cucu_python_package
-    steps:
-      - run:
-          name: build the cucu python package
-          command: poetry build
-
-  install_cucu_globally: &install_cucu_globally
-    steps:
-      - run:
-          name: install cucu globally
-          command: pip install dist/cucu-*.tar.gz
-
-  setup_remote_docker_env: &setup_remote_docker_env
-    steps:
-      - setup_remote_docker:
-          version: 20.10.14
-
-  wait_for_selenium: &wait_for_selenium
-    steps:
-      - run:
-          # retry connection every 5s x 60 which is a total of 5 minutes
-          command: curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
-
-  run_functional_tests: &run_functional_tests
-    parameters:
-      browser:
-        type: string
-        default: "chrome"
-    steps:
-      - run:
-          command: poetry run cucu run features --workers 8 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<< parameters.browser >>"
-          environment:
-            COVERAGE_PROCESS_START: pyproject.toml  # set to config file
-
-  run_unit_tests: &run_unit_tests
-    steps:
-      - run:
-          name: run unit tests
-          command: poetry run coverage run -m pytest --junit-xml=results/unit-tests.xml
-
-  code_coverage_check: &code_coverage_check
-    steps:
-      - run:
-          command: |
-            set +eo pipefail
-            poetry run coverage combine .coverage.*
-            poetry run coverage html
-            poetry run coverage report --fail-under=70
-
 executors:
   unit-test-executor:
     docker:
@@ -119,12 +41,38 @@ executors:
           SCREEN_HEIGHT: 768
     resource_class: xlarge
 
+commands:
+  install_cucu_dependencies: &install_cucu_dependencies
+    steps:
+      - restore_cache:
+          keys:
+            - cucu-deps-{{ checksum "poetry.lock" }}
+      - run:
+          name: install cucu dependencies
+          no_output_timeout: 15m
+          command: |
+            set +eo pipefail
+            pip install --upgrade pip
+            pip install poetry
+            poetry config installer.max-workers 10
+            poetry config virtualenvs.in-project true
+            poetry install --no-ansi
+      - save_cache:
+          paths:
+            - ./.venv
+          key: cucu-deps-{{ checksum "poetry.lock" }}
+
+  build_cucu_python_package: &build_cucu_python_package
+    steps:
+      - run:
+          name: build the cucu python package
+          command: poetry build
+
 jobs:
   pre-commit:
     resource_class: small
     docker:
       - image: cimg/python:3.11.4
-
     steps:
       - checkout
       - run:
@@ -134,7 +82,6 @@ jobs:
             pip install --upgrade pip
             pip install pre-commit
             pre-commit install-hooks
-
       - install_cucu_dependencies
       - run:
           name: run pre-commit validations
@@ -144,32 +91,47 @@ jobs:
     resource_class: small
     docker:
       - image: cimg/python:3.11.4
-
     steps:
       - checkout
       - install_cucu_dependencies
       - build_cucu_python_package
-      - install_cucu_globally
+      - run:
+          name: install cucu globally
+          command: pip install dist/cucu-*.tar.gz
 
   test:
     parameters:
       browser:
         type: string
         default: "chrome"
-
     executor: << parameters.browser >>-test-executor
-
     steps:
       - checkout
       - install_cucu_dependencies
-      - install_test_dependencies
-      - setup_remote_docker_env
-      - wait_for_selenium
-      - run_functional_tests:
-          browser: "<< parameters.browser >>"
-      - run_unit_tests
-      - code_coverage_check
-
+      - run:
+          name: install test dependencies
+          command: |
+            set +eo pipefail
+            apt-get update
+            apt-get install -y expect
+      - setup_remote_docker:
+          version: 20.10.14
+      - run:
+          # retry connection every 5s x 60 which is a total of 5 minutes
+          command: curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
+      - run:
+          command: poetry run cucu run features --workers 8 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<< parameters.browser >>"
+          environment:
+            COVERAGE_PROCESS_START: pyproject.toml  # set to config file
+      - run:
+          name: run unit tests
+          command: poetry run coverage run -m pytest --junit-xml=results/unit-tests.xml
+      - run:
+          command: |
+            set +eo pipefail
+            poetry run coverage combine .coverage.*
+            poetry run coverage html
+            poetry run coverage report --fail-under=70
       - run:
           name: tar up results and reporting
           command: |
@@ -177,16 +139,12 @@ jobs:
             tar cvfz report.tgz report
             tar cvfz junit_results.tgz junit_results
           when: always
-
       - store_artifacts:
           path: results.tgz
-
       - store_artifacts:
           path: junit_results.tgz
-
       - store_artifacts:
           path: report.tgz
-
       - store_test_results:
           path: junit_results
 
