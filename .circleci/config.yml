@@ -51,7 +51,7 @@ commands:
           name: install cucu dependencies
           no_output_timeout: 15m
           command: |
-            set +eo pipefail
+            set -exuo pipefail
             pip install --upgrade pip
             pip install poetry
             poetry config installer.max-workers 10
@@ -79,7 +79,7 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            set +eo pipefail
+            set -exuo pipefail
             pip install --upgrade pip
             pip install pre-commit
             pre-commit install-hooks
@@ -113,7 +113,7 @@ jobs:
       - run:
           name: install test dependencies
           command: |
-            set +eo pipefail
+            set -exuo pipefail
             apt-get update
             apt-get install -y expect
       - setup_remote_docker:
@@ -130,7 +130,7 @@ jobs:
           command: poetry run coverage run -m pytest --junit-xml=results/unit-tests.xml
       - run:
           command: |
-            set +eo pipefail
+            set -exuo pipefail
             poetry run coverage combine .coverage.*
             poetry run coverage html
             poetry run coverage report --fail-under=70
@@ -160,7 +160,7 @@ jobs:
       - run:
           name: Publish to private PyPI repository
           command: |
-            set +eo pipefail
+            set -exuo pipefail
             poetry config repositories.private ${PUBLISH_REPOSITORY}
             poetry config http-basic.private ${PUBLISH_USERNAME} ${PUBLISH_PASSWORD}
             poetry publish -r private
