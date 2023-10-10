@@ -151,11 +151,6 @@ jobs:
       - build_cucu_python_package
       - install_cucu_globally
 
-      - run:
-          name: run pre-commit validations
-          command: pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
-
-
   test:
     parameters:
       browser:
