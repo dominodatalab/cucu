@@ -46,7 +46,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - cucu-deps-{{ checksum "poetry.lock" }}
+            - cucu-deps-{{ .Environment.CACHE_VERSION }}-{{ checksum "poetry.lock" }}
       - run:
           name: install cucu dependencies
           no_output_timeout: 15m
@@ -60,7 +60,7 @@ commands:
       - save_cache:
           paths:
             - ./.venv
-          key: cucu-deps-{{ checksum "poetry.lock" }}
+          key: cucu-deps-{{ .Environment.CACHE_VERSION }}-{{ checksum "poetry.lock" }}
 
   build_cucu_python_package: &build_cucu_python_package
     steps:
