@@ -124,3 +124,31 @@ Feature: Tables
      Then I should see "{TABLE_3_VALUE}" is equal to "31"
      When I save "4th" table "3rd" row , "2nd" column  value to a variable "TABLE_4_VALUE"
      Then I should see "{TABLE_4_VALUE}" is equal to "133,000"
+
+  Scenario: User can click specific row in table
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
+      And I should see a table that matches the following:
+        | Color  | Font            | Style     |
+        | Red    | Arial           | Bold      |
+        | Blue   | Helvetica       | Underline |
+        | Green  | Times New Roman | Italic    |
+     When I wait to click the "2nd" row in the "5th" table
+     Then I should see the text "Row 2 clicked"
+     When I wait to click the "3rd" row in the "5th" table
+     Then I should see the text "Row 3 clicked"
+     When I wait to click the "4th" row in the "5th" table
+     Then I should see the text "Row 4 clicked"
+
+  Scenario: User can click specific cell in table
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
+      And I should see a table that matches the following:
+        | City  | Country | Continent |
+        | Paris | France  | Europe    |
+        | Cairo | Egypt   | Africa    |
+        | Tokyo | Japan   | Asia      |
+     When I wait to click the cell corresponding to the "2nd" row and "2nd" column in the "6th" table
+     Then I should see the text "France clicked"
+     When I wait to click the cell corresponding to the "3rd" row and "3rd" column in the "6th" table
+     Then I should see the text "Africa clicked"
+     When I wait to click the cell corresponding to the "4th" row and "1st" column in the "6th" table
+     Then I should see the text "Tokyo clicked"
