@@ -2,6 +2,8 @@ import pkgutil
 import re
 from io import StringIO
 
+from selenium.webdriver.common.by import By
+
 from cucu import config, format_gherkin_table, fuzzy, helpers, retry, step
 from cucu.browser.frames import run_in_all_frames
 
@@ -274,3 +276,69 @@ def get_table_cell_value(ctx, table, row, column, variable_name):
             f"Cannot find table:{table+1},row:{row+1},column:{column+1}. Please check your table data."
         )
     config.CONFIG[variable_name] = cell_value
+
+
+def find_table_element(ctx, nth=1):
+    """
+    Return the nth table as a WebElement
+
+    parameters:
+      ctx(object): behave context object used to share data between steps
+      nth(int): specifies the exact table within the list of available tables to match against.
+                Defaults to 1st table.
+
+    returns:
+      A selenium WebElement associated with the table that was specified
+    """
+    ctx.check_browser_initialized()
+
+    try:
+        return ctx.browser.css_find_elements("table")[nth]
+    except IndexError:
+        raise RuntimeError(
+            f"Cannot find table:{nth+1}. Please check your table data."
+        )
+
+
+def click_table_cell(ctx, row, column, table):
+    """
+    Clicks the cell corresponding to the given row and column
+
+    parameters:
+      ctx(object): behave context object used to share data between steps
+      row(int): the row of the table to click
+      column(int): the column of the table to click
+      table(int): specifies the exact table within the list of available tables to match against.
+    """
+    table_element = find_table_element(ctx, table)
+
+    try:
+        row = table_element.find_elements(By.CSS_SELECTOR, "tbody tr")[row]
+        cell = row.find_elements(By.CSS_SELECTOR, "td")[column]
+    except IndexError:
+        raise RuntimeError(
+            f"Cannot find table:{table+1},row:{row+1},column:{column+1}. Please check your table data."
+        )
+    ctx.browser.click(cell)
+
+
+@step('I wait to click the "{row:nth}" row in the "{table:nth}" table')
+def wait_click_table_row(ctx, row, table):
+    """
+    Add 1 to the row number if the table has a header row.
+
+    Note: Firefox is unable to click directly on a row <tr> if it has child columns <td>.
+    In order to workaround this, the step just clicks the first column <td> of the row <tr>.
+    Bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1448825
+    """
+    retry(click_table_cell)(ctx, row, 1, table)
+
+
+@step(
+    'I wait to click the cell corresponding to the "{row:nth}" row and "{column:nth}" column in the "{table:nth}" table'
+)
+def wait_click_table_cell(ctx, row, column, table):
+    """
+    Add 1 to the row number if the table has a header row.
+    """
+    retry(click_table_cell)(ctx, row, column, table)
