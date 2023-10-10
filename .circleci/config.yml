@@ -11,6 +11,7 @@ commands:
           no_output_timeout: 15m
           command: |
             set +eo pipefail
+            poetry config installer.max-workers 10
             pip install poetry
             poetry install --no-ansi
 
