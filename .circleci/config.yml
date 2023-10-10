@@ -179,12 +179,12 @@ workflows:
           name: test-edge
           browser: edge
           requires:
-            - test-chrome
+            - pre-commit
       - test:
           name: test-firefox
           browser: firefox
           requires:
-            - test-edge
+            - pre-commit
       - publish:
           filters:
             branches:
