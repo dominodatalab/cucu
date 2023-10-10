@@ -20,7 +20,7 @@ commands:
           command: |
             set +eo pipefail
             apt-get update
-            apt-get install -y expect libgl1
+            apt-get install -y expect
 
   build_cucu_python_package: &build_cucu_python_package
     steps:
