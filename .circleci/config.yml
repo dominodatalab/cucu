@@ -70,7 +70,8 @@ commands:
 
 jobs:
   pre-commit:
-    resource_class: medium
+    # use small since doesn't run across cpu cores
+    resource_class: small
     docker:
       - image: cimg/python:3.11.5
     steps:
@@ -88,6 +89,7 @@ jobs:
           command: pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
 
   build-and-install:
+    # use small since doesn't run across cpu cores
     resource_class: small
     docker:
       - image: cimg/python:3.11.5
