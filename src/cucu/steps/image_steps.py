@@ -1,7 +1,9 @@
 import os
 
-import cv2
+from skimage import io
+from skimage.color import rgb2gray
 from skimage.metrics import structural_similarity
+from skimage.transform import resize
 
 from cucu import StopRetryException, helpers, logger, retry, step
 from cucu.config import CONFIG
@@ -51,19 +53,22 @@ def compare_two_images(
     ctx, image1_filepath, image2_filepath, min_similarity_percent
 ):
     # load the input images
-    # The cv2.imread() function return a NumPy array if the image is loaded successfully.
-    image1 = cv2.imread(os.path.abspath(image1_filepath))
-    image2 = cv2.imread(os.path.abspath(image2_filepath))
+    # The imread() function return a NumPy array if the image is loaded successfully.
+
+    image1 = io.imread(os.path.abspath(image1_filepath))[:, :, :3]
+    image2 = io.imread(os.path.abspath(image2_filepath))[:, :, :3]
 
     # convert the images to grayscale
-    image1 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
-    image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
+
+    print("image1:", image1.shape)
+    print("image2:", image2.shape)
+
+    image1 = rgb2gray(image1)
+    image2 = rgb2gray(image2)
 
     # make the shapes of two images same to compare.
-    # cv2.resize() - tuple passed for determining the size of the new image follows the order (width, height) unlike as expected (height, width).
     if image1.shape != image2.shape:
-        h, w = image1.shape
-        image2 = cv2.resize(image2, (w, h))
+        image2 = resize(image2, image1.shape)
 
     # Calculate structural similarity of images.
     similarity_score, diff = structural_similarity(image1, image2, full=True)
