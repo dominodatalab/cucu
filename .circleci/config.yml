@@ -6,14 +6,22 @@ version: 2.1
 commands:
   install_cucu_dependencies: &install_cucu_dependencies
     steps:
+      - restore_cache:
+          keys:
+            - cucu-deps-{{ checksum "poetry.lock" }} 
       - run:
           name: install cucu dependencies
           no_output_timeout: 15m
           command: |
             set +eo pipefail
-            poetry config installer.max-workers 10
             pip install poetry
+            poetry config installer.max-workers 10
+            poetry config virtualenvs.in-project true
             poetry install --no-ansi
+      - save_cache:
+          paths:
+            - ./.venv
+          key: cucu-deps-{{ checksum "poetry.lock" }}
 
   install_test_dependencies: &install_test_dependencies
     steps:
