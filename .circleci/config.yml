@@ -8,6 +8,7 @@ commands:
     steps:
       - run:
           name: install cucu dependencies
+          no_output_timeout: 15m
           command: |
             set +eo pipefail
             pip install poetry
