@@ -8,7 +8,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - cucu-deps-{{ checksum "poetry.lock" }} 
+            - cucu-deps-{{ checksum "poetry.lock" }}
       - run:
           name: install cucu dependencies
           no_output_timeout: 15m
