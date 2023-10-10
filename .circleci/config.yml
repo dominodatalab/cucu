@@ -6,11 +6,11 @@ version: 2.1
 executors:
   unit-test-executor:
     docker:
-      - image: python:3.11.4
+      - image: python:3.11.5
 
   chrome-test-executor:
     docker:
-      - image: python:3.11.4
+      - image: python:3.11.5
       - image: selenium/standalone-chrome:114.0-chromedriver-114.0-20230614
         environment:
           SE_NODE_MAX_SESSIONS: 12
@@ -21,7 +21,7 @@ executors:
 
   firefox-test-executor:
     docker:
-      - image: python:3.11.4
+      - image: python:3.11.5
       - image: selenium/standalone-firefox:114.0-geckodriver-0.33-20230614
         environment:
           SE_NODE_MAX_SESSIONS: 12
@@ -32,7 +32,7 @@ executors:
 
   edge-test-executor:
     docker:
-      - image: python:3.11.4
+      - image: python:3.11.5
       - image: selenium/standalone-edge:114.0-edgedriver-114.0-20230614
         environment:
           SE_NODE_MAX_SESSIONS: 12
@@ -72,7 +72,7 @@ jobs:
   pre-commit:
     resource_class: small
     docker:
-      - image: cimg/python:3.11.4
+      - image: cimg/python:3.11.5
     steps:
       - checkout
       - run:
@@ -90,7 +90,7 @@ jobs:
   build-and-install:
     resource_class: small
     docker:
-      - image: cimg/python:3.11.4
+      - image: cimg/python:3.11.5
     steps:
       - checkout
       - install_cucu_dependencies
@@ -150,7 +150,7 @@ jobs:
 
   publish:
     docker:
-      - image: cimg/python:3.11.4
+      - image: cimg/python:3.11.5
     steps:
       - checkout
       - install_cucu_dependencies
