@@ -154,8 +154,6 @@ jobs:
       - checkout
       - install_cucu_dependencies
       - install_test_dependencies
-      - build_cucu_python_package
-      - install_cucu_globally
       - setup_remote_docker_env
       - wait_for_selenium
       - run_functional_tests:
