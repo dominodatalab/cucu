@@ -342,3 +342,20 @@ def wait_click_table_cell(ctx, row, column, table):
     Add 1 to the row number if the table has a header row.
     """
     retry(click_table_cell)(ctx, row, column, table)
+
+
+@step(
+    'I wait to click the "{column:nth}" column within a row that contains the text "{match_text}" in the "{table:nth}" table'
+)
+def wait_click_table_cell_matching_text(ctx, column, match_text, table):
+    def click_table_cell_matching_text(ctx, column, match_text, table):
+        table_element = find_table_element(ctx, table)
+
+        row = table_element.find_elements(
+            By.XPATH, f'//td[.="{match_text}"]/parent::tr'
+        )
+        cell = row.find_elements(By.CSS_SELECTOR, "td")[column]
+
+        ctx.browser.click(cell)
+
+    retry(click_table_cell_matching_text)(ctx, column, table, match_text)
