@@ -8,6 +8,9 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 0.169.0
 - Add - step and test for waiting until a table has a certain number of rows
 
+## 0.168.0
+- Add - step and test for clicking a table column within a table row that has specified text
+
 ## 0.167.0
 - Fix - fuzzy JS code injection in web page redirection
 
