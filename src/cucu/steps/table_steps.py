@@ -351,10 +351,15 @@ def wait_click_table_cell_matching_text(ctx, column, match_text, table):
     def click_table_cell_matching_text(ctx, column, match_text, table):
         table_element = find_table_element(ctx, table)
 
-        row = table_element.find_elements(
-            By.XPATH, f'//td[.="{match_text}"]/parent::tr'
-        )[0]
-        cell = row.find_elements(By.CSS_SELECTOR, "td")[column]
+        try:
+            row = table_element.find_elements(
+                By.XPATH, f'//td[.="{match_text}"]/parent::tr'
+            )[0]
+            cell = row.find_elements(By.CSS_SELECTOR, "td")[column]
+        except IndexError:
+            raise RuntimeError(
+                f"Cannot find table:{table+1},row:{row+1},text:{match_text}. Please check your table data."
+            )
 
         ctx.browser.click(cell)
 
