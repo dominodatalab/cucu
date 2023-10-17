@@ -163,11 +163,10 @@ Feature: Tables
       """
         I wait to see there are "3" rows in the "7th" table
       """
-     When I wait to click the button "Add row after 20 seconds"
-    #  Then I wait to see there are "3" rows in the "7th" table
+     When I wait to click the button "Add row after 15 seconds"
+     Then I wait to see there are "3" rows in the "7th" table
       And I should see the previous step took more than "15" seconds
       And I should see a table that matches the following:
         | Row Number |
         |      2     |
         |      3     |
-      # And I wait to see there are "10" rows in the "7th" table
