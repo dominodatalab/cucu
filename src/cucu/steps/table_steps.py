@@ -353,9 +353,9 @@ def wait_click_table_cell_matching_text(ctx, column, match_text, table):
 
         row = table_element.find_elements(
             By.XPATH, f'//td[.="{match_text}"]/parent::tr'
-        )
+        )[0]
         cell = row.find_elements(By.CSS_SELECTOR, "td")[column]
 
         ctx.browser.click(cell)
 
-    retry(click_table_cell_matching_text)(ctx, column, table, match_text)
+    retry(click_table_cell_matching_text)(ctx, column, match_text, table)
