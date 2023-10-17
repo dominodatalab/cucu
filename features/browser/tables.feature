@@ -153,7 +153,7 @@ Feature: Tables
      When I wait to click the cell corresponding to the "4th" row and "1st" column in the "6th" table
      Then I should see the text "Tokyo clicked"
 
-  Scenario:
+  Scenario: User can wait until a table contains a specified number of rows
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
       And I wait to click the button "Add row immediately"
       And I should see a table that matches the following:
