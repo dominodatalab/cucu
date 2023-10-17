@@ -342,3 +342,25 @@ def wait_click_table_cell(ctx, row, column, table):
     Add 1 to the row number if the table has a header row.
     """
     retry(click_table_cell)(ctx, row, column, table)
+
+
+@step(
+    'I wait to see there are "{row_count:nth}" rows in the "{table:nth}" table'
+)
+def wait_table_row_count(ctx, row_count, table):
+    """
+    Add 1 to the row number if the table has a header row.
+    """
+
+    def find_table_row_count(ctx, row_count, table):
+        table_element = find_table_element(ctx, table)
+        table_rows = table_element.findElements(By.tagName("tr")).length
+
+        if row_count == table_rows:
+            return
+        else:
+            raise RuntimeError(
+                f"Unable to find {row_count} rows in the {table} table. Please check your table data."
+            )
+
+    retry(find_table_row_count)(ctx, row_count, table)
