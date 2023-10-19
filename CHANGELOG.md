@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.169.0
+- Add - enable use with python 3.12
+
 ## 0.168.0
 - Add - step and test for clicking a table column within a table row that has specified text
 
