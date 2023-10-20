@@ -195,12 +195,18 @@ workflows:
       - test:
           name: test-chrome
           browser: chrome
+          requires:
+            - pre-commit
       - test:
           name: test-edge
           browser: edge
+          requires:
+            - test-chrome
       - test:
           name: test-firefox
           browser: firefox
+          requires:
+            - test-chrome
       - publish:
           filters:
             branches:
