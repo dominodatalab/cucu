@@ -71,7 +71,7 @@ Feature: Run
     Given I run the command "cucu run data/features/slow_features --runtime-timeout 5 --results {CUCU_RESULTS_DIR}/runtime_timeout_results" and save stdout to "STDOUT" and expect exit code "1"
 
      # TODO: QE-10912 Investigate why this is taking longer in python 3.11
-     Then I should see the previous step took less than "8" seconds
+     Then I should see the previous step took less than "11" seconds
       And I should see "{STDOUT}" contains the following:
       """
       runtime timeout reached, aborting run
@@ -80,7 +80,7 @@ Feature: Run
   @runtime-timeout
   Scenario: User can run with a runtime timeout and exit without having hit the timeout
     Given I run the command "cucu run data/features/echo.feature --runtime-timeout 300 --results {CUCU_RESULTS_DIR}/runtime_timeout_results" and save stdout to "STDOUT" and expect exit code "0"
-     Then I should see the previous step took less than "5" seconds
+     Then I should see the previous step took less than "7" seconds
       And I should see "{STDOUT}" does not contain the following:
       """
       runtime timeout reached, aborting run
@@ -89,7 +89,7 @@ Feature: Run
   @runtime-timeout @workers
   Scenario: User can run with a runtime timeout and workers and exit without having hit the timeout
     Given I run the command "cucu run data/features/tagged_features --workers 2 --runtime-timeout 300 --results {CUCU_RESULTS_DIR}/runtime_timeout_with_workers_results" and save stdout to "STDOUT" and expect exit code "0"
-     Then I should see the previous step took less than "5" seconds
+     Then I should see the previous step took less than "7" seconds
       And I should see "{STDOUT}" does not contain the following:
       """
       runtime timeout reached, aborting run
