@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.170.0
+- Change - retry ElementNotInteractableException exception when clicking a dynamically generated dropdown option
+
 ## 0.169.0
 - Add - step and test for waiting until a table has a certain number of rows
 
