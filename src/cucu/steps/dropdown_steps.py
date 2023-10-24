@@ -1,12 +1,16 @@
 import logging
 
 import humanize
-from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    ElementNotInteractableException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from tenacity import (
     before_sleep_log,
+    retry_if_exception_type,
     retry_if_result,
     stop_after_attempt,
     wait_fixed,
@@ -152,6 +156,18 @@ def click_dropdown(ctx, dropdown):
             break
 
 
+@retrying(
+    retry=retry_if_exception_type(ElementNotInteractableException),
+    stop=stop_after_attempt(10),
+    wait=wait_fixed(0.1),
+    before_sleep=before_sleep_log(logger, logging.DEBUG),
+    reraise=True,
+)
+def click_dynamic_dropdown_option(ctx, option_element):
+    ctx.browser.execute("arguments[0].scrollIntoView();", option_element)
+    ctx.browser.click(option_element)
+
+
 def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
     """
     find and select dropdown option
@@ -255,8 +271,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
         )
 
     logger.debug("clicking dropdown option")
-    ctx.browser.execute("arguments[0].scrollIntoView();", option_element)
-    ctx.browser.click(option_element)
+    click_dynamic_dropdown_option(ctx, option_element)
 
 
 def assert_dropdown_option_selected(
