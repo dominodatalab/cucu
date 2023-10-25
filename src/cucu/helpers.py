@@ -552,8 +552,8 @@ def define_thing_with_name_in_state_steps(
         logger.debug(f'{thing} {name} was in desired state "{state}"')
 
     @step(f'I should immediately see the {thing} "{{name}}" is {state}')
-    def should_immedieately_see_the_in_state(ctx, thing, name, state, index=0):
-        base_should_see_the_in_state(ctx, thing, name, state, index=0)
+    def should_immediately_see_the_in_state(ctx, name, index=0):
+        base_should_see_the_in_state(ctx, thing, name, index=0)
 
     @step(f'I should see the {thing} "{{name}}" is {state}')
     def should_see_the_in_state(ctx, name):
@@ -579,7 +579,7 @@ def define_thing_with_name_in_state_steps(
     if with_nth:
 
         @step(
-            f'I should_immediately see the "{{nth:nth}}" {thing} "{{name}}" is {state}'
+            f'I should immediately see the "{{nth:nth}}" {thing} "{{name}}" is {state}'
         )
         def base_should_see_the_nth_in_state(ctx, nth, name):
             base_should_see_the_in_state(ctx, thing, name, index=nth)
@@ -669,3 +669,155 @@ def define_run_steps_if_I_can_see_element_with_name_steps(thing, find_func):
             retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
             wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
         )(ctx, name)
+
+
+def define_interaction_on_thing_with_name_steps(
+    thing, action, find_func, action_func, prep: str, i_thing, i_find_func, with_nth=False
+    ):
+    """
+    defines steps with with the following signatures:
+      I {action} the {thing} "{name}" {prep} the {i_thing} "{i_name}"
+      I wait to {action} the {thing} "{name}" {prep} the {i_thing} "{i_name}"
+      I wait up to "{seconds}" seconds to {action} the {thing} "{name}" {prep} the {i_thing} "{i_name}"
+      ...
+      I {action} the {thing} "{name}" {prep} the {i_thing} "{i_name}" if it exists
+
+
+      when with_nth=True we also define:
+
+      I {action} the "{nth}" {thing} "{name}" {prep} the "{i_nth}" {i_thing} "{i_name}"
+      I wait to {action} the "{nth}" {thing} "{name}" {prep} the "{i_nth}" {i_thing} "{i_name}"
+      I wait up to "{seconds}" seconds to {action} the "{nth}" {thing} "{name}" {prep} the "{i_nth}" {i_thing} "{i_name}"
+      ...
+      I {action} the "{nth}" {thing} "{name}" {prep} the "{i_nth}" {i_thing} "{i_name}" if it exists
+
+    parameters:
+        thing(string):       name of the thing we're creating the steps for such
+                             as button, dialog, etc.
+        action(stirng):      the name of the action being performed, such as:
+                             click, disable, etc.
+        find_func(function): function that returns the desired element:
+
+                            def find_func(ctx, name, index=):
+                                '''
+                                ctx(object):  behave context object
+                                name(string): name of the thing to find
+                                index(int):   when there are multiple elements
+                                            with the same name and you've
+                                            specified with_nth=True
+                                '''
+        action_func(function): function that performs the desired action:
+
+                               def action_func(ctx, element):
+                                  '''
+                                  ctx(object):  behave context object
+                                  element(object): the element found
+                                  '''
+        prep(string):        preposition to help with readability as there are
+                             many different prepositions that would be valid for 
+                             a desired action
+        i_thing(string):     name of the thing that is being interacted with
+                             from the defined action
+        with_nth(bool):      when set to True we'll define the expanded set of
+                             "nth" steps. default: False
+    """
+
+    # undecorated def for reference below
+    def base_action_the(ctx, thing, name, i_thing, i_name, index=0, i_index=0, must_exist=True):
+        prefix = nth_to_ordinal(index)
+        i_prefix = nth_to_ordinal(i_index)
+
+        element = find_func(ctx, name, index=index)
+        i_element = i_find_func(ctx, i_name, i_index)
+
+        if element is None:
+            if must_exist:
+                raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
+        if i_element is None:
+            if must_exist:
+                raise RuntimeError(f'unable to find the {i_prefix}{i_thing} "{i_name}"')
+
+        action_func(ctx, element, i_element)
+        logger.debug(
+            f'Successfully executed {action} {prefix}{thing} "{name}" {prep} {i_prefix}{i_thing} "{i_name}"'
+        )
+
+    @step(f'I immediately {action} the {thing} "{{name}}" {prep} the {i_thing} "{{i_name}}"')
+    def immediately_action_the(ctx, name, i_name):
+        base_action_the(ctx, thing, name, i_thing, i_name)
+
+    @step(f'I {action} the {thing} "{{name}}" {prep} the {i_thing} "{{i_name}}"')
+    def action_the(ctx, name, i_name):
+        retry(
+            base_action_the,
+            retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+            wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+        )(ctx, thing, name, i_thing, i_name)
+
+    @step(f'I immediately {action} the {thing} "{{name}}" {prep} the {i_thing} "{{i_name}}" if it exists')
+    def immediately_action_the_if_thing_exists(ctx, name, i_name):
+        base_action_the(ctx, thing, name, i_thing, i_name, must_exist=False)
+
+    @step(f'I {action} the {thing} "{{name}}" {prep} the {i_thing} "{{i_name}}" if it exists')
+    def action_the_thing_if_it_exists(ctx, name, i_name):
+        retry(
+            base_action_the,
+            retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+            wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+        )(ctx, thing, name, i_thing, i_name , must_exist=False)
+
+    @step(f'I wait to {action} the {thing} "{{name}}" {prep} the {i_thing} "{{i_name}}"')
+    def wait_to_action_the(ctx, name, i_name):
+        retry(base_action_the)(ctx, thing, name, i_thing, i_name)
+
+    @step(f'I wait to {action} the {thing} "{{name}}" {prep} the {i_thing} "{{i_name}}" if it exists')
+    def wait_to_action_the_thing_if_it_exists(ctx, name, i_name):
+        retry(base_action_the)(ctx, thing, name, i_thing, i_name, must_exist=False)
+
+    @step(
+        f'I wait up to "{{seconds}}" seconds to {action} the {thing} "{{name}}" {prep} the {i_thing} "{{i_name}}"'
+    )
+    def wait_up_to_seconds_to_action_the(ctx, seconds, name, i_name):
+        seconds = float(seconds)
+        retry(base_action_the, wait_up_to_s=seconds)(ctx, thing, name, i_thing, i_name)
+
+    if with_nth:
+
+        @step(f'I immediately {action} the "{{nth:nth}}" {thing} "{{name}}" {prep} the "{{i_nth:nth}}" {i_thing} "{{i_name}}"')
+        def immediately_action_the_nth_i_nth(ctx, nth, name, i_nth, i_name):
+            base_action_the(ctx, thing, name, i_thing, i_name, index=nth, i_index=i_nth)
+
+        @step(f'I {action} the "{{nth:nth}}" {thing} "{{name}}" {prep} the "{{i_nth:nth}}" {i_thing} "{{i_name}}"')
+        def action_the_nth_i_nth(ctx, nth, name, i_nth, i_name):
+            retry(
+                base_action_the,
+                retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+                wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+            )(ctx, thing, name, i_thing, i_name, index=nth, i_index=i_nth)
+
+        @step(
+            f'I immediately {action} the "{{nth:nth}}" {thing} "{{name}}" {prep} the "{{i_nth:nth}}" {i_thing} "{{i_name}}" if it exists'
+        )
+        def immediately_action_the_nth_thing_if_thing_exists(ctx, nth, name, i_nth, i_name):
+            base_action_the(ctx, thing, name, i_thing, i_name, index=nth, i_index=i_nth, must_exist=False)
+
+        @step(f'I {action} the "{{nth:nth}}" {thing} "{{name}}" {prep} the "{{i_nth:nth}}" {i_thing} "{{i_name}}" if it exists')
+        def action_the_nth_thing_if_thing_exists(ctx, nth, name, i_nth, i_name):
+            retry(
+                base_action_the,
+                retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
+                wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+            )(ctx, thing, name, i_thing, i_name, index=nth, i_index=i_nth, must_exist=False)
+
+        @step(f'I wait to {action} the "{{nth:nth}}" {thing} "{{name}}" {prep} the "{{i_nth:nth}}" {i_thing} "{{i_name}}"')
+        def wait_to_action_the_nth_ith(ctx, nth, name, i_nth, i_name):
+            retry(base_action_the)(ctx, thing, name, i_thing, i_name, index=nth, i_index=i_nth)
+
+        @step(
+            f'I wait up to "{{seconds}}" seconds to {action} the "{{nth:nth}}" {thing} "{{name}}" {prep} the "{{i_nth:nth}}" {i_thing} "{{i_name}}"'
+        )
+        def wait_up_to_action_the_nth_i_nth(ctx, seconds, nth, name, i_nth, i_name):
+            seconds = float(seconds)
+            retry(base_action_the, wait_up_to_s=seconds)(
+                ctx, thing, name, i_thing, i_name, index=nth, i_index=i_nth
+            )
