@@ -90,7 +90,7 @@ executors:
   firefox-test-executor:
     docker:
       - image: python:3.11.4
-      - image: selenium/standalone-firefox:114.0-geckodriver-0.33-20230614
+      - image: selenium/standalone-firefox:117.0
         environment:
           SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
@@ -101,7 +101,7 @@ executors:
   edge-test-executor:
     docker:
       - image: python:3.11.4
-      - image: selenium/standalone-edge:114.0-edgedriver-114.0-20230614
+      - image: selenium/standalone-edge:117.0
         environment:
           SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
