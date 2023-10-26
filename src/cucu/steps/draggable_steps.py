@@ -1,5 +1,5 @@
 import humanize
-from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
 
 from cucu import fuzzy, helpers, logger
 
@@ -63,14 +63,83 @@ def find_target_element(ctx, name, index=0):
     return _element
 
 
-def drag_element_to_element(ctx, drag_name, drop_name):
-    start_drag_rect = drag_name.rect
-    logger.info(f"Start location of drag element: {start_drag_rect}")
+JS_DRAG_AND_DROP = """
+var dragElem = arguments[0];
+var dropElem = arguments[1];
+var completed = false;
 
-    action = ActionChains(ctx.browser.driver)
-    action.click_and_hold(drag_name).move_to_element(drop_name).release(
-        drop_name
-    ).perform()
+console.log("JavaScript drag-and-drop sequence initiated.");
+
+// Create and dispatch 'dragstart' event on dragElem
+var dragStartEvent = new DragEvent('dragstart', {
+  bubbles: true,
+  cancelable: true,
+  composed: true,
+  dataTransfer: new DataTransfer(),
+});
+console.log("Dispatching dragstart event");
+dragElem.dispatchEvent(dragStartEvent);
+
+setTimeout(() => {
+  // Create and dispatch 'dragenter' event on dropElem
+  var dragEnterEvent = new DragEvent('dragenter', {
+    bubbles: true,
+    cancelable: true,
+    composed: true,
+    dataTransfer: dragStartEvent.dataTransfer,
+  });
+  console.log("Dispatching dragenter event");
+  dropElem.dispatchEvent(dragEnterEvent);
+
+  setTimeout(() => {
+    // Create and dispatch 'drop' event on dropElem
+    var dropEvent = new DragEvent('drop', {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      dataTransfer: dragStartEvent.dataTransfer,
+    });
+    console.log("Dispatching drop event");
+    dropElem.dispatchEvent(dropEvent);
+
+    setTimeout(() => {
+      // Create and dispatch 'dragend' event on dragElem
+      var dragEndEvent = new DragEvent('dragend', {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        dataTransfer: dropEvent.dataTransfer,
+      });
+      console.log("Dispatching dragend event");
+      dragElem.dispatchEvent(dragEndEvent);
+
+      console.log("JavaScript drag-and-drop sequence completed.");
+      completed = true;
+      window.dragAndDropCompleted = completed;
+
+    }, 100);  // End of 'dragend' event
+
+  }, 100);  // End of 'drop' event
+
+}, 100);  // End of 'dragenter' event
+"""
+
+
+def drag_element_to_element(ctx, drag_name, drop_name):
+    driver = ctx.browser.driver
+
+    start_drag_rect = drag_name.rect
+    logger.debug(f"Start location of drag element: {start_drag_rect}")
+    logger.debug("Executing drag-and-drop via JavaScript.")
+
+    driver.execute_script(JS_DRAG_AND_DROP, drag_name, drop_name)
+
+    # Wait for the JavaScript flag to be set to True
+    WebDriverWait(driver, 10).until(
+        lambda driver: driver.execute_script(
+            "return window.dragAndDropCompleted;"
+        )
+    )
 
     end_drag_rect = drag_name.rect
     logger.info(f"End location of drag element: {end_drag_rect}")
@@ -80,7 +149,9 @@ def drag_element_to_element(ctx, drag_name, drop_name):
             "Drag element position did not change after drag and drop operation!"
         )
     else:
-        logger.info("Drag element position changed successfully!")
+        logger.debug("Drag element position changed successfully.")
+
+    logger.debug("Drag-and-drop operation executed.")
 
 
 helpers.define_thing_with_name_in_state_steps(

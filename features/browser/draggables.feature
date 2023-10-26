@@ -22,14 +22,17 @@ Feature: Draggables
     Given I wait to see the text "Drag"
      When I should immediately see the "3rd" element "Drop Here" is not draggable
 
+  @dev
   Scenario: User can drag an element to an element
     Given I wait to see the text "Drag"
-     When I immediately drag the element "Drag Me 1" to the element "Drop Here 1"
+     When I drag the element "Drag Me 1" to the element "Drop Here 1"
 
+  @dev
   Scenario: User can drag an nth element to an same nth element
     Given I wait to see the text "Drag"
-     When I immediately drag the "1st" element "Drag Me" to the "1st" element "Drop Here"
+     When I drag the "1st" element "Drag Me" to the "1st" element "Drop Here"
 
+  @dev
   Scenario: User can drag an nth element to an different nth element
     Given I wait to see the text "Drag"
-     When I immediately drag the "2nd" element "Drag Me" to the "3rd" element "Drop Here"
+     When I drag the "2nd" element "Drag Me" to the "3rd" element "Drop Here"
