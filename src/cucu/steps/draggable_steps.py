@@ -6,7 +6,11 @@ from cucu import fuzzy, helpers, logger
 
 def find_draggable_element(ctx, name, index=0):
     """
+    find a draggable element on screen by fuzzy matching on the name provided
+    and the target element:
+
         * <* draggable="true">
+
     parameters:
       ctx(object): behave context object used to share data between steps
       name(str):   name that identifies the desired draggable element on screen
