@@ -133,7 +133,7 @@ def drag_element_to_element(ctx, drag_name, drop_name):
     driver = ctx.browser.driver
 
     start_drag_rect = drag_name.rect
-    logger.debug(f"Start location of drag element: {start_drag_rect}")
+    logger.info(f"Start location of drag element: {start_drag_rect}")
     logger.debug("Executing drag-and-drop via JavaScript.")
 
     driver.execute_script(JS_DRAG_AND_DROP, drag_name, drop_name)
@@ -178,21 +178,21 @@ helpers.define_thing_with_name_in_state_steps(
     with_nth=True,
 )
 
-helpers.define_interaction_on_thing_with_name_steps(
-    "element",
+helpers.define_two_thing_interaction_steps(
     "drag",
-    find_draggable_element,
     drag_element_to_element,
+    "element",
+    find_draggable_element,
     "to",
     "element",
     find_target_element,
 )
 
-helpers.define_interaction_on_thing_with_name_steps(
-    "element",
+helpers.define_two_thing_interaction_steps(
     "drag",
-    find_draggable_element,
     drag_element_to_element,
+    "element",
+    find_draggable_element,
     "to",
     "element",
     find_target_element,
