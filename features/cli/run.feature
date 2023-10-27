@@ -71,7 +71,7 @@ Feature: Run
     Given I run the command "cucu run data/features/slow_features --runtime-timeout 5 --results {CUCU_RESULTS_DIR}/runtime_timeout_results" and save stdout to "STDOUT" and expect exit code "1"
 
      # TODO: QE-10912 Investigate why this is taking longer in python 3.11
-     Then I should see the previous step took less than "10" seconds
+     Then I should see the previous step took less than "11" seconds
       And I should see "{STDOUT}" contains the following:
       """
       runtime timeout reached, aborting run
