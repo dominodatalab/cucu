@@ -74,11 +74,11 @@ commands:
 executors:
   unit-test-executor:
     docker:
-      - image: python:3.11.4
+      - image: cimg/python:3.11.4
 
   chrome-test-executor:
     docker:
-      - image: python:3.11.4
+      - image: cimg/python:3.11.4
       - image: selenium/standalone-chrome:117.0
         environment:
           SE_NODE_MAX_SESSIONS: 12
@@ -89,7 +89,7 @@ executors:
 
   firefox-test-executor:
     docker:
-      - image: python:3.11.4
+      - image: cimg/python:3.11.4
       - image: selenium/standalone-firefox:117.0
         environment:
           SE_NODE_MAX_SESSIONS: 12
@@ -100,7 +100,7 @@ executors:
 
   edge-test-executor:
     docker:
-      - image: python:3.11.4
+      - image: cimg/python:3.11.4
       - image: selenium/standalone-edge:117.0
         environment:
           SE_NODE_MAX_SESSIONS: 12
