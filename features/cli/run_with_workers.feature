@@ -1,3 +1,4 @@
+@runtime-timeout
 @workers
 Feature: Run with workers
   As a developer I want tests to be parallelized using workers and run as
