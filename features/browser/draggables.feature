@@ -10,26 +10,48 @@ Feature: Draggables
      When I wait to see the text "Drag"
      Then I should immediately see the element "Drag Me 1" is draggable
 
-  Scenario: User can see that an nth element is draggable
-     When I wait to see the text "Drag"
-     Then I should immediately see the "2nd" element "Drag Me" is draggable
-
   Scenario: User can see that an element is not draggable
      When I wait to see the text "Drag"
      Then I should immediately see the element "Drop Here 2" is not draggable
-
-  Scenario: User can see that an nth element is not draggable
-     When I wait to see the text "Drag"
-     Then I should immediately see the "3rd" element "Drop Here" is not draggable
 
   Scenario: User can drag an element to an element
      When I wait to see the text "Drag"
      Then I drag the element "Drag Me 1" to the element "Drop Here 1"
 
-  Scenario: User can drag an nth element to the same nth element
+  Scenario: User can drag an element to an element if they exist and they both exist
      When I wait to see the text "Drag"
-     Then I drag the "1st" element "Drag Me" to the "1st" element "Drop Here"
+     Then I drag the element "Drag Me 1" to the element "Drop Here 1" if they both exist
 
-  Scenario: User can drag an nth element to a different nth element
+  @negative
+  Scenario: User cannot drag element as the drop element does not exist
      When I wait to see the text "Drag"
-     Then I drag the "2nd" element "Drag Me" to the "3rd" element "Drop Here"
+     Then I expect the following step to fail with "Unable to find the element \"Nonexistent drop\""
+     """
+      When I drag the element "Drag Me 1" to the element "Nonexistent drop"
+     """
+
+  @negative
+  Scenario: User cannot drag element as the drag element does not exist
+     When I wait to see the text "Drag"
+     Then I expect the following step to fail with "Unable to find the element \"Nonexistent drag\""
+     """
+      When I drag the element "Nonexistent drag" to the element "Drop Here 1"
+     """
+
+  @negative
+  Scenario: User cannot perform drag action as neither elements exist
+     When I wait to see the text "Drag"
+     Then I expect the following step to fail with "Unable to find the element \"Nonexistent drag\", Unable to find the element \"Nonexistent drop\""
+     """
+      When I drag the element "Nonexistent drag" to the element "Nonexistent drop"
+     """
+
+  @negative
+  Scenario: User can drag an element to an element if they exist but drag element does not exist
+     When I wait to see the text "Drag"
+     Then I drag the element "Nonexistent drag" to the element "Drop Here 1" if they both exist
+
+  @negative
+  Scenario: User can drag an element to an element if they exist but drop element does not exist
+     When I wait to see the text "Drag"
+     Then I drag the element "Drag Me 1" to the element "Nonexistent drop" if they both exist

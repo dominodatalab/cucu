@@ -1,4 +1,3 @@
-import humanize
 from selenium.webdriver.support.ui import WebDriverWait
 
 from cucu import fuzzy, helpers, logger
@@ -22,13 +21,6 @@ def find_draggable_element(ctx, name, index=0):
     _element = fuzzy.find(
         ctx.browser, name, ['*[draggable="true"]'], index=index
     )
-
-    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
-
-    if _element is None:
-        raise RuntimeError(
-            f"Could not find {prefix}element {name} or it is not draggable"
-        )
 
     return _element
 
@@ -58,11 +50,6 @@ def is_not_draggable(element):
 def find_target_element(ctx, name, index=0):
     ctx.check_browser_initialized()
     _element = fuzzy.find(ctx.browser, name, ["*"], index=index)
-
-    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
-
-    if _element is None:
-        raise RuntimeError(f"Could not find {prefix}element {name}")
 
     return _element
 
@@ -132,8 +119,12 @@ setTimeout(() => {
 def drag_element_to_element(ctx, drag_name, drop_name):
     driver = ctx.browser.driver
 
+    driver.execute_script("window.dragAndDropCompleted = false;")
+
     start_drag_rect = drag_name.rect
-    logger.info(f"Start location of drag element: {start_drag_rect}")
+    logger.info(
+        f"Start location of drag element {drag_name.text}: {start_drag_rect}"
+    )
     logger.debug("Executing drag-and-drop via JavaScript.")
 
     driver.execute_script(JS_DRAG_AND_DROP, drag_name, drop_name)
@@ -146,7 +137,9 @@ def drag_element_to_element(ctx, drag_name, drop_name):
     )
 
     end_drag_rect = drag_name.rect
-    logger.info(f"End location of drag element: {end_drag_rect}")
+    logger.info(
+        f"End location of drag element {drag_name.text}: {end_drag_rect}"
+    )
 
     if start_drag_rect == end_drag_rect:
         raise RuntimeError(

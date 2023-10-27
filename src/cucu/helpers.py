@@ -753,25 +753,25 @@ def define_two_thing_interaction_steps(
         prefix_1 = nth_to_ordinal(index_1)
         prefix_2 = nth_to_ordinal(index_2)
 
-        element = thing_1_find_func(ctx, name_1, index_1)
-        i_element = thing_2_find_func(ctx, name_2, index_2)
+        element_1 = thing_1_find_func(ctx, name_1, index_1)
+        element_2 = thing_2_find_func(ctx, name_2, index_2)
 
-        if element is None or i_element is None:
+        if element_1 is None or element_2 is None:
             if must_exist:
                 error_message = []
-                if element is None:
+                if element_1 is None:
                     error_message.append(
                         f'Unable to find the {prefix_1}{thing_1} "{name_1}"'
                     )
-                if i_element is None:
+                if element_2 is None:
                     error_message.append(
                         f'Unable to find the {prefix_2}{thing_2} "{name_2}"'
                     )
 
-                raise RuntimeError(" ".join(error_message))
+                raise RuntimeError(", ".join(error_message))
 
         else:
-            action_func(ctx, element, i_element)
+            action_func(ctx, element_1, element_2)
             logger.debug(
                 f'Successfully executed {action} {prefix_1}{thing_1} "{name_1}" {preposition} {prefix_2}{thing_2} "{name_2}"'
             )
