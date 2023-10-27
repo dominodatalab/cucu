@@ -25,7 +25,7 @@ commands:
   build_cucu_python_package: &build_cucu_python_package
     steps:
       - run:
-          name: build the cucu python pa12.0
+          name: build the cucu python package
           command: poetry build
 
   install_cucu_globally: &install_cucu_globally
