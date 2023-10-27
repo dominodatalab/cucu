@@ -7,29 +7,29 @@ Feature: Draggables
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/draggables.html"
 
   Scenario: User can see that an element is draggable
-    Given I wait to see the text "Drag"
-     When I should immediately see the element "Drag Me 1" is draggable
+     When I wait to see the text "Drag"
+     Then I should immediately see the element "Drag Me 1" is draggable
 
   Scenario: User can see that an nth element is draggable
-    Given I wait to see the text "Drag"
-     When I should immediately see the "2nd" element "Drag Me" is draggable
+     When I wait to see the text "Drag"
+     Then I should immediately see the "2nd" element "Drag Me" is draggable
 
   Scenario: User can see that an element is not draggable
-    Given I wait to see the text "Drag"
-     When I should immediately see the element "Drop Here 2" is not draggable
+     When I wait to see the text "Drag"
+     Then I should immediately see the element "Drop Here 2" is not draggable
 
   Scenario: User can see that an nth element is not draggable
-    Given I wait to see the text "Drag"
-     When I should immediately see the "3rd" element "Drop Here" is not draggable
+     When I wait to see the text "Drag"
+     Then I should immediately see the "3rd" element "Drop Here" is not draggable
 
   Scenario: User can drag an element to an element
-    Given I wait to see the text "Drag"
-     When I drag the element "Drag Me 1" to the element "Drop Here 1"
+     When I wait to see the text "Drag"
+     Then I drag the element "Drag Me 1" to the element "Drop Here 1"
 
   Scenario: User can drag an nth element to the same nth element
-    Given I wait to see the text "Drag"
-     When I drag the "1st" element "Drag Me" to the "1st" element "Drop Here"
+     When I wait to see the text "Drag"
+     Then I drag the "1st" element "Drag Me" to the "1st" element "Drop Here"
 
   Scenario: User can drag an nth element to a different nth element
-    Given I wait to see the text "Drag"
-     When I drag the "2nd" element "Drag Me" to the "3rd" element "Drop Here"
+     When I wait to see the text "Drag"
+     Then I drag the "2nd" element "Drag Me" to the "3rd" element "Drop Here"
