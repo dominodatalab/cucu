@@ -14,6 +14,11 @@ Feature: Duplicate Draggables
      When I wait to see the text "Drag"
      Then I should immediately see the "3rd" element "Drop Here" is not draggable
 
+  Scenario: User can see that a parent nth element is not draggable with a child nth element that is draggable
+     When I wait to see the text "Drag"
+     Then I drag the "2nd" element "Drag Me" to the "2nd" element "Drop Here"
+      And I should immediately see the "2nd" element "Drop Here" is not draggable
+
   Scenario: User can drag an nth element to the same nth element
      When I wait to see the text "Drag"
      Then I drag the "3rd" element "Drag Me" to the "3rd" element "Drop Here"

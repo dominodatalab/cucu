@@ -14,6 +14,11 @@ Feature: Draggables
      When I wait to see the text "Drag"
      Then I should immediately see the element "Drop Here 2" is not draggable
 
+  Scenario: User can see that a parent element is not draggable with a child element that is draggable
+     When I wait to see the text "Drag"
+     Then I drag the element "Drag Me 1" to the element "Drop Here 1"
+      And I should immediately see the element "Drop Here 1" is not draggable
+
   Scenario: User can drag an element to an element
      When I wait to see the text "Drag"
      Then I drag the element "Drag Me 1" to the element "Drop Here 1"
