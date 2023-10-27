@@ -26,10 +26,10 @@ Feature: Draggables
     Given I wait to see the text "Drag"
      When I drag the element "Drag Me 1" to the element "Drop Here 1"
 
-  Scenario: User can drag an nth element to an same nth element
+  Scenario: User can drag an nth element to the same nth element
     Given I wait to see the text "Drag"
      When I drag the "1st" element "Drag Me" to the "1st" element "Drop Here"
 
-  Scenario: User can drag an nth element to an different nth element
+  Scenario: User can drag an nth element to a different nth element
     Given I wait to see the text "Drag"
      When I drag the "2nd" element "Drag Me" to the "3rd" element "Drop Here"
