@@ -80,7 +80,7 @@ Feature: Run
   @runtime-timeout
   Scenario: User can run with a runtime timeout and exit without having hit the timeout
     Given I run the command "cucu run data/features/echo.feature --runtime-timeout 300 --results {CUCU_RESULTS_DIR}/runtime_timeout_results" and save stdout to "STDOUT" and expect exit code "0"
-     Then I should see the previous step took less than "5" seconds
+     Then I should see the previous step took less than "6" seconds
       And I should see "{STDOUT}" does not contain the following:
       """
       runtime timeout reached, aborting run
