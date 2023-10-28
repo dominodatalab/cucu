@@ -55,64 +55,36 @@ def find_target_element(ctx, name, index=0):
 
 
 JS_DRAG_AND_DROP = """
-var dragElem = arguments[0];
-var dropElem = arguments[1];
-var completed = false;
+    const cucuDragAndDrop = async (dragElem, dropElem) => {
 
-console.log("JavaScript drag-and-drop sequence initiated.");
+    function triggerEvent(elem, eventName, dataTransfer = null) {
+        return new Promise((resolve) => {
+            const eventObj = new DragEvent(eventName, {
+                bubbles: true,
+                cancelable: true,
+                composed: true,
+                dataTransfer: dataTransfer,
+            });
 
-// Create and dispatch 'dragstart' event on dragElem
-var dragStartEvent = new DragEvent('dragstart', {
-  bubbles: true,
-  cancelable: true,
-  composed: true,
-  dataTransfer: new DataTransfer(),
-});
-console.log("Dispatching dragstart event");
-dragElem.dispatchEvent(dragStartEvent);
+            function listener() {
+                resolve(eventObj);
+                elem.removeEventListener(eventName, listener);
+            }
 
-setTimeout(() => {
-  // Create and dispatch 'dragenter' event on dropElem
-  var dragEnterEvent = new DragEvent('dragenter', {
-    bubbles: true,
-    cancelable: true,
-    composed: true,
-    dataTransfer: dragStartEvent.dataTransfer,
-  });
-  console.log("Dispatching dragenter event");
-  dropElem.dispatchEvent(dragEnterEvent);
+            elem.addEventListener(eventName, listener);
+            elem.dispatchEvent(eventObj);
+        });
+    }
 
-  setTimeout(() => {
-    // Create and dispatch 'drop' event on dropElem
-    var dropEvent = new DragEvent('drop', {
-      bubbles: true,
-      cancelable: true,
-      composed: true,
-      dataTransfer: dragStartEvent.dataTransfer,
-    });
-    console.log("Dispatching drop event");
-    dropElem.dispatchEvent(dropEvent);
+    const dragstartObj = await triggerEvent(dragElem, 'dragstart', new DataTransfer());
+    await triggerEvent(dropElem, 'dragenter', dragstartObj.dataTransfer);
+    const dropeventObj = await triggerEvent(dropElem, 'drop', dragstartObj.dataTransfer);
+    await triggerEvent(dragElem, 'dragend', dropeventObj.dataTransfer);
 
-    setTimeout(() => {
-      // Create and dispatch 'dragend' event on dragElem
-      var dragEndEvent = new DragEvent('dragend', {
-        bubbles: true,
-        cancelable: true,
-        composed: true,
-        dataTransfer: dropEvent.dataTransfer,
-      });
-      console.log("Dispatching dragend event");
-      dragElem.dispatchEvent(dragEndEvent);
+    window.dragAndDropCompleted = true;
+    };
 
-      console.log("JavaScript drag-and-drop sequence completed.");
-      completed = true;
-      window.dragAndDropCompleted = completed;
-
-    }, 100);  // End of 'dragend' event
-
-  }, 100);  // End of 'drop' event
-
-}, 100);  // End of 'dragenter' event
+    cucuDragAndDrop(arguments[0], arguments[1]);
 """
 
 
