@@ -39,12 +39,20 @@ def generate_image_filename(step_index, step_name):
      - filename does not exceed 255 chars (OS limitation)
      - unique even when truncated
     """
+    max_filename = 255 - len(".png")
     escaped_step_name = CONFIG.hide_secrets(step_name).replace("/", "_")
-    prefix = f"{step_index} - {escaped_step_name}"
-    if len(prefix) > 251:
-        md5sum = hashlib.md5(prefix.encode("utf-8")).hexdigest()[:7]
-        prefix = prefix[: 251 - len(md5sum)] + md5sum
-    return f"{prefix}.png"
+    filename = f"{step_index} - {escaped_step_name}"
+
+    if len(filename) > max_filename:
+        ellipsis = "..."
+        # save the last chars as the ending often important
+        end_count = 10
+        front_count = max_filename - (len(ellipsis) + end_count)
+        filename = (
+            filename[:front_count] + ellipsis + filename[-1 * end_count :]
+        )
+
+    return f"{filename}.png"
 
 
 def check_browser_initialized(ctx):
