@@ -54,7 +54,7 @@ pebble = "^5.0.3"
 pygls = "^1.0"
 PyYAML = "^6.0"
 requests = "^2.27.1"
-selenium = "^4.10"
+selenium = "^4.14"
 tabulate = "^0.9"
 tenacity = "^8.0.1"
 
