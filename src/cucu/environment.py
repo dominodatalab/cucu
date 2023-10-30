@@ -42,7 +42,7 @@ def generate_image_filename(step_index, step_name):
     escaped_step_name = CONFIG.hide_secrets(step_name).replace("/", "_")
     prefix = f"{step_index} - {escaped_step_name}"
     if len(prefix) > 251:
-        md5sum = hashlib.md5(prefix.encode("utf-8")).hexdigest()
+        md5sum = hashlib.md5(prefix.encode("utf-8")).hexdigest()[:7]
         prefix = prefix[: 251 - len(md5sum)] + md5sum
     return f"{prefix}.png"
 
