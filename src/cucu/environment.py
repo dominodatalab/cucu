@@ -37,7 +37,7 @@ def generate_image_filename(step_index, step_name):
      - hides secrets
      - escaped
      - filename does not exceed 255 chars (OS limitation)
-     - unique even when truncated
+     - uniqueness comes from step number
     """
     max_filename = 255 - len(".png")
     escaped_step_name = CONFIG.hide_secrets(step_name).replace("/", "_")
