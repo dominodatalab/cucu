@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "cucu"
-version = "0.171.0"
+version = "0.172.0"
 license = "MIT"
 description = "Easy BDD web testing"
 authors = ["Domino Data Lab <open-source@dominodatalab.com>"]
 readme = "README.md"
-homepage = ""
-repository = ""
+homepage = "https://github.com/cerebrotech/cucu"
+repository = "https://github.com/cerebrotech/cucu"
 keywords = ["cucumber", "selenium"]
 classifiers = [
     "Development Status :: 4 - Beta",
