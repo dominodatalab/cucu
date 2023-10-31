@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.173.0
+- Add - functions and steps for dragging and dropping elements
+- Add - add helper function for two interacting elements
+
 ## 0.172.0
 - Add repository and homepage fields to solve an issue with pip/poetry failing to install this package.
 
