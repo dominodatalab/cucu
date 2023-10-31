@@ -748,7 +748,6 @@ def define_two_thing_interaction_steps(
         name_2,
         index_1=0,
         index_2=0,
-        must_exist=True,
     ):
         prefix_1 = nth_to_ordinal(index_1)
         prefix_2 = nth_to_ordinal(index_2)
@@ -757,18 +756,17 @@ def define_two_thing_interaction_steps(
         element_2 = thing_2_find_func(ctx, name_2, index_2)
 
         if element_1 is None or element_2 is None:
-            if must_exist:
-                error_message = []
-                if element_1 is None:
-                    error_message.append(
-                        f'Unable to find the {prefix_1}{thing_1} "{name_1}"'
-                    )
-                if element_2 is None:
-                    error_message.append(
-                        f'Unable to find the {prefix_2}{thing_2} "{name_2}"'
-                    )
+            error_message = []
+            if element_1 is None:
+                error_message.append(
+                    f'Unable to find the {prefix_1}{thing_1} "{name_1}"'
+                )
+            if element_2 is None:
+                error_message.append(
+                    f'Unable to find the {prefix_2}{thing_2} "{name_2}"'
+                )
 
-                raise RuntimeError(", ".join(error_message))
+            raise RuntimeError(", ".join(error_message))
 
         else:
             action_func(ctx, element_1, element_2)
@@ -793,34 +791,10 @@ def define_two_thing_interaction_steps(
         )(ctx, thing_1, name_1, thing_2, name_2)
 
     @step(
-        f'I immediately {action} the {thing_1} "{{name_1}}" {preposition} the {thing_2} "{{name_2}}" if they both exist'
-    )
-    def immediately_action_the_if_thing_exists(ctx, name_1, name_2):
-        base_action_the(ctx, thing_1, name_1, thing_2, name_2, must_exist=False)
-
-    @step(
-        f'I {action} the {thing_1} "{{name_1}}" {preposition} the {thing_2} "{{name_2}}" if they both exist'
-    )
-    def action_the_thing_if_it_exists(ctx, name_1, name_2):
-        retry(
-            base_action_the,
-            retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
-            wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
-        )(ctx, thing_1, name_1, thing_2, name_2, must_exist=False)
-
-    @step(
         f'I wait to {action} the {thing_1} "{{name_1}}" {preposition} the {thing_2} "{{name_2}}"'
     )
     def wait_to_action_the(ctx, name_1, name_2):
         retry(base_action_the)(ctx, thing_1, name_1, thing_2, name_2)
-
-    @step(
-        f'I wait to {action} the {thing_1} "{{name_1}}" {preposition} the {thing_2} "{{name_2}}" if they both exist'
-    )
-    def wait_to_action_the_thing_if_it_exists(ctx, name_1, name_2):
-        retry(base_action_the)(
-            ctx, thing_1, name_1, thing_2, name_2, must_exist=False
-        )
 
     @step(
         f'I wait up to "{{seconds}}" seconds to {action} the {thing_1} "{{name_1}}" {preposition} the {thing_2} "{{name_2}}"'
@@ -863,44 +837,6 @@ def define_two_thing_interaction_steps(
                 name_2,
                 index_1=nth_1,
                 index_2=nth_2,
-            )
-
-        @step(
-            f'I immediately {action} the "{{nth_1:nth}}" {thing_1} "{{name_1}}" {preposition} the "{{nth_2:nth}}" {thing_2} "{{name_2}}" if they both exist'
-        )
-        def immediately_action_the_nth_thing_if_thing_exists(
-            ctx, nth_1, name_1, nth_2, name_2
-        ):
-            base_action_the(
-                ctx,
-                thing_1,
-                name_1,
-                thing_2,
-                name_2,
-                index_1=nth_1,
-                index_2=nth_2,
-                must_exist=False,
-            )
-
-        @step(
-            f'I {action} the "{{nth_1:nth}}" {thing_1} "{{name_1}}" {preposition} the "{{nth_2:nth}}" {thing_2} "{{name_2}}" if they both exist'
-        )
-        def action_the_nth_thing_if_thing_exists(
-            ctx, nth_1, name_1, nth_2, name_2
-        ):
-            retry(
-                base_action_the,
-                retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
-                wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
-            )(
-                ctx,
-                thing_1,
-                name_1,
-                thing_2,
-                name_2,
-                index_1=nth_1,
-                index_2=nth_2,
-                must_exist=False,
             )
 
         @step(

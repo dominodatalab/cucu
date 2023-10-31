@@ -94,7 +94,7 @@ def drag_element_to_element(ctx, drag_name, drop_name):
     driver.execute_script("window.dragAndDropCompleted = false;")
 
     start_drag_rect = drag_name.rect
-    logger.info(
+    logger.debug(
         f"Start location of drag element {drag_name.text}: {start_drag_rect}"
     )
     logger.debug("Executing drag-and-drop via JavaScript.")
@@ -109,13 +109,13 @@ def drag_element_to_element(ctx, drag_name, drop_name):
     )
 
     end_drag_rect = drag_name.rect
-    logger.info(
+    logger.debug(
         f"End location of drag element {drag_name.text}: {end_drag_rect}"
     )
 
     if start_drag_rect == end_drag_rect:
         raise RuntimeError(
-            "Drag element position did not change after drag and drop operation!"
+            f"Drag element {drag_name.text} position did not change"
         )
     else:
         logger.debug("Drag element position changed successfully.")
