@@ -14,6 +14,7 @@ import jinja2
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
+from cucu.environment import generate_image_filename
 
 
 def escape(data):
@@ -175,8 +176,8 @@ def generate(results, basepath, only_failures=False):
                 if show_status:
                     print("s", end="", flush=True)
                 total_steps += 1
-                image_filename = (
-                    f"{step_index} - {step['name'].replace('/', '_')}.png"
+                image_filename = generate_image_filename(
+                    step_index, step["name"]
                 )
                 image_filepath = os.path.join(scenario_filepath, image_filename)
 

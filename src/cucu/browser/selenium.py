@@ -194,7 +194,6 @@ class Selenium(Browser):
             raise Exception(f"unknown browser {browser}")
 
         self.driver.set_window_size(width, height)
-        self.wait_for_page_to_load()
 
     def get_log(self):
         if config.CONFIG["CUCU_BROWSER"] == "firefox":

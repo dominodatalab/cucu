@@ -1,6 +1,7 @@
 import pkgutil
 from enum import Enum
 
+from cucu import logger
 from cucu.browser.frames import search_in_all_frames
 
 
@@ -27,17 +28,15 @@ def init(browser):
     parameters:
         browser - ...
     """
-    browser.execute(load_jquery_lib())
+    script = "return typeof cucu !== 'undefined' && typeof cucu.fuzzy_find === 'function';"
+    cucu_injected = browser.execute(script)
+    if cucu_injected:
+        # cucu fuzzy find already exists
+        return
 
-    # to prevent interference with the jQuery used on the web page
-    browser.execute("window.jqCucu = jQuery.noConflict(true);")
-    script = "return window.jqCucu && jqCucu.fn.jquery;"
-    jquery_version = browser.execute(script)
-
-    while jquery_version is None or not jquery_version.startswith("3.5.1"):
-        jquery_version = browser.execute(script)
-
-    browser.execute(load_fuzzy_lib())
+    logger.debug("inject cucu fuzzy find library to the browser")
+    jqCucu_script = "window.jqCucu = jQuery.noConflict(true);"
+    browser.execute(load_jquery_lib() + jqCucu_script + load_fuzzy_lib())
 
 
 class Direction(Enum):

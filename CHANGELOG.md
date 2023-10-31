@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.172.0
+- Add repository and homepage fields to solve an issue with pip/poetry failing to install this package.
+
+## 0.171.0
+- Change - shorten image filenames for OS compatibiltiy
+- Add - enable install on python 3.12
+- Change - CI - use python 3.12
+- Change - CI - use selenium 117 images
+- Change - CI - chain jobs
+- Change - CI - pre-commit use smaller resource
+- Change - increase runtime-timeout values
+
+## 0.170.0
+- Change - retry ElementNotInteractableException exception when clicking a dynamically generated dropdown option
+
+## 0.169.0
+- Add - step and test for waiting until a table has a certain number of rows
+
+## 0.168.0
+- Add - step and test for clicking a table column within a table row that has specified text
+
+## 0.167.0
+- Fix - fuzzy JS code injection in web page redirection
+
 ## 0.166.0
 - Add - functions and steps for clicking a row in a table
 

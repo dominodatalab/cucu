@@ -56,6 +56,6 @@ Feature: Helpers
      When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/checkboxes.html?delay_page_load_ms=10000"
      Then I expect the following step to fail with "checkbox "checkbox with inner label" is not checked"
       """
-      Then I wait up to "10" seconds to see the checkbox "checkbox with inner label" is checked
+      Then I wait up to "11" seconds to see the checkbox "checkbox with inner label" is checked
       """
       And I should see the previous step took more than "9" seconds
