@@ -5,8 +5,8 @@ license = "MIT"
 description = "Easy BDD web testing"
 authors = ["Domino Data Lab <open-source@dominodatalab.com>"]
 readme = "README.md"
-homepage = ""
-repository = ""
+homepage = "https://github.com/cerebrotech/cucu"
+repository = "https://github.com/cerebrotech/cucu"
 keywords = ["cucumber", "selenium"]
 classifiers = [
     "Development Status :: 4 - Beta",
