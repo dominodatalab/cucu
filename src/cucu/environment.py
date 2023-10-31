@@ -46,7 +46,7 @@ def generate_image_filename(step_index, step_name):
     if len(filename) > max_filename:
         ellipsis = "..."
         # save the last chars as the ending often important
-        end_count = 10
+        end_count = 100
         front_count = max_filename - (len(ellipsis) + end_count)
         filename = (
             filename[:front_count] + ellipsis + filename[-1 * end_count :]
