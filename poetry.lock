@@ -475,6 +475,25 @@ files = [
 ]
 
 [[package]]
+name = "detect-secrets"
+version = "1.4.0"
+description = "Tool for detecting secrets in the codebase"
+optional = false
+python-versions = "*"
+files = [
+    {file = "detect_secrets-1.4.0-py3-none-any.whl", hash = "sha256:d08ecabeee8b68c0acb0e8a354fb98d822a653f6ed05e520cead4c6fc1fc02cd"},
+    {file = "detect_secrets-1.4.0.tar.gz", hash = "sha256:d56787e339758cef48c9ccd6692f7a094b9963c979c9813580b0169e41132833"},
+]
+
+[package.dependencies]
+pyyaml = "*"
+requests = "*"
+
+[package.extras]
+gibberish = ["gibberish-detector"]
+word-list = ["pyahocorasick"]
+
+[[package]]
 name = "dparse"
 version = "0.6.3"
 description = "A parser for Python dependency files"
@@ -1734,4 +1753,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<=3.13"
-content-hash = "a1a1796cc290803801dfdb92d62cc1b5c05936accd7eb518f0806cd9acf7d781"
+content-hash = "13011043dda156cb61b9bf94c263f899185ffa2fff5ec8e7c94321ce0d2d307d"
