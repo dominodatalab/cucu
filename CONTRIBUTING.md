@@ -204,6 +204,12 @@ TODO - Coverage
 make coverage
 ```
 
+## Preventing secrets
+Only you can prevent 🌳🔥 secrets from being commited to the repo!
+We use Yelp's `detect-secrets` in `cucu` development to help prevent secrets from being commited to the repo.
+This requires developers to be mindful by using `make check` before committing.
+To work around false-positives, use `make update-secrets`. Thanks!
+
 
 # Backstory
 Cucu was originally developed primarly by Rodney Gomes, leveraging his
