@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 0.174.0
 - Chore - prevent secrets from being merged to main
+- Chore - stablize CI by reducing workers
 
 ## 0.173.0
 - Add - functions and steps for dragging and dropping elements
