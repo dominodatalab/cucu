@@ -52,7 +52,7 @@ commands:
         default: "chrome"
     steps:
       - run:
-          command: poetry run cucu run features --workers 8 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<< parameters.browser >>"
+          command: poetry run cucu run features --workers 6 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<< parameters.browser >>"
           environment:
             COVERAGE_PROCESS_START: pyproject.toml  # set to config file
 
