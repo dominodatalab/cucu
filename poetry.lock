@@ -1177,18 +1177,18 @@ files = [
 
 [[package]]
 name = "pygls"
-version = "1.1.1"
+version = "1.1.2"
 description = "A pythonic generic language server (pronounced like 'pie glass')"
 optional = false
 python-versions = ">=3.7.9,<4"
 files = [
-    {file = "pygls-1.1.1-py3-none-any.whl", hash = "sha256:330704551a335b443bf1cdfb0507f121608591095898d451f0007eeb1510067c"},
-    {file = "pygls-1.1.1.tar.gz", hash = "sha256:b1b4ddd6f800a5573f61f0ec2cd3bc7a859d171f48142b46e1de35a1357c00fe"},
+    {file = "pygls-1.1.2-py3-none-any.whl", hash = "sha256:783d29c93679bb6756772f2de9b9f53b1a6fdf3fba66aeca23e87aa8aab20ecf"},
+    {file = "pygls-1.1.2.tar.gz", hash = "sha256:93fe17c01fd03307774290e685e7fa25bc1411cd72f243ff33eef21927fd0ad5"},
 ]
 
 [package.dependencies]
 lsprotocol = "2023.0.0b1"
-typeguard = ">=3.0.0,<4.0.0"
+typeguard = ">=3.0.0,<5"
 
 [package.extras]
 ws = ["websockets (>=11.0.3,<12.0.0)"]
@@ -1767,4 +1767,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<=3.13"
-content-hash = "1446b26d9024f8ff68cff76684519fb6f3c2dd5989cf4d0db693c03dd746dfdc"
+content-hash = "c8ba9ac2bbf0fe00468aeb7650c373734753a1af9368f7e6664b5d774b17e16a"
