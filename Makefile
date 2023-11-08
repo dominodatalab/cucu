@@ -28,6 +28,13 @@ check:
 	poetry run safety check
 	# check project config
 	poetry check
+	# prevent new secrets
+	#  🔔 to update secrets ignore list use: make update-secrets
+	poetry run detect-secrets-hook -n --baseline .secrets.baseline $$(git ls-files -z | xargs -0)
+
+update-secrets:
+	poetry run detect-secrets scan -n --baseline .secrets.baseline
+	poetry run detect-secrets audit .secrets.baseline
 
 test:
 	poetry run pytest tests

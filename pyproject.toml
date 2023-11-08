@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cucu"
-version = "0.173.0"
+version = "0.174.0"
 license = "MIT"
 description = "Easy BDD web testing"
 authors = ["Domino Data Lab <open-source@dominodatalab.com>"]
@@ -63,6 +63,7 @@ tenacity = "^8.2.3"
 [tool.poetry.group.dev.dependencies]
 bandit = "^1.7.5"
 black = "^23.3"
+detect-secrets = "^1.4.0"
 pytest = "^7.4.2"
 ruff = "^0.1.1"
 safety = "^2.4.0b1"

@@ -194,7 +194,7 @@ Feature: Report basics
 
   @runtime-timeout
   Scenario: User can run with a runtime timeout and still produce a valid report
-    Given I run the command "cucu run data/features/slow_features --runtime-timeout 7 --results {CUCU_RESULTS_DIR}/runtime_timeout_reporting_results" and expect exit code "1"
+    Given I run the command "cucu run data/features/slow_features --runtime-timeout 9 --results {CUCU_RESULTS_DIR}/runtime_timeout_reporting_results" and expect exit code "1"
      Then I should see the previous step took less than "13" seconds
      When I run the command "cucu report {CUCU_RESULTS_DIR}/runtime_timeout_reporting_results --output {CUCU_RESULTS_DIR}/runtime_timeout_reporting_report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/runtime_timeout_reporting_report/" and save the port to the variable "PORT"
