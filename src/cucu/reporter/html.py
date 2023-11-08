@@ -284,14 +284,18 @@ def generate(results, basepath, only_failures=False):
                         encoding="utf-8",
                     )
 
-            scenario["duration"] = scenario_duration
+            scenario["duration"] = str(scenario_duration).zfill(
+                3
+            )  # left padding duration with zeroes for proper sorting in reports
             feature_duration += scenario_duration
 
         if feature_started_at is None:
             feature["started_at"] = ""
 
         feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
-        feature["duration"] = sum([x["duration"] for x in scenarios])
+        feature["duration"] = str(
+            sum([x["duration"] for x in scenarios])
+        ).zfill(3)
 
         feature["total_scenarios"] = total_scenarios
         feature["total_scenarios_passed"] = total_scenarios_passed
