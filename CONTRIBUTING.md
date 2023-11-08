@@ -208,7 +208,8 @@ make coverage
 Only you can prevent 🌳🔥 secrets from being commited to the repo!
 We use Yelp's `detect-secrets` in `cucu` development to help prevent secrets from being commited to the repo.
 This requires developers to be mindful by using `make check` before committing.
-To work around false-positives, use `make update-secrets`. Thanks!
+If you encounter false positives, run `make update-secrets`.
+This should solve the problem by updating the ignore list.
 
 
 # Backstory
