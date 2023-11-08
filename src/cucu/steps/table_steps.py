@@ -4,7 +4,15 @@ from io import StringIO
 
 from selenium.webdriver.common.by import By
 
-from cucu import config, format_gherkin_table, fuzzy, helpers, retry, step
+from cucu import (
+    config,
+    format_gherkin_table,
+    fuzzy,
+    helpers,
+    logger,
+    retry,
+    step,
+)
 from cucu.browser.frames import run_in_all_frames
 
 
@@ -342,3 +350,49 @@ def wait_click_table_cell(ctx, row, column, table):
     Add 1 to the row number if the table has a header row.
     """
     retry(click_table_cell)(ctx, row, column, table)
+
+
+@step(
+    'I wait to click the "{column:nth}" column within a row that contains the text "{match_text}" in the "{table:nth}" table'
+)
+def wait_click_table_cell_matching_text(ctx, column, match_text, table):
+    def click_table_cell_matching_text(ctx, column, match_text, table):
+        table_element = find_table_element(ctx, table)
+
+        try:
+            row = table_element.find_elements(
+                By.XPATH, f'//td[.="{match_text}"]/parent::tr'
+            )
+            if len(row) > 1:
+                logger.warn(
+                    f'Found {len(row)} rows with matching text "{match_text}", using the first row.'
+                )
+            cell = row[0].find_elements(By.CSS_SELECTOR, "td")[column]
+        except IndexError:
+            raise RuntimeError(
+                f"Cannot find table:{table+1},column:{column+1},text:{match_text}. Please check your table data."
+            )
+
+        ctx.browser.click(cell)
+
+    retry(click_table_cell_matching_text)(ctx, column, match_text, table)
+
+
+@step('I wait to see there are "{row_count}" rows in the "{table:nth}" table')
+def wait_table_row_count(ctx, row_count, table):
+    """
+    Add 1 to the row number if the table has a header row.
+    """
+
+    def find_table_row_count(ctx, row_count, table):
+        table_element = find_table_element(ctx, table)
+        table_rows = len(table_element.find_elements(By.CSS_SELECTOR, "tr"))
+
+        if int(row_count) == table_rows:
+            return
+        else:
+            raise RuntimeError(
+                f"Unable to find {row_count} rows in table {table+1}. Please check your table data."
+            )
+
+    retry(find_table_row_count)(ctx, row_count, table)

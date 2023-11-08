@@ -152,3 +152,35 @@ Feature: Tables
      Then I should see the text "Africa clicked"
      When I wait to click the cell corresponding to the "4th" row and "1st" column in the "6th" table
      Then I should see the text "Tokyo clicked"
+
+  Scenario: User can click a column within a row that contains specific text within the table
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
+      And I should see a table that matches the following:
+        | City  | Country | Continent |
+        | Paris | France  | Europe    |
+        | Cairo | Egypt   | Africa    |
+        | Tokyo | Japan   | Asia      |
+     When I wait to click the "2nd" column within a row that contains the text "Paris" in the "6th" table
+     Then I should see the text "France clicked"
+     When I wait to click the "1st" column within a row that contains the text "Africa" in the "6th" table
+     Then I should see the text "Cairo clicked"
+     When I wait to click the "3rd" column within a row that contains the text "Japan" in the "6th" table
+     Then I should see the text "Asia clicked"
+
+  Scenario: User can wait until a table contains a specified number of rows
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
+      And I wait to click the button "Add row immediately"
+      And I should see a table that matches the following:
+        | Row Number |
+        |      2     |
+     Then I wait to see the following steps fail
+      """
+        I wait to see there are "3" rows in the "7th" table
+      """
+     When I wait to click the button "Add row after 20 seconds"
+     Then I wait to see there are "3" rows in the "7th" table
+      And I should see the previous step took more than "15" seconds
+      And I should see a table that matches the following:
+        | Row Number |
+        |      2     |
+        |      3     |

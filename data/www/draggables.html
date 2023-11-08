@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .draggable {
+            width: 100px;
+            height: 100px;
+            background-color: lightblue;
+            text-align: center;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        .target {
+            width: 400px;
+            height: 500px;
+            background-color: lightgray;
+            margin: 10px;
+            float: left;
+        }
+    </style>
+</head>
+<body>
+        <div id="draggable1" class="draggable" draggable="true" ondragstart="dragStart(event)">Drag Me 1</div>
+        <div id="draggable2" class="draggable" draggable="true" ondragstart="dragStart(event)">Drag Me 2</div>
+        <div id="draggable3" class="draggable" draggable="true" ondragstart="dragStart(event)">Drag Me 3</div>
+
+
+        <div id="target1" class="target" ondragover="dragOver(event)" ondrop="drop(event)">Drop Here 1</div>
+        <div id="target2" class="target" ondragover="dragOver(event)" ondrop="drop(event)">Drop Here 2</div>
+        <div id="target3" class="target" ondragover="dragOver(event)" ondrop="drop(event)">Drop Here 3</div>
+        <div id="target4" class="target" >Drop Here 4</div>
+
+    <script>
+        function dragStart(e) {
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("Text", e.target.getAttribute("id"));
+        }
+
+        function dragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function drop(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            var data = e.dataTransfer.getData("Text");
+            e.target.appendChild(document.getElementById(data));
+        }
+    </script>
+</body>
+</html>

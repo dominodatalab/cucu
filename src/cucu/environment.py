@@ -31,11 +31,28 @@ CONFIG.define(
 init_page_checks()
 
 
-def escape_filename(string):
+def generate_image_filename(step_index, step_name):
     """
-    escape string so it can be used as a filename safely.
+    generate .png image file name that meets these criteria:
+     - hides secrets
+     - escaped
+     - filename does not exceed 255 chars (OS limitation)
+     - uniqueness comes from step number
     """
-    return string.replace("/", "_")
+    max_filename = 255 - len(".png")
+    escaped_step_name = CONFIG.hide_secrets(step_name).replace("/", "_")
+    filename = f"{step_index} - {escaped_step_name}"
+
+    if len(filename) > max_filename:
+        ellipsis = "..."
+        # save the last chars as the ending often important
+        end_count = 100
+        front_count = max_filename - (len(ellipsis) + end_count)
+        filename = (
+            filename[:front_count] + ellipsis + filename[-1 * end_count :]
+        )
+
+    return f"{filename}.png"
 
 
 def check_browser_initialized(ctx):
@@ -223,9 +240,8 @@ def after_step(ctx, step):
     # and this step has no substeps as in the reporting the substeps that
     # may actually do something on the browser take their own screenshots
     if ctx.browser is not None and ctx.current_step.has_substeps is False:
-        step_name = escape_filename(CONFIG.hide_secrets(step.name))
         filepath = os.path.join(
-            ctx.scenario_dir, f"{ctx.step_index} - {step_name}.png"
+            ctx.scenario_dir, generate_image_filename(ctx.step_index, step.name)
         )
 
         ctx.browser.screenshot(filepath)

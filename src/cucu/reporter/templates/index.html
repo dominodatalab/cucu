@@ -36,7 +36,7 @@
             <td class="text-center">{{ feature['total_scenarios_failed'] }}</td>
             <td class="text-center">{{ feature['total_scenarios_skipped'] }}</td>
             <td class="text-center"><span class="status-{{ feature['status'] }}">{{ feature['status'] }}</span></td>
-            <td class="text-center">{{ '{:.3f}'.format(feature['duration']) }}</td>
+            <td class="text-center">{{ feature['duration'] }}</td>
         </tr>
         {% endfor %}
     </table>

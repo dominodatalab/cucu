@@ -14,6 +14,7 @@ import jinja2
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
+from cucu.environment import generate_image_filename
 
 
 def escape(data):
@@ -44,6 +45,13 @@ def process_tags(element):
         prepared_tags.append(tag)
 
     element["tags"] = " ".join(prepared_tags)
+
+
+def left_pad_zeroes(elapsed_time):
+    int_decimal = str(round(elapsed_time, 3)).split(".")
+    padded_int = int_decimal[0].zfill(3)
+    padded_duration = padded_int + "." + int_decimal[1]
+    return padded_duration
 
 
 def generate(results, basepath, only_failures=False):
@@ -175,8 +183,8 @@ def generate(results, basepath, only_failures=False):
                 if show_status:
                     print("s", end="", flush=True)
                 total_steps += 1
-                image_filename = (
-                    f"{step_index} - {step['name'].replace('/', '_')}.png"
+                image_filename = generate_image_filename(
+                    step_index, step["name"]
                 )
                 image_filepath = os.path.join(scenario_filepath, image_filename)
 
@@ -284,18 +292,16 @@ def generate(results, basepath, only_failures=False):
                         encoding="utf-8",
                     )
 
-            scenario["duration"] = str(scenario_duration).zfill(
-                3
-            )  # left padding duration with zeroes for proper sorting in reports
+            scenario["duration"] = left_pad_zeroes(scenario_duration)
             feature_duration += scenario_duration
 
         if feature_started_at is None:
             feature["started_at"] = ""
 
         feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
-        feature["duration"] = str(
-            sum([x["duration"] for x in scenarios])
-        ).zfill(3)
+        feature["duration"] = left_pad_zeroes(
+            sum([float(x["duration"]) for x in scenarios])
+        )
 
         feature["total_scenarios"] = total_scenarios
         feature["total_scenarios_passed"] = total_scenarios_passed
@@ -311,7 +317,7 @@ def generate(results, basepath, only_failures=False):
     ]
     grand_totals = {}
     for k in keys:
-        grand_totals[k] = sum([x[k] for x in reported_features])
+        grand_totals[k] = sum([float(x[k]) for x in reported_features])
 
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)  # nosec

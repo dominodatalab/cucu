@@ -35,7 +35,7 @@
                     <td><a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><span>{{ escape(scenario['name']) }}</span></a><br>{{ scenario['tags'] }}</td>
                     <td class="text-center">{{ scenario['total_steps'] }}</td>
                     <td class="text-center"><span class="status-{{ scenario['status'] }}">{{ scenario['status'] }}</span></td>
-                    <td class="text-center">{{ '{:.3f}'.format(scenario['duration']) }}</td>
+                    <td class="text-center">{{ scenario['duration'] }}</td>
                 </tr>
                 {%  endif %}
             {% endfor %}

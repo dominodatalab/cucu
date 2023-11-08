@@ -3,7 +3,7 @@ import os
 
 from selenium.webdriver.common.keys import Keys
 
-from cucu import config, fuzzy, logger, retry, run_steps, step
+from cucu import config, logger, retry, run_steps, step
 from cucu.browser.selenium import Selenium
 
 
@@ -37,7 +37,6 @@ def open_a_browser(ctx, url):
 
     logger.debug(f"navigating to url #{url}")
     ctx.browser.navigate(url)
-    fuzzy.init(ctx.browser)
 
 
 @step('I open a new browser at the url "{url}"')
@@ -46,7 +45,6 @@ def open_a_new_browser(ctx, url):
     ctx.browsers.append(ctx.browser)
     logger.debug(f"navigating to url #{url}")
     ctx.browser.navigate(url)
-    fuzzy.init(ctx.browser)
 
 
 @step("I execute in the current browser the following javascript")
