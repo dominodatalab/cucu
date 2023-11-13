@@ -42,7 +42,7 @@
                 <th>Scenario</th>
                 <th class="text-center">Steps</th>
                 <th class="text-center">Status</th>
-                <th class="text-center">Duration</th>
+                <th class="text-center">Duration (s)</th>
             </tr>
         </thead>
         {% for scenario in scenarios %}
@@ -60,7 +60,7 @@
                 </td>
                 <td class="text-center">{{ scenario['total_steps'] }}</td>
                 <td class="text-center"><span class="status-{{ scenario['status'] }}">{{ scenario['status'] }}</span></td>
-                <td class="text-center">{{ scenario['duration'] }}s</td>
+                <td class="text-center">{{ scenario['duration'] }}</td>
             </tr>
             {%  endif %}
         {% endfor %}
