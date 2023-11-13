@@ -422,6 +422,11 @@ CONFIG.define(
     "when set to 'true' results in stacktraces showing in the JUnit XML failure output",
     default="false",
 )
+CONFIG.define(
+    "CUCU_INJECT_ELEMENT_BORDER",
+    "when set to 'true', adds borders to some elements cucu interacts with in order to draw attention to them in the screenshot",
+    default=False,
+)
 
 
 # define re_map here instead of in utils.py to avoid circular import

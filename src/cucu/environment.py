@@ -246,7 +246,10 @@ def after_step(ctx, step):
 
         # If we've marked an element as the one we're interacting with,
         # inject a border to highlight that element
-        if not CONFIG["__PERTINENT_ELEMENT"]:
+        if (
+            not CONFIG["CUCU_INJECT_ELEMENT_BORDER"]
+            or not CONFIG["__PERTINENT_ELEMENT"]
+        ):
             ctx.browser.screenshot(filepath)
         else:
             border_style = "solid magenta 4px"
