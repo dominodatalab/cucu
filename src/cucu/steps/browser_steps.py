@@ -1,5 +1,6 @@
 import base64
 import os
+import re
 
 from selenium.webdriver.common.keys import Keys
 
@@ -217,12 +218,24 @@ def wait_to_switch_to_previous_browser_tab(ctx):
     retry(switch_to_previous_tab)(ctx)
 
 
-def save_downloaded_file(ctx, filename):
+def save_downloaded_file(ctx, filename, variable=None):
     ctx.check_browser_initialized()
-
-    # use default frame when adding elements to the document to avoid this errro on access:
-    # "selenium.common.exceptions.ElementNotInteractableException: Message: element not interactable"
     ctx.browser.switch_to_default_frame()
+
+    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
+
+    all_files = os.listdir(cucu_downloads_dir)
+    matched_files = [file for file in all_files if re.match(filename, file)]
+
+    if not matched_files:
+        raise RuntimeError(f"No files found matching regex: {filename}")
+
+    if len(matched_files) > 1:
+        logger.warn("More than one file found. Using the first matched file.")
+
+        filename = matched_files[0]
+    if variable:
+        config.CONFIG[variable] = filename
 
     elem = ctx.browser.execute(
         """
@@ -233,7 +246,6 @@ def save_downloaded_file(ctx, filename):
         return window.document.documentElement.appendChild(input);
         """
     )
-    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
     elem.send_keys(f"{cucu_downloads_dir}/{filename}")
     ctx.browser.execute(
         """
@@ -285,6 +297,27 @@ def wait_to_see_downloaded_file(ctx, filename):
 def wait_up_to_seconds_to_see_downloaded_file(ctx, seconds, filename):
     seconds = float(seconds)
     retry(save_downloaded_file, wait_up_to_s=seconds)(ctx, filename)
+
+
+@step(
+    'I wait to see the downloaded regex file "{filename}" and save the filename to the variable "{variable}"'
+)
+def wait_to_see_downloaded_file_with_regex_and_save_name(
+    ctx, filename, variable
+):
+    retry(save_downloaded_file)(ctx, filename, variable=variable)
+
+
+@step(
+    'I wait up to "{seconds}" seconds to see the downloaded regex file "{filename}" and save the filename to the variable "{variable}"'
+)
+def wait_up_to_seconds_to_see_downloaded_file_with_and_save_name(
+    ctx, seconds, filename, variable
+):
+    seconds = float(seconds)
+    retry(save_downloaded_file, wait_up_to_s=seconds)(
+        ctx, filename, variable=variable
+    )
 
 
 @step('I download an mht archive of the current page to "{file_path}"')
