@@ -47,6 +47,14 @@ def process_tags(element):
     element["tags"] = " ".join(prepared_tags)
 
 
+# function to left pad duration with '0' for better alphabetical sorting in html reports.
+def left_pad_zeroes(elapsed_time):
+    int_decimal = str(round(elapsed_time, 3)).split(".")
+    int_decimal[0] = int_decimal[0].zfill(3)
+    padded_duration = ".".join(int_decimal)
+    return padded_duration
+
+
 def generate(results, basepath, only_failures=False):
     """
     generate an HTML report for the results provided.
@@ -285,14 +293,16 @@ def generate(results, basepath, only_failures=False):
                         encoding="utf-8",
                     )
 
-            scenario["duration"] = scenario_duration
+            scenario["duration"] = left_pad_zeroes(scenario_duration)
             feature_duration += scenario_duration
 
         if feature_started_at is None:
             feature["started_at"] = ""
 
         feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
-        feature["duration"] = sum([x["duration"] for x in scenarios])
+        feature["duration"] = left_pad_zeroes(
+            sum([float(x["duration"]) for x in scenarios])
+        )
 
         feature["total_scenarios"] = total_scenarios
         feature["total_scenarios_passed"] = total_scenarios_passed
@@ -308,7 +318,7 @@ def generate(results, basepath, only_failures=False):
     ]
     grand_totals = {}
     for k in keys:
-        grand_totals[k] = sum([x[k] for x in reported_features])
+        grand_totals[k] = sum([float(x[k]) for x in reported_features])
 
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)  # nosec

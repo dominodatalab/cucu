@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cucu"
-version = "0.174.0"
+version = "0.175.0"
 license = "MIT"
 description = "Easy BDD web testing"
 authors = ["Domino Data Lab <open-source@dominodatalab.com>"]
@@ -23,7 +23,6 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Software Development :: Testing :: BDD",
 ]

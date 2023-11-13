@@ -35,7 +35,7 @@
                     <button class="btn btn-md btn-light" title="scroll to bottom" onclick="window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });" class="nav-link">⬇️ </button>
                 </li>
                 <li class="align-middle">
-                    <div style="padding: 8px">Started {{ scenario["started_at"] }} for {{ '{:.3f}'.format(scenario['duration']) }}s</div>
+                    <div style="padding: 8px">Started {{ scenario["started_at"] }} for {{ scenario['duration'] }}</div>
                 </li>
               </ul>
             </div>
@@ -75,7 +75,7 @@
                 {% endif %}
             </td>
             <td style="text-align: right; margin-top: auto;" class="col-2">
-                <pre style="display: inline; color: gray;">Offset and Duration</pre>
+                <pre style="display: inline; color: gray;">Offset and Duration (s)</pre>
             </td>
         </tr>
         {% for step in steps %}
