@@ -15,5 +15,6 @@ This contains a list of present and past contributors. If you are interested in 
 | Dan Clegg       | ddl-dcleg                     |
 | Urian Chang     | urianchang                    |
 | Med Mahmoud     | ddl-mmahmoud                  |
+| Michael Noonan  | ddl-michael-noonan            |
 
 \* original author and creator
