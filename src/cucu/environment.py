@@ -244,7 +244,28 @@ def after_step(ctx, step):
             ctx.scenario_dir, generate_image_filename(ctx.step_index, step.name)
         )
 
-        ctx.browser.screenshot(filepath)
+        # If we've marked an element as the one we're interacting with,
+        # inject a border to highlight that element
+        if (
+            not CONFIG["CUCU_INJECT_ELEMENT_BORDER"]
+            or not CONFIG["__PERTINENT_ELEMENT"]
+        ):
+            ctx.browser.screenshot(filepath)
+        else:
+            border_style = "solid magenta 4px"
+            border_radius = "4px"
+            highlighter = (
+                f'arguments[0].style["border"] = "{border_style}";'
+                f'arguments[0].style["border-radius"] = "{border_radius}";'
+            )
+            ctx.browser.execute(highlighter, CONFIG["__PERTINENT_ELEMENT"])
+            ctx.browser.screenshot(filepath)
+            clear_highlight = (
+                'arguments[0].style["border"] = "";'
+                'arguments[0].style["border-radius"] = "";'
+            )
+            ctx.browser.execute(clear_highlight, CONFIG["__PERTINENT_ELEMENT"])
+            CONFIG["__PERTINENT_ELEMENT"] = None
 
         if CONFIG["CUCU_MONITOR_PNG"] is not None:
             shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
