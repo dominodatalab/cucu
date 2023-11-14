@@ -305,6 +305,8 @@ def find_file_with_regex(ctx, filename_regex, index=0):
 
 
 def save_downloaded_file_with_regex(ctx, regex, variable, index=0):
+    ctx.check_browser_initialized()
+    ctx.browser.switch_to_default_frame()
     matched_filename = find_file_with_regex(ctx, regex, index)
     save_downloaded_file(ctx, matched_filename)
     config.CONFIG[variable] = matched_filename
