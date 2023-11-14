@@ -218,11 +218,9 @@ def wait_to_switch_to_previous_browser_tab(ctx):
     retry(switch_to_previous_tab)(ctx)
 
 
-def save_downloaded_file(ctx, filename, variable=None):
+def setup_file_input(ctx):
     ctx.check_browser_initialized()
     ctx.browser.switch_to_default_frame()
-
-    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
 
     elem = ctx.browser.execute(
         """
@@ -233,7 +231,10 @@ def save_downloaded_file(ctx, filename, variable=None):
         return window.document.documentElement.appendChild(input);
         """
     )
-    elem.send_keys(f"{cucu_downloads_dir}/{filename}")
+    return elem
+
+
+def read_file_as_base64(ctx, elem, filename):
     ctx.browser.execute(
         """
         var input = arguments[0];
@@ -261,10 +262,25 @@ def save_downloaded_file(ctx, filename, variable=None):
     if not result.startswith("data:"):
         raise Exception("Failed to get file content: %s" % result)
 
-    filedata = base64.b64decode(result[result.find("base64,") + 7 :])
-    scenario_downloads_dir = config.CONFIG["SCENARIO_DOWNLOADS_DIR"]
-    download_filepath = os.path.join(scenario_downloads_dir, filename)
-    open(download_filepath, "wb").write(filedata)
+    return result
+
+
+def write_base64_to_file(base64_data, filepath):
+    filedata = base64.b64decode(base64_data[base64_data.find("base64,") + 7 :])
+    open(filepath, "wb").write(filedata)
+
+
+def save_downloaded_file(ctx, filename, variable=None):
+    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
+    elem = setup_file_input(ctx)
+    elem.send_keys(f"{cucu_downloads_dir}/{filename}")
+
+    base64_data = read_file_as_base64(ctx, elem, filename)
+    download_filepath = os.path.join(
+        config.CONFIG["SCENARIO_DOWNLOADS_DIR"], filename
+    )
+    write_base64_to_file(base64_data, download_filepath)
+
     return download_filepath
 
 
