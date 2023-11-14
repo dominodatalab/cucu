@@ -224,20 +224,6 @@ def save_downloaded_file(ctx, filename, variable=None):
 
     cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
 
-    all_files = os.listdir(cucu_downloads_dir)
-    matched_files = [file for file in all_files if re.match(filename, file)]
-
-    if not matched_files:
-        raise RuntimeError(f"No files found matching regex: {filename}")
-
-    if len(matched_files) > 1:
-        logger.warn("More than one file found. Using the first matched file.")
-        logger.warn(f"Found: {matched_files}")
-
-        filename = matched_files[0]
-    if variable:
-        config.CONFIG[variable] = filename
-
     elem = ctx.browser.execute(
         """
         var input = window.document.createElement('INPUT');
@@ -281,6 +267,32 @@ def save_downloaded_file(ctx, filename, variable=None):
     open(download_filepath, "wb").write(filedata)
 
 
+def find_file_with_regex(directory, filename_regex, index=0):
+    all_files = os.listdir(directory)
+    matched_files = [
+        file for file in all_files if re.match(filename_regex, file)
+    ]
+
+    if not matched_files:
+        raise FileNotFoundError(
+            f"No files found matching regex: {filename_regex}"
+        )
+
+    if len(matched_files) > 1:
+        logger.warn("More than one file found. Using the first matched file.")
+        logger.warn(f"Found: {matched_files}")
+
+    return matched_files[index]
+
+
+def save_downloaded_file_with_regex(ctx, regex, variable, index=0):
+    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
+    matched_filename = find_file_with_regex(cucu_downloads_dir, regex, index)
+    save_downloaded_file(ctx, matched_filename)
+    config.CONFIG[variable] = matched_filename
+    return matched_filename
+
+
 @step('I wait to see the downloaded file "{filename}"')
 def wait_to_see_downloaded_file(ctx, filename):
     """
@@ -304,7 +316,7 @@ def wait_up_to_seconds_to_see_downloaded_file(ctx, seconds, filename):
     'I wait to see the downloaded filename matching the regex "{regex}" and save the filename to the variable "{variable}"'
 )
 def wait_to_see_downloaded_file_with_regex_and_save_name(ctx, regex, variable):
-    retry(save_downloaded_file)(ctx, regex, variable=variable)
+    retry(save_downloaded_file_with_regex)(ctx, regex, variable=variable)
 
 
 @step(
@@ -314,7 +326,7 @@ def wait_up_to_seconds_to_see_downloaded_file_with_and_save_name(
     ctx, seconds, regex, variable
 ):
     seconds = float(seconds)
-    retry(save_downloaded_file, wait_up_to_s=seconds)(
+    retry(save_downloaded_file_with_regex, wait_up_to_s=seconds)(
         ctx, regex, variable=variable
     )
 
