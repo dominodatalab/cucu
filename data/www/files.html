@@ -1,14 +1,23 @@
 <html>
   <head>
     <title>File!</title>
+    <script>
+      function generateFilename() {
+        var date = new Date();
+        var timestamp = date.getTime();
+        var filename = "file_" + timestamp + ".txt";
+        document.getElementById("generatedDownloadLink").setAttribute("download", filename);
+      }
+    </script>
   </head>
-  <body>
+  <body onload="generateFilename()">
     <form action="nothing_to_see_here.html">
       <label>upload some files: </label>
       <input type="file" id="myFile" name="filename"><br/>
       <input type="submit" value="upload!"></input><br/>
     </form>
-    <a href="file.txt" download>download this file</a>
+    <a href="file.txt" download>download this file</a><br/>
+    <a href="file.txt" id="generatedDownloadLink" download>download this unique file</a>
     <iframe name="some_subframe" src="buttons.html"></iframe>
   </body>
 </html>

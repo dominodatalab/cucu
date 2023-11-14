@@ -27,6 +27,6 @@ Feature: File downloads
      When I click the link "download this file"
      Then I wait to see the downloaded file "file.txt"
       And I wait to see a file at "{SCENARIO_DOWNLOADS_DIR}/file.txt"
-     When I click the link "download this file"
-      And I wait to see the downloaded filename matching the regex "file\s\(1\)\.txt" and save the filename to the variable "FILE_NAME"
+     When I click the link "download this unique file"
+      And I wait to see the downloaded filename matching the regex "file_\d+\.txt" and save the filename to the variable "FILE_NAME"
       And I wait to see a file at "{SCENARIO_DOWNLOADS_DIR}/{FILE_NAME}"

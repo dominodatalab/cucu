@@ -265,10 +265,13 @@ def save_downloaded_file(ctx, filename, variable=None):
     scenario_downloads_dir = config.CONFIG["SCENARIO_DOWNLOADS_DIR"]
     download_filepath = os.path.join(scenario_downloads_dir, filename)
     open(download_filepath, "wb").write(filedata)
+    return download_filepath
 
 
-def find_file_with_regex(directory, filename_regex, index=0):
-    all_files = os.listdir(directory)
+def find_file_with_regex(ctx, filename_regex, index=0):
+    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
+    all_files = os.listdir(cucu_downloads_dir)
+
     matched_files = [
         file for file in all_files if re.match(filename_regex, file)
     ]
@@ -286,11 +289,9 @@ def find_file_with_regex(directory, filename_regex, index=0):
 
 
 def save_downloaded_file_with_regex(ctx, regex, variable, index=0):
-    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
-    matched_filename = find_file_with_regex(cucu_downloads_dir, regex, index)
+    matched_filename = find_file_with_regex(ctx, regex, index)
     save_downloaded_file(ctx, matched_filename)
     config.CONFIG[variable] = matched_filename
-    return matched_filename
 
 
 @step('I wait to see the downloaded file "{filename}"')
