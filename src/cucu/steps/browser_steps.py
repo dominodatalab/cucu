@@ -218,9 +218,26 @@ def wait_to_switch_to_previous_browser_tab(ctx):
     retry(switch_to_previous_tab)(ctx)
 
 
-def setup_file_input(ctx):
+def save_downloaded_file(ctx, filename, variable=None, use_regex=False):
     ctx.check_browser_initialized()
     ctx.browser.switch_to_default_frame()
+
+    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
+
+    if use_regex:
+        all_files = os.listdir(cucu_downloads_dir)
+        matched_files = [file for file in all_files if re.match(filename, file)]
+
+        if not matched_files:
+            raise FileNotFoundError(
+                f"No files found matching regex: {filename}"
+            )
+
+        if len(matched_files) > 1:
+            logger.warn(
+                "More than one file found. Using the first matched file."
+            )
+        filename = matched_files[0]  # Use the first matched file
 
     elem = ctx.browser.execute(
         """
@@ -231,10 +248,7 @@ def setup_file_input(ctx):
         return window.document.documentElement.appendChild(input);
         """
     )
-    return elem
-
-
-def read_file_as_base64(ctx, elem, filename):
+    elem.send_keys(f"{cucu_downloads_dir}/{filename}")
     ctx.browser.execute(
         """
         var input = arguments[0];
@@ -262,54 +276,13 @@ def read_file_as_base64(ctx, elem, filename):
     if not result.startswith("data:"):
         raise Exception("Failed to get file content: %s" % result)
 
-    return result
+    filedata = base64.b64decode(result[result.find("base64,") + 7 :])
+    scenario_downloads_dir = config.CONFIG["SCENARIO_DOWNLOADS_DIR"]
+    download_filepath = os.path.join(scenario_downloads_dir, filename)
+    open(download_filepath, "wb").write(filedata)
 
-
-def write_base64_to_file(base64_data, filepath):
-    filedata = base64.b64decode(base64_data[base64_data.find("base64,") + 7 :])
-    open(filepath, "wb").write(filedata)
-
-
-def save_downloaded_file(ctx, filename, variable=None):
-    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
-    elem = setup_file_input(ctx)
-    elem.send_keys(f"{cucu_downloads_dir}/{filename}")
-
-    base64_data = read_file_as_base64(ctx, elem, filename)
-    download_filepath = os.path.join(
-        config.CONFIG["SCENARIO_DOWNLOADS_DIR"], filename
-    )
-    write_base64_to_file(base64_data, download_filepath)
-
-    return download_filepath
-
-
-def find_file_with_regex(ctx, filename_regex, index=0):
-    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
-    all_files = os.listdir(cucu_downloads_dir)
-
-    matched_files = [
-        file for file in all_files if re.match(filename_regex, file)
-    ]
-
-    if not matched_files:
-        raise FileNotFoundError(
-            f"No files found matching regex: {filename_regex}"
-        )
-
-    if len(matched_files) > 1:
-        logger.warn("More than one file found. Using the first matched file.")
-        logger.warn(f"Found: {matched_files}")
-
-    return matched_files[index]
-
-
-def save_downloaded_file_with_regex(ctx, regex, variable, index=0):
-    ctx.check_browser_initialized()
-    ctx.browser.switch_to_default_frame()
-    matched_filename = find_file_with_regex(ctx, regex, index)
-    save_downloaded_file(ctx, matched_filename)
-    config.CONFIG[variable] = matched_filename
+    if variable:
+        config.CONFIG[variable] = filename
 
 
 @step('I wait to see the downloaded file "{filename}"')
@@ -335,7 +308,7 @@ def wait_up_to_seconds_to_see_downloaded_file(ctx, seconds, filename):
     'I wait to see the downloaded filename matching the regex "{regex}" and save the filename to the variable "{variable}"'
 )
 def wait_to_see_downloaded_file_with_regex_and_save_name(ctx, regex, variable):
-    retry(save_downloaded_file_with_regex)(ctx, regex, variable=variable)
+    retry(save_downloaded_file)(ctx, regex, use_regex=True, variable=variable)
 
 
 @step(
@@ -345,8 +318,8 @@ def wait_up_to_seconds_to_see_downloaded_file_with_and_save_name(
     ctx, seconds, regex, variable
 ):
     seconds = float(seconds)
-    retry(save_downloaded_file_with_regex, wait_up_to_s=seconds)(
-        ctx, regex, variable=variable
+    retry(save_downloaded_file, wait_up_to_s=seconds)(
+        ctx, regex, use_regex=True, variable=variable
     )
 
 
