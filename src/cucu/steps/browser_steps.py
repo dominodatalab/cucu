@@ -232,6 +232,7 @@ def save_downloaded_file(ctx, filename, variable=None):
 
     if len(matched_files) > 1:
         logger.warn("More than one file found. Using the first matched file.")
+        logger.warn(f"Found: {matched_files}")
 
         filename = matched_files[0]
     if variable:
@@ -300,23 +301,21 @@ def wait_up_to_seconds_to_see_downloaded_file(ctx, seconds, filename):
 
 
 @step(
-    'I wait to see the downloaded regex file "{filename}" and save the filename to the variable "{variable}"'
+    'I wait to see the downloaded filename matching the regex "{regex}" and save the filename to the variable "{variable}"'
 )
-def wait_to_see_downloaded_file_with_regex_and_save_name(
-    ctx, filename, variable
-):
-    retry(save_downloaded_file)(ctx, filename, variable=variable)
+def wait_to_see_downloaded_file_with_regex_and_save_name(ctx, regex, variable):
+    retry(save_downloaded_file)(ctx, regex, variable=variable)
 
 
 @step(
-    'I wait up to "{seconds}" seconds to see the downloaded regex file "{filename}" and save the filename to the variable "{variable}"'
+    'I wait up to "{seconds}" seconds to see the downloaded filename matching the regex "{regex}" and save the filename to the variable "{variable}"'
 )
 def wait_up_to_seconds_to_see_downloaded_file_with_and_save_name(
-    ctx, seconds, filename, variable
+    ctx, seconds, regex, variable
 ):
     seconds = float(seconds)
     retry(save_downloaded_file, wait_up_to_s=seconds)(
-        ctx, filename, variable=variable
+        ctx, regex, variable=variable
     )
 
 
