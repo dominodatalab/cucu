@@ -218,6 +218,17 @@ def wait_to_switch_to_previous_browser_tab(ctx):
     retry(switch_to_previous_tab)(ctx)
 
 
+def ensure_directory_exists(directory):
+    if not os.path.exists(directory):
+        try:
+            os.makedirs(directory)
+        except OSError as error:
+            logger.error(
+                f"Could not create directory: {directory}. Error: {error}"
+            )
+            raise
+
+
 def save_downloaded_file(ctx, filename, variable=None, use_regex=False):
     ctx.check_browser_initialized()
     ctx.browser.switch_to_default_frame()
@@ -225,6 +236,7 @@ def save_downloaded_file(ctx, filename, variable=None, use_regex=False):
     cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
 
     if use_regex:
+        ensure_directory_exists(cucu_downloads_dir)
         all_files = os.listdir(cucu_downloads_dir)
         matched_files = [file for file in all_files if re.match(filename, file)]
 
