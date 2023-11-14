@@ -218,15 +218,9 @@ def wait_to_switch_to_previous_browser_tab(ctx):
     retry(switch_to_previous_tab)(ctx)
 
 
-def ensure_directory_exists(directory):
-    if not os.path.exists(directory):
-        try:
-            os.makedirs(directory)
-        except OSError as error:
-            logger.error(
-                f"Could not create directory: {directory}. Error: {error}"
-            )
-            raise
+def wait_for_dir(dir):
+    if not os.path.isdir(dir):
+        raise RuntimeError(f"Directory {dir} not found")
 
 
 def save_downloaded_file(ctx, filename, variable=None, use_regex=False):
@@ -236,9 +230,11 @@ def save_downloaded_file(ctx, filename, variable=None, use_regex=False):
     cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
 
     if use_regex:
-        ensure_directory_exists(cucu_downloads_dir)
-        all_files = os.listdir(cucu_downloads_dir)
-        matched_files = [file for file in all_files if re.match(filename, file)]
+        retry(wait_for_dir(cucu_downloads_dir))
+        walker = os.walk(cucu_downloads_dir)
+        files = next(walker)[2]
+        logger.info(files)
+        matched_files = [file for file in files if re.match(filename, file)]
 
         if not matched_files:
             raise FileNotFoundError(
@@ -249,7 +245,8 @@ def save_downloaded_file(ctx, filename, variable=None, use_regex=False):
             logger.warn(
                 "More than one file found. Using the first matched file."
             )
-        filename = matched_files[0]  # Use the first matched file
+            logger.warn(f"Here are the files that were found:\n{files}")
+        filename = matched_files[0]
 
     elem = ctx.browser.execute(
         """
