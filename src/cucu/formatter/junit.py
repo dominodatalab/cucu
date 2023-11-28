@@ -8,6 +8,7 @@ import bs4
 from behave.formatter.base import Formatter
 from behave.model_core import Status
 from bs4.formatter import XMLFormatter
+from tenacity import RetryError
 
 from cucu.config import CONFIG
 
@@ -76,6 +77,13 @@ class CucuJUnitFormatter(Formatter):
                 failures += [
                     f"{self.current_step.keyword} {self.current_step.name}"
                 ]
+
+                if self.current_step.exception:
+                    error = self.current_step.exception
+                    if isinstance(error, RetryError):
+                        error = error.last_attempt.exception()
+
+                    failures.append(repr(error))
 
                 if CONFIG["CUCU_JUNIT_WITH_STACKTRACE"] == "true":
                     failures += traceback.format_tb(
