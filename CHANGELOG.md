@@ -5,8 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.177.0
+## 0.178.0
 - Add - error message to json and junit
+
+## 0.177.0
+- Fix - text regex steps mess up the fuzzy find js code
 - Chore - bump dependencies
 - Chore - update pip in CI pre-commit
 - Chore - group dependabot updates
