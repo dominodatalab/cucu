@@ -7,6 +7,21 @@ parameters:
   python_version:
     type: string
     default: '3.12.0'
+  selenium_version:
+    type: string
+    default: '117.0'
+  se_node_max_sessions: 
+    type: integer
+    default: 12
+  se_node_session_timeout: 
+    type: integer
+    default: 300
+  screen_width: 
+    type: integer
+    default: 1366
+  screen_height: 
+    type: integer
+    default: 768
 
 workflows:
   build-test-publish:
@@ -65,12 +80,12 @@ jobs:
 
     docker:
       - image: python:<<pipeline.parameters.python_version>>
-      - image: selenium/standalone-<< parameters.browser >>:117.0
+      - image: selenium/standalone-<<parameters.browser>>:<<pipeline.parameters.selenium_version>>
         environment:
-          SE_NODE_MAX_SESSIONS: 12
-          SE_NODE_SESSION_TIMEOUT: 300
-          SCREEN_WIDTH: 1366
-          SCREEN_HEIGHT: 768
+          SE_NODE_MAX_SESSIONS: <<pipeline.parameters.se_node_max_sessions>>
+          SE_NODE_SESSION_TIMEOUT: <<pipeline.parameters.se_node_session_timeout>>
+          SCREEN_WIDTH: <<pipeline.parameters.screen_width>>
+          SCREEN_HEIGHT: <<pipeline.parameters.screen_height>>
     resource_class: xlarge
 
     steps:
