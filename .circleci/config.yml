@@ -3,6 +3,11 @@
 ---
 version: 2.1
 
+parameters:
+  python_version:
+    type: string
+    default: '3.12.0'
+
 workflows:
   build-test-publish:
     jobs:
@@ -32,7 +37,7 @@ workflows:
 jobs:
   pre-commit:
     docker:
-      - image: cimg/python:3.12.0
+      - image: cimg/python:<<pipeline.parameters.python_version>>
     resource_class: medium
 
     steps:
@@ -59,7 +64,7 @@ jobs:
         default: "chrome"
 
     docker:
-      - image: python:3.12.0
+      - image: python:<<pipeline.parameters.python_version>>
       - image: selenium/standalone-<< parameters.browser >>:117.0
         environment:
           SE_NODE_MAX_SESSIONS: 12
@@ -98,7 +103,7 @@ jobs:
 
   publish:
     docker:
-      - image: cimg/python:3.12.0
+      - image: cimg/python:<<pipeline.parameters.python_version>>
     steps:
       - checkout
       - install_cucu_dependencies
