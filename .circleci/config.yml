@@ -3,6 +3,114 @@
 ---
 version: 2.1
 
+workflows:
+  build-test-publish:
+    jobs:
+      - pre-commit
+      - test:
+          name: test-chrome
+          browser: chrome
+          requires:
+            - pre-commit
+      - test:
+          name: test-edge
+          browser: edge
+          requires:
+            - test-chrome
+      - test:
+          name: test-firefox
+          browser: firefox
+          requires:
+            - test-chrome
+      - publish:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^\d+\.\d+\.\d+/
+
+jobs:
+  pre-commit:
+    docker:
+      - image: cimg/python:3.12.0
+    resource_class: medium
+
+    steps:
+      - checkout
+      - run:
+          name: install dependencies
+          command: |
+            set +eo pipefail
+            pip install --upgrade pip
+            pip install pre-commit
+            pre-commit install-hooks
+
+      - install_cucu_dependencies
+      - build_cucu_python_package
+      - install_cucu_globally
+      - run:
+          name: run pre-commit validations
+          command: pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
+
+  test:
+    parameters:
+      browser:
+        type: string
+        default: "chrome"
+
+    docker:
+      - image: python:3.12.0
+      - image: selenium/standalone-<< parameters.browser >>:117.0
+        environment:
+          SE_NODE_MAX_SESSIONS: 12
+          SE_NODE_SESSION_TIMEOUT: 300
+          SCREEN_WIDTH: 1366
+          SCREEN_HEIGHT: 768
+    resource_class: xlarge
+
+    steps:
+      - checkout
+      - install_cucu_dependencies
+      - install_test_dependencies
+      - build_cucu_python_package
+      - install_cucu_globally
+      - setup_remote_docker_env
+      - wait_for_selenium
+      - run_functional_tests:
+          browser: "<< parameters.browser >>"
+      - run_unit_tests
+      - code_coverage_check
+      - run:
+          name: tar up results and reporting
+          command: |
+            tar cvfz results.tgz results
+            tar cvfz report.tgz report
+            tar cvfz junit_results.tgz junit_results
+          when: always
+      - store_artifacts:
+          path: results.tgz
+      - store_artifacts:
+          path: junit_results.tgz
+      - store_artifacts:
+          path: report.tgz
+      - store_test_results:
+          path: junit_results
+
+  publish:
+    docker:
+      - image: cimg/python:3.12.0
+    steps:
+      - checkout
+      - install_cucu_dependencies
+      - build_cucu_python_package
+      - run:
+          name: Publish to private PyPI repository
+          command: |
+            set +eo pipefail
+            poetry config repositories.private ${PUBLISH_REPOSITORY}
+            poetry config http-basic.private ${PUBLISH_USERNAME} ${PUBLISH_PASSWORD}
+            poetry publish -r private
+
 commands:
   install_cucu_dependencies: &install_cucu_dependencies
     steps:
@@ -71,147 +179,3 @@ commands:
             poetry run coverage combine .coverage.*
             poetry run coverage html
             poetry run coverage report --fail-under=70
-
-executors:
-  unit-test-executor:
-    docker:
-      - image: python:3.12.0
-
-  chrome-test-executor:
-    docker:
-      - image: python:3.12.0
-      - image: selenium/standalone-chrome:117.0
-        environment:
-          SE_NODE_MAX_SESSIONS: 12
-          SE_NODE_SESSION_TIMEOUT: 300
-          SCREEN_WIDTH: 1366
-          SCREEN_HEIGHT: 768
-    resource_class: xlarge
-
-  firefox-test-executor:
-    docker:
-      - image: python:3.12.0
-      - image: selenium/standalone-firefox:117.0
-        environment:
-          SE_NODE_MAX_SESSIONS: 12
-          SE_NODE_SESSION_TIMEOUT: 300
-          SCREEN_WIDTH: 1366
-          SCREEN_HEIGHT: 768
-    resource_class: xlarge
-
-  edge-test-executor:
-    docker:
-      - image: python:3.12.0
-      - image: selenium/standalone-edge:117.0
-        environment:
-          SE_NODE_MAX_SESSIONS: 12
-          SE_NODE_SESSION_TIMEOUT: 300
-          SCREEN_WIDTH: 1366
-          SCREEN_HEIGHT: 768
-    resource_class: xlarge
-
-jobs:
-  pre-commit:
-    docker:
-      - image: cimg/python:3.12.0
-    resource_class: medium
-
-    steps:
-      - checkout
-      - run:
-          name: install dependencies
-          command: |
-            set +eo pipefail
-            pip install --upgrade pip
-            pip install pre-commit
-            pre-commit install-hooks
-
-      - install_cucu_dependencies
-      - build_cucu_python_package
-      - install_cucu_globally
-
-      - run:
-          name: run pre-commit validations
-          command: pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
-
-  test:
-    parameters:
-      browser:
-        type: string
-        default: "chrome"
-
-    executor: << parameters.browser >>-test-executor
-
-    steps:
-      - checkout
-      - install_cucu_dependencies
-      - install_test_dependencies
-      - build_cucu_python_package
-      - install_cucu_globally
-      - setup_remote_docker_env
-      - wait_for_selenium
-      - run_functional_tests:
-          browser: "<< parameters.browser >>"
-      - run_unit_tests
-      - code_coverage_check
-
-      - run:
-          name: tar up results and reporting
-          command: |
-            tar cvfz results.tgz results
-            tar cvfz report.tgz report
-            tar cvfz junit_results.tgz junit_results
-          when: always
-
-      - store_artifacts:
-          path: results.tgz
-
-      - store_artifacts:
-          path: junit_results.tgz
-
-      - store_artifacts:
-          path: report.tgz
-
-      - store_test_results:
-          path: junit_results
-
-  publish:
-    docker:
-      - image: cimg/python:3.12.0
-    steps:
-      - checkout
-      - install_cucu_dependencies
-      - build_cucu_python_package
-      - run:
-          name: Publish to private PyPI repository
-          command: |
-            set +eo pipefail
-            poetry config repositories.private ${PUBLISH_REPOSITORY}
-            poetry config http-basic.private ${PUBLISH_USERNAME} ${PUBLISH_PASSWORD}
-            poetry publish -r private
-
-workflows:
-  build-test-publish:
-    jobs:
-      - pre-commit
-      - test:
-          name: test-chrome
-          browser: chrome
-          requires:
-            - pre-commit
-      - test:
-          name: test-edge
-          browser: edge
-          requires:
-            - test-chrome
-      - test:
-          name: test-firefox
-          browser: firefox
-          requires:
-            - test-chrome
-      - publish:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^\d+\.\d+\.\d+/
