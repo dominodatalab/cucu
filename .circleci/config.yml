@@ -10,16 +10,16 @@ parameters:
   selenium_version:
     type: string
     default: '117.0'
-  se_node_max_sessions: 
+  se_node_max_sessions:
     type: integer
     default: 12
-  se_node_session_timeout: 
+  se_node_session_timeout:
     type: integer
     default: 300
-  screen_width: 
+  screen_width:
     type: integer
     default: 1366
-  screen_height: 
+  screen_height:
     type: integer
     default: 768
 
