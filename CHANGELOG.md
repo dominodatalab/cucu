@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 0.178.0
 - Add - error message to json and junit
+- Chore - bump pebble
 
 ## 0.177.0
 - Fix - text regex steps mess up the fuzzy find js code
