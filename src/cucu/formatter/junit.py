@@ -83,7 +83,9 @@ class CucuJUnitFormatter(Formatter):
                     if isinstance(error, RetryError):
                         error = error.last_attempt.exception()
 
-                    failures += repr(error).splitlines()
+                    error_lines = error.args[0].splitlines()
+                    error_lines[0] = f"{error.__class__.__name__}: {error_lines[0]}"
+                    failures += error_lines
 
                 if CONFIG["CUCU_JUNIT_WITH_STACKTRACE"] == "true":
                     failures += traceback.format_tb(

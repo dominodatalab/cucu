@@ -238,22 +238,27 @@ Feature: Run outputs
      Then I run the command "cucu run {CUCU_RESULTS_DIR}/tables_in_output/tables_in_output.feature --results {CUCU_RESULTS_DIR}/tables_in_output_results" and save stdout to "STDOUT" and expect exit code "1"
       And I should see "{STDOUT}" contains the following
       """
+      RuntimeError: unable to find desired table
+      expected:
+        | nope | this | is | not | it |
+
+      found: 
       "1st" table:
-      | Name   | City          | Country       |
-      | Alfred | Berlin        | Germany       |
-      | Joe    | San Francisco | United States |
-      | Maria  | Cancun        | Mexico        |
+        | Name   | City          | Country       |
+        | Alfred | Berlin        | Germany       |
+        | Joe    | San Francisco | United States |
+        | Maria  | Cancun        | Mexico        |
       "2nd" table:
-      | Name   | Age |
-      | Alfred | 31  |
-      | Joe    | 35  |
-      | Maria  | 33  |
+        | Name   | Age |
+        | Alfred | 31  |
+        | Joe    | 35  |
+        | Maria  | 33  |
       "3rd" table:
-      | Name (last name optional) | Age (in years) |
-      | Alfred                    | 31             |
-      | Maria Lopez               | 33             |
+        | Name (last name optional) | Age (in years) |
+        | Alfred                    | 31             |
+        | Maria Lopez               | 33             |
       "4th" table:
-      | User Title   | Yearly Salary |
-      | Alfred White | 120,000       |
-      | Maria Lopez  | 133,000       |
+        | User Title   | Yearly Salary |
+        | Alfred White | 120,000       |
+        | Maria Lopez  | 133,000       |
       """

@@ -212,7 +212,9 @@ class CucuJSONFormatter(Formatter):
                 if isinstance(error, RetryError):
                     error = error.last_attempt.exception()
 
-                result_element["exception"] = repr(error).splitlines()
+                error_lines = error.args[0].splitlines()
+                error_lines[0] = f"{error.__class__.__name__}: {error_lines[0]}"
+                result_element["exception"] = error_lines
 
     def embedding(self, mime_type, data):
         # nothing to do, but we need to implement the method
