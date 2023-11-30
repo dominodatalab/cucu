@@ -1,5 +1,5 @@
 Feature: Text
-  As a developer I want to make sure the test writer can verify the visibilty
+  As a developer I want to make sure the test writer can verify the visibility
   of text on the page
 
   Scenario: User can see text within a simple label
@@ -83,3 +83,10 @@ Feature: Text
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
      Then I match the regex "(?P<word>[^ ]*)\s*to Clipboard" on the current page and save the group "word" to the variable "WORD"
      Then I should see "{WORD}" is equal to "Copy"
+
+  Scenario: User can do regex text match and fuzzy find on the same page
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
+     Then I should see the text "just some text in a label"
+      And I should see text matching the regex "just.*a.l[abcd]bel" on the current page
+      And I should see the text "just some text in a label"
