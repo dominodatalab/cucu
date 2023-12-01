@@ -81,7 +81,7 @@ jobs:
         default: "chrome"
 
     docker:
-      - image: python:<<pipeline.parameters.python_version>>-node
+      - image: cimg/python:<<pipeline.parameters.python_version>>-node
       - image: selenium/standalone-<<parameters.browser>>:<<pipeline.parameters.selenium_version>>
         environment:
           SE_NODE_MAX_SESSIONS: <<pipeline.parameters.se_node_max_sessions>>
