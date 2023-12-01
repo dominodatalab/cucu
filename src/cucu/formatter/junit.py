@@ -78,13 +78,15 @@ class CucuJUnitFormatter(Formatter):
                     f"{self.current_step.keyword} {self.current_step.name}"
                 ]
 
-                if self.current_step.exception:
-                    error = self.current_step.exception
+                if error := self.current_step.exception:
                     if isinstance(error, RetryError):
                         error = error.last_attempt.exception()
 
-                    error_lines = error.args[0].splitlines()
-                    error_lines[0] = f"{error.__class__.__name__}: {error_lines[0]}"
+                    if len(error.args) > 0 and isinstance(error.args[0], str):
+                        error_lines = error.args[0].splitlines()
+                        error_lines[0] = f"{error.__class__.__name__}: {error_lines[0]}"
+                    else:
+                        error_lines = [repr(error)]
                     failures += error_lines
 
                 if CONFIG["CUCU_JUNIT_WITH_STACKTRACE"] == "true":

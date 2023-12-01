@@ -11,6 +11,22 @@ Feature: Run with JUnit
       And I should not see a file at "{CUCU_RESULTS_DIR}/run_with_custom_junit_results/Echo.xml"
       And I should see a file at "{CUCU_RESULTS_DIR}/junit_files/Echo.xml"
 
+  Scenario: User can see the error message for tables in the JUnit XML results
+    Given I run the command "cucu run data/features/feature_with_failing_scenario_with_table.feature --results {CUCU_RESULTS_DIR}/tables_in_output_results" and save stdout to "STDOUT" and expect exit code "1"
+     Then I should see the file at "{CUCU_RESULTS_DIR}/tables_in_output_results/Feature with failing to find a table.xml" contains the following:
+      """
+      RuntimeError: unable to find desired table
+      expected:
+        | nope | this | is | not | it |
+
+      found: 
+      "1st" table:
+        | Name   | City          | Country       |
+        | Alfred | Berlin        | Germany       |
+        | Joe    | San Francisco | United States |
+        | Maria  | Cancun        | Mexico        |
+      """
+
   Scenario: User can choose to include or exclude stacktraces from the JUnit XML results
     Given I run the command "cucu run data/features/feature_with_failing_scenario.feature --results {CUCU_RESULTS_DIR}/junit_without_stacktraces_results" and expect exit code "1"
      Then I should see the file at "{CUCU_RESULTS_DIR}/junit_without_stacktraces_results/Feature with failing scenario.xml" does not contain the following:

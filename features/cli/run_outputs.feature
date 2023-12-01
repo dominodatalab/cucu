@@ -217,25 +217,7 @@ Feature: Run outputs
       """
 
   Scenario: User gets expected table representation in console output
-    Given I create a file at "{CUCU_RESULTS_DIR}/tables_in_output/environment.py" with the following:
-      """
-      from cucu.environment import *
-      """
-      And I create a file at "{CUCU_RESULTS_DIR}/tables_in_output/steps/__init__.py" with the following:
-      """
-      from cucu.steps import *
-      """
-      And I create a file at "{CUCU_RESULTS_DIR}/tables_in_output/tables_in_output.feature" with the following:
-      """
-      Feature: Feature with failing to find a table
-
-        Scenario: Scenario that opens a page and fails to find a table
-          Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
-            And I open a browser at the url "http://\{HOST_ADDRESS\}:\{PORT\}/tables.html"
-           Then I should see a table that is the following:
-             | nope | this | is | not | it |
-      """
-     Then I run the command "cucu run {CUCU_RESULTS_DIR}/tables_in_output/tables_in_output.feature --results {CUCU_RESULTS_DIR}/tables_in_output_results" and save stdout to "STDOUT" and expect exit code "1"
+    Given I run the command "cucu run data/features/feature_with_failing_scenario_with_table.feature --results {CUCU_RESULTS_DIR}/tables_in_output_results" and save stdout to "STDOUT" and expect exit code "1"
       And I should see "{STDOUT}" contains the following
       """
       RuntimeError: unable to find desired table
