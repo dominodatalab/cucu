@@ -213,9 +213,11 @@ class CucuJSONFormatter(Formatter):
 
                 if len(error.args) > 0 and isinstance(error.args[0], str):
                     error_lines = error.args[0].splitlines()
-                    error_lines[0] = f"{error.__class__.__name__}: {error_lines[0]}"
+                    error_lines[
+                        0
+                    ] = f"{error.__class__.__name__}: {error_lines[0]}"
                 else:
-                    error_lines = [repr(error)]                
+                    error_lines = [repr(error)]
 
                 result_element["exception"] = error_lines
 

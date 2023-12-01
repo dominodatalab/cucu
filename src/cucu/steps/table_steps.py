@@ -121,10 +121,14 @@ def report_unable_to_find_table(expected_table, found_tables):
     stream.write("\n")
     for index, table in enumerate(found_tables):
         print_index = helpers.nth_to_ordinal(index) or '"1st" '
-        stream.write(f"{print_index}table:\n{format_gherkin_table(table, [], '  ')}\n")
+        stream.write(
+            f"{print_index}table:\n{format_gherkin_table(table, [], '  ')}\n"
+        )
 
     stream.seek(0)
-    raise RuntimeError(f"unable to find desired table\nexpected:\n{format_gherkin_table(expected_table, [], '  ')}\n\nfound: {stream.read()}")
+    raise RuntimeError(
+        f"unable to find desired table\nexpected:\n{format_gherkin_table(expected_table, [], '  ')}\n\nfound: {stream.read()}"
+    )
 
 
 def find_table(ctx, assert_func, nth=None):
