@@ -283,6 +283,7 @@ Feature: Report basics
      Then I should see a table that matches the following:
        | Started at | Feature                                | Total | Passed | Failed | Skipped | Status | Duration |
        | .*         | Feature with failing scenario          | 1     | 0      | 1      | 0       | failed | .*       |
+       | .*         | Feature with failing to find a table   | 1     | 0      | 1      | 0       | failed | .*       |
        | .*         | Feature with failing scenario with web | 1     | 0      | 1      | 0       | failed | .*       |
      When I click the button "Feature with failing scenario with web"
      Then I should see a table that matches the following:
