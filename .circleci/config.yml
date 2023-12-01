@@ -81,7 +81,7 @@ jobs:
         default: "chrome"
 
     docker:
-      - image: cimg/python:<<pipeline.parameters.python_version>>-node
+      - image: cimg/python:<<pipeline.parameters.python_version>>
       - image: selenium/standalone-<<parameters.browser>>:<<pipeline.parameters.selenium_version>>
         environment:
           SE_NODE_MAX_SESSIONS: <<pipeline.parameters.se_node_max_sessions>>
@@ -107,17 +107,28 @@ jobs:
             equal: ["<< parameters.browser >>", "chrome"]
           steps:
             - run:
+                name: install sonar and dependencies
+                command: |
+                  set -exuo pipefail
+                  curl -fsSL https://deb.nodesource.com/setup_15.x | sudo -E bash -
+                  sudo apt-get install -y nodejs
+                  node -v
+
+                  sudo apt-get install -y jq
+                  jq --version
+
+                  echo "download and install"
+                  wget -O sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+                  unzip -q sonar-scanner.zip
+                  ./sonar-scanner/bin/sonar-scanner --version
+            - run:
                 name: Run sonar-scanner
                 command: |
                   set -exuo pipefail
                   sudo apt-get install -y jq
 
-                  echo "download and install"
-                  wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-                  unzip sonar-scanner-cli-5.0.1.3006-linux.zip
-
                   export SONAR_SCANNER_OPTS="-Xmx2048m"
-                  SONAR_CMD="eval ./sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner \
+                  SONAR_CMD="eval ./sonar-scanner/bin/sonar-scanner \
                     -Dsonar.projectKey=cucu \
                     -Dsonar.sources=. \
                     -Dsonar.host.url=${SONARQUBE_HOST_URL} \
