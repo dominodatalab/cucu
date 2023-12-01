@@ -120,8 +120,8 @@ jobs:
                   SONAR_CMD="eval ./sonar-scanner-5.0.1.3006/bin/sonar-scanner \
                     -Dsonar.projectKey=cucu \
                     -Dsonar.sources=. \
-                    -Dsonar.host.url=${SONAR_URL} \
-                    -Dsonar.login=${SONAR_LOGIN}"
+                    -Dsonar.host.url=${SONARQUBE_HOST_URL} \
+                    -Dsonar.login=${SONARQUBE_TOKEN}"
 
                   # Check if there is an open pull request
                   if [[ ! -z $CIRCLE_PULL_REQUEST ]]; then
