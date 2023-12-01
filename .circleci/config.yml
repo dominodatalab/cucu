@@ -110,7 +110,7 @@ jobs:
                 name: Run sonar-scanner
                 command: |
                   set -exuo pipefail
-                  apt-get install -y jq
+                  sudo apt-get install -y jq
 
                   echo "download and install"
                   wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
@@ -186,8 +186,8 @@ commands:
           name: install test dependencies
           command: |
             set +eo pipefail
-            apt-get update
-            apt-get install -y expect
+            sudo apt-get update
+            sudo apt-get install -y expect
 
   build_cucu_python_package: &build_cucu_python_package
     steps:
