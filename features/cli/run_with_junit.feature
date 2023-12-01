@@ -19,7 +19,7 @@ Feature: Run with JUnit
       expected:
         | nope | this | is | not | it |
 
-      found: 
+      found:
       "1st" table:
         | Name   | City          | Country       |
         | Alfred | Berlin        | Germany       |
