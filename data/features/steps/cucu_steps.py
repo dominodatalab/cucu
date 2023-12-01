@@ -60,7 +60,7 @@ def i_wait_to_fail(_):
     def fail():
         raise RuntimeError("step fails on purpose after a while")
 
-    retry(fail)
+    retry(fail)()
 
 
 @step('I use a step with "{nth:nth}" usage')

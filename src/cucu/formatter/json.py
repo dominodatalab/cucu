@@ -12,6 +12,7 @@ import uuid
 import six
 from behave.formatter.base import Formatter
 from behave.model_core import Status
+from tenacity import RetryError
 
 from cucu import behave_tweaks
 from cucu.config import CONFIG
@@ -202,8 +203,23 @@ class CucuJSONFormatter(Formatter):
             error_message = step.error_message
             if self.split_text_into_lines:
                 error_message = error_message.splitlines()
+
             result_element = steps[step_index]["result"]
             result_element["error_message"] = error_message
+
+            if error := step.exception:
+                if isinstance(error, RetryError):
+                    error = error.last_attempt.exception()
+
+                if len(error.args) > 0 and isinstance(error.args[0], str):
+                    error_lines = error.args[0].splitlines()
+                    error_lines[
+                        0
+                    ] = f"{error.__class__.__name__}: {error_lines[0]}"
+                else:
+                    error_lines = [repr(error)]
+
+                result_element["exception"] = error_lines
 
     def embedding(self, mime_type, data):
         # nothing to do, but we need to implement the method

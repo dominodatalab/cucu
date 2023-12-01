@@ -5,8 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.178.0
+- Add - error message to json and junit
+- Change - print expected and found tables on fail
+- Chore - bump pebble
+
 ## 0.177.0
 - Fix - text regex steps mess up the fuzzy find js code
+- Chore - bump dependencies
+- Chore - update pip in CI pre-commit
+- Chore - group dependabot updates
 
 ## 0.176.0
 - Add - preliminary border injection behind feature flag
