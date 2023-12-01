@@ -97,7 +97,11 @@ jobs:
       - build_cucu_python_package
       - install_cucu_globally
       - setup_remote_docker_env
-      - run_sonarqube
+      - when:
+          condition:
+            equal: ["<< parameters.browser >>", "chrome"]
+          steps:
+            - run_sonarqube
       - wait_for_selenium
       - run_functional_tests:
           browser: "<< parameters.browser >>"
@@ -204,50 +208,47 @@ commands:
             poetry run coverage report --fail-under=70
 
   run_sonarqube: &run_sonarqube
-    when:
-      condition:
-        equal: ["<< parameters.browser >>", "chrome"]
-      steps:
-        - run:
-            name: install sonar and dependencies
-            command: |
-              set -exuo pipefail
-              curl -fsSL https://deb.nodesource.com/setup_15.x | sudo -E bash -
-              sudo apt-get install -y nodejs
-              node -v
+    steps:
+      - run:
+          name: install sonar and dependencies
+          command: |
+            set -exuo pipefail
+            curl -fsSL https://deb.nodesource.com/setup_15.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            node -v
 
-              sudo apt-get install -y jq
-              jq --version
+            sudo apt-get install -y jq
+            jq --version
 
-              echo "download and install"
-              wget -O sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-              unzip -q sonar-scanner.zip
-              ./sonar-scanner/bin/sonar-scanner --version
-        - run:
-            name: Run sonar-scanner
-            command: |
-              set -exuo pipefail
-              sudo apt-get install -y jq
+            echo "download and install"
+            wget -O sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+            unzip -q sonar-scanner.zip
+            ./sonar-scanner/bin/sonar-scanner --version
+      - run:
+          name: Run sonar-scanner
+          command: |
+            set -exuo pipefail
+            sudo apt-get install -y jq
 
-              export SONAR_SCANNER_OPTS="-Xmx2048m"
-              SONAR_CMD="eval ./sonar-scanner/bin/sonar-scanner \
-                -Dsonar.projectKey=cucu \
-                -Dsonar.sources=. \
-                -Dsonar.host.url=${SONARQUBE_HOST_URL} \
-                -Dsonar.login=${SONARQUBE_TOKEN}"
+            export SONAR_SCANNER_OPTS="-Xmx2048m"
+            SONAR_CMD="eval ./sonar-scanner/bin/sonar-scanner \
+              -Dsonar.projectKey=cucu \
+              -Dsonar.sources=. \
+              -Dsonar.host.url=${SONARQUBE_HOST_URL} \
+              -Dsonar.login=${SONARQUBE_TOKEN}"
 
-              # Check if there is an open pull request
-              if [[ ! -z $CIRCLE_PULL_REQUEST ]]; then
-                pr=$(echo https://api.github.com/repos/${CIRCLE_PULL_REQUEST:19} | sed "s/\/pull\//\/pulls\//")
-                base_branch=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" $pr | jq -r '.base.ref')
-                SONAR_CMD+=" \
-                -Dsonar.pullrequest.key=${CIRCLE_PULL_REQUEST##*/} \
-                -Dsonar.pullrequest.branch=${CIRCLE_BRANCH} \
-                -Dsonar.pullrequest.base=${base_branch}"
-              else
-                SONAR_CMD+=" \
-                -Dsonar.branch.name=${CIRCLE_BRANCH}"
-              fi
+            # Check if there is an open pull request
+            if [[ ! -z $CIRCLE_PULL_REQUEST ]]; then
+              pr=$(echo https://api.github.com/repos/${CIRCLE_PULL_REQUEST:19} | sed "s/\/pull\//\/pulls\//")
+              base_branch=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" $pr | jq -r '.base.ref')
+              SONAR_CMD+=" \
+              -Dsonar.pullrequest.key=${CIRCLE_PULL_REQUEST##*/} \
+              -Dsonar.pullrequest.branch=${CIRCLE_BRANCH} \
+              -Dsonar.pullrequest.base=${base_branch}"
+            else
+              SONAR_CMD+=" \
+              -Dsonar.branch.name=${CIRCLE_BRANCH}"
+            fi
 
-              echo "Running sonarqube analysis... $SONAR_CMD"
-              eval $SONAR_CMD
+            echo "Running sonarqube analysis... $SONAR_CMD"
+            eval $SONAR_CMD
