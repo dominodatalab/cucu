@@ -108,7 +108,7 @@ jobs:
                 name: Run sonar-scanner
                 command: |
                   set -exuo pipefail
-                  apt-get install jq
+                  apt-get install -y jq
 
                   echo "download and install"
                   wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
