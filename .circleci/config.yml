@@ -66,7 +66,7 @@ jobs:
             pip install --upgrade pip
             pip install pre-commit
             pre-commit install-hooks
-
+      - run_sonarqube
       - install_cucu_dependencies
       - build_cucu_python_package
       - install_cucu_globally
@@ -97,11 +97,11 @@ jobs:
       - build_cucu_python_package
       - install_cucu_globally
       - setup_remote_docker_env
-      - when:
-          condition:
-            equal: ["<< parameters.browser >>", "chrome"]
-          steps:
-            - run_sonarqube
+      # - when:
+      #     condition:
+      #       equal: ["<< parameters.browser >>", "chrome"]
+      #     steps:
+      #       - run_sonarqube
       - wait_for_selenium
       - run_functional_tests:
           browser: "<< parameters.browser >>"
