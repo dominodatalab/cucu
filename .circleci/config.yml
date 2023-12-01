@@ -30,6 +30,8 @@ workflows:
       - test:
           name: test-chrome
           browser: chrome
+          context:
+            - sonarqube_scan_context
           requires:
             - pre-commit
       - test:
@@ -40,8 +42,6 @@ workflows:
       - test:
           name: test-firefox
           browser: firefox
-          context:
-            - sonarqube_scan_context
           requires:
             - test-chrome
       - publish:
