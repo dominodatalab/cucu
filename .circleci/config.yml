@@ -40,6 +40,8 @@ workflows:
       - test:
           name: test-firefox
           browser: firefox
+          context:
+            - sonarqube_scan_context
           requires:
             - test-chrome
       - publish:
