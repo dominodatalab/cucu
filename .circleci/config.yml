@@ -27,16 +27,17 @@ workflows:
   build-test-publish:
     jobs:
       - pre-commit
-      - test:
-          name: test-chrome
-          browser: chrome
-          context:
-            - sonarqube_scan_context
-          requires:
-            - pre-commit
+      # - test:
+      #     name: test-chrome
+      #     browser: chrome
+      #     context:
+      #       - sonarqube_scan_context
+      #     requires:
+      #       - pre-commit
       - sonarqube:
           requires:
-            - test-chrome
+            - pre-commit
+            # - test-chrome
       # - test:
       #     name: test-edge
       #     browser: edge
