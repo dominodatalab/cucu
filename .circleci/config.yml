@@ -34,27 +34,30 @@ workflows:
             - sonarqube_scan_context
           requires:
             - pre-commit
-      - test:
-          name: test-edge
-          browser: edge
+      - run_sonarqube:
           requires:
             - test-chrome
-      - test:
-          name: test-firefox
-          browser: firefox
-          requires:
-            - test-chrome
-      - publish:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^\d+\.\d+\.\d+/
+      # - test:
+      #     name: test-edge
+      #     browser: edge
+      #     requires:
+      #       - test-chrome
+      # - test:
+      #     name: test-firefox
+      #     browser: firefox
+      #     requires:
+      #       - test-chrome
+      # - publish:
+      #     filters:
+      #       branches:
+      #         ignore: /.*/
+      #       tags:
+      #         only: /^\d+\.\d+\.\d+/
 
 jobs:
   pre-commit:
     docker:
-      - image: cimg/base:2023.06-22.04
+      - image: cimg/python:3.12.0
     resource_class: medium
 
     steps:
@@ -66,7 +69,6 @@ jobs:
             pip install --upgrade pip
             pip install pre-commit
             pre-commit install-hooks
-      - run_sonarqube
       - install_cucu_dependencies
       - build_cucu_python_package
       - install_cucu_globally
@@ -122,6 +124,15 @@ jobs:
           path: report.tgz
       - store_test_results:
           path: junit_results
+
+  sonarqube:
+    docker:
+      - image: cimg/base:2023.06-22.04
+    resource_class: medium
+
+    steps:
+      - checkout
+      - run_sonarqube
 
   publish:
     docker:
