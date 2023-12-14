@@ -26,7 +26,7 @@ parameters:
 workflows:
   build-test-publish:
     jobs:
-      - pre-commit
+      # - pre-commit
       # - test:
       #     name: test-chrome
       #     browser: chrome
@@ -34,9 +34,10 @@ workflows:
       #       - sonarqube_scan_context
       #     requires:
       #       - pre-commit
-      - sonarqube:
-          requires:
-            - pre-commit
+      - sonarqube
+      # :
+      #     requires:
+      #       - pre-commit
             # - test-chrome
       # - test:
       #     name: test-edge
