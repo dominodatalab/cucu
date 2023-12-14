@@ -141,10 +141,12 @@ def report_found_undesired_table(unexpected_tables, found_tables):
         )
 
     stream.seek(0)
-    error_message = ''
+    error_message = ""
     for table in unexpected_tables:
-        error_message += f"found undesired table\n\nundesired table:\n{format_gherkin_table(table, [], '  ')}\n\n"\
-                         f"all tables found:{stream.read()}\n"
+        error_message += (
+            f"found undesired table\n\nundesired table:\n{format_gherkin_table(table, [], '  ')}\n\n"
+            f"all tables found:{stream.read()}\n"
+        )
     raise RuntimeError(error_message)
 
 
