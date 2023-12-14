@@ -34,8 +34,9 @@ workflows:
       #       - sonarqube_scan_context
       #     requires:
       #       - pre-commit
-      - sonarqube
-      # :
+      - sonarqube:
+            context:
+              - sonarqube_scan_context
       #     requires:
       #       - pre-commit
             # - test-chrome
