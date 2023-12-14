@@ -232,11 +232,9 @@ commands:
 
             echo "download and install"
             wget -O sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-            mkdir sonar-scanner
-            cd sonar-scanner
-            unzip -q ../sonar-scanner.zip -d .
+            unzip -q sonar-scanner.zip
             ls -al
-            ./sonar-scanner/bin/sonar-scanner --version
+            ./sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner --version
       - run:
           name: Run sonar-scanner
           command: |
@@ -244,7 +242,7 @@ commands:
             sudo apt-get install -y jq
 
             export SONAR_SCANNER_OPTS="-Xmx2048m"
-            SONAR_CMD="eval ./sonar-scanner/bin/sonar-scanner \
+            SONAR_CMD="eval ./sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner \
               -Dsonar.projectKey=cucu \
               -Dsonar.sources=. \
               -Dsonar.host.url=${SONARQUBE_HOST_URL} \
