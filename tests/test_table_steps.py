@@ -7,13 +7,10 @@ from cucu.steps.table_steps import (
 
 
 class TestDoNotFindTable(TestCase):
-
-    def __init__(self, method_name='runTest'):
+    def __init__(self, method_name="runTest"):
         super().__init__(method_name)
         self.seen_tables = [
-            [
-                ["", "", "✕"]
-            ],
+            [["", "", "✕"]],
             [
                 ["", "NAME", "SIZE", "MODIFIED", ""],
                 ["", "", "", "", ""],
