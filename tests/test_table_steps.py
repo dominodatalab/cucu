@@ -7,7 +7,10 @@ class TestDoNotFindTable(TestCase):
 
     def test_do_not_find_table_error(self):
         # Assert that if ANY table matches the undesired table pattern, a RuntimeError is raised
-        undesired_table = [['', 'NAME', 'SIZE', 'MODIFIED', ''], ['', '3GB_file\\.txt', '.*', '.*', '']]
+        undesired_table = [
+            ['', 'NAME', 'SIZE', 'MODIFIED', ''],
+            ['', '3GB_file\\.txt', '.*', '.*', '']
+        ]
         expected_mock = mock.MagicMock(return_value=undesired_table)
         with mock.patch("cucu.steps.table_steps.behave_table_to_array", expected_mock):
             tables = [
@@ -28,7 +31,10 @@ class TestDoNotFindTable(TestCase):
 
     def test_do_not_find_table(self):
         # Assert that if NO table matches the undesired table pattern, no exception is raised
-        undesired_table = [['', 'NAME', 'SIZE', 'MODIFIED', ''], ['', '999GB_file\\.txt', '.*', '.*', '']]
+        undesired_table = [
+            ['', 'NAME', 'SIZE', 'MODIFIED', ''],
+            ['', '999GB_file\\.txt', '.*', '.*', '']
+        ]
         expected_mock = mock.MagicMock(return_value=undesired_table)
         with mock.patch("cucu.steps.table_steps.behave_table_to_array", expected_mock):
             tables = [
