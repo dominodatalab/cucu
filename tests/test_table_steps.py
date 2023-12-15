@@ -1,4 +1,4 @@
-from unittest import mock, TestCase
+from unittest import TestCase, mock
 
 from cucu.steps.table_steps import (
     check_table_contains_matching_rows_in_table,
