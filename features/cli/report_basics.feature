@@ -31,7 +31,7 @@ Feature: Report basics
       """
 
   Scenario: User can run a test and see extended output
-    Given I run the command "cucu run data/features/with_secret/scenario_with_comments.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "0"
+    Given I run the command "cucu run data/features/with_secret/scenario_with_comments.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "1"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
@@ -49,8 +49,12 @@ Feature: Report basics
       And I wait to see the text "# MY_SECRET="****""
 
         * # Can see image for step with secret in name
-     When I click the button "I should see the text "****""
-     Then I should see the image with the alt text "Then I should see the text "****""
+     When I click the button "I should see the text "\{MY_SECRET\}""
+     Then I should see the image with the alt text "Then I should see the text "\{MY_SECRET\}""
+
+        * # Cannot see secrets in the exception message
+     When I click the button "Then I click the button "\{MY_SECRET\}""
+     Then I should see the text "unable to find the button "****""
 
   @QE-6852
   Scenario: User can run a multi scenario test with web steps and generate report with a shareable url
