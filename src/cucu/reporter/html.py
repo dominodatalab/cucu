@@ -14,7 +14,7 @@ import jinja2
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
-from cucu.environment import generate_image_filename
+from cucu.environment import get_step_image_dir
 
 
 def escape(data):
@@ -184,16 +184,18 @@ def generate(results, basepath, only_failures=False):
                 if show_status:
                     print("s", end="", flush=True)
                 total_steps += 1
-                image_filename = generate_image_filename(
-                    step_index, step["name"]
-                )
-                image_filepath = os.path.join(scenario_filepath, image_filename)
+                image_dir = get_step_image_dir(step_index, step["name"])
+                image_dirpath = os.path.join(scenario_filepath, image_dir)
 
                 if step["name"].startswith("#"):
                     step["heading_level"] = "h4"
 
-                if os.path.exists(image_filepath):
-                    step["image"] = urllib.parse.quote(image_filename)
+                if os.path.exists(image_dirpath):
+                    _, _, image_names = next(os.walk(image_dirpath))
+                    step["images"] = [
+                        urllib.parse.quote(os.path.join(image_dir, i))
+                        for i in image_names
+                    ]
 
                 if "result" in step:
                     if step["result"]["status"] in ["failed", "passed"]:

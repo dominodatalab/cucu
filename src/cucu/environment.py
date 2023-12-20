@@ -31,7 +31,23 @@ CONFIG.define(
 init_page_checks()
 
 
-def generate_image_filename(step_index, step_name):
+def ellipsize_filename(raw_filename):
+    max_filename = 255
+    if len(raw_filename) < max_filename:
+        return raw_filename
+
+    ellipsis = "..."
+    # save the last chars, as the ending is often important
+    end_count = 100
+    front_count = max_filename - (len(ellipsis) + end_count)
+    ellipsized_filename = (
+        raw_filename[:front_count] + ellipsis + raw_filename[-1 * end_count :]
+    )
+
+    return ellipsized_filename
+
+
+def get_step_image_dir(step_index, step_name):
     """
     generate .png image file name that meets these criteria:
      - hides secrets
@@ -39,20 +55,47 @@ def generate_image_filename(step_index, step_name):
      - filename does not exceed 255 chars (OS limitation)
      - uniqueness comes from step number
     """
-    max_filename = 255 - len(".png")
     escaped_step_name = CONFIG.hide_secrets(step_name).replace("/", "_")
-    filename = f"{step_index} - {escaped_step_name}"
+    unabridged_dirname = f"{step_index:0>4} - {escaped_step_name}"
+    dirname = ellipsize_filename(unabridged_dirname)
 
-    if len(filename) > max_filename:
-        ellipsis = "..."
-        # save the last chars as the ending often important
-        end_count = 100
-        front_count = max_filename - (len(ellipsis) + end_count)
-        filename = (
-            filename[:front_count] + ellipsis + filename[-1 * end_count :]
+    return dirname
+
+
+def take_screenshot(ctx, step_name, label="", highlight_element=None):
+    screenshot_dir = os.path.join(
+        ctx.scenario_dir, get_step_image_dir(ctx.step_index, step_name)
+    )
+    if not os.path.exists(screenshot_dir):
+        os.mkdir(screenshot_dir)
+
+    if len(label) > 0:
+        label = f" - {CONFIG.hide_secrets(label).replace('/', '_')}"
+    filename = f"{CONFIG['__STEP_SCREENSHOT_COUNT']:0>4}{label}.png"
+    filename = ellipsize_filename(filename)
+    filepath = os.path.join(screenshot_dir, filename)
+
+    if not CONFIG["CUCU_INJECT_ELEMENT_BORDER"] or not highlight_element:
+        ctx.browser.screenshot(filepath)
+    else:
+        border_style = "solid magenta 4px"
+        border_radius = "4px"
+        highlighter = (
+            f'arguments[0].style["border"] = "{border_style}";'
+            f'arguments[0].style["border-radius"] = "{border_radius}";'
         )
+        ctx.browser.execute(highlighter, highlight_element)
+        ctx.browser.screenshot(filepath)
+        clear_highlight = (
+            'arguments[0].style["border"] = "";'
+            'arguments[0].style["border-radius"] = "";'
+        )
+        ctx.browser.execute(clear_highlight, highlight_element)
 
-    return f"{filename}.png"
+    if CONFIG["CUCU_MONITOR_PNG"] is not None:
+        shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
+
+    CONFIG["__STEP_SCREENSHOT_COUNT"] += 1
 
 
 def check_browser_initialized(ctx):
@@ -240,40 +283,13 @@ def after_step(ctx, step):
     # and this step has no substeps as in the reporting the substeps that
     # may actually do something on the browser take their own screenshots
     if ctx.browser is not None and ctx.current_step.has_substeps is False:
-        filepath = os.path.join(
-            ctx.scenario_dir, generate_image_filename(ctx.step_index, step.name)
-        )
-
-        # If we've marked an element as the one we're interacting with,
-        # inject a border to highlight that element
-        if (
-            not CONFIG["CUCU_INJECT_ELEMENT_BORDER"]
-            or not CONFIG["__PERTINENT_ELEMENT"]
-        ):
-            ctx.browser.screenshot(filepath)
-        else:
-            border_style = "solid magenta 4px"
-            border_radius = "4px"
-            highlighter = (
-                f'arguments[0].style["border"] = "{border_style}";'
-                f'arguments[0].style["border-radius"] = "{border_radius}";'
-            )
-            ctx.browser.execute(highlighter, CONFIG["__PERTINENT_ELEMENT"])
-            ctx.browser.screenshot(filepath)
-            clear_highlight = (
-                'arguments[0].style["border"] = "";'
-                'arguments[0].style["border-radius"] = "";'
-            )
-            ctx.browser.execute(clear_highlight, CONFIG["__PERTINENT_ELEMENT"])
-            CONFIG["__PERTINENT_ELEMENT"] = None
-
-        if CONFIG["CUCU_MONITOR_PNG"] is not None:
-            shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
+        take_screenshot(ctx, step.name, label="after step")
 
     # if the step has substeps from using `run_steps` then we already moved
     # the step index in the run_steps method and shouldn't do it here
     if not step.has_substeps:
         ctx.step_index += 1
+        CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
     if CONFIG.bool("CUCU_IPDB_ON_FAILURE") and step.status == "failed":
         ctx._runner.stop_capture()

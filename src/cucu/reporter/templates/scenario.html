@@ -134,11 +134,13 @@
                     <pre style="color: darkgray; margin: 0;">{{ escape("\n".join(step['result']['stdout'])) }}</pre>
                 {% endif %}
 
-                {% if step['image'] is defined %}
+                {% if step['images'] is defined %}
                     {% if step['result']['stdout'] %}
                         <br/>
                     {% endif %}
-                    <img class="mx-auto d-block img-fluid shadow bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ step["image"] }}'></img>
+                    {% for image in step['images'] %}
+                        <img class="mx-auto d-block img-fluid shadow bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ image }}'></img>
+                    {% endfor %}
                 {% endif %}
 
                 {% if step['result']['error_message'] is defined %}
