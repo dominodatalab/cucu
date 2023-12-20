@@ -17,7 +17,7 @@ Feature: Secrets
           run_steps(
               context,
               \"\"\"
-          When I echo "super secret"
+          When I echo "\{MY_SECRET\}"
           \"\"\",
           )
       """
