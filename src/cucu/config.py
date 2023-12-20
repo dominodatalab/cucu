@@ -304,27 +304,15 @@ class Config(dict):
         ]
 
         config = {k: self[k] for k in sorted(keys)}
-        results = self.hide_secrets(yaml.dump(config))
-        # fix leading '*' issue
-        is_bytes = isinstance(results, bytes)
-        if is_bytes:
-            results = results.decode()
+        for k, v in config.items():
+            if isinstance(v, str):
+                v = self.hide_secrets(v)
+                # fix leading '*' issue
+                if v.startswith("*"):
+                    v = f"'{v}'"
+                config[k] = v
 
-        lines = results.split("\n")
-        for x in range(len(lines)):
-            parts = lines[x].split(": ", 1)
-            if len(parts) != 2:
-                continue
-
-            key, value = parts[0], parts[1]
-            if value.startswith("*"):
-                lines[x] = f"{key}: '{value}'"
-        results = "\n".join(lines)
-
-        if is_bytes:
-            results = results.encode()
-
-        return results
+        return yaml.dump(config)
 
 
 # global config object
@@ -348,7 +336,7 @@ CONFIG.define(
 CONFIG.define(
     "CWD",
     "the current working directory of the cucu process",
-    default=os.getcwd,
+    default=os.getcwd(),
 )
 CONFIG.define(
     "CUCU_SECRETS",
