@@ -147,17 +147,31 @@ you can spin up manually in standalone mode like so:
 docker run -d -p 4444:4444 selenium/standalone-chrome:latest
 ```
 
+If you are using ARM64 CPU architecture (Mac M1 or M2), you must use seleniarm
+container.
+
+```bash
+docker run -d -p 4444:4444 seleniarm/standalone-chromium:latest
+```
+
 And can choose a specific version replacing the `latest` with any tag from
 [here](https://hub.docker.com/r/selenium/standalone-chrome/tags). You can find
 browser tags for `standalone-edge` and `standalone-firefox` the same way. Once
 you run the command you will see with `docker  ps -a` that the container
 is running and listening on port `4444`:
 
+Specific tags for seleniarm:
+[here](https://hub.docker.com/r/seleniarm/standalone-chromium/tags)
+
 ```bash
 > docker ps -a
 CONTAINER ID ... PORTS                                                NAMES
 7c719f4bee29 ... 0.0.0.0:4444->4444/tcp, :::4444->4444/tcp, 5900/tcp  wizardly_haslett
 ```
+
+*NOTE:* For seleniarm containers, the available browsers are chromium and firefox.
+The reason for this is because Google and Microsoft have not released binaries
+for their respective browsers (Chome and Edge).
 
 Now when running `cucu run some.feature` you can provide
 `--selenium-remote-url http://localhost:4444` and this way you'll run a very
@@ -167,6 +181,9 @@ You can also create a docker hub setup with all 3 browser nodes connected using
 the utilty script at `./bin/start_selenium_hub.sh` and you can point your tests
 at `http://localhost:4444` and then specify the `--browser` to be `chrome`,
 `firefox` or `edge` and use that specific browser for testing.
+
+The docker hub setup for seleniarm: `./bin/start_seleniarm_hub.sh`
+*NOTE:* `edge` cannot be selected as a specific browser for testing
 
 To ease using various custom settings you can also set most of the command line
 options in a local `cucurc.yml` or in a more global place at `~/.cucurc.yml`
