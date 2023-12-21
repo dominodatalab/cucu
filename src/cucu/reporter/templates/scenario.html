@@ -139,7 +139,7 @@
                         <br/>
                     {% endif %}
                     {% for image in step['images'] %}
-                        <img class="mx-auto d-block img-fluid shadow bg-white rounded" alt='{{ step_name }}' title='{{ step_name }}' src='{{ image }}'></img>
+                        <img class="mx-auto d-block img-fluid shadow bg-white rounded" style="margin-bottom:15px" alt='{{ image["label"] }}' title='{{ image["label"] }}' src='{{ image["src"] }}'></img>
                     {% endfor %}
                 {% endif %}
 

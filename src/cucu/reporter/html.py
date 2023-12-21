@@ -14,7 +14,7 @@ import jinja2
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
-from cucu.environment import get_step_image_dir
+from cucu.utils import get_step_image_dir
 
 
 def escape(data):
@@ -192,10 +192,25 @@ def generate(results, basepath, only_failures=False):
 
                 if os.path.exists(image_dirpath):
                     _, _, image_names = next(os.walk(image_dirpath))
-                    step["images"] = [
-                        urllib.parse.quote(os.path.join(image_dir, i))
-                        for i in image_names
-                    ]
+                    images = []
+                    for image_name in image_names:
+                        words = image_name.split("-", 1)
+                        index = words[0].strip()
+                        try:
+                            label, _ = os.path.splitext(words[1].strip())
+                        except IndexError:
+                            label = step["name"]
+
+                        images.append(
+                            {
+                                "src": urllib.parse.quote(
+                                    os.path.join(image_dir, image_name)
+                                ),
+                                "index": index,
+                                "label": label,
+                            }
+                        )
+                    step["images"] = sorted(images, key=lambda x: x["index"])
 
                 if "result" in step:
                     if step["result"]["status"] in ["failed", "passed"]:
