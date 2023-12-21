@@ -171,7 +171,7 @@ CONTAINER ID ... PORTS                                                NAMES
 
 *NOTE:* For seleniarm containers, the available browsers are chromium and firefox.
 The reason for this is because Google and Microsoft have not released binaries
-for their respective browsers (Chome and Edge).
+for their respective browsers (Chrome and Edge).
 
 Now when running `cucu run some.feature` you can provide
 `--selenium-remote-url http://localhost:4444` and this way you'll run a very
