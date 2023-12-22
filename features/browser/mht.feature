@@ -1,7 +1,7 @@
 Feature: Download MHT archives
   As a user of web-based testing
   I want to download MHT archives
-  So that I can bebug DOM-based failures more easily
+  So that I can debug DOM-based failures more easily
 
   Scenario: Download an MHT file during a test
     Given I skip this scenario if the current browser is not "chrome"

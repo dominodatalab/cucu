@@ -26,7 +26,7 @@ Feature: Report basics
      When I run the command "ls "{SCENARIO_RESULTS_DIR}/"" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
-      [\s\S]*\.png
+      (\d\d\d\d - [\s\S]*)
       [\s\S]*
       """
 
@@ -50,7 +50,7 @@ Feature: Report basics
 
         * # Can see image for step with secret in name
      When I click the button "I should see the text "\{MY_SECRET\}""
-     Then I should see the image with the alt text "Then I should see the text "\{MY_SECRET\}""
+     Then I should see the image with the alt text "After I should see the text "\{MY_SECRET\}""
 
         * # Cannot see secrets in the exception message
      When I click the button "Then I click the button "\{MY_SECRET\}""
@@ -66,19 +66,19 @@ Feature: Report basics
      # Verify HTML report
      When I click the link "Multiple scenarios with browser steps"
       And I click the link "Open our test checkboxes page"
-      And I should not see the image with the alt text "Given I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
-      And I should not see the image with the alt text "And I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html\""
-      And I should not see the image with the alt text "Then I should see the checkbox \"checkbox with inner label\""
+      And I should not see the image with the alt text "After I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
+      And I should not see the image with the alt text "After I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html\""
+      And I should not see the image with the alt text "After I should see the checkbox \"checkbox with inner label\""
      Then I click the button "Then I should see the checkbox \"checkbox with inner label\""
-      And I should see the image with the alt text "Then I should see the checkbox \"checkbox with inner label\""
-      And I should not see the image with the alt text "Given I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
-      And I should not see the image with the alt text "And I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html""
+      And I should see the image with the alt text "After I should see the checkbox \"checkbox with inner label\""
+      And I should not see the image with the alt text "After I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
+      And I should not see the image with the alt text "After I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html""
      When I save the current url to the variable "CURRENT_URL"
       And I click the link "Index"
      Then I navigate to the url "{CURRENT_URL}"
-      And I wait to see the image with the alt text "Then I should see the checkbox \"checkbox with inner label\""
-      And I should not see the image with the alt text "Given I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
-      And I should not see the image with the alt text "And I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html\""
+      And I wait to see the image with the alt text "After I should see the checkbox \"checkbox with inner label\""
+      And I should not see the image with the alt text "After I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
+      And I should not see the image with the alt text "After I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html\""
 
   Scenario: User can run a feature with mixed results and has all results reported correctly without skips
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/mixed-results" and expect exit code "1"
@@ -295,4 +295,4 @@ Feature: Report basics
        | .*     | Just a scenario that opens a web page | 3     | failed | .*       |
      When I click the button "Just a scenario that opens a web page"
       And I wait to click the button "show images"
-      And I should see the image with the alt text "And I should see the text \"inexistent\""
+      And I should see the image with the alt text "After I should see the text \"inexistent\""

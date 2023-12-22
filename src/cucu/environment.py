@@ -194,6 +194,8 @@ def before_step(ctx, step):
     ctx.current_step.has_substeps = False
     ctx.start_time = time.monotonic()
 
+    CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
+
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
         hook(ctx)
@@ -216,7 +218,7 @@ def after_step(ctx, step):
     # and this step has no substeps as in the reporting the substeps that
     # may actually do something on the browser take their own screenshots
     if ctx.browser is not None and ctx.current_step.has_substeps is False:
-        take_screenshot(ctx, step.name, label="after step")
+        take_screenshot(ctx, step.name, label=f"After {step.name}")
 
     # if the step has substeps from using `run_steps` then we already moved
     # the step index in the run_steps method and shouldn't do it here
