@@ -197,8 +197,13 @@ def generate(results, basepath, only_failures=False):
                         words = image_name.split("-", 1)
                         index = words[0].strip()
                         try:
+                            # Images with label should have a name in the form:
+                            # 0000 - This is the image label.png
                             label, _ = os.path.splitext(words[1].strip())
                         except IndexError:
+                            # Images with no label should instead look like:
+                            # 0000.png
+                            # so we default to the step name in this case.
                             label = step["name"]
 
                         images.append(
