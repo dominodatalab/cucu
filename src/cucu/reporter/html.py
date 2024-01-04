@@ -14,7 +14,7 @@ import jinja2
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
-from cucu.environment import generate_image_filename
+from cucu.utils import get_step_image_dir
 
 
 def escape(data):
@@ -184,16 +184,38 @@ def generate(results, basepath, only_failures=False):
                 if show_status:
                     print("s", end="", flush=True)
                 total_steps += 1
-                image_filename = generate_image_filename(
-                    step_index, step["name"]
-                )
-                image_filepath = os.path.join(scenario_filepath, image_filename)
+                image_dir = get_step_image_dir(step_index, step["name"])
+                image_dirpath = os.path.join(scenario_filepath, image_dir)
 
                 if step["name"].startswith("#"):
                     step["heading_level"] = "h4"
 
-                if os.path.exists(image_filepath):
-                    step["image"] = urllib.parse.quote(image_filename)
+                if os.path.exists(image_dirpath):
+                    _, _, image_names = next(os.walk(image_dirpath))
+                    images = []
+                    for image_name in image_names:
+                        words = image_name.split("-", 1)
+                        index = words[0].strip()
+                        try:
+                            # Images with label should have a name in the form:
+                            # 0000 - This is the image label.png
+                            label, _ = os.path.splitext(words[1].strip())
+                        except IndexError:
+                            # Images with no label should instead look like:
+                            # 0000.png
+                            # so we default to the step name in this case.
+                            label = step["name"]
+
+                        images.append(
+                            {
+                                "src": urllib.parse.quote(
+                                    os.path.join(image_dir, image_name)
+                                ),
+                                "index": index,
+                                "label": label,
+                            }
+                        )
+                    step["images"] = sorted(images, key=lambda x: x["index"])
 
                 if "result" in step:
                     if step["result"]["status"] in ["failed", "passed"]:

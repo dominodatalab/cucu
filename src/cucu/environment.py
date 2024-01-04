@@ -2,7 +2,6 @@ import datetime
 import hashlib
 import json
 import os
-import shutil
 import sys
 import time
 from functools import partial
@@ -10,6 +9,7 @@ from functools import partial
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
+from cucu.utils import take_screenshot
 
 CONFIG.define(
     "FEATURE_RESULTS_DIR",
@@ -29,30 +29,6 @@ CONFIG.define(
 
 
 init_page_checks()
-
-
-def generate_image_filename(step_index, step_name):
-    """
-    generate .png image file name that meets these criteria:
-     - hides secrets
-     - escaped
-     - filename does not exceed 255 chars (OS limitation)
-     - uniqueness comes from step number
-    """
-    max_filename = 255 - len(".png")
-    escaped_step_name = CONFIG.hide_secrets(step_name).replace("/", "_")
-    filename = f"{step_index} - {escaped_step_name}"
-
-    if len(filename) > max_filename:
-        ellipsis = "..."
-        # save the last chars as the ending often important
-        end_count = 100
-        front_count = max_filename - (len(ellipsis) + end_count)
-        filename = (
-            filename[:front_count] + ellipsis + filename[-1 * end_count :]
-        )
-
-    return f"{filename}.png"
 
 
 def check_browser_initialized(ctx):
@@ -218,6 +194,8 @@ def before_step(ctx, step):
     ctx.current_step.has_substeps = False
     ctx.start_time = time.monotonic()
 
+    CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
+
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
         hook(ctx)
@@ -240,40 +218,13 @@ def after_step(ctx, step):
     # and this step has no substeps as in the reporting the substeps that
     # may actually do something on the browser take their own screenshots
     if ctx.browser is not None and ctx.current_step.has_substeps is False:
-        filepath = os.path.join(
-            ctx.scenario_dir, generate_image_filename(ctx.step_index, step.name)
-        )
-
-        # If we've marked an element as the one we're interacting with,
-        # inject a border to highlight that element
-        if (
-            not CONFIG["CUCU_INJECT_ELEMENT_BORDER"]
-            or not CONFIG["__PERTINENT_ELEMENT"]
-        ):
-            ctx.browser.screenshot(filepath)
-        else:
-            border_style = "solid magenta 4px"
-            border_radius = "4px"
-            highlighter = (
-                f'arguments[0].style["border"] = "{border_style}";'
-                f'arguments[0].style["border-radius"] = "{border_radius}";'
-            )
-            ctx.browser.execute(highlighter, CONFIG["__PERTINENT_ELEMENT"])
-            ctx.browser.screenshot(filepath)
-            clear_highlight = (
-                'arguments[0].style["border"] = "";'
-                'arguments[0].style["border-radius"] = "";'
-            )
-            ctx.browser.execute(clear_highlight, CONFIG["__PERTINENT_ELEMENT"])
-            CONFIG["__PERTINENT_ELEMENT"] = None
-
-        if CONFIG["CUCU_MONITOR_PNG"] is not None:
-            shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
+        take_screenshot(ctx, step.name, label=f"After {step.name}")
 
     # if the step has substeps from using `run_steps` then we already moved
     # the step index in the run_steps method and shouldn't do it here
     if not step.has_substeps:
         ctx.step_index += 1
+        CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
     if CONFIG.bool("CUCU_IPDB_ON_FAILURE") and step.status == "failed":
         ctx._runner.stop_capture()

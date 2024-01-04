@@ -3,7 +3,9 @@ various cucu utilities can be placed here and then exposed publicly through
 the src/cucu/__init__.py
 """
 import logging
+import os
 import pkgutil
+import shutil
 
 from tabulate import DataRow, TableFormat, tabulate
 from tenacity import (
@@ -150,3 +152,70 @@ def text_in_current_frame(browser: Browser) -> str:
         browser.execute("window.jqCucu = jQuery.noConflict(true);")
     text = browser.execute('return jqCucu("body").children(":visible").text();')
     return text
+
+
+def ellipsize_filename(raw_filename):
+    max_filename = 255
+    if len(raw_filename) < max_filename:
+        return raw_filename
+
+    ellipsis = "..."
+    # save the last chars, as the ending is often important
+    end_count = 100
+    front_count = max_filename - (len(ellipsis) + end_count)
+    ellipsized_filename = (
+        raw_filename[:front_count] + ellipsis + raw_filename[-1 * end_count :]
+    )
+
+    return ellipsized_filename
+
+
+def get_step_image_dir(step_index, step_name):
+    """
+    generate .png image file name that meets these criteria:
+     - hides secrets
+     - escaped
+     - filename does not exceed 255 chars (OS limitation)
+     - uniqueness comes from step number
+    """
+    escaped_step_name = CONFIG.hide_secrets(step_name).replace("/", "_")
+    unabridged_dirname = f"{step_index:0>4} - {escaped_step_name}"
+    dirname = ellipsize_filename(unabridged_dirname)
+
+    return dirname
+
+
+def take_screenshot(ctx, step_name, label="", highlight_element=None):
+    screenshot_dir = os.path.join(
+        ctx.scenario_dir, get_step_image_dir(ctx.step_index, step_name)
+    )
+    if not os.path.exists(screenshot_dir):
+        os.mkdir(screenshot_dir)
+
+    if len(label) > 0:
+        label = f" - {CONFIG.hide_secrets(label).replace('/', '_')}"
+    filename = f"{CONFIG['__STEP_SCREENSHOT_COUNT']:0>4}{label}.png"
+    filename = ellipsize_filename(filename)
+    filepath = os.path.join(screenshot_dir, filename)
+
+    if not CONFIG["CUCU_INJECT_ELEMENT_BORDER"] or not highlight_element:
+        ctx.browser.screenshot(filepath)
+    else:
+        border_style = "solid magenta 4px"
+        border_radius = "4px"
+        highlighter = (
+            f'arguments[0].style["border"] = "{border_style}";'
+            f'arguments[0].style["border-radius"] = "{border_radius}";'
+        )
+        ctx.browser.execute(highlighter, highlight_element)
+        ctx.browser.screenshot(filepath)
+        clear_highlight = (
+            'arguments[0].style["border"] = "";'
+            'arguments[0].style["border-radius"] = "";'
+        )
+        ctx.browser.execute(clear_highlight, highlight_element)
+
+    if CONFIG["CUCU_MONITOR_PNG"] is not None:
+        shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
+
+    CONFIG["__STEP_SCREENSHOT_COUNT"] += 1
