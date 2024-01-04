@@ -279,6 +279,26 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see the text "No data available in table"
 
+  Scenario: User can run and generate reports that perform highlighting
+    Given I create a file at "{CUCU_RESULTS_DIR}/highlights/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/highlights/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I create a file at "{CUCU_RESULTS_DIR}/highlights/text.feature" with the following:
+      """
+      Feature: run a test with highlighting
+
+        Scenario: See text that should be highlit
+           When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
+           Then I should see the text "just some text in a label"
+      """
+      And I run the command "cucu run {CUCU_RESULTS_DIR}/highlights --results {CUCU_RESULTS_DIR}/empty_features_results --env CUCU_INJECT_ELEMENT_BORDER='True' --generate-report --report {CUCU_RESULTS_DIR}/highlights_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+
   @report-only-failures
   Scenario: User can generate a report with only failures
     Given I run the command "cucu run data/features --tags @passing,@failing --report-only-failures --results {CUCU_RESULTS_DIR}/report_only_failures --generate-report --report {CUCU_RESULTS_DIR}/report_only_failures_report" and expect exit code "1"
