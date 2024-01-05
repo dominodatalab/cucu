@@ -75,7 +75,7 @@ class CucuJUnitFormatter(Formatter):
                     )
 
                 failures += [
-                    f"{self.current_step.keyword} {self.current_step.name}"
+                    f"{self.current_step.keyword} {self.current_step.name} (after {round(self.current_step.duration, 3)}s)"
                 ]
 
                 if error := self.current_step.exception:
