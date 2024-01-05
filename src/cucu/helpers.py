@@ -4,6 +4,7 @@ import humanize
 
 from cucu import logger, retry, run_steps
 from cucu.config import CONFIG
+from cucu.utils import take_screenshot
 
 
 class step(object):
@@ -120,7 +121,12 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
         if element is None:
             raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
         logger.debug(f'Success: saw {prefix}{thing} "{name}"')
-        CONFIG["__PERTINENT_ELEMENT"] = element
+        take_screenshot(
+            ctx,
+            ctx.current_step.name,
+            label=f"saw {thing} {name}",
+            highlight_element=element,
+        )
 
     @step(f'I should immediately see the {thing} "{{name}}"')
     def should_immediately_see_the(ctx, thing, name):

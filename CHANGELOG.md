@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.183.0
+- Change - Added ability to take multiple screenshots per step
+
+## 0.182.0
+Chore - Update docker README for ARM64 based CPU
+Chore - Add seleniarm_hub bash file
+
+## 0.181.0
+- Change - only obfuscate values in config yaml file
+
+## 0.180.0
+- Change - only obfuscate certain parts in json output
+
+## 0.179.0
+- Fix - step that expects to not see a table
+
 ## 0.178.0
 - Add - error message to json and junit
 - Change - print expected and found tables on fail

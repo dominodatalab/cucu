@@ -14,7 +14,6 @@ from behave.formatter.base import Formatter
 from behave.model_core import Status
 from tenacity import RetryError
 
-from cucu import behave_tweaks
 from cucu.config import CONFIG
 
 
@@ -34,7 +33,7 @@ class CucuJSONFormatter(Formatter):
     def __init__(self, stream_opener, config):
         super(CucuJSONFormatter, self).__init__(stream_opener, config)
         # -- ENSURE: Output stream is open.
-        self.stream = behave_tweaks.CucuOutputStream(self.open())
+        self.stream = self.open()
         self.feature_count = 0
         self.current_feature = None
         self.current_feature_data = None
@@ -184,11 +183,11 @@ class CucuJSONFormatter(Formatter):
 
         stdout = None
         if "stdout" in step.__dict__ and step.stdout != []:
-            stdout = ["".join(step.stdout).rstrip()]
+            stdout = [CONFIG.hide_secrets("".join(step.stdout).rstrip())]
 
         stderr = None
         if "stderr" in step.__dict__ and step.stderr != []:
-            stderr = ["".join(step.stderr).rstrip()]
+            stderr = [CONFIG.hide_secrets("".join(step.stderr).rstrip())]
 
         steps[step_index]["result"] = {
             "stdout": stdout,
@@ -200,7 +199,7 @@ class CucuJSONFormatter(Formatter):
 
         if step.error_message and step.status == Status.failed:
             # -- OPTIONAL: Provided for failed steps.
-            error_message = step.error_message
+            error_message = CONFIG.hide_secrets(step.error_message)
             if self.split_text_into_lines:
                 error_message = error_message.splitlines()
 
@@ -212,7 +211,8 @@ class CucuJSONFormatter(Formatter):
                     error = error.last_attempt.exception()
 
                 if len(error.args) > 0 and isinstance(error.args[0], str):
-                    error_lines = error.args[0].splitlines()
+                    redacted_error_msg = CONFIG.hide_secrets(error.args[0])
+                    error_lines = redacted_error_msg.splitlines()
                     error_lines[
                         0
                     ] = f"{error.__class__.__name__}: {error_lines[0]}"
@@ -241,11 +241,6 @@ class CucuJSONFormatter(Formatter):
 
     def close(self):
         self.write_json_footer()
-        #
-        # HACK: avoid failing the strange assert in the base formatter class:
-        # https://github.com/behave/behave/blob/v1.2.6/behave/formatter/base.py#L186
-        #
-        self.stream = self.stream.stream
         self.close_stream()
 
     # -- JSON-DATA COLLECTION:
