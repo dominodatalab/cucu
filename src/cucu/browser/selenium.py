@@ -73,6 +73,7 @@ class Selenium(Browser):
 
             options.add_argument(f"--window-size={width},{height}")
             options.add_argument("--disable-dev-shm-usage")
+            options.add_argument("--proxy-server=socks5://localhost:1055")
 
             if headless:
                 options.add_argument("--headless")
@@ -115,6 +116,11 @@ class Selenium(Browser):
                 "browser.helperApps.neverAsk.saveToDisk",
                 "images/jpeg, application/pdf, application/octet-stream, text/plain",
             )
+
+            options.set_preference("network.proxy.type", 1)
+            options.set_preference("network.proxy.socks", "localhost")
+            options.set_preference("network.proxy.socks_port", 1055)
+            options.set_preference("network.proxy.socks_remote_dns", True)
 
             if ignore_ssl_certificate_errors:
                 options.accept_insecure_certs = True
