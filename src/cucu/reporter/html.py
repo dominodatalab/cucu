@@ -285,6 +285,7 @@ def generate(results, basepath, only_failures=False):
                 scenario["logs"] = log_files
 
             scenario["total_steps"] = total_steps
+
             if scenario_started_at is None:
                 scenario["started_at"] = ""
             else:
@@ -296,24 +297,21 @@ def generate(results, basepath, only_failures=False):
                     (scenario_started_at - feature_started_at).total_seconds()
                 )
 
-                for log_file in [
-                    x for x in log_files if ".console." in x["name"]
-                ]:
-                    if show_status:
-                        print("c", end="", flush=True)
+            for log_file in [x for x in log_files if ".console." in x["name"]]:
+                if show_status:
+                    print("c", end="", flush=True)
 
-                    log_file_filepath = os.path.join(
-                        scenario_filepath, "logs", log_file["name"]
-                    )
+                log_file_filepath = os.path.join(
+                    scenario_filepath, "logs", log_file["name"]
+                )
 
-                    input_file = Path(log_file_filepath)
-                    output_file = Path(log_file_filepath + ".html")
-                    output_file.write_text(
-                        parse_log_to_html(
-                            input_file.read_text(encoding="utf-8")
-                        ),
-                        encoding="utf-8",
-                    )
+                input_file = Path(log_file_filepath)
+                output_file = Path(log_file_filepath + ".html")
+
+                output_file.write_text(
+                    parse_log_to_html(input_file.read_text(encoding="utf-8")),
+                    encoding="utf-8",
+                )
 
             scenario["duration"] = left_pad_zeroes(scenario_duration)
             feature_duration += scenario_duration
