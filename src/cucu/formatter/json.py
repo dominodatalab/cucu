@@ -232,7 +232,7 @@ class CucuJSONFormatter(Formatter):
         if not self.current_feature_data:
             return
 
-        # -- NORMAL CASE: Write collected data of current feature.formatter
+        # -- NORMAL CASE: Write collected data of current feature.
         self.finish_current_scenario()
         self.update_status_data()
 
@@ -277,7 +277,7 @@ class CucuJSONFormatter(Formatter):
 
                 if (
                     self.last_step is not None
-                ):  #  If a before scenario hook fails, last_stpe will be None.
+                ):  #  If a before scenario hook fails, last_step will be None.
                     if "error_message" not in self.last_step["result"]:
                         self.last_step["result"][
                             "error_message"

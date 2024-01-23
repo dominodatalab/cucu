@@ -59,9 +59,9 @@ class CucuJUnitFormatter(Formatter):
                 round(self.current_scenario_duration, 3)
             )
 
-            hook_status = self.current_scenario.hook_failed
-            if hook_status:
-                status = "hook_error"
+            hook_failed = self.current_scenario.hook_failed
+            if hook_failed:
+                status = "error"
             else:
                 status = self.current_scenario.compute_status().name
 
