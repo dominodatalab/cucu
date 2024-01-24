@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import time
+import traceback
 from functools import partial
 
 from cucu import config, init_scenario_hook_variables, logger
@@ -144,7 +145,12 @@ def after_scenario(ctx, scenario):
 
     # run after all scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"][::-1]:
-        hook(ctx)
+        try:
+            hook(ctx)
+        except Exception as e:
+            scenario.hook_failed = True
+            print(traceback.format_exc())
+            print(f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}")
 
     # run after this scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"][::-1]:

@@ -58,7 +58,7 @@ class CucuJUnitFormatter(Formatter):
             self.current_scenario_results["time"] = str(
                 round(self.current_scenario_duration, 3)
             )
-
+            # print("error_message_junit", self.current_scenario.error_message)
             hook_failed = self.current_scenario.hook_failed
             if hook_failed:
                 status = "error"
