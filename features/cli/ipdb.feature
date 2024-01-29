@@ -12,5 +12,5 @@ Feature: ipdb
      Then I strip ansi codes from "{STDOUT}" and save to the variable "STDOUT"
       And I should see "{STDOUT}" contains the following
       """
-      ---> 55     raise RuntimeError("step fails on purpose")
+      ---> 61     raise RuntimeError("step fails on purpose")
       """
