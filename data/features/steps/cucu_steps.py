@@ -1,4 +1,10 @@
-from cucu import StopRetryException, retry, run_steps, step
+from cucu import (
+    StopRetryException,
+    register_after_this_scenario_hook,
+    retry,
+    run_steps,
+    step,
+)
 
 
 @step("I use a step with substeps that log")
@@ -61,6 +67,14 @@ def i_wait_to_fail(_):
         raise RuntimeError("step fails on purpose after a while")
 
     retry(fail)()
+
+
+@step("I error")
+def i_error(_):
+    def hook_fail(_):
+        raise RuntimeError("step errors on purpose")
+
+    register_after_this_scenario_hook(hook_fail)
 
 
 @step('I use a step with "{nth:nth}" usage')

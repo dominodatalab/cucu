@@ -87,11 +87,12 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
        | Started at | Feature                    | Total | Passed | Failed | Skipped | Errored | Status | Duration |
-       | .*         | Feature with mixed results | 4     | 2      | 2      | 0       | 0       | failed | .*       |
+       | .*         | Feature with mixed results | 5     | 2      | 2      | 0       | 1       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
       | Offset | Scenario                            | Steps | Status  | Duration |
       | .*     | Scenario that also passes           | 1     | passed  | .*       |
+      | .*     | Scenario that errors                | 2     | errored | .*       |
       | .*     | Scenario that fails                 | 2     | failed  | .*       |
       | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
       | .*     | Scenario that passes                | 1     | passed  | .*       |
@@ -110,11 +111,12 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
        | Started at | Feature                    | Total | Passed | Failed | Skipped | Errored | Status | Duration |
-       | .*         | Feature with mixed results | 5     | 2      | 2      | 1       | 0       | failed | .*       |
+       | .*         | Feature with mixed results | 6     | 2      | 2      | 1       | 1       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
       | Offset | Scenario                            | Steps | Status  | Duration |
       | .*     | Scenario that also passes           | 1     | passed  | .*       |
+      | .*     | Scenario that errors                | 2     | errored | .*       |
       | .*     | Scenario that fails                 | 2     | failed  | .*       |
       | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
       | .*     | Scenario that is skipped            | 1     | skipped | .*       |
@@ -219,11 +221,12 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
       | Started at | Feature                    | Total | Passed | Failed | Skipped | Errored | Status | Duration |
-      | .*         | Feature with mixed results | 4     | 2      | 2      | 0       | 0       | failed | .*       |
+      | .*         | Feature with mixed results | 5     | 2      | 2      | 0       | 1       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
       | Offset | Scenario                            | Steps | Status  | Duration |
       | .*     | Scenario that also passes           | 1     | passed  | .*       |
+      | .*     | Scenario that errors                | 2     | errored | .*       |
       | .*     | Scenario that fails                 | 2     | failed  | .*       |
       | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
       | .*     | Scenario that passes                | 1     | passed  | .*       |

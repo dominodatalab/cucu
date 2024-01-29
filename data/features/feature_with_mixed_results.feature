@@ -8,6 +8,10 @@ Feature: Feature with mixed results
     Given I fail
       And I echo "should never see this"
 
+  Scenario: Scenario that errors
+    Given I error
+      And I echo "should never see this"   
+
   Scenario: Scenario that also passes
     Given I echo "passing"
 
