@@ -44,7 +44,7 @@ Feature: Before retry handlers
             [\s\S]*
       .* INFO handled the pesky button buttons!
            Then I wait to see the button "button with child" .*
-       HOOK shutdown_webserver: passed ✅
+      HOOK shutdown_webserver: passed ✅
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
