@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 0.185.0
-- Change - hook failures will report as 'error' instead of 'failed' to testrail
+- Change - hook failures will report as 'errored' instead of 'failed' to testrail and html reports
 
 ## 0.184.0
 - Change - Added step duration to failure step

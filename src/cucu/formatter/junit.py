@@ -61,7 +61,7 @@ class CucuJUnitFormatter(Formatter):
             # print("error_message_junit", self.current_scenario.error_message)
             hook_failed = self.current_scenario.hook_failed
             if hook_failed:
-                status = "error"
+                status = "errored"
             else:
                 status = self.current_scenario.compute_status().name
 

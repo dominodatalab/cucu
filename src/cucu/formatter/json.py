@@ -259,14 +259,27 @@ class CucuJSONFormatter(Formatter):
     def update_status_data(self):
         assert self.current_feature
         assert self.current_feature_data
-        self.current_feature_data["status"] = self.current_feature.status.name
+
+        if self.current_scenario:
+            if self.current_scenario.hook_failed:
+                self.current_feature_data["status"] = "errored"
+            else:
+                self.current_feature_data[
+                    "status"
+                ] = self.current_feature.status.name
+        # self.current_feature_data["status"] = self.current_feature.status.name
 
     def finish_current_scenario(self):
         if self.current_scenario:
-            status_name = self.current_scenario.status.name
+            hook_failed = self.current_scenario.hook_failed
+            if hook_failed:
+                status_name = "errored"
+            else:
+                status_name = self.current_scenario.status.name
+
             self.current_feature_element["status"] = status_name
 
-            if status_name == "failed":
+            if status_name in ["failed", "errored"]:
                 # we need to record the error_message and exc_traceback in the
                 # last executed step and mark it as failed so the reporting can
                 # show the result correctly
@@ -274,7 +287,6 @@ class CucuJSONFormatter(Formatter):
                 error_message += traceback.format_tb(
                     self.current_scenario.exc_traceback
                 )
-                # print("error_message_json", error_message)
                 #  If a before scenario hook fails, last_step will be None.
                 if self.last_step is not None:
                     if "error_message" not in self.last_step["result"]:
