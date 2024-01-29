@@ -194,7 +194,7 @@ Feature: Run with hooks
       """
       raise RuntimeError("boom")
       """
-  @current
+
   Scenario: User gets expected output when running a scenario with multiple after hooks failing and passing in order
     Given I create a file at "{CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks/environment.py" with the following:
       """
@@ -242,7 +242,6 @@ Feature: Run with hooks
       And I click the link "Hello world scenario"
      Then I should see the text "HOOK-ERROR in after_scenario_fail: RuntimeError: boom"
 
-  @current
   Scenario: User gets expected output when running a scenario with multiple after hooks passing and failing in order
     Given I create a file at "{CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/environment.py" with the following:
       """
