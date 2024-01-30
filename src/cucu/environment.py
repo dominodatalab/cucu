@@ -135,10 +135,7 @@ def run_after_scenario_hook(ctx, scenario, hook):
             f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}"
         )
         scenario.error_message = error_message
-        logger.debug(traceback.format_exc())
-        logger.debug(
-            f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}"
-        )
+        logger.debug(error_message)
 
 
 def after_scenario(ctx, scenario):
