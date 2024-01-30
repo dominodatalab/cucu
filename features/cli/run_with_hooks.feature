@@ -60,7 +60,7 @@ Feature: Run with hooks
             And I echo "World"     # .*
       .* DEBUG No browsers - skipping MHT webpage snapshot
       .* DEBUG just logging some stuff from my after scenario hook
-      HOOK after_scenario_log: passed ✅
+      .* DEBUG HOOK after_scenario_log: passed ✅
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
@@ -113,9 +113,9 @@ Feature: Run with hooks
             And I run the following steps after the current scenario-2     # .*
       .* DEBUG No browsers - skipping MHT webpage snapshot
       .* DEBUG just logging some stuff from second_after_this_scenario_hook_2
-      HOOK after_this_scenario_2: passed ✅
+      .* DEBUG HOOK after_this_scenario_2: passed ✅
       .* DEBUG just logging some stuff from first_after_this_scenario_hook_1
-      HOOK after_this_scenario_1: passed ✅
+      .* DEBUG HOOK after_this_scenario_1: passed ✅
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
@@ -147,7 +147,7 @@ Feature: Run with hooks
         Scenario: Hello world scenario
           Given I echo "Hello World"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/failing_custom_hooks_results/ --generate-report --report {CUCU_RESULTS_DIR}/failing_custom_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/failing_custom_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/failing_custom_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      Then I should see "{STDOUT}" contains the following
       """
       HOOK-ERROR in after_scenario_fail: RuntimeError: boom
@@ -223,7 +223,7 @@ Feature: Run with hooks
         Scenario: Hello world scenario
           Given I echo "Hello World"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_results/ --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      Then I should see "{STDOUT}" contains the following
       """
       HOOK-ERROR in after_scenario_fail: RuntimeError: boom
@@ -270,7 +270,7 @@ Feature: Run with hooks
         Scenario: Hello world scenario
           Given I echo "Hello World"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_results/ --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      Then I should see "{STDOUT}" contains the following
       """
       HOOK-ERROR in after_scenario_fail: RuntimeError: boom
@@ -283,7 +283,6 @@ Feature: Run with hooks
       """
       HOOK after_scenario_pass: passed ✅
       """
-
      When I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_report" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
       And I click the link "Feature that has failing and passing after scenario hooks"

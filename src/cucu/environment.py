@@ -126,19 +126,19 @@ def before_scenario(ctx, scenario):
 def run_after_scenario_hook(ctx, scenario, hook):
     try:
         hook(ctx)
-        print(f"HOOK {hook.__name__}: passed ✅")
+        logger.debug(f"HOOK {hook.__name__}: passed ✅")
     except Exception as e:
         scenario.hook_failed = True
-
         # attach error_message to scenario
         error_message = traceback.format_exc()
         error_message += (
             f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}"
         )
         scenario.error_message = error_message
-        # print to stdout
-        print(traceback.format_exc())
-        print(f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}")
+        logger.debug(traceback.format_exc())
+        logger.debug(
+            f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}"
+        )
 
 
 def after_scenario(ctx, scenario):

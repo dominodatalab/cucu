@@ -259,15 +259,7 @@ class CucuJSONFormatter(Formatter):
     def update_status_data(self):
         assert self.current_feature
         assert self.current_feature_data
-
-        if self.current_scenario:
-            if self.current_scenario.hook_failed:
-                self.current_feature_data["status"] = "errored"
-            else:
-                self.current_feature_data[
-                    "status"
-                ] = self.current_feature.status.name
-        # self.current_feature_data["status"] = self.current_feature.status.name
+        self.current_feature_data["status"] = self.current_feature.status.name
 
     def finish_current_scenario(self):
         if self.current_scenario:
