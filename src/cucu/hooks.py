@@ -59,7 +59,7 @@ def register_after_all_hook(hook_func):
 
 def register_before_scenario_hook(hook_func):
     """
-    register a before scenario hook that will execute before eery scenario has
+    register a before scenario hook that will execute before every scenario has
     executed and we will pass the current behave context object as the only
     argument to the hook_func provided.
     """

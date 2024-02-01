@@ -8,9 +8,14 @@ Feature: Feature with mixed results
     Given I fail
       And I echo "should never see this"
 
-  Scenario: Scenario that errors
-    Given I error
+  Scenario: Scenario and after-hook both fail
+    Given I error after-scenario hook
+      And I fail
       And I echo "should never see this"   
+      
+  Scenario: Scenario with after-hook error
+    Given I error after-scenario hook
+      And I echo "should never see this"            
 
   Scenario: Scenario that also passes
     Given I echo "passing"
@@ -21,3 +26,11 @@ Feature: Feature with mixed results
   @disabled
   Scenario: Scenario that is skipped
     Given I echo "should never see this"
+
+  # Scenario: Scenario to register before-hook error
+  #   Given I error before-scenario hook
+  #     And I echo "should never see this"
+
+  # Scenario: Scenario with before-hook fail
+  #   Given I error before-scenario hook
+  #     And I echo "should never see this"            

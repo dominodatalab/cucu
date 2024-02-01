@@ -69,12 +69,20 @@ def i_wait_to_fail(_):
     retry(fail)()
 
 
-@step("I error")
-def i_error(_):
-    def hook_fail(_):
-        raise RuntimeError("step errors on purpose")
+@step("I error after-scenario hook")
+def i_error_after_hook(_):
+    def after_hook_fail(_):
+        raise RuntimeError("after-hook errors on purpose")
 
-    register_after_this_scenario_hook(hook_fail)
+    register_after_this_scenario_hook(after_hook_fail)
+
+
+# @step("I error before-scenario hook")
+# def i_error_before_hook(_):
+#     def before_hook_fail(_):
+#         raise RuntimeError("before-hook errors on purpose")
+
+#     register_before_scenario_hook(before_hook_fail)
 
 
 @step('I use a step with "{nth:nth}" usage')

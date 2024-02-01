@@ -144,19 +144,24 @@ Feature: Run outputs
      Then I should see a file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/Feature with mixed results.xml"
       And I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/Feature with mixed results.xml" matches the following:
       """
-      <testsuite name="Feature with mixed results" tests="6" errors="1" failures="2" skipped="1" timestamp=".*">
+      <testsuite name="Feature with mixed results" tests="7" errors="1" failures="3" skipped="1" timestamp=".*" tags="mixed">
        <testcase classname="Feature with mixed results" name="Scenario that passes" status="passed" time=".*">
        </testcase>
        <testcase classname="Feature with mixed results" name="Scenario that fails" status="failed" time=".*">
         <failure>
-      [\s\S]*
+        [\s\S]*
         </failure>
        </testcase>
-       <testcase classname="Feature with mixed results" name="Scenario that errors" status="errored" time=".*">
+       <testcase classname="Feature with mixed results" name="Scenario and after-hook both fail" status="failed" time=".*">
+        <failure>
+        [\s\S]*
+        </failure>
+       </testcase>
+       <testcase classname="Feature with mixed results" name="Scenario with after-hook error" status="errored" time=".*">
        </testcase>
        <testcase classname="Feature with mixed results" name="Scenario that also passes" status="passed" time=".*">
        </testcase>
-       <testcase classname="Feature with mixed results" name="Scenario that has an undefined step" status=".*" time=".*">
+       <testcase classname="Feature with mixed results" name="Scenario that has an undefined step" status="failed" time=".*">
        </testcase>
        <testcase classname="Feature with mixed results" name="Scenario that is skipped" status="skipped" time=".*" tags="disabled">
         <skipped>
