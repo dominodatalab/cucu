@@ -77,14 +77,6 @@ def i_error_after_hook(_):
     register_after_this_scenario_hook(after_hook_fail)
 
 
-# @step("I error before-scenario hook")
-# def i_error_before_hook(_):
-#     def before_hook_fail(_):
-#         raise RuntimeError("before-hook errors on purpose")
-
-#     register_before_scenario_hook(before_hook_fail)
-
-
 @step('I use a step with "{nth:nth}" usage')
 def uses_nth_step(ctx, nth):
     print("just a step that nth behave argument type")
