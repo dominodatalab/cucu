@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import time
+import traceback
 from functools import partial
 
 from cucu import config, init_scenario_hook_variables, logger
@@ -122,6 +123,24 @@ def before_scenario(ctx, scenario):
         hook(ctx)
 
 
+def run_after_scenario_hook(ctx, scenario, hook):
+    scenario_status = scenario.status.name
+    try:
+        hook(ctx)
+        logger.debug(f"HOOK {hook.__name__}: passed ✅")
+    except Exception as e:
+        # scenario 'failed' status takes precedence over 'errored' status
+        if scenario_status != "failed":
+            scenario.hook_failed = True
+        # attach error_message to scenario
+        error_message = (
+            f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}\n"
+        )
+        error_message += traceback.format_exc()
+        scenario.error_message = error_message
+        logger.error(error_message)
+
+
 def after_scenario(ctx, scenario):
     for timer_name in ctx.step_timers:
         logger.warn(f'timer "{timer_name}" was never stopped/recorded')
@@ -144,11 +163,11 @@ def after_scenario(ctx, scenario):
 
     # run after all scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"][::-1]:
-        hook(ctx)
+        run_after_scenario_hook(ctx, scenario, hook)
 
     # run after this scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"][::-1]:
-        hook(ctx)
+        run_after_scenario_hook(ctx, scenario, hook)
 
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 

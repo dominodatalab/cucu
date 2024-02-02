@@ -26,7 +26,7 @@
             <span>Status: </span>
             {% if feature['status'] == 'passed' %}
                 <span style="display: inline; color: green">{{ feature['status'] }}</span>
-            {% elif feature['status'] == 'failed' %}
+            {% elif (feature['status'] == 'failed') or (feature['status'] == 'errored') %}
                 <span style="display: inline; color: red">{{ feature['status'] }}</span>
             {% elif feature['status'] == 'skipped' %}
                 <span style="display: inline; color: blue">{{ feature['status'] }}</span>

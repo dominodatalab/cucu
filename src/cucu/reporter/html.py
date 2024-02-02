@@ -115,6 +115,7 @@ def generate(results, basepath, only_failures=False):
         total_scenarios_passed = 0
         total_scenarios_failed = 0
         total_scenarios_skipped = 0
+        total_scenarios_errored = 0
         feature_started_at = None
 
         reported_features.append(feature)
@@ -177,6 +178,8 @@ def generate(results, basepath, only_failures=False):
                 total_scenarios_failed += 1
             elif scenario["status"] == "skipped":
                 total_scenarios_skipped += 1
+            elif scenario["status"] == "errored":
+                total_scenarios_errored += 1
 
             step_index = 0
             scenario_started_at = None
@@ -330,12 +333,14 @@ def generate(results, basepath, only_failures=False):
         feature["total_scenarios_passed"] = total_scenarios_passed
         feature["total_scenarios_failed"] = total_scenarios_failed
         feature["total_scenarios_skipped"] = total_scenarios_skipped
+        feature["total_scenarios_errored"] = total_scenarios_errored
 
     keys = [
         "total_scenarios",
         "total_scenarios_passed",
         "total_scenarios_failed",
         "total_scenarios_skipped",
+        "total_scenarios_errored",
         "duration",
     ]
     grand_totals = {}
