@@ -298,7 +298,12 @@ class Selenium(Browser):
             cdp_response = self.driver.command_executor._request(
                 "POST", cdp_url, cdp_request_body
             )
-            logger.debug("cdp_response_keys:", cdp_response.keys())
+            logger.debug("cdp_response_keys:", list(cdp_response.keys()))
+            logger.debug(
+                "cdp_response_value_keys:",
+                list(cdp_response.get("value").keys()),
+            )
+            logger.debug("cdp_response_type:", type(cdp_response))
             mht_data = cdp_response.get("value").get("data")
         else:
             mht_response = self.driver.execute_cdp_cmd(
