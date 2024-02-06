@@ -298,12 +298,13 @@ class Selenium(Browser):
             cdp_response = self.driver.command_executor._request(
                 "POST", cdp_url, cdp_request_body
             )
-            mht_data = cdp_response.get("value")["data"]
+            logger.debug("cdp_response_keys:", cdp_response.keys())
+            mht_data = cdp_response.get("value").get("data")
         else:
             mht_response = self.driver.execute_cdp_cmd(
                 "Page.captureSnapshot", {}
             )
-            mht_data = mht_response["data"]
+            mht_data = mht_response.get("data")
 
         if mht_data is None:
             logger.warn(
