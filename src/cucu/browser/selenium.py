@@ -298,10 +298,12 @@ class Selenium(Browser):
             cdp_response = self.driver.command_executor._request(
                 "POST", cdp_url, cdp_request_body
             )
-            if isinstance(cdp_response.get("value"), dict):
+            # Flaky: Adding try catch block to handle the situation where we do not get a dictionary object.
+            # Could not reproduce this in local. So far we have seen this issue only when running on a remote web driver.
+            try:
                 mht_data = cdp_response.get("value").get("data")
-            else:
-                mht_data = cdp_response.get("value")
+            except Exception as e:
+                logger.error(f'object "{cdp_response.get("value")}" : {e}')
         else:
             mht_response = self.driver.execute_cdp_cmd(
                 "Page.captureSnapshot", {}
