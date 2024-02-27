@@ -20,7 +20,7 @@
                 return (elem.textContent || elem.innerText || jqCucu(elem).text() || '').trim() === match[3].trim();
             },
             vis: function (elem) {
-                return !(jqCucu(elem).is(":hidden") || jqCucu(elem).width() == 0 || jqCucu(elem).height == 0 || jqCucu(elem).parents(":hidden").length);
+                return !(jqCucu(elem).is(":hidden") || jqCucu(elem).css("width") == "0px" || jqCucu(elem).css("height") == "0px" || jqCucu(elem).parents(":hidden").length);
             }
         }
     );
