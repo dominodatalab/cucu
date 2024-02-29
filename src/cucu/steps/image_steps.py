@@ -1,4 +1,5 @@
 from cucu import helpers
+from cucu.utils import take_before_screenshot
 
 
 def find_image(ctx, name, index=0):
@@ -24,7 +25,11 @@ def find_image(ctx, name, index=0):
     if index >= len(images):
         return None
 
-    return images[index]
+    element = images[index]
+
+    take_before_screenshot(ctx, "image", name, index, element)
+
+    return element
 
 
 helpers.define_should_see_thing_with_name_steps(

@@ -3,6 +3,7 @@ import os
 import humanize
 
 from cucu import fuzzy, logger, step
+from cucu.utils import take_before_screenshot
 
 
 def find_file_input(ctx, name, index=0):
@@ -19,14 +20,16 @@ def find_file_input(ctx, name, index=0):
         the WebElement that matches the provided arguments.
     """
     ctx.check_browser_initialized()
-    _input = fuzzy.find(ctx.browser, name, ['input[type="file"]'], index=index)
+    element = fuzzy.find(ctx.browser, name, ['input[type="file"]'], index=index)
 
     prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
-    if _input is None:
+    take_before_screenshot(ctx, "file input", name, index, element)
+
+    if element is None:
         raise RuntimeError(f'unable to find the {prefix}file input "{name}"')
 
-    return _input
+    return element
 
 
 @step('I upload the file "{filepath}" to the file input "{name}"')

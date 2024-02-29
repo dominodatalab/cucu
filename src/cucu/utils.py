@@ -7,6 +7,7 @@ import os
 import pkgutil
 import shutil
 
+import humanize
 from tabulate import DataRow, TableFormat, tabulate
 from tenacity import (
     before_sleep_log,
@@ -183,6 +184,18 @@ def get_step_image_dir(step_index, step_name):
     dirname = ellipsize_filename(unabridged_dirname)
 
     return dirname
+
+
+def take_before_screenshot(ctx, thing, name, index, element=None):
+    observed = "saw " if element else "didn't see "
+    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+
+    take_screenshot(
+        ctx,
+        ctx.current_step.name,
+        label=f"{observed} {prefix}{thing} {name}",
+        highlight_element=element,
+    )
 
 
 def take_screenshot(ctx, step_name, label="", highlight_element=None):

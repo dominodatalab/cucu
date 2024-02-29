@@ -1,4 +1,5 @@
 from cucu import fuzzy, helpers
+from cucu.utils import take_before_screenshot
 
 from . import base_steps
 
@@ -20,7 +21,13 @@ def find_link(ctx, name, index=0):
         the WebElement that matches the provided arguments.
     """
     ctx.check_browser_initialized()
-    return fuzzy.find(ctx.browser, name, ["a", '*[role="link"]'], index=index)
+    element = fuzzy.find(
+        ctx.browser, name, ["a", '*[role="link"]'], index=index
+    )
+
+    take_before_screenshot(ctx, "link", name, index, element)
+
+    return element
 
 
 def click_link(ctx, link):
