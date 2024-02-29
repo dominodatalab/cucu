@@ -2,6 +2,7 @@
 various cucu utilities can be placed here and then exposed publicly through
 the src/cucu/__init__.py
 """
+
 import logging
 import os
 import pkgutil
