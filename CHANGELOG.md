@@ -6,8 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 0.189.0
-- Add - before action screenshots
-- Chore - downgrade CI to python 3.11
+- Add - screenshot highlight on find functions
+- Chore - CI downgrade to python 3.11 for stability
+- Chore - CI unpin remote docker executor
+- Chore - bump packages
+  |  | Package                                                            | From      | To       |
+  |--|--------------------------------------------------------------------|-----------|----------|
+  |  | [coverage](https://github.com/nedbat/coveragepy)                   | `7.4.2`   | `7.4.3`  |
+  |  | [importlib-metadata](https://github.com/python/importlib_metadata) | `6.11.0`  | `7.0.1`  |
+  |  | [black](https://github.com/psf/black)                              | `23.12.1` | `24.2.0` |
+  |  | [pytest](https://github.com/pytest-dev/pytest)                     | `7.4.4`   | `8.0.2`  |
+  |  | [ruff](https://github.com/astral-sh/ruff)                          | `0.1.15`  | `0.2.2`  |
+  |  | [safety](https://github.com/pyupio/safety)                         | `2.4.0b2` | `3.0.1`  |
+  |  | bandit                                                             | `1.7.5`   | `1.7.7`  |
+  |  | jinja2                                                             | `3.1.2`   | `3.1.3`  |
 
 ## 0.188.0
 - Fix - how element size is gotten in fuzzy find
