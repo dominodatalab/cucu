@@ -413,7 +413,7 @@ CONFIG.define(
 CONFIG.define(
     "CUCU_INJECT_ELEMENT_BORDER",
     "when set to 'true', adds borders to some elements cucu interacts with in order to draw attention to them in the screenshot",
-    default=False,
+    default=True,
 )
 
 
