@@ -1,5 +1,5 @@
 from cucu import fuzzy, helpers
-from cucu.utils import take_before_screenshot
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -32,7 +32,7 @@ def find_checkbox(ctx, name, index=0):
         direction=fuzzy.Direction.RIGHT_TO_LEFT,
     )
 
-    take_before_screenshot(ctx, "checkbox", name, index, element)
+    take_saw_element_screenshot(ctx, "checkbox", name, index, element)
 
     return element
 

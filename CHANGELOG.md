@@ -20,6 +20,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
   |  | [safety](https://github.com/pyupio/safety)                         | `2.4.0b2` | `3.0.1`  |
   |  | bandit                                                             | `1.7.5`   | `1.7.7`  |
   |  | jinja2                                                             | `3.1.2`   | `3.1.3`  |
+- Chore - black format files
+- 
 
 ## 0.188.0
 - Fix - how element size is gotten in fuzzy find

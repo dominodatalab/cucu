@@ -1,5 +1,5 @@
 from cucu import fuzzy, helpers
-from cucu.utils import take_before_screenshot
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -19,7 +19,7 @@ def find_tab(ctx, name, index=0):
     ctx.check_browser_initialized()
     element = fuzzy.find(ctx.browser, name, ['*[role="tab"]'], index=index)
 
-    take_before_screenshot(ctx, "tab", name, index, element)
+    take_saw_element_screenshot(ctx, "tab", name, index, element)
 
     return element
 

@@ -187,7 +187,7 @@ def get_step_image_dir(step_index, step_name):
     return dirname
 
 
-def take_before_screenshot(ctx, thing, name, index, element=None):
+def take_saw_element_screenshot(ctx, thing, name, index, element=None):
     observed = "saw " if element else "didn't see "
     prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 

@@ -1,5 +1,5 @@
 from cucu import fuzzy, helpers
-from cucu.utils import take_before_screenshot
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -53,7 +53,7 @@ def find_button(ctx, name, index=0):
         index=index,
     )
 
-    take_before_screenshot(ctx, "button", name, index, element)
+    take_saw_element_screenshot(ctx, "button", name, index, element)
 
     return element
 

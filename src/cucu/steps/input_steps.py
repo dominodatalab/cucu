@@ -6,7 +6,7 @@ import humanize
 from selenium.webdriver.common.keys import Keys
 
 from cucu import fuzzy, helpers, retry, step
-from cucu.utils import take_before_screenshot
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -45,7 +45,7 @@ def find_input(ctx, name, index=0):
 
     prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
-    take_before_screenshot(ctx, "input", name, index, element)
+    take_saw_element_screenshot(ctx, "input", name, index, element)
 
     if element is None:
         raise RuntimeError(f'unable to find the {prefix}input "{name}"')

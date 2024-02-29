@@ -1,6 +1,6 @@
 from cucu import fuzzy, helpers, retry, step
 from cucu.config import CONFIG
-from cucu.utils import take_before_screenshot
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -33,7 +33,7 @@ def find_radio_button(ctx, name, index=0):
         direction=fuzzy.Direction.RIGHT_TO_LEFT,
     )
 
-    take_before_screenshot(ctx, "radio button", name, index, element)
+    take_saw_element_screenshot(ctx, "radio button", name, index, element)
 
     return element
 

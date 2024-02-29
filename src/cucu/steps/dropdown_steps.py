@@ -19,7 +19,7 @@ from tenacity import retry as retrying
 
 from cucu import fuzzy, helpers, logger, retry, step
 from cucu.steps.input_steps import find_input
-from cucu.utils import take_before_screenshot
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -69,7 +69,7 @@ def find_dropdown(ctx, name, index=0):
             direction=fuzzy.Direction.RIGHT_TO_LEFT,
         )
 
-    take_before_screenshot(ctx, "dropdown", name, index, dropdown)
+    take_saw_element_screenshot(ctx, "dropdown", name, index, dropdown)
 
     if dropdown:
         outer_html = dropdown.get_attribute("outerHTML")

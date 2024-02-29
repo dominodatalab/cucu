@@ -1,5 +1,5 @@
 from cucu import fuzzy, helpers
-from cucu.utils import take_before_screenshot
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -25,7 +25,7 @@ def find_link(ctx, name, index=0):
         ctx.browser, name, ["a", '*[role="link"]'], index=index
     )
 
-    take_before_screenshot(ctx, "link", name, index, element)
+    take_saw_element_screenshot(ctx, "link", name, index, element)
 
     return element
 

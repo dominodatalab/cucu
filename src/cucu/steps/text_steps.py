@@ -1,7 +1,7 @@
 from cucu import fuzzy, helpers, step
 from cucu.browser.frames import try_in_frames_until_success
 from cucu.steps import step_utils
-from cucu.utils import take_before_screenshot, text_in_current_frame
+from cucu.utils import take_saw_element_screenshot, text_in_current_frame
 
 
 def find_text(ctx, name, index=0):
@@ -25,7 +25,7 @@ def find_text(ctx, name, index=0):
         direction=fuzzy.Direction.LEFT_TO_RIGHT,
     )
 
-    take_before_screenshot(ctx, "text", name, index, element)
+    take_saw_element_screenshot(ctx, "text", name, index, element)
 
     return element
 

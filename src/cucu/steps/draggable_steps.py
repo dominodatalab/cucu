@@ -1,7 +1,7 @@
 from selenium.webdriver.support.ui import WebDriverWait
 
 from cucu import fuzzy, helpers, logger
-from cucu.utils import take_before_screenshot
+from cucu.utils import take_saw_element_screenshot
 
 
 def find_draggable_element(ctx, name, index=0):
@@ -23,7 +23,7 @@ def find_draggable_element(ctx, name, index=0):
         ctx.browser, name, ['*[draggable="true"]'], index=index
     )
 
-    take_before_screenshot(ctx, "draggable", name, index, element)
+    take_saw_element_screenshot(ctx, "draggable", name, index, element)
 
     return element
 

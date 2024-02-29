@@ -3,7 +3,7 @@
 # https://www.w3.org/TR/wai-aria-1.1/#menuitem
 #
 from cucu import fuzzy, helpers
-from cucu.utils import take_before_screenshot
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -23,7 +23,7 @@ def find_menuitem(ctx, name, index=0):
     ctx.check_browser_initialized()
     element = fuzzy.find(ctx.browser, name, ['*[role="menuitem"]'], index=index)
 
-    take_before_screenshot(ctx, "menuitem", name, index, element)
+    take_saw_element_screenshot(ctx, "menuitem", name, index, element)
 
     return element
 

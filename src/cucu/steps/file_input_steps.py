@@ -3,7 +3,7 @@ import os
 import humanize
 
 from cucu import fuzzy, logger, step
-from cucu.utils import take_before_screenshot
+from cucu.utils import take_saw_element_screenshot
 
 
 def find_file_input(ctx, name, index=0):
@@ -24,7 +24,7 @@ def find_file_input(ctx, name, index=0):
 
     prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
-    take_before_screenshot(ctx, "file input", name, index, element)
+    take_saw_element_screenshot(ctx, "file input", name, index, element)
 
     if element is None:
         raise RuntimeError(f'unable to find the {prefix}file input "{name}"')

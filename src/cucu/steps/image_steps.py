@@ -1,5 +1,5 @@
 from cucu import helpers
-from cucu.utils import take_before_screenshot
+from cucu.utils import take_saw_element_screenshot
 
 
 def find_image(ctx, name, index=0):
@@ -27,7 +27,7 @@ def find_image(ctx, name, index=0):
 
     element = images[index]
 
-    take_before_screenshot(ctx, "image", name, index, element)
+    take_saw_element_screenshot(ctx, "image", name, index, element)
 
     return element
 
