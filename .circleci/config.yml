@@ -37,8 +37,7 @@ commands:
 
   setup_remote_docker_env: &setup_remote_docker_env
     steps:
-      - setup_remote_docker:
-          version: 20.10.14
+      - setup_remote_docker
 
   wait_for_selenium: &wait_for_selenium
     steps:
