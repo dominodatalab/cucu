@@ -188,13 +188,13 @@ def get_step_image_dir(step_index, step_name):
 
 
 def take_saw_element_screenshot(ctx, thing, name, index, element=None):
-    observed = "saw " if element else "did not see "
+    observed = "saw" if element else "did not see"
     prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
     take_screenshot(
         ctx,
         ctx.current_step.name,
-        label=f"{observed} {prefix}{thing} {name}",
+        label=f"{observed} {prefix}{thing} \"{name}\"",
         highlight_element=element,
     )
 
