@@ -118,15 +118,16 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
         prefix = nth_to_ordinal(index)
         element = find_func(ctx, name, index=index)
 
-        if element is None:
-            raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
-        logger.debug(f'Success: saw {prefix}{thing} "{name}"')
         take_screenshot(
             ctx,
             ctx.current_step.name,
-            label=f"saw {thing} {name}",
+            label=f"should see {thing} {name}",
             highlight_element=element,
         )
+
+        if element is None:
+            raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
+        logger.debug(f'Success: saw {prefix}{thing} "{name}"')
 
     @step(f'I should immediately see the {thing} "{{name}}"')
     def should_immediately_see_the(ctx, thing, name):
@@ -181,6 +182,13 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
     def base_should_not_see_the(ctx, thing, name, index=0):
         prefix = nth_to_ordinal(index)
         element = find_func(ctx, name, index=index)
+
+        take_screenshot(
+            ctx,
+            ctx.current_step.name,
+            label=f"should not see {thing} {name}",
+            highlight_element=element,
+        )
 
         if element is not None:
             raise RuntimeError(f'able to find the {prefix}{thing} "{name}"')
@@ -291,6 +299,13 @@ def define_action_on_thing_with_name_steps(
     def base_action_the(ctx, thing, name, index=0, must_exist=True):
         prefix = nth_to_ordinal(index)
         element = find_func(ctx, name, index=index)
+
+        take_screenshot(
+            ctx,
+            ctx.current_step.name,
+            label=f"should action on {thing} {name}",
+            highlight_element=element,
+        )
 
         if element is None:
             if must_exist:
@@ -438,6 +453,13 @@ def define_ensure_state_on_thing_with_name_steps(
         prefix = nth_to_ordinal(index)
         element = find_func(ctx, name, index=index)
 
+        take_screenshot(
+            ctx,
+            ctx.current_step.name,
+            label=f"should see {thing} {name}",
+            highlight_element=element,
+        )
+
         if element is None:
             raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
 
@@ -551,6 +573,13 @@ def define_thing_with_name_in_state_steps(
         prefix = nth_to_ordinal(index)
         element = find_func(ctx, name, index=index)
 
+        take_screenshot(
+            ctx,
+            ctx.current_step.name,
+            label=f"should see {thing} {name}",
+            highlight_element=element,
+        )
+
         if element is None:
             raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
 
@@ -640,6 +669,13 @@ def define_run_steps_if_I_can_see_element_with_name_steps(thing, find_func):
     def base_run_if_visibile(ctx, name):
         element = find_func(ctx, name)
 
+        take_screenshot(
+            ctx,
+            ctx.current_step.name,
+            label=f"should see {thing} {name}",
+            highlight_element=element,
+        )
+
         if element is not None:
             run_steps(ctx, ctx.text)
 
@@ -659,6 +695,13 @@ def define_run_steps_if_I_can_see_element_with_name_steps(thing, find_func):
 
     def base_run_if_not_visibile(ctx, name):
         element = find_func(ctx, name)
+
+        take_screenshot(
+            ctx,
+            ctx.current_step.name,
+            label=f"should not see {thing} {name}",
+            highlight_element=element,
+        )
 
         if element is None:
             run_steps(ctx, ctx.text)
@@ -760,7 +803,20 @@ def define_two_thing_interaction_steps(
         prefix_2 = nth_to_ordinal(index_2)
 
         element_1 = thing_1_find_func(ctx, name_1, index_1)
+        take_screenshot(
+            ctx,
+            ctx.current_step.name,
+            label=f"should see {thing_1} {name_1}",
+            highlight_element=element_1,
+        )
+
         element_2 = thing_2_find_func(ctx, name_2, index_2)
+        take_screenshot(
+            ctx,
+            ctx.current_step.name,
+            label=f"should see {thing_2} {name_2}",
+            highlight_element=element_2,
+        )
 
         if element_1 is None or element_2 is None:
             error_message = []
