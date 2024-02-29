@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 0.189.0
 - Add - before action screenshots
+- Chore - downgrade CI to python 3.11
 
 ## 0.188.0
 - Fix - how element size is gotten in fuzzy find
