@@ -194,7 +194,7 @@ def take_saw_element_screenshot(ctx, thing, name, index, element=None):
     take_screenshot(
         ctx,
         ctx.current_step.name,
-        label=f"{observed} {prefix}{thing} \"{name}\"",
+        label=f'{observed} {prefix}{thing} "{name}"',
         highlight_element=element,
     )
 
@@ -215,6 +215,7 @@ def take_screenshot(ctx, step_name, label="", highlight_element=None):
     if not CONFIG["CUCU_INJECT_ELEMENT_BORDER"] or not highlight_element:
         ctx.browser.screenshot(filepath)
     else:
+        # doesn't work with images, checkboxes, radio buttons, flexbox layouts, 0000 - saw  text # First comment.png
         border_style = "solid magenta 4px"
         border_radius = "4px"
         highlighter = (
