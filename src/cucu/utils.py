@@ -212,7 +212,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
     filename = ellipsize_filename(filename)
     filepath = os.path.join(screenshot_dir, filename)
 
-    if not CONFIG["CUCU_INJECT_ELEMENT_BORDER"] or not element:
+    if CONFIG["CUCU_SKIP_HIGHLIGHT_BORDER"] or not element:
         ctx.browser.screenshot(filepath)
     else:
         location = element.location
