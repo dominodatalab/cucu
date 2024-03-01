@@ -195,7 +195,7 @@ def take_saw_element_screenshot(ctx, thing, name, index, element=None):
         ctx,
         ctx.current_step.name,
         label=f'{observed} {prefix}{thing} "{name}"',
-        highlight_element=element,
+        element=element,
     )
 
 
