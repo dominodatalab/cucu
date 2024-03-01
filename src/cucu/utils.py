@@ -199,7 +199,7 @@ def take_saw_element_screenshot(ctx, thing, name, index, element=None):
     )
 
 
-def take_screenshot(ctx, step_name, label="", highlight_element=None):
+def take_screenshot(ctx, step_name, label="", element=None):
     screenshot_dir = os.path.join(
         ctx.scenario_dir, get_step_image_dir(ctx.step_index, step_name)
     )
@@ -212,23 +212,31 @@ def take_screenshot(ctx, step_name, label="", highlight_element=None):
     filename = ellipsize_filename(filename)
     filepath = os.path.join(screenshot_dir, filename)
 
-    if not CONFIG["CUCU_INJECT_ELEMENT_BORDER"] or not highlight_element:
+    if not CONFIG["CUCU_INJECT_ELEMENT_BORDER"] or not element:
         ctx.browser.screenshot(filepath)
     else:
         # doesn't work with images, checkboxes, radio buttons, flexbox layouts, 0000 - saw  text # First comment.png
-        border_style = "solid magenta 4px"
-        border_radius = "4px"
-        highlighter = (
-            f'arguments[0].style["border"] = "{border_style}";'
-            f'arguments[0].style["border-radius"] = "{border_radius}";'
-        )
-        ctx.browser.execute(highlighter, highlight_element)
+        location = element.location
+        x, y = location["x"], location["y"]
+        size = element.size
+        width, height = size["width"], size["height"]
+
+        script = f"""
+            var body = document.querySelector('body');
+            var cucu_border = document.createElement('div');
+            cucu_border.setAttribute('id', 'cucu_border');
+            cucu_border.setAttribute('style', 'position: fixed; top: {y}px; left: {x}px; width: {width}px; height: {height}px; border-radius: 4px; border: 4px solid magenta;');
+            body.append(cucu_border);
+        """
+        ctx.browser.execute(script)
+
         ctx.browser.screenshot(filepath)
-        clear_highlight = (
-            'arguments[0].style["border"] = "";'
-            'arguments[0].style["border-radius"] = "";'
-        )
-        ctx.browser.execute(clear_highlight, highlight_element)
+        clear_highlight = """
+            var body = document.querySelector('body');
+            var cucu_border = document.getElementById('cucu_border');
+            body.removeChild(cucu_border);
+        """
+        ctx.browser.execute(clear_highlight, element)
 
     if CONFIG["CUCU_MONITOR_PNG"] is not None:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])

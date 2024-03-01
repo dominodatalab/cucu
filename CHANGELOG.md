@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 0.189.0
 - Add - screenshot highlight on find functions
+- Change - highlight to be separate overlay element
 - Chore - CI downgrade to python 3.11 for stability
 - Chore - CI unpin remote docker executor
 - Chore - bump packages
