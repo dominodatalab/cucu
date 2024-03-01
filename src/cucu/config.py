@@ -398,7 +398,7 @@ CONFIG.define(
     "CUCU_MONITOR_PNG",
     "when set to a filename `cucu` will update the image to match "
     "the exact image step at runtime.",
-    default=None,
+    default=".monitor.png",
 )
 CONFIG.define(
     "CUCU_LINT_RULES_PATH",
@@ -411,8 +411,8 @@ CONFIG.define(
     default="false",
 )
 CONFIG.define(
-    "CUCU_INJECT_ELEMENT_BORDER",
-    "when set to 'true', adds borders to some elements cucu interacts with in order to draw attention to them in the screenshot",
+    "CUCU_SKIP_HIGHLIGHT_BORDER",
+    "when set to 'True' skips adding a border to highlight found element in screenshots",
     default=False,
 )
 

@@ -37,8 +37,7 @@ commands:
 
   setup_remote_docker_env: &setup_remote_docker_env
     steps:
-      - setup_remote_docker:
-          version: 20.10.14
+      - setup_remote_docker
 
   wait_for_selenium: &wait_for_selenium
     steps:
@@ -75,13 +74,14 @@ commands:
 executors:
   unit-test-executor:
     docker:
-      - image: python:3.12.0
+      - image: python:3.11.7
 
   chrome-test-executor:
     docker:
-      - image: python:3.12.0
-      - image: selenium/standalone-chrome:117.0
+      - image: python:3.11.7
+      - image: selenium/standalone-chrome:122.0
         environment:
+          CUCU_MONITOR_PNG: ""
           SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1366
@@ -90,9 +90,10 @@ executors:
 
   firefox-test-executor:
     docker:
-      - image: python:3.12.0
-      - image: selenium/standalone-firefox:117.0
+      - image: python:3.11.7
+      - image: selenium/standalone-firefox:122.0
         environment:
+          CUCU_MONITOR_PNG: ""
           SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1366
@@ -101,9 +102,10 @@ executors:
 
   edge-test-executor:
     docker:
-      - image: python:3.12.0
-      - image: selenium/standalone-edge:117.0
+      - image: python:3.11.7
+      - image: selenium/standalone-edge:122.0
         environment:
+          CUCU_MONITOR_PNG: ""
           SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1366
@@ -113,7 +115,7 @@ executors:
 jobs:
   pre-commit:
     docker:
-      - image: cimg/python:3.12.0
+      - image: cimg/python:3.11.7
     resource_class: medium
 
     steps:
@@ -177,7 +179,7 @@ jobs:
 
   publish:
     docker:
-      - image: cimg/python:3.12.0
+      - image: cimg/python:3.11.7
     steps:
       - checkout
       - install_cucu_dependencies

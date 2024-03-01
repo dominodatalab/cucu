@@ -1,5 +1,6 @@
 from cucu import fuzzy, helpers, retry, step
 from cucu.config import CONFIG
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -21,7 +22,7 @@ def find_radio_button(ctx, name, index=0):
         the WebElement that matches the provided arguments.
     """
     ctx.check_browser_initialized()
-    return fuzzy.find(
+    element = fuzzy.find(
         ctx.browser,
         name,
         [
@@ -31,6 +32,10 @@ def find_radio_button(ctx, name, index=0):
         index=index,
         direction=fuzzy.Direction.RIGHT_TO_LEFT,
     )
+
+    take_saw_element_screenshot(ctx, "radio button", name, index, element)
+
+    return element
 
 
 def find_n_assert_radio_button(ctx, name, index=0, is_visible=True):

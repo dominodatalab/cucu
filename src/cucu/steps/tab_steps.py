@@ -1,4 +1,5 @@
 from cucu import fuzzy, helpers
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -16,7 +17,11 @@ def find_tab(ctx, name, index=0):
         the WebElement that matches the provided arguments.
     """
     ctx.check_browser_initialized()
-    return fuzzy.find(ctx.browser, name, ['*[role="tab"]'], index=index)
+    element = fuzzy.find(ctx.browser, name, ['*[role="tab"]'], index=index)
+
+    take_saw_element_screenshot(ctx, "tab", name, index, element)
+
+    return element
 
 
 def click_tab(ctx, tab):

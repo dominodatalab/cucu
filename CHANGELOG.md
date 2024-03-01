@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.190.0
+- Add - screenshot highlight on find functions
+- Change - highlight to be separate overlay element
+- Change - enable element border highlight be default
+- Change - enable CUCU_MONITOR_PNG by default
+- Chore - CI downgrade to python 3.11 for stability
+- Chore - CI unpin remote docker executor
+- Chore - bump packages
+  |  | Package                                                            | From      | To       |
+  |--|--------------------------------------------------------------------|-----------|----------|
+  |  | [coverage](https://github.com/nedbat/coveragepy)                   | `7.4.2`   | `7.4.3`  |
+  |  | [importlib-metadata](https://github.com/python/importlib_metadata) | `6.11.0`  | `7.0.1`  |
+  |  | [black](https://github.com/psf/black)                              | `23.12.1` | `24.2.0` |
+  |  | [pytest](https://github.com/pytest-dev/pytest)                     | `7.4.4`   | `8.0.2`  |
+  |  | [ruff](https://github.com/astral-sh/ruff)                          | `0.1.15`  | `0.2.2`  |
+  |  | [safety](https://github.com/pyupio/safety)                         | `2.4.0b2` | `3.0.1`  |
+  |  | bandit                                                             | `1.7.5`   | `1.7.7`  |
+  |  | jinja2                                                             | `3.1.2`   | `3.1.3`  |
+- Chore - black format files
+
 ## 0.189.0
 - Change - after-hook failures will report as 'passed' instead of 'failed/errored' to testrail and html reports
 
