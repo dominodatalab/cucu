@@ -215,22 +215,26 @@ def take_screenshot(ctx, step_name, label="", element=None):
     if not CONFIG["CUCU_INJECT_ELEMENT_BORDER"] or not element:
         ctx.browser.screenshot(filepath)
     else:
-        # doesn't work with images, checkboxes, radio buttons, flexbox layouts, 0000 - saw  text # First comment.png
         location = element.location
-        x, y = location["x"], location["y"]
+        border_width = 4
+        x, y = location["x"] - border_width, location["y"] - border_width
         size = element.size
         width, height = size["width"], size["height"]
+
+        position_css = f"position: absolute; top: {y}px; left: {x}px; width: {width}px; height: {height}px; z-index: 9001;"
+        visual_css = "border-radius: 4px; border: 4px solid #ff00ff1c; background: #ff00ff05; filter: drop-shadow(magenta 0 0 10px);"
 
         script = f"""
             var body = document.querySelector('body');
             var cucu_border = document.createElement('div');
             cucu_border.setAttribute('id', 'cucu_border');
-            cucu_border.setAttribute('style', 'position: fixed; top: {y}px; left: {x}px; width: {width}px; height: {height}px; border-radius: 4px; border: 4px solid magenta;');
+            cucu_border.setAttribute('style', '{position_css} {visual_css}');
             body.append(cucu_border);
         """
         ctx.browser.execute(script)
 
         ctx.browser.screenshot(filepath)
+
         clear_highlight = """
             var body = document.querySelector('body');
             var cucu_border = document.getElementById('cucu_border');
