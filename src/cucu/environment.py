@@ -124,15 +124,11 @@ def before_scenario(ctx, scenario):
 
 
 def run_after_scenario_hook(ctx, scenario, hook):
-    scenario_status = scenario.status.name
     try:
         hook(ctx)
         logger.debug(f"HOOK {hook.__name__}: passed ✅")
     except Exception as e:
-        # scenario 'failed' status takes precedence over 'errored' status
-        if scenario_status != "failed":
-            scenario.hook_failed = True
-        # attach error_message to scenario
+        # For any after scenario hooks,'hook_failed' status will be 'False' but will attach the error message to scenario.
         error_message = (
             f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}\n"
         )
