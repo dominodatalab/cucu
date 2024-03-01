@@ -225,20 +225,24 @@ def take_screenshot(ctx, step_name, label="", element=None):
         visual_css = "border-radius: 4px; border: 4px solid #ff00ff1c; background: #ff00ff05; filter: drop-shadow(magenta 0 0 10px);"
 
         script = f"""
-            var body = document.querySelector('body');
-            var cucu_border = document.createElement('div');
-            cucu_border.setAttribute('id', 'cucu_border');
-            cucu_border.setAttribute('style', '{position_css} {visual_css}');
-            body.append(cucu_border);
+            (function() {{ // double curly-brace to escape python f-string
+                var body = document.querySelector('body');
+                var cucu_border = document.createElement('div');
+                cucu_border.setAttribute('id', 'cucu_border');
+                cucu_border.setAttribute('style', '{position_css} {visual_css}');
+                body.append(cucu_border);
+            }})();
         """
         ctx.browser.execute(script)
 
         ctx.browser.screenshot(filepath)
 
         clear_highlight = """
-            var body = document.querySelector('body');
-            var cucu_border = document.getElementById('cucu_border');
-            body.removeChild(cucu_border);
+            (function() {
+                var body = document.querySelector('body');
+                var cucu_border = document.getElementById('cucu_border');
+                body.removeChild(cucu_border);
+            })();
         """
         ctx.browser.execute(clear_highlight, element)
 
