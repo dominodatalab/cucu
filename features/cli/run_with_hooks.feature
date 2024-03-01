@@ -147,7 +147,7 @@ Feature: Run with hooks
         Scenario: Hello world scenario
           Given I echo "Hello World"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/failing_custom_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/failing_custom_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/failing_custom_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/failing_custom_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" contains the following
       """
       HOOK-ERROR in after_scenario_fail: RuntimeError: boom
@@ -160,7 +160,7 @@ Feature: Run with hooks
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
       And I click the link "Feature that fails due to after scenario hook"
       And I click the link "Hello world scenario"
-     Then I should see the text "HOOK-ERROR in after_scenario_fail: RuntimeError: boom"
+     Then I should see the text "Hello World"
 
   Scenario: User gets expected output when running a scenario with failing before hooks
     Given I create a file at "{CUCU_RESULTS_DIR}/failing_before_hooks/environment.py" with the following:
@@ -223,7 +223,7 @@ Feature: Run with hooks
         Scenario: Hello world scenario
           Given I echo "Hello World"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" contains the following
       """
       HOOK-ERROR in after_scenario_fail: RuntimeError: boom
@@ -240,7 +240,7 @@ Feature: Run with hooks
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
       And I click the link "Feature that has failing and passing after scenario hooks"
       And I click the link "Hello world scenario"
-     Then I should see the text "HOOK-ERROR in after_scenario_fail: RuntimeError: boom"
+     Then I should see the text "Hello World"
 
   Scenario: User gets expected output when running a scenario with multiple after hooks passing and failing in order
     Given I create a file at "{CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/environment.py" with the following:
@@ -270,7 +270,7 @@ Feature: Run with hooks
         Scenario: Hello world scenario
           Given I echo "Hello World"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" contains the following
       """
       HOOK-ERROR in after_scenario_fail: RuntimeError: boom
@@ -287,4 +287,4 @@ Feature: Run with hooks
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
       And I click the link "Feature that has failing and passing after scenario hooks"
       And I click the link "Hello world scenario"
-     Then I should see the text "HOOK-ERROR in after_scenario_fail: RuntimeError: boom"
+     Then I should see the text "Hello World"

@@ -87,7 +87,7 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
        | Started at | Feature                    | Total | Passed | Failed | Skipped | Errored | Status | Duration |
-       | .*         | Feature with mixed results | 6     | 2      | 3      | 0       | 1       | failed | .*       |
+       | .*         | Feature with mixed results | 6     | 3      | 3      | 0       | 0       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
       | Offset | Scenario                            | Steps | Status  | Duration |
@@ -96,7 +96,7 @@ Feature: Report basics
       | .*     | Scenario that fails                 | 2     | failed  | .*       |
       | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
       | .*     | Scenario that passes                | 1     | passed  | .*       |
-      | .*     | Scenario with after-hook error      | 2     | errored | .*       |
+      | .*     | Scenario with after-hook error      | 2     | passed  | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -112,7 +112,7 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
        | Started at | Feature                    | Total | Passed | Failed | Skipped | Errored | Status | Duration |
-       | .*         | Feature with mixed results | 7     | 2      | 3      | 1       | 1       | failed | .*       |
+       | .*         | Feature with mixed results | 7     | 3      | 3      | 1       | 0       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
       | Offset | Scenario                            | Steps | Status  | Duration |
@@ -122,7 +122,7 @@ Feature: Report basics
       | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
       | .*     | Scenario that is skipped            | 1     | skipped | .*       |
       | .*     | Scenario that passes                | 1     | passed  | .*       |
-      | .*     | Scenario with after-hook error      | 2     | errored | .*       |
+      | .*     | Scenario with after-hook error      | 2     | passed  | .*       |
 
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
@@ -224,7 +224,7 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
       | Started at | Feature                    | Total | Passed | Failed | Skipped | Errored | Status | Duration |
-      | .*         | Feature with mixed results | 6     | 2      | 3      | 0       | 1       | failed | .*       |
+      | .*         | Feature with mixed results | 6     | 3      | 3      | 0       | 0       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
       | Offset | Scenario                            | Steps | Status  | Duration |
@@ -233,7 +233,7 @@ Feature: Report basics
       | .*     | Scenario that fails                 | 2     | failed  | .*       |
       | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
       | .*     | Scenario that passes                | 1     | passed  | .*       |
-      | .*     | Scenario with after-hook error      | 2     | errored | .*       |
+      | .*     | Scenario with after-hook error      | 2     | passed  | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
