@@ -242,7 +242,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
         """
         ctx.browser.execute(clear_highlight, element)
 
-    if CONFIG["CUCU_MONITOR_PNG"] is not None:
+    if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] += 1
