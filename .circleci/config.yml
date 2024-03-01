@@ -79,8 +79,9 @@ executors:
   chrome-test-executor:
     docker:
       - image: python:3.11.7
-      - image: selenium/standalone-chrome:117.0
+      - image: selenium/standalone-chrome:122.0
         environment:
+          CUCU_MONITOR_PNG: ""
           SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1366
@@ -90,8 +91,9 @@ executors:
   firefox-test-executor:
     docker:
       - image: python:3.11.7
-      - image: selenium/standalone-firefox:117.0
+      - image: selenium/standalone-firefox:122.0
         environment:
+          CUCU_MONITOR_PNG: ""
           SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1366
@@ -101,8 +103,9 @@ executors:
   edge-test-executor:
     docker:
       - image: python:3.11.7
-      - image: selenium/standalone-edge:117.0
+      - image: selenium/standalone-edge:122.0
         environment:
+          CUCU_MONITOR_PNG: ""
           SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1366
