@@ -234,12 +234,12 @@ def take_screenshot(ctx, step_name, label="", element=None):
         x, y = location["x"], location["y"]
         size = element.size
         width, height = size["width"], size["height"]
-        add_highlight = " ".join([
-            f"arguments[0].style.top = '{y}px';",
-            f"arguments[0].style.left = '{x}px';",
-            f"arguments[0].style.width = '{width}px';",
-            f"arguments[0].style.height = '{height}px';",
-        ])
+        add_highlight = f"""
+            arguments[0].style.top = '{y}px';
+            arguments[0].style.left = '{x}px';
+            arguments[0].style.width = '{width}px';
+            arguments[0].style.height = '{height}px';
+        """
         ctx.browser.execute(add_highlight, cucu_border)
 
         ctx.browser.screenshot(filepath)
