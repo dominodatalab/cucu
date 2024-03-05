@@ -396,9 +396,8 @@ CONFIG.define(
 )
 CONFIG.define(
     "CUCU_MONITOR_PNG",
-    "when set to a filename `cucu` will update the image to match "
-    "the exact image step at runtime.",
-    default=".monitor.png",
+    "filename of image used to monitor live updates. Ex: '.monitor.png'",
+    default="",
 )
 CONFIG.define(
     "CUCU_LINT_RULES_PATH",
