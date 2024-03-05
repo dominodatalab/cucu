@@ -215,32 +215,32 @@ def take_screenshot(ctx, step_name, label="", element=None):
     if CONFIG["CUCU_SKIP_HIGHLIGHT_BORDER"] or not element:
         ctx.browser.screenshot(filepath)
     else:
-        location = element.location
-        border_width = 4
-        x, y = location["x"] - border_width, location["y"] - border_width
-        size = element.size
-        width, height = size["width"], size["height"]
+        # location = element.location
+        # border_width = 4
+        # x, y = location["x"] - border_width, location["y"] - border_width
+        # size = element.size
+        # width, height = size["width"], size["height"]
 
-        position_css = f"position: absolute; top: {y}px; left: {x}px; width: {width}px; height: {height}px; z-index: 9001;"
-        visual_css = "background: none; pointer-events: none; box-shadow: 0 0px 4px 4px #ff00ff;"
+        # position_css = f"position: absolute; top: {y}px; left: {x}px; width: {width}px; height: {height}px; z-index: 9001;"
+        # visual_css = "background: none; pointer-events: none; box-shadow: 0 0px 4px 4px #ff00ff;"
 
-        script = f"""
-            (function() {{ // double curly-brace to escape python f-string
-                var body = document.querySelector('body');
-                var cucu_border = document.createElement('div');
-                cucu_border.setAttribute('class', 'cucu_border');
-                cucu_border.setAttribute('style', '{position_css} {visual_css}');
-                body.append(cucu_border);
+        # script = f"""
+        #     (function() {{ // double curly-brace to escape python f-string
+        #         var body = document.querySelector('body');
+        #         var cucu_border = document.createElement('div');
+        #         cucu_border.setAttribute('class', 'cucu_border');
+        #         cucu_border.setAttribute('style', '{position_css} {visual_css}');
+        #         body.append(cucu_border);
                 
-                // self-delete after 5s
-                setTimeout(function(){{
-                    body.removeChild(cucu_border);
-                }}, 5000);
-            }})();
-        """
-        ctx.browser.execute(script)
+        #         // self-delete after 5s
+        #         setTimeout(function(){{
+        #             body.removeChild(cucu_border);
+        #         }}, 5000);
+        #     }})();
+        # """
+        # ctx.browser.execute(script)
 
-        ctx.browser.screenshot(filepath)
+        # ctx.browser.screenshot(filepath)
 
         # clear_highlight = """
         #     (function() {
@@ -251,6 +251,12 @@ def take_screenshot(ctx, step_name, label="", element=None):
         #     })();
         # """
         # ctx.browser.execute(clear_highlight, element)
+        
+        highlighter = 'arguments[0].style["box-shadow"] = "box-shadow: 0 0px 4px 4px #ff00ff";'
+        ctx.browser.execute(highlighter, element)
+        ctx.browser.screenshot(filepath)
+        clear_highlight = 'arguments[0].style["box-shadow"] = "";'
+        ctx.browser.execute(clear_highlight, element)
 
     if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
