@@ -215,13 +215,50 @@ def take_screenshot(ctx, step_name, label="", element=None):
     if CONFIG["CUCU_SKIP_HIGHLIGHT_BORDER"] or not element:
         ctx.browser.screenshot(filepath)
     else:
-        highlighter = 'arguments[0].style.boxShadow = "0 0px 4px 4px #ff00ff";'
-        ctx.browser.execute(highlighter, element)
+        cucu_border = ctx.browser.execute("return document.getElementById('cucu_border');")
+        if not cucu_border:
+            visual_css = "background: none; pointer-events: none; box-shadow: 0 0px 4px 4px #ff00ff; overflow: hidden; z-index: 9001;"
+            position_css = "position: absolute; top: -100px; left: -100px; width: 0px; height: 0px;"
+            create_cucu_border = f"""
+                var cucu_border = document.createElement('div');
+                cucu_border.setAttribute('id', 'cucu_border');
+                cucu_border.setAttribute('style', '{position_css} {visual_css}');
+                document.querySelector('body').append(cucu_border);
+
+                return cucu_border
+            """
+            cucu_border = ctx.browser.execute(create_cucu_border)
+            logger.debug("create cucu_border element")
+
+        location = element.location
+        x, y = location["x"], location["y"]
+        size = element.size
+        width, height = size["width"], size["height"]
+        add_highlight = " ".join([
+            f"arguments[0].style.top = '{y}px';",
+            f"arguments[0].style.left = '{x}px';",
+            f"arguments[0].style.width = '{width}px';",
+            f"arguments[0].style.height = '{height}px';",
+        ])
+        ctx.browser.execute(add_highlight, cucu_border)
 
         ctx.browser.screenshot(filepath)
 
-        clear_highlight = 'arguments[0].style.boxShadow = "";'
-        ctx.browser.execute(clear_highlight, element)
+        clear_highlight = """
+            arguments[0].style.top = '-100px';
+            arguments[0].style.left = '-100px';
+            arguments[0].style.width = '0px';
+            arguments[0].style.height = '0px';
+        """
+        ctx.browser.execute(clear_highlight, cucu_border)
+
+        # highlighter = 'arguments[0].style.boxShadow = "0 0px 4px 4px #ff00ff";'
+        # ctx.browser.execute(highlighter, element)
+
+        # ctx.browser.screenshot(filepath)
+
+        # clear_highlight = 'arguments[0].style.boxShadow = "";'
+        # ctx.browser.execute(clear_highlight, element)
 
     if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
