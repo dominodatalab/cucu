@@ -216,7 +216,9 @@ def take_screenshot(ctx, step_name, label="", element=None):
         ctx.browser.screenshot(filepath)
     else:
         cucu_border = ctx.browser.execute("return document.getElementById('cucu_border');")
-        if not cucu_border:
+        if cucu_border:
+            logger.debug("cucu_border element - found existing")
+        else:
             visual_css = "background: none; pointer-events: none; box-shadow: 0 0px 4px 4px #ff00ff; overflow: hidden; z-index: 9001;"
             position_css = "position: absolute; top: -100px; left: -100px; width: 0px; height: 0px;"
             create_cucu_border = f"""
@@ -228,7 +230,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
                 return cucu_border
             """
             cucu_border = ctx.browser.execute(create_cucu_border)
-            logger.debug("create cucu_border element")
+            logger.debug("cucu_border element - created")
 
         location = element.location
         x, y = location["x"], location["y"]
@@ -241,6 +243,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
             arguments[0].style.height = '{height}px';
         """
         ctx.browser.execute(add_highlight, cucu_border)
+        logger.debug("cucu_border element - moved over element to highlight")
 
         ctx.browser.screenshot(filepath)
 
@@ -251,6 +254,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
             arguments[0].style.height = '0px';
         """
         ctx.browser.execute(clear_highlight, cucu_border)
+        logger.debug("cucu_border element - highlight cleared")
 
     if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
