@@ -222,13 +222,13 @@ def take_screenshot(ctx, step_name, label="", element=None):
         width, height = size["width"], size["height"]
 
         position_css = f"position: absolute; top: {y}px; left: {x}px; width: {width}px; height: {height}px; z-index: 9001;"
-        visual_css = "border-radius: 4px; border: 4px solid #ff00ff1c; background: #ff00ff05; filter: drop-shadow(magenta 0 0 10px);"
+        visual_css = "border-radius: 4px; border: 4px solid #ff00ff; background: #none; filter: drop-shadow(#ffffff 0 0 10px); pointer-events: none;"
 
         script = f"""
             (function() {{ // double curly-brace to escape python f-string
                 var body = document.querySelector('body');
                 var cucu_border = document.createElement('div');
-                cucu_border.setAttribute('id', 'cucu_border');
+                cucu_border.setAttribute('class', 'cucu_border');
                 cucu_border.setAttribute('style', '{position_css} {visual_css}');
                 body.append(cucu_border);
             }})();
@@ -239,9 +239,10 @@ def take_screenshot(ctx, step_name, label="", element=None):
 
         clear_highlight = """
             (function() {
-                var body = document.querySelector('body');
-                var cucu_border = document.getElementById('cucu_border');
-                body.removeChild(cucu_border);
+                var elements = document.querySelectorAll('.cucu_border');
+                elements.forEach(function(element) {
+                    element.parentNode.removeChild(element);
+                });
             })();
         """
         ctx.browser.execute(clear_highlight, element)
