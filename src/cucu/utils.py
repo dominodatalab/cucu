@@ -222,7 +222,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
         width, height = size["width"], size["height"]
 
         position_css = f"position: absolute; top: {y}px; left: {x}px; width: {width}px; height: {height}px; z-index: 9001;"
-        visual_css = "background: none; pointer-events: none; box-shadow: 0 0px 4px 4px #ff00ff; "
+        visual_css = "background: none; pointer-events: none; box-shadow: 0 0px 4px 4px #ff00ff;"
 
         script = f"""
             (function() {{ // double curly-brace to escape python f-string
@@ -231,21 +231,26 @@ def take_screenshot(ctx, step_name, label="", element=None):
                 cucu_border.setAttribute('class', 'cucu_border');
                 cucu_border.setAttribute('style', '{position_css} {visual_css}');
                 body.append(cucu_border);
+                
+                // self-delete after 5s
+                setTimeout(function(){{
+                    body.removeChild(cucu_boder);
+                }}, 5000);
             }})();
         """
         ctx.browser.execute(script)
 
         ctx.browser.screenshot(filepath)
 
-        clear_highlight = """
-            (function() {
-                var elements = document.querySelectorAll('.cucu_border');
-                elements.forEach(function(element) {
-                    element.parentNode.removeChild(element);
-                });
-            })();
-        """
-        ctx.browser.execute(clear_highlight, element)
+        # clear_highlight = """
+        #     (function() {
+        #         var elements = document.querySelectorAll('.cucu_border');
+        #         elements.forEach(function(element) {
+        #             element.parentNode.removeChild(element);
+        #         });
+        #     })();
+        # """
+        # ctx.browser.execute(clear_highlight, element)
 
     if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
