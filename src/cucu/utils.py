@@ -222,7 +222,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
         width, height = size["width"], size["height"]
 
         position_css = f"position: absolute; top: {y}px; left: {x}px; width: {width}px; height: {height}px; z-index: 9001;"
-        visual_css = "border-radius: 4px; border: 4px solid #ff00ff; background: #none; filter: drop-shadow(#ffffff 0 0 10px); pointer-events: none;"
+        visual_css = "background: none; pointer-events: none; box-shadow: 0 0px 4px 4px #ff00ff; "
 
         script = f"""
             (function() {{ // double curly-brace to escape python f-string
