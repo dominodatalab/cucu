@@ -234,7 +234,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
                 
                 // self-delete after 5s
                 setTimeout(function(){{
-                    body.removeChild(cucu_boder);
+                    body.removeChild(cucu_border);
                 }}, 5000);
             }})();
         """
