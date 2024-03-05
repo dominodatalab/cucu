@@ -252,14 +252,6 @@ def take_screenshot(ctx, step_name, label="", element=None):
         """
         ctx.browser.execute(clear_highlight, cucu_border)
 
-        # highlighter = 'arguments[0].style.boxShadow = "0 0px 4px 4px #ff00ff";'
-        # ctx.browser.execute(highlighter, element)
-
-        # ctx.browser.screenshot(filepath)
-
-        # clear_highlight = 'arguments[0].style.boxShadow = "";'
-        # ctx.browser.execute(clear_highlight, element)
-
     if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
 
