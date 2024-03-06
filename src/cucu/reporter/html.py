@@ -14,7 +14,7 @@ import jinja2
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
-from cucu.utils import get_step_image_dir
+from cucu.utils import ellipsize_filename, get_step_image_dir
 
 
 def escape(data):
@@ -123,8 +123,12 @@ def generate(results, basepath, only_failures=False):
 
         if feature["status"] not in ["skipped", "untested"]:
             # copy each feature directories contents over to the report directory
-            src_feature_filepath = os.path.join(results, feature["name"])
-            dst_feature_filepath = os.path.join(basepath, feature["name"])
+            src_feature_filepath = os.path.join(
+                results, ellipsize_filename(feature["name"])
+            )
+            dst_feature_filepath = os.path.join(
+                basepath, ellipsize_filename((feature["name"]))
+            )
             shutil.copytree(
                 src_feature_filepath, dst_feature_filepath, dirs_exist_ok=True
             )
@@ -133,7 +137,9 @@ def generate(results, basepath, only_failures=False):
             CONFIG.restore()
 
             scenario_filepath = os.path.join(
-                basepath, feature["name"], scenario["name"]
+                basepath,
+                ellipsize_filename((feature["name"])),
+                ellipsize_filename(scenario["name"]),
             )
 
             scenario_configpath = os.path.join(
@@ -230,12 +236,10 @@ def generate(results, basepath, only_failures=False):
                         if scenario_started_at is None:
                             scenario_started_at = timestamp
                             scenario["started_at"] = timestamp
-                        step["result"]["time_offset"] = (
-                            datetime.utcfromtimestamp(
-                                (
-                                    timestamp - scenario_started_at
-                                ).total_seconds()
-                            )
+                        step["result"][
+                            "time_offset"
+                        ] = datetime.utcfromtimestamp(
+                            (timestamp - scenario_started_at).total_seconds()
                         )
 
                     scenario_duration += step["result"]["duration"]

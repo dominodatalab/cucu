@@ -144,7 +144,7 @@ Feature: Secrets
            Then I pass the secret "\{MY_SECRET\}" to a substep
       """
      When I run the command "cucu run {CUCU_RESULTS_DIR}/substeps_without_variable_passthru --secrets MY_SECRET --results={CUCU_RESULTS_DIR}/substeps_without_variable_passthru_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
-     Then I should see a file at "{CUCU_RESULTS_DIR}/substeps_without_variable_passthru_results/Feature that spills the beans/This scenario prints some secrets to the logs/0003 - I echo "************"/0000 - After I echo "************".png"
+     Then I should see a file at "{CUCU_RESULTS_DIR}/substeps_without_variable_passthru_results/Feature that spills the beans/This scenario prints some secrets to the logs/0003 - I echo ************/0000 - After I echo ************.png"
 
   Scenario: User gets expected behavior when using variable_passthru=True
     Given I create a file at "{CUCU_RESULTS_DIR}/substeps_with_variable_passthru/environment.py" with the following:
@@ -178,4 +178,4 @@ Feature: Secrets
            Then I pass the secret "\{MY_SECRET\}" to a substep
       """
      When I run the command "cucu run {CUCU_RESULTS_DIR}/substeps_with_variable_passthru --secrets MY_SECRET --results={CUCU_RESULTS_DIR}/substeps_with_variable_passthru_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
-     Then I should see a file at "{CUCU_RESULTS_DIR}/substeps_with_variable_passthru_results/Feature that spills the beans/This scenario prints some secrets to the logs/0003 - I echo "\{MY_SECRET\}"/0000 - After I echo "\{MY_SECRET\}".png"
+     Then I should see a file at "{CUCU_RESULTS_DIR}/substeps_with_variable_passthru_results/Feature that spills the beans/This scenario prints some secrets to the logs/0003 - I echo MY_SECRET/0000 - After I echo MY_SECRET.png"

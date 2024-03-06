@@ -157,19 +157,31 @@ def text_in_current_frame(browser: Browser) -> str:
 
 
 def ellipsize_filename(raw_filename):
-    max_filename = 255
-    if len(raw_filename) < max_filename:
-        return raw_filename
+    max_filename = 100
+    new_raw_filename = normalize_filename(raw_filename)
+    if len(new_raw_filename) < max_filename:
+        return new_raw_filename
 
     ellipsis = "..."
     # save the last chars, as the ending is often important
-    end_count = 100
+    end_count = 40
     front_count = max_filename - (len(ellipsis) + end_count)
     ellipsized_filename = (
-        raw_filename[:front_count] + ellipsis + raw_filename[-1 * end_count :]
+        new_raw_filename[:front_count]
+        + ellipsis
+        + new_raw_filename[-1 * end_count :]
     )
-
     return ellipsized_filename
+
+
+def normalize_filename(raw_filename):
+    normalized_filename = (
+        raw_filename.replace('"', "")
+        .replace("{", "")
+        .replace("}", "")
+        .replace("#", "")
+    )
+    return normalized_filename
 
 
 def get_step_image_dir(step_index, step_name):
