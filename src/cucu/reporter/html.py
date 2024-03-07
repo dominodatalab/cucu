@@ -127,7 +127,7 @@ def generate(results, basepath, only_failures=False):
                 results, ellipsize_filename(feature["name"])
             )
             dst_feature_filepath = os.path.join(
-                basepath, ellipsize_filename((feature["name"]))
+                basepath, ellipsize_filename(feature["name"])
             )
             shutil.copytree(
                 src_feature_filepath, dst_feature_filepath, dirs_exist_ok=True
@@ -138,7 +138,7 @@ def generate(results, basepath, only_failures=False):
 
             scenario_filepath = os.path.join(
                 basepath,
-                ellipsize_filename((feature["name"])),
+                ellipsize_filename(feature["name"]),
                 ellipsize_filename(scenario["name"]),
             )
 

@@ -50,7 +50,6 @@ Feature: Report basics
 
         * # Can see image for step with secret in name
      When I click the button "I should see the text "\{MY_SECRET\}""
-     #Then I should see the image with the alt text "After I should see the text "\{MY_SECRET\}""
      Then I should see the image with the alt text "After I should see the text MY_SECRET"
 
         * # Cannot see secrets in the exception message
@@ -71,9 +70,7 @@ Feature: Report basics
       And I should not see the image with the alt text "After I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html\""
       And I should not see the image with the alt text "After I should see the checkbox \"checkbox with inner label\""
      Then I click the button "Then I should see the checkbox \"checkbox with inner label\""
-      # And I should see the image with the alt text "After I should see the checkbox \"checkbox with inner label\""
       And I should see the image with the alt text "After I should see the checkbox checkbox with inner label"
-      # And I should not see the image with the alt text "After I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
       And I should not see the image with the alt text "After I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
       And I should not see the image with the alt text "After I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html""
      When I save the current url to the variable "CURRENT_URL"
@@ -325,5 +322,4 @@ Feature: Report basics
        | .*     | Just a scenario that opens a web page | 3     | failed | .*       |
      When I click the button "Just a scenario that opens a web page"
       And I wait to click the button "show images"
-      #And I should see the image with the alt text "After I should see the text \"inexistent\""
       And I should see the image with the alt text "After I should see the text inexistent"
