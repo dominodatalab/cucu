@@ -10,7 +10,7 @@ from functools import partial
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
-from cucu.utils import take_screenshot
+from cucu.utils import ellipsize_filename, take_screenshot
 
 CONFIG.define(
     "FEATURE_RESULTS_DIR",
@@ -57,7 +57,9 @@ def after_all(ctx):
 def before_feature(ctx, feature):
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         results_dir = config.CONFIG["CUCU_RESULTS_DIR"]
-        ctx.feature_dir = os.path.join(results_dir, feature.name)
+        ctx.feature_dir = os.path.join(
+            results_dir, ellipsize_filename(feature.name)
+        )
         CONFIG["FEATURE_RESULTS_DIR"] = ctx.feature_dir
 
 
@@ -86,7 +88,9 @@ def before_scenario(ctx, scenario):
     ctx.step_timers = {}
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
-        ctx.scenario_dir = os.path.join(ctx.feature_dir, scenario.name)
+        ctx.scenario_dir = os.path.join(
+            ctx.feature_dir, ellipsize_filename(scenario.name)
+        )
         CONFIG["SCENARIO_RESULTS_DIR"] = ctx.scenario_dir
         os.makedirs(ctx.scenario_dir, exist_ok=True)
 
