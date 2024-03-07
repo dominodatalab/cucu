@@ -236,10 +236,12 @@ def generate(results, basepath, only_failures=False):
                         if scenario_started_at is None:
                             scenario_started_at = timestamp
                             scenario["started_at"] = timestamp
-                        step["result"][
-                            "time_offset"
-                        ] = datetime.utcfromtimestamp(
-                            (timestamp - scenario_started_at).total_seconds()
+                        step["result"]["time_offset"] = (
+                            datetime.utcfromtimestamp(
+                                (
+                                    timestamp - scenario_started_at
+                                ).total_seconds()
+                            )
                         )
 
                     scenario_duration += step["result"]["duration"]
