@@ -221,7 +221,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
     if len(label) > 0:
         label = f" - {CONFIG.hide_secrets(label).replace('/', '_')}"
 
-    filename = f"{label}.png"  # f"{CONFIG['__STEP_SCREENSHOT_COUNT']:0>4}{label}.png"
+    filename = f"{CONFIG['__STEP_SCREENSHOT_COUNT']:0>4}{label}.png"
     filename = ellipsize_filename(filename)
     filepath = os.path.join(screenshot_dir, filename)
 
@@ -278,4 +278,4 @@ def take_screenshot(ctx, step_name, label="", element=None):
     if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
 
-    # CONFIG["__STEP_SCREENSHOT_COUNT"] += 1
+    CONFIG["__STEP_SCREENSHOT_COUNT"] += 1
