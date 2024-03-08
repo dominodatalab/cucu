@@ -159,7 +159,14 @@ def after_scenario(ctx, scenario):
                 mht_filename,
             )
             logger.debug(f"Saving MHT webpage snapshot: {mht_filename}")
-            browser.download_mht(mht_pathname)
+            try:
+                browser.download_mht(mht_pathname)
+                logger.debug("download_mht: passed ✅")
+            except Exception as e:
+                error_message = f"Something unexpected has happened: {e.__class__.__name__}: {e}\n"
+                error_message += traceback.format_exc()
+                scenario.error_message = error_message
+                logger.error(error_message)
 
     # run after all scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"][::-1]:
