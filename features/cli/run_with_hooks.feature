@@ -61,6 +61,7 @@ Feature: Run with hooks
       .* DEBUG No browsers - skipping MHT webpage snapshot
       .* DEBUG just logging some stuff from my after scenario hook
       .* DEBUG HOOK after_scenario_log: passed ✅
+      .* DEBUG HOOK download_browser_logs: passed ✅
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
@@ -116,6 +117,7 @@ Feature: Run with hooks
       .* DEBUG HOOK after_this_scenario_2: passed ✅
       .* DEBUG just logging some stuff from first_after_this_scenario_hook_1
       .* DEBUG HOOK after_this_scenario_1: passed ✅
+      .* DEBUG HOOK download_browser_logs: passed ✅
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
