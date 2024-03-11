@@ -184,29 +184,34 @@ def after_scenario(ctx, scenario):
         if len(ctx.browsers) != 0:
             logger.debug("quitting browser between sessions")
 
-        # close the browser unless someone has set the keep browser alive
-        # environment variable which allows tests to reuse the same browser
-        # session
-        for browser in ctx.browsers:
-            # save the browser logs to the current scenarios results directory
-            browser_log_filepath = os.path.join(
-                ctx.scenario_logs_dir, "browser_console.log.txt"
-            )
-
-            os.makedirs(os.path.dirname(browser_log_filepath), exist_ok=True)
-            with open(browser_log_filepath, "w") as output:
-                for log in browser.get_log():
-                    output.write(f"{json.dumps(log)}\n")
-
-            browser.quit()
-
-        ctx.browsers = []
+        run_after_scenario_hook(ctx, scenario, download_browser_logs)
 
     cucu_config_filepath = os.path.join(
         ctx.scenario_logs_dir, "cucu.config.yaml.txt"
     )
     with open(cucu_config_filepath, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
+
+
+def download_browser_logs(ctx):
+    # close the browser unless someone has set the keep browser alive
+    # environment variable which allows tests to reuse the same browser
+    # session
+
+    for browser in ctx.browsers:
+        # save the browser logs to the current scenarios results directory
+        browser_log_filepath = os.path.join(
+            ctx.scenario_logs_dir, "browser_console.log.txt"
+        )
+
+        os.makedirs(os.path.dirname(browser_log_filepath), exist_ok=True)
+        with open(browser_log_filepath, "w") as output:
+            for log in browser.get_log():
+                output.write(f"{json.dumps(log)}\n")
+
+        browser.quit()
+
+    ctx.browsers = []
 
 
 def before_step(ctx, step):
