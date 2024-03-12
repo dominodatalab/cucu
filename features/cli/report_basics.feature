@@ -304,7 +304,7 @@ Feature: Report basics
            When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
            Then I should see the text "just some text in a label"
       """
-      And I run the command "cucu run {CUCU_RESULTS_DIR}/highlights --results {CUCU_RESULTS_DIR}/empty_features_results --env CUCU_SKIP_HIGHLIGHT_BORDER='True' --generate-report --report {CUCU_RESULTS_DIR}/highlights_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I run the command "cucu run {CUCU_RESULTS_DIR}/highlights --results {CUCU_RESULTS_DIR}/empty_features_results --env CUCU_SKIP_HIGHLIGHT_BORDER='False' --generate-report --report {CUCU_RESULTS_DIR}/highlights_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
 
   @report-only-failures
   Scenario: User can generate a report with only failures
