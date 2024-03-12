@@ -145,28 +145,7 @@ def after_scenario(ctx, scenario):
     for timer_name in ctx.step_timers:
         logger.warn(f'timer "{timer_name}" was never stopped/recorded')
 
-    if not ctx.browsers:
-        logger.debug("No browsers - skipping MHT webpage snapshot")
-    elif config.CONFIG["CUCU_BROWSER"].lower() != "chrome":
-        logger.debug("Browser not Chrome - skipping MHT webpage snapshot")
-    else:
-        for index, browser in enumerate(ctx.browsers):
-            mht_filename = (
-                f"browser{index if len(ctx.browsers) > 1 else ''}_snapshot.mht"
-            )
-            mht_pathname = os.path.join(
-                CONFIG["SCENARIO_LOGS_DIR"],
-                mht_filename,
-            )
-            logger.debug(f"Saving MHT webpage snapshot: {mht_filename}")
-            try:
-                browser.download_mht(mht_pathname)
-                logger.debug("download_mht: passed ✅")
-            except Exception as e:
-                error_message = f"Something unexpected has happened: {e.__class__.__name__}: {e}\n"
-                error_message += traceback.format_exc()
-                scenario.error_message = error_message
-                logger.error(error_message)
+    run_after_scenario_hook(ctx, scenario, download_mht_data)
 
     # run after all scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"][::-1]:
@@ -191,6 +170,24 @@ def after_scenario(ctx, scenario):
     )
     with open(cucu_config_filepath, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
+
+
+def download_mht_data(ctx):
+    if not ctx.browsers:
+        logger.debug("No browsers - skipping MHT webpage snapshot")
+    elif config.CONFIG["CUCU_BROWSER"].lower() != "chrome":
+        logger.debug("Browser not Chrome - skipping MHT webpage snapshot")
+    else:
+        for index, browser in enumerate(ctx.browsers):
+            mht_filename = (
+                f"browser{index if len(ctx.browsers) > 1 else ''}_snapshot.mht"
+            )
+            mht_pathname = os.path.join(
+                CONFIG["SCENARIO_LOGS_DIR"],
+                mht_filename,
+            )
+            logger.debug(f"Saving MHT webpage snapshot: {mht_filename}")
+            browser.download_mht(mht_pathname)
 
 
 def download_browser_logs(ctx):
