@@ -59,6 +59,7 @@ Feature: Run with hooks
       .* DEBUG just logging some stuff from my after step hook
             And I echo "World"     # .*
       .* DEBUG No browsers - skipping MHT webpage snapshot
+      .* DEBUG HOOK download_mht_data: passed ✅
       .* DEBUG just logging some stuff from my after scenario hook
       .* DEBUG HOOK after_scenario_log: passed ✅
       .* DEBUG HOOK download_browser_logs: passed ✅
@@ -113,6 +114,7 @@ Feature: Run with hooks
           Given I run the following steps after the current scenario-1     # .*
             And I run the following steps after the current scenario-2     # .*
       .* DEBUG No browsers - skipping MHT webpage snapshot
+      .* DEBUG HOOK download_mht_data: passed ✅
       .* DEBUG just logging some stuff from second_after_this_scenario_hook_2
       .* DEBUG HOOK after_this_scenario_2: passed ✅
       .* DEBUG just logging some stuff from first_after_this_scenario_hook_1
