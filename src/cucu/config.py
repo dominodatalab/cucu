@@ -413,7 +413,7 @@ CONFIG.define(
 CONFIG.define(
     "CUCU_SKIP_HIGHLIGHT_BORDER",
     "when set to 'True' skips adding a border to highlight found element in screenshots",
-    default=False,
+    default=True,
 )
 
 
