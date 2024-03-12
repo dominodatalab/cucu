@@ -15,7 +15,7 @@ Feature: Feature with mixed results
       
   Scenario: Scenario with after-hook error
     Given I error after-scenario hook
-      And I echo "should never see this"            
+      And I echo "should never see this"      
 
   Scenario: Scenario that also passes
     Given I echo "passing"
@@ -25,4 +25,4 @@ Feature: Feature with mixed results
 
   @disabled
   Scenario: Scenario that is skipped
-    Given I echo "should never see this"           
+    Given I echo "should never see this"        

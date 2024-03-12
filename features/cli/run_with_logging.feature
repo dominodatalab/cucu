@@ -36,6 +36,8 @@ Feature: Run with logging
       .* WARNING world
             And I log "world" at level "warn"      # .*
       .* DEBUG No browsers - skipping MHT webpage snapshot
+      .* DEBUG HOOK download_mht_data: passed ✅
+      .* DEBUG HOOK download_browser_logs: passed ✅
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
