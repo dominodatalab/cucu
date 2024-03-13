@@ -220,42 +220,63 @@ def take_screenshot(ctx, step_name, label="", element=None):
 
     if len(label) > 0:
         label = f" - {CONFIG.hide_secrets(label).replace('/', '_')}"
+
     filename = f"{CONFIG['__STEP_SCREENSHOT_COUNT']:0>4}{label}.png"
     filename = ellipsize_filename(filename)
     filepath = os.path.join(screenshot_dir, filename)
 
     if CONFIG["CUCU_SKIP_HIGHLIGHT_BORDER"] or not element:
         ctx.browser.screenshot(filepath)
-    else:
-        location = element.location
-        border_width = 4
-        x, y = location["x"] - border_width, location["y"] - border_width
-        size = element.size
-        width, height = size["width"], size["height"]
-
-        position_css = f"position: absolute; top: {y}px; left: {x}px; width: {width}px; height: {height}px; z-index: 9001;"
-        visual_css = "border-radius: 4px; border: 4px solid #ff00ff1c; background: #ff00ff05; filter: drop-shadow(magenta 0 0 10px);"
-
-        script = f"""
-            (function() {{ // double curly-brace to escape python f-string
-                var body = document.querySelector('body');
+    elif CONFIG["CUCU_BORDER_BETA"]:
+        cucu_border = ctx.browser.execute(
+            "return document.getElementById('cucu_border');"
+        )
+        if cucu_border:
+            logger.debug("cucu_border element - found existing")
+        else:
+            visual_css = "background: none; pointer-events: none; box-shadow: 0 0px 4px 4px #ff00ff; overflow: hidden; z-index: 9001;"
+            position_css = "position: absolute; top: -100px; left: -100px; width: 0px; height: 0px;"
+            create_cucu_border = f"""
                 var cucu_border = document.createElement('div');
                 cucu_border.setAttribute('id', 'cucu_border');
                 cucu_border.setAttribute('style', '{position_css} {visual_css}');
-                body.append(cucu_border);
-            }})();
+                document.querySelector('body').append(cucu_border);
+
+                return cucu_border
+            """
+            cucu_border = ctx.browser.execute(create_cucu_border)
+            logger.debug("cucu_border element - created")
+
+        location = element.location
+        x, y = location["x"], location["y"]
+        size = element.size
+        width, height = size["width"], size["height"]
+        add_highlight = f"""
+            arguments[0].style.top = '{y}px';
+            arguments[0].style.left = '{x}px';
+            arguments[0].style.width = '{width}px';
+            arguments[0].style.height = '{height}px';
         """
-        ctx.browser.execute(script)
+        ctx.browser.execute(add_highlight, cucu_border)
+        logger.debug("cucu_border element - moved over element to highlight")
 
         ctx.browser.screenshot(filepath)
 
         clear_highlight = """
-            (function() {
-                var body = document.querySelector('body');
-                var cucu_border = document.getElementById('cucu_border');
-                body.removeChild(cucu_border);
-            })();
+            arguments[0].style.top = '-100px';
+            arguments[0].style.left = '-100px';
+            arguments[0].style.width = '0px';
+            arguments[0].style.height = '0px';
         """
+        ctx.browser.execute(clear_highlight, cucu_border)
+        logger.debug("cucu_border element - highlight cleared")
+    else:
+        add_highlight = (
+            'arguments[0].style["box-shadow"] = "0 0px 4px 4px #ff00ff";'
+        )
+        ctx.browser.execute(add_highlight, element)
+        ctx.browser.screenshot(filepath)
+        clear_highlight = 'arguments[0].style["box-shadow"] = "";'
         ctx.browser.execute(clear_highlight, element)
 
     if CONFIG["CUCU_MONITOR_PNG"]:
