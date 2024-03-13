@@ -221,14 +221,16 @@ def take_screenshot(ctx, step_name, label="", element=None):
     if len(label) > 0:
         label = f" - {CONFIG.hide_secrets(label).replace('/', '_')}"
 
-    filename = f"{label}.png"  # f"{CONFIG['__STEP_SCREENSHOT_COUNT']:0>4}{label}.png"
+    filename = f"{CONFIG['__STEP_SCREENSHOT_COUNT']:0>4}{label}.png"
     filename = ellipsize_filename(filename)
     filepath = os.path.join(screenshot_dir, filename)
 
     if CONFIG["CUCU_SKIP_HIGHLIGHT_BORDER"] or not element:
         ctx.browser.screenshot(filepath)
     elif CONFIG["CUCU_BORDER_BETA"]:
-        cucu_border = ctx.browser.execute("return document.getElementById('cucu_border');")
+        cucu_border = ctx.browser.execute(
+            "return document.getElementById('cucu_border');"
+        )
         if cucu_border:
             logger.debug("cucu_border element - found existing")
         else:
@@ -269,7 +271,9 @@ def take_screenshot(ctx, step_name, label="", element=None):
         ctx.browser.execute(clear_highlight, cucu_border)
         logger.debug("cucu_border element - highlight cleared")
     else:
-        add_highlight = 'arguments[0].style["box-shadow"] = "0 0px 4px 4px #ff00ff";'
+        add_highlight = (
+            'arguments[0].style["box-shadow"] = "0 0px 4px 4px #ff00ff";'
+        )
         ctx.browser.execute(add_highlight, element)
         ctx.browser.screenshot(filepath)
         clear_highlight = 'arguments[0].style["box-shadow"] = "";'
@@ -278,4 +282,4 @@ def take_screenshot(ctx, step_name, label="", element=None):
     if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
 
-    # CONFIG["__STEP_SCREENSHOT_COUNT"] += 1
+    CONFIG["__STEP_SCREENSHOT_COUNT"] += 1
