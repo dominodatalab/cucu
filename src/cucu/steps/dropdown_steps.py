@@ -268,7 +268,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
                 option_element = find_dropdown_option(ctx, option)
                 if option_element:
                     break
-            except:
+            except Exception:
                 option_element = None
 
     if option_element is None:
