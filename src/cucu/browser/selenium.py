@@ -86,6 +86,7 @@ class Selenium(Browser):
                 try:
                     self.driver = webdriver.Remote(
                         command_executor=selenium_remote_url,
+                        keep_alive=False,
                         options=options,
                     )
                 except urllib3.exceptions.ReadTimeoutError:
@@ -133,6 +134,7 @@ class Selenium(Browser):
                 try:
                     self.driver = webdriver.Remote(
                         command_executor=selenium_remote_url,
+                        keep_alive=False,
                         options=options,
                     )
                 except urllib3.exceptions.ReadTimeoutError:
@@ -169,6 +171,7 @@ class Selenium(Browser):
                 try:
                     self.driver = webdriver.Remote(
                         command_executor=selenium_remote_url,
+                        keep_alive=False,
                         options=options,
                     )
                 except urllib3.exceptions.ReadTimeoutError:
