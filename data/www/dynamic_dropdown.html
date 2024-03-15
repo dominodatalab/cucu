@@ -1,0 +1,46 @@
+<html>
+  <head>
+    <title>Dynamic Dropdown</title>
+    <script>
+    function update() {
+        const options = ["aa", "ab", "ac", "abb", "acc", "abbc"];
+
+        let input = document.getElementById("dropdownInput").value;
+        console.log("input value:")
+        console.log(input)
+        const available_options = [];
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].startsWith(input)) {
+                available_options.push(options[i]);
+            }
+        }
+        console.log("available_options:")
+        console.log(available_options)
+
+
+        // Get the select element
+        let sel = document.getElementById('dropdown');
+        while (sel.hasChildNodes()) {
+            sel.removeChild(sel.firstChild);
+        }
+
+        let size = 2;
+        if (available_options.length < 2) {
+            size = 1;
+        }
+        for (let i = 0; i < size; i++) {
+            var opt = document.createElement('option');
+            opt.value = available_options[i];
+            opt.innerHTML = available_options[i];
+            sel.appendChild(opt);
+            sel.size = 2;
+        }
+    }
+    </script>
+  </head>
+  <body>
+    <label for="dropdown">Dynamic Dropdown</label><br/>
+    <input id="dropdownInput" onkeypress="update();" type="text"></input><br/>
+    <select id="dropdown"></select>
+  </body>
+</html>

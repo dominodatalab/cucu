@@ -211,11 +211,10 @@ class CucuJSONFormatter(Formatter):
                     error = error.last_attempt.exception()
 
                 if len(error.args) > 0 and isinstance(error.args[0], str):
+                    error_class_name = error.__class__.__name__
                     redacted_error_msg = CONFIG.hide_secrets(error.args[0])
                     error_lines = redacted_error_msg.splitlines()
-                    error_lines[0] = (
-                        f"{error.__class__.__name__}: {error_lines[0]}"
-                    )
+                    error_lines[0] = f"{error_class_name}: {error_lines[0]}"
                 else:
                     error_lines = [repr(error)]
 

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.194.0
+- Fix - Ignore exceptions while key in desired dynamic dropdown value
+
+## 0.193.0
+- Change - Set default value of `CUCU_SKIP_HIGHLIGHT_BORDER` to `True`
+
 ## 0.192.0
 - Fix - test status should be independent of ‘mht data' and 'browser logs' download status.
 
