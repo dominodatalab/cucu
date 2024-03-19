@@ -180,6 +180,7 @@ def normalize_filename(raw_filename):
         .replace("{", "")
         .replace("}", "")
         .replace("#", "")
+        .replace("&", "")
     )
     return normalized_filename
 
