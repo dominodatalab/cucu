@@ -117,7 +117,9 @@ class CucuJUnitFormatter(Formatter):
             "failure": None,
             "skipped": None,
         }
-        self.current_scenario_results["shortname"] = escape(ellipsize_filename(scenario.name))
+        self.current_scenario_results["shortname"] = escape(
+            ellipsize_filename(scenario.name)
+        )
         if scenario.tags:
             self.current_scenario_results["tags"] = ", ".join(scenario.tags)
 
