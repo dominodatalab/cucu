@@ -55,7 +55,7 @@
                 {% endif %}
                 </td>
                 <td>
-                    <a href="{{ urlencode(escape(feature['name'])) }}/{{ urlencode(escape(scenario['name'])) }}/index.html"><span style="display: inline; color: grey">{{ escape(scenario['name']) }}</span></a><br/>
+                    <a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/index.html"><span style="display: inline; color: grey">{{ escape(scenario['name']) }}</span></a><br/>
                     <span style="display: inline; color: darkslateblue">{{ scenario['tags'] }}</span>
                 </td>
                 <td class="text-center">{{ scenario['total_steps'] }}</td>

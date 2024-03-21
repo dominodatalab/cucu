@@ -100,6 +100,7 @@ def generate(results, basepath, only_failures=False):
     CONFIG.snapshot()
     reported_features = []
     for feature in features:
+        feature["folder_name"] = ellipsize_filename(feature["name"])
         if show_status:
             print("F", end="", flush=True)
         scenarios = []
@@ -123,11 +124,9 @@ def generate(results, basepath, only_failures=False):
 
         if feature["status"] not in ["skipped", "untested"]:
             # copy each feature directories contents over to the report directory
-            src_feature_filepath = os.path.join(
-                results, ellipsize_filename(feature["name"])
-            )
+            src_feature_filepath = os.path.join(results, feature["folder_name"])
             dst_feature_filepath = os.path.join(
-                basepath, ellipsize_filename(feature["name"])
+                basepath, feature["folder_name"]
             )
             shutil.copytree(
                 src_feature_filepath, dst_feature_filepath, dirs_exist_ok=True
@@ -136,10 +135,11 @@ def generate(results, basepath, only_failures=False):
         for scenario in scenarios:
             CONFIG.restore()
 
+            scenario["folder_name"] = ellipsize_filename(scenario["name"])
             scenario_filepath = os.path.join(
                 basepath,
-                ellipsize_filename(feature["name"]),
-                ellipsize_filename(scenario["name"]),
+                feature["folder_name"],
+                scenario["folder_name"],
             )
 
             scenario_configpath = os.path.join(
@@ -399,7 +399,7 @@ def generate(results, basepath, only_failures=False):
     feature_template = templates.get_template("feature.html")
 
     for feature in reported_features:
-        feature_basepath = os.path.join(basepath, feature["name"])
+        feature_basepath = os.path.join(basepath, feature["folder_name"])
         os.makedirs(feature_basepath, exist_ok=True)
 
         scenarios = []
@@ -424,7 +424,9 @@ def generate(results, basepath, only_failures=False):
 
         for scenario in scenarios:
             steps = scenario["steps"]
-            scenario_basepath = os.path.join(feature_basepath, scenario["name"])
+            scenario_basepath = os.path.join(
+                feature_basepath, scenario["folder_name"]
+            )
             os.makedirs(scenario_basepath, exist_ok=True)
 
             scenario_output_filepath = os.path.join(
