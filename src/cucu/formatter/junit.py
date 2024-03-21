@@ -39,7 +39,7 @@ class CucuJUnitFormatter(Formatter):
         date_now = datetime.now()
         self.feature_results = {
             "name": escape(feature.name),
-            "shortname": escape(ellipsize_filename(feature.name)),
+            "foldername": escape(ellipsize_filename(feature.name)),
             "tests": 0,
             "errors": 0,
             "failures": 0,
@@ -117,7 +117,7 @@ class CucuJUnitFormatter(Formatter):
             "failure": None,
             "skipped": None,
         }
-        self.current_scenario_results["shortname"] = escape(
+        self.current_scenario_results["foldername"] = escape(
             ellipsize_filename(scenario.name)
         )
         if scenario.tags:
@@ -169,7 +169,7 @@ class CucuJUnitFormatter(Formatter):
         given a feature results dictionary that looks like so:
             {
                 "name": "name of the feature",
-                "shortname": "",
+                "foldername": "",
                 "tests": 0,
                 "errors": 0,
                 "failures": 0,
@@ -177,7 +177,7 @@ class CucuJUnitFormatter(Formatter):
                 "timestamp": "",
                 "scenarios": {
                     "scenario name": {
-                        "shortname": "",
+                        "foldername": "",
                         "tags": "DOM-3435, testrail(3366,45891)",
                         "status": "passed/failed/skipped",
                         "time": "0.0000":
@@ -196,7 +196,7 @@ class CucuJUnitFormatter(Formatter):
                 ordered = [
                     "classname",
                     "name",
-                    "shortname",
+                    "foldername",
                     "tests",
                     "errors",
                     "failures",
@@ -214,7 +214,7 @@ class CucuJUnitFormatter(Formatter):
         soup = bs4.BeautifulSoup()
         testsuite = bs4.Tag(name="testsuite")
         testsuite["name"] = results["name"]
-        testsuite["shortname"] = results["shortname"]
+        testsuite["foldername"] = results["foldername"]
         testsuite["timestamp"] = results["timestamp"]
 
         junit_dir = CONFIG["CUCU_JUNIT_DIR"]
@@ -264,7 +264,7 @@ class CucuJUnitFormatter(Formatter):
             testcase = bs4.Tag(name="testcase")
             testcase["classname"] = results["name"]
             testcase["name"] = scenario_name
-            testcase["shortname"] = scenario["shortname"]
+            testcase["foldername"] = scenario["foldername"]
             if "tags" in scenario:
                 testcase["tags"] = scenario["tags"]
             testcase["status"] = scenario["status"]
