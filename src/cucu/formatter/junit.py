@@ -11,6 +11,7 @@ from bs4.formatter import XMLFormatter
 from tenacity import RetryError
 
 from cucu.config import CONFIG
+from cucu.utils import ellipsize_filename
 
 
 class CucuJUnitFormatter(Formatter):
@@ -38,6 +39,7 @@ class CucuJUnitFormatter(Formatter):
         date_now = datetime.now()
         self.feature_results = {
             "name": escape(feature.name),
+            "shortname": escape(ellipsize_filename(feature.name)),
             "tests": 0,
             "errors": 0,
             "failures": 0,
@@ -115,6 +117,7 @@ class CucuJUnitFormatter(Formatter):
             "failure": None,
             "skipped": None,
         }
+        self.current_scenario_results["shortname"] = escape(ellipsize_filename(scenario.name))
         if scenario.tags:
             self.current_scenario_results["tags"] = ", ".join(scenario.tags)
 
@@ -123,7 +126,7 @@ class CucuJUnitFormatter(Formatter):
             scenario_name
         ] = self.current_scenario_results
 
-        # we write out every new scenario into the JUnit results output which
+        # we write out every new scenario into the JUnit results output
         # which allows us to have a valid JUnit XML results file per feature
         # file currently running even if the process crashes or is killed so we
         # can still generate valid reports from every run.
@@ -164,6 +167,7 @@ class CucuJUnitFormatter(Formatter):
         given a feature results dictionary that looks like so:
             {
                 "name": "name of the feature",
+                "shortname": "",
                 "tests": 0,
                 "errors": 0,
                 "failures": 0,
@@ -171,6 +175,7 @@ class CucuJUnitFormatter(Formatter):
                 "timestamp": "",
                 "scenarios": {
                     "scenario name": {
+                        "shortname": "",
                         "tags": "DOM-3435, testrail(3366,45891)",
                         "status": "passed/failed/skipped",
                         "time": "0.0000":
@@ -189,6 +194,7 @@ class CucuJUnitFormatter(Formatter):
                 ordered = [
                     "classname",
                     "name",
+                    "shortname",
                     "tests",
                     "errors",
                     "failures",
@@ -206,6 +212,7 @@ class CucuJUnitFormatter(Formatter):
         soup = bs4.BeautifulSoup()
         testsuite = bs4.Tag(name="testsuite")
         testsuite["name"] = results["name"]
+        testsuite["shortname"] = results["shortname"]
         testsuite["timestamp"] = results["timestamp"]
 
         junit_dir = CONFIG["CUCU_JUNIT_DIR"]
@@ -255,6 +262,7 @@ class CucuJUnitFormatter(Formatter):
             testcase = bs4.Tag(name="testcase")
             testcase["classname"] = results["name"]
             testcase["name"] = scenario_name
+            testcase["shortname"] = scenario["shortname"]
             if "tags" in scenario:
                 testcase["tags"] = scenario["tags"]
             testcase["status"] = scenario["status"]
