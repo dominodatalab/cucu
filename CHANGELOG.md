@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 0.194.0
+- Fix - HTML report is generated into a wrong folder
+- Change - `&` is replaced in file name
+- Change - shortened feature name and scenario name are recorded in JUnit
+
+## 0.194.0
 - Fix - Ignore exceptions while key in desired dynamic dropdown value
 
 ## 0.193.0

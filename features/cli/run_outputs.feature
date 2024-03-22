@@ -144,26 +144,26 @@ Feature: Run outputs
      Then I should see a file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/Feature with mixed results.xml"
       And I should see the file at "{CUCU_RESULTS_DIR}/validate_junit_xml_results/Feature with mixed results.xml" matches the following:
       """
-      <testsuite name="Feature with mixed results" tests="7" errors="0" failures="3" skipped="1" timestamp=".*" tags="mixed">
-       <testcase classname="Feature with mixed results" name="Scenario that passes" status="passed" time=".*">
+      <testsuite name="Feature with mixed results" foldername="Feature with mixed results" tests="7" errors="0" failures="3" skipped="1" timestamp=".*" tags="mixed">
+       <testcase classname="Feature with mixed results" name="Scenario that passes" foldername="Scenario that passes" status="passed" time=".*">
        </testcase>
-       <testcase classname="Feature with mixed results" name="Scenario that fails" status="failed" time=".*">
+       <testcase classname="Feature with mixed results" name="Scenario that fails" foldername="Scenario that fails" status="failed" time=".*">
         <failure>
         [\s\S]*
         </failure>
        </testcase>
-       <testcase classname="Feature with mixed results" name="Scenario and after-hook both fail" status="failed" time=".*">
+       <testcase classname="Feature with mixed results" name="Scenario and after-hook both fail" foldername="Scenario and after-hook both fail" status="failed" time=".*">
         <failure>
         [\s\S]*
         </failure>
        </testcase>
-       <testcase classname="Feature with mixed results" name="Scenario with after-hook error" status="passed" time=".*">
+       <testcase classname="Feature with mixed results" name="Scenario with after-hook error" foldername="Scenario with after-hook error" status="passed" time=".*">
        </testcase>
-       <testcase classname="Feature with mixed results" name="Scenario that also passes" status="passed" time=".*">
+       <testcase classname="Feature with mixed results" name="Scenario that also passes" foldername="Scenario that also passes" status="passed" time=".*">
        </testcase>
-       <testcase classname="Feature with mixed results" name="Scenario that has an undefined step" status="failed" time=".*">
+       <testcase classname="Feature with mixed results" name="Scenario that has an undefined step" foldername="Scenario that has an undefined step" status="failed" time=".*">
        </testcase>
-       <testcase classname="Feature with mixed results" name="Scenario that is skipped" status="skipped" time=".*" tags="disabled">
+       <testcase classname="Feature with mixed results" name="Scenario that is skipped" foldername="Scenario that is skipped" status="skipped" time=".*" tags="disabled">
         <skipped>
         </skipped>
        </testcase>
