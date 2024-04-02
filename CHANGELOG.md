@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.194.0
+## 0.196.0
+- Fix - after scenario hook error message unintentionally replaces scenario error message
+
+## 0.195.0
 - Fix - HTML report is generated into a wrong folder
 - Change - `&` is replaced in file name
 - Change - shortened feature name and scenario name are recorded in JUnit
