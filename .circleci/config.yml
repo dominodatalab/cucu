@@ -91,7 +91,7 @@ executors:
   firefox-test-executor:
     docker:
       - image: python:3.11.7
-      - image: selenium/standalone-firefox:122.0
+      - image: selenium/standalone-firefox:124.0
         environment:
           CUCU_MONITOR_PNG: ""
           SE_NODE_MAX_SESSIONS: 12
