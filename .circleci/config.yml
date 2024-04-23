@@ -79,7 +79,7 @@ executors:
   chrome-test-executor:
     docker:
       - image: python:3.11.7
-      - image: selenium/standalone-chrome:122.0
+      - image: selenium/standalone-chrome:123.0
         environment:
           CUCU_MONITOR_PNG: ""
           SE_NODE_MAX_SESSIONS: 12
