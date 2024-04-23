@@ -115,7 +115,7 @@ executors:
 jobs:
   pre-commit:
     docker:
-      - image: cimg/python:3.11.7
+      - image: cimg/python:3.12.3
     resource_class: medium
 
     steps:
@@ -179,7 +179,7 @@ jobs:
 
   publish:
     docker:
-      - image: cimg/python:3.11.7
+      - image: cimg/python:3.12.3
     steps:
       - checkout
       - install_cucu_dependencies
