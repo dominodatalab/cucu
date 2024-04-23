@@ -16,7 +16,7 @@ jobs:
     steps:
       - id: check_out
         name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - id: release_if_needed
         name: Release on version change merged
         env:
