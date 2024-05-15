@@ -46,6 +46,8 @@ def before_all(ctx):
     CONFIG["__CUCU_CTX"] = ctx
     CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
+    for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
+        hook(ctx)
 
 
 def after_all(ctx):
