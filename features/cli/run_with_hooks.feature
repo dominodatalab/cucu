@@ -6,7 +6,16 @@ Feature: Run with hooks
     Given I create a file at "{CUCU_RESULTS_DIR}/custom_hooks/environment.py" with the following:
       """
       from cucu.environment import *
-      from cucu import logger, register_before_scenario_hook, register_after_scenario_hook, register_after_step_hook, register_before_step_hook, register_after_step_hook
+      from cucu import logger, register_before_all_hook, register_after_all_hook, register_before_scenario_hook, register_after_scenario_hook, register_after_step_hook, register_before_step_hook, register_after_step_hook
+
+      def before_all_log(ctx):
+          logger.debug("just logging some stuff from my before all hook")
+
+      def after_all_log(ctx):
+          logger.debug("just logging some stuff from my after all hook")
+
+      register_before_all_hook(before_all_log)
+      register_after_all_hook(after_all_log)
 
       def before_scenario_log(ctx):
           logger.debug("just logging some stuff from my before scenario hook")
@@ -44,6 +53,7 @@ Feature: Run with hooks
       And I should see "{STDOUT}" matches the following
       """
       [\s\S]*
+      .* DEBUG just logging some stuff from my before all hook
       Feature: Feature that simply echo's "Hello World"
       .* DEBUG just logging some stuff from my before scenario hook
 
@@ -64,6 +74,7 @@ Feature: Run with hooks
       .* DEBUG HOOK after_scenario_log: passed ✅
       .* DEBUG HOOK download_browser_logs: passed ✅
 
+      .* DEBUG just logging some stuff from my after all hook
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
       2 steps passed, 0 failed, 0 skipped, 0 undefined
