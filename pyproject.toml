@@ -65,7 +65,7 @@ black = "^24.2"
 detect-secrets = "^1.4.0"
 pytest = "^8.0.2"
 ruff = "^0.4.1"
-safety = "^3.0.1"
+safety = "^3.2"
 
 [tool.black]
 line-length = 80
