@@ -1,0 +1,12 @@
+openapi: 3.0.1
+info:
+  title: cucu
+  description: Cortex descriptor created automatically by eng-devprod
+  x-cortex-tag: cucu
+  x-cortex-type: service
+  x-cortex-owners:
+  - name: eng-automation
+    type: group
+    provider: OKTA
+    description: Updated by eng-devprod
+
