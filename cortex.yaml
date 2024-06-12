@@ -9,4 +9,7 @@ info:
     type: group
     provider: OKTA
     description: Updated by eng-devprod
-
+  x-cortex-git:
+    github:
+      alias: cortex
+      repository: cerebrotech/cucu
