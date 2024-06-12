@@ -15,9 +15,14 @@ Feature: Feature with comments
           """
 
      * # Second comment about
+     # we shouldn't set a secret this way in production because the secret will end up
+     # in the source code. However, in test, this is a simple way to mimic a secret
      When I set the variable "MY_SECRET" to "buzz"
-      And I write "buzz" into the input "input type=text"
-     Then I should see the text "buzz"
+      And I write "{MY_SECRET}" into the input "input type=text"
+     Then I should see the text "{MY_SECRET}"
 
      * # Comment about {MY_SECRET}
      Then I echo "{MY_SECRET}"
+
+     * # Cause an intended exception with secrets
+     Then I click the button "{MY_SECRET}"

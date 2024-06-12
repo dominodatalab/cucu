@@ -156,7 +156,7 @@ class Config(dict):
 
         return references
 
-    def hide_secrets(self, text):
+    def hide_secrets(self, text: str | bytes):
         secret_keys = [x for x in self.get("CUCU_SECRETS", "").split(",") if x]
         secret_values = [self.get(x) for x in secret_keys if self.get(x)]
         secret_values = [x for x in secret_values if isinstance(x, str)]
@@ -304,27 +304,15 @@ class Config(dict):
         ]
 
         config = {k: self[k] for k in sorted(keys)}
-        results = self.hide_secrets(yaml.dump(config))
-        # fix leading '*' issue
-        is_bytes = isinstance(results, bytes)
-        if is_bytes:
-            results = results.decode()
+        for k, v in config.items():
+            if isinstance(v, str):
+                v = self.hide_secrets(v)
+                # fix leading '*' issue
+                if v.startswith("*"):
+                    v = f"'{v}'"
+                config[k] = v
 
-        lines = results.split("\n")
-        for x in range(len(lines)):
-            parts = lines[x].split(": ", 1)
-            if len(parts) != 2:
-                continue
-
-            key, value = parts[0], parts[1]
-            if value.startswith("*"):
-                lines[x] = f"{key}: '{value}'"
-        results = "\n".join(lines)
-
-        if is_bytes:
-            results = results.encode()
-
-        return results
+        return yaml.dump(config)
 
 
 # global config object
@@ -348,7 +336,7 @@ CONFIG.define(
 CONFIG.define(
     "CWD",
     "the current working directory of the cucu process",
-    default=os.getcwd,
+    default=os.getcwd(),
 )
 CONFIG.define(
     "CUCU_SECRETS",
@@ -410,7 +398,7 @@ CONFIG.define(
     "CUCU_MONITOR_PNG",
     "when set to a filename `cucu` will update the image to match "
     "the exact image step at runtime.",
-    default=None,
+    default=".monitor.png",
 )
 CONFIG.define(
     "CUCU_LINT_RULES_PATH",
@@ -423,9 +411,9 @@ CONFIG.define(
     default="false",
 )
 CONFIG.define(
-    "CUCU_INJECT_ELEMENT_BORDER",
-    "when set to 'true', adds borders to some elements cucu interacts with in order to draw attention to them in the screenshot",
-    default=False,
+    "CUCU_SKIP_HIGHLIGHT_BORDER",
+    "when set to 'True' skips adding a border to highlight found element in screenshots",
+    default=True,
 )
 
 

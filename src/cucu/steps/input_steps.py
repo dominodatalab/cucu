@@ -6,6 +6,7 @@ import humanize
 from selenium.webdriver.common.keys import Keys
 
 from cucu import fuzzy, helpers, retry, step
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -30,7 +31,7 @@ def find_input(ctx, name, index=0):
     """
     ctx.check_browser_initialized()
 
-    input_ = fuzzy.find(
+    element = fuzzy.find(
         ctx.browser,
         name,
         [
@@ -44,10 +45,12 @@ def find_input(ctx, name, index=0):
 
     prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 
-    if input_ is None:
+    take_saw_element_screenshot(ctx, "input", name, index, element)
+
+    if element is None:
         raise RuntimeError(f'unable to find the {prefix}input "{name}"')
 
-    return input_
+    return element
 
 
 def click_input(ctx, input_):
@@ -66,8 +69,6 @@ def clear_input(input_):
     """
     internal method used to clear inputs and make sure they clear correctly
     """
-    input_.clear()
-
     # Keys.CONTROL works on the Selenium grid (when running in CI)
     #  - it stopped working on laptop after the upgrade in antd version (Feb 2023)
     # Keys.COMMAND works on laptop, but not on Selenium grid,
@@ -79,7 +80,7 @@ def clear_input(input_):
     input_.send_keys(Keys.BACKSPACE)
 
 
-def find_n_write(ctx, name, value, index=0):
+def find_n_write(ctx, name, value, index=0, clear_existing=True):
     """
     find the input with the name provided and write the value provided into it.
 
@@ -87,6 +88,7 @@ def find_n_write(ctx, name, value, index=0):
       ctx(object): behave context object used to share data between steps
       name(str):   name that identifies the desired input on screen
       index(str):  the index of the input if there are a few with the same name.
+      clear_existing(bool): if clearing the existing content before writing
 
     raises:
         an error if the desired input is not found
@@ -98,7 +100,9 @@ def find_n_write(ctx, name, value, index=0):
     if base_steps.is_disabled(input_):
         raise RuntimeError("unable to write into the input, as it is disabled")
 
-    clear_input(input_)
+    if clear_existing:
+        clear_input(input_)
+
     if len(value) > 512:
         #
         # to avoid various bugs with writing large chunks of text into
@@ -215,7 +219,7 @@ def wait_up_to_write_multi_lines_into_input(ctx, seconds, name):
 
 @step('I send the "{key}" key to the input "{name}"')
 def send_keys_to_input(ctx, key, name):
-    find_n_write(ctx, name, Keys.__dict__[key.upper()])
+    find_n_write(ctx, name, Keys.__dict__[key.upper()], clear_existing=False)
 
 
 @step('I clear the input "{name}"')

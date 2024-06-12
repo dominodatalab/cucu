@@ -6,7 +6,16 @@ Feature: Run with hooks
     Given I create a file at "{CUCU_RESULTS_DIR}/custom_hooks/environment.py" with the following:
       """
       from cucu.environment import *
-      from cucu import logger, register_before_scenario_hook, register_after_scenario_hook, register_after_step_hook, register_before_step_hook, register_after_step_hook
+      from cucu import logger, register_before_all_hook, register_after_all_hook, register_before_scenario_hook, register_after_scenario_hook, register_after_step_hook, register_before_step_hook, register_after_step_hook
+
+      def before_all_log(ctx):
+          logger.debug("just logging some stuff from my before all hook")
+
+      def after_all_log(ctx):
+          logger.debug("just logging some stuff from my after all hook")
+
+      register_before_all_hook(before_all_log)
+      register_after_all_hook(after_all_log)
 
       def before_scenario_log(ctx):
           logger.debug("just logging some stuff from my before scenario hook")
@@ -44,6 +53,7 @@ Feature: Run with hooks
       And I should see "{STDOUT}" matches the following
       """
       [\s\S]*
+      .* DEBUG just logging some stuff from my before all hook
       Feature: Feature that simply echo's "Hello World"
       .* DEBUG just logging some stuff from my before scenario hook
 
@@ -59,15 +69,19 @@ Feature: Run with hooks
       .* DEBUG just logging some stuff from my after step hook
             And I echo "World"     # .*
       .* DEBUG No browsers - skipping MHT webpage snapshot
+      .* DEBUG HOOK download_mht_data: passed ✅
       .* DEBUG just logging some stuff from my after scenario hook
+      .* DEBUG HOOK after_scenario_log: passed ✅
+      .* DEBUG HOOK download_browser_logs: passed ✅
 
+      .* DEBUG just logging some stuff from my after all hook
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
       2 steps passed, 0 failed, 0 skipped, 0 undefined
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
-  @current
+
   Scenario: User can run after this scenario hook and verify hooks are executed in LIFO order
     Given I create a file at "{CUCU_RESULTS_DIR}/custom_hooks/environment.py" with the following:
       """
@@ -111,8 +125,12 @@ Feature: Run with hooks
           Given I run the following steps after the current scenario-1     # .*
             And I run the following steps after the current scenario-2     # .*
       .* DEBUG No browsers - skipping MHT webpage snapshot
+      .* DEBUG HOOK download_mht_data: passed ✅
       .* DEBUG just logging some stuff from second_after_this_scenario_hook_2
+      .* DEBUG HOOK after_this_scenario_2: passed ✅
       .* DEBUG just logging some stuff from first_after_this_scenario_hook_1
+      .* DEBUG HOOK after_this_scenario_1: passed ✅
+      .* DEBUG HOOK download_browser_logs: passed ✅
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
@@ -144,10 +162,10 @@ Feature: Run with hooks
         Scenario: Hello world scenario
           Given I echo "Hello World"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/failing_custom_hooks_results/ --generate-report --report {CUCU_RESULTS_DIR}/failing_custom_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/failing_custom_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/failing_custom_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" contains the following
       """
-      HOOK-ERROR in after_scenario: RuntimeError: boom
+      HOOK-ERROR in after_scenario_fail: RuntimeError: boom
       """
       And I should see "{STDOUT}" contains the following
       """
@@ -157,4 +175,131 @@ Feature: Run with hooks
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
       And I click the link "Feature that fails due to after scenario hook"
       And I click the link "Hello world scenario"
-     Then I should see the text "HOOK-ERROR in after_scenario: RuntimeError: boom"
+     Then I should see the text "Hello World"
+
+  Scenario: User gets expected output when running a scenario with failing before hooks
+    Given I create a file at "{CUCU_RESULTS_DIR}/failing_before_hooks/environment.py" with the following:
+      """
+      from cucu.environment import *
+      from cucu import register_before_scenario_hook
+
+      def before_scenario_fail(ctx):
+        raise RuntimeError("boom")
+
+      register_before_scenario_hook(before_scenario_fail)
+
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/failing_before_hooks/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/failing_before_hooks/echo.feature" with the following:
+      """
+      Feature: Feature that fails due to before scenario hook
+
+        Scenario: Hello world scenario
+          Given I echo "Hello World"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_before_hooks/echo.feature --results {CUCU_RESULTS_DIR}/failing_before_hooks_results/ --generate-report --report {CUCU_RESULTS_DIR}/failing_before_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     Then I should see "{STDOUT}" contains the following
+      """
+      HOOK-ERROR in before_scenario: RuntimeError: boom
+      """
+      And I should see "{STDOUT}" contains the following
+      """
+      raise RuntimeError("boom")
+      """
+
+  Scenario: User gets expected output when running a scenario with multiple after hooks failing and passing in order
+    Given I create a file at "{CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks/environment.py" with the following:
+      """
+      from cucu.environment import *
+      from cucu import logger, register_after_scenario_hook
+
+      def after_scenario_pass(ctx):
+        logger.debug("This hook should execute and pass")
+
+      register_after_scenario_hook(after_scenario_pass)
+
+      def after_scenario_fail(ctx):
+        raise RuntimeError("boom")
+
+      register_after_scenario_hook(after_scenario_fail)
+
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks/echo.feature" with the following:
+      """
+      Feature: Feature that has failing and passing after scenario hooks
+
+        Scenario: Hello world scenario
+          Given I echo "Hello World"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see "{STDOUT}" contains the following
+      """
+      HOOK-ERROR in after_scenario_fail: RuntimeError: boom
+      """
+      And I should see "{STDOUT}" contains the following
+      """
+      raise RuntimeError("boom")
+      """
+      And I should see "{STDOUT}" contains the following
+      """
+      HOOK after_scenario_pass: passed ✅
+      """
+     When I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_report" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+      And I click the link "Feature that has failing and passing after scenario hooks"
+      And I click the link "Hello world scenario"
+     Then I should see the text "Hello World"
+
+  Scenario: User gets expected output when running a scenario with multiple after hooks passing and failing in order
+    Given I create a file at "{CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/environment.py" with the following:
+      """
+      from cucu.environment import *
+      from cucu import logger, register_after_scenario_hook
+
+      def after_scenario_fail(ctx):
+        raise RuntimeError("boom")
+
+      register_after_scenario_hook(after_scenario_fail)
+
+      def after_scenario_pass(ctx):
+        logger.debug("This hook should execute and pass")
+
+      register_after_scenario_hook(after_scenario_pass)
+
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/echo.feature" with the following:
+      """
+      Feature: Feature that has failing and passing after scenario hooks
+
+        Scenario: Hello world scenario
+          Given I echo "Hello World"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see "{STDOUT}" contains the following
+      """
+      HOOK-ERROR in after_scenario_fail: RuntimeError: boom
+      """
+      And I should see "{STDOUT}" contains the following
+      """
+      raise RuntimeError("boom")
+      """
+      And I should see "{STDOUT}" contains the following
+      """
+      HOOK after_scenario_pass: passed ✅
+      """
+     When I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_report" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+      And I click the link "Feature that has failing and passing after scenario hooks"
+      And I click the link "Hello world scenario"
+     Then I should see the text "Hello World"

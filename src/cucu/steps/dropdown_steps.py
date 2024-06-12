@@ -19,6 +19,7 @@ from tenacity import retry as retrying
 
 from cucu import fuzzy, helpers, logger, retry, step
 from cucu.steps.input_steps import find_input
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -67,6 +68,8 @@ def find_dropdown(ctx, name, index=0):
             index=index,
             direction=fuzzy.Direction.RIGHT_TO_LEFT,
         )
+
+    take_saw_element_screenshot(ctx, "dropdown", name, index, dropdown)
 
     if dropdown:
         outer_html = dropdown.get_attribute("outerHTML")
@@ -257,13 +260,16 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
         # After each key stroke there is a request and an update of the option list. To prevent stale element,
         # we send keys one by one here and try to find the option after each key.
         for key in option:
-            dropdown_input = find_input(ctx, dropdown, index)
-            logger.debug(f'sending key "{key}"')
-            dropdown_input.send_keys(key)
-            ctx.browser.wait_for_page_to_load()
-            option_element = find_dropdown_option(ctx, option)
-            if option_element:
-                break
+            try:
+                dropdown_input = find_input(ctx, dropdown, index)
+                logger.debug(f'sending key "{key}"')
+                dropdown_input.send_keys(key)
+                ctx.browser.wait_for_page_to_load()
+                option_element = find_dropdown_option(ctx, option)
+                if option_element:
+                    break
+            except Exception:
+                option_element = None
 
     if option_element is None:
         raise RuntimeError(

@@ -2,9 +2,13 @@
 various cucu utilities can be placed here and then exposed publicly through
 the src/cucu/__init__.py
 """
-import logging
-import pkgutil
 
+import logging
+import os
+import pkgutil
+import shutil
+
+import humanize
 from tabulate import DataRow, TableFormat, tabulate
 from tenacity import (
     before_sleep_log,
@@ -150,3 +154,112 @@ def text_in_current_frame(browser: Browser) -> str:
         browser.execute("window.jqCucu = jQuery.noConflict(true);")
     text = browser.execute('return jqCucu("body").children(":visible").text();')
     return text
+
+
+def ellipsize_filename(raw_filename):
+    max_filename = 100
+    new_raw_filename = normalize_filename(raw_filename)
+    if len(new_raw_filename) < max_filename:
+        return new_raw_filename
+
+    ellipsis = "..."
+    # save the last chars, as the ending is often important
+    end_count = 40
+    front_count = max_filename - (len(ellipsis) + end_count)
+    ellipsized_filename = (
+        new_raw_filename[:front_count]
+        + ellipsis
+        + new_raw_filename[-1 * end_count :]
+    )
+    return ellipsized_filename
+
+
+def normalize_filename(raw_filename):
+    normalized_filename = (
+        raw_filename.replace('"', "")
+        .replace("{", "")
+        .replace("}", "")
+        .replace("#", "")
+        .replace("&", "")
+    )
+    return normalized_filename
+
+
+def get_step_image_dir(step_index, step_name):
+    """
+    generate .png image file name that meets these criteria:
+     - hides secrets
+     - escaped
+     - filename does not exceed 255 chars (OS limitation)
+     - uniqueness comes from step number
+    """
+    escaped_step_name = CONFIG.hide_secrets(step_name).replace("/", "_")
+    unabridged_dirname = f"{step_index:0>4} - {escaped_step_name}"
+    dirname = ellipsize_filename(unabridged_dirname)
+
+    return dirname
+
+
+def take_saw_element_screenshot(ctx, thing, name, index, element=None):
+    observed = "saw" if element else "did not see"
+    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+
+    take_screenshot(
+        ctx,
+        ctx.current_step.name,
+        label=f'{observed} {prefix}{thing} "{name}"',
+        element=element,
+    )
+
+
+def take_screenshot(ctx, step_name, label="", element=None):
+    screenshot_dir = os.path.join(
+        ctx.scenario_dir, get_step_image_dir(ctx.step_index, step_name)
+    )
+    if not os.path.exists(screenshot_dir):
+        os.mkdir(screenshot_dir)
+
+    if len(label) > 0:
+        label = f" - {CONFIG.hide_secrets(label).replace('/', '_')}"
+    filename = f"{CONFIG['__STEP_SCREENSHOT_COUNT']:0>4}{label}.png"
+    filename = ellipsize_filename(filename)
+    filepath = os.path.join(screenshot_dir, filename)
+
+    if CONFIG["CUCU_SKIP_HIGHLIGHT_BORDER"] or not element:
+        ctx.browser.screenshot(filepath)
+    else:
+        location = element.location
+        border_width = 4
+        x, y = location["x"] - border_width, location["y"] - border_width
+        size = element.size
+        width, height = size["width"], size["height"]
+
+        position_css = f"position: absolute; top: {y}px; left: {x}px; width: {width}px; height: {height}px; z-index: 9001;"
+        visual_css = "border-radius: 4px; border: 4px solid #ff00ff1c; background: #ff00ff05; filter: drop-shadow(magenta 0 0 10px);"
+
+        script = f"""
+            (function() {{ // double curly-brace to escape python f-string
+                var body = document.querySelector('body');
+                var cucu_border = document.createElement('div');
+                cucu_border.setAttribute('id', 'cucu_border');
+                cucu_border.setAttribute('style', '{position_css} {visual_css}');
+                body.append(cucu_border);
+            }})();
+        """
+        ctx.browser.execute(script)
+
+        ctx.browser.screenshot(filepath)
+
+        clear_highlight = """
+            (function() {
+                var body = document.querySelector('body');
+                var cucu_border = document.getElementById('cucu_border');
+                body.removeChild(cucu_border);
+            })();
+        """
+        ctx.browser.execute(clear_highlight, element)
+
+    if CONFIG["CUCU_MONITOR_PNG"]:
+        shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
+
+    CONFIG["__STEP_SCREENSHOT_COUNT"] += 1

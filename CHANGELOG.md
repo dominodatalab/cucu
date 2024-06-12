@@ -5,8 +5,93 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.197.0
+- Fix - before all hooks are now executed
+
+## 0.196.0
+- Fix - after scenario hook error message unintentionally replaces scenario error message
+
+## 0.195.0
+- Fix - HTML report is generated into a wrong folder
+- Change - `&` is replaced in file name
+- Change - shortened feature name and scenario name are recorded in JUnit
+
+## 0.194.0
+- Fix - Ignore exceptions while key in desired dynamic dropdown value
+
+## 0.193.0
+- Change - Set default value of `CUCU_SKIP_HIGHLIGHT_BORDER` to `True`
+
+## 0.192.0
+- Fix - test status should be independent of ‘mht data' and 'browser logs' download status.
+
+## 0.191.0
+- Change - shorten fienames and paths, remove quotes, '{,},#' from file names.
+
+## 0.190.0
+- Add - screenshot highlight on find functions
+- Change - highlight to be separate overlay element
+- Change - enable element border highlight be default
+- Change - enable CUCU_MONITOR_PNG by default
+- Chore - CI downgrade to python 3.11 for stability
+- Chore - CI unpin remote docker executor
+- Chore - bump packages
+  |  | Package                                                            | From      | To       |
+  |--|--------------------------------------------------------------------|-----------|----------|
+  |  | [coverage](https://github.com/nedbat/coveragepy)                   | `7.4.2`   | `7.4.3`  |
+  |  | [importlib-metadata](https://github.com/python/importlib_metadata) | `6.11.0`  | `7.0.1`  |
+  |  | [black](https://github.com/psf/black)                              | `23.12.1` | `24.2.0` |
+  |  | [pytest](https://github.com/pytest-dev/pytest)                     | `7.4.4`   | `8.0.2`  |
+  |  | [ruff](https://github.com/astral-sh/ruff)                          | `0.1.15`  | `0.2.2`  |
+  |  | [safety](https://github.com/pyupio/safety)                         | `2.4.0b2` | `3.0.1`  |
+  |  | bandit                                                             | `1.7.5`   | `1.7.7`  |
+  |  | jinja2                                                             | `3.1.2`   | `3.1.3`  |
+- Chore - black format files
+
+## 0.189.0
+- Change - after-hook failures will report as 'passed' instead of 'failed/errored' to testrail and html reports
+
+## 0.188.0
+- Fix - how element size is gotten in fuzzy find
+
+## 0.187.0
+- Fix - clearing input sometimes causes the input to be not interactable
+
+## 0.186.0
+- Fix - handle mht data response that is not of type dictionary
+
+## 0.185.0
+- Change - hook failures will report as 'errored' instead of 'failed' to testrail and html reports
+
+## 0.184.0
+- Change - Added step duration to failure step
+
+## 0.183.0
+- Change - Added ability to take multiple screenshots per step
+
+## 0.182.0
+- Chore - Update docker README for ARM64 based CPU
+- Chore - Add seleniarm_hub bash file
+
+## 0.181.0
+- Change - only obfuscate values in config yaml file
+
+## 0.180.0
+- Change - only obfuscate certain parts in json output
+
+## 0.179.0
+- Fix - step that expects to not see a table
+
+## 0.178.0
+- Add - error message to json and junit
+- Change - print expected and found tables on fail
+- Chore - bump pebble
+
 ## 0.177.0
 - Fix - text regex steps mess up the fuzzy find js code
+- Chore - bump dependencies
+- Chore - update pip in CI pre-commit
+- Chore - group dependabot updates
 
 ## 0.176.0
 - Add - preliminary border injection behind feature flag

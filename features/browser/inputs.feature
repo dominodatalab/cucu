@@ -126,6 +126,14 @@ Feature: Inputs
      Then I should see "blup" in the input "input with label for"
       And I should see "input with label for was modified" in the input "last touched input"
 
+  Scenario: User can send an enter key after content
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
+      And I should see no value in the input "input accepting enter"
+     When I write "beep" into the input "input accepting enter"
+      And I send the "enter" key to the input "input accepting enter"
+     Then I should see "beep" in the input "input accepting enter"
+      And I should see "Enter was sent" in the input "last touched input"
+
   @wait
   Scenario: User can wait to clear an input
     Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"
@@ -168,7 +176,7 @@ Feature: Inputs
      Then I write "bar" into the input "input with @value set"
       And I should see "bar" in the input "input with @value set"
 
-  Scenario: User can write into a disabled input field
+  Scenario: User cannot write into a disabled input field
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
      Then I should see the input "disabled input" is disabled
       And I expect the following step to fail with "unable to write into the input, as it is disabled"
@@ -176,7 +184,7 @@ Feature: Inputs
       Then I write "foo" into the input "disabled input"
       """
 
-  Scenario: User can not clear a disabled input field
+  Scenario: User cannot clear a disabled input field
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
      Then I should see the input "disabled input" is disabled
       And I expect the following step to fail with "unable to clear the input, as it is disabled"

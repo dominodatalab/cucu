@@ -12,8 +12,8 @@ import uuid
 import six
 from behave.formatter.base import Formatter
 from behave.model_core import Status
+from tenacity import RetryError
 
-from cucu import behave_tweaks
 from cucu.config import CONFIG
 
 
@@ -33,7 +33,7 @@ class CucuJSONFormatter(Formatter):
     def __init__(self, stream_opener, config):
         super(CucuJSONFormatter, self).__init__(stream_opener, config)
         # -- ENSURE: Output stream is open.
-        self.stream = behave_tweaks.CucuOutputStream(self.open())
+        self.stream = self.open()
         self.feature_count = 0
         self.current_feature = None
         self.current_feature_data = None
@@ -183,11 +183,11 @@ class CucuJSONFormatter(Formatter):
 
         stdout = None
         if "stdout" in step.__dict__ and step.stdout != []:
-            stdout = ["".join(step.stdout).rstrip()]
+            stdout = [CONFIG.hide_secrets("".join(step.stdout).rstrip())]
 
         stderr = None
         if "stderr" in step.__dict__ and step.stderr != []:
-            stderr = ["".join(step.stderr).rstrip()]
+            stderr = [CONFIG.hide_secrets("".join(step.stderr).rstrip())]
 
         steps[step_index]["result"] = {
             "stdout": stdout,
@@ -199,11 +199,26 @@ class CucuJSONFormatter(Formatter):
 
         if step.error_message and step.status == Status.failed:
             # -- OPTIONAL: Provided for failed steps.
-            error_message = step.error_message
+            error_message = CONFIG.hide_secrets(step.error_message)
             if self.split_text_into_lines:
                 error_message = error_message.splitlines()
+
             result_element = steps[step_index]["result"]
             result_element["error_message"] = error_message
+
+            if error := step.exception:
+                if isinstance(error, RetryError):
+                    error = error.last_attempt.exception()
+
+                if len(error.args) > 0 and isinstance(error.args[0], str):
+                    error_class_name = error.__class__.__name__
+                    redacted_error_msg = CONFIG.hide_secrets(error.args[0])
+                    error_lines = redacted_error_msg.splitlines()
+                    error_lines[0] = f"{error_class_name}: {error_lines[0]}"
+                else:
+                    error_lines = [repr(error)]
+
+                result_element["exception"] = error_lines
 
     def embedding(self, mime_type, data):
         # nothing to do, but we need to implement the method
@@ -225,11 +240,6 @@ class CucuJSONFormatter(Formatter):
 
     def close(self):
         self.write_json_footer()
-        #
-        # HACK: avoid failing the strange assert in the base formatter class:
-        # https://github.com/behave/behave/blob/v1.2.6/behave/formatter/base.py#L186
-        #
-        self.stream = self.stream.stream
         self.close_stream()
 
     # -- JSON-DATA COLLECTION:
@@ -252,10 +262,15 @@ class CucuJSONFormatter(Formatter):
 
     def finish_current_scenario(self):
         if self.current_scenario:
-            status_name = self.current_scenario.status.name
+            hook_failed = self.current_scenario.hook_failed
+            if hook_failed:
+                status_name = "errored"
+            else:
+                status_name = self.current_scenario.status.name
+
             self.current_feature_element["status"] = status_name
 
-            if status_name == "failed":
+            if status_name in ["failed", "errored"]:
                 # we need to record the error_message and exc_traceback in the
                 # last executed step and mark it as failed so the reporting can
                 # show the result correctly
@@ -263,8 +278,11 @@ class CucuJSONFormatter(Formatter):
                 error_message += traceback.format_tb(
                     self.current_scenario.exc_traceback
                 )
-
-                if "error_message" not in self.last_step["result"]:
+                #  If a before scenario hook fails, last_step will be None.
+                if (
+                    self.last_step is not None
+                    and "error_message" not in self.last_step["result"]
+                ):
                     self.last_step["result"]["error_message"] = error_message
 
     # -- JSON-WRITER:

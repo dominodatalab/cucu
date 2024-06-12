@@ -23,6 +23,7 @@
                 <th class="text-center">Passed<br/>{{ grand_totals['total_scenarios_passed'] }}</th>
                 <th class="text-center">Failed<br/>{{ grand_totals['total_scenarios_failed'] }}</th>
                 <th class="text-center">Skipped<br/>{{ grand_totals['total_scenarios_skipped'] }}</th>
+                <th class="text-center">Errored<br/>{{ grand_totals['total_scenarios_errored'] }}</th>
                 <th class="text-center">Status<br/>&nbsp;</th>
                 <th class="text-center">Duration (s)<br/>{{ '{:.3f}'.format(grand_totals['duration']) }}s</th>
             </tr>
@@ -35,6 +36,7 @@
             <td class="text-center">{{ feature['total_scenarios_passed'] }}</td>
             <td class="text-center">{{ feature['total_scenarios_failed'] }}</td>
             <td class="text-center">{{ feature['total_scenarios_skipped'] }}</td>
+            <td class="text-center">{{ feature['total_scenarios_errored'] }}</td>
             <td class="text-center"><span class="status-{{ feature['status'] }}">{{ feature['status'] }}</span></td>
             <td class="text-center">{{ feature['duration'] }}</td>
         </tr>
@@ -42,6 +44,6 @@
     </table>
 
     <script>
-    setupReportTables([[6, 'asc']], [{type: 'timestamp', searchable: false}, {type: 'string'}, {type: 'num', searchable: false}, {type: 'num', searchable: false}, {type: 'num', searchable: false}, {type: 'num', searchable: false}, {type: 'html'} , {type: 'timestamp', searchable: false} ])
+    setupReportTables([[6, 'asc']], [{type: 'timestamp', searchable: false}, {type: 'string'}, {type: 'num', searchable: false}, {type: 'num', searchable: false}, {type: 'num', searchable: false}, {type: 'num', searchable: false}, {type: 'num', searchable: false}, {type: 'html'} , {type: 'timestamp', searchable: false} ])
     </script>
 {% endblock %}

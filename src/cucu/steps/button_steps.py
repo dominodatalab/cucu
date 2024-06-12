@@ -1,4 +1,5 @@
 from cucu import fuzzy, helpers
+from cucu.utils import take_saw_element_screenshot
 
 from . import base_steps
 
@@ -34,7 +35,7 @@ def find_button(ctx, name, index=0):
         the WebElement that matches the provided arguments.
     """
     ctx.check_browser_initialized()
-    button = fuzzy.find(
+    element = fuzzy.find(
         ctx.browser,
         name,
         [
@@ -52,7 +53,9 @@ def find_button(ctx, name, index=0):
         index=index,
     )
 
-    return button
+    take_saw_element_screenshot(ctx, "button", name, index, element)
+
+    return element
 
 
 def click_button(ctx, button):

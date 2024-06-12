@@ -116,15 +116,38 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     return False
 
 
-def report_unable_to_find_table(tables):
+def report_unable_to_find_table(expected_table, found_tables):
     stream = StringIO()
     stream.write("\n")
-    for index, table in enumerate(tables):
+    for index, table in enumerate(found_tables):
         print_index = helpers.nth_to_ordinal(index) or '"1st" '
-        stream.write(f"{print_index}table:\n{format_gherkin_table(table)}\n")
+        stream.write(
+            f"{print_index}table:\n{format_gherkin_table(table, [], '  ')}\n"
+        )
 
     stream.seek(0)
-    raise RuntimeError(f"unable to find desired table, found: {stream.read()}")
+    raise RuntimeError(
+        f"unable to find desired table\nexpected:\n{format_gherkin_table(expected_table, [], '  ')}\n\nfound:{stream.read()}"
+    )
+
+
+def report_found_undesired_table(unexpected_tables, found_tables):
+    stream = StringIO()
+    stream.write("\n")
+    for index, table in enumerate(found_tables):
+        print_index = helpers.nth_to_ordinal(index) or '"1st" '
+        stream.write(
+            f"{print_index}table:\n{format_gherkin_table(table, [], '  ')}\n"
+        )
+
+    stream.seek(0)
+    error_message = ""
+    for table in unexpected_tables:
+        error_message += (
+            f"found undesired table\n\nundesired table:\n{format_gherkin_table(table, [], '  ')}\n\n"
+            f"all tables found:{stream.read()}\n"
+        )
+    raise RuntimeError(error_message)
 
 
 def find_table(ctx, assert_func, nth=None):
@@ -143,18 +166,18 @@ def find_table(ctx, assert_func, nth=None):
         RuntimeError when the desired table was not found
     """
     expected = behave_table_to_array(ctx.table)
-    tables = find_tables(ctx)
+    found_tables = find_tables(ctx)
 
     if nth is not None:
-        if assert_func(tables[nth], expected):
+        if assert_func(found_tables[nth], expected):
             return
 
     else:
-        for table in tables:
+        for table in found_tables:
             if assert_func(table, expected):
                 return
 
-    report_unable_to_find_table(tables)
+    report_unable_to_find_table(expected, found_tables)
 
 
 def do_not_find_table(ctx, assert_func, nth=None):
@@ -174,17 +197,22 @@ def do_not_find_table(ctx, assert_func, nth=None):
     """
     expected = behave_table_to_array(ctx.table)
     tables = find_tables(ctx)
+    matching_tables = []
 
     if nth is not None:
-        if not assert_func(tables[nth], expected):
-            return
+        if assert_func(tables[nth], expected):
+            matching_tables.append(tables[nth])
 
     else:
         for table in tables:
-            if not assert_func(table, expected):
-                return
+            if assert_func(table, expected):
+                matching_tables.append(table)
 
-    report_unable_to_find_table(tables)
+    # If none of the tables match the pattern, then return
+    if len(matching_tables) == 0:
+        return
+
+    report_found_undesired_table(matching_tables, tables)
 
 
 for thing, check_func in {

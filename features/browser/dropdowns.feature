@@ -43,3 +43,8 @@ Feature: Dropdowns
       And I should see the option "navy" is not selected on the "2nd" dropdown "Pick a color"
       And I should see the option "forrest" is not selected on the "2nd" dropdown "Pick a color"
       And I should see the option "ruby" is selected on the "2nd" dropdown "Pick a color"
+
+  Scenario: User can select from a dynamic dropdown
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/dynamic_dropdown.html"
+     Then I should see the dropdown "Dynamic Dropdown"
+      And I wait to select the option "abbc" from the dynamic dropdown "Dynamic Dropdown"

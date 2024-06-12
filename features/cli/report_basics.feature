@@ -26,12 +26,12 @@ Feature: Report basics
      When I run the command "ls "{SCENARIO_RESULTS_DIR}/"" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
-      [\s\S]*\.png
+      (\d\d\d\d - [\s\S]*)
       [\s\S]*
       """
 
   Scenario: User can run a test and see extended output
-    Given I run the command "cucu run data/features/with_secret/scenario_with_comments.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "0"
+    Given I run the command "cucu run data/features/with_secret/scenario_with_comments.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "1"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
@@ -49,8 +49,12 @@ Feature: Report basics
       And I wait to see the text "# MY_SECRET="****""
 
         * # Can see image for step with secret in name
-     When I click the button "I should see the text "****""
-     Then I should see the image with the alt text "Then I should see the text "****""
+     When I click the button "I should see the text "\{MY_SECRET\}""
+     Then I should see the image with the alt text "After I should see the text MY_SECRET"
+
+        * # Cannot see secrets in the exception message
+     When I click the button "Then I click the button "\{MY_SECRET\}""
+     Then I should see the text "unable to find the button "****""
 
   @QE-6852
   Scenario: User can run a multi scenario test with web steps and generate report with a shareable url
@@ -62,19 +66,19 @@ Feature: Report basics
      # Verify HTML report
      When I click the link "Multiple scenarios with browser steps"
       And I click the link "Open our test checkboxes page"
-      And I should not see the image with the alt text "Given I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
-      And I should not see the image with the alt text "And I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html\""
-      And I should not see the image with the alt text "Then I should see the checkbox \"checkbox with inner label\""
+      And I should not see the image with the alt text "After I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
+      And I should not see the image with the alt text "After I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html\""
+      And I should not see the image with the alt text "After I should see the checkbox \"checkbox with inner label\""
      Then I click the button "Then I should see the checkbox \"checkbox with inner label\""
-      And I should see the image with the alt text "Then I should see the checkbox \"checkbox with inner label\""
-      And I should not see the image with the alt text "Given I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
-      And I should not see the image with the alt text "And I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html""
+      And I should see the image with the alt text "After I should see the checkbox checkbox with inner label"
+      And I should not see the image with the alt text "After I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
+      And I should not see the image with the alt text "After I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html""
      When I save the current url to the variable "CURRENT_URL"
       And I click the link "Index"
      Then I navigate to the url "{CURRENT_URL}"
-      And I wait to see the image with the alt text "Then I should see the checkbox \"checkbox with inner label\""
-      And I should not see the image with the alt text "Given I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
-      And I should not see the image with the alt text "And I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html\""
+      And I wait to see the image with the alt text "After I should see the checkbox checkbox with inner label"
+      And I should not see the image with the alt text "After I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
+      And I should not see the image with the alt text "After I open a browser at the url \"http://{HOST_ADDRESS}:{PORT}/checkboxes.html\""
 
   Scenario: User can run a feature with mixed results and has all results reported correctly without skips
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/mixed-results" and expect exit code "1"
@@ -82,15 +86,17 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-       | Started at | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
-       | .*         | Feature with mixed results | 4     | 2      | 2      | 0       | failed | .*       |
+       | Started at | Feature                    | Total | Passed | Failed | Skipped | Errored | Status | Duration |
+       | .*         | Feature with mixed results | 6     | 3      | 3      | 0       | 0       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
       | Offset | Scenario                            | Steps | Status  | Duration |
+      | .*     | Scenario and after-hook both fail   | 3     | failed  | .*       |
       | .*     | Scenario that also passes           | 1     | passed  | .*       |
       | .*     | Scenario that fails                 | 2     | failed  | .*       |
       | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
       | .*     | Scenario that passes                | 1     | passed  | .*       |
+      | .*     | Scenario with after-hook error      | 2     | passed  | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -105,16 +111,19 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-       | Started at | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
-       | .*         | Feature with mixed results | 5     | 2      | 2      | 1       | failed | .*       |
+       | Started at | Feature                    | Total | Passed | Failed | Skipped | Errored | Status | Duration |
+       | .*         | Feature with mixed results | 7     | 3      | 3      | 1       | 0       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
       | Offset | Scenario                            | Steps | Status  | Duration |
+      | .*     | Scenario and after-hook both fail   | 3     | failed  | .*       |
       | .*     | Scenario that also passes           | 1     | passed  | .*       |
       | .*     | Scenario that fails                 | 2     | failed  | .*       |
       | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
       | .*     | Scenario that is skipped            | 1     | skipped | .*       |
       | .*     | Scenario that passes                | 1     | passed  | .*       |
+      | .*     | Scenario with after-hook error      | 2     | passed  | .*       |
+
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -128,8 +137,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-       | Started at | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
-       | .*         | Feature with background    | 1     | 1      | 0      | 0       | passed | .*       |
+       | Started at | Feature                    | Total | Passed | Failed | Skipped | Errored | Status | Duration |
+       | .*         | Feature with background    | 1     | 1      | 0      | 0       | 0       | passed | .*       |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
       | Offset | Scenario                            | Steps | Status  | Duration |
@@ -142,8 +151,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-       | Started at | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
-       | .*         | Feature with background    | 2     | 1      | 0      | 1       | passed | .*       |
+       | Started at | Feature                    | Total | Passed | Failed | Skipped | Errored | Status | Duration |
+       | .*         | Feature with background    | 2     | 1      | 0      | 1       | 0       | passed | .*       |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
       | Offset | Scenario                            | Steps | Status  | Duration |
@@ -214,15 +223,17 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-      | Started at | Feature                    | Total | Passed | Failed | Skipped | Status | Duration |
-      | .*         | Feature with mixed results | 4     | 2      | 2      | 0       | failed | .*       |
+      | Started at | Feature                    | Total | Passed | Failed | Skipped | Errored | Status | Duration |
+      | .*         | Feature with mixed results | 6     | 3      | 3      | 0       | 0       | failed | .*       |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
       | Offset | Scenario                            | Steps | Status  | Duration |
+      | .*     | Scenario and after-hook both fail   | 3     | failed  | .*       |
       | .*     | Scenario that also passes           | 1     | passed  | .*       |
       | .*     | Scenario that fails                 | 2     | failed  | .*       |
       | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
       | .*     | Scenario that passes                | 1     | passed  | .*       |
+      | .*     | Scenario with after-hook error      | 2     | passed  | .*       |
       And I click the button "Scenario that fails"
      Then I should see the text "RuntimeError: step fails on purpose"
      When I click the button "Index"
@@ -235,8 +246,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_background_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-      | Started at | Feature                 | Total | Passed | Failed | Skipped | Status | Duration |
-      | .*         | Feature with background | 1     | 1      | 0      | 0       | passed | .*       |
+      | Started at | Feature                 | Total | Passed | Failed | Skipped | Errored | Status | Duration |
+      | .*         | Feature with background | 1     | 1      | 0      | 0       | 0       | passed | .*       |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
       | Offset | Scenario                            | Steps | Status  | Duration |
@@ -275,19 +286,40 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see the text "No data available in table"
 
+  Scenario: User can run and generate reports that perform highlighting
+    Given I create a file at "{CUCU_RESULTS_DIR}/highlights/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/highlights/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I create a file at "{CUCU_RESULTS_DIR}/highlights/text.feature" with the following:
+      """
+      Feature: run a test with highlighting
+
+        Scenario: See text that should be highlit
+           When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
+           Then I should see the text "just some text in a label"
+      """
+      And I run the command "cucu run {CUCU_RESULTS_DIR}/highlights --results {CUCU_RESULTS_DIR}/empty_features_results --env CUCU_SKIP_HIGHLIGHT_BORDER='False' --generate-report --report {CUCU_RESULTS_DIR}/highlights_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+
   @report-only-failures
   Scenario: User can generate a report with only failures
     Given I run the command "cucu run data/features --tags @passing,@failing --report-only-failures --results {CUCU_RESULTS_DIR}/report_only_failures --generate-report --report {CUCU_RESULTS_DIR}/report_only_failures_report" and expect exit code "1"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_only_failures_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-       | Started at | Feature                                | Total | Passed | Failed | Skipped | Status | Duration |
-       | .*         | Feature with failing scenario          | 1     | 0      | 1      | 0       | failed | .*       |
-       | .*         | Feature with failing scenario with web | 1     | 0      | 1      | 0       | failed | .*       |
+       | Started at | Feature                                | Total | Passed | Failed | Skipped | Errored | Status | Duration |
+       | .*         | Feature with failing scenario          | 1     | 0      | 1      | 0       | 0       | failed | .*       |
+       | .*         | Feature with failing to find a table   | 1     | 0      | 1      | 0       | 0       | failed | .*       |
+       | .*         | Feature with failing scenario with web | 1     | 0      | 1      | 0       | 0       | failed | .*       |
      When I click the button "Feature with failing scenario with web"
      Then I should see a table that matches the following:
        | Offset | Scenario                              | Steps | Status | Duration |
        | .*     | Just a scenario that opens a web page | 3     | failed | .*       |
      When I click the button "Just a scenario that opens a web page"
       And I wait to click the button "show images"
-      And I should see the image with the alt text "And I should see the text \"inexistent\""
+      And I should see the image with the alt text "After I should see the text inexistent"

@@ -1,6 +1,7 @@
 from selenium.webdriver.support.ui import WebDriverWait
 
 from cucu import fuzzy, helpers, logger
+from cucu.utils import take_saw_element_screenshot
 
 
 def find_draggable_element(ctx, name, index=0):
@@ -18,11 +19,13 @@ def find_draggable_element(ctx, name, index=0):
         the WebElement that matches the provided arguments.
     """
     ctx.check_browser_initialized()
-    _element = fuzzy.find(
+    element = fuzzy.find(
         ctx.browser, name, ['*[draggable="true"]'], index=index
     )
 
-    return _element
+    take_saw_element_screenshot(ctx, "draggable", name, index, element)
+
+    return element
 
 
 def is_draggable(element):

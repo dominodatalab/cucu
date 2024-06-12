@@ -5,6 +5,12 @@
     function update(value) {
         document.querySelector("#input").value = value + " was modified";
     }
+
+    function verify_enter(event) {
+        if (event.key == "Enter") {
+            document.querySelector("#input").value = "Enter was sent";
+        }
+    }
     </script>
   </head>
   <body>
@@ -27,6 +33,7 @@
     <p for="input-for">input with label for</p> <input onkeypress="update('input with label for');" id="input-for" type="text"></input><br/>
     <label>textarea with label</label>          <textarea onkeypress="update('textarea with label');"></textarea><br/>
     <p for="following-input">following input to a textarea</p><input onkeypress="update('following input to a textarea');" id="following-input" type="text"></input><br/>
+    <label>input accepting enter</label>.         <input onkeypress="verify_enter(event);" type="text"></input><br/>
 
     <label>input with @value set</label>        <input onkeypress="update('input with @value set');" value="foo"></input><br/>
 
