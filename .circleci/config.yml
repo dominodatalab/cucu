@@ -127,7 +127,7 @@ jobs:
 
   sonarqube:
     docker:
-      - image: cimg/base:2023.06-22.04
+      - image: quay.io/domino/sdlc-sonarqube-executor-docker:0
     resource_class: medium
 
     steps:
@@ -220,19 +220,19 @@ commands:
 
   run_sonarqube: &run_sonarqube
     steps:
-      - run:
-          name: install sonar and dependencies
-          command: |
-            set -exuo pipefail
+      # - run:
+      #     name: install sonar and dependencies
+      #     command: |
+      #       set -exuo pipefail
 
-            sudo apt-get install -y jq
-            jq --version
+      #       sudo apt-get install -y jq
+      #       jq --version
 
-            echo "download and install"
-            wget -O sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-            unzip -q sonar-scanner.zip
-            ls -al
-            ./sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner --version
+      #       echo "download and install"
+      #       wget -O sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+      #       unzip -q sonar-scanner.zip
+      #       ls -al
+      #       ./sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner --version
       - run:
           name: Run sonar-scanner
           command: |
@@ -240,7 +240,7 @@ commands:
             sudo apt-get install -y jq
 
             export SONAR_SCANNER_OPTS="-Xmx2048m"
-            SONAR_CMD="eval ./sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner \
+            SONAR_CMD="eval /home/circleci/build/sonar/bin/sonar-scanner \
               -Dsonar.projectKey=cucu \
               -Dsonar.sources=. \
               -Dsonar.host.url=${SONARQUBE_HOST_URL} \
