@@ -6,10 +6,10 @@ version: 2.1
 parameters:
   python_version:
     type: string
-    default: '3.12.0'
+    default: '3.11.7'
   selenium_version:
     type: string
-    default: '117.0'
+    default: '124.0'
   se_node_max_sessions:
     type: integer
     default: 12
@@ -37,22 +37,22 @@ workflows:
             - sonarqube_scan_context
           requires:
             - test-chrome
-      # - test:
-      #     name: test-edge
-      #     browser: edge
-      #     requires:
-      #       - test-chrome
-      # - test:
-      #     name: test-firefox
-      #     browser: firefox
-      #     requires:
-      #       - test-chrome
-      # - publish:
-      #     filters:
-      #       branches:
-      #         ignore: /.*/
-      #       tags:
-      #         only: /^\d+\.\d+\.\d+/
+      - test:
+          name: test-edge
+          browser: edge
+          requires:
+            - test-chrome
+      - test:
+          name: test-firefox
+          browser: firefox
+          requires:
+            - test-chrome
+      - publish:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^\d+\.\d+\.\d+/
 
 jobs:
   pre-commit:
@@ -183,7 +183,8 @@ commands:
 
   setup_remote_docker_env: &setup_remote_docker_env
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 20.10.14
 
   wait_for_selenium: &wait_for_selenium
     steps:
@@ -217,53 +218,7 @@ commands:
             poetry run coverage html
             poetry run coverage report --fail-under=70
 
-executors:
-  unit-test-executor:
-    docker:
-      - image: python:3.11.7
-
-  chrome-test-executor:
-    docker:
-      - image: python:3.11.7
-      - image: selenium/standalone-chrome:124.0
-        environment:
-          CUCU_MONITOR_PNG: ""
-          SE_NODE_MAX_SESSIONS: 12
-          SE_NODE_SESSION_TIMEOUT: 300
-          SCREEN_WIDTH: 1366
-          SCREEN_HEIGHT: 768
-    resource_class: xlarge
-
-  firefox-test-executor:
-    docker:
-      - image: python:3.11.7
-      - image: selenium/standalone-firefox:125.0
-        environment:
-          CUCU_MONITOR_PNG: ""
-          SE_NODE_MAX_SESSIONS: 12
-          SE_NODE_SESSION_TIMEOUT: 300
-          SCREEN_WIDTH: 1366
-          SCREEN_HEIGHT: 768
-    resource_class: xlarge
-
-  edge-test-executor:
-    docker:
-      - image: python:3.11.7
-      - image: selenium/standalone-edge:124.0
-        environment:
-          CUCU_MONITOR_PNG: ""
-          SE_NODE_MAX_SESSIONS: 12
-          SE_NODE_SESSION_TIMEOUT: 300
-          SCREEN_WIDTH: 1366
-          SCREEN_HEIGHT: 768
-    resource_class: xlarge
-
-jobs:
-  pre-commit:
-    docker:
-      - image: cimg/python:3.12.3
-    resource_class: medium
-
+  run_sonarqube: &run_sonarqube
     steps:
       - run:
           name: install sonar and dependencies
@@ -281,60 +236,28 @@ jobs:
       - run:
           name: Run sonar-scanner
           command: |
-            tar cvfz results.tgz results
-            tar cvfz report.tgz report
-            tar cvfz junit_results.tgz junit_results
-          when: always
+            set -exuo pipefail
+            sudo apt-get install -y jq
 
-      - store_artifacts:
-          path: results.tgz
+            export SONAR_SCANNER_OPTS="-Xmx2048m"
+            SONAR_CMD="eval ./sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner \
+              -Dsonar.projectKey=cucu \
+              -Dsonar.sources=. \
+              -Dsonar.host.url=${SONARQUBE_HOST_URL} \
+              -Dsonar.login=${SONARQUBE_TOKEN}"
 
-      - store_artifacts:
-          path: junit_results.tgz
+            # Check if there is an open pull request
+            if [[ ! -z $CIRCLE_PULL_REQUEST ]]; then
+              pr=$(echo https://api.github.com/repos/${CIRCLE_PULL_REQUEST:19} | sed "s/\/pull\//\/pulls\//")
+              base_branch=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" $pr | jq -r '.base.ref')
+              SONAR_CMD+=" \
+              -Dsonar.pullrequest.key=${CIRCLE_PULL_REQUEST##*/} \
+              -Dsonar.pullrequest.branch=${CIRCLE_BRANCH} \
+              -Dsonar.pullrequest.base=${base_branch}"
+            else
+              SONAR_CMD+=" \
+              -Dsonar.branch.name=${CIRCLE_BRANCH}"
+            fi
 
-      - store_artifacts:
-          path: report.tgz
-
-      - store_test_results:
-          path: junit_results
-
-  publish:
-    docker:
-      - image: cimg/python:3.12.3
-    steps:
-      - checkout
-      - install_cucu_dependencies
-      - build_cucu_python_package
-      - run:
-          name: Publish to private PyPI repository
-          command: |
-            set +eo pipefail
-            poetry config repositories.private ${PUBLISH_REPOSITORY}
-            poetry config http-basic.private ${PUBLISH_USERNAME} ${PUBLISH_PASSWORD}
-            poetry publish -r private
-
-workflows:
-  build-test-publish:
-    jobs:
-      - pre-commit
-      - test:
-          name: test-chrome
-          browser: chrome
-          requires:
-            - pre-commit
-      - test:
-          name: test-edge
-          browser: edge
-          requires:
-            - test-chrome
-      - test:
-          name: test-firefox
-          browser: firefox
-          requires:
-            - test-chrome
-      - publish:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^\d+\.\d+\.\d+/
+            echo "Running sonarqube analysis... $SONAR_CMD"
+            eval $SONAR_CMD
