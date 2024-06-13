@@ -103,7 +103,7 @@ executors:
   edge-test-executor:
     docker:
       - image: python:3.11.7
-      - image: selenium/standalone-edge:124.0
+      - image: selenium/standalone-edge:125.0
         environment:
           CUCU_MONITOR_PNG: ""
           SE_NODE_MAX_SESSIONS: 12
