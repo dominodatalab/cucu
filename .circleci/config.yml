@@ -153,7 +153,13 @@ jobs:
           path: junit_results
 
   sonarqube:
-    executor: quay-executor
+    docker:
+      - image: quay.io/domino/sdlc-sonarqube-executor-docker:0
+        environment:
+          PYENV_VERSION: <<pipeline.parameters.python_version>>
+        auth:
+          username: $QUAY_READONLY_USER
+          password: $QUAY_READONLY_PASSWORD
     resource_class: medium
 
     steps:
@@ -209,13 +215,3 @@ jobs:
             poetry config repositories.private ${PUBLISH_REPOSITORY}
             poetry config http-basic.private ${PUBLISH_USERNAME} ${PUBLISH_PASSWORD}
             poetry publish -r private
-
-executors:
-  quay-executor:
-    docker:
-      - image: quay.io/domino/sdlc-sonarqube-executor-docker:0
-        environment:
-          PYENV_VERSION: <<pipeline.parameters.python_version>>
-        auth:
-          username: $QUAY_READONLY_USER
-          password: $QUAY_READONLY_PASSWORD
