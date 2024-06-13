@@ -146,6 +146,8 @@ jobs:
             tar cvfz junit_results.tgz junit_results
           when: always
       - store_artifacts:
+          path: coverage.xml
+      - store_artifacts:
           path: results.tgz
       - store_artifacts:
           path: junit_results.tgz
