@@ -74,11 +74,11 @@ commands:
 executors:
   unit-test-executor:
     docker:
-      - image: python:3.11.7
+      - image: python:3.12.4
 
   chrome-test-executor:
     docker:
-      - image: python:3.11.7
+      - image: python:3.12.4
       - image: selenium/standalone-chrome:124.0
         environment:
           CUCU_MONITOR_PNG: ""
@@ -90,7 +90,7 @@ executors:
 
   firefox-test-executor:
     docker:
-      - image: python:3.11.7
+      - image: python:3.12.4
       - image: selenium/standalone-firefox:125.0
         environment:
           CUCU_MONITOR_PNG: ""
@@ -102,7 +102,7 @@ executors:
 
   edge-test-executor:
     docker:
-      - image: python:3.11.7
+      - image: python:3.12.4
       - image: selenium/standalone-edge:124.0
         environment:
           CUCU_MONITOR_PNG: ""
