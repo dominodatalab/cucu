@@ -35,7 +35,7 @@ workflows:
       - sonarqube:
           context:
             - sonarqube_scan_context
-            - workflow
+            - repo-standards-docker-login-readonly
           requires:
             - test-chrome
       - test:
@@ -129,6 +129,9 @@ jobs:
   sonarqube:
     docker:
       - image: quay.io/domino/sdlc-sonarqube-executor-docker:0
+    auth:
+      username: $QUAY_READONLY_USER
+      password: $QUAY_READONLY_PASSWORD
     resource_class: medium
 
     steps:
