@@ -133,6 +133,11 @@ jobs:
             poetry run coverage combine .coverage.*
             poetry run coverage html
             poetry run coverage report --fail-under=70
+            poetry run coverage xml
+      - persist_to_workspace:
+          root: .
+          paths:
+            - coverage.xml
       - run:
           name: tar up results and reporting
           command: |
@@ -161,6 +166,8 @@ jobs:
 
     steps:
       - checkout
+      - attach_workspace:
+          at: .
       - run:
           name: Run sonar-scanner
           command: |
@@ -185,6 +192,11 @@ jobs:
             else
               SONAR_CMD+=" \
               -Dsonar.branch.name=${CIRCLE_BRANCH}"
+            fi
+
+            COVERAGE_FILE="./coverage.xml"
+            if [[ -f $COVERAGE_FILE ]]; then
+              SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=$COVERAGE_FILE"
             fi
 
             echo "Running sonarqube analysis... $SONAR_CMD"
