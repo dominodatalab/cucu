@@ -7,10 +7,11 @@
   "python": {
     "enabled": true
   },
+
   "packageRules": [
     {
       "groupName": "glom all dependencies",
-      "sourceDirectory": "src"
+      "matchFileNames": ["src/**"]
     }
   ]
 }
