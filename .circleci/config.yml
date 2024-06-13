@@ -3,26 +3,6 @@
 ---
 version: 2.1
 
-parameters:
-  python_version:
-    type: string
-    default: '3.11.7'
-  selenium_version:
-    type: string
-    default: '124.0'
-  se_node_max_sessions:
-    type: integer
-    default: 12
-  se_node_session_timeout:
-    type: integer
-    default: 300
-  screen_width:
-    type: integer
-    default: 1366
-  screen_height:
-    type: integer
-    default: 768
-
 workflows:
   build-test-publish:
     jobs:
@@ -85,16 +65,11 @@ jobs:
       browser:
         type: string
         default: "chrome"
-    docker:
-      - image: cimg/python:<<pipeline.parameters.python_version>>
-      - image: selenium/standalone-<<parameters.browser>>:<<pipeline.parameters.selenium_version>>
-        environment:
-          SE_NODE_MAX_SESSIONS: <<pipeline.parameters.se_node_max_sessions>>
-          SE_NODE_SESSION_TIMEOUT: <<pipeline.parameters.se_node_session_timeout>>
-          SCREEN_WIDTH: <<pipeline.parameters.screen_width>>
-          SCREEN_HEIGHT: <<pipeline.parameters.screen_height>>
-    resource_class: xlarge
+
+    executor: << parameters.browser >>-test-executor
+
     steps:
+      - setup_remote_docker
       - checkout
       - run:
           name: install cucu dependencies
@@ -109,13 +84,6 @@ jobs:
             set +eo pipefail
             apt-get update
             apt-get install -y expect
-      - run:
-          name: build the cucu python package
-          command: poetry build
-      - run:
-          name: install cucu globally
-          command: pip install dist/cucu-*.tar.gz
-      - setup_remote_docker
       - run:
           name: wait_for_selenium
           # retry connection every 5s x 60 which is a total of 5 minutes
@@ -153,7 +121,7 @@ jobs:
 
   publish:
     docker:
-      - image: cimg/python:<<pipeline.parameters.python_version>>
+      - image: cimg/python:3.12.3
     steps:
       - checkout
       - run:
@@ -173,3 +141,45 @@ jobs:
             poetry config repositories.private ${PUBLISH_REPOSITORY}
             poetry config http-basic.private ${PUBLISH_USERNAME} ${PUBLISH_PASSWORD}
             poetry publish -r private
+
+executors:
+  unit-test-executor:
+    docker:
+      - image: python:3.11.7
+
+  chrome-test-executor:
+    docker:
+      - image: python:3.11.7
+      - image: selenium/standalone-chrome:124.0
+        environment:
+          CUCU_MONITOR_PNG: ""
+          SE_NODE_MAX_SESSIONS: 12
+          SE_NODE_SESSION_TIMEOUT: 300
+          SCREEN_WIDTH: 1366
+          SCREEN_HEIGHT: 768
+    resource_class: xlarge
+
+  firefox-test-executor:
+    docker:
+      - image: python:3.11.7
+      - image: selenium/standalone-firefox:125.0
+        environment:
+          CUCU_MONITOR_PNG: ""
+          SE_NODE_MAX_SESSIONS: 12
+          SE_NODE_SESSION_TIMEOUT: 300
+          SCREEN_WIDTH: 1366
+          SCREEN_HEIGHT: 768
+    resource_class: xlarge
+
+  edge-test-executor:
+    docker:
+      - image: python:3.11.7
+      - image: selenium/standalone-edge:124.0
+        environment:
+          CUCU_MONITOR_PNG: ""
+          SE_NODE_MAX_SESSIONS: 12
+          SE_NODE_SESSION_TIMEOUT: 300
+          SCREEN_WIDTH: 1366
+          SCREEN_HEIGHT: 768
+    resource_class: xlarge
+
