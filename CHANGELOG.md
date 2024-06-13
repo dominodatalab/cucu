@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.198.0
+- chore - refactor circle config (config-drive executor, embed commands, move workflows up)
+- chore - configure renovate
+- chore - remove dependabot config (duplicates renovate)
+- chore - remove safety (duplicates sonarqube)
+
 ## 0.197.0
 - Fix - before all hooks are now executed
 
