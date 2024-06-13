@@ -182,4 +182,3 @@ executors:
           SCREEN_WIDTH: 1366
           SCREEN_HEIGHT: 768
     resource_class: xlarge
-
