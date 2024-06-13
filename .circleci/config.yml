@@ -27,17 +27,17 @@ workflows:
   build-test-publish:
     jobs:
       - pre-commit
-      # - test:
-      #     name: test-chrome
-      #     browser: chrome
-      #     requires:
-      #       - pre-commit
+      - test:
+          name: test-chrome
+          browser: chrome
+          requires:
+            - pre-commit
       - sonarqube:
           context:
             - sonarqube_scan_context
             - repo-standards-docker-login-readonly
           requires:
-            - pre-commit
+            - test-chrome
       # - test:
       #     name: test-edge
       #     browser: edge
@@ -48,12 +48,12 @@ workflows:
       #     browser: firefox
       #     requires:
       #       - test-chrome
-      # - publish:
-      #     filters:
-      #       branches:
-      #         ignore: /.*/
-      #       tags:
-      #         only: /^\d+\.\d+\.\d+/
+      - publish:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^\d+\.\d+\.\d+/
 
 jobs:
   pre-commit:
