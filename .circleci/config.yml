@@ -55,6 +55,16 @@ workflows:
       #       tags:
       #         only: /^\d+\.\d+\.\d+/
 
+executors:
+  quay-executor:
+    docker:
+      - image: quay.io/domino/sdlc-sonarqube-executor-docker:0
+        environment:
+          PYENV_VERSION: <<pipeline.parameters.python_version>>
+        auth:
+          username: $QUAY_READONLY_USER
+          password: $QUAY_READONLY_PASSWORD
+
 jobs:
   pre-commit:
     docker:
@@ -127,11 +137,7 @@ jobs:
           path: junit_results
 
   sonarqube:
-    docker:
-      - image: quay.io/domino/sdlc-sonarqube-executor-docker:0
-    auth:
-      username: $QUAY_READONLY_USER
-      password: $QUAY_READONLY_PASSWORD
+    executor: quay-executor
     resource_class: medium
 
     steps:
