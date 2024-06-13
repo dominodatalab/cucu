@@ -58,7 +58,7 @@ workflows:
 jobs:
   pre-commit:
     docker:
-      - image: cimg/python:3.12.3
+      - image: cimg/python:<<pipeline.parameters.python_version>>
     resource_class: medium
     steps:
       - checkout
@@ -110,12 +110,6 @@ jobs:
             pip install poetry
             python -m virtualenv --upgrade-embed-wheels
             poetry install --no-ansi
-      - run:
-          name: install test dependencies
-          command: |
-            set +eo pipefail
-            apt-get update
-            apt-get install -y expect
       - run:
           name: wait_for_selenium
           # retry connection every 5s x 60 which is a total of 5 minutes
