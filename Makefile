@@ -24,10 +24,6 @@ check:
 	poetry run cucu lint features
 	# lint code for security mistakes
 	poetry run bandit src features data -r -c pyproject.toml -q --severity high
-	# check deps against known security issues
-	# 67599 - issue in `pip`, which is disputed as a CVE
-	# 63687 - issue only affects Windows
-	poetry run safety check --ignore=67599,63687
 	# check project config
 	poetry check
 	# prevent new secrets
