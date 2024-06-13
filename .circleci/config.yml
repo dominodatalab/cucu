@@ -64,6 +64,12 @@ jobs:
             pip install pre-commit
             pre-commit install-hooks
       - run:
+          name: install cucu dependencies
+          command: |
+            set +eo pipefail
+            python -m virtualenv --upgrade-embed-wheels
+            poetry install --no-ansi
+      - run:
           name: build the cucu python package
           command: poetry build
       - run:
@@ -90,6 +96,12 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - run:
+          name: install cucu dependencies
+          command: |
+            set +eo pipefail
+            python -m virtualenv --upgrade-embed-wheels
+            poetry install --no-ansi
       - run:
           name: wait_for_selenium
           # retry connection every 5s x 60 which is a total of 5 minutes
@@ -130,6 +142,12 @@ jobs:
       - image: cimg/python:<<pipeline.parameters.python_version>>
     steps:
       - checkout
+      - run:
+          name: install cucu dependencies
+          command: |
+            set +eo pipefail
+            python -m virtualenv --upgrade-embed-wheels
+            poetry install --no-ansi
       - run:
           name: build the cucu python package
           command: poetry build
