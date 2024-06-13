@@ -95,6 +95,7 @@ jobs:
           SCREEN_HEIGHT: <<pipeline.parameters.screen_height>>
     resource_class: xlarge
     steps:
+      - setup_remote_docker
       - checkout
       - run:
           name: install cucu dependencies
@@ -109,13 +110,6 @@ jobs:
             set +eo pipefail
             apt-get update
             apt-get install -y expect
-      - run:
-          name: build the cucu python package
-          command: poetry build
-      - run:
-          name: install cucu globally
-          command: pip install dist/cucu-*.tar.gz
-      - setup_remote_docker
       - run:
           name: wait_for_selenium
           # retry connection every 5s x 60 which is a total of 5 minutes
