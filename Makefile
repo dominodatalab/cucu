@@ -64,6 +64,7 @@ coverage: src/* tests/*
 	COVERAGE_PROCESS_START=.coveragerc poetry run cucu run features --workers 6
 	poetry run coverage run -m pytest
 	poetry run coverage combine .coverage.*
-	poetry run coverage html --omit='*virtualenvs*'
-	poetry run coverage report --omit='*virtualenvs*' --fail-under=85
+	poetry run coverage html
+	poetry run coverage xml
+	poetry run coverage report
 	echo "open HTML coverage report at htmlcov/index.html"

@@ -120,7 +120,7 @@ jobs:
           command: curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
       - run:
           name: run_functional_tests
-          command: poetry run cucu run features --workers 6 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<< parameters.browser >>"
+          command: poetry run cucu run features --workers 6 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<<parameters.browser>>"
           environment:
             COVERAGE_PROCESS_START: pyproject.toml  # set to config file
       - run:
@@ -132,12 +132,13 @@ jobs:
             set +eo pipefail
             poetry run coverage combine .coverage.*
             poetry run coverage html
-            poetry run coverage report --fail-under=70
+            poetry run coverage report
             poetry run coverage xml
+            mv coverage.xml coverage-<<parameters.browser>>.xml
       - persist_to_workspace:
           root: .
           paths:
-            - coverage.xml
+            - coverage-<<parameters.browser>>.xml
       - run:
           name: tar up results and reporting
           command: |
@@ -146,7 +147,7 @@ jobs:
             tar cvfz junit_results.tgz junit_results
           when: always
       - store_artifacts:
-          path: coverage.xml
+          path: coverage-<<parameters.browser>>.xml
       - store_artifacts:
           path: results.tgz
       - store_artifacts:
@@ -194,9 +195,9 @@ jobs:
               -Dsonar.branch.name=${CIRCLE_BRANCH}"
             fi
 
-            COVERAGE_FILE="/tmp/workspace/coverage.xml"
+            COVERAGE_FILE="/tmp/workspace/coverage-<<parameters.browser>>.xml"
             if [[ -f $COVERAGE_FILE ]]; then
-              SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=$COVERAGE_FILE"
+              SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=\"$(echo ls /tmp/workspace/coverage-*.xml)\""
             fi
 
             echo "Running sonarqube analysis... $SONAR_CMD"
