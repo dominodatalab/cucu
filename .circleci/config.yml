@@ -36,8 +36,8 @@ workflows:
           context:
             - sonarqube_scan_context
             - repo-standards-docker-login-readonly
-          requires:
-            - test-chrome
+          # requires:
+          #   - test-chrome
       - test:
           name: test-edge
           browser: edge
@@ -175,7 +175,8 @@ jobs:
           name: Run sonar-scanner
           command: |
             set -exuo pipefail
-            # sudo apt-get install -y jq
+            pwd
+            ls -al
 
             export SONAR_SCANNER_OPTS="-Xmx2048m"
             SONAR_CMD="eval /home/circleci/build/sonar/bin/sonar-scanner \
@@ -195,7 +196,7 @@ jobs:
               -Dsonar.branch.name=${CIRCLE_BRANCH}"
             fi
 
-            COVERAGE_FILE="/tmp/workspace/coverage-<<parameters.browser>>.xml"
+            COVERAGE_FILE="/tmp/workspace/coverage-chrome.xml"
             if [[ -f $COVERAGE_FILE ]]; then
               SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=\"$(echo ls /tmp/workspace/coverage-*.xml)\""
             fi
