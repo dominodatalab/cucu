@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: cucu
-  description: Cortex descriptor created automatically by eng-devprod
+  description: Easy BDD web testing for local and CI, batteries included and extensible, with extremely descriptive reports
   x-cortex-tag: cucu
   x-cortex-type: service
   x-cortex-owners:
@@ -13,3 +13,6 @@ info:
     github:
       alias: cortex
       repository: cerebrotech/cucu
+  x-cortex-circle-ci:
+    projects:
+      - projectSlug: github/cerebrotech/cucu
