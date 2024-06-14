@@ -178,8 +178,6 @@ jobs:
 
             export SONAR_SCANNER_OPTS="-Xmx2048m"
             SONAR_CMD="eval /home/circleci/build/sonar/bin/sonar-scanner \
-              -Dsonar.projectKey=cucu \
-              -Dsonar.sources=. \
               -Dsonar.host.url=${SONARQUBE_HOST_URL} \
               -Dsonar.login=${SONARQUBE_TOKEN}"
 
