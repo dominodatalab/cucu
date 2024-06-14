@@ -36,8 +36,8 @@ workflows:
           context:
             - sonarqube_scan_context
             - repo-standards-docker-login-readonly
-          # requires:
-          #   - test-chrome
+          requires:
+            - test-chrome
       - test:
           name: test-edge
           browser: edge
