@@ -198,7 +198,7 @@ jobs:
 
             COVERAGE_FILE="/tmp/workspace/coverage-chrome.xml"
             if [[ -f $COVERAGE_FILE ]]; then
-              SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=\"$(echo ls /tmp/workspace/coverage-*.xml)\""
+              SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=\"$(echo /tmp/workspace/coverage-*.xml)\""
             fi
 
             echo "Running sonarqube analysis... $SONAR_CMD"
