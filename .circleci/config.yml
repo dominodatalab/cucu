@@ -169,7 +169,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: .
+          at: /tmp/workspace
       - run:
           name: Run sonar-scanner
           command: |
@@ -194,7 +194,7 @@ jobs:
               -Dsonar.branch.name=${CIRCLE_BRANCH}"
             fi
 
-            COVERAGE_FILE="./coverage.xml"
+            COVERAGE_FILE="/tmp/workspace/coverage.xml"
             if [[ -f $COVERAGE_FILE ]]; then
               SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=$COVERAGE_FILE"
             fi
