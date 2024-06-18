@@ -155,6 +155,10 @@ jobs:
           path: *.tgz
       - store_artifacts:
           path: htmlcov
+      - store_artifacts:
+          path: junit_results.tgz
+      - store_artifacts:
+          path: report.tgz
       - store_test_results:
           path: junit_results
 
