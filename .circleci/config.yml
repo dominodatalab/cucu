@@ -172,7 +172,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /tmp/workspace
+          at: /tmp/ws
       - run:
           name: Run sonar-scanner
           command: |
@@ -196,13 +196,14 @@ jobs:
               -Dsonar.branch.name=${CIRCLE_BRANCH}"
             fi
 
-            COVERAGE_FILE="/tmp/workspace/coverage-chrome.xml"
-            if [[ -f $COVERAGE_FILE ]]; then
-              SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=\"$(echo /tmp/workspace/coverage-*.xml)\""
+            if [[ -d "/tmp/ws" && $(ls -A /tmp/ws/coverage-*.xml 2> /dev/null) ]]; then
+              FILES=\"$(ls -A /tmp/ws/coverage-*.xml | paste -sd, -)\"
+              
+              SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=${FILES}"
             fi
 
             echo "Running sonarqube analysis... $SONAR_CMD"
-            eval $SONAR_CMD
+            $SONAR_CMD
 
   publish:
     docker:
