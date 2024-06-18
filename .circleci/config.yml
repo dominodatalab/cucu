@@ -198,7 +198,6 @@ jobs:
 
             if [[ -d "/tmp/ws" && $(ls -A /tmp/ws/coverage-*.xml 2> /dev/null) ]]; then
               FILES=\"$(ls -A /tmp/ws/coverage-*.xml | paste -sd, -)\"
-              
               SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=${FILES}"
             fi
 
