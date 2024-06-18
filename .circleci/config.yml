@@ -152,7 +152,7 @@ jobs:
       - store_artifacts:
           path: coverage-<<parameters.browser>>.xml
       - store_artifacts:
-          path: *.tgz
+          path: results.tgz
       - store_artifacts:
           path: htmlcov
       - store_artifacts:
