@@ -137,11 +137,10 @@ jobs:
             poetry run coverage report
             poetry run coverage xml
             mv coverage.xml coverage-<<parameters.browser>>.xml
-            cp .coverage .coverage-<<parameters.browser>>
       - persist_to_workspace:
           root: .
           paths:
-            - .coverage-<<parameters.browser>>
+            - coverage-<<parameters.browser>>.xml
       - run:
           name: tar up results and reporting
           command: |
@@ -153,8 +152,6 @@ jobs:
           path: coverage-<<parameters.browser>>.xml
       - store_artifacts:
           path: results.tgz
-      - store_artifacts:
-          path: htmlcov
       - store_artifacts:
           path: junit_results.tgz
       - store_artifacts:
@@ -176,20 +173,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: /tmp/ws
-      - run:
-          name: install cucu dependencies
-          command: |
-            set +eo pipefail
-            python -m virtualenv --upgrade-embed-wheels
-            poetry install --no-ansi
-      - run:
-          name: combine coverage files from all browsers
-          command: |
-            set +exou pipefail
-            poetry run coverage combine /tmp/ws/.coverage.*
-            poetry run coverage html
-            poetry run coverage report
-            poetry run coverage xml
       - run:
           name: Run sonar-scanner
           command: |
@@ -213,12 +196,13 @@ jobs:
               -Dsonar.branch.name=${CIRCLE_BRANCH}"
             fi
 
-            SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=coverage.xml"
+            if [[ -d "/tmp/ws" && $(ls -A /tmp/ws/coverage-*.xml 2> /dev/null) ]]; then
+              FILES=\"$(ls -A /tmp/ws/coverage-*.xml | paste -sd, -)\"
+              SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=${FILES}"
+            fi
 
             echo "Running sonarqube analysis... $SONAR_CMD"
             $SONAR_CMD
-      - store_artifacts:
-          path: htmlcov
 
   publish:
     docker:
