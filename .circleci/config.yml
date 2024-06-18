@@ -152,11 +152,9 @@ jobs:
       - store_artifacts:
           path: coverage-<<parameters.browser>>.xml
       - store_artifacts:
-          path: results.tgz
+          path: *.tgz
       - store_artifacts:
-          path: junit_results.tgz
-      - store_artifacts:
-          path: report.tgz
+          path: htmlcov
       - store_test_results:
           path: junit_results
 
@@ -185,6 +183,8 @@ jobs:
           command: |
             set +exou pipefail
             poetry run coverage combine /tmp/ws/.coverage.*
+            poetry run coverage html
+            poetry run coverage report
             poetry run coverage xml
       - run:
           name: Run sonar-scanner
@@ -213,6 +213,8 @@ jobs:
 
             echo "Running sonarqube analysis... $SONAR_CMD"
             $SONAR_CMD
+      - store_artifacts:
+          path: htmlcov
 
   publish:
     docker:
