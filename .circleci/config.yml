@@ -32,14 +32,6 @@ workflows:
           browser: chrome
           requires:
             - pre-commit
-      - sonarqube:
-          context:
-            - sonarqube_scan_context
-            - repo-standards-docker-login-readonly
-          requires:
-            - test-chrome
-            - test-edge
-            - test-firefox
       - test:
           name: test-edge
           browser: edge
@@ -50,6 +42,14 @@ workflows:
           browser: firefox
           requires:
             - pre-commit
+      - sonarqube:
+          context:
+            - sonarqube_scan_context
+            - repo-standards-docker-login-readonly
+          requires:
+            - test-chrome
+            - test-edge
+            - test-firefox
       - publish:
           filters:
             branches:
@@ -137,10 +137,11 @@ jobs:
             poetry run coverage report
             poetry run coverage xml
             mv coverage.xml coverage-<<parameters.browser>>.xml
+            cp .coverage .coverage-<<parameters.browser>>
       - persist_to_workspace:
           root: .
           paths:
-            - coverage-<<parameters.browser>>.xml
+            - .coverage-<<parameters.browser>>
       - run:
           name: tar up results and reporting
           command: |
@@ -174,6 +175,18 @@ jobs:
       - attach_workspace:
           at: /tmp/ws
       - run:
+          name: install cucu dependencies
+          command: |
+            set +eo pipefail
+            python -m virtualenv --upgrade-embed-wheels
+            poetry install --no-ansi
+      - run:
+          name: combine coverage files from all browsers
+          command: |
+            set +exou pipefail
+            poetry run coverage combine /tmp/ws/.coverage.*
+            poetry run coverage xml
+      - run:
           name: Run sonar-scanner
           command: |
             set -exuo pipefail
@@ -196,10 +209,7 @@ jobs:
               -Dsonar.branch.name=${CIRCLE_BRANCH}"
             fi
 
-            if [[ -d "/tmp/ws" && $(ls -A /tmp/ws/coverage-*.xml 2> /dev/null) ]]; then
-              FILES=\"$(ls -A /tmp/ws/coverage-*.xml | paste -sd, -)\"
-              SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=${FILES}"
-            fi
+            SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=coverage.xml"
 
             echo "Running sonarqube analysis... $SONAR_CMD"
             $SONAR_CMD
