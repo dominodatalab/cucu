@@ -184,7 +184,7 @@ jobs:
               -Dsonar.login=${SONARQUBE_TOKEN}"
 
             # Check if there is an open pull request
-            if [[ ! -z $CIRCLE_PULL_REQUEST ]]; then
+            if [[ -n ${CIRCLE_PULL_REQUEST:-} ]]; then
               pr=$(echo https://api.github.com/repos/${CIRCLE_PULL_REQUEST:19} | sed "s/\/pull\//\/pulls\//")
               base_branch=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" $pr | jq -r '.base.ref')
               SONAR_CMD+=" \
