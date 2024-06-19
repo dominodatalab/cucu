@@ -13,8 +13,9 @@ terraform.tfstate.backup
 __pycache__
 *.pyc
 pygls.log
-report
-results
+junit_results/
+report/
+results/
 .monitor.png
 geckodriver.log
 

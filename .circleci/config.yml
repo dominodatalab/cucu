@@ -36,12 +36,20 @@ workflows:
           name: test-edge
           browser: edge
           requires:
-            - test-chrome
+            - pre-commit
       - test:
           name: test-firefox
           browser: firefox
           requires:
+            - pre-commit
+      - sonarqube:
+          context:
+            - sonarqube_scan_context
+            - repo-standards-docker-login-readonly
+          requires:
             - test-chrome
+            - test-edge
+            - test-firefox
       - publish:
           filters:
             branches:
@@ -114,7 +122,7 @@ jobs:
           command: curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
       - run:
           name: run_functional_tests
-          command: poetry run cucu run features --workers 6 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<< parameters.browser >>"
+          command: poetry run cucu run features --workers 6 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<<parameters.browser>>"
           environment:
             COVERAGE_PROCESS_START: pyproject.toml  # set to config file
       - run:
@@ -126,7 +134,13 @@ jobs:
             set +eo pipefail
             poetry run coverage combine .coverage.*
             poetry run coverage html
-            poetry run coverage report --fail-under=70
+            poetry run coverage report
+            poetry run coverage xml
+            mv coverage.xml coverage-<<parameters.browser>>.xml
+      - persist_to_workspace:
+          root: .
+          paths:
+            - coverage-<<parameters.browser>>.xml
       - run:
           name: tar up results and reporting
           command: |
@@ -135,6 +149,8 @@ jobs:
             tar cvfz junit_results.tgz junit_results
           when: always
       - store_artifacts:
+          path: coverage-<<parameters.browser>>.xml
+      - store_artifacts:
           path: results.tgz
       - store_artifacts:
           path: junit_results.tgz
@@ -142,6 +158,51 @@ jobs:
           path: report.tgz
       - store_test_results:
           path: junit_results
+
+  sonarqube:
+    docker:
+      - image: quay.io/domino/sdlc-sonarqube-executor-docker:0
+        environment:
+          PYENV_VERSION: <<pipeline.parameters.python_version>>
+        auth:
+          username: $QUAY_READONLY_USER
+          password: $QUAY_READONLY_PASSWORD
+    resource_class: medium
+
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/ws
+      - run:
+          name: Run sonar-scanner
+          command: |
+            set -exuo pipefail
+
+            export SONAR_SCANNER_OPTS="-Xmx2048m"
+            SONAR_CMD="eval /home/circleci/build/sonar/bin/sonar-scanner \
+              -Dsonar.host.url=${SONARQUBE_HOST_URL} \
+              -Dsonar.login=${SONARQUBE_TOKEN}"
+
+            # Check if there is an open pull request
+            if [[ ! -z $CIRCLE_PULL_REQUEST ]]; then
+              pr=$(echo https://api.github.com/repos/${CIRCLE_PULL_REQUEST:19} | sed "s/\/pull\//\/pulls\//")
+              base_branch=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" $pr | jq -r '.base.ref')
+              SONAR_CMD+=" \
+              -Dsonar.pullrequest.key=${CIRCLE_PULL_REQUEST##*/} \
+              -Dsonar.pullrequest.branch=${CIRCLE_BRANCH} \
+              -Dsonar.pullrequest.base=${base_branch}"
+            else
+              SONAR_CMD+=" \
+              -Dsonar.branch.name=${CIRCLE_BRANCH}"
+            fi
+
+            if [[ -d "/tmp/ws" && $(ls -A /tmp/ws/coverage-*.xml 2> /dev/null) ]]; then
+              FILES=\"$(ls -A /tmp/ws/coverage-*.xml | paste -sd, -)\"
+              SONAR_CMD="${SONAR_CMD} -Dsonar.python.coverage.reportPaths=${FILES}"
+            fi
+
+            echo "Running sonarqube analysis... $SONAR_CMD"
+            $SONAR_CMD
 
   publish:
     docker:
