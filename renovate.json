@@ -9,7 +9,8 @@
   },
   "packageRules": [
     {
-      "groupName": "glom all dependencies"
+      "groupName": "glom all dependencies",
+      "matchFileNames": ["**"]
     }
   ]
 }
