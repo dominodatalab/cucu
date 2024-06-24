@@ -5,14 +5,13 @@ import os
 import shutil
 import signal
 import time
-from collections import namedtuple
 from importlib.metadata import version
 from threading import Timer
 
 import click
 import coverage
 from click import ClickException
-from pebble import ProcessPool
+from mpire import WorkerPool
 from tabulate import tabulate
 
 from cucu import (
@@ -28,9 +27,6 @@ from cucu.cli.run import behave, behave_init, write_run_details
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.config import CONFIG
 from cucu.lint import linter
-
-# QE-10912 Remove Pebble before distributing cucu
-
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
@@ -344,7 +340,7 @@ def run(
             else:
                 feature_filepaths = [filepath]
 
-            with ProcessPool(max_workers=int(workers)) as pool:
+            with WorkerPool(n_jobs=int(workers)) as pool:
                 # Each feature file is applied to the pool as an async task.
                 # It then polls the async result of each task. It the result
                 # is ready, it removes the result from the list of results that
@@ -366,10 +362,8 @@ def run(
                     timer = Timer(runtime_timeout, runtime_exit)
                     timer.start()
 
-                AsyncResult = namedtuple("AsyncResult", ["feature", "result"])
-                async_results = []
-                for feature_filepath in feature_filepaths:
-                    result = pool.schedule(
+                async_results = {
+                    feature_filepath: pool.apply_async(
                         behave,
                         [
                             feature_filepath,
@@ -390,30 +384,33 @@ def run(
                         {
                             "redirect_output": True,
                         },
-                        timeout=float(feature_timeout),
+                        task_timeout=float(feature_timeout),
                     )
-                    async_results.append(AsyncResult(feature_filepath, result))
+                    for feature_filepath in feature_filepaths
+                }
 
-                workers_failed = False
+                # poll while we have running tasks until the overall time limit
+                task_failed = False
                 while not timeout_reached:
-                    remaining = []
-                    for feature_result in async_results:
-                        feature, result = feature_result
-                        if result.done():
+                    remaining = {}
+                    for feature, result in async_results.items():
+                        if result.ready():
                             try:
-                                exit_code = result.result()
+                                exit_code = result.get(1)  # wait 1 second max
                                 if exit_code != 0:
-                                    workers_failed = True
+                                    task_failed = True
                             except Exception:
                                 logger.exception(
                                     f"an exception is raised during feature {feature}"
                                 )
-                                workers_failed = True
+                                task_failed = True
                         else:
-                            remaining.append(feature_result)
+                            remaining[feature] = result
 
                     if len(remaining) == 0:
-                        if timer:
+                        if (
+                            timer
+                        ):  # we're done so cancel any outstanding overall time limit
                             timer.cancel()
                         break
 
@@ -422,18 +419,13 @@ def run(
                 else:
                     logger.error(
                         "features not finished:\n"
-                        "\n".join(
-                            [
-                                "    " + feature_result.feature
-                                for feature_result in async_results
-                            ]
-                        ),
+                        "\n".join(["    " + key for key in async_results]),
                     )
                     for _, result in async_results:
                         result.cancel()
-                    workers_failed = True
+                    task_failed = True
 
-                if workers_failed:
+                if task_failed:
                     raise RuntimeError(
                         "there are failures, see above for details"
                     )
