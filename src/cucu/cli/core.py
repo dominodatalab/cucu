@@ -7,9 +7,11 @@ import signal
 import time
 from importlib.metadata import version
 from threading import Timer
+import sys
 
 import click
 import coverage
+import mpire
 from click import ClickException
 from mpire import WorkerPool
 from tabulate import tabulate
@@ -335,12 +337,15 @@ def run(
         else:
             if os.path.isdir(filepath):
                 basepath = os.path.join(filepath, "**/*.feature")
-                feature_filepaths = glob.iglob(basepath, recursive=True)
+                feature_filepaths = list(glob.iglob(basepath, recursive=True))
 
             else:
                 feature_filepaths = [filepath]
 
-            with WorkerPool(n_jobs=int(workers)) as pool:
+            print(f"hi cpus: {mpire.cpu_count()}")
+
+            #  daemon=False,
+            with WorkerPool(n_jobs=int(workers), enable_insights=True, start_method="spawn") as pool:
                 # Each feature file is applied to the pool as an async task.
                 # It then polls the async result of each task. It the result
                 # is ready, it removes the result from the list of results that
@@ -356,7 +361,7 @@ def run(
 
                     def runtime_exit():
                         nonlocal timeout_reached
-                        logger.error("runtime timeout reached, aborting run")
+                        logger.error("runtime timeout reached, cancelling run")
                         timeout_reached = True
 
                     timer = Timer(runtime_timeout, runtime_exit)
@@ -385,47 +390,67 @@ def run(
                             "redirect_output": True,
                         },
                         task_timeout=float(feature_timeout),
+                        worker_exit_timeout=1,
                     )
                     for feature_filepath in feature_filepaths
                 }
+                
+                logger.info(f"Starting parallel procs for {len(async_results)} features across {workers} workers")
 
                 # poll while we have running tasks until the overall time limit
-                task_failed = False
+                task_failed = {}
                 while not timeout_reached:
                     remaining = {}
                     for feature, result in async_results.items():
+                        if timeout_reached:
+                            break
+
                         if result.ready():
                             try:
-                                exit_code = result.get(1)  # wait 1 second max
+                                exit_code = result.get(0.1)  # wait 0.1 second max
                                 if exit_code != 0:
-                                    task_failed = True
+                                    task_failed[feature] = result
+                            except TimeoutError:
+                                logger.warn("recieved a timeout error while trying to get() from the task, ignoring")
+                                remaining[feature] = result
                             except Exception:
                                 logger.exception(
                                     f"an exception is raised during feature {feature}"
                                 )
-                                task_failed = True
+                                task_failed[feature] = result
                         else:
                             remaining[feature] = result
 
                     if len(remaining) == 0:
-                        if (
-                            timer
-                        ):  # we're done so cancel any outstanding overall time limit
+                        if timer:
+                            # we're done so cancel any outstanding overall time limit
                             timer.cancel()
                         break
 
                     async_results = remaining
                     time.sleep(1)
-                else:
+
+                logger.warn("finished loop")
+                if timeout_reached:
+                    logger.warn("starting terminate")
+                    pool.terminate()
                     logger.error(
                         "features not finished:\n"
                         "\n".join(["    " + key for key in async_results]),
                     )
-                    for _, result in async_results:
-                        result.cancel()
-                    task_failed = True
+                    # sys.exit(1)
 
+                    task_failed.update(async_results)
+                    # CONFIG["__CUCU_CTX"]._runner.aborted = True
+                    # os.kill(os.getpid(), signal.SIGINT)
+
+                pool.print_insights()
+                total_count = len(feature_filepaths)
+                pass_count = sum(pool.get_insights()["n_completed_tasks"])
+                fail_count = len(task_failed)
+                logger.info(f"{pass_count} success, {fail_count} fail, {total_count} total Features to run")
                 if task_failed:
+                    logger.error(f"Failing Features:\n{'\n'.join(task_failed.keys())}")
                     raise RuntimeError(
                         "there are failures, see above for details"
                     )
