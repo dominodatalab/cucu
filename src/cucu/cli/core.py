@@ -344,9 +344,7 @@ def run(
             print(f"hi cpus: {mpire.cpu_count()}")
 
             #  daemon=False,
-            with WorkerPool(
-                n_jobs=int(workers), enable_insights=True, start_method="spawn"
-            ) as pool:
+            with WorkerPool(n_jobs=int(workers), start_method="spawn") as pool:
                 # Each feature file is applied to the pool as an async task.
                 # It then polls the async result of each task. It the result
                 # is ready, it removes the result from the list of results that
@@ -410,13 +408,12 @@ def run(
 
                         if result.ready():
                             try:
-                                exit_code = result.get(
-                                    0.1
-                                )  # wait 0.1 second max
+                                # wait 0.1s max
+                                exit_code = result.get(0.1)
                                 if exit_code != 0:
                                     task_failed[feature] = result
                             except TimeoutError:
-                                # logger.warn("recieved a timeout error while trying to get() from the task, ignoring")
+                                # system could be slow, so ignore for now
                                 remaining[feature] = result
                             except Exception:
                                 logger.exception(
@@ -435,25 +432,13 @@ def run(
                     async_results = remaining
                     time.sleep(1)
 
-                logger.warn("finished loop")
                 if timeout_reached:
-                    print("timeout reached! ⌛️")
+                    logger.warn("timeout reached, send kill signal to workers")
                     for worker in pool._workers:
-                        print(f"{worker.worker_id} kill it with fire 🔥")
                         os.kill(worker.pid, signal.SIGKILL)
 
-                    # logger.warn("starting terminate")
-                    # pool.terminate()
+                task_failed.update(async_results)
 
-                    task_failed.update(async_results)
-
-                # pool.print_insights()
-                total_count = len(feature_filepaths)
-                pass_count = sum(pool.get_insights()["n_completed_tasks"])
-                fail_count = len(task_failed)
-                logger.info(
-                    f"{pass_count} success, {fail_count} fail, {total_count} total Features to run"
-                )
                 if task_failed:
                     logger.error(
                         f"Failing Features:\n{'\n'.join(task_failed.keys())}"
