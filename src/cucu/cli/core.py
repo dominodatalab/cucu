@@ -440,9 +440,8 @@ def run(
                 task_failed.update(async_results)
 
                 if task_failed:
-                    logger.error(
-                        f"Failing Features:\n{'\n'.join(task_failed.keys())}"
-                    )
+                    failing_features = "\n".join(task_failed.keys())
+                    logger.error(f"Failing Features:\n{failing_features}")
                     raise RuntimeError(
                         "there are failures, see above for details"
                     )
