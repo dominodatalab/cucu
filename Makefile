@@ -19,7 +19,7 @@ check:
 	# format code
 	poetry run black . --check
 	# lint code
-	poetry run check ruff .
+	poetry run ruff check .
 	# lint .feature files
 	poetry run cucu lint features
 	# lint code for security mistakes
