@@ -12,14 +12,14 @@ install: src/*
 
 format:
 	poetry run black .
-	poetry run ruff . --fix
+	poetry run ruff format .
 	poetry run cucu lint features
 
 check:
 	# format code
 	poetry run black . --check
 	# lint code
-	poetry run ruff .
+	poetry run ruff check .
 	# lint .feature files
 	poetry run cucu lint features
 	# lint code for security mistakes
