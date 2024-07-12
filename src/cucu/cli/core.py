@@ -11,6 +11,7 @@ from threading import Timer
 import click
 import coverage
 import mpire
+import psutil
 from click import ClickException
 from mpire import WorkerPool
 from tabulate import tabulate
@@ -435,7 +436,11 @@ def run(
                 if timeout_reached:
                     logger.warn("timeout reached, send kill signal to workers")
                     for worker in pool._workers:
-                        os.kill(worker.pid, signal.SIGKILL)
+                        worker_proc = psutil.Process(worker.pid)
+                        for child in worker_proc.children():
+                            child.kill()
+
+                        worker_proc.kill()
 
                 task_failed.update(async_results)
 
