@@ -416,7 +416,6 @@ def run(
                                     task_failed[feature] = result
                             except TimeoutError:
                                 #  just ignore slow interprocess comms
-                                # print("T", end="")
                                 pass
                             except Exception:
                                 logger.exception(
