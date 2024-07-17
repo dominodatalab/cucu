@@ -364,7 +364,8 @@ def run(
                         logger.error("runtime timeout reached, cancelling run")
                         timeout_reached = True
 
-                    timer = Timer(runtime_timeout, runtime_exit)
+                    STARTUP_DELAY = 10  # allow for process startup
+                    timer = Timer(runtime_timeout + STARTUP_DELAY, runtime_exit)
                     timer.start()
 
                 async_results = {
@@ -409,13 +410,14 @@ def run(
 
                         if result.ready():
                             try:
-                                # wait 0.1s max
+                                # wait 0.1s max, usually interprocess comms are fast
                                 exit_code = result.get(0.1)
                                 if exit_code != 0:
                                     task_failed[feature] = result
                             except TimeoutError:
-                                # system could be slow, so ignore for now
-                                remaining[feature] = result
+                                #  just ignore slow interprocess comms
+                                # print("T", end="")
+                                pass
                             except Exception:
                                 logger.exception(
                                     f"an exception is raised during feature {feature}"
@@ -434,13 +436,16 @@ def run(
                     time.sleep(1)
 
                 if timeout_reached:
-                    logger.warn("timeout reached, send kill signal to workers")
+                    logger.warn("Timeout reached, send kill signal to workers")
                     for worker in pool._workers:
-                        worker_proc = psutil.Process(worker.pid)
-                        for child in worker_proc.children():
-                            child.kill()
+                        try:
+                            worker_proc = psutil.Process(worker.pid)
+                            for child in worker_proc.children():
+                                child.kill()
 
-                        worker_proc.kill()
+                            worker_proc.kill()
+                        except psutil.NoSuchProcess:
+                            pass
 
                 task_failed.update(async_results)
 
