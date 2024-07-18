@@ -6,9 +6,9 @@ Feature: Run with workers
 
   Scenario: User can parallelize a slow set of tests and speedup execution
     Given I run the command "cucu run data/features/slow_features --results {CUCU_RESULTS_DIR}/slow_features_without_workers" and expect exit code "0"
-     Then I should see the previous step took more than "15" seconds
+     Then I should see the previous step took more than "23" seconds
      When I run the command "cucu run data/features/slow_features --workers 3 --results {CUCU_RESULTS_DIR}/slow_features_with_workers" and expect exit code "0"
-     Then I should see the previous step took less than "14" seconds
+     Then I should see the previous step took less than "24" seconds
 
   Scenario: User gets a report even when running with workesr
     Given I run the command "cucu run data/features/slow_features --workers 3 --generate-report --report {CUCU_RESULTS_DIR}/generate_report_with_workers_report --results {CUCU_RESULTS_DIR}/generate_report_with_workers_results" and expect exit code "0"

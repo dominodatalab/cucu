@@ -342,8 +342,6 @@ def run(
             else:
                 feature_filepaths = [filepath]
 
-            print(f"hi cpus: {mpire.cpu_count()}")
-
             #  daemon=False,
             with WorkerPool(n_jobs=int(workers), start_method="spawn") as pool:
                 # Each feature file is applied to the pool as an async task.
@@ -361,11 +359,10 @@ def run(
 
                     def runtime_exit():
                         nonlocal timeout_reached
-                        logger.error("runtime timeout reached, cancelling run")
+                        logger.error("runtime timeout reached, aborting run")
                         timeout_reached = True
 
-                    STARTUP_DELAY = 10  # allow for process startup
-                    timer = Timer(runtime_timeout + STARTUP_DELAY, runtime_exit)
+                    timer = Timer(runtime_timeout, runtime_exit)
                     timer.start()
 
                 async_results = {
@@ -396,10 +393,6 @@ def run(
                     for feature_filepath in feature_filepaths
                 }
 
-                logger.info(
-                    f"Starting parallel procs for {len(async_results)} features across {workers} workers"
-                )
-
                 # poll while we have running tasks until the overall time limit
                 task_failed = {}
                 while not timeout_reached:
@@ -425,13 +418,14 @@ def run(
                         else:
                             remaining[feature] = result
 
+                    async_results = remaining
+
                     if len(remaining) == 0:
                         if timer:
                             # we're done so cancel any outstanding overall time limit
                             timer.cancel()
                         break
 
-                    async_results = remaining
                     time.sleep(1)
 
                 if timeout_reached:
