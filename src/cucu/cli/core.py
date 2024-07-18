@@ -10,7 +10,6 @@ from threading import Timer
 
 import click
 import coverage
-import mpire
 import psutil
 from click import ClickException
 from mpire import WorkerPool
@@ -403,13 +402,15 @@ def run(
 
                         if result.ready():
                             try:
-                                # wait 0.1s max, usually interprocess comms are fast
+                                # wait 0.1s max for interprocess communication
                                 exit_code = result.get(0.1)
                                 if exit_code != 0:
                                     task_failed[feature] = result
-                            except TimeoutError:
-                                #  just ignore slow interprocess comms
-                                pass
+                            except TimeoutError as err:
+                                if f"timeout={feature_timeout}" in str(err):
+                                    print(f"{err}")
+                                    task_failed[feature] = result
+                                # ignore timeout errors from interprocess communication slowness
                             except Exception:
                                 logger.exception(
                                     f"an exception is raised during feature {feature}"

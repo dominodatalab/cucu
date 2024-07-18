@@ -107,6 +107,6 @@ Feature: Run
      Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*
-      .*Task timeout.*3.0.*
+      .*task timed out.*timeout=3.0.*
       [\s\S]*
       """
