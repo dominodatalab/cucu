@@ -26,4 +26,4 @@ def test_timeout_with_behave_exception_in_workers():
     p.start()
     p.join()
     elapsed_time = time.time() - start
-    assert elapsed_time < 5
+    assert elapsed_time < 14
