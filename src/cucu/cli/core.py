@@ -341,7 +341,6 @@ def run(
             else:
                 feature_filepaths = [filepath]
 
-            #  daemon=False,
             with WorkerPool(n_jobs=int(workers), start_method="spawn") as pool:
                 # Each feature file is applied to the pool as an async task.
                 # It then polls the async result of each task. It the result
@@ -387,7 +386,6 @@ def run(
                             "redirect_output": True,
                         },
                         task_timeout=float(feature_timeout),
-                        worker_exit_timeout=1,
                     )
                     for feature_filepath in feature_filepaths
                 }
