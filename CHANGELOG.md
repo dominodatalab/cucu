@@ -11,7 +11,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - chore - configure renovate
 - chore - remove dependabot config (duplicates renovate)
 - chore - remove safety (duplicates sonarqube)
-- change - swap pebble for mpire
+- change - swap pebble for mpire, kill procs on run timeout
+- chore - increase expected times for multiproc
 
 ## 0.197.0
 - Fix - before all hooks are now executed
