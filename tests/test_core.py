@@ -17,7 +17,7 @@ def process_func_to_run_cucu(workers, runtime_timeout):
     )
 
 
-def test_scenario_failure_shortcuts_runtime_timeout():
+def test_subprocess_failure_shortcuts_runtime_timeout():
     start = time.time()
     p = Process(target=process_func_to_run_cucu, args=(2, RUNTIME_TIMEOUT))
     p.start()
