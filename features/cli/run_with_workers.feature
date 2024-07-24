@@ -3,22 +3,24 @@
 Feature: Run with workers
   As a developer I want tests to be parallelized using workers and run as
   expected
+  # single worker overhead = 3s
+  # multiple worker overhead = 3, 11, 14, 18, 
 
   Scenario: User can parallelize a slow set of tests and speedup execution
     Given I run the command "cucu run data/features/slow_features --results {CUCU_RESULTS_DIR}/slow_features_without_workers" and expect exit code "0"
-     Then I should see the previous step took more than "23" seconds
-     When I run the command "cucu run data/features/slow_features --workers 3 --results {CUCU_RESULTS_DIR}/slow_features_with_workers" and expect exit code "0"
-     Then I should see the previous step took less than "24" seconds
+     Then I should see the previous step took more than "25" seconds
+     When I run the command "cucu run data/features/slow_features --workers 5 --results {CUCU_RESULTS_DIR}/slow_features_with_workers" and expect exit code "0"
+     Then I should see the previous step took less than "25" seconds
 
   Scenario: User gets a report even when running with workesr
-    Given I run the command "cucu run data/features/slow_features --workers 3 --generate-report --report {CUCU_RESULTS_DIR}/generate_report_with_workers_report --results {CUCU_RESULTS_DIR}/generate_report_with_workers_results" and expect exit code "0"
+    Given I run the command "cucu run data/features/slow_features --workers 4 --generate-report --report {CUCU_RESULTS_DIR}/generate_report_with_workers_report --results {CUCU_RESULTS_DIR}/generate_report_with_workers_results" and expect exit code "0"
      Then I should see a file at "{CUCU_RESULTS_DIR}/generate_report_with_workers_report/index.html"
 
   Scenario: User gets only dots in the output when running with workers
-    Given I run the command "cucu run data/features/slow_features --workers 2 --results {CUCU_RESULTS_DIR}/dots_in_report_with_workers_results" and save stdout to "STDOUT" and expect exit code "0"
+    Given I run the command "cucu run data/features/slow_features --workers 3 --results {CUCU_RESULTS_DIR}/dots_in_report_with_workers_results" and save stdout to "STDOUT" and expect exit code "0"
      Then I should see "{STDOUT}" is equal to the following:
      """
-     ...
+     .....
      """
 
   Scenario: User gets progress even when a step is in a retry() block
