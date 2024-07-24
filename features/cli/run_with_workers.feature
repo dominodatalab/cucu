@@ -3,8 +3,6 @@
 Feature: Run with workers
   As a developer I want tests to be parallelized using workers and run as
   expected
-  # single worker overhead = 3s
-  # multiple worker overhead = 3, 11, 14, 18, 
 
   Scenario: User can parallelize a slow set of tests and speedup execution
     Given I run the command "cucu run data/features/slow_features --results {CUCU_RESULTS_DIR}/slow_features_without_workers" and expect exit code "0"
