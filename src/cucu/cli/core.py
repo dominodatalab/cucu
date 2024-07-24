@@ -363,8 +363,9 @@ def run(
                     timer = Timer(runtime_timeout, runtime_exit)
                     timer.start()
 
-                async_results = {
-                    feature_filepath: pool.apply_async(
+                async_results = {}
+                for feature_filepath in feature_filepaths:
+                    async_results[feature_filepath] = pool.apply_async(
                         behave,
                         [
                             feature_filepath,
@@ -387,8 +388,7 @@ def run(
                         },
                         task_timeout=float(feature_timeout),
                     )
-                    for feature_filepath in feature_filepaths
-                }
+                    logger.debug(f"scheduled feature file {feature_filepath}")
 
                 # poll while we have running tasks until the overall time limit
                 task_failed = {}
