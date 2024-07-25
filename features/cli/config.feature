@@ -84,6 +84,7 @@ Feature: Config
        [\s\S]*
        """
 
+  @workers
   Scenario: User can load cucurc values from cucurc files at various levels when using workers
     Given I create a file at "{CUCU_RESULTS_DIR}/load_nested_cucurc_with_workers/environment.py" with the following:
       """

@@ -5,14 +5,14 @@ import os
 import shutil
 import signal
 import time
-from collections import namedtuple
 from importlib.metadata import version
 from threading import Timer
 
 import click
 import coverage
+import psutil
 from click import ClickException
-from pebble import ProcessPool
+from mpire import WorkerPool
 from tabulate import tabulate
 
 from cucu import (
@@ -28,9 +28,6 @@ from cucu.cli.run import behave, behave_init, write_run_details
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.config import CONFIG
 from cucu.lint import linter
-
-# QE-10912 Remove Pebble before distributing cucu
-
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
@@ -339,12 +336,12 @@ def run(
         else:
             if os.path.isdir(filepath):
                 basepath = os.path.join(filepath, "**/*.feature")
-                feature_filepaths = glob.iglob(basepath, recursive=True)
+                feature_filepaths = list(glob.iglob(basepath, recursive=True))
 
             else:
                 feature_filepaths = [filepath]
 
-            with ProcessPool(max_workers=int(workers)) as pool:
+            with WorkerPool(n_jobs=int(workers), start_method="spawn") as pool:
                 # Each feature file is applied to the pool as an async task.
                 # It then polls the async result of each task. It the result
                 # is ready, it removes the result from the list of results that
@@ -366,10 +363,9 @@ def run(
                     timer = Timer(runtime_timeout, runtime_exit)
                     timer.start()
 
-                AsyncResult = namedtuple("AsyncResult", ["feature", "result"])
-                async_results = []
+                async_results = {}
                 for feature_filepath in feature_filepaths:
-                    result = pool.schedule(
+                    async_results[feature_filepath] = pool.apply_async(
                         behave,
                         [
                             feature_filepath,
@@ -390,50 +386,64 @@ def run(
                         {
                             "redirect_output": True,
                         },
-                        timeout=float(feature_timeout),
+                        task_timeout=float(feature_timeout),
                     )
-                    async_results.append(AsyncResult(feature_filepath, result))
+                    logger.debug(f"scheduled feature file {feature_filepath}")
 
-                workers_failed = False
+                # poll while we have running tasks until the overall time limit
+                task_failed = {}
                 while not timeout_reached:
-                    remaining = []
-                    for feature_result in async_results:
-                        feature, result = feature_result
-                        if result.done():
+                    remaining = {}
+                    for feature, result in async_results.items():
+                        if timeout_reached:
+                            break
+
+                        if result.ready():
                             try:
-                                exit_code = result.result()
+                                # wait 0.1s max for interprocess communication
+                                exit_code = result.get(0.1)
                                 if exit_code != 0:
-                                    workers_failed = True
+                                    task_failed[feature] = result
+                            except TimeoutError as err:
+                                if f"timeout={feature_timeout}" in str(err):
+                                    print(f"{err}")
+                                    task_failed[feature] = result
+                                # ignore timeout errors from interprocess communication slowness
                             except Exception:
                                 logger.exception(
                                     f"an exception is raised during feature {feature}"
                                 )
-                                workers_failed = True
+                                task_failed[feature] = result
                         else:
-                            remaining.append(feature_result)
+                            remaining[feature] = result
+
+                    async_results = remaining
 
                     if len(remaining) == 0:
                         if timer:
+                            # we're done so cancel any outstanding overall time limit
                             timer.cancel()
                         break
 
-                    async_results = remaining
                     time.sleep(1)
-                else:
-                    logger.error(
-                        "features not finished:\n"
-                        "\n".join(
-                            [
-                                "    " + feature_result.feature
-                                for feature_result in async_results
-                            ]
-                        ),
-                    )
-                    for _, result in async_results:
-                        result.cancel()
-                    workers_failed = True
 
-                if workers_failed:
+                if timeout_reached:
+                    logger.warn("Timeout reached, send kill signal to workers")
+                    for worker in pool._workers:
+                        try:
+                            worker_proc = psutil.Process(worker.pid)
+                            for child in worker_proc.children():
+                                child.kill()
+
+                            worker_proc.kill()
+                        except psutil.NoSuchProcess:
+                            pass
+
+                task_failed.update(async_results)
+
+                if task_failed:
+                    failing_features = "\n".join(task_failed.keys())
+                    logger.error(f"Failing Features:\n{failing_features}")
                     raise RuntimeError(
                         "there are failures, see above for details"
                     )

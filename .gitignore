@@ -185,3 +185,6 @@ terraform.rc
 
 # VSCode
 .vscode
+
+# generated during test run
+skip_first_scenario.txt

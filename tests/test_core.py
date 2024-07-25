@@ -11,8 +11,11 @@ RUNTIME_TIMEOUT = 10
 def process_func_to_run_cucu(workers, runtime_timeout):
     isdir_mock = mock.MagicMock(return_value=False)
     with mock.patch("os.path.isdir", isdir_mock):
-        behave_mock = mock.MagicMock(side_effect=RuntimeError("something bad"))
-        with mock.patch("cucu.cli.core.behave", behave_mock):
+        config_mock = mock.MagicMock()
+        config_mock.load_cucurc_files = mock.MagicMock(
+            side_effect=RuntimeError("something bad")
+        )
+        with mock.patch("cucu.cli.run.CONFIG", config_mock):
             runner = CliRunner()
             runner.invoke(
                 core.run,
@@ -20,7 +23,7 @@ def process_func_to_run_cucu(workers, runtime_timeout):
             )
 
 
-def test_timeout_with_behave_exception_in_workers():
+def test_subprocess_failure_shortcuts_runtime_timeout():
     start = time.time()
     p = Process(target=process_func_to_run_cucu, args=(2, RUNTIME_TIMEOUT))
     p.start()
