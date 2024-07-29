@@ -50,12 +50,6 @@ workflows:
             - test-chrome
             - test-edge
             - test-firefox
-      - publish:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^\d+\.\d+\.\d+/
 
 jobs:
   pre-commit:
@@ -203,25 +197,3 @@ jobs:
 
             echo "Running sonarqube analysis... $SONAR_CMD"
             $SONAR_CMD
-
-  publish:
-    docker:
-      - image: cimg/python:<<pipeline.parameters.python_version>>
-    steps:
-      - checkout
-      - run:
-          name: install cucu dependencies
-          command: |
-            set +eo pipefail
-            python -m virtualenv --upgrade-embed-wheels
-            poetry install --no-ansi
-      - run:
-          name: build the cucu python package
-          command: poetry build
-      - run:
-          name: Publish to private PyPI repository
-          command: |
-            set +eo pipefail
-            poetry config repositories.private ${PUBLISH_REPOSITORY}
-            poetry config http-basic.private ${PUBLISH_USERNAME} ${PUBLISH_PASSWORD}
-            poetry publish -r private
