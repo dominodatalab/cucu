@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 0.199.0
 - chore - remove deprecated CI
+- chore - add PR template
 
 ## 0.198.0
 - chore - add sonarqube
