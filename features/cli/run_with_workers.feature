@@ -14,11 +14,16 @@ Feature: Run with workers
     Given I run the command "cucu run data/features/slow_features --workers 4 --generate-report --report {CUCU_RESULTS_DIR}/generate_report_with_workers_report --results {CUCU_RESULTS_DIR}/generate_report_with_workers_results" and expect exit code "0"
      Then I should see a file at "{CUCU_RESULTS_DIR}/generate_report_with_workers_report/index.html"
 
-  Scenario: User gets only dots in the output when running with workers
+  Scenario: User gets scheduling info and dots in the output when running with workers
     Given I run the command "cucu run data/features/slow_features --workers 3 --results {CUCU_RESULTS_DIR}/dots_in_report_with_workers_results" and save stdout to "STDOUT" and expect exit code "0"
-     Then I should see "{STDOUT}" is equal to the following:
+     Then I should see "{STDOUT}" matches the following:
      """
-     .....
+     .* INFO scheduled feature file .*
+     .* INFO scheduled feature file .*
+     .* INFO scheduled feature file .*
+     .* INFO scheduled feature file .*
+     .* INFO scheduled feature file .*
+     \.\.\.\.\.
      """
 
   Scenario: User gets progress even when a step is in a retry() block
