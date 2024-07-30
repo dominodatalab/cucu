@@ -388,7 +388,7 @@ def run(
                         },
                         task_timeout=float(feature_timeout),
                     )
-                    logger.debug(f"scheduled feature file {feature_filepath}")
+                    logger.info(f"scheduled feature file {feature_filepath}")
 
                 # poll while we have running tasks until the overall time limit
                 task_failed = {}
