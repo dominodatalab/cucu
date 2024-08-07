@@ -323,3 +323,18 @@ Feature: Report basics
      When I click the button "Just a scenario that opens a web page"
       And I wait to click the button "show images"
       And I should see the image with the alt text "After I should see the text inexistent"
+
+  Scenario: User can run a basic test and create a report with the report path in JUnit
+    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/junit-results" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/junit-results --output {CUCU_RESULTS_DIR}/junit-report --junit {CUCU_RESULTS_DIR}/junit-results" and expect exit code "0"
+      And I should see the file at "{CUCU_RESULTS_DIR}/junit-results/Echo.xml" contains the following
+      """
+      report_path="results/junit-report/Echo/Echo an environment variable/index.html"
+      """
+
+  Scenario: User can run a basic test with report option and have the report path in JUnit
+    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/junit-generate-results --generate-report --report {CUCU_RESULTS_DIR}/junit-generate-report" and expect exit code "0"
+      And I should see the file at "{CUCU_RESULTS_DIR}/junit-generate-results/Echo.xml" contains the following
+      """
+      report_path="results/junit-generate-report/Echo/Echo an environment variable/index.html"
+      """
