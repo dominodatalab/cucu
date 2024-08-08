@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.201.0
+- change - add report path to the JUnit files when available
+
 ## 0.200.0
 - change - increase the log level of scheduling a feature file
 
