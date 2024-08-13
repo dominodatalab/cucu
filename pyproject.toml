@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cucu"
-version = "0.200.0"
+version = "0.201.0"
 license = "MIT"
 description = "Easy BDD web testing"
 authors = ["Domino Data Lab <open-source@dominodatalab.com>"]
