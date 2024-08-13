@@ -3,8 +3,7 @@
 End-to-end testing framework that uses [gherkin](https://cucumber.io/docs/gherkin/)
 to drive various underlying tools/frameworks to create real world testing scenarios.
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/cerebrotech/cucu/tree/main.svg?style=svg&circle-token=81eb2db26e4d6529e8cbb1319fe0f50a992bb50e)](https://dl.circleci.com/status-badge/redirect/gh/cerebrotech/cucu/tree/main)
-
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/dominodatalab/cucu/tree/main.svg?style=svg&circle-token=CCIPRJ_FnyZPtQ9odT5vmGW3CmZNU_bf0cfd776a09729ca4225a2860d9b59c4dae88af)](https://dl.circleci.com/status-badge/redirect/gh/dominodatalab/cucu/tree/main)
 
 ## Why cucu?
 1. Cucu avoids unnecessary abstractions (i.e. no Page Objects!) while keeping scenarios readable.
@@ -66,7 +65,7 @@ _Get your repo setup using cucu as a test framework_
 1. install and start Docker if you haven't already
 2. add cucu your `requirements.txt` to get from GH by label (use current label number)
    ```
-   git+ssh://git@github.com/cerebrotech/cucu@0.119.0#egg=cucu
+   git+ssh://git@github.com/dominodatalab/cucu@0.119.0#egg=cucu
    ```
 3. install it
    ```bash

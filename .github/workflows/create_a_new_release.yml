@@ -20,15 +20,15 @@ jobs:
       - id: release_if_needed
         name: Release on version change merged
         env:
-          GITHUB_TOKEN: ${{ secrets.DOMINO_BUILDS_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           version=$(sed -n "s/^version *= *\"\(.*\)\"/\1/p" pyproject.toml)
-          latest_release=$(gh api /repos/cerebrotech/cucu/releases/latest --jq '.tag_name')
+          latest_release=$(gh api /repos/dominodatalab/cucu/releases/latest --jq '.tag_name')
           if [[ $version != $latest_release ]]; then
             gh api \
               --method POST \
               -H "Accept: application/vnd.github+json" \
-              /repos/cerebrotech/cucu/releases \
+              /repos/dominodatalab/cucu/releases \
               -f tag_name=$version \
               -f name="v$version" \
               -F draft=false \
