@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 0.203.0
 - chore - move repo GH org locations
+- chore - remove sonarqube
 
 ## 0.202.0
 - add - wait step to saving values from any table cells to a variable
