@@ -116,13 +116,13 @@ Feature: Tables
   Scenario: User can save any table cell value to a variable
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
       And I set the variable "USERNAME" to "Alfred White"
-     When I save "1st" table "1st" row , "1st" column  value to a variable "TABLE_1_VALUE"
+     When I save "1st" table, "1st" row, "1st" column value to a variable "TABLE_1_VALUE"
      Then I should see "{TABLE_1_VALUE}" is equal to "Name"
-     When I save "2nd" table "2nd" row , "1st" column  value to a variable "TABLE_2_VALUE"
+     When I save "2nd" table, "2nd" row, "1st" column value to a variable "TABLE_2_VALUE"
      Then I should see "{TABLE_2_VALUE}" is equal to "Alfred"
-     When I save "3rd" table "2nd" row , "2nd" column  value to a variable "TABLE_3_VALUE"
+     When I wait to save "3rd" table, "2nd" row, "2nd" column value to a variable "TABLE_3_VALUE"
      Then I should see "{TABLE_3_VALUE}" is equal to "31"
-     When I save "4th" table "3rd" row , "2nd" column  value to a variable "TABLE_4_VALUE"
+     When I wait to save "4th" table, "3rd" row, "2nd" column value to a variable "TABLE_4_VALUE"
      Then I should see "{TABLE_4_VALUE}" is equal to "133,000"
 
   Scenario: User can click specific row in table
