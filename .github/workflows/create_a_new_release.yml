@@ -20,7 +20,7 @@ jobs:
       - id: release_if_needed
         name: Release on version change merged
         env:
-          GITHUB_TOKEN: ${{ secrets.DOMINO_BUILDS_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           version=$(sed -n "s/^version *= *\"\(.*\)\"/\1/p" pyproject.toml)
           latest_release=$(gh api /repos/dominodatalab/cucu/releases/latest --jq '.tag_name')
