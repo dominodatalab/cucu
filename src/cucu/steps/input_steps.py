@@ -113,7 +113,9 @@ def find_n_write(ctx, name, value, index=0, clear_existing=True):
         #  * https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4469
         #  * various stackoverflow articles on this matter
         #
-        ctx.browser.execute("arguments[0].value = arguments[1];", input_, value)
+        ctx.browser.execute(
+            "arguments[0].value = arguments[1];", input_, value
+        )
         input_.send_keys(" ")
         input_.send_keys(Keys.BACKSPACE)
 
@@ -212,7 +214,9 @@ def wait_to_write_multi_lines_into_input(ctx, name):
     retry(find_n_write)(ctx, name, ctx.text)
 
 
-@step('I wait up to "{seconds}" to write the following into the input "{name}"')
+@step(
+    'I wait up to "{seconds}" to write the following into the input "{name}"'
+)
 def wait_up_to_write_multi_lines_into_input(ctx, seconds, name):
     retry(find_n_write, wait_up_to_s=float(seconds))(ctx, name, ctx.text)
 

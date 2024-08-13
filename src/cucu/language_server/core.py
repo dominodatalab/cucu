@@ -65,7 +65,9 @@ def start(port=None):
     version = metadata.version(__package__.split(".")[0])
     server = LanguageServer(name="cucu", version=version)
     steps_cache, _ = load_cucu_steps()
-    logging.basicConfig(filename="pygls.log", filemode="w", level=logging.DEBUG)
+    logging.basicConfig(
+        filename="pygls.log", filemode="w", level=logging.DEBUG
+    )
 
     @server.feature(
         TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[","])

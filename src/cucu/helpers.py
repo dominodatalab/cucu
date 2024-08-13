@@ -599,7 +599,9 @@ def define_thing_with_name_in_state_steps(
         @step(
             f'I wait up to "{{seconds}}" seconds to see the "{{nth:nth}}" {thing} "{{name}}" is {state}'
         )
-        def wait_up_to_seconds_to_see_the_nth_in_state(ctx, seconds, nth, name):
+        def wait_up_to_seconds_to_see_the_nth_in_state(
+            ctx, seconds, nth, name
+        ):
             seconds = float(seconds)
             retry(base_should_see_the_in_state, wait_up_to_s=seconds)(
                 ctx, thing, name, index=nth
@@ -810,7 +812,9 @@ def define_two_thing_interaction_steps(
         @step(
             f'I immediately {action} the "{{nth_1:nth}}" {thing_1} "{{name_1}}" {preposition} the "{{nth_2:nth}}" {thing_2} "{{name_2}}"'
         )
-        def immediately_action_the_nth_i_nth(ctx, nth_1, name_1, nth_2, name_2):
+        def immediately_action_the_nth_i_nth(
+            ctx, nth_1, name_1, nth_2, name_2
+        ):
             base_action_the(
                 ctx,
                 thing_1,

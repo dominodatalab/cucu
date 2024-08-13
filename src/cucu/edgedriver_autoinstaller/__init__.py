@@ -21,7 +21,9 @@ def install(cwd=False):
         os.environ["PATH"] = edgedriver_dir
     elif edgedriver_dir not in os.environ["PATH"]:
         os.environ["PATH"] = (
-            edgedriver_dir + utils.get_variable_separator() + os.environ["PATH"]
+            edgedriver_dir
+            + utils.get_variable_separator()
+            + os.environ["PATH"]
         )
     return edgedriver_filepath
 

@@ -124,6 +124,9 @@ def test_leaf_map():
 
         return value
 
-    expected = {"a": "z", "b": ["x", "k", "c", "d", {"one": "bee", "two": "z"}]}
+    expected = {
+        "a": "z",
+        "b": ["x", "k", "c", "d", {"one": "bee", "two": "z"}],
+    }
     actual = leaf_map(data, something)
     assert actual == expected
