@@ -5,6 +5,7 @@ import os
 import shutil
 import signal
 import time
+import xml.etree.ElementTree as ET
 from importlib.metadata import version
 from threading import Timer
 
@@ -453,19 +454,24 @@ def run(
 
         if generate_report:
             _generate_report(
-                results, report, only_failures=report_only_failures
+                results, report, only_failures=report_only_failures, junit=junit
             )
 
 
-def _generate_report(filepath, output, only_failures: False):
+def _generate_report(
+    filepath: str, output: str, only_failures: False, junit: str | None = None
+):
     """
     helper method to handle report generation so it can be used by the `cucu report`
-    command also the `cucu run` when told to generate a report.
+    command also the `cucu run` when told to generate a report. If junit is provided, it adds report
+    path to the JUnit files.
 
 
     parameters:
         filepath(string): the results directory containing the previous test run
         output(string): the directory where we'll generate the report
+        only_failures(bool, optional): if only report failures. The default is False.
+        junit(str|None, optional): the directory of the JUnit files. The default if None.
     """
     if os.path.exists(output):
         shutil.rmtree(output)
@@ -476,6 +482,25 @@ def _generate_report(filepath, output, only_failures: False):
         filepath, output, only_failures=only_failures
     )
     print(f"HTML test report at {report_location}")
+
+    if junit:
+        _add_report_path_in_junit(junit, output)
+
+
+def _add_report_path_in_junit(junit_folder, report_folder):
+    for junit_file in glob.glob(f"{junit_folder}/*.xml", recursive=True):
+        junit = ET.parse(junit_file)
+        test_suite = junit.getroot()
+        ts_folder = test_suite.get("foldername")
+        for test_case in test_suite.iter("testcase"):
+            report_path = os.path.join(
+                report_folder,
+                ts_folder,
+                test_case.get("foldername"),
+                "index.html",
+            )
+            test_case.set("report_path", report_path)
+        junit.write(junit_file, encoding="utf-8", xml_declaration=False)
 
 
 @main.command()
@@ -505,8 +530,21 @@ def _generate_report(filepath, output, only_failures: False):
     help="when set status output is shown (helpful for CI that wants stdout updates)",
 )
 @click.option("-o", "--output", default="report")
+@click.option(
+    "-j",
+    "--junit",
+    default=None,
+    help="specify the output directory for JUnit XML files, default is "
+    "the same location as --results",
+)
 def report(
-    filepath, only_failures, logging_level, show_skips, show_status, output
+    filepath,
+    only_failures,
+    logging_level,
+    show_skips,
+    show_status,
+    output,
+    junit,
 ):
     """
     generate a test report from a results directory
@@ -535,7 +573,7 @@ def report(
         # initialize any underlying custom step code things
         behave_init(run_details["filepath"])
 
-    _generate_report(filepath, output, only_failures=only_failures)
+    _generate_report(filepath, output, only_failures=only_failures, junit=junit)
 
 
 @main.command()
