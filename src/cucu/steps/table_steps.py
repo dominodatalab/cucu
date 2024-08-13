@@ -299,9 +299,6 @@ helpers.define_action_on_thing_with_name_steps(
 )
 
 
-@step(
-    'I save "{table:nth}" table "{row:nth}" row , "{column:nth}" column  value to a variable "{variable_name}"'
-)
 def get_table_cell_value(ctx, table, row, column, variable_name):
     tables = find_tables(ctx)
 
@@ -312,6 +309,20 @@ def get_table_cell_value(ctx, table, row, column, variable_name):
             f"Cannot find table:{table+1},row:{row+1},column:{column+1}. Please check your table data."
         )
     config.CONFIG[variable_name] = cell_value
+
+
+@step(
+    'I save "{table:nth}" table, "{row:nth}" row, "{column:nth}" column value to a variable "{variable_name}"'
+)
+def step_get_table_cell_value(ctx, table, row, column, variable_name):
+    get_table_cell_value(ctx, table, row, column, variable_name)
+
+
+@step(
+    'I wait to save "{table:nth}" table, "{row:nth}" row, "{column:nth}" column value to a variable "{variable_name}"'
+)
+def wait_to_get_table_cell_value(ctx, table, row, column, variable_name):
+    retry(get_table_cell_value)(ctx, table, row, column, variable_name)
 
 
 def find_table_element(ctx, nth=1):
