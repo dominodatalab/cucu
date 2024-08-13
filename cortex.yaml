@@ -12,7 +12,7 @@ info:
   x-cortex-git:
     github:
       alias: cortex
-      repository: cerebrotech/cucu
+      repository: dominodatalab/cucu
   x-cortex-circle-ci:
     projects:
-      - projectSlug: github/cerebrotech/cucu
+      - projectSlug: github/dominodatalab/cucu
