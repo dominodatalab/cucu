@@ -11,7 +11,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v3
-    - name: Install poetry
+    - name: Install depedencies
       run: |
-        pip install poetry
+        pip install pre-commit poetry
+        pre-commit install-hooks
     - uses: pre-commit/action@v3.0.1
