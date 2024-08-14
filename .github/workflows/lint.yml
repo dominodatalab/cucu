@@ -13,6 +13,6 @@ jobs:
     - uses: actions/setup-python@v3
     - name: Install depedencies
       run: |
-        pip install pre-commit poetry
-        pre-commit install-hooks
+        pip install poetry
+        poetry install --no-ansi
     - uses: pre-commit/action@v3.0.1
