@@ -1,4 +1,4 @@
-name: unit-test
+name: build
 
 on:
   pull_request:
@@ -6,6 +6,17 @@ on:
     branches: [main]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+    - name: Install depedencies
+      run: |
+        pip install poetry
+        poetry install --no-ansi
+    - uses: pre-commit/action@v3.0.1
+
   unit-test:
     runs-on: ubuntu-latest
     steps:
