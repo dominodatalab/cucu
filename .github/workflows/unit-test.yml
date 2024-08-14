@@ -1,4 +1,4 @@
-name: lint
+name: unit-test
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 jobs:
-  lint:
+  unit-test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -15,4 +15,6 @@ jobs:
       run: |
         pip install poetry
         poetry install --no-ansi
-    - uses: pre-commit/action@v3.0.1
+    - name: unit tests
+      run: |
+        poetry run coverage run -m pytest --junit-xml=results/unit-tests.xml
