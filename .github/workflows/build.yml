@@ -52,20 +52,20 @@ jobs:
         pip install poetry
         poetry install --no-ansi
 
-    - name: Install Google Chrome
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget
-        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo apt install -y ./google-chrome-stable_current_amd64.deb
+    # - name: Install Google Chrome
+    #   run: |
+    #     sudo apt-get update
+    #     sudo apt-get install -y wget
+    #     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    #     sudo apt install -y ./google-chrome-stable_current_amd64.deb
 
-    - name: Install ChromeDriver
-      run: |
-        CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
-        wget https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip
-        unzip chromedriver_linux64.zip
-        sudo mv chromedriver /usr/local/bin/chromedriver
-        sudo chmod +x /usr/local/bin/chromedriver
+    # - name: Install ChromeDriver
+    #   run: |
+    #     CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
+    #     wget https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip
+    #     unzip chromedriver_linux64.zip
+    #     sudo mv chromedriver /usr/local/bin/chromedriver
+    #     sudo chmod +x /usr/local/bin/chromedriver
 
     - name: UI tests
       # env:
