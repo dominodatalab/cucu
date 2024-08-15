@@ -9,8 +9,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
     - name: Install depedencies
       run: |
         pip install poetry
@@ -20,8 +20,8 @@ jobs:
   API-tests:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
     - name: Install depedencies
       run: |
         pip install poetry
@@ -45,11 +45,11 @@ jobs:
         SCREEN_HEIGHT: 768
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         clean: false
         set-safe-directory: false
-    - uses: actions/setup-python@v3
+    - uses: actions/setup-python@v5
     - name: Install depedencies
       run: |
         pip install poetry
