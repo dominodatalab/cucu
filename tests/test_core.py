@@ -19,7 +19,7 @@ def process_func_to_run_cucu(workers, runtime_timeout):
             runner = CliRunner()
             runner.invoke(
                 core.run,
-                f"--runtime-timeout {runtime_timeout} --workers={workers} abc",
+                f"data/features/slow_features --runtime-timeout {runtime_timeout} --workers={workers} abc",
             )
 
 
