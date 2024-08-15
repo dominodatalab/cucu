@@ -29,3 +29,32 @@ jobs:
     - name: unit tests
       run: |
         poetry run coverage run -m pytest --junit-xml=results/unit-tests.xml
+
+  UI-test:
+    runs-on: ubuntu-latest
+
+    container:
+      image: selenium/standalone-chrome:124.0
+      ports:
+        - 4444:4444
+      env:
+        SE_NODE_MAX_SESSIONS: 12
+        SE_NODE_SESSION_TIMEOUT: 300
+        SCREEN_WIDTH: 1366
+        SCREEN_HEIGHT: 768
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+    - name: Install depedencies
+      run: |
+        pip install poetry
+        poetry install --no-ansi
+    - name: wait for selenium
+      run: |
+        curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
+    - name: UI tests
+      env:
+        COVERAGE_PROCESS_START: pyproject.toml
+      run: |
+        poetry run cucu run features --workers 6 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "chrome"
