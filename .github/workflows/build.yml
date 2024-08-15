@@ -46,19 +46,35 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      # with:
-      #   clean: false
-      #   set-safe-directory: false
     - uses: actions/setup-python@v5
     - name: Install depedencies
       run: |
         pip install poetry
         poetry install --no-ansi
-    - name: wait for selenium
+
+    - name: Install Google Chrome
       run: |
-        curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
+        sudo apt-get update
+        sudo apt-get install -y wget
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo apt install -y ./google-chrome-stable_current_amd64.deb
+
+    - name: Install ChromeDriver
+      run: |
+        CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
+        wget https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip
+        unzip chromedriver_linux64.zip
+        sudo mv chromedriver /usr/local/bin/chromedriver
+        sudo chmod +x /usr/local/bin/chromedriver
+
     - name: UI tests
       # env:
       #   COVERAGE_PROCESS_START: pyproject.toml
       run: |
         poetry run cucu run features --workers 6 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "chrome"
+      env:
+        SE_NODE_MAX_SESSIONS: 12
+        SE_NODE_SESSION_TIMEOUT: 300
+        SCREEN_WIDTH: 1366
+        SCREEN_HEIGHT: 768
+        DISPLAY: :99  # Needed for headless mode
