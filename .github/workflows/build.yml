@@ -45,6 +45,9 @@ jobs:
         SCREEN_HEIGHT: 768
 
     steps:
+    - name: Fix permissions after selenium starts up
+      run: |
+        sudo chmod -R a+rwx /__w
     - uses: actions/checkout@v4
       with:
         clean: false
