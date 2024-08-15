@@ -35,6 +35,7 @@ jobs:
 
     container:
       image: selenium/standalone-chrome:124.0
+      options: --shm-size=2gb
       ports:
         - 4444:4444
       env:
