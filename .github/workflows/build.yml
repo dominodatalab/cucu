@@ -17,7 +17,7 @@ jobs:
         poetry install --no-ansi
     - uses: pre-commit/action@v3.0.1
 
-  unit-test:
+  API-tests:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -30,7 +30,7 @@ jobs:
       run: |
         poetry run coverage run -m pytest --junit-xml=results/unit-tests.xml
 
-  UI-test:
+  UI-tests:
     runs-on: ubuntu-latest
 
     container:
