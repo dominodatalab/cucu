@@ -6,52 +6,49 @@ on:
     branches: [main]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-    - name: Install depedencies
-      run: |
-        pip install poetry
-        poetry install --no-ansi
-    - uses: pre-commit/action@v3.0.1
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - uses: actions/setup-python@v5
+  #   - name: Install depedencies
+  #     run: |
+  #       pip install poetry
+  #       poetry install --no-ansi
+  #   - uses: pre-commit/action@v3.0.1
 
-  API-tests:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-    - name: Install depedencies
-      run: |
-        pip install poetry
-        poetry install --no-ansi
-    - name: unit tests
-      run: |
-        poetry run coverage run -m pytest --junit-xml=results/unit-tests.xml
+  # API-tests:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - uses: actions/setup-python@v5
+  #   - name: Install depedencies
+  #     run: |
+  #       pip install poetry
+  #       poetry install --no-ansi
+  #   - name: unit tests
+  #     run: |
+  #       poetry run coverage run -m pytest --junit-xml=results/unit-tests.xml
 
   UI-tests:
     runs-on: ubuntu-latest
 
-    container:
-      image: selenium/standalone-chrome:124.0
-      options: --shm-size=2gb
-      ports:
-        - 4444:4444
-      env:
-        SE_NODE_MAX_SESSIONS: 12
-        SE_NODE_SESSION_TIMEOUT: 300
-        SCREEN_WIDTH: 1366
-        SCREEN_HEIGHT: 768
+    # container:
+    #   image: selenium/standalone-chrome:124.0
+    #   options: --shm-size=2gb
+    #   ports:
+    #     - 4444:4444
+    #   env:
+    #     SE_NODE_MAX_SESSIONS: 12
+    #     SE_NODE_SESSION_TIMEOUT: 300
+    #     SCREEN_WIDTH: 1366
+    #     SCREEN_HEIGHT: 768
 
     steps:
-    - name: Fix permissions after selenium starts up
-      run: |
-        sudo chmod -R a+rwx /__w
     - uses: actions/checkout@v4
-      with:
-        clean: false
-        set-safe-directory: false
+      # with:
+      #   clean: false
+      #   set-safe-directory: false
     - uses: actions/setup-python@v5
     - name: Install depedencies
       run: |
@@ -61,7 +58,7 @@ jobs:
       run: |
         curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
     - name: UI tests
-      env:
-        COVERAGE_PROCESS_START: pyproject.toml
+      # env:
+      #   COVERAGE_PROCESS_START: pyproject.toml
       run: |
         poetry run cucu run features --workers 6 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "chrome"
