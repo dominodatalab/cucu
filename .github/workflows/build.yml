@@ -75,7 +75,7 @@ jobs:
       # env:
       #   COVERAGE_PROCESS_START: pyproject.toml
       run: |
-        poetry run cucu run features --workers 6 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "chrome"
+        poetry run cucu run features --workers 1 --generate-report --junit junit_results --browser "chrome"
       env:
         SE_NODE_MAX_SESSIONS: 12
         SE_NODE_SESSION_TIMEOUT: 300
