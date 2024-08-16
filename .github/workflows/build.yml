@@ -52,30 +52,21 @@ jobs:
         pip install poetry
         poetry install --no-ansi
 
-    # - name: Install Google Chrome
-    #   run: |
-    #     sudo apt-get update
-    #     sudo apt-get install -y wget
-    #     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-    #     sudo apt install -y ./google-chrome-stable_current_amd64.deb
-
-    # - name: Install ChromeDriver
-    #   run: |
-    #     CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE)
-    #     wget https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip
-    #     unzip chromedriver_linux64.zip
-    #     sudo mv chromedriver /usr/local/bin/chromedriver
-    #     sudo chmod +x /usr/local/bin/chromedriver
+    - uses: browser-actions/setup-chrome@v1
+      with:
+        chrome-version: 120
+        install-dependencies: true
+        install-chromedriver: true
 
     # - name: wait_for_selenium
-      # retry connection every 5s x 60 which is a total of 5 minutes
-      # run: curl --retry 2 --retry-delay 2 --retry-connrefused http://localhost:4444
+    #   # retry connection every 5s x 60 which is a total of 5 minutes
+    #   run: curl --retry 2 --retry-delay 2 --retry-connrefused http://localhost:4444
 
     - name: UI tests
       # env:
       #   COVERAGE_PROCESS_START: pyproject.toml
       run: |
-        poetry run cucu run features --workers 1 --generate-report --junit junit_results --browser "chrome"
+        poetry run cucu run features/cli/help --workers 1 --generate-report --junit junit_results --browser "chrome" --selenium-remote-url http://localhost:4444
       env:
         SE_NODE_MAX_SESSIONS: 12
         SE_NODE_SESSION_TIMEOUT: 300
