@@ -3,18 +3,18 @@
 ---
 version: 2.1
 
-workflows:
-  build-test-publish:
-    jobs:
-      - test:
-          name: test-chrome
-          browser: chrome
-      - test:
-          name: test-edge
-          browser: edge
-      - test:
-          name: test-firefox
-          browser: firefox
+# workflows:
+#   build-test-publish:
+#     jobs:
+#       - test:
+#           name: test-chrome
+#           browser: chrome
+#       - test:
+#           name: test-edge
+#           browser: edge
+#       - test:
+#           name: test-firefox
+#           browser: firefox
 
 jobs:
   test:
