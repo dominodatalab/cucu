@@ -24,7 +24,7 @@ class Config(dict):
 
         parameters:
             name(string): the name of the variable
-            description(string): a succint description of variables purpose
+            description(string): a succinct description of variables purpose
             default(string): an optional default to set the variable to
         """
         self.defined_variables[name] = {
@@ -92,7 +92,8 @@ class Config(dict):
         if config:
             for key in config.keys():
                 if key == "CUCU_SECRETS":  # security: only add restrictions
-                    vals = self.get(key, "").split(",") + config[key].split(",")
+                    vals = self.get(key, "").split(",")
+                    vals = vals + config[key].split(",")
                     self[key] = ",".join(set(vals) ^ {""})
                 else:
                     self[key] = config[key]

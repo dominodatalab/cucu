@@ -125,9 +125,9 @@ def parse_matcher(name, rule_name, rule, line, state):
 
             if value in state["unique_per_all_scenarios"][rule_name]:
                 # we have another scenario which already has this value in use.
-                other_file_path, other_line_number, other_scenario_name = state[
-                    "unique_per_all_scenarios"
-                ][rule_name][value]
+                other_file_path, other_line_number, other_scenario_name = (
+                    state["unique_per_all_scenarios"][rule_name][value]
+                )
 
                 return (
                     True,

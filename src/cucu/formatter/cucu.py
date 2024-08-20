@@ -124,7 +124,9 @@ class CucuFormatter(Formatter):
         if step.is_substep:
             prefix = self.SUBSTEP_PREFIX
 
-        text = self.colorize(f"{indent}{prefix}{keyword} {step.name}\n", "grey")
+        text = self.colorize(
+            f"{indent}{prefix}{keyword} {step.name}\n", "grey"
+        )
         self.stream.write(text)
         self.stream.flush()
 

@@ -20,7 +20,9 @@ def find_file_input(ctx, name, index=0):
         the WebElement that matches the provided arguments.
     """
     ctx.check_browser_initialized()
-    element = fuzzy.find(ctx.browser, name, ['input[type="file"]'], index=index)
+    element = fuzzy.find(
+        ctx.browser, name, ['input[type="file"]'], index=index
+    )
 
     prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
 

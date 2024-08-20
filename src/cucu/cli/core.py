@@ -454,7 +454,10 @@ def run(
 
         if generate_report:
             _generate_report(
-                results, report, only_failures=report_only_failures, junit=junit
+                results,
+                report,
+                only_failures=report_only_failures,
+                junit=junit,
             )
 
 
@@ -573,7 +576,9 @@ def report(
         # initialize any underlying custom step code things
         behave_init(run_details["filepath"])
 
-    _generate_report(filepath, output, only_failures=only_failures, junit=junit)
+    _generate_report(
+        filepath, output, only_failures=only_failures, junit=junit
+    )
 
 
 @main.command()

@@ -96,7 +96,9 @@ def before_scenario(ctx, scenario):
         CONFIG["SCENARIO_RESULTS_DIR"] = ctx.scenario_dir
         os.makedirs(ctx.scenario_dir, exist_ok=True)
 
-        ctx.scenario_downloads_dir = os.path.join(ctx.scenario_dir, "downloads")
+        ctx.scenario_downloads_dir = os.path.join(
+            ctx.scenario_dir, "downloads"
+        )
         CONFIG["SCENARIO_DOWNLOADS_DIR"] = ctx.scenario_downloads_dir
         os.makedirs(ctx.scenario_downloads_dir, exist_ok=True)
 

@@ -9,7 +9,9 @@ def init_page_checks():
     """
 
     @retry(
-        stop=stop_after_delay(float(config.CONFIG["CUCU_STEP_WAIT_TIMEOUT_S"])),
+        stop=stop_after_delay(
+            float(config.CONFIG["CUCU_STEP_WAIT_TIMEOUT_S"])
+        ),
         wait=wait_fixed(float(config.CONFIG["CUCU_STEP_RETRY_AFTER_S"])),
     )
     def wait_for_document_to_be_ready(browser):
@@ -26,7 +28,9 @@ def init_page_checks():
     )
 
     @retry(
-        stop=stop_after_delay(float(config.CONFIG["CUCU_STEP_WAIT_TIMEOUT_S"])),
+        stop=stop_after_delay(
+            float(config.CONFIG["CUCU_STEP_WAIT_TIMEOUT_S"])
+        ),
         wait=wait_fixed(float(config.CONFIG["CUCU_STEP_RETRY_AFTER_S"])),
     )
     def wait_for_all_images_to_be_loaded(browser):

@@ -32,7 +32,9 @@ def find_text(ctx, name, index=0):
 
 # Also update the line number in the  scenario: `User gets the right stacktrace for steps using step helpers` when changing the code below.
 helpers.define_should_see_thing_with_name_steps("text", find_text)
-helpers.define_run_steps_if_I_can_see_element_with_name_steps("text", find_text)
+helpers.define_run_steps_if_I_can_see_element_with_name_steps(
+    "text", find_text
+)
 
 
 @step(
