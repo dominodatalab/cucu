@@ -73,7 +73,7 @@ jobs:
       # env:
       #   COVERAGE_PROCESS_START: pyproject.toml
       run: |
-        poetry run cucu run features/cli/help.feature --workers 1 --generate-report --junit junit_results --browser "chrome" --selenium-remote-url http://localhost:4444
+        poetry run cucu run features/cli/help.feature --workers 1 --generate-report --report output/report --junit output/junit --browser "chrome" --selenium-remote-url http://localhost:4444
       env:
         SE_NODE_MAX_SESSIONS: 12
         SE_NODE_SESSION_TIMEOUT: 300
@@ -82,3 +82,8 @@ jobs:
         DISPLAY: :99  # Needed for headless mode
         SELENIUM_HOST: localhost
         SELENIUM_PORT: 4444
+    - name: save output
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: output/
