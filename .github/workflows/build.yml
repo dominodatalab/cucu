@@ -52,29 +52,14 @@ jobs:
       run: |
         pip install poetry
         poetry install --no-ansi
-
-    # - name: Install Google Chrome and ChromeDriver
-    #   run: |
-    #     sudo apt-get update
-    #     sudo apt-get install -y wget
-    #     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-    #     sudo apt install -y ./google-chrome-stable_current_amd64.deb
-
-    #     wget https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip
-    #     unzip chromedriver_linux64.zip
-    #     sudo mv chromedriver /usr/local/bin/chromedriver
-    #     sudo chmod +x /usr/local/bin/chromedriver
-
     - name: wait_for_selenium
-      # retry connection every 5s x 60 which is a total of 5 minutes
-      run: curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:4444
-
+      # retry connection every 2s x 60 which is a total of 2 minutes
+      run: curl --retry 60 --retry-delay 2 --retry-connrefused http://localhost:4444
     - name: UI tests
-      # env:
-      #   COVERAGE_PROCESS_START: pyproject.toml
       run: |
-        poetry run cucu run features/cli/help.feature --workers 1 --generate-report --report output/report --junit output/junit --browser "chrome" --selenium-remote-url http://localhost:4444
+        poetry run cucu run features --browser "chrome" --workers 6 --generate-report --report output/report --junit output/junit --selenium-remote-url http://localhost:4444
       env:
+        # COVERAGE_PROCESS_START: pyproject.toml
         SE_NODE_MAX_SESSIONS: 12
         SE_NODE_SESSION_TIMEOUT: 300
         SCREEN_WIDTH: 1366
@@ -83,7 +68,7 @@ jobs:
         SELENIUM_HOST: localhost
         SELENIUM_PORT: 4444
     - name: save output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: build-artifacts
+        name: chrome-tests
         path: output/
