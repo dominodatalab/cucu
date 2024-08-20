@@ -48,6 +48,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
     - name: Install depedencies
       run: |
         pip install poetry
@@ -68,6 +70,7 @@ jobs:
         SELENIUM_HOST: localhost
         SELENIUM_PORT: 4444
     - name: save output
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: chrome-tests
