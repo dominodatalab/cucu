@@ -1,7 +1,8 @@
 name: Create a New Release
 # The following job is run when a commit changes pyproject.toml file:
 #   * Checks if the version of the project is the same of the latest release
-#   * If not, create a new release
+#   * If not, create a new release and then start the publishing
+#   * to test.pypi.org job
 
 on:
   push:
