@@ -59,7 +59,7 @@ jobs:
       run: curl --retry 60 --retry-delay 2 --retry-connrefused http://localhost:4444
     - name: UI tests
       run: |
-        poetry run cucu run features --browser "chrome" --workers 6 --generate-report --report output/report --junit output/junit --selenium-remote-url http://localhost:4444
+        poetry run cucu run features/cli --browser "chrome" --workers 6 --generate-report --report output/report --junit output/junit --selenium-remote-url http://localhost:4444
       env:
         # COVERAGE_PROCESS_START: pyproject.toml
         SE_NODE_MAX_SESSIONS: 12
