@@ -84,5 +84,6 @@ jobs:
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
       with:
+        check_name: "chrome results"
         files: |
           output/junit/**/*.xml
