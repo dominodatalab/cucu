@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        browser: ["chrome" ]  # , "firefox", "edge"]
+        browser: ["chrome", "firefox", "edge"]
     permissions:  # to publish junit results - see https://github.com/EnricoMi/publish-unit-test-result-action?tab=readme-ov-file#permissions
       contents: read
       issues: read
