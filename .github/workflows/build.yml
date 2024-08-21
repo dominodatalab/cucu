@@ -70,7 +70,7 @@ jobs:
         image: selenium/standalone-${{ matrix.browser }}:124.0
         ports:
           - 4444:4444
-        options: --shm-size=2gb
+        options: --shm-size=4gb
         env:
           SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
