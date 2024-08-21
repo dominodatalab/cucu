@@ -64,7 +64,6 @@ jobs:
     - name: UI tests
       run: |
         poetry run cucu run features --browser "chrome" --workers 1 --generate-report --report output/report --junit output/junit --selenium-remote-url http://localhost:4444
-        tar cvfz output.tgz output
       env:
         # COVERAGE_PROCESS_START: pyproject.toml
         SE_NODE_MAX_SESSIONS: 12
@@ -74,6 +73,10 @@ jobs:
         DISPLAY: :99  # Needed for headless mode
         SELENIUM_HOST: localhost
         SELENIUM_PORT: 4444
+    - name: tar results
+      if: always()
+      run: |
+        tar cvfz output.tgz output
     - name: save output
       if: always()
       uses: actions/upload-artifact@v4
