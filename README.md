@@ -3,6 +3,8 @@
 End-to-end testing framework that uses [gherkin](https://cucumber.io/docs/gherkin/)
 to drive various underlying tools/frameworks to create real world testing scenarios.
 
+[![build](https://github.com/dominodatalab/cucu/actions/workflows/build.yml/badge.svg)](https://github.com/dominodatalab/cucu/actions/workflows/build.yml)
+
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/dominodatalab/cucu/tree/main.svg?style=svg&circle-token=CCIPRJ_FnyZPtQ9odT5vmGW3CmZNU_bf0cfd776a09729ca4225a2860d9b59c4dae88af)](https://dl.circleci.com/status-badge/redirect/gh/dominodatalab/cucu/tree/main)
 
 ## Why cucu?
