@@ -6,31 +6,52 @@ on:
     branches: [main]
 
 jobs:
-  # lint:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #   - uses: actions/setup-python@v5
-  #   - name: Install depedencies
-  #     run: |
-  #       pip install poetry
-  #       poetry install --no-ansi
-  #   - uses: pre-commit/action@v3.0.1
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+    - name: Install depedencies
+      run: |
+        pip install poetry
+        poetry install --no-ansi
+    - uses: pre-commit/action@v3.0.1
 
-  # API-tests:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #   - uses: actions/setup-python@v5
-  #   - name: Install depedencies
-  #     run: |
-  #       pip install poetry
-  #       poetry install --no-ansi
-  #   - name: unit tests
-  #     run: |
-  #       poetry run coverage run -m pytest --junit-xml=results/unit-tests.xml
+  unit-tests:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+    - name: Install depedencies
+      run: |
+        pip install poetry
+        poetry install --no-ansi
+    - name: unit tests
+      run: |
+        poetry run coverage run -m pytest --junit-xml=output/unit-tests.xml
+    - name: package results
+      if: always()
+      run: |
+        mkdir -p output
+        mv .coverage.* output/
+        tar cvfz output.tgz output
+    - name: save output
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: unit-tests
+        path: output.tgz
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        check_name: "unit results"
+        files: |
+          output/unit-tests.xml
 
-  UI-tests:
+  cucu-tests:
+    needs: unit-tests
     runs-on: ubuntu-latest
     permissions:  # to publish junit results - see https://github.com/EnricoMi/publish-unit-test-result-action?tab=readme-ov-file#permissions
       contents: read
@@ -73,9 +94,11 @@ jobs:
         DISPLAY: :99  # Needed for headless mode
         SELENIUM_HOST: localhost
         SELENIUM_PORT: 4444
-    - name: tar results
+    - name: package results
       if: always()
       run: |
+        mkdir -p output
+        mv .coverage.* output/
         tar cvfz output.tgz output
     - name: save output
       if: always()
