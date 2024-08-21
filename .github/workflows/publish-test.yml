@@ -1,0 +1,29 @@
+name: publish-test
+# publish to test.pypi.org on merge to default branch
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [trigger_publish_test]
+
+jobs:
+  publish-test-main:
+    environment: cucu-publish-test  # match name in test.PyPI.org OIDC
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for connecttion to pypi OIDC
+    steps:
+      - name: checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5  # don't use eifinger/setup-rye@v3 since pdm build detects it as dirty
+        with:
+          python-version: "3.12"
+      - name: build package
+        run: pip install build && python -m build
+      - name: publish to test.pypi.org
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
