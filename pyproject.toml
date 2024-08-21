@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cucu"
-version = "0.203.0"
+version = "0.204.0"
 description = "Easy BDD web testing"
 readme = "README.md"
 license = "The Clear BSD License"
