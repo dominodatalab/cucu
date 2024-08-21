@@ -1,0 +1,34 @@
+name: publish-test
+# publish to test.pypi.org on merge to default branch
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [trigger_publish_test]
+
+jobs:
+  publish-test-main:
+    environment: cucu-publish-test  # match name in test.PyPI.org OIDC
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for connection to pypi OIDC
+    steps:
+      - name: checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install depedencies
+        run: |
+          pip install poetry
+          poetry install --no-ansi
+      - name: build package
+        run: |
+          poetry build
+      - name: publish to test.pypi.org
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
