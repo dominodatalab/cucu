@@ -57,6 +57,9 @@ jobs:
   cucu:
     needs: unit
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: ["chrome" ]  # , "firefox", "edge"]
     permissions:  # to publish junit results - see https://github.com/EnricoMi/publish-unit-test-result-action?tab=readme-ov-file#permissions
       contents: read
       issues: read
@@ -64,7 +67,7 @@ jobs:
       pull-requests: write
     services:
       webserver:
-        image: selenium/standalone-chrome:124.0
+        image: selenium/standalone-${{ matrix.browser }}:124.0
         ports:
           - 4444:4444
         options: --shm-size=2gb
@@ -88,7 +91,7 @@ jobs:
       run: curl --retry 60 --retry-delay 2 --retry-connrefused http://localhost:4444
     - name: UI tests
       run: |
-        poetry run cucu run features --browser "chrome" --workers 1 --generate-report --report output/report --junit output/junit --selenium-remote-url http://localhost:4444
+        poetry run cucu run features --browser "${{ matrix.browser }}" --workers 1 --generate-report --report output/report --junit output/junit --selenium-remote-url http://localhost:4444
       env:
         # COVERAGE_PROCESS_START: pyproject.toml
         SE_NODE_MAX_SESSIONS: 12
@@ -108,12 +111,12 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: chrome-tests
+        name: ${{ matrix.browser }}-tests
         path: output.tgz
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
       with:
-        check_name: "chrome results"
+        check_name: "${{ matrix.browser }} results"
         files: |
           output/junit/**/*.xml
