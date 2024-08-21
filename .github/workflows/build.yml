@@ -19,7 +19,7 @@ jobs:
         poetry install --no-ansi
     - uses: pre-commit/action@v3.0.1
 
-  unit-tests:
+  unit:
     needs: lint
     runs-on: ubuntu-latest
     steps:
@@ -54,8 +54,8 @@ jobs:
         files: |
           output/unit-tests.xml
 
-  cucu-tests:
-    needs: unit-tests
+  cucu:
+    needs: unit
     runs-on: ubuntu-latest
     permissions:  # to publish junit results - see https://github.com/EnricoMi/publish-unit-test-result-action?tab=readme-ov-file#permissions
       contents: read
