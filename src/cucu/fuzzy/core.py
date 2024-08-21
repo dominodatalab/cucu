@@ -9,7 +9,9 @@ def load_jquery_lib():
     """
     load jquery library
     """
-    jquery_lib = pkgutil.get_data("cucu", "external/jquery/jquery-3.5.1.min.js")
+    jquery_lib = pkgutil.get_data(
+        "cucu", "external/jquery/jquery-3.5.1.min.js"
+    )
     return jquery_lib.decode("utf8")
 
 

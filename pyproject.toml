@@ -67,13 +67,13 @@ pytest = "^8.0.2"
 ruff = "^0.5.0"
 
 [tool.black]
-line-length = 80
+line-length = 79
 
 [tool.ruff]
 lint.select = ["E", "F", "I", "Q0"]  # default options + isort
 exclude = [".env", ".venv", "venv", "__init__.py"]
 lint.ignore = ["E501", "F403"]  # line_length, import *
-line-length = 80
+line-length = 79
 
 [tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"

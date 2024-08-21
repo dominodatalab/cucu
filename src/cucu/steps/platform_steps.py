@@ -12,7 +12,9 @@ def skip_scenario_if_on_mac(ctx):
 @step("I skip this scenario if not on linux")
 def skip_scenario_if_on_linuxc(ctx):
     if "linux" not in sys.platform:
-        ctx.scenario.skip(reason="skipping scenario since we're not on a linux")
+        ctx.scenario.skip(
+            reason="skipping scenario since we're not on a linux"
+        )
 
 
 @step("I run the following steps if on mac")

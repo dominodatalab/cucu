@@ -52,6 +52,12 @@ helpers.define_thing_with_name_in_state_steps(
     "link", "disabled", find_link, base_steps.is_disabled, with_nth=True
 )
 helpers.define_thing_with_name_in_state_steps(
-    "link", "not disabled", find_link, base_steps.is_not_disabled, with_nth=True
+    "link",
+    "not disabled",
+    find_link,
+    base_steps.is_not_disabled,
+    with_nth=True,
 )
-helpers.define_run_steps_if_I_can_see_element_with_name_steps("link", find_link)
+helpers.define_run_steps_if_I_can_see_element_with_name_steps(
+    "link", find_link
+)

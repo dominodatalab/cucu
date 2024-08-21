@@ -15,7 +15,9 @@ def open_browser(ctx):
     browser = Selenium()
     logger.debug(f"opening browser {browser_name}")
     browser.open(
-        browser_name, headless=headless, selenium_remote_url=selenium_remote_url
+        browser_name,
+        headless=headless,
+        selenium_remote_url=selenium_remote_url,
     )
 
     return browser
@@ -253,7 +255,10 @@ def save_downloaded_file(ctx, filename):
     )
 
     def wait_for_file():
-        if ctx.browser.execute("return window.__cucu_downloaded_file;") is None:
+        if (
+            ctx.browser.execute("return window.__cucu_downloaded_file;")
+            is None
+        ):
             raise RuntimeError(f"waiting on file {filename}")
 
     retry(wait_for_file)()
@@ -313,7 +318,9 @@ def skip_if_browser(ctx, name):
 @step('I skip this scenario if the current browser is not "{name}"')
 def skip_if_not_browser(ctx, name):
     if config.CONFIG["CUCU_BROWSER"].lower() != name.lower():
-        ctx.scenario.skip(reason=f"skipping scenario since we're not on {name}")
+        ctx.scenario.skip(
+            reason=f"skipping scenario since we're not on {name}"
+        )
 
 
 @step('I save the browser cookie "{cookie_name}" to the variable "{variable}"')

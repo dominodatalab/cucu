@@ -38,7 +38,8 @@ def process_tags(element):
         tag = f"@{tag}"
 
         # process custom tag handlers
-        for regex, handler in CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"].items():
+        tag_handlers = CONFIG["__CUCU_HTML_REPORT_TAG_HANDLERS"].items()
+        for regex, handler in tag_handlers:
             if regex.match(tag):
                 tag = handler(tag)
 
@@ -124,7 +125,9 @@ def generate(results, basepath, only_failures=False):
 
         if feature["status"] not in ["skipped", "untested"]:
             # copy each feature directories contents over to the report directory
-            src_feature_filepath = os.path.join(results, feature["folder_name"])
+            src_feature_filepath = os.path.join(
+                results, feature["folder_name"]
+            )
             dst_feature_filepath = os.path.join(
                 basepath, feature["folder_name"]
             )
