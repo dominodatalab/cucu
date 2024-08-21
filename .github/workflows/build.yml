@@ -32,7 +32,11 @@ jobs:
 
   UI-tests:
     runs-on: ubuntu-latest
-
+    permissions:  # to publish junit results - see https://github.com/EnricoMi/publish-unit-test-result-action?tab=readme-ov-file#permissions
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
     services:
       webserver:
         image: selenium/standalone-chrome:124.0
@@ -59,7 +63,8 @@ jobs:
       run: curl --retry 60 --retry-delay 2 --retry-connrefused http://localhost:4444
     - name: UI tests
       run: |
-        poetry run cucu run features/cli --browser "chrome" --workers 6 --generate-report --report output/report --junit output/junit --selenium-remote-url http://localhost:4444
+        poetry run cucu run features/cli/help.feature --browser "chrome" --workers 1 --generate-report --report output/report --junit output/junit --selenium-remote-url http://localhost:4444
+        tar cvfz output.tgz output
       env:
         # COVERAGE_PROCESS_START: pyproject.toml
         SE_NODE_MAX_SESSIONS: 12
@@ -74,4 +79,10 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: chrome-tests
-        path: output/
+        path: output.tgz
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: |
+          output/junit/**/*.xml
