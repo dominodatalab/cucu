@@ -3,20 +3,56 @@
 ---
 version: 2.1
 
-# workflows:
-#   build-test-publish:
-#     jobs:
-#       - test:
-#           name: test-chrome
-#           browser: chrome
-#       - test:
-#           name: test-edge
-#           browser: edge
-#       - test:
-#           name: test-firefox
-#           browser: firefox
+workflows:
+  build-test-publish:
+    jobs:
+      - pre-commit
+      - test:
+          name: test-chrome
+          browser: chrome
+          requires:
+            - pre-commit
+      - test:
+          name: test-edge
+          browser: edge
+          requires:
+            - pre-commit
+      - test:
+          name: test-firefox
+          browser: firefox
+          requires:
+            - pre-commit
 
 jobs:
+  pre-commit:
+    docker:
+      - image: cimg/python:3.11.7
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: install dependencies
+          command: |
+            set +eo pipefail
+            pip install --upgrade pip
+            pip install pre-commit
+            pre-commit install-hooks
+      - run:
+          name: install cucu dependencies
+          command: |
+            set +eo pipefail
+            python -m virtualenv --upgrade-embed-wheels
+            poetry install --no-ansi
+      - run:
+          name: build the cucu python package
+          command: poetry build
+      - run:
+          name: install cucu globally
+          command: pip install dist/cucu-*.tar.gz
+      - run:
+          name: run pre-commit validations
+          command: pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
+
   test:
     parameters:
       browser:

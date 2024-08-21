@@ -1,9 +1,10 @@
 name: build
+# This is a beta version of migrating the CircleCI build to GH Actions
+# TODO: Figure out and prevent firefox and edge tests getting auto-cancelled (out of memory?)
+# TODO: Combine coverage reports in another job
 
 on:
-  pull_request:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   lint:
