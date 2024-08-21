@@ -22,7 +22,7 @@ to drive various underlying tools/frameworks to create real world testing scenar
 4. Does fuzzy matching to approximate actions of a real user
 5. Provides many steps out of the box
 6. Makes it easy to create **customized** steps
-7. Enables heirarchal configuration and env var **and CLI arg overrides**
+7. Enables hierarchical configuration and env var **and CLI arg overrides**
 8. Comes with a linter that is **customizable**
 
 ## Supporting docs
