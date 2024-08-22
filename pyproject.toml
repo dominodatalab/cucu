@@ -29,6 +29,9 @@ include = [
     { path = "CHANGELOG.md", format = "sdist" },
     { path = "LICENSE", format = "sdist" },
 ]
+packages = [  # here since we had to change the name on test.pypi.org
+    { include = "src/cucu" }
+]
 
 [tool.poetry.scripts]
 cucu = "cucu.cli:main"
