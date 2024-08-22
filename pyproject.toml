@@ -30,7 +30,7 @@ include = [
     { path = "LICENSE", format = "sdist" },
 ]
 packages = [  # here since we had to change the name on test.pypi.org
-    { include = "src/cucu" }
+    { include = "cucu", from = "src" },
 ]
 
 [tool.poetry.scripts]
