@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "cucu"
-version = "0.203.0"
-license = "MIT"
+version = "0.204.0"
 description = "Easy BDD web testing"
-authors = ["Domino Data Lab <open-source@dominodatalab.com>"]
 readme = "README.md"
+license = "The Clear BSD License"
+keywords = ["cucumber", "selenium", "behave"]
 homepage = "https://github.com/dominodatalab/cucu"
 repository = "https://github.com/dominodatalab/cucu"
-keywords = ["cucumber", "selenium"]
+authors = ["Domino Data Lab <open-source@dominodatalab.com>"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
@@ -18,7 +18,6 @@ classifiers = [
     "Natural Language :: English",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

@@ -1,7 +1,8 @@
 name: Create a New Release
 # The following job is run when a commit changes pyproject.toml file:
 #   * Checks if the version of the project is the same of the latest release
-#   * If not, create a new release
+#   * If not, create a new release and then start the publishing
+#   * to test.pypi.org job
 
 on:
   push:
@@ -35,3 +36,10 @@ jobs:
               -F prerelease=false \
               -F generate_release_notes=true
           fi
+      - name: trigger publish-test workflow
+        run: |
+            curl -X POST \
+            -H "Authorization: token ${{ github.token }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/dispatches \
+            -d '{"event_type": "trigger_publish_test"}'

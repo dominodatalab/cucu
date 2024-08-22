@@ -1,0 +1,123 @@
+name: build
+# This is a beta version of migrating the CircleCI build to GH Actions
+# TODO: Figure out and prevent firefox and edge tests getting auto-cancelled (out of memory?)
+# TODO: Combine coverage reports in another job
+
+on:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install depedencies
+      run: |
+        pip install poetry
+        poetry install --no-ansi
+    - uses: pre-commit/action@v3.0.1
+
+  unit:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install depedencies
+      run: |
+        pip install poetry
+        poetry install --no-ansi
+    - name: unit tests
+      run: |
+        poetry run coverage run -m pytest --junit-xml=output/unit-tests.xml
+    - name: package results
+      if: always()
+      run: |
+        mkdir -p output
+        mv .coverage.* output/
+        tar cvfz output.tgz output
+    - name: save output
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: unit-tests
+        path: output.tgz
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        check_name: "unit results"
+        files: |
+          output/unit-tests.xml
+
+  cucu:
+    needs: unit
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: ["chrome", "firefox", "edge"]
+    permissions:  # to publish junit results - see https://github.com/EnricoMi/publish-unit-test-result-action?tab=readme-ov-file#permissions
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+    services:
+      webserver:
+        image: selenium/standalone-${{ matrix.browser }}:124.0
+        ports:
+          - 4444:4444
+        options: --shm-size=4gb
+        env:
+          SE_NODE_MAX_SESSIONS: 12
+          SE_NODE_SESSION_TIMEOUT: 300
+          SCREEN_WIDTH: 1366
+          SCREEN_HEIGHT: 768
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install depedencies
+      run: |
+        pip install poetry
+        poetry install --no-ansi
+    - name: wait_for_selenium
+      # retry connection every 2s x 60 which is a total of 2 minutes
+      run: curl --retry 60 --retry-delay 2 --retry-connrefused http://localhost:4444
+    - name: UI tests
+      run: |
+        poetry run cucu run features --browser "${{ matrix.browser }}" --workers 1 --generate-report --report output/report --junit output/junit --selenium-remote-url http://localhost:4444
+      env:
+        COVERAGE_PROCESS_START: pyproject.toml
+        SE_NODE_MAX_SESSIONS: 12
+        SE_NODE_SESSION_TIMEOUT: 300
+        SCREEN_WIDTH: 1366
+        SCREEN_HEIGHT: 768
+        DISPLAY: :99  # Needed for headless mode
+        SELENIUM_HOST: localhost
+        SELENIUM_PORT: 4444
+    - name: package results
+      if: always()
+      run: |
+        mkdir -p output
+        mv .coverage.* output/
+        tar cvfz output.tgz output
+    - name: save output
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.browser }}-tests
+        path: output.tgz
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        check_name: "${{ matrix.browser }} results"
+        files: |
+          output/junit/**/*.xml

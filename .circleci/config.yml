@@ -3,26 +3,6 @@
 ---
 version: 2.1
 
-parameters:
-  python_version:
-    type: string
-    default: '3.11.7'
-  selenium_version:
-    type: string
-    default: '124.0'
-  se_node_max_sessions:
-    type: integer
-    default: 12
-  se_node_session_timeout:
-    type: integer
-    default: 300
-  screen_width:
-    type: integer
-    default: 1366
-  screen_height:
-    type: integer
-    default: 768
-
 workflows:
   build-test-publish:
     jobs:
@@ -46,7 +26,7 @@ workflows:
 jobs:
   pre-commit:
     docker:
-      - image: cimg/python:<<pipeline.parameters.python_version>>
+      - image: cimg/python:3.11.7
     resource_class: medium
     steps:
       - checkout
@@ -79,13 +59,13 @@ jobs:
         type: string
         default: "chrome"
     docker:
-      - image: cimg/python:<<pipeline.parameters.python_version>>
-      - image: selenium/standalone-<<parameters.browser>>:<<pipeline.parameters.selenium_version>>
+      - image: cimg/python:3.11.7
+      - image: selenium/standalone-<<parameters.browser>>:124.0
         environment:
-          SE_NODE_MAX_SESSIONS: <<pipeline.parameters.se_node_max_sessions>>
-          SE_NODE_SESSION_TIMEOUT: <<pipeline.parameters.se_node_session_timeout>>
-          SCREEN_WIDTH: <<pipeline.parameters.screen_width>>
-          SCREEN_HEIGHT: <<pipeline.parameters.screen_height>>
+          SE_NODE_MAX_SESSIONS: 12
+          SE_NODE_SESSION_TIMEOUT: 300
+          SCREEN_WIDTH: 1366
+          SCREEN_HEIGHT: 768
     resource_class: xlarge
     steps:
       - setup_remote_docker
