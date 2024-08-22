@@ -26,7 +26,7 @@ jobs:
         run: |
           pip install poetry
           poetry install --no-ansi
-      - name: change package name for test.pypi.org
+      - name: change package name for test.pypi.org since we don't have 'cucu'
         run: |
           sed -i "s|name = \"cucu\"|name = \"cucu-test\"|g" pyproject.toml
       - name: build package
