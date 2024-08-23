@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # Required for connection to pypi OIDC
+      contents: read  # For non-public repo
     steps:
       - name: checkout main
         uses: actions/checkout@v4
