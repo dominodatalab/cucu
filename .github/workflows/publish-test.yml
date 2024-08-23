@@ -25,17 +25,17 @@ jobs:
       - name: change package name for test.pypi.org since we don't have 'cucu'
         run: |
           sed -i "s|name = \"cucu\"|name = \"cucu-test\"|g" pyproject.toml
-      # - name: build package
-      #   run: |
-      #     pip install poetry
-      #     poetry install --no-ansi
-      #     poetry build
       - name: build package
         run: |
-          python -m pip install poetry
+          pip install poetry
           poetry install --no-ansi
-          poetry add build
-          poetry run python build -n
+          poetry build -vvv
+      # - name: build package
+      #   run: |
+      #     python -m pip install poetry
+      #     poetry install --no-ansi
+      #     poetry add build
+      #     poetry run python build -n
       - name: publish to test.pypi.org
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
