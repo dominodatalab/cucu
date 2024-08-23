@@ -22,20 +22,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: change package name for test.pypi.org since we don't have 'cucu'
-        run: |
-          sed -i "s|name = \"cucu\"|name = \"cucu-test\"|g" pyproject.toml
-      - name: build package
+      - name: Install depedencies
         run: |
           pip install poetry
           poetry install --no-ansi
-          poetry build -vvv
-      # - name: build package
-      #   run: |
-      #     python -m pip install poetry
-      #     poetry install --no-ansi
-      #     poetry add build
-      #     poetry run python build -n
+      - name: build package
+        run: |
+          poetry build
       - name: publish to test.pypi.org
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
