@@ -17,12 +17,12 @@ to drive various underlying tools/frameworks to create real world testing scenar
           And I click the button "Google Search"
          Then I wait to see the text "results"
     ```
-2. Designed to be run **locally and in CI**
+2. Designed to be run **locally** and in **CI**
 3. Runs a selenium container for you OR you can bring your own browser / container
 4. Does fuzzy matching to approximate actions of a real user
 5. Provides many steps out of the box
 6. Makes it easy to create **customized** steps
-7. Enables hierarchical configuration and env var **and CLI arg overrides**
+7. Enables hierarchical configuration and env var and **CLI arg overrides**
 8. Comes with a linter that is **customizable**
 
 ## Supporting docs
@@ -56,23 +56,18 @@ to drive various underlying tools/frameworks to create real world testing scenar
 # Installation
 ## Requirements
 Cucu requires
-1. python 3.7+
+1. python 3.9+
 2. docker (to do UI testing)
 
 ## Install Walkthrough
 _Get your repo setup using cucu as a test framework_
 
 1. install and start Docker if you haven't already
-2. add cucu your `requirements.txt` to get from GH by label (use current label number)
+2. install [cucu](https://pypi.org/project/cucu/)
    ```
-   git+ssh://git@github.com/dominodatalab/cucu@0.119.0#egg=cucu
+   pip install cucu
    ```
-3. install it
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. create the folder structure and files with content:
-
+3. create the folder structure and files with content:
     _Cucu uses the [behave framework](https://github.com/behave/behave) which expects the `features/steps` directories_
    - features/
       - steps/
@@ -92,7 +87,7 @@ _Get your repo setup using cucu as a test framework_
 
      # Define custom before/after hooks here
      ```
-1. list available cucu steps
+4. list available cucu steps
    ```bash
    cucu steps
    ```
@@ -101,7 +96,7 @@ _Get your repo setup using cucu as a test framework_
      cucu steps | fzf
      # start typing for search
      ```
-2. **create your first cucu test**
+5. **create your first cucu test**
    - features/my_first_test.feature
      ```gherkin
      Feature: My First Cucu Test
@@ -113,7 +108,7 @@ _Get your repo setup using cucu as a test framework_
            And I click the button "Google Search"
           Then I wait to see the text "results"
      ```
-3. **run it**
+6. **run it**
    ```bash
    cucu run features/my_first_test.feature
    ```
@@ -123,10 +118,10 @@ _Get your repo setup using cucu as a test framework_
 The command `cucu run` is used to run a given test or set of tests and in its
 simplest form you can use it like so:
 ```bash
-cucu run data/features/google_kitten_search.feature
+cucu run features/my_first_test.feature
 ```
 
-That would simply run the "google search for kittens test" and once it's
+That would simply run the "google search for the word google" and once it's
 finished executing you can use the `cucu report` command to generate an easy
 to navigate and read HTML test report which includes the steps and screenshots
 from that previous test run.
@@ -372,7 +367,7 @@ In the `fix` section one can choose to do `match` and `replace` or to simply
 ## Install From Source
 
 Clone this repo locally and then proceed to install python 3.7+ as indicated
-earlier. At this point you should be able to simply run `make install` at the
+earlier. At this point you should be able to simply run `make setup` at the
 top level of the source tree and it should install all required dependencies.
 
 ## Install From Build
