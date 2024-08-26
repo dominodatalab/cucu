@@ -15,7 +15,7 @@ repos:
       - id: makefile
         name: run make lint
         entry: make
-        args: ["check"]
+        args: ["lint"]
         language: system
         pass_filenames: false
         verbose: true
