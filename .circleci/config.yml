@@ -6,25 +6,25 @@ version: 2.1
 workflows:
   build-test-publish:
     jobs:
-      - pre-commit
+      - build
       - test:
           name: test-chrome
           browser: chrome
           requires:
-            - pre-commit
+            - build
       - test:
           name: test-edge
           browser: edge
           requires:
-            - pre-commit
+            - build
       - test:
           name: test-firefox
           browser: firefox
           requires:
-            - pre-commit
+            - build
 
 jobs:
-  pre-commit:
+  build:
     docker:
       - image: cimg/python:3.11.7
     resource_class: medium

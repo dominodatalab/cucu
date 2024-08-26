@@ -1,20 +1,25 @@
 # help menu when you run just `make`
+all: help setup fix lint test build
+
 help:
 	#   Provided as a convience to run commands with poetry
 	#   setup  - installs the necessary development dependencies.
-	#   format   - formats the code
-	#   check    - checks the code
-	#   test     - tests the code
-	#   build    - build the dist
+	#   fix    - fixes code formatting
+	#   lint   - lints the code
+	#   test   - tests the code
+	#   build  - build the dist
 
 setup: src/*
+	# make setup
 	poetry install
 
-format:
+fix:
+	# make fix
 	poetry run ruff format .
 	poetry run cucu lint --fix features
 
 lint:
+	# make lint
 	# lint code
 	poetry run ruff check .
 	# lint .feature files
@@ -23,15 +28,20 @@ lint:
 	poetry check
 
 test:
+	# make test
 	poetry run pytest tests
-	poetry run cucu run features --workers=4
+	# ℹ️ takes a while to run all cucu features
+	poetry run cucu run features --workers=4 --generate-report
+	# open HTML report at report/index.html
 
 build:
+	# make build
 	rm -f dist/*.tar.gz
 	rm -f dist/*.whl
 	poetry build
 
 coverage: src/* tests/*
+	# make coverage
 	rm -fr .coverage .coverage.*
 	# this makes it so all of the underlying `cucu` command calls are run
 	# with the coverage enabled even when spawned as a separate process for the
@@ -45,4 +55,4 @@ coverage: src/* tests/*
 	echo "open HTML coverage report at htmlcov/index.html"
 
 # disable caching for all make targets
-.PHONY: help format lint test build coverage
+.PHONY: all help format lint test build coverage
