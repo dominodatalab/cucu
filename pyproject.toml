@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cucu"
-version = "0.204.0"
+version = "0.205.0"
 description = "Easy BDD web testing"
 readme = "README.md"
 license = "The Clear BSD License"
@@ -60,14 +60,8 @@ mpire = "^2.10.2"
 psutil = "^6.0.0"
 
 [tool.poetry.group.dev.dependencies]
-bandit = "^1.7.7"
-black = "^24.2"
-detect-secrets = "^1.4.0"
 pytest = "^8.0.2"
 ruff = "^0.5.0"
-
-[tool.black]
-line-length = 79
 
 [tool.ruff]
 lint.select = ["E", "F", "I", "Q0"]  # default options + isort
