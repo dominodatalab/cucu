@@ -128,7 +128,19 @@ def before_scenario(ctx, scenario):
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
-        hook(ctx)
+        try:
+            hook(ctx)
+            logger.debug(f"HOOK {hook.__name__}: passed ✅")
+        except Exception as e:
+            # For any before scenario hooks,'hook_failed' status will be 'False'
+            # but will attach the error message to scenario.
+            error_message = (
+                f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}\n"
+            )
+            error_message += traceback.format_exc()
+            logger.error(error_message)
+            ctx.scenario.mark_skipped()
+            ctx.scenario.hook_failed = True
 
 
 def run_after_scenario_hook(ctx, scenario, hook):
@@ -136,7 +148,8 @@ def run_after_scenario_hook(ctx, scenario, hook):
         hook(ctx)
         logger.debug(f"HOOK {hook.__name__}: passed ✅")
     except Exception as e:
-        # For any after scenario hooks,'hook_failed' status will be 'False' but will attach the error message to scenario.
+        # For any after scenario hooks,'hook_failed' status will be 'False'
+        # but will attach the error message to scenario.
         error_message = (
             f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}\n"
         )

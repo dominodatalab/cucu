@@ -56,6 +56,7 @@ Feature: Run with hooks
       .* DEBUG just logging some stuff from my before all hook
       Feature: Feature that simply echo's "Hello World"
       .* DEBUG just logging some stuff from my before scenario hook
+      .* DEBUG HOOK before_scenario_log: passed ✅
 
         Scenario: This is a scenario that simply echo's hello world
       .* DEBUG just logging some stuff from my before step hook
@@ -203,7 +204,7 @@ Feature: Run with hooks
      When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_before_hooks/echo.feature --results {CUCU_RESULTS_DIR}/failing_before_hooks_results/ --generate-report --report {CUCU_RESULTS_DIR}/failing_before_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      Then I should see "{STDOUT}" contains the following
       """
-      HOOK-ERROR in before_scenario: RuntimeError: boom
+      HOOK-ERROR in before_scenario_fail: RuntimeError: boom
       """
       And I should see "{STDOUT}" contains the following
       """
@@ -303,3 +304,36 @@ Feature: Run with hooks
       And I click the link "Feature that has failing and passing after scenario hooks"
       And I click the link "Hello world scenario"
      Then I should see the text "Hello World"
+
+  Scenario: When a before_scenario hook fails, the Scenario is skipped, but reports as failed
+    Given I create a file at "{CUCU_RESULTS_DIR}/custom_hooks/environment.py" with the following:
+      """
+      from cucu.environment import *
+      from cucu import register_before_scenario_hook
+
+      def before_scenario_error(ctx):
+          raise RuntimeError("This error should be logged and reported.")
+
+      register_before_scenario_hook(before_scenario_error)
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/custom_hooks/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/custom_hooks/echo.feature" with the following:
+      """
+      Feature: Feature that simply echoes "Hello World"
+
+        Scenario: This is a scenario that simply echoes hello world
+          Given I echo "Hello"
+            And I echo "World"
+      """
+     * # The --show-skips argument is necessary for both the `cucu run` command and the `cucu report` command
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/custom_hooks/echo.feature --show-skips --results {CUCU_RESULTS_DIR}/custom_hooks_results/ -l debug --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     When I run the command "cucu report {CUCU_RESULTS_DIR}/custom_hooks_results --show-skips --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
+     Then I wait to click the link "This is a scenario that simply echoes hello world"
+     When I wait to click the link "Logs"
+      And I wait to click the link "cucu.debug.console.log"
+     Then I wait to see the text "This error should be logged and reported."
