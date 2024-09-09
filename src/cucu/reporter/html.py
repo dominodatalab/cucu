@@ -283,7 +283,7 @@ def generate(results, basepath, only_failures=False):
                         f"{scenario_filepath}/"
                     )
 
-                    if ".console." in log_filepath:
+                    if ".console." in log_filepath and scenario_started_at:
                         log_filepath += ".html"
 
                     log_files.append(
