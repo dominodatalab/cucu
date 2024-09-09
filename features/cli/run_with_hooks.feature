@@ -306,7 +306,7 @@ Feature: Run with hooks
      Then I should see the text "Hello World"
 
   @QE-16733
-  Scenario: When a before_scenario hook fails, the Scenario is skipped, but reports as failed
+  Scenario: When a before_scenario hook fails, the Scenario is skipped, but reports as errored
     Given I create a file at "{CUCU_RESULTS_DIR}/custom_hooks/environment.py" with the following:
       """
       from cucu.environment import *
@@ -334,7 +334,9 @@ Feature: Run with hooks
      When I run the command "cucu report {CUCU_RESULTS_DIR}/custom_hooks_results --show-skips --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
-     Then I wait to click the link "This is a scenario that simply echoes hello world"
+     Then I should see a table that contains rows matching the following
+        | .* | Feature that simply echoes "Hello World" | This is a scenario that simply echoes hello world | .* | errored | .* |
+      And I wait to click the link "This is a scenario that simply echoes hello world"
      * # Additional check of the log file itself here, when QE-16733 is resolved
      # When I wait to click the link "Logs"
      #  And I wait to click the link "cucu.debug.console.log"
