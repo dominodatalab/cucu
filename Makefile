@@ -1,4 +1,4 @@
-# help menu when you run just `make`
+# default target
 all: help setup fix lint test build
 
 help:
