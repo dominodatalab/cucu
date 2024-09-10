@@ -72,9 +72,6 @@ line-length = 79
 [tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"
 
-[tool.bandit]
-exclude_dirs = [".env", ".venv", "venv"]
-
 [tool.pytest]
 junit_family = "xunit2"
 
@@ -89,16 +86,3 @@ source = ["src"]
 [tool.coverage.report]
 fail_under = 70
 show_missing = true
-
-[tool.tox]
-legacy_tox_ini = """
-    [tox]
-    min_version = 4.5.1
-    env_list =
-        py310
-        py39
-        py38
-
-    [testenv]
-    commands = cucu run features --tags=report --tags=show-skips
-"""
