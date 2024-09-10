@@ -1,13 +1,13 @@
-[tool.poetry]
+[project]
 name = "cucu"
 version = "0.206.0"
 description = "Easy BDD web testing"
 readme = "README.md"
-license = "The Clear BSD License"
+license = { text = "The Clear BSD License" }
 keywords = ["cucumber", "selenium", "behave"]
 homepage = "https://github.com/dominodatalab/cucu"
 repository = "https://github.com/dominodatalab/cucu"
-authors = ["Domino Data Lab <open-source@dominodatalab.com>"]
+authors = [{ name = "Domino Data Lab", email = "open-source@dominodatalab.com" }]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
@@ -41,8 +41,10 @@ dependencies = [
     "ipdb~=0.13.13",
     "jellyfish~=1.0.1",
     "jinja2~=3.1.3",
+    "lsprotocol~=2023.0.1",
     "mpire~=2.10.2",
     "psutil~=6.0.0",
+    "pygls~=1.3.1",
     "pyyaml~=6.0.1",
     "requests~=2.31.0",
     "selenium~=4.15",
@@ -65,8 +67,8 @@ dev-dependencies = [
 
 [tool.ruff]
 lint.select = ["E", "F", "I", "Q0"]  # default options + isort
-exclude = [".env", ".venv", "venv", "__init__.py"]
 lint.ignore = ["E501", "F403"]  # line_length, import *
+exclude = [".env", ".venv", "venv", "__init__.py"]
 line-length = 79
 
 [tool.ruff.lint.flake8-quotes]
