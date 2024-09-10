@@ -126,9 +126,9 @@ class CucuJUnitFormatter(Formatter):
             self.current_scenario_results["tags"] = ", ".join(scenario.tags)
 
         scenario_name = escape(scenario.name)
-        self.feature_results["scenarios"][
-            scenario_name
-        ] = self.current_scenario_results
+        self.feature_results["scenarios"][scenario_name] = (
+            self.current_scenario_results
+        )
 
         # we write out every new scenario into the JUnit results output
         # which allows us to have a valid JUnit XML results file per feature

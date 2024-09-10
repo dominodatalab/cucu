@@ -107,9 +107,9 @@ def parse_matcher(name, rule_name, rule, line, state):
                         f', "{value}" also used in "{other_filepath}"',
                     )
 
-            state["unique_per_all_features"][rule_name][
-                value
-            ] = feature_filepath
+            state["unique_per_all_features"][rule_name][value] = (
+                feature_filepath
+            )
             return (False, "")
 
         # unique across all scenarios across all features

@@ -112,7 +112,7 @@ def init_step_hooks(stdout, stderr):
                         func,
                         *args,
                         variable_passthru=variable_passthru,
-                        **kwargs
+                        **kwargs,
                     )
 
                 fix_inner_step(inner_step)

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.206.0
+- chore - prep for publish
+- replace black with ruff
+- remove detect-secrets to be replaced by GH repo security
+- remove bandit to be replaced by GH CodeQL
+- cleanup makefile
+
 ## 0.205.0
 - change - increase information logged for failing before_scenario_hooks
 
