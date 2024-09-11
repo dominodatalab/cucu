@@ -30,6 +30,7 @@ jobs:
     resource_class: medium
     steps:
       - checkout
+      - inline-orb-uv/setup-uv
       - run:
           name: install dependencies
           command: |
@@ -39,11 +40,7 @@ jobs:
             pre-commit install-hooks
       - run:
           name: install cucu dependencies
-          command: |
-            set +eo pipefail
-            curl -LsSf https://astral.sh/uv/install.sh | sh
-            source $HOME/.cargo/env
-            uv sync
+          command: uv sync
       - run:
           name: build the cucu python package
           command: uv build
@@ -71,13 +68,10 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - inline-orb-uv/setup-uv
       - run:
           name: install cucu dependencies
-          command: |
-            set +eo pipefail
-            curl -LsSf https://astral.sh/uv/install.sh | sh
-            source $HOME/.cargo/env
-            uv sync
+          command: uv sync
       - run:
           name: install test dependencies
           command: |
@@ -126,3 +120,27 @@ jobs:
           path: report.tgz
       - store_test_results:
           path: junit_results
+
+orbs:
+  inline-orb-uv: 
+    jobs:
+      setup-uv:
+        docker:
+          - image: circleci/python:3.9
+        steps:
+          - restore_cache:
+              keys:
+                - v1-uv-cache-{{ checksum "pyproject.toml" }}
+          - run:
+              name: Install uv
+              command: |
+                curl -LsSf https://astral.sh/uv/install.sh | sh
+                echo 'source $HOME/.cargo/env' >> $BASH_ENV
+                source $BASH_ENV
+          - save_cache:
+              paths:
+                - $HOME/.cargo/env
+              key: v1-uv-cache-{{ checksum "pyproject.toml" }}
+          - run:
+              name: Verify uv installation
+              command: uv --version
