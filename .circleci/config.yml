@@ -3,6 +3,30 @@
 ---
 version: 2.1
 
+orbs:
+  inline-orb-uv: 
+    jobs:
+      setup-uv:
+        docker:
+          - image: circleci/python:3.9
+        steps:
+          - restore_cache:
+              keys:
+                - v1-uv-cache-{{ checksum "pyproject.toml" }}
+          - run:
+              name: Install uv
+              command: |
+                curl -LsSf https://astral.sh/uv/install.sh | sh
+                echo 'source $HOME/.cargo/env' >> $BASH_ENV
+                source $BASH_ENV
+          - save_cache:
+              paths:
+                - $HOME/.cargo/env
+              key: v1-uv-cache-{{ checksum "pyproject.toml" }}
+          - run:
+              name: Verify uv installation
+              command: uv --version
+
 workflows:
   build-test-publish:
     jobs:
@@ -120,27 +144,3 @@ jobs:
           path: report.tgz
       - store_test_results:
           path: junit_results
-
-orbs:
-  inline-orb-uv: 
-    jobs:
-      setup-uv:
-        docker:
-          - image: circleci/python:3.9
-        steps:
-          - restore_cache:
-              keys:
-                - v1-uv-cache-{{ checksum "pyproject.toml" }}
-          - run:
-              name: Install uv
-              command: |
-                curl -LsSf https://astral.sh/uv/install.sh | sh
-                echo 'source $HOME/.cargo/env' >> $BASH_ENV
-                source $BASH_ENV
-          - save_cache:
-              paths:
-                - $HOME/.cargo/env
-              key: v1-uv-cache-{{ checksum "pyproject.toml" }}
-          - run:
-              name: Verify uv installation
-              command: uv --version
