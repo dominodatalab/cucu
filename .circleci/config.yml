@@ -32,15 +32,8 @@ jobs:
       - checkout
       - inline-orb-uv/setup-uv
       - run:
-          name: install dependencies
-          command: |
-            set +eo pipefail
-            pip install --upgrade pip
-            pip install pre-commit
-            pre-commit install-hooks
-      - run:
-          name: install cucu dependencies
-          command: uv sync
+          name: install cucu with Python 3.12
+          command: uv sync -p 3.12 --dev
       - run:
           name: build the cucu python package
           command: uv build
@@ -49,7 +42,7 @@ jobs:
           command: pip install dist/cucu-*.tar.gz
       - run:
           name: run pre-commit validations
-          command: pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
+          command: uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
 
   test:
     parameters:

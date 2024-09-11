@@ -87,9 +87,6 @@ There are a few reasons for writing the actual tests in `gherkin` including:
 7. [ipdb]() - debugging convience
 8. [jellyfish]() / [humanize]() / [tabulate]() - easier human readablilty
 
-TODO remove:
-pebble = "^5.0.3"
-
 # Dev Setup
 The short list
 1. install [uv](https://github.com/astral-sh/uv)
@@ -99,14 +96,12 @@ The short list
    # creates virtual env, downloading python if needed
    make setup
 
-   # lint
+   # lint the code
    make lint
 
-
    # from top-level of cucu directory
-   pre-commit install
+   uv run pre-commit install
    ```
-
 
 ## Running cucu
 1. `uv run` cucu commands

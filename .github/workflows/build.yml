@@ -17,8 +17,10 @@ jobs:
         enable-cache: true
     - name: Install cucu with Python 3.12
       run: |
-        uv sync -p 3.12
-    - uses: pre-commit/action@v3.0.1
+        uv sync -p 3.12 --dev
+    - name: Run pre-commit
+      run: |
+        uv run pre-commit run
 
   unit:
     needs: lint
@@ -31,7 +33,7 @@ jobs:
         enable-cache: true
     - name: Install cucu with Python 3.12
       run: |
-        uv sync -p 3.12
+        uv sync -p 3.12 --dev
     - name: unit tests
       run: |
         uv run coverage run -m pytest --junit-xml=output/unit-tests.xml
