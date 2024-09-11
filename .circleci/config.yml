@@ -35,15 +35,19 @@ jobs:
           name: install cucu with Python 3.12
           command: uv sync -p 3.12 --dev
       - run:
+          name: run pre-commit validations
+          command: uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
+      - run:
           name: build the cucu python package
           command: uv build
       - run:
-          name: install cucu globally
-          command: pip install dist/cucu-*.tar.gz
-      - run:
-          name: run pre-commit validations
-          command: uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
-
+          name: test cucu install
+          command: |
+            rm -rf .venv
+            uv venv .venv -p 3.12
+            source .venv/bin/activate
+            pip install dist/cucu-*.tar.gz
+            cucu --help
   test:
     parameters:
       browser:
