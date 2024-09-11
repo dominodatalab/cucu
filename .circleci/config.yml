@@ -41,13 +41,9 @@ jobs:
           name: build the cucu python package
           command: uv build
       - run:
-          name: test cucu install
-          command: |
-            rm -rf .venv
-            uv venv .venv -p 3.12
-            source .venv/bin/activate
-            pip install dist/cucu-*.tar.gz
-            cucu --help
+          name: install cucu globally
+          command: pip install dist/cucu-*.tar.gz
+
   test:
     parameters:
       browser:
