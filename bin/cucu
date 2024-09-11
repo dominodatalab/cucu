@@ -1,2 +1,2 @@
 #!env bash
-poetry run cucu $@
+uv run cucu $@

@@ -372,15 +372,13 @@ top level of the source tree and it should install all required dependencies.
 
 ## Install From Build
 
-Within the cucu directory you can run `poetry build` and that will produce some
+Within the cucu directory you can run `uv build` and that will produce some
 output like so:
 
 ```bash
-Building cucu (0.1.0)
-  - Building sdist
-  - Built cucu-0.1.0.tar.gz
-  - Building wheel
-  - Built cucu-0.1.0-py3-none-any.whl
+Building source distribution...
+Building wheel from source distribution...
+Successfully built dist/cucu-0.207.0.tar.gz and dist/cucu-0.207.0-py3-none-any.whl
 ```
 
 At this point you can install the file `dist/cucu-0.1.0.tar.gz` using

@@ -8,7 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 0.207.0
 - chore - prep for publish - p2
 - replace poetry with uv
-
+- set default local python to 3.12
 
 ## 0.206.0
 - chore - prep for publish

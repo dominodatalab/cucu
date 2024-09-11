@@ -92,71 +92,36 @@ pebble = "^5.0.3"
 
 # Dev Setup
 The short list
-1. install `poetry`
-2. install a compatible python - see pyproject.toml
-3. start docker - used for `cucu run`*
-4. shell
+1. install [uv](https://github.com/astral-sh/uv)
+2. start docker - used for `cucu run`*
+3. shell
    ```bash
-   # install poetry plugin
-   poetry self add poetry-dotenv-plugin
+   # creates virtual env, downloading python if needed
+   make setup
 
-   # creates your poetry env
-   make install
+   # lint
+   make lint
 
-   # just making sure all the code checks work
-   make check
 
    # from top-level of cucu directory
    pre-commit install
    ```
 
-### Fancier Dev Setup
-Disclaimer: Tested only on MacOS, and needed for VSCode debugging
-
-1. use `pipx` to install `poetry` in a separate python virtual environment
-   ```bash
-   brew install pipx
-   pipx install poetry
-   # inject the extension into the poetry pipx virtualenv
-   pipx inject poetry poetry-dotenv-plugin
-   ```
-   _now the poetry app and dependencies won't be in your main python install_
-2. setup poetry's directory to use the project's directory (THIS IS A GLOBAL CHANGE)
-   1. exit poetry shell if you're in it
-   2. delete all existing poetry virtualenv directories
-      ```bash
-      rm -rf ~/.cache/pypoetry
-      ```
-   3. change poetry's global config
-      ```bash
-      poetry config virtualenvs.in-project true
-      ```
-   4. re-install cucu's poetry
-      ```bash
-      poetry install
-      # you should see the newly created virtualenv directory under the cucu top-level directory
-      ls .venv/
-      ```
-   _required for VSCode debugging below_
 
 ## Running cucu
-1. drop into a poetry shell environment
+1. `uv run` cucu commands
    ```bash
-   poetry shell
-   ```
-2. once in the poetry shell use the `cucu` command like normal
-   ```bash
-   cucu
+   uv run cucu
    ```
 3. you can run a test and see the generated **results/** directory
    ```bash
-   cucu run features/browser/links.feature
+   uv run cucu run features/browser/links.feature
    ls results
    ```
 4. and even generate an html report
    ```bash
-   cucu report
-   ls report/index.html
+   uv run cucu report
+   ls report
    ```
 
 ## Debugging cucu
@@ -164,9 +129,8 @@ Here's some options:
 1. drop into an ipdb debugger on failure using the cucu run `-i` argument
 2. add a `breakpoint()` call to python code to drop into an ipdb debugger
 3. configure VSCode to launch and connect in debug mode
-   1. setup poetry's directory to use the project's directory - see [Fancier Dev Setup](#fancier-dev-setup)
-   2. in VSCode **`Python: Select Interpreter`** as `./.venv/bin/python`
-   3. add a launch`.vscode/launch.json` and **change the `args`**
+   1. in VSCode **`Python: Select Interpreter`** as `./.venv/bin/python`
+   2. add a launch`.vscode/launch.json` and **change the `args`**
       ```json
       {
           "version": "0.2.0",
@@ -182,8 +146,8 @@ Here's some options:
           ]
       }
       ```
-   4. add a VSCode breakpoint to python code
-   5. run the VSCode debugger as normal
+   3. add a VSCode breakpoint to python code
+   4. run the VSCode debugger as normal
 4. if are developing cucu and want to test it as a framework in another project then install it in `--editable` mode
    ```bash
    # change to your project
@@ -198,19 +162,6 @@ Easy as this (but runs a while)
 ```bash
 make test
 ```
-
-TODO - Coverage
-```bash
-make coverage
-```
-
-## Preventing secrets
-Only you can prevent 🌳🔥 secrets from being commited to the repo!
-We use Yelp's `detect-secrets` in `cucu` development to help prevent secrets from being commited to the repo.
-This requires developers to be mindful by using `make check` before committing.
-If you encounter false positives, run `make update-secrets`.
-This should solve the problem by updating the ignore list.
-
 
 # Backstory
 Cucu was originally developed primarly by Rodney Gomes, leveraging his
