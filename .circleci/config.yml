@@ -133,7 +133,7 @@ orbs:
           - run:
               name: Install uv
               command: |
-                pip install uv
+                curl -LsSf https://astral.sh/uv/install.sh | sh
                 echo 'source $HOME/.cargo/env' >> $BASH_ENV
                 source $BASH_ENV
 
