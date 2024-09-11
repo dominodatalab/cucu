@@ -3,6 +3,7 @@ from multiprocessing import Process
 from unittest import mock
 
 from click.testing import CliRunner
+
 from cucu.cli import core
 
 RUNTIME_TIMEOUT = 10

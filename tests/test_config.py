@@ -1,7 +1,8 @@
 import tempfile
 
-import cucu
 import pytest
+
+import cucu
 from cucu.config import CONFIG, leaf_map
 
 

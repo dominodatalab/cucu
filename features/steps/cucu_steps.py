@@ -1,6 +1,7 @@
 # only thing your project requires to load cucu steps
-from cucu import step
 from selenium.webdriver.common.by import By
+
+from cucu import step
 
 
 @step('I should see the element with id "{id}" has a child')

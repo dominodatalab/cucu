@@ -74,6 +74,9 @@ line-length = 79
 [tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"
 
+[tool.ruff.lint.isort]
+detect-same-package = true
+
 [tool.pytest]
 junit_family = "xunit2"
 

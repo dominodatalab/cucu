@@ -1,4 +1,5 @@
 import pytest
+
 from cucu.browser.core import Browser
 
 
