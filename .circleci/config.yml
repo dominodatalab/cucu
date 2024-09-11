@@ -128,20 +128,17 @@ orbs:
         steps:
           - restore_cache:
               keys:
-                - v1-uv-cache-{{ checksum "pyproject.toml" }}
-
+                - v1-uv-cache-{{ checksum "uv.lock" }}
           - run:
               name: Install uv
               command: |
                 curl -LsSf https://astral.sh/uv/install.sh | sh
                 echo 'source $HOME/.cargo/env' >> $BASH_ENV
                 source $BASH_ENV
-
           - save_cache:
               paths:
                 - $HOME/.cargo/env
-              key: v1-uv-cache-{{ checksum "pyproject.toml" }}
-
+              key: v1-uv-cache-{{ checksum "uv.lock" }}
           - run:
               name: Verify uv installation
               command: uv --version
