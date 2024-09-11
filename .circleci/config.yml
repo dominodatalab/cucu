@@ -42,6 +42,7 @@ jobs:
           command: |
             set +eo pipefail
             curl -LsSf https://astral.sh/uv/install.sh | sh
+            source $HOME/.cargo/env
             uv sync
       - run:
           name: build the cucu python package
@@ -75,6 +76,7 @@ jobs:
           command: |
             set +eo pipefail
             curl -LsSf https://astral.sh/uv/install.sh | sh
+            source $HOME/.cargo/env
             uv sync
       - run:
           name: install test dependencies
