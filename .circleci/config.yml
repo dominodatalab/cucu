@@ -26,7 +26,7 @@ workflows:
 jobs:
   build:
     docker:
-      - image: cimg/python:3.11.7
+      - image: cimg/python:3.12
     resource_class: medium
     steps:
       - checkout
@@ -50,7 +50,7 @@ jobs:
         type: string
         default: "chrome"
     docker:
-      - image: cimg/python:3.11.7
+      - image: cimg/python:3.12
       - image: selenium/standalone-<<parameters.browser>>:124.0
         environment:
           SE_NODE_MAX_SESSIONS: 12
