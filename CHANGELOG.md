@@ -10,6 +10,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - replace poetry with uv
 - set default local python to 3.12
 - run pre-commit with uv
+- fix isort with ruff
 
 ## 0.206.0
 - chore - prep for publish
