@@ -11,30 +11,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v2
       with:
-        python-version: '3.11'
-    - name: Install depedencies
+        enable-cache: true
+    - name: Install cucu with Python 3.12
       run: |
-        pip install poetry
-        poetry install --no-ansi
-    - uses: pre-commit/action@v3.0.1
+        uv sync -p 3.12 --dev
+    - name: Run pre-commit
+      run: |
+        uv run pre-commit run
 
   unit:
     needs: lint
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v2
       with:
-        python-version: '3.11'
-    - name: Install depedencies
+        enable-cache: true
+    - name: Install cucu with Python 3.12
       run: |
-        pip install poetry
-        poetry install --no-ansi
+        uv sync -p 3.12 --dev
     - name: unit tests
       run: |
-        poetry run coverage run -m pytest --junit-xml=output/unit-tests.xml
+        uv run coverage run -m pytest --junit-xml=output/unit-tests.xml
     - name: package results
       if: always()
       run: |
@@ -80,19 +82,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v2
       with:
-        python-version: '3.11'
-    - name: Install depedencies
+        enable-cache: true
+    - name: Install Python 3.12
       run: |
-        pip install poetry
-        poetry install --no-ansi
+        uv python install 3.12
+        uv sync
     - name: wait_for_selenium
       # retry connection every 2s x 60 which is a total of 2 minutes
       run: curl --retry 60 --retry-delay 2 --retry-connrefused http://localhost:4444
     - name: UI tests
       run: |
-        poetry run cucu run features --browser "${{ matrix.browser }}" --workers 1 --generate-report --report output/report --junit output/junit --selenium-remote-url http://localhost:4444
+        uv run cucu run features --browser "${{ matrix.browser }}" --workers 1 --generate-report --report output/report --junit output/junit --selenium-remote-url http://localhost:4444
       env:
         COVERAGE_PROCESS_START: pyproject.toml
         SE_NODE_MAX_SESSIONS: 12

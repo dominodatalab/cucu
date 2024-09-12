@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.207.0
+- chore - prep for publish - p2
+- replace poetry with uv
+- set default local python to 3.12
+- run pre-commit with uv
+- fix isort with ruff
+
 ## 0.206.0
 - chore - prep for publish
 - replace black with ruff

@@ -17,15 +17,15 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v2
         with:
-          python-version: '3.11'
-      - name: Install depedencies
+          enable-cache: true
+      - name: Install cucu with Python 3.12
         run: |
-          pip install poetry
-          poetry install --no-ansi
+          uv sync -p 3.12
       - name: build package
         run: |
-          poetry build
+          uv build
       - name: publish to test.pypi.org
         uses: pypa/gh-action-pypi-publish@release/v1

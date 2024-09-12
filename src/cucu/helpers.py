@@ -15,7 +15,7 @@ class step(object):
     call @step() and when that decorator executes in behave it will take the
     location of the function provided to the decorator and use that to both
     report as the location of the step's "source"
-    (ie poetry run behave --no-summary --format steps.doc --dry-run). Now that
+    (ie uv run behave --no-summary --format steps.doc --dry-run). Now that
     would be confusing as the step is likely defined somewhere under
     `src/cucu/steps` but the location in the behave steps output would be wrong
     and then at runtime if there's an exception throw from one of the other
