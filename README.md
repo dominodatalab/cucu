@@ -50,7 +50,6 @@ to drive various underlying tools/frameworks to create real world testing scenar
   - [Before / After hooks](#before--after-hooks)
   - [Custom lint rules](#custom-lint-rules)
 - [More Ways To Install Cucu](#more-ways-to-install-cucu)
-  - [Install From Source](#install-from-source)
   - [Install From Build](#install-from-build)
 
 # Installation
@@ -364,12 +363,6 @@ In the `fix` section one can choose to do `match` and `replace` or to simply
 
 # More Ways To Install Cucu
 
-## Install From Source
-
-Clone this repo locally and then proceed to install python 3.7+ as indicated
-earlier. At this point you should be able to simply run `make setup` at the
-top level of the source tree and it should install all required dependencies.
-
 ## Install From Build
 
 Within the cucu directory you can run `uv build` and that will produce some
@@ -382,5 +375,5 @@ Successfully built dist/cucu-0.207.0.tar.gz and dist/cucu-0.207.0-py3-none-any.w
 ```
 
 At this point you can install the file `dist/cucu-0.1.0.tar.gz` using
-`pip install ....tar.gz` anywhere you'd like and have the `cucu` tool ready to
+`pip install .../cucu/dist/cucu-*.tar.gz` anywhere you'd like and have the `cucu` tool ready to
 run.
