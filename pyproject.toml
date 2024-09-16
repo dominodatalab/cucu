@@ -1,6 +1,6 @@
 [project]
 name = "cucu"
-version = "0.208.0"
+version = "1.0.0"
 description = "Easy BDD web testing"
 readme = "README.md"
 license = { text = "The Clear BSD License" }
