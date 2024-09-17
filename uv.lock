@@ -263,7 +263,7 @@ toml = [
 
 [[package]]
 name = "cucu"
-version = "0.207.0"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
