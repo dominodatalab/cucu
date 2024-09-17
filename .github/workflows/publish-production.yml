@@ -1,5 +1,5 @@
 name: publish-production
-# publish to test.pypi.org on merge to default branch
+# publish to pypi.org on merge to default branch
 
 on:
   workflow_dispatch:
@@ -27,5 +27,5 @@ jobs:
       - name: build package
         run: |
           uv build
-      - name: publish to test.pypi.org
+      - name: publish to pypi.org
         uses: pypa/gh-action-pypi-publish@release/v1
