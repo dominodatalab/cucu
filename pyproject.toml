@@ -7,7 +7,7 @@ license = { text = "The Clear BSD License" }
 keywords = ["cucumber", "selenium", "behave"]
 authors = [
     {name = "Domino Data Lab", email = "open-source@dominodatalab.com"},
-    {name = "Rodney Gomes", email = "rlgomes@users.noreply.github.com"},
+    {name = "Rodney Gomes", email = "107359+rlgomes@users.noreply.github.com"},
     {name = "Cedric Young", email = "4129217+ccedricyoung@users.noreply.github.com"},
     {name = "Xin Dong", email = "104880864+ddl-xin@users.noreply.github.com"},
     {name = "Kavya", email = "91882851+ddl-kavya@users.noreply.github.com"},
