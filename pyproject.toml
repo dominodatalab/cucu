@@ -7,18 +7,18 @@ license = { text = "The Clear BSD License" }
 keywords = ["cucumber", "selenium", "behave"]
 authors = [
     {name = "Domino Data Lab", email = "open-source@dominodatalab.com"},
-    {name = "Rodney Gomes", email = "rlgomes@noreply.github.com"},
-    {name = "Cedric Young", email = "ccedricyoung@noreply.github.com"},
-    {name = "Xin Dong", email = "ddl-xin@noreply.github.com"},
-    {name = "Kavya", email = "ddl-kavya@noreply.github.com"},
-    {name = "Kevin Garton", email = "ddl-kgarton@noreply.github.com"},
-    {name = "Joy Liao", email = "ddl-joy-liao@noreply.github.com"},
+    {name = "Rodney Gomes", email = "rlgomes@users.noreply.github.com"},
+    {name = "Cedric Young", email = "4129217+ccedricyoung@users.noreply.github.com"},
+    {name = "Xin Dong", email = "104880864+ddl-xin@users.noreply.github.com"},
+    {name = "Kavya", email = "91882851+ddl-kavya@users.noreply.github.com"},
+    {name = "Kevin Garton", email = "71028750+ddl-kgarton@users.noreply.github.com"},
+    {name = "Joy Liao", email = "107583686+ddl-joy-liao@users.noreply.github.com"},
 ]
 maintainers = [
     {name = "Domino Data Lab", email = "open-source@dominodatalab.com"},
-    {name = "Cedric Young", email = "ccedricyoung@noreply.github.com"},
-    {name = "Kevin Garton", email = "ddl-kgarton@noreply.github.com"},
-    {name = "Brian Colby", email = "ddl-bcolby@noreply.github.com"}
+    {name = "Cedric Young", email = "4129217+ccedricyoung@users.noreply.github.com"},
+    {name = "Kevin Garton", email = "71028750+ddl-kgarton@users.noreply.github.com"},
+    {name = "Brian Colby", email = "92048365+ddl-bcolby@users.noreply.github.com"}
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
