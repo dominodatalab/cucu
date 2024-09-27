@@ -1,13 +1,25 @@
 [project]
 name = "cucu"
-version = "1.0.0"
+version = "1.0.1"
 description = "Easy BDD web testing"
 readme = "README.md"
 license = { text = "The Clear BSD License" }
 keywords = ["cucumber", "selenium", "behave"]
-homepage = "https://github.com/dominodatalab/cucu"
-repository = "https://github.com/dominodatalab/cucu"
-authors = [{ name = "Domino Data Lab", email = "open-source@dominodatalab.com" }]
+authors = [
+    {name = "Domino Data Lab", email = "open-source@dominodatalab.com"},
+    {name = "Rodney Gomes", email = "rlgomes@noreply.github.com"},
+    {name = "Cedric Young", email = "ccedricyoung@noreply.github.com"},
+    {name = "Xin Dong", email = "ddl-xin@noreply.github.com"},
+    {name = "Kavya", email = "ddl-kavya@noreply.github.com"},
+    {name = "Kevin Garton", email = "ddl-kgarton@noreply.github.com"},
+    {name = "Joy Liao", email = "ddl-joy-liao@noreply.github.com"},
+]
+maintainers = [
+    {name = "Domino Data Lab", email = "open-source@dominodatalab.com"},
+    {name = "Cedric Young", email = "ccedricyoung@noreply.github.com"},
+    {name = "Kevin Garton", email = "ddl-kgarton@noreply.github.com"},
+    {name = "Brian Colby", email = "ddl-bcolby@noreply.github.com"}
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
@@ -51,6 +63,11 @@ dependencies = [
     "tabulate~=0.9.0",
     "tenacity~=9.0.0",
 ]
+
+[project.urls]
+Homepage  = "https://github.com/dominodatalab/cucu"
+Download  = "https://pypi.org/project/cucu/"
+"Source Code" = "https://github.com/dominodatalab/cucu"
 
 [project.scripts]
 cucu = "cucu.cli:main"
