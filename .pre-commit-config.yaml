@@ -13,9 +13,9 @@ repos:
   - repo: local
     hooks:
       - id: makefile
-        name: run make lint
+        name: run make ci-lint
         entry: make
-        args: ["lint"]
+        args: ["ci-lint"]
         language: system
         pass_filenames: false
         verbose: true
