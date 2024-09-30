@@ -15,6 +15,7 @@ setup: src/*
 
 fix:
 	# make fix
+	uv sync
 	uv run ruff format .
 	uv run ruff check . --fix
 	uv run cucu lint --fix features
@@ -23,6 +24,17 @@ lint:
 	# make lint
 	# lint code
 	uv run ruff check .
+	# pre-commit
+	SKIP=makefile uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
+	# lint .feature files
+	uv run cucu lint features
+
+ci-lint:
+	# make ci-lint
+	# only for use by CI through pre-commit
+	# lint code
+	uv run ruff check .
+	# don't run pre-commit since CI already did
 	# lint .feature files
 	uv run cucu lint features
 
@@ -55,4 +67,4 @@ coverage: src/* tests/*
 	echo "open HTML coverage report at htmlcov/index.html"
 
 # disable caching for all make targets
-.PHONY: all help format lint test build coverage
+.PHONY: all help format lint ci-lint test build coverage
