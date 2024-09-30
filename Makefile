@@ -15,6 +15,7 @@ setup: src/*
 
 fix:
 	# make fix
+	uv sync
 	uv run ruff format .
 	uv run ruff check . --fix
 	uv run cucu lint --fix features
@@ -23,6 +24,8 @@ lint:
 	# make lint
 	# lint code
 	uv run ruff check .
+	# pre-commit
+	uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
 	# lint .feature files
 	uv run cucu lint features
 
