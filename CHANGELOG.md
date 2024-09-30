@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.0.1
 - chore - fix pyproject.toml authors and urls
+- change - add pre-commit to makefile
 
 ## 1.0.0
 - change to 1.0.0!
