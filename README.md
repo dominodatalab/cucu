@@ -1,4 +1,4 @@
-# ![Cucu Logo](logo.png) **CUCU** - Easy BDD web testing
+# ![Cucu Logo](https://raw.githubusercontent.com/dominodatalab/cucu/refs/heads/main/logo.png) **CUCU** - Easy BDD web testing
 
 End-to-end testing framework that uses [gherkin](https://cucumber.io/docs/gherkin/)
 to drive various underlying tools/frameworks to create real world testing scenarios.
