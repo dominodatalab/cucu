@@ -67,4 +67,4 @@ coverage: src/* tests/*
 	echo "open HTML coverage report at htmlcov/index.html"
 
 # disable caching for all make targets
-.PHONY: all help format lint ci-lint test build coverage
+.PHONY: all help fix lint ci-lint test build coverage

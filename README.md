@@ -1,11 +1,11 @@
-# ![Cucu Logo](logo.png) **CUCU** - Easy BDD web testing
+# ![Cucu Logo](https://raw.githubusercontent.com/dominodatalab/cucu/refs/heads/main/logo.png) **CUCU** - Easy BDD web testing <!-- omit from toc -->
 
 End-to-end testing framework that uses [gherkin](https://cucumber.io/docs/gherkin/)
 to drive various underlying tools/frameworks to create real world testing scenarios.
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/dominodatalab/cucu/tree/main.svg?style=svg&circle-token=CCIPRJ_FnyZPtQ9odT5vmGW3CmZNU_bf0cfd776a09729ca4225a2860d9b59c4dae88af)](https://dl.circleci.com/status-badge/redirect/gh/dominodatalab/cucu/tree/main)
 
-## Why cucu?
+## Why cucu? <!-- omit from toc -->
 1. Cucu avoids unnecessary abstractions (i.e. no Page Objects!) while keeping scenarios readable.
     ```gherkin
     Feature: My First Cucu Test
@@ -25,19 +25,15 @@ to drive various underlying tools/frameworks to create real world testing scenar
 7. Enables hierarchical configuration and env var and **CLI arg overrides**
 8. Comes with a linter that is **customizable**
 
-## Supporting docs
+## Supporting docs <!-- omit from toc -->
 1. [CHANGELOG.md](CHANGELOG.md) - for latest news
 2. [CONTRIBUTING.md](CONTRIBUTING.md) - how we develop and test the library
 3. [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 4. [CONTRIBUTORS.md](CONTRIBUTORS.md)
 5. [LICENSE](LICENSE)
 
-# Table of Contents
+# Table of Contents <!-- omit from toc -->
 
-- [ **CUCU** - Easy BDD web testing](#-cucu---easy-bdd-web-testing)
-  - [Why cucu?](#why-cucu)
-  - [Supporting docs](#supporting-docs)
-- [Table of Contents](#table-of-contents)
 - [Installation](#installation)
   - [Requirements](#requirements)
   - [Install Walkthrough](#install-walkthrough)
