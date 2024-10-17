@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag and Drop File Upload Test with Validation</title>
+    <style>
+        #drop-zone {
+            width: 500px;
+            height: 100px;
+            border: 2px dashed #0088cc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            font-family: Arial, sans-serif;
+            color: #0088cc;
+            background-color: #f9f9f9;
+        }
+        #drop-zone.hover {
+            background-color: #f0f0f0;
+        }
+        #message {
+            text-align: center;
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Drag and Drop File Upload Test</h2>
+
+    <!-- Drag and Drop Zone -->
+    <div id="drop-zone">
+        Click or drag file to this area to upload
+    </div>
+
+    <input type="file" id="myFile" style="display: none;">
+
+    <!-- Validation Message Area -->
+    <div id="message"></div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('myFile');
+        const messageDiv = document.getElementById('message');
+
+        // Function to display validation messages
+        function showMessage(message, isError = false) {
+            messageDiv.textContent = message;
+            messageDiv.style.color = isError ? '#ff0000' : '#008000'; // Red for errors, green for success
+        }
+
+        // Trigger file input click when the drop zone is clicked
+        dropZone.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        // Handle drag over
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('hover');
+        });
+
+        // Handle drag leave
+        dropZone.addEventListener('dragleave', function() {
+            dropZone.classList.remove('hover');
+        });
+
+        // Handle file drop
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('hover');
+            const files = e.dataTransfer.files;
+
+            if (files.length > 0) {
+                showMessage(`File dropped: ${files[0].name}`, false);
+                fileInput.files = files;
+                }
+            else {
+                showMessage('No file was dropped.', true);
+            }
+        });
+    </script>
+
+</body>
+</html>
