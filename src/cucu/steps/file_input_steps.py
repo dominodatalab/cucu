@@ -86,3 +86,4 @@ def should_drag_and_drop_file(ctx, filepath, name):
 @step('I wait to drag and drop the file "{filepath}" to "{name}"')
 def wait_to_drag_and_drop_file(ctx, filepath, name):
     retry(drag_and_drop_file)(ctx, name, filepath)
+    
