@@ -2,7 +2,7 @@ import os
 
 import humanize
 
-from cucu import fuzzy, logger, step
+from cucu import fuzzy, logger, retry, step
 from cucu.utils import take_saw_element_screenshot
 
 
@@ -68,8 +68,6 @@ JS_DROP_FILE = """
     return input;
 """
 
-
-@step('I drag and drop the file "{filepath}" to "{name}"')
 def drag_and_drop_file(ctx, name, filepath):
     drop_target = fuzzy.find(ctx.browser, name, ["*"])
     drop_target_html = drop_target.get_attribute("outerHTML")
@@ -78,3 +76,13 @@ def drag_and_drop_file(ctx, name, filepath):
     )
     file_input = ctx.browser.execute(JS_DROP_FILE, drop_target, 0, 0)
     file_input.send_keys(os.path.abspath(filepath))
+
+
+@step('I drag and drop the file "{filepath}" to "{name}"')
+def should_drag_and_drop_file(ctx, filepath, name):
+    drag_and_drop_file(ctx, name, filepath)
+
+
+@step('I wait to drag and drop the file "{filepath}" to "{name}"')
+def wait_to_drag_and_drop_file(ctx, filepath, name):
+    retry(drag_and_drop_file)(ctx, name, filepath)

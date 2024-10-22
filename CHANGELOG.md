@@ -5,62 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.3
+- Add - functional test for drag and drop file functionality
+
 ## 1.0.2
-- chore - fix logo for pypi
+- Chore - fix logo for pypi
 
 ## 1.0.1
-- chore - fix pyproject.toml authors and urls
-- change - add pre-commit to makefile
+- Chore - fix pyproject.toml authors and urls
+- Change - add pre-commit to makefile
 
 ## 1.0.0
-- change to 1.0.0!
-- chore - fix GH workflow for test publish
+- Change to 1.0.0!
+- Chore - fix GH workflow for test publish
 
 ## 0.207.0
-- chore - prep for publish - p2
-- replace poetry with uv
-- set default local python to 3.12
-- run pre-commit with uv
-- fix isort with ruff
+- Chore - prep for publish - p2
+- Replace poetry with uv
+- Set default local python to 3.12
+- Run pre-commit with uv
+- Fix isort with ruff
 
 ## 0.206.0
-- chore - prep for publish
-- replace black with ruff
-- remove detect-secrets to be replaced by GH repo security
-- remove bandit to be replaced by GH CodeQL
-- cleanup makefile
+- Chore - prep for publish
+- Replace black with ruff
+- Remove detect-secrets to be replaced by GH repo security
+- Remove bandit to be replaced by GH CodeQL
+- Cleanup makefile
 
 ## 0.205.0
-- change - increase information logged for failing before_scenario_hooks
+- Change - increase information logged for failing before_scenario_hooks
 
 ## 0.204.0
-- chore - add gh workflows for publishing
-- chore - fix project metadata
+- Chore - add gh workflows for publishing
+- Chore - fix project metadata
 
 ## 0.203.0
-- chore - move repo GH org locations
-- chore - remove sonarqube
+- Chore - move repo GH org locations
+- Chore - remove sonarqube
 
 ## 0.202.0
-- add - wait step to saving values from any table cells to a variable
+- Add - wait step to saving values from any table cells to a variable
 
 ## 0.201.0
-- change - add report path to the JUnit files when available
+- Change - add report path to the JUnit files when available
 
 ## 0.200.0
-- change - increase the log level of scheduling a feature file
+- Change - increase the log level of scheduling a feature file
 
 ## 0.199.0
-- chore - remove deprecated CI
-- chore - add PR template
+- Chore - remove deprecated CI
+- Chore - add PR template
 
 ## 0.198.0
-- chore - add sonarqube
-- chore - refactor circle config (config-drive executor, embed commands, move workflows up)
-- chore - configure renovate
-- chore - remove dependabot config (duplicates renovate)
-- chore - remove safety (duplicates sonarqube)
-- change - swap pebble for mpire, kill procs on run timeout
+- Chore - add sonarqube
+- Chore - refactor circle config (config-drive executor, embed commands, move workflows up)
+- Chore - configure renovate
+- Chore - remove dependabot config (duplicates renovate)
+- Chore - remove safety (duplicates sonarqube)
+- Change - swap pebble for mpire, kill procs on run timeout
 
 ## 0.197.0
 - Fix - before all hooks are now executed
