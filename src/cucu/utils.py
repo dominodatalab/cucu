@@ -11,8 +11,8 @@ import shutil
 import humanize
 from tabulate import DataRow, TableFormat, tabulate
 from tenacity import (
-    before_log,
     after_log,
+    before_log,
     before_sleep_log,
     retry_if_not_exception_type,
     stop_after_delay,
