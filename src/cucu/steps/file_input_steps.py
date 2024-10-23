@@ -68,6 +68,7 @@ JS_DROP_FILE = """
     return input;
 """
 
+
 def drag_and_drop_file(ctx, name, filepath):
     drop_target = fuzzy.find(ctx.browser, name, ["*"])
     drop_target_html = drop_target.get_attribute("outerHTML")
