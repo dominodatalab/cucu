@@ -125,12 +125,14 @@ orbs:
           - run:
               name: Install uv
               command: |
+                echo 'export UV_INSTALL_DIR=/home/circleci/.uv' >> $BASH_ENV
+                source $BASH_ENV
                 curl -LsSf https://astral.sh/uv/install.sh | sh
-                echo 'source $HOME/.local/bin/env' >> $BASH_ENV
+                echo 'source $UV_INSTALL_DIR/env' >> $BASH_ENV
                 source $BASH_ENV
           - save_cache:
               paths:
-                - $HOME/.cargo/env
+                - $UV_INSTALL_DIR/env
               key: v1-uv-cache-{{ checksum "uv.lock" }}
           - run:
               name: Verify uv installation
