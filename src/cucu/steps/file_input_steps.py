@@ -41,30 +41,123 @@ def upload_file_to_input(ctx, filepath, name):
 
 
 JS_DROP_FILE = """
-    var target = arguments[0],
-        offsetX = arguments[1],
-        offsetY = arguments[2],
-        document = target.ownerDocument || document,
-        window = document.defaultView || window;
+    var args = arguments,
+    element = args[0],
+    offsetX = args[1],
+    offsetY = args[2],
+    doc = element.ownerDocument || document;
 
-    var input = document.createElement('INPUT');
-    input.type = 'file';
-    input.onchange = function () {
-      var rect = target.getBoundingClientRect(),
-          x = rect.left + (offsetX || (rect.width >> 1)),
-          y = rect.top + (offsetY || (rect.height >> 1)),
-          dataTransfer = { files: this.files };
+    for (var i = 0; ; ) {
+    var box = element.getBoundingClientRect(),
+        clientX = box.left + (offsetX || box.width / 2),
+        clientY = box.top + (offsetY || box.height / 2),
+        target = doc.elementFromPoint(clientX, clientY);
 
-      ['dragenter', 'dragover', 'drop'].forEach(function (name) {
-        var evt = document.createEvent('MouseEvent');
-        evt.initMouseEvent(name, !0, !0, window, 0, 0, 0, x, y, !1, !1, !1, !1, 0, null);
-        evt.dataTransfer = dataTransfer;
-        target.dispatchEvent(evt);
-      });
+    if (target && element.contains(target)) break;
 
-      setTimeout(function () { document.body.removeChild(input); }, 25);
+    if (++i > 1) {
+        var ex = new Error("Element not interactable");
+        ex.code = 15;
+        throw ex;
+    }
+
+    element.scrollIntoView({
+        behavior: "instant",
+        block: "center",
+        inline: "center",
+    });
+    }
+
+    var input = doc.createElement("INPUT");
+    input.setAttribute("type", "file");
+    input.setAttribute("multiple", "");
+    input.setAttribute("style", "position:fixed;z-index:2147483647;left:0;top:0;");
+    input.onchange = function (ev) {
+    input.parentElement.removeChild(input);
+    ev.stopPropagation();
+
+    var dataTransfer = {
+        constructor: DataTransfer,
+        effectAllowed: "all",
+        dropEffect: "none",
+        types: ["Files"],
+        files: input.files,
+        setData: function setData() {},
+        getData: function getData() {},
+        clearData: function clearData() {},
+        setDragImage: function setDragImage() {},
     };
-    document.body.appendChild(input);
+
+    if (window.DataTransferItemList) {
+        dataTransfer.items = Object.setPrototypeOf(
+        Array.prototype.map.call(input.files, function (f) {
+            return {
+            constructor: DataTransferItem,
+            kind: "file",
+            type: f.type,
+            getAsFile: function getAsFile() {
+                return f;
+            },
+            getAsString: function getAsString(callback) {
+                var reader = new FileReader();
+                reader.onload = function (ev) {
+                callback(ev.target.result);
+                };
+                reader.readAsText(f);
+            },
+            webkitGetAsEntry: function webkitGetAsEntry() {
+                return {
+                constructor: window.FileSystemEntry || window.Entry,
+                name: f.name,
+                fullPath: "/" + f.name,
+                isFile: true,
+                isDirectory: false,
+                file: function file(callback) {
+                    callback(f);
+                },
+                };
+            },
+            };
+        }),
+        {
+            constructor: DataTransferItemList,
+            add: function add() {},
+            clear: function clear() {},
+            remove: function remove() {},
+        }
+        );
+    }
+
+    ["dragenter", "dragover", "drop"].forEach(function (type) {
+        var event = doc.createEvent("DragEvent");
+        event.initMouseEvent(
+        type,
+        true,
+        true,
+        doc.defaultView,
+        0,
+        0,
+        0,
+        clientX,
+        clientY,
+        false,
+        false,
+        false,
+        false,
+        0,
+        null
+        );
+
+        Object.setPrototypeOf(event, null);
+        event.dataTransfer = dataTransfer;
+        Object.setPrototypeOf(event, DragEvent.prototype);
+
+        target.dispatchEvent(event);
+    });
+    };
+
+    doc.documentElement.appendChild(input);
+    input.getBoundingClientRect(); /* force reflow for Firefox */
     return input;
 """
 
