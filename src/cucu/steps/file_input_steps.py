@@ -48,23 +48,21 @@ JS_DROP_FILE = """
     doc = element.ownerDocument || document;
 
     var box = element.getBoundingClientRect(),
-        clientX = box.left + (offsetX || box.width / 2), 
+        clientX = box.left + (offsetX || box.width / 2),
         clientY = box.top + (offsetY || box.height / 2),
         target = doc.elementFromPoint(clientX, clientY);
     if (!(target && element.contains(target))) {
-        // Drag and drop target not valid, maybe because it's off-screen.
-        // Retry after scrolling it into view.
         element.scrollIntoView({
             behavior: "instant",
             block: "center",
             inline: "center",
-        }); 
+        });
         var box = element.getBoundingClientRect(),
-            clientX = box.left + (offsetX || box.width / 2), 
+            clientX = box.left + (offsetX || box.width / 2),
             clientY = box.top + (offsetY || box.height / 2),
             target = doc.elementFromPoint(clientX, clientY);
-            
-        if (!(target && element.contains(target))) { 
+
+        if (!(target && element.contains(target))) {
             // Scrolling didn't do the trick, so give up
             var ex = new Error("Element not interactable");
             ex.code = 15;
