@@ -342,7 +342,9 @@ def run(
             else:
                 feature_filepaths = [filepath]
 
-            with WorkerPool(n_jobs=int(workers), start_method="spawn") as pool:
+            with WorkerPool(
+                n_jobs=int(workers), start_method="fork"
+            ) as pool:
                 # Each feature file is applied to the pool as an async task.
                 # It then polls the async result of each task. It the result
                 # is ready, it removes the result from the list of results that
