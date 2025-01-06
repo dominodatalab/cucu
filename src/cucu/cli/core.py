@@ -343,7 +343,7 @@ def run(
                 feature_filepaths = [filepath]
 
             with WorkerPool(
-                n_jobs=int(workers), start_method="fork"
+                n_jobs=int(workers), start_method="forkserver"
             ) as pool:
                 # Each feature file is applied to the pool as an async task.
                 # It then polls the async result of each task. It the result
