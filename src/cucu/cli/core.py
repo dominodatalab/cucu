@@ -4,7 +4,6 @@ import json
 import os
 import shutil
 import signal
-import sys
 import time
 import xml.etree.ElementTree as ET
 from importlib.metadata import version
@@ -379,8 +378,12 @@ def run(
                             pass
 
                 def handle_kill_signal(signum, frame):
-                    signal.signal(signum, signal.SIG_IGN) # ignore additional signals
-                    logger.warn(f"received signal {signum}, sending kill signal to workers")
+                    signal.signal(
+                        signum, signal.SIG_IGN
+                    )  # ignore additional signals
+                    logger.warn(
+                        f"received signal {signum}, sending kill signal to workers"
+                    )
                     kill_workers()
                     if timer:
                         timer.cancel()
@@ -390,7 +393,6 @@ def run(
                 # This is for local runs where you want to cancel the run with a ctrl+c or SIGTERM
                 signal.signal(signal.SIGINT, handle_kill_signal)
                 signal.signal(signal.SIGTERM, handle_kill_signal)
-
 
                 async_results = {}
                 for feature_filepath in feature_filepaths:
