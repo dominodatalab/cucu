@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import signal
+import sys
 import time
 import xml.etree.ElementTree as ET
 from importlib.metadata import version
@@ -366,6 +367,31 @@ def run(
                     timer = Timer(runtime_timeout, runtime_exit)
                     timer.start()
 
+                def kill_workers():
+                    for worker in pool._workers:
+                        try:
+                            worker_proc = psutil.Process(worker.pid)
+                            for child in worker_proc.children():
+                                child.kill()
+
+                            worker_proc.kill()
+                        except psutil.NoSuchProcess:
+                            pass
+
+                def handle_kill_signal(signum, frame):
+                    signal.signal(signum, signal.SIG_IGN) # ignore additional signals
+                    logger.warn(f"received signal {signum}, sending kill signal to workers")
+                    kill_workers()
+                    if timer:
+                        timer.cancel()
+
+                    os.kill(os.getpid(), signal.SIGINT)
+
+                # This is for local runs where you want to cancel the run with a ctrl+c or SIGTERM
+                signal.signal(signal.SIGINT, handle_kill_signal)
+                signal.signal(signal.SIGTERM, handle_kill_signal)
+
+
                 async_results = {}
                 for feature_filepath in feature_filepaths:
                     async_results[feature_filepath] = pool.apply_async(
@@ -432,15 +458,7 @@ def run(
 
                 if timeout_reached:
                     logger.warn("Timeout reached, send kill signal to workers")
-                    for worker in pool._workers:
-                        try:
-                            worker_proc = psutil.Process(worker.pid)
-                            for child in worker_proc.children():
-                                child.kill()
-
-                            worker_proc.kill()
-                        except psutil.NoSuchProcess:
-                            pass
+                    kill_workers()
 
                 task_failed.update(async_results)
 
