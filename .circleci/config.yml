@@ -53,7 +53,9 @@ jobs:
       - image: cimg/python:3.12
       - image: selenium/standalone-<<parameters.browser>>:130.0
         environment:
+          SE_ENABLE_TRACING: false
           SE_NODE_MAX_SESSIONS: 12
+          SE_NODE_OVERRIDE_MAX_SESSIONS: true
           SE_NODE_SESSION_TIMEOUT: 300
           SCREEN_WIDTH: 1366
           SCREEN_HEIGHT: 768
