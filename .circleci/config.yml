@@ -51,7 +51,7 @@ jobs:
         default: "chrome"
     docker:
       - image: cimg/python:3.12
-      - image: selenium/standalone-<<parameters.browser>>:124.0
+      - image: selenium/standalone-<<parameters.browser>>:131.0
         environment:
           SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300
