@@ -51,6 +51,8 @@ jobs:
         default: "chrome"
     docker:
       - image: cimg/python:3.12
+        environment:
+          COVERAGE_CORE: sysmon
       - image: selenium/standalone-<<parameters.browser>>:130.0
         environment:
           SE_ENABLE_TRACING: false
