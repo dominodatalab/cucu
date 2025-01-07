@@ -189,6 +189,7 @@ def main():
     "--workers",
     default=None,
     help="Specifies the number of workers to use to run tests in parallel",
+    type=int,    
 )
 @click.option(
     "--verbose/--no-verbose",
@@ -338,7 +339,6 @@ def run(
             if os.path.isdir(filepath):
                 basepath = os.path.join(filepath, "**/*.feature")
                 feature_filepaths = list(glob.iglob(basepath, recursive=True))
-
             else:
                 feature_filepaths = [filepath]
 
