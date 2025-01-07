@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import signal
+import sys
 import time
 import xml.etree.ElementTree as ET
 from importlib.metadata import version
@@ -189,7 +190,7 @@ def main():
     "--workers",
     default=None,
     help="Specifies the number of workers to use to run tests in parallel",
-    type=int,    
+    type=int,
 )
 @click.option(
     "--verbose/--no-verbose",
@@ -342,8 +343,13 @@ def run(
             else:
                 feature_filepaths = [filepath]
 
+            if sys.platform == "darwin":
+                start_method = "forkserver"
+            else:
+                start_method = "fork"
+
             with WorkerPool(
-                n_jobs=int(workers), start_method="fork"
+                n_jobs=int(workers), start_method=start_method
             ) as pool:
                 # Each feature file is applied to the pool as an async task.
                 # It then polls the async result of each task. It the result
