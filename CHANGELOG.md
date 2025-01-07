@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.7
+- Fix - parse --workers correctly
+- Fix - Ctrl-C to terminate for multi-workers
+- Change - use fork when not MacOS for multi-worker
+- Chore - speed up CI runs (increase workers, add envvar tweaks)
+- Chore - bump jellyfish to 1.1.3
+
 ## 1.0.6
 - Chore - relax required versions for requests library
 

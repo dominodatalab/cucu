@@ -344,6 +344,7 @@ def run(
                 feature_filepaths = [filepath]
 
             if sys.platform == "darwin":
+                logger.info("MAC OS detected, using 'forkserver' start method since 'fork' is unstable")
                 start_method = "forkserver"
             else:
                 start_method = "fork"
