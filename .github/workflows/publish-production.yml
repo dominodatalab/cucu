@@ -21,9 +21,9 @@ jobs:
         uses: astral-sh/setup-uv@v2
         with:
           enable-cache: true
-      - name: Install cucu with Python 3.13
+      - name: Install cucu with Python 3.12
         run: |
-          uv sync -p 3.13
+          uv sync -p 3.12
       - name: build package
         run: |
           uv build

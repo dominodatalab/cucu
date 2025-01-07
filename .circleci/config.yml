@@ -26,14 +26,14 @@ workflows:
 jobs:
   build:
     docker:
-      - image: cimg/python:3.13
+      - image: cimg/python:3.12
     resource_class: medium
     steps:
       - checkout
       - inline-orb-uv/setup-uv
       - run:
-          name: install cucu with Python 3.13
-          command: uv sync -p 3.13 --dev
+          name: install cucu with Python 3.12
+          command: uv sync -p 3.12 --dev
       - run:
           name: run pre-commit validations
           command: uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
@@ -50,7 +50,7 @@ jobs:
         type: string
         default: "chrome"
     docker:
-      - image: cimg/python:3.13
+      - image: cimg/python:3.12
         environment:
           COVERAGE_CORE: sysmon
       - image: selenium/standalone-<<parameters.browser>>:124.0
