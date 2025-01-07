@@ -15,9 +15,9 @@ jobs:
       uses: astral-sh/setup-uv@v2
       with:
         enable-cache: true
-    - name: Install cucu with Python 3.12
+    - name: Install cucu with Python 3.13
       run: |
-        uv sync -p 3.12 --dev
+        uv sync -p 3.13 --dev
     - name: Run pre-commit
       run: |
         uv run pre-commit run
@@ -31,9 +31,9 @@ jobs:
       uses: astral-sh/setup-uv@v2
       with:
         enable-cache: true
-    - name: Install cucu with Python 3.12
+    - name: Install cucu with Python 3.13
       run: |
-        uv sync -p 3.12 --dev
+        uv sync -p 3.13 --dev
     - name: unit tests
       run: |
         uv run coverage run -m pytest --junit-xml=output/unit-tests.xml
@@ -86,9 +86,9 @@ jobs:
       uses: astral-sh/setup-uv@v2
       with:
         enable-cache: true
-    - name: Install Python 3.12
+    - name: Install Python 3.13
       run: |
-        uv python install 3.12
+        uv python install 3.13
         uv sync
     - name: wait_for_selenium
       # retry connection every 2s x 60 which is a total of 2 minutes
