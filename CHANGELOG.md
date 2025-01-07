@@ -9,6 +9,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Fix - stablize CI runs (increase workers, add envvar tweaks)
 - Fix - parse --workers correctly
 - Fix - Ctrl-C to terminate for multi-workers
+- Fix - ensure testing webserver is online
 - Change - use fork when not MacOS for multi-worker
 - Chore - bump jellyfish to 1.1.3
 
