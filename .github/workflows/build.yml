@@ -70,7 +70,7 @@ jobs:
       pull-requests: write
     services:
       webserver:
-        image: selenium/standalone-${{ matrix.browser }}:124.0
+        image: selenium/standalone-${{ matrix.browser }}:125.0
         ports:
           - 4444:4444
         options: --shm-size=4gb

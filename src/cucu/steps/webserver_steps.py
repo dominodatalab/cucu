@@ -1,10 +1,11 @@
+import socket
 from functools import partial
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
 
 from behave import step
 
-from cucu import register_after_this_scenario_hook
+from cucu import logger, register_after_this_scenario_hook
 from cucu.config import CONFIG
 
 
@@ -32,6 +33,9 @@ def run_webserver_for_scenario(ctx, directory, variable):
 
     _, port = httpd.server_address
     CONFIG[variable] = str(port)
+
+    with socket.create_connection(("localhost", port), timeout=5):
+        logger.debug(f"Webserver is running at {port=}port")
 
     def shutdown_webserver(_):
         httpd.shutdown()

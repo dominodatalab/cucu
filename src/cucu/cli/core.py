@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import signal
+import sys
 import time
 import xml.etree.ElementTree as ET
 from importlib.metadata import version
@@ -189,6 +190,7 @@ def main():
     "--workers",
     default=None,
     help="Specifies the number of workers to use to run tests in parallel",
+    type=int,
 )
 @click.option(
     "--verbose/--no-verbose",
@@ -338,11 +340,20 @@ def run(
             if os.path.isdir(filepath):
                 basepath = os.path.join(filepath, "**/*.feature")
                 feature_filepaths = list(glob.iglob(basepath, recursive=True))
-
             else:
                 feature_filepaths = [filepath]
 
-            with WorkerPool(n_jobs=int(workers), start_method="spawn") as pool:
+            if sys.platform == "darwin":
+                logger.info(
+                    "MAC OS detected, using 'forkserver' start method since 'fork' is unstable"
+                )
+                start_method = "forkserver"
+            else:
+                start_method = "fork"
+
+            with WorkerPool(
+                n_jobs=int(workers), start_method=start_method
+            ) as pool:
                 # Each feature file is applied to the pool as an async task.
                 # It then polls the async result of each task. It the result
                 # is ready, it removes the result from the list of results that
@@ -363,6 +374,34 @@ def run(
 
                     timer = Timer(runtime_timeout, runtime_exit)
                     timer.start()
+
+                def kill_workers():
+                    for worker in pool._workers:
+                        try:
+                            worker_proc = psutil.Process(worker.pid)
+                            for child in worker_proc.children():
+                                child.kill()
+
+                            worker_proc.kill()
+                        except psutil.NoSuchProcess:
+                            pass
+
+                def handle_kill_signal(signum, frame):
+                    signal.signal(
+                        signum, signal.SIG_IGN
+                    )  # ignore additional signals
+                    logger.warn(
+                        f"received signal {signum}, sending kill signal to workers"
+                    )
+                    kill_workers()
+                    if timer:
+                        timer.cancel()
+
+                    os.kill(os.getpid(), signal.SIGINT)
+
+                # This is for local runs where you want to cancel the run with a ctrl+c or SIGTERM
+                signal.signal(signal.SIGINT, handle_kill_signal)
+                signal.signal(signal.SIGTERM, handle_kill_signal)
 
                 async_results = {}
                 for feature_filepath in feature_filepaths:
@@ -430,15 +469,7 @@ def run(
 
                 if timeout_reached:
                     logger.warn("Timeout reached, send kill signal to workers")
-                    for worker in pool._workers:
-                        try:
-                            worker_proc = psutil.Process(worker.pid)
-                            for child in worker_proc.children():
-                                child.kill()
-
-                            worker_proc.kill()
-                        except psutil.NoSuchProcess:
-                            pass
+                    kill_workers()
 
                 task_failed.update(async_results)
 
