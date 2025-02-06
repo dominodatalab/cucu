@@ -1,4 +1,5 @@
 import logging
+import os
 
 import chromedriver_autoinstaller
 import geckodriver_autoinstaller
@@ -8,7 +9,6 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
-from selenium.webdriver.remote.remote_connection import RemoteConnection
 
 from cucu import config, edgedriver_autoinstaller, logger
 from cucu.browser.core import Browser
@@ -55,7 +55,7 @@ class Selenium(Browser):
             init()
 
         timeout = float(config.CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT_S"])
-        RemoteConnection.set_timeout(timeout)
+        os.environ["GLOBAL_DEFAULT_TIMEOUT"] = str(timeout)
 
         height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
         width = config.CONFIG["CUCU_BROWSER_WINDOW_WIDTH"]
