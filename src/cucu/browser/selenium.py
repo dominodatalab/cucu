@@ -56,6 +56,7 @@ class Selenium(Browser):
 
         timeout = float(config.CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT_S"])
         os.environ["GLOBAL_DEFAULT_TIMEOUT"] = str(timeout)
+        logger.debug(f"GLOBAL_DEFAULT_TIMEOUT: {timeout}")
 
         height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
         width = config.CONFIG["CUCU_BROWSER_WINDOW_WIDTH"]
@@ -293,7 +294,7 @@ class Selenium(Browser):
 
         mht_data = None
         if self.driver._is_remote:
-            cdp_url = f"{self.driver.command_executor._url}/session/{self.driver.session_id}/chromium/send_command_and_get_result"
+            cdp_url = f"{self.driver.command_executor._client_config.remote_server_addr}/session/{self.driver.session_id}/chromium/send_command_and_get_result"
             cdp_request_body = '{"cmd": "Page.captureSnapshot", "params": {}}'
             cdp_response = self.driver.command_executor._request(
                 "POST", cdp_url, cdp_request_body
