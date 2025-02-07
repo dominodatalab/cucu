@@ -56,7 +56,6 @@ class Selenium(Browser):
 
         timeout = float(config.CONFIG["CUCU_SELENIUM_DEFAULT_TIMEOUT_S"])
         os.environ["GLOBAL_DEFAULT_TIMEOUT"] = str(timeout)
-        logger.debug(f"GLOBAL_DEFAULT_TIMEOUT: {timeout}")
 
         height = config.CONFIG["CUCU_BROWSER_WINDOW_HEIGHT"]
         width = config.CONFIG["CUCU_BROWSER_WINDOW_WIDTH"]
