@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.0.9
 - Chore - update for selenium 4.28
+- Chore - update CI with selenium docker images to 126
 
 ## 1.0.8
 - Chore - bump pypi publishing GH action version
