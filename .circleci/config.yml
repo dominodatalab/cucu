@@ -130,6 +130,7 @@ orbs:
           - run:
               name: Install uv
               command: |
+                set -euxo pipefail
                 echo 'export UV_INSTALL_DIR=$HOME/.uv' >> $BASH_ENV
                 source $BASH_ENV
                 curl --retry 9 -LsSf https://astral.sh/uv/install.sh | sh
