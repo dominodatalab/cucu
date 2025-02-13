@@ -1,6 +1,6 @@
 [project]
 name = "cucu"
-version = "1.0.9"
+version = "1.0.10"
 description = "Easy BDD web testing"
 readme = "README.md"
 license = { text = "The Clear BSD License" }
@@ -65,7 +65,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage  = "https://github.com/dominodatalab/cucu"
+Homepage  = "https://github.com/dominodatalab/cucu/wiki"
 Download  = "https://pypi.org/project/cucu/"
 "Source Code" = "https://github.com/dominodatalab/cucu"
 
