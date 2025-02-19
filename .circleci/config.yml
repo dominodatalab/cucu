@@ -161,14 +161,17 @@ jobs:
             source $BASH_ENV
 
             COLOR="red"
-            if (( $(echo "$COVERAGE > 90" | bc -l) )); then
+            if [[ $COVERAGE -ge 90 ]]; then
               COLOR="green"
-            elif (( $(echo "$COVERAGE > 75" | bc -l) )); then
+            elif [[ $COVERAGE -ge 75 ]]; then
               COLOR="yellow"
+            elif [[ $COVERAGE -ge 55 ]]; then
+              COLOR="red"
+            else; then
+              COLOR="grey"
             fi
-
             echo "<svg xmlns='http://www.w3.org/2000/svg' width='120' height='20'>
-              <rect width='120' height='20' fill='black'/>
+              <rect width='120' height='20' fill="$COVERAGE"/>
               <text x='10' y='15' fill='white' font-family='Arial' font-size='14'>Coverage: $COVERAGE%</text>
             </svg>" > coverage.svg
       - store_artifacts:
