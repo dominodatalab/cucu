@@ -101,10 +101,10 @@ jobs:
           command: |
             set +eo pipefail
             uv run coverage combine .coverage.*
-            mv .coverage .coverage.<<parameters.browser>>
             uv run coverage html
             uv run coverage report
             uv run coverage xml
+            mv .coverage .coverage.<<parameters.browser>>
             mv coverage.xml coverage-<<parameters.browser>>.xml
       - persist_to_workspace:
           root: .
