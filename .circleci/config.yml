@@ -155,7 +155,7 @@ jobs:
       - run:
           name: Generate SVG badge
           command: |
-            echo "export COVERAGE=$(jq '.totals.percent_covered' coverage.json)" >> $BASH_ENV
+            echo "export COVERAGE=$(jq '.totals.percent_covered |  . * 10 | round / 10' coverage.json" >> $BASH_ENV
             source $BASH_ENV
 
             COLOR="red"
@@ -195,7 +195,7 @@ jobs:
 
             # Move and overwrite coverage report
             rm -rf docs/coverage/*
-            mv -f coverage_html/* docs/coverage/
+            mv -f htmlcov/* docs/coverage/
 
             # Commit changes
             git add docs/badges/coverage.svg docs/coverage/
