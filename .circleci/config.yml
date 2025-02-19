@@ -101,6 +101,7 @@ jobs:
           command: |
             set +eo pipefail
             uv run coverage combine .coverage.*
+            mv .coverage .coverage.<<parameters.browser>>
             uv run coverage html
             uv run coverage report
             uv run coverage xml
@@ -109,6 +110,7 @@ jobs:
           root: .
           paths:
             - coverage-<<parameters.browser>>.xml
+            - .coverage.<<parameters.browser>>
       - run:
           name: tar up results and reporting
           command: |
@@ -116,6 +118,8 @@ jobs:
             tar cvfz report.tgz report
             tar cvfz junit_results.tgz junit_results
           when: always
+      - store_artifacts:
+          path: .coverage.<<parameters.browser>>
       - store_artifacts:
           path: coverage-<<parameters.browser>>.xml
       - store_artifacts:
@@ -139,7 +143,7 @@ jobs:
       - run:
           name: Combine coverage reports
           command: |
-            uv run coverage combine coverage-*.xml
+            uv run coverage combine
             uv run coverage html
             uv run coverage report
             uv run coverage xml
