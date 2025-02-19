@@ -96,7 +96,7 @@ jobs:
       - run:
           name: code_coverage_check
           command: |
-            set +eo pipefail
+            set -euxo pipefail
             uv run coverage combine .coverage.*
             uv run coverage html
             uv run coverage report
@@ -141,6 +141,7 @@ jobs:
       - run:
           name: Combine coverage reports
           command: |
+            set -euxo pipefail
             uv run coverage combine
             uv run coverage xml
             uv run coverage html
@@ -155,6 +156,7 @@ jobs:
       - run:
           name: Generate SVG badge
           command: |
+            set -euxo pipefail
             echo "export COVERAGE=$(jq '.totals.percent_covered |  . * 10 | round / 10' coverage.json)" >> $BASH_ENV
             source $BASH_ENV
 
