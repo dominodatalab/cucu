@@ -174,7 +174,8 @@ jobs:
               COLOR="red"
             fi
 
-            echo <<EOF > cov_badge.json
+            # escape the double less than sign for CircleCI
+            echo \<<EOF > cov_badge.json
             {
               "schemaVersion": 1,
               "label": "coverage",
@@ -185,7 +186,7 @@ jobs:
             EOF
 
             # Create a simple redirect to the CircleCI build page
-            echo <<EOF > cov_index.html
+            echo \<<EOF > cov_index.html
             <html>
               <head>
                 <meta http-equiv="refresh" content="0; url=${CIRCLE_BUILD_URL}" />
