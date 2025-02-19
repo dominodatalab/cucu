@@ -27,9 +27,6 @@ workflows:
             - test-chrome
             - test-edge
             - test-firefox
-      - publish_to_pages:
-          requires:
-            - coverage
 
 jobs:
   build:
@@ -104,6 +101,7 @@ jobs:
             uv run coverage html
             uv run coverage report
             uv run coverage xml
+            uv run coverage xml
             mv .coverage .coverage.<<parameters.browser>>
             mv coverage.xml coverage-<<parameters.browser>>.xml
       - persist_to_workspace:
@@ -144,16 +142,22 @@ jobs:
           name: Combine coverage reports
           command: |
             uv run coverage combine
-            uv run coverage html
-            uv run coverage report
             uv run coverage xml
+            uv run coverage html
+            uv run coverage json
+            uv run coverage report
       - store_artifacts:
           path: coverage.xml
+      - store_artifacts:
+          path: coverage.json
       - store_artifacts:
           path: htmlcov
       - run:
           name: Generate SVG badge
           command: |
+            echo "export COVERAGE=$(jq '.totals.percent_covered' coverage.json)" >> $BASH_ENV
+            source $BASH_ENV
+
             COLOR="red"
             if (( $(echo "$COVERAGE > 90" | bc -l) )); then
               COLOR="green"
@@ -165,22 +169,8 @@ jobs:
               <rect width='120' height='20' fill='black'/>
               <text x='10' y='15' fill='white' font-family='Arial' font-size='14'>Coverage: $COVERAGE%</text>
             </svg>" > coverage.svg
-      - persist_to_workspace:
-          root: .
-          paths:
-            - coverage.svg
       - store_artifacts:
           path: coverage.svg
-
-  publish_to_pages:
-    docker:
-      - image: cimg/python:3.12
-    resource_class: small
-    steps:
-      - checkout
-      - inline-orb-uv/setup-uv
-      - attach_workspace:
-          at: .
       - run:
           name: Publish to GitHub Pages
           command: |
@@ -188,7 +178,6 @@ jobs:
 
             # Get commit hash from main branch
             GIT_HASH=$(git rev-parse --short HEAD)
-            COVERAGE=$(jq '.totals.percent_covered' coverage.json)
             COMMIT_MSG="[skip ci] Update coverage badge and report - ${GIT_HASH}, Coverage: ${COVERAGE}%"
 
             # git config --global user.name "circleci-bot"
