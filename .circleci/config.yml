@@ -155,7 +155,7 @@ jobs:
             elif (( $(echo "$COVERAGE > 75" | bc -l) )); then
               COLOR="yellow"
             fi
-            
+
             echo "<svg xmlns='http://www.w3.org/2000/svg' width='120' height='20'>
               <rect width='120' height='20' fill='black'/>
               <text x='10' y='15' fill='white' font-family='Arial' font-size='14'>Coverage: $COVERAGE%</text>
