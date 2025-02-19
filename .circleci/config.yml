@@ -22,6 +22,14 @@ workflows:
           browser: firefox
           requires:
             - build
+      - coverage:
+          requires:
+            - test-chrome
+            - test-edge
+            - test-firefox
+      - publish_to_pages:
+          requires:
+            - coverage
 
 jobs:
   build:
@@ -118,6 +126,90 @@ jobs:
           path: report.tgz
       - store_test_results:
           path: junit_results
+
+  coverage:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Combine coverage reports
+          command: |
+            uv run coverage combine coverage-*.xml
+            uv run coverage html
+            uv run coverage report
+            uv run coverage xml
+      - store_artifacts:
+          path: coverage.xml
+      - store_artifacts:
+          path: htmlcov
+      - run:
+          name: Generate SVG badge
+          command: |
+            COLOR="red"
+            if (( $(echo "$COVERAGE > 90" | bc -l) )); then
+              COLOR="green"
+            elif (( $(echo "$COVERAGE > 75" | bc -l) )); then
+              COLOR="yellow"
+            fi
+            
+            echo "<svg xmlns='http://www.w3.org/2000/svg' width='120' height='20'>
+              <rect width='120' height='20' fill='black'/>
+              <text x='10' y='15' fill='white' font-family='Arial' font-size='14'>Coverage: $COVERAGE%</text>
+            </svg>" > coverage.svg
+      - persist_to_workspace:
+          root: .
+          paths:
+            - coverage.svg
+      - store_artifacts:
+          path: coverage.svg
+
+  publish_to_pages:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Publish to GitHub Pages
+          command: |
+            set -euxo pipefail
+
+            # Get commit hash from main branch
+            GIT_HASH=$(git rev-parse --short HEAD)
+            COVERAGE=$(jq '.totals.percent_covered' coverage.json)
+            COMMIT_MSG="[skip ci] Update coverage badge and report - ${GIT_HASH}, Coverage: ${COVERAGE}%"
+
+            # git config --global user.name "circleci-bot"
+            # git config --global user.email "circleci@users.noreply.github.com"
+
+            # Fetch or create gh-pages branch
+            git fetch origin gh-pages || git checkout --orphan gh-pages
+            git checkout gh-pages
+
+            # Ensure docs directory exists
+            mkdir -p docs/badges docs/coverage
+
+            # Move and overwrite coverage badge
+            mv -f coverage.svg docs/badges/coverage.svg
+
+            # Move and overwrite coverage report
+            rm -rf docs/coverage/*
+            mv -f coverage_html/* docs/coverage/
+
+            # Commit changes
+            git add docs/badges/coverage.svg docs/coverage/
+            git commit -m "${COMMIT_MSG}" || echo "No changes to commit"
+
+            # Push changes if main or override
+            if [ ${CIRCLE_BRANCH:-} == main || ${OVERRIDE_PAGES:-} == true ]; then
+              git push origin gh-pages
+            fi
 
 orbs:
   inline-orb-uv:
