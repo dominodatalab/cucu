@@ -154,28 +154,49 @@ jobs:
       - store_artifacts:
           path: htmlcov
       - run:
-          name: Generate SVG badge
+          name: Generate shields.io badge json and redirect
           command: |
             set -euxo pipefail
             echo "export COVERAGE=$(jq '.totals.percent_covered | round ' coverage.json)" >> $BASH_ENV
             source $BASH_ENV
 
-            COLOR="red"
-            if [[ $COVERAGE -ge 90 ]]; then
+            if [[ $COVERAGE -ge 95 ]]; then
+              COLOR="brightgreen"
+            elif [[ $COVERAGE -ge 90 ]]; then
               COLOR="green"
             elif [[ $COVERAGE -ge 75 ]]; then
+              COLOR="yellowgreen"
+            elif [[ $COVERAGE -ge 60 ]]; then
               COLOR="yellow"
-            elif [[ $COVERAGE -ge 55 ]]; then
-              COLOR="red"
+            elif [[ $COVERAGE -ge 40 ]]; then
+              COLOR="orange"
             else
-              COLOR="grey"
+              COLOR="red"
             fi
-            echo "<svg xmlns='http://www.w3.org/2000/svg' width='120' height='20'>
-              <rect width='120' height='20' fill="$COVERAGE"/>
-              <text x='10' y='15' fill='white' font-family='Arial' font-size='14'>Coverage: $COVERAGE%</text>
-            </svg>" > coverage.svg
+
+            echo <<EOF > cov_badge.json
+            {
+              "schemaVersion": 1,
+              "label": "coverage",
+              "message": "${COVERAGE}%",
+              "color": "${COLOR}"
+              "link": "${CIRCLE_BUILD_URL}"
+            }
+            EOF
+
+            # Create a simple redirect to the CircleCI build page
+            echo <<EOF > cov_index.html
+            <html>
+              <head>
+                <meta http-equiv="refresh" content="0; url=${CIRCLE_BUILD_URL}" />
+              </head>
+              <body></body>
+            </html>
+            EOF
       - store_artifacts:
-          path: coverage.svg
+          path: cov_.html
+      - store_artifacts:
+          path: cov_badge.json
       - run:
           name: Publish to GitHub Pages
           command: |
@@ -193,17 +214,20 @@ jobs:
             git checkout gh-pages
 
             # Ensure docs directory exists
-            mkdir -p docs/badges docs/coverage
+            COVERAGE_BADGE_DIR=docs/coverage/badge
+            mkdir -p $COVERAGE_BADGE_DIR
 
-            # Move and overwrite coverage badge
-            mv -f coverage.svg docs/badges/coverage.svg
+            # Move and overwrite coverage badge and redirect
+            mv -f cov_badge.json $COVERAGE_BADGE_DIR/badge.json
+            mv -f cov_index.html $COVERAGE_BADGE_DIR/index.html
 
+            COVERAGE_HTML_DIR=docs/coverage/html/
             # Move and overwrite coverage report
-            rm -rf docs/coverage/*
-            mv -f htmlcov/* docs/coverage/
+            rm -rf ${COVERAGE_HTML_DIR}*
+            mv -f htmlcov/* ${COVERAGE_HTML_DIR}
 
             # Commit changes
-            git add docs/badges/coverage.svg docs/coverage/
+            git add docs/badges/cov_badge.json ${COVERAGE_HTML_DIR}
             git commit -m "${COMMIT_MSG}" || echo "No changes to commit"
 
             # Push changes if main or override

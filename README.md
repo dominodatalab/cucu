@@ -1,6 +1,8 @@
 [![pypi](https://img.shields.io/pypi/v/cucu.svg)](https://pypi.org/project/cucu/)
 [![license](https://img.shields.io/pypi/l/cucu.svg)](https://spdx.org/licenses/BSD-3-Clause-Clear.html)
-[![build](https://dl.circleci.com/status-badge/img/gh/dominodatalab/cucu/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/dominodatalab/cucu/tree/main)
+[![CI](https://dl.circleci.com/status-badge/img/gh/dominodatalab/cucu/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/dominodatalab/cucu/tree/main)
+[![coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fdominodatalab.github.io%2Fcucu%2Fcoverage%2Fbadge%2Fbadge.json)](https://dominodatalab.github.io/cucu/coverage/badge)
+
 
 # ![Cucu Logo](https://raw.githubusercontent.com/dominodatalab/cucu/refs/heads/main/logo.png) **CUCU** - Easy BDD web testing <!-- omit from toc -->
 
