@@ -133,6 +133,7 @@ jobs:
     resource_class: small
     steps:
       - checkout
+      - inline-orb-uv/setup-uv
       - attach_workspace:
           at: .
       - run:
@@ -173,6 +174,7 @@ jobs:
     resource_class: small
     steps:
       - checkout
+      - inline-orb-uv/setup-uv
       - attach_workspace:
           at: .
       - run:
