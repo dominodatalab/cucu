@@ -225,7 +225,7 @@ jobs:
             COVERAGE_HTML_DIR=docs/coverage/html/
             # Move and overwrite coverage report
             rm -rf ${COVERAGE_HTML_DIR}*
-            mv -f htmlcov/* ${COVERAGE_HTML_DIR}
+            mv -f htmlcov ${COVERAGE_HTML_DIR}
 
             # Commit changes
             git add docs/badges/cov_badge.json ${COVERAGE_HTML_DIR}
