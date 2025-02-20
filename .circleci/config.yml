@@ -222,13 +222,15 @@ jobs:
             mv -f cov_badge.json $COVERAGE_BADGE_DIR/badge.json
             mv -f cov_index.html $COVERAGE_BADGE_DIR/index.html
 
-            COVERAGE_HTML_DIR=docs/coverage/html/
+            COVERAGE_HTML_DIR=docs/coverage/html
             # Move and overwrite coverage report
             rm -rf ${COVERAGE_HTML_DIR}*
             mv -f htmlcov ${COVERAGE_HTML_DIR}
+            rm ${COVERAGE_HTML_DIR}/.gitignore
 
             # Commit changes
-            git add .
+            git status
+            git add docs
             git commit -m "${COMMIT_MSG}" || echo "No changes to commit"
 
             # Push changes if main or override
