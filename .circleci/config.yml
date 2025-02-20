@@ -181,7 +181,6 @@ jobs:
               "label": "coverage",
               "message": "${COVERAGE}%",
               "color": "${COLOR}"
-              "link": "${CIRCLE_BUILD_URL}"
             }
             EOF
 
