@@ -205,7 +205,7 @@ jobs:
 
             # Get commit hash from main branch
             GIT_HASH=$(git rev-parse --short HEAD)
-            COMMIT_MSG="[skip ci] Update coverage badge and report - ${GIT_HASH}, Coverage: ${COVERAGE}%"
+            COMMIT_MSG="[skip ci] Update coverage to ${COVERAGE}% for commit ${GIT_HASH}"
 
             # git config --global user.name "circleci-bot"
             # git config --global user.email "circleci@users.noreply.github.com"
@@ -232,7 +232,7 @@ jobs:
             git commit -m "${COMMIT_MSG}" || echo "No changes to commit"
 
             # Push changes if main or override
-            if [ ${CIRCLE_BRANCH:-} == main || ${OVERRIDE_PAGES:-} == true ]; then
+            if [[ "${CIRCLE_BRANCH:-}" == main || "${OVERRIDE_PAGES:-}" == true ]]; then
               git push origin gh-pages
             fi
 
