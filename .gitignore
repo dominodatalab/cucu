@@ -1,0 +1,5 @@
+.DS_Store
+results/*
+**/__pycache__/
+coverage*.xml
+.coverage
