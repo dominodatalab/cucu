@@ -228,7 +228,7 @@ jobs:
             mv -f htmlcov ${COVERAGE_HTML_DIR}
 
             # Commit changes
-            git add docs/badges/cov_badge.json ${COVERAGE_HTML_DIR}
+            git add .
             git commit -m "${COMMIT_MSG}" || echo "No changes to commit"
 
             # Push changes if main or override
