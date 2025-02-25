@@ -186,8 +186,7 @@ Let's descibe the automated processes used in development.
 Everyone should know about pre-commit by now. You should install it locally and it runs on git commit automatically.
 - [.pre-commit-config.yml](.pre-commit-config.yml)
 
-We have a makefile and if you have make installed (comes with XCode for MacOS).
-You can run `make` only from the root of the repo.
+You can also run `make` from the repo root for some convience commands if you have makefile installed (comes with XCode for MacOS).
 - [Makefile](Makefile)
 
 ## 2. Branch builds (CirlceCI)
