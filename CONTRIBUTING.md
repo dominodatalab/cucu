@@ -1,11 +1,29 @@
-# Contributing to Cucu
+# Contributing to Cucu <!-- omit from toc -->
+
 Thank you for your interest in contributing to Cucu!
 
-## Getting started checklist
+
+## Getting started checklist <!-- omit from toc -->
 1. Read our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 2. Agree to [Developer Certificate of Origin](#developer-certificate-of-origin)
 3. Glance at the [Design](#design)
 4. Walk through [Cucu Development](#cucu-development)
+
+
+# Table of Contents <!-- omit from toc -->
+- [Developer Certificate of Origin](#developer-certificate-of-origin)
+- [Design](#design)
+  - [Why Gherkin (i.e. BDD-style tests)](#why-gherkin-ie-bdd-style-tests)
+  - [Notable libraries used](#notable-libraries-used)
+- [Dev Setup](#dev-setup)
+  - [Running cucu](#running-cucu)
+  - [Debugging cucu](#debugging-cucu)
+  - [Running Built In Tests](#running-built-in-tests)
+- [Development Automation](#development-automation)
+  - [1. Pre-commit and make](#1-pre-commit-and-make)
+  - [2. Branch builds (CirlceCI)](#2-branch-builds-cirlceci)
+  - [3. Releases (GitHub Actions)](#3-releases-github-actions)
+- [Backstory](#backstory)
 
 
 # Developer Certificate of Origin
@@ -157,6 +175,49 @@ Easy as this (but runs a while)
 ```bash
 make test
 ```
+
+# Development Automation
+Let's descibe the automated processes used in development.
+1. Pre-commit and make
+2. Branch builds (CircleCI)
+3. Releases (GitHub Actions)
+
+## 1. Pre-commit and make
+Everyone should know about pre-commit by now. You should install it locally and it runs on git commit automatically.
+- [.pre-commit-config.yml](.pre-commit-config.yml)
+
+You can also run `make` from the repo root for some convience commands if you have makefile installed (comes with XCode for MacOS).
+- [Makefile](Makefile)
+
+## 2. Branch builds (CirlceCI)
+We use CircleCI to run branch builds, which runs pre-commit and `make lint`, runs each browser test (chrome, edge, firefox) with unit tests, then combines the coverage results.
+- [.circleci/config.yml](.circleci/config.yml)
+
+Only the default branch publishes coverage, which works like this:
+1. The merge to default branch kicks off a regular build with build, tests, and coverage jobs
+2. The coverage job generates a json file and an index.html redirect file which are published to the repo's GitHub pages `gh-pages` branch.
+3. The README has a coverage badge link using https://img.shields.io and points back to the GitHub pages json file
+4. Once the GitHub page's cache clears (every 10 minutes) then the new coverage should be shown in the badge and the link redirects back to the coverage job that generated it.
+
+This round about way of coverage avoids using a coverage provider, which we're not quite up to yet.
+
+## 3. Releases (GitHub Actions)
+We use GitHub Actions to do the release process
+- [.github/workflows/create_a_new_release.yml](.github/workflows/create_a_new_release.yml)
+- [.github/workflows/publish-test.yml](.github/workflows/publish-test.yml)
+- [.github/workflows/publish-production.yml](.github/workflows/publish-production.yml)
+
+Here's the sequence to get a new release out on pypi.org
+1. Create a branch with the following
+   1. pyproject.toml - bump the version
+   2. CHANGELOG.md - add version notes
+   3. uv.lock - `uv lock` to update version in file
+2. Go through the PR process, get approved and merge
+3. The merge will republish the coverage badge in CircleCI (see previous)
+4. The new version is detected and a new GitHub Release is published by create_a_new_release.yml
+5. create_a_new_release.yml starts publish-test.yml which publishes it to test.pypi.org
+6. For pypi.org we have to manually trigger publish-production.yml
+
 
 # Backstory
 Cucu was originally developed primarly by Rodney Gomes, leveraging his
