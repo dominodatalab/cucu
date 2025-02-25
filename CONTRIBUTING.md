@@ -198,7 +198,7 @@ Only the default branch publishes coverage, which works like this:
 1. The merge to default branch kicks off a regular build with build, tests, and coverage jobs
 2. The coverage job generates a json file and an index.html redirect file which are published to the repo's GitHub pages `gh-pages` branch.
 3. The README has a coverage badge link using https://img.shields.io and points back to the GitHub pages json file
-4. Once the GitHub pages cache clears (every 10 minutes) then the new coverage should be shown in the badge and the link goes to the redirect which points back to the coverage job that generated it.
+4. Once the GitHub page's cache clears (every 10 minutes) then the new coverage should be shown in the badge and the link redirects back to the coverage job that generated it.
 
 This round about way of coverage avoids using a coverage provider, which we're not quite up to yet.
 
