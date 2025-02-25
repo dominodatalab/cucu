@@ -263,7 +263,7 @@ toml = [
 
 [[package]]
 name = "cucu"
-version = "1.0.9"
+version = "1.0.11"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -310,7 +310,7 @@ requires-dist = [
     { name = "jinja2", specifier = "~=3.1.3" },
     { name = "lsprotocol", specifier = "~=2023.0.1" },
     { name = "mpire", specifier = "~=2.10.2" },
-    { name = "psutil", specifier = "~=6.0.0" },
+    { name = "psutil", specifier = ">=6.0" },
     { name = "pygls", specifier = "~=1.3.1" },
     { name = "pyyaml", specifier = "~=6.0.1" },
     { name = "requests", specifier = ">=2.31.0,<3.0.0" },
