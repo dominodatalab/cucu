@@ -191,7 +191,7 @@ You can run `make` only from the root of the repo.
 - [Makefile](Makefile)
 
 ## 2. Branch builds (CirlceCI)
-We use CircleCI to run branch builds which runs runs pre-commit and `make lint`, runs each browser tests (chrome, edge, firefox) with unit tests, then combines the coverage results.
+We use CircleCI to run branch builds, which runs pre-commit and `make lint`, runs each browser test (chrome, edge, firefox) with unit tests, then combines the coverage results.
 - [.circleci/config.yml](.circleci/config.yml)
 
 Only the default branch publishes coverage, which works like this:
