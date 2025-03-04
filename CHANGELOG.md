@@ -8,6 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 1.0.12
 - Chore - add coverage badge
 - Chore - add docs on dev automation
+- CI - fix renovate config
 
 ## 1.0.11
 - Chore - bump psutil
