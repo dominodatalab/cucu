@@ -7,13 +7,18 @@
   "ignorePaths": [
     "**/.python-version"
   ],
-  "python": {
-    "enabled": true
-  },
   "packageRules": [
     {
+      "matchCategories": [
+        "python"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "glom all dependencies",
-      "matchFileNames": ["**"],
+      "matchFileNames": [
+        "**"
+      ],
       "automerge": true,
       "platformAutomerge": true
     },
