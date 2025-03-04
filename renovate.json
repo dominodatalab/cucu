@@ -2,7 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": "Renovate config",
   "extends": [
-    "github>cerebrotech/renovate-config"
+    "config:best-practices"
   ],
   "python": {
     "enabled": true
