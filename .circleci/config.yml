@@ -205,7 +205,7 @@ jobs:
             GIT_HASH=$(git rev-parse --short HEAD)
             COMMIT_MSG="[skip ci] Update coverage to ${COVERAGE}% for commit ${GIT_HASH}"
 
-            git config --global user.name $CIRCLE_USERNAME
+            git config --global user.name ${CIRCLE_USERNAME:-"open-source-bot"}
             git config --global user.email "open-source@dominodatalab.com"
 
             # Fetch or create gh-pages branch

@@ -4,6 +4,9 @@
   "extends": [
     "config:best-practices"
   ],
+  "ignorePaths": [
+    "**/.python-version"
+  ],
   "packageRules": [
     {
       "matchCategories": [
@@ -15,7 +18,30 @@
       "groupName": "glom all dependencies",
       "matchFileNames": [
         "**"
-      ]
+      ],
+      "automerge": true,
+      "platformAutomerge": true
+    },
+    {
+      "description": "Ignore minor Python version updates",
+      "matchFileNames": [
+        "**Dockerfile",
+        ".circleci/config.yml",
+        ".github/workflows/*.yml"
+      ],
+      "matchDatasources": [
+        "pyenv",
+        "docker",
+        "pypi"
+      ],
+      "matchPackageNames": [
+        "cimg/python",
+        "python"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "enabled": false
     }
   ]
 }
