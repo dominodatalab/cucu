@@ -9,6 +9,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Chore - add coverage badge
 - Chore - add docs on dev automation
 - CI - fix renovate config
+- CI - fix for bots
 
 ## 1.0.11
 - Chore - bump psutil

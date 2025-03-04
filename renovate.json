@@ -10,7 +10,9 @@
   "packageRules": [
     {
       "groupName": "glom all dependencies",
-      "matchFileNames": ["**"]
+      "matchFileNames": ["**"],
+      "automerge": true,
+      "platformAutomerge": true
     }
   ]
 }
