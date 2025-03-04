@@ -774,6 +774,9 @@ def tags(filepath):
     """
     init_global_hook_variables()
 
+    # TODO: this is waaaaay too naive and won't work
+    # instead need to use the behave parse_file helper (or find some other state that's loaded in behave)
+    # maybe call behave_init with each file and pop some state from the library?
     tags = _find_unique_tags(root_dir=filepath, pattern="*.feature", string_capture="^\(@[\w-]+\)")
 
     print(tabulate(tags, tablefmt="fancy_grid"))
