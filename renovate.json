@@ -4,13 +4,18 @@
   "extends": [
     "config:best-practices"
   ],
-  "python": {
-    "enabled": true
-  },
   "packageRules": [
     {
+      "matchCategories": [
+        "python"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "glom all dependencies",
-      "matchFileNames": ["**"]
+      "matchFileNames": [
+        "**"
+      ]
     }
   ]
 }
