@@ -11,6 +11,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - CI - fix renovate config
 - CI - change renovate to ignore python minor versions
 - CI - fix for bots
+- Chore - bump dep versions
 
 ## 1.0.11
 - Chore - bump psutil
