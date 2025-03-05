@@ -159,7 +159,7 @@ def run_after_scenario_hook(ctx, scenario, hook):
 
 def after_scenario(ctx, scenario):
     for timer_name in ctx.step_timers:
-        logger.warn(f'timer "{timer_name}" was never stopped/recorded')
+        logger.warning(f'timer "{timer_name}" was never stopped/recorded')
 
     run_after_scenario_hook(ctx, scenario, download_mht_data)
 

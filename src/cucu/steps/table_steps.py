@@ -403,7 +403,7 @@ def wait_click_table_cell_matching_text(ctx, column, match_text, table):
                 By.XPATH, f'//td[.="{match_text}"]/parent::tr'
             )
             if len(row) > 1:
-                logger.warn(
+                logger.warning(
                     f'Found {len(row)} rows with matching text "{match_text}", using the first row.'
                 )
             cell = row[0].find_elements(By.CSS_SELECTOR, "td")[column]

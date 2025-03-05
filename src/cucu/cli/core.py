@@ -390,7 +390,7 @@ def run(
                     signal.signal(
                         signum, signal.SIG_IGN
                     )  # ignore additional signals
-                    logger.warn(
+                    logger.warning(
                         f"received signal {signum}, sending kill signal to workers"
                     )
                     kill_workers()
@@ -468,7 +468,7 @@ def run(
                     time.sleep(1)
 
                 if timeout_reached:
-                    logger.warn("Timeout reached, send kill signal to workers")
+                    logger.warning("Timeout reached, send kill signal to workers")
                     kill_workers()
 
                 task_failed.update(async_results)
