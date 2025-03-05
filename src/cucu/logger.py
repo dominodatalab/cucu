@@ -80,8 +80,22 @@ def info(*args, **kwargs):
     logging.info(*args, **kwargs)
 
 
-@wraps(logging.warn)
+@wraps(logging.warning)
 def warn(*args, **kwargs):
+    console_handler = logging.getLogger().handlers[0]
+    logging_level = console_handler.level
+
+    if logging_level <= logging.WARN:
+        CONFIG["__CUCU_WROTE_TO_OUTPUT"] = True
+
+    logging.getLogger().warning(
+        'The method "warn" is deprecated use warning() instead.'
+    )
+    logging.getLogger().warning(*args, **kwargs)
+
+
+@wraps(logging.warning)
+def warning(*args, **kwargs):
     console_handler = logging.getLogger().handlers[0]
     logging_level = console_handler.level
 
