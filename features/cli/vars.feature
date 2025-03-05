@@ -101,7 +101,7 @@ Feature: Vars
         Scenario: That simply prints a custom variable
       booyah
 
-          Given I echo "\{CUSTOM_VARIABLE\}"     # .*
+          Given I echo "\{CUSTOM_VARIABLE\}" \s*# .*
           # CUSTOM_VARIABLE="booyah"
 
       1 feature passed, 0 failed, 0 skipped

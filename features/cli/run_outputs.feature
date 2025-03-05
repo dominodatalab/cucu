@@ -76,20 +76,20 @@ Feature: Run outputs
         Scenario: Scenario which now has a background using a step with substeps
       first line of the background
 
-          Given I echo "first line of the background"     # .*
+          Given I echo "first line of the background" \s*# .*
       hello
 
-            ⤷ When I echo "hello"                         # .*
+            ⤷ When I echo "hello" \s*# .*
       cruel
 
-            ⤷  And I echo "cruel"                         # .*
+            ⤷  And I echo "cruel" \s*# .*
       world
 
-            ⤷  And I echo "world"                         # .*
+            ⤷  And I echo "world" \s*# .*
             And I use a step with substeps that log       # .*
       This is from the scenario
 
-           When I echo "This is from the scenario"        # .*
+           When I echo "This is from the scenario" \s*# .*
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
