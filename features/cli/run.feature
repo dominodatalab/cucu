@@ -27,7 +27,7 @@ Feature: Run
         Scenario: Scenario that passes
       passing
 
-          Given I echo "passing"     # .*
+          Given I echo "passing" \s*# .*
 
         Scenario: Scenario that fails
           Given I fail                             # .*
@@ -54,7 +54,7 @@ Feature: Run
         Scenario: Scenario that also passes
       passing
 
-          Given I echo "passing"     # .*
+          Given I echo "passing" \s*# .*
       [\s]*
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 6 skipped

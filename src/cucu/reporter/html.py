@@ -79,7 +79,7 @@ def generate(results, basepath, only_failures=False):
             except Exception as exception:
                 if show_status:
                     print("")  # add a newline before logger
-                logger.warn(
+                logger.warning(
                     f"unable to read file {run_json_filepath}, got error: {exception}"
                 )
 
@@ -152,7 +152,7 @@ def generate(results, basepath, only_failures=False):
                 try:
                     CONFIG.load(scenario_configpath)
                 except Exception as e:
-                    logger.warn(
+                    logger.warning(
                         f"Could not reload config: {scenario_configpath}: {e}"
                     )
             else:
@@ -170,7 +170,7 @@ def generate(results, basepath, only_failures=False):
                 try:
                     sub_headers.append(handler(scenario))
                 except Exception:
-                    logger.warn(
+                    logger.warning(
                         f"Exception while trying to run sub_headers hook for scenario: \"{scenario['name']}\"\n{traceback.format_exc()}"
                     )
             scenario["sub_headers"] = "<br/>".join(sub_headers)

@@ -43,15 +43,15 @@ Feature: Config
          Scenario: This scenario prints a bunch of variables
        bar
 
-           Given I echo "\{FOO\}"      # .*
+           Given I echo "\{FOO\}" \s*# .*
            # FOO="bar"
        booze
 
-             And I echo "\{FIZZ\}"     # .*
+             And I echo "\{FIZZ\}" \s*# .*
              # FIZZ="booze"
        buzz
 
-             And I echo "\{BUZZ\}"     # .*
+             And I echo "\{BUZZ\}" \s*# .*
              # BUZZ="buzz"
 
        1 feature passed, 0 failed, 0 skipped
@@ -67,15 +67,15 @@ Feature: Config
          Scenario: This scenario prints a bunch of variables
        bar
 
-           Given I echo "\{FOO\}"      # .*
+           Given I echo "\{FOO\}" \s*# .*
            # FOO="bar"
        booze
 
-             And I echo "\{FIZZ\}"     # .*
+             And I echo "\{FIZZ\}" \s*# .*
              # FIZZ="booze"
        buzz
 
-             And I echo "\{BUZZ\}"     # .*
+             And I echo "\{BUZZ\}" \s*# .*
              # BUZZ="buzz"
 
        1 feature passed, 0 failed, 0 skipped
@@ -122,15 +122,15 @@ Feature: Config
          Scenario: This scenario prints a bunch of variables
        bar
 
-           Given I echo "\{FOO\}"      # .*
+           Given I echo "\{FOO\}" \s*# .*
            # FOO="bar"
        booze
 
-             And I echo "\{FIZZ\}"     # .*
+             And I echo "\{FIZZ\}" \s*# .*
              # FIZZ="booze"
        buzz
 
-             And I echo "\{BUZZ\}"     # .*
+             And I echo "\{BUZZ\}" \s*# .*
              # BUZZ="buzz"
 
        1 feature passed, 0 failed, 0 skipped

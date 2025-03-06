@@ -63,12 +63,12 @@ Feature: Run with hooks
       Hello
 
       .* DEBUG just logging some stuff from my after step hook
-          Given I echo "Hello"     # .*
+          Given I echo "Hello" \s*# .*
       .* DEBUG just logging some stuff from my before step hook
       World
 
       .* DEBUG just logging some stuff from my after step hook
-            And I echo "World"     # .*
+            And I echo "World" \s*# .*
       .* DEBUG No browsers - skipping MHT webpage snapshot
       .* DEBUG HOOK download_mht_data: passed ✅
       .* DEBUG just logging some stuff from my after scenario hook

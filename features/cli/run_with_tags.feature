@@ -16,7 +16,7 @@ Feature: Run with tags
         Scenario: Scenario that is tagged with @second
       second
 
-          Given I echo "second"     # .*
+          Given I echo "second" \s*# .*
 
         @disabled @testrail\(123,456\)
         Scenario: Scenario that is skipped
@@ -39,7 +39,7 @@ Feature: Run with tags
         Scenario: Scenario that is tagged with @first
       first
 
-          Given I echo "first"     # .*
+          Given I echo "first" \s*# .*
 
         @second
         Scenario: Scenario that is tagged with @second

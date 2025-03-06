@@ -52,7 +52,7 @@ def init_page_checks():
                 # lets print the image outerHTML so its easier to identify
                 for broken_image in broken_images:
                     html = broken_image.get_attribute("outerHTML")
-                    logger.warn(f"broken image found: {html}")
+                    logger.warning(f"broken image found: {html}")
 
                 raise RuntimeError("broken images were found on the page")
         else:
