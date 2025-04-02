@@ -210,23 +210,28 @@ class Selenium(Browser):
 
     def switch_to_next_tab(self):
         window_handles = self.driver.window_handles
+        logger.debug(f"total number of tabs open: {len(window_handles)}")
         window_handle = self.driver.current_window_handle
         window_handle_index = window_handles.index(window_handle)
-
+        
         if window_handle_index == len(window_handles) - 1:
             raise RuntimeError("no next browser tab available")
-
+        
         self.driver.switch_to.window(window_handles[window_handle_index + 1])
+        logger.debug(f"you are on the tab: {window_handle_index + 1}")
+        logger.debug(f"url of the current tab: {self.driver.current_url}")
 
     def switch_to_previous_tab(self):
         window_handles = self.driver.window_handles
+        logger.debug(f"total number of tabs open: {len(window_handles)}")
         window_handle = self.driver.current_window_handle
         window_handle_index = window_handles.index(window_handle)
 
         if window_handle_index == 0:
             raise RuntimeError("no previous browser tab available")
-
         self.driver.switch_to.window(window_handles[window_handle_index - 1])
+        logger.debug(f"you are on the tab: {window_handle_index + 1}")
+        logger.debug(f"url of the current tab: {self.driver.current_url}")
 
     def back(self):
         self.driver.back()
