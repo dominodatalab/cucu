@@ -213,10 +213,9 @@ class Selenium(Browser):
         logger.debug(f"total number of tabs open: {len(window_handles)}")
         window_handle = self.driver.current_window_handle
         window_handle_index = window_handles.index(window_handle)
-        
+
         if window_handle_index == len(window_handles) - 1:
             raise RuntimeError("no next browser tab available")
-        
         self.driver.switch_to.window(window_handles[window_handle_index + 1])
         logger.debug(f"you are on tab: {window_handle_index + 1} with url: {self.driver.current_url}")
 
