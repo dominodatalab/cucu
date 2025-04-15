@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.2.0
+
+- Add logging to provide more insight into what Fuzzy is doing
+ 
 ## 1.1.1
 - Chore - bump coverage lib from 7.6.12 to 7.8.0
 - Chore - change CI to not use experimental COVERAGE_CORE=sysmon
