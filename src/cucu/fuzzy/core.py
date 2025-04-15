@@ -104,4 +104,6 @@ def find(
         script = f"return cucu.fuzzy_find({','.join(args)});"
         return browser.execute(script)
 
-    return search_in_all_frames(browser, execute_fuzzy_find)
+    fuzzy_return = search_in_all_frames(browser, execute_fuzzy_find)
+    logger.info("Fuzzy found {element} by search term {label}".format(**fuzzy_return))
+    return fuzzy_return["element"]
