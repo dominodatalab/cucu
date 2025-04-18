@@ -59,7 +59,7 @@ jobs:
         environment:
           # Starting with python 3.13 coverage could be 2x slower so use experimental COVERAGE_CORE=sysmon
           COVERAGE_CORE: sysmon
-      - image: selenium/standalone-<<parameters.browser>>:126.0
+      - image: selenium/standalone-<<parameters.browser>>:132.0
         environment:
           SE_ENABLE_TRACING: false
           SE_NODE_MAX_SESSIONS: 12
