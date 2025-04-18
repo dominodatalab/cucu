@@ -82,7 +82,7 @@ def behave(
         os.environ[key] = value
 
     if debug_on_failure:
-        os.environ["CUCU_debug_on_failure"] = "true"
+        os.environ["CUCU_DEBUG_ON_FAILURE"] = "true"
 
     os.environ["CUCU_RESULTS_DIR"] = results
     os.environ["CUCU_JUNIT_DIR"] = junit

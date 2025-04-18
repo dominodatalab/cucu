@@ -8,6 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 1.1.0
 - Add - now python 3.13 compatible
 - Change - use stdlib pdb instead of unsupported ipdb
+- Change - rename CUCU_IPDB_ON_FAILURE => to CUCU_DEBUG_ON_FAILURE
 - Chore - bump selenium lib to 4.31.0
 - Chore - bump selenium/standalone browser images from 126.0 => to 132.0
 

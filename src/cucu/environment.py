@@ -270,7 +270,7 @@ def after_step(ctx, step):
         ctx.step_index += 1
         CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
-    if CONFIG.bool("CUCU_debug_on_failure") and step.status == "failed":
+    if CONFIG.bool("CUCU_DEBUG_ON_FAILURE") and step.status == "failed":
         ctx._runner.stop_capture()
         import pdb
 
