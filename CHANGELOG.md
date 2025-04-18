@@ -8,6 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 1.1.0
 - Add - now python 3.13 compatible
 - Change - use stdlib pdb instead of unsupported ipdb
+- Chore - bump selenium lib to 4.31.0
 
 ## 1.0.13
 - Change - rename logger.warn to logger.warning
