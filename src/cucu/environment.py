@@ -270,11 +270,11 @@ def after_step(ctx, step):
         ctx.step_index += 1
         CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
-    if CONFIG.bool("CUCU_IPDB_ON_FAILURE") and step.status == "failed":
+    if CONFIG.bool("CUCU_debug_on_failure") and step.status == "failed":
         ctx._runner.stop_capture()
-        import ipdb
+        import pdb
 
-        ipdb.post_mortem(step.exc_traceback)
+        pdb.post_mortem(step.exc_traceback)
 
     CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
 

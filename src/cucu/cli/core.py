@@ -90,10 +90,10 @@ def main():
 )
 @click.option("-n", "--name", help="used to specify the exact scenario to run")
 @click.option(
-    "-i",
-    "--ipdb-on-failure/--no-ipdb-on-failure",
+    "-d",
+    "--debug-on-failure/--no-debug-on-failure",
     default=False,
-    help="on failure drop into the ipdb debug shell",
+    help="on failure drop into the debug shell",
 )
 @click.option(
     "-j",
@@ -213,7 +213,7 @@ def run(
     fail_fast,
     headless,
     name,
-    ipdb_on_failure,
+    debug_on_failure,
     junit,
     junit_with_stacktrace,
     logging_level,
@@ -323,7 +323,7 @@ def run(
                 fail_fast,
                 headless,
                 name,
-                ipdb_on_failure,
+                debug_on_failure,
                 junit,
                 results,
                 secrets,
@@ -415,7 +415,7 @@ def run(
                             fail_fast,
                             headless,
                             name,
-                            ipdb_on_failure,
+                            debug_on_failure,
                             junit,
                             results,
                             secrets,
