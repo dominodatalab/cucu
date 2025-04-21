@@ -46,7 +46,7 @@ def behave(
     fail_fast,
     headless,
     name,
-    ipdb_on_failure,
+    debug_on_failure,
     junit,
     results,
     secrets,
@@ -81,8 +81,8 @@ def behave(
         key, value = variable.split("=")
         os.environ[key] = value
 
-    if ipdb_on_failure:
-        os.environ["CUCU_IPDB_ON_FAILURE"] = "true"
+    if debug_on_failure:
+        os.environ["CUCU_DEBUG_ON_FAILURE"] = "true"
 
     os.environ["CUCU_RESULTS_DIR"] = results
     os.environ["CUCU_JUNIT_DIR"] = junit

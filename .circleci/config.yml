@@ -31,14 +31,14 @@ workflows:
 jobs:
   build:
     docker:
-      - image: cimg/python:3.12@sha256:12ecf4f4bc4d76e6c76e631124196490ddd7f9f5887aacd6080f8a9facbca8ab
+      - image: cimg/python:3.13@sha256:a00bfa949271c5519c63d623c6c5ab61fa0868f88ffa3a66b0983bf7df376f3d
     resource_class: medium
     steps:
       - checkout
       - inline-orb-uv/setup-uv
       - run:
-          name: install cucu with Python 3.12
-          command: uv sync -p 3.12 --dev
+          name: install cucu with Python 3.13
+          command: uv sync -p 3.13 --dev
       - run:
           name: run pre-commit validations
           command: uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
@@ -55,9 +55,9 @@ jobs:
         type: string
         default: "chrome"
     docker:
-      - image: cimg/python:3.12@sha256:12ecf4f4bc4d76e6c76e631124196490ddd7f9f5887aacd6080f8a9facbca8ab
+      - image: cimg/python:3.13@sha256:a00bfa949271c5519c63d623c6c5ab61fa0868f88ffa3a66b0983bf7df376f3d
         environment:
-          # Starting with python 3.12 coverage could be 2x slower so use experimental COVERAGE_CORE=sysmon
+          # Starting with python 3.13 coverage could be 2x slower so use experimental COVERAGE_CORE=sysmon
           COVERAGE_CORE: sysmon
       - image: selenium/standalone-<<parameters.browser>>:126.0
         environment:
@@ -130,7 +130,7 @@ jobs:
 
   coverage:
     docker:
-      - image: cimg/python:3.12@sha256:12ecf4f4bc4d76e6c76e631124196490ddd7f9f5887aacd6080f8a9facbca8ab
+      - image: cimg/python:3.13@sha256:a00bfa949271c5519c63d623c6c5ab61fa0868f88ffa3a66b0983bf7df376f3d
     resource_class: small
     steps:
       - checkout
