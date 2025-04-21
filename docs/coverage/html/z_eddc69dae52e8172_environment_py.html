@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_616d3026f19e8882___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.6.12">coverage.py v7.6.12</a>,
-            created at 2025-03-06 17:55 +0000
+            created at 2025-04-21 17:42 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -354,11 +354,11 @@
     <p class="run"><span class="n"><a id="t270" href="#t270">270</a></span><span class="t">        <span class="nam">ctx</span><span class="op">.</span><span class="nam">step_index</span> <span class="op">+=</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t271" href="#t271">271</a></span><span class="t">        <span class="nam">CONFIG</span><span class="op">[</span><span class="str">"__STEP_SCREENSHOT_COUNT"</span><span class="op">]</span> <span class="op">=</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t272" href="#t272">272</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t273" href="#t273">273</a></span><span class="t">    <span class="key">if</span> <span class="nam">CONFIG</span><span class="op">.</span><span class="nam">bool</span><span class="op">(</span><span class="str">"CUCU_IPDB_ON_FAILURE"</span><span class="op">)</span> <span class="key">and</span> <span class="nam">step</span><span class="op">.</span><span class="nam">status</span> <span class="op">==</span> <span class="str">"failed"</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t273" href="#t273">273</a></span><span class="t">    <span class="key">if</span> <span class="nam">CONFIG</span><span class="op">.</span><span class="nam">bool</span><span class="op">(</span><span class="str">"CUCU_DEBUG_ON_FAILURE"</span><span class="op">)</span> <span class="key">and</span> <span class="nam">step</span><span class="op">.</span><span class="nam">status</span> <span class="op">==</span> <span class="str">"failed"</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t274" href="#t274">274</a></span><span class="t">        <span class="nam">ctx</span><span class="op">.</span><span class="nam">_runner</span><span class="op">.</span><span class="nam">stop_capture</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t275" href="#t275">275</a></span><span class="t">        <span class="key">import</span> <span class="nam">ipdb</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t275" href="#t275">275</a></span><span class="t">        <span class="key">import</span> <span class="nam">pdb</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t276" href="#t276">276</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t277" href="#t277">277</a></span><span class="t">        <span class="nam">ipdb</span><span class="op">.</span><span class="nam">post_mortem</span><span class="op">(</span><span class="nam">step</span><span class="op">.</span><span class="nam">exc_traceback</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t277" href="#t277">277</a></span><span class="t">        <span class="nam">pdb</span><span class="op">.</span><span class="nam">post_mortem</span><span class="op">(</span><span class="nam">step</span><span class="op">.</span><span class="nam">exc_traceback</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t278" href="#t278">278</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t279" href="#t279">279</a></span><span class="t">    <span class="nam">CONFIG</span><span class="op">[</span><span class="str">"__CUCU_BEFORE_THIS_SCENARIO_HOOKS"</span><span class="op">]</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t280" href="#t280">280</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -374,7 +374,7 @@
             <a class="nav" href="z_616d3026f19e8882___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.6.12">coverage.py v7.6.12</a>,
-            created at 2025-03-06 17:55 +0000
+            created at 2025-04-21 17:42 +0000
         </p>
     </div>
 </footer>
