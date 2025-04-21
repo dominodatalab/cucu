@@ -44,7 +44,7 @@ include = [
 requires-python = ">=3.9"
 dependencies = [
     "beautifulsoup4~=4.13.3",
-    "behave~=1.2.6",
+    "behave~=1.2.7.dev6",
     "chromedriver-autoinstaller~=0.6.2",
     "click~=8.1.7",
     "coverage[toml]~=7.6.12",

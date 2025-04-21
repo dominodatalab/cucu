@@ -30,16 +30,21 @@ wheels = [
 
 [[package]]
 name = "behave"
-version = "1.2.6"
+version = "1.2.7.dev6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "colorama" },
+    { name = "cucumber-expressions" },
+    { name = "cucumber-tag-expressions" },
     { name = "parse" },
     { name = "parse-type" },
     { name = "six" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
+    { name = "win-unicode-console", marker = "python_full_version < '3.10'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c8/4b/d0a8c23b6c8985e5544ea96d27105a273ea22051317f850c2cdbf2029fe4/behave-1.2.6.tar.gz", hash = "sha256:b9662327aa53294c1351b0a9c369093ccec1d21026f050c3bd9b3e5cccf81a86", size = 701696 }
+sdist = { url = "https://files.pythonhosted.org/packages/fe/b7/be3a5fb5ed211c6a4833989197879c07845019faa59eba0106482e8e16ac/behave-1.2.7.dev6.tar.gz", hash = "sha256:6e8791901c518bdbd41a99df6574127f53d9cb651e451268d3c50741941de0bf", size = 827062 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/6c/ec9169548b6c4cb877aaa6773408ca08ae2a282805b958dbc163cb19822d/behave-1.2.6-py2.py3-none-any.whl", hash = "sha256:ebda1a6c9e5bfe95c5f9f0a2794e01c7098b3dde86c10a95d8621c5907ff6f1c", size = 136779 },
+    { url = "https://files.pythonhosted.org/packages/79/89/93f6e97a3b2ba68de26b42a67ba03f9aa92f2691a7724d9c86137b1266f3/behave-1.2.7.dev6-py2.py3-none-any.whl", hash = "sha256:b4f1535249414f6cca544870f62ca7291002eedb66ddc154cff20b363bd77e09", size = 201938 },
 ]
 
 [[package]]
@@ -308,7 +313,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = "~=4.13.3" },
-    { name = "behave", specifier = "~=1.2.6" },
+    { name = "behave", specifier = "~=1.2.7.dev6" },
     { name = "chromedriver-autoinstaller", specifier = "~=0.6.2" },
     { name = "click", specifier = "~=8.1.7" },
     { name = "coverage", extras = ["toml"], specifier = "~=7.6.12" },
@@ -333,6 +338,24 @@ dev = [
     { name = "pre-commit", specifier = ">=3.8.0" },
     { name = "pytest", specifier = "~=8.3.5" },
     { name = "ruff", specifier = ">=0.6.4" },
+]
+
+[[package]]
+name = "cucumber-expressions"
+version = "18.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c6/7d/f4e231167b23b3d7348aa1c90117ce8854fae186d6984ad66d705df24061/cucumber_expressions-18.0.1.tar.gz", hash = "sha256:86ce41bf28ee520408416f38022e5a083d815edf04a0bd1dae46d474ca597c60", size = 22232 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/80/e0/31ce90dad5234c3d52432bfce7562aa11cda4848aea90936a4be6c67d7ab/cucumber_expressions-18.0.1-py3-none-any.whl", hash = "sha256:86230d503cdda7ef35a1f2072a882d7d57c740aa4c163c82b07f039b6bc60c42", size = 20211 },
+]
+
+[[package]]
+name = "cucumber-tag-expressions"
+version = "6.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3d/1e/49c8695e628c3751349ee3055ed46a37c114f3a9ddff8044f78ab8c4e0a5/cucumber_tag_expressions-6.1.2.tar.gz", hash = "sha256:e63a66a8df15e70a3b0908af98c4fe4f3910f6e0cd375ae230be6097f2ff8a81", size = 41430 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3a/9d/3a5915bc5ec087e988b4e04bfd4961467f2e8e51c434e18be0dd3be6b2b9/cucumber_tag_expressions-6.1.2-py2.py3-none-any.whl", hash = "sha256:58e7aff9d93f319661e24f080e02e795269b79932a787138ae6647358adb24e3", size = 9333 },
 ]
 
 [[package]]
@@ -1034,6 +1057,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/e6/30/fba0d96b4b5fbf594
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5a/84/44687a29792a70e111c5c477230a72c4b957d88d16141199bf9acb7537a3/websocket_client-1.8.0-py3-none-any.whl", hash = "sha256:17b44cc997f5c498e809b22cdf2d9c7a9e71c02c8cc2b6c56e7c2d1239bfa526", size = 58826 },
 ]
+
+[[package]]
+name = "win-unicode-console"
+version = "0.5"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/8d/7aad74930380c8972ab282304a2ff45f3d4927108bb6693cabcc9fc6a099/win_unicode_console-0.5.zip", hash = "sha256:d4142d4d56d46f449d6f00536a73625a871cba040f0bc1a2e305a04578f07d1e", size = 31420 }
 
 [[package]]
 name = "wsproto"
