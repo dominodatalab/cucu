@@ -1,6 +1,6 @@
 [project]
 name = "cucu"
-version = "1.1.0"
+version = "1.1.1"
 description = "Easy BDD web testing"
 readme = "README.md"
 license = { text = "The Clear BSD License" }
@@ -47,7 +47,7 @@ dependencies = [
     "behave>=1.2.7-dev",
     "chromedriver-autoinstaller~=0.6.2",
     "click~=8.1.7",
-    "coverage[toml]~=7.6.12",
+    "coverage[toml]~=7.8",
     "geckodriver-autoinstaller~=0.1.0",
     "humanize~=4.12.1",
     "importlib-metadata~=8.6.1",
