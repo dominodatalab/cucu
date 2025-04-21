@@ -31,7 +31,7 @@ workflows:
 jobs:
   build:
     docker:
-      - image: cimg/python:3.13
+      - image: cimg/python:3.13@sha256:a00bfa949271c5519c63d623c6c5ab61fa0868f88ffa3a66b0983bf7df376f3d
     resource_class: medium
     steps:
       - checkout
@@ -55,7 +55,7 @@ jobs:
         type: string
         default: "chrome"
     docker:
-      - image: cimg/python:3.13
+      - image: cimg/python:3.13@sha256:a00bfa949271c5519c63d623c6c5ab61fa0868f88ffa3a66b0983bf7df376f3d
         environment:
           # Starting with python 3.13 coverage could be 2x slower so use experimental COVERAGE_CORE=sysmon
           COVERAGE_CORE: sysmon
@@ -130,7 +130,7 @@ jobs:
 
   coverage:
     docker:
-      - image: cimg/python:3.13
+      - image: cimg/python:3.13@sha256:a00bfa949271c5519c63d623c6c5ab61fa0868f88ffa3a66b0983bf7df376f3d
     resource_class: small
     steps:
       - checkout
