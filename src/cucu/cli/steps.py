@@ -47,7 +47,10 @@ def load_cucu_steps(filepath=None):
     stdout = stdout.getvalue()
     stderr = stderr.getvalue()
 
-    if stdout.startswith("ParserError"):
+    if stdout.startswith("USING RUNNER:"):
+        # remove the first line of the output
+        stdout = "\n".join(stdout.split("\n")[1:])
+    elif stdout.startswith("ParserError"):
         print(stdout)
         raise RuntimeError(
             "unable to parse feature files, see above for details"

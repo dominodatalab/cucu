@@ -3,9 +3,13 @@
 #      writing while not interfering with the way behave does its own log
 #      capturing
 #
+import os
 import sys
 import warnings
 from functools import wraps
+
+# set env var BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON=yes before importing behave
+os.environ["BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON"] = "yes"
 
 import behave
 from behave.__main__ import main as original_behave_main
