@@ -119,7 +119,7 @@ def init_step_hooks(stdout, stderr):
 
             return wrapper
 
-        behave.__dict__[decorator_name] = new_decorator
+        behave.__dict__[decorator_name.title()] = behave.__dict__[decorator_name] = new_decorator
 
 
 _stdout = sys.stdout
