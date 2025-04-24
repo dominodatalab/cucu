@@ -66,7 +66,7 @@ def init_step_hooks(stdout, stderr):
                     # resolve variables in the table values
                     if ctx.table is not None:
                         ctx.table.original = Table(
-                            ctx.table.headings, rows=ctx.table.rows
+                            ctx.table.headings, rows=ctx.table.rows, line=ctx.table.line
                         )
                         new_rows = []
                         for row in ctx.table.rows:
