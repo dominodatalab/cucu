@@ -171,6 +171,10 @@ class CucuFormatter(Formatter):
             text = self.colorize(
                 f"{indent}{prefix}{keyword} {step.name}\n", "cyan"
             )
+        else:
+            text = self.colorize(
+                f"{indent}{prefix}{keyword} {step.name}\n", "yellow"
+            )
 
         if self.monochrome:
             self.stream.write(f"{text}")
