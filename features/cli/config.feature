@@ -56,7 +56,7 @@ Feature: Config
 
        1 feature passed, 0 failed, 0 skipped
        1 scenario passed, 0 failed, 0 skipped
-       3 steps passed, 0 failed, 0 skipped, 0 undefined
+       3 steps passed, 0 failed, 0 skipped
        [\s\S]*
        """
      When I run the command "cucu run {CUCU_RESULTS_DIR}/load --results={CUCU_RESULTS_DIR}/nested_cucurc_from_top_level_directory_results --env BUZZ=buzz --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
@@ -80,7 +80,7 @@ Feature: Config
 
        1 feature passed, 0 failed, 0 skipped
        1 scenario passed, 0 failed, 0 skipped
-       3 steps passed, 0 failed, 0 skipped, 0 undefined
+       3 steps passed, 0 failed, 0 skipped
        [\s\S]*
        """
 
@@ -135,7 +135,7 @@ Feature: Config
 
        1 feature passed, 0 failed, 0 skipped
        1 scenario passed, 0 failed, 0 skipped
-       3 steps passed, 0 failed, 0 skipped, 0 undefined
+       3 steps passed, 0 failed, 0 skipped
        [\s\S]*
        """
 
