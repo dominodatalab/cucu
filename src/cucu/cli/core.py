@@ -2,6 +2,7 @@
 import glob
 import json
 import os
+import re
 import shutil
 import signal
 import sys
@@ -763,6 +764,45 @@ def vars(filepath):
     )
 
     print(tabulate(variables, tablefmt="fancy_grid"))
+
+
+@main.command()
+@click.argument("filepath", default="features")
+def tags(filepath):
+    """
+    print list of defined tags
+    """
+    init_global_hook_variables()
+
+    # TODO: this is waaaaay too naive and won't work
+    # instead need to use the behave parse_file helper (or find some other state that's loaded in behave)
+    # maybe call behave_init with each file and pop some state from the library?
+    tags = _find_unique_tags(root_dir=filepath, pattern="*.feature", string_capture="^\(@[\w-]+\)")
+
+    print(tabulate(tags, tablefmt="fancy_grid"))
+
+def _find_unique_tags(root_dir, pattern, string_capture):
+    """
+    Recursively searches files matching a pattern, extracting unique pattern matches.
+
+    Args:
+        root_dir: The root directory to start the search from.
+        pattern: The file pattern to match (e.g., "*.feature").
+        string_capture: The pattern to find strings within the files (e.g., r'"(.*?)"').
+
+    Returns:
+        A set of unique regex captures found in the files.
+    """
+    unique = set()
+    for filename in glob.iglob(os.path.join(root_dir, "**", pattern), recursive=True):
+        try:
+            with open(filename, "r") as f:
+                content = f.read()
+                matches = re.findall(string_capture, content)
+                unique.update(matches)
+        except Exception as e:
+            print(f"Error processing file {filename}: {e}")
+    return unique
 
 
 @main.command()
