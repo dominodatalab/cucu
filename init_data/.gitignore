@@ -2,4 +2,4 @@
 .monitor.png
 report/
 results/ 
-# /cucurc.yml # TODO: Uncomment this rule as should be a local only config file
+# /cucurc.yml # TODO: Uncomment this rule as the file should be a local only config file
