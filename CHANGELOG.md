@@ -8,7 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 1.2.0
 
 - Add logging to provide more insight into what Fuzzy is doing
- 
+
 ## 1.1.1
 - Chore - bump coverage lib from 7.6.12 to 7.8.0
 - Chore - change CI to not use experimental COVERAGE_CORE=sysmon
