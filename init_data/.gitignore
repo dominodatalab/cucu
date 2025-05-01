@@ -1,5 +1,5 @@
 # Cucu temp files
 .monitor.png
 report/
-results/ 
+results/
 # /cucurc.yml # TODO: Uncomment this rule as the file should be a local only config file

@@ -56,7 +56,7 @@ to drive various underlying tools/frameworks to create real world testing scenar
 
 # Installation
 Let's get your repo to start using the cucu framework!
-> [!NOTE] If you're not using uv, then just 
+> [!NOTE] If you're not using uv, then just
 > `pip install cucu` for your repo
 
 ## Requirements

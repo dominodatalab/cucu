@@ -61,4 +61,3 @@ Use [cucu](https://pypi.org/project/cucu/) to run e2e-tests with the following:
    | Tag       | Gist                                                                                            | Example   |
    | --------- | ----------------------------------------------------------------------------------------------- | --------- |
    | @sid-#### | **[Required]** The scenario (i.e. test case) id (numbers only) that is used to track and record | @sid-1234 |
-
