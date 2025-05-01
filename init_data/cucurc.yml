@@ -1,0 +1,10 @@
+# Don't check in this file! (I mean you could, but you probably don't want to)
+
+# The config heirarchy starts with ~/.cucurc.yml, then this file, and down the folder tree.
+# Use this file for local configuration per user
+
+# This is just an example, normally you could have it as environment variables or pass it in the command line
+MY_SECRET_USERNAME: "Bob"
+MY_SECRET_PASSWORD: "123456"
+
+SOME_OTHER_SECRET: "another secret"

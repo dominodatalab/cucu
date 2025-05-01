@@ -41,8 +41,9 @@ to drive various underlying tools/frameworks to create real world testing scenar
 
 - [Installation](#installation)
   - [Requirements](#requirements)
-  - [Install Walkthrough](#install-walkthrough)
-- [Usage](#usage)
+  - [Setup](#setup)
+  - [Usage](#usage)
+- [Usage](#usage-1)
   - [Cucu Run](#cucu-run)
   - [Run specific browser version with docker](#run-specific-browser-version-with-docker)
 - [Extending Cucu](#extending-cucu)
@@ -54,40 +55,55 @@ to drive various underlying tools/frameworks to create real world testing scenar
   - [Install From Build](#install-from-build)
 
 # Installation
+Let's get your repo to start using the cucu framework!
+> [!NOTE] If you're not using uv, then just 
+> `pip install cucu` for your repo
+
 ## Requirements
-Cucu requires
-1. python 3.9+
-2. docker (to do UI testing)
+1. Docker (for UI testing)
+2. The [uv](https://docs.astral.sh/uv/) tool
+3. A repo in a clean state
 
-## Install Walkthrough
-_Get your repo setup using cucu as a test framework_
+## Setup
+> [!NOTE] Always run cucu from your repo root folder
 
-1. install and start Docker if you haven't already
-2. install [cucu](https://pypi.org/project/cucu/)
+1. Have docker running (don't need it right now, but why not get ready for testing)
+2. Make sure you have no files to commit and a clean working tree
    ```
-   pip install cucu
+   git status
    ```
-3. create the folder structure and files with content:
-    _Cucu uses the [behave framework](https://github.com/behave/behave) which expects the `features/steps` directories_
-   - features/
-      - steps/
-      - `__init__.py` # enables cucu and custom steps
-        ```python
-        # import all of the steps from cucu
-        from cucu.steps import *  # noqa: F403, F401
+   Should report: `nothing to commit, working tree clean`
 
-        # import individual sub-modules here (i.e. module names of your custom step py files)
-        # Example: For file features/steps/ui/login.py
-        # import steps.ui.login_steps
-        ```
-   - environment.py - enables before/after hooks
-     ```python
-     # flake8: noqa
-     from cucu.environment import *
+3. Add [cucu](https://pypi.org/project/cucu/) to your project and activate your venv
+   ```
+   uv add cucu --dev
+   source .venv/bin/activate
+   ```
+4. Initialize cucu (copies the `init_data` folder to your repo)
+   ```
+   cucu init
+   ```
+5. Manually resolve any file conflicts
+   ```
+   git status
+   ```
+6. Run the example tests
+   ```
+   cucu run features
+   ```
+7. Done! But there is more optional stuff you can do, like:
+   1. Run with `--no-headless` mode to see the browser interaction
+   2. Run with `--generate-report` (or `-g`) to generate the html **report/** folder
+   3. Reference the exact test (i.e. scenario) with `features/example.feature:8` instead of using the `features` folder
+   ```
+   cucu run features/example.feature:8 -g --no-headless
+   ```
 
-     # Define custom before/after hooks here
-     ```
-4. list available cucu steps
+## Usage
+> [!Note] Cucu needs to be run from your **repo root** (i.e. the parent of the `features` folder)
+
+
+2. list available cucu steps
    ```bash
    cucu steps
    ```

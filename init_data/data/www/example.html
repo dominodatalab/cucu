@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <title>Some Example</title>
+    <script>
+    function update() {
+      document.querySelector("#my_status").textContent = "Welcome " + document.querySelector("#my_name").value + " !";
+      document.querySelector("#my_name").value = "";
+      document.querySelector("#my_key").value = "";
+    }
+    </script>
+  </head>
+  <body>
+
+    <h1>Some Example</h1>
+    <div id="my_status"></div>
+    <br/>
+
+    <div style="background: aliceblue;">Fake login box
+      <br/>
+      <label>username:</label><input id="my_name" type="text"></input>
+      <br/>
+      <label>The password here but use aria label to find</label><input aria-label="password" id="my_key" type="password"></input>
+      <br/>
+      <button onclick="update();">Login</button>
+    </div>
+  </body>
+</html>

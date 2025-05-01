@@ -8,6 +8,7 @@ import sys
 import time
 import xml.etree.ElementTree as ET
 from importlib.metadata import version
+from pathlib import Path
 from threading import Timer
 
 import click
@@ -468,7 +469,9 @@ def run(
                     time.sleep(1)
 
                 if timeout_reached:
-                    logger.warning("Timeout reached, send kill signal to workers")
+                    logger.warning(
+                        "Timeout reached, send kill signal to workers"
+                    )
                     kill_workers()
 
                 task_failed.update(async_results)
@@ -763,6 +766,40 @@ def vars(filepath):
     )
 
     print(tabulate(variables, tablefmt="fancy_grid"))
+
+
+@main.command()
+@click.argument("filepath", default="")
+def init(filepath):
+    """
+    initialize cucu in the current directory
+
+    Copies the `init_data` directory to the current directory
+    """
+    current_dir = Path(__file__).parent
+    src_dir = ""
+    while src_dir == "":
+        if current_dir.name == "src":
+            src_dir = current_dir
+        else:
+            current_dir = current_dir.parent
+
+    print(f"{src_dir=}")
+    repo_dir = filepath if filepath.strip() else os.path.join(os.getcwd())
+
+    features_dir = os.path.join(repo_dir, "features")
+    if os.path.exists(features_dir):
+        if (
+            input(
+                "Found existing files, do you want to continue? (y/n) "
+            ).lower()
+            != "y"
+        ):
+            print("aborting")
+            return
+
+    shutil.copytree(src_dir.parent / "init_data", repo_dir, dirs_exist_ok=True)
+    print("You can now start writing your tests")
 
 
 @main.command()
