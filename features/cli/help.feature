@@ -15,6 +15,7 @@ Feature: Help
 
       Commands:
         debug   debug cucu library
+        init    initialize cucu in the current directory
         lint    lint feature files
         lsp     start the cucu language server
         report  generate a test report from a results directory
