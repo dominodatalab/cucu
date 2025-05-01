@@ -308,7 +308,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = "~=4.13.3" },
-    { name = "behave", specifier = "~=1.2.6" },
+    { name = "behave", specifier = "==1.2.6" },
     { name = "chromedriver-autoinstaller", specifier = "~=0.6.2" },
     { name = "click", specifier = "~=8.1.7" },
     { name = "coverage", extras = ["toml"], specifier = "~=7.8" },
