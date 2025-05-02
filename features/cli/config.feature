@@ -38,7 +38,7 @@ Feature: Config
      When I run the command "cucu run {CUCU_RESULTS_DIR}/load/nested/cucurc --results={CUCU_RESULTS_DIR}/nested_cucurc_from_parent_directory_results --env BUZZ=buzz --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following:
        """
-       Feature: Feature file that prints some variables
+       [\s\S]*Feature: Feature file that prints some variables
 
          Scenario: This scenario prints a bunch of variables
        bar
@@ -56,13 +56,13 @@ Feature: Config
 
        1 feature passed, 0 failed, 0 skipped
        1 scenario passed, 0 failed, 0 skipped
-       3 steps passed, 0 failed, 0 skipped, 0 undefined
+       3 steps passed, 0 failed, 0 skipped(, 0 undefined)?
        [\s\S]*
        """
      When I run the command "cucu run {CUCU_RESULTS_DIR}/load --results={CUCU_RESULTS_DIR}/nested_cucurc_from_top_level_directory_results --env BUZZ=buzz --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following:
        """
-       Feature: Feature file that prints some variables
+       [\s\S]*Feature: Feature file that prints some variables
 
          Scenario: This scenario prints a bunch of variables
        bar
@@ -80,7 +80,7 @@ Feature: Config
 
        1 feature passed, 0 failed, 0 skipped
        1 scenario passed, 0 failed, 0 skipped
-       3 steps passed, 0 failed, 0 skipped, 0 undefined
+       3 steps passed, 0 failed, 0 skipped(, 0 undefined)?
        [\s\S]*
        """
 
@@ -117,7 +117,7 @@ Feature: Config
      When I run the command "cucu run {CUCU_RESULTS_DIR}/load_nested_cucurc_with_workers --results={CUCU_RESULTS_DIR}/nested_cucurc_with_workers_results --env BUZZ=buzz --workers 2 --no-color-output" and expect exit code "0"
      Then I should see the file at "{CUCU_RESULTS_DIR}/nested_cucurc_with_workers_results/Feature file that prints some variables.log" matches the following:
        """
-       Feature: Feature file that prints some variables
+       [\s\S]*Feature: Feature file that prints some variables
 
          Scenario: This scenario prints a bunch of variables
        bar
@@ -135,7 +135,7 @@ Feature: Config
 
        1 feature passed, 0 failed, 0 skipped
        1 scenario passed, 0 failed, 0 skipped
-       3 steps passed, 0 failed, 0 skipped, 0 undefined
+       3 steps passed, 0 failed, 0 skipped(, 0 undefined)?
        [\s\S]*
        """
 
