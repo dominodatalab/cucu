@@ -801,7 +801,7 @@ def init(filepath, logging_level):
         answer = input("Overwrite existing files? [y/N]:")
         if answer.lower() != "y":
             print("Aborted!")
-            return 1
+            return
 
     shutil.copytree(src_dir.parent / "init_data", repo_dir, dirs_exist_ok=True)
     print("You can now start writing your tests")

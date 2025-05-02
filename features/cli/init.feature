@@ -9,3 +9,23 @@ Feature: Init
       You can now start writing your tests
       """
       And I should see the directory at "{CUCU_RESULTS_DIR}/cucu_init/features"
+
+    * # User can cancel when there are existing files
+     When I run the following script and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      """
+      echo 'n\n' | cucu init {CUCU_RESULTS_DIR}/cucu_init
+      """
+     Then I should see "{STDOUT}" contains the following:
+      """
+      Overwrite existing files? [y/N]:Aborted!
+      """
+
+    * # User can overwrite existing files
+     When I run the following script and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      """
+      echo 'y\n' | cucu init {CUCU_RESULTS_DIR}/cucu_init
+      """
+     Then I should see "{STDOUT}" contains the following:
+      """
+      Overwrite existing files? [y/N]:You can now start writing your tests
+      """
