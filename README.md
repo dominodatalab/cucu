@@ -103,7 +103,7 @@ Let's get your repo to start using the cucu framework!
 > [!Note] Cucu needs to be run from your **repo root** (i.e. the parent of the `features` folder)
 
 
-2. list available cucu steps
+1. list available cucu steps
    ```bash
    cucu steps
    ```
@@ -112,7 +112,7 @@ Let's get your repo to start using the cucu framework!
      cucu steps | fzf
      # start typing for search
      ```
-5. **create your first cucu test**
+2. **create your first cucu test**
    - features/my_first_test.feature
      ```gherkin
      Feature: My First Cucu Test
@@ -124,7 +124,7 @@ Let's get your repo to start using the cucu framework!
            And I click the button "Google Search"
           Then I wait to see the text "results"
      ```
-6. **run it**
+3. **run it**
    ```bash
    cucu run features/my_first_test.feature
    ```
