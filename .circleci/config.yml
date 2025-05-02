@@ -86,7 +86,7 @@ jobs:
           name: run_functional_tests
           command: uv run cucu run features --workers 8 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<<parameters.browser>>"
           environment:
-            COVERAGE_PROCESS_START: pyproject.toml  # set to config file
+            COVERAGE_PROCESS_START: ${CIRCLE_WORKING_DIRECTORY}/pyproject.toml  # set to config file
       - run:
           name: run unit tests
           command: uv run coverage run -m pytest --junit-xml=results/unit-tests.xml

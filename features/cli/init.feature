@@ -33,7 +33,6 @@ Feature: Init
   Scenario: The example feature actually works
      When I run the following script and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       """
-      export COVERAGE_RCFILE={CWD}/pyproject.toml
       cd src/cucu/init_data
       cucu run features --results={CUCU_RESULTS_DIR}/cucu_init_results --no-color-output
       """
