@@ -45,7 +45,7 @@ Use [cucu](https://pypi.org/project/cucu/) to run e2e-tests with the following:
     cucu lint
     ```
 
-# Tagging Tests
+### Tagging Tests
 
 > [!Note] This is just an example of how use tags
 
