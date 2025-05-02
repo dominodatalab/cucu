@@ -770,12 +770,21 @@ def vars(filepath):
 
 @main.command()
 @click.argument("filepath", default="")
-def init(filepath):
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+def init(filepath, logging_level):
     """
     initialize cucu in the current directory
 
     Copies the `init_data` directory to the current directory
     """
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
+
     current_dir = Path(__file__).parent
     src_dir = ""
     while src_dir == "":
@@ -784,19 +793,15 @@ def init(filepath):
         else:
             current_dir = current_dir.parent
 
-    print(f"{src_dir=}")
+    logger.debug(f"cucu init: copy example directory from {src_dir=}")
     repo_dir = filepath if filepath.strip() else os.path.join(os.getcwd())
 
     features_dir = os.path.join(repo_dir, "features")
     if os.path.exists(features_dir):
-        if (
-            input(
-                "Found existing files, do you want to continue? (y/n) "
-            ).lower()
-            != "y"
-        ):
-            print("aborting")
-            return
+        answer = input("Overwrite existing files? [y/N]:")
+        if answer.lower() != "y":
+            print("Aborted!")
+            return 1
 
     shutil.copytree(src_dir.parent / "init_data", repo_dir, dirs_exist_ok=True)
     print("You can now start writing your tests")
