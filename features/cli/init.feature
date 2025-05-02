@@ -33,7 +33,7 @@ Feature: Init
   Scenario: The example feature actually works
      When I run the following script and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       """
-      cd init_data
+      cd src/cucu/init_data
       cucu run features --results={CUCU_RESULTS_DIR}/cucu_init_results --no-color-output
       """
      Then I should see "{STDOUT}" matches the following:

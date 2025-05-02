@@ -79,7 +79,6 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.sdist]
 include = [
   "/src",
-  "/init_data",
   "/CHANGELOG.md",
 ]
 exclude = [

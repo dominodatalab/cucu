@@ -785,15 +785,9 @@ def init(filepath, logging_level):
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())
 
-    current_dir = Path(__file__).parent
-    src_dir = ""
-    while src_dir == "":
-        if current_dir.name == "src":
-            src_dir = current_dir
-        else:
-            current_dir = current_dir.parent
+    init_data_dir = Path(__file__).parent.parent / "init_data"
 
-    logger.debug(f"cucu init: copy example directory from {src_dir=}")
+    logger.debug(f"cucu init: copy example directory from {init_data_dir=}")
     repo_dir = filepath if filepath.strip() else os.path.join(os.getcwd())
 
     features_dir = os.path.join(repo_dir, "features")
@@ -803,7 +797,7 @@ def init(filepath, logging_level):
             print("Aborted!")
             return
 
-    shutil.copytree(src_dir.parent / "init_data", repo_dir, dirs_exist_ok=True)
+    shutil.copytree(init_data_dir, repo_dir, dirs_exist_ok=True)
     print("You can now start writing your tests")
 
 
