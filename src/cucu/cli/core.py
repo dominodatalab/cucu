@@ -26,7 +26,7 @@ from cucu import (
     reporter,
 )
 from cucu.cli import thread_dumper
-from cucu.cli.run import behave, behave_init, write_run_details
+from cucu.cli.run import behave, behave_init, write_run_info
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.config import CONFIG
 from cucu.lint import linter
@@ -294,7 +294,7 @@ def run(
         os.environ["CUCU_RECORD_ENV_VARS"] = "true"
 
     if not dry_run:
-        write_run_details(results, filepath)
+        write_run_info(results, locals())
 
     try:
         if workers is None or workers == 1:

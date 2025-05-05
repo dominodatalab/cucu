@@ -48,6 +48,7 @@ dependencies = [
     "chromedriver-autoinstaller~=0.6.2",
     "click~=8.1.7",
     "coverage[toml]~=7.8",
+    "duckdb>=1.2.2",
     "geckodriver-autoinstaller~=0.1.0",
     "humanize~=4.12.1",
     "importlib-metadata~=8.7.0",
