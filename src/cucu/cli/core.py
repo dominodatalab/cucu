@@ -468,7 +468,9 @@ def run(
                     time.sleep(1)
 
                 if timeout_reached:
-                    logger.warning("Timeout reached, send kill signal to workers")
+                    logger.warning(
+                        "Timeout reached, send kill signal to workers"
+                    )
                     kill_workers()
 
                 task_failed.update(async_results)

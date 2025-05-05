@@ -10,7 +10,6 @@ import duckdb
 from cucu import (
     behave_tweaks,
     init_global_hook_variables,
-    logger,
     register_before_retry_hook,
 )
 from cucu.browser import selenium
@@ -209,6 +208,6 @@ def write_run_info(results, run_locals):
 
     # TODO: explicitly create the cucu_run table
     with duckdb.connect(db_filepath) as conn:
-        conn.sql(f"CREATE TABLE cucu_run AS SELECT * FROM read_json('{run_details_filepath}');")
-        logger.debug(conn.sql(f"SELECT * FROM read_json('{run_details_filepath}');"))
-
+        conn.sql(
+            f"CREATE TABLE cucu_run AS SELECT * FROM read_json('{run_details_filepath}');"
+        )
