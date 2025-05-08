@@ -203,7 +203,7 @@ def write_run_info(results, run_locals):
         output.write(json.dumps(run_info, indent=2, sort_keys=True))
 
     CONFIG["RESULTS_DB_PATH"] = os.path.join(results, "results.db")
-    if os.path.exists(db_filepath):
+    if os.path.exists(CONFIG["RESULTS_DB_PATH"]):
         return
 
     # TODO: explicitly create the cucu_run table
