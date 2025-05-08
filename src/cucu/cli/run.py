@@ -206,8 +206,11 @@ def write_run_info(results, run_locals):
     if os.path.exists(db_filepath):
         return
 
-    # TODO: explicitly create the cucu_run table
     with duckdb.connect(db_filepath) as conn:
-        conn.sql(
-            f"CREATE TABLE cucu_run AS SELECT * FROM read_json('{run_details_filepath}');"
-        )
+        conn.sql(f"""
+            CREATE TABLE cucu_run
+            AS SELECT
+                nextval('seq_run_id') AS run_id,
+                * 
+                FROM read_json('{run_details_filepath}');
+        """)

@@ -34,7 +34,7 @@ def run_webserver_for_scenario(ctx, directory, variable):
     _, port = httpd.server_address
     CONFIG[variable] = str(port)
 
-    with socket.create_connection(("localhost", port), timeout=5):
+    with socket.create_connection((CONFIG["HOST_ADDRESS"], port), timeout=5):
         logger.debug(f"Webserver is running at {port=}port")
 
     def shutdown_webserver(_):
