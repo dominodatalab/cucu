@@ -1,6 +1,6 @@
 [project]
 name = "cucu"
-version = "1.1.1"
+version = "1.1.2"
 description = "Easy BDD web testing"
 readme = "README.md"
 license = { text = "The Clear BSD License" }
@@ -27,21 +27,13 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Natural Language :: English",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3 :: Only",
     "Topic :: Software Development :: Testing :: BDD",
 ]
 include = [
     { path = "CHANGELOG.md", format = "sdist" },
     { path = "LICENSE", format = "sdist" },
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "beautifulsoup4~=4.13.3",
     "behave==1.2.6",
@@ -76,6 +68,17 @@ cucu = "cucu.cli:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/CHANGELOG.md",
+]
+exclude = [
+  "/data",
+  "/features",
+  "/tests",
+]
 
 [tool.uv]
 dev-dependencies = [
