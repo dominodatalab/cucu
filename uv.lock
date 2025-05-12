@@ -157,14 +157,14 @@ wheels = [
 
 [[package]]
 name = "click"
-version = "8.1.7"
+version = "8.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de", size = 336121, upload-time = "2023-08-17T17:29:11.868Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cd/0f/62ca20172d4f87d93cf89665fbaedcd560ac48b465bd1d92bfc7ea6b0a41/click-8.2.0.tar.gz", hash = "sha256:f5452aeddd9988eefa20f90f05ab66f17fce1ee2a36907fd30b05bbb5953814d", size = 235857, upload-time = "2025-05-10T22:21:03.111Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/00/2e/d53fa4befbf2cfa713304affc7ca780ce4fc1fd8710527771b58311a3229/click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28", size = 97941, upload-time = "2023-08-17T17:29:10.08Z" },
+    { url = "https://files.pythonhosted.org/packages/a2/58/1f37bf81e3c689cc74ffa42102fa8915b59085f54a6e4a80bc6265c0f6bf/click-8.2.0-py3-none-any.whl", hash = "sha256:6b303f0b2aa85f1cb4e5303078fadcbcd4e476f114fab9b5007005711839325c", size = 102156, upload-time = "2025-05-10T22:21:01.352Z" },
 ]
 
 [[package]]
@@ -279,7 +279,7 @@ requires-dist = [
     { name = "beautifulsoup4", specifier = "~=4.13.3" },
     { name = "behave", specifier = "==1.2.6" },
     { name = "chromedriver-autoinstaller", specifier = "~=0.6.2" },
-    { name = "click", specifier = "~=8.1.7" },
+    { name = "click", specifier = "~=8.2.0" },
     { name = "coverage", extras = ["toml"], specifier = "~=7.8" },
     { name = "geckodriver-autoinstaller", specifier = "~=0.1.0" },
     { name = "humanize", specifier = "~=4.12.1" },
