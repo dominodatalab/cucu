@@ -14,4 +14,4 @@
 - Use `make lint` to check for code style issues.
 - Use `make fix` to fix code style issues.
 - Part of `make lint` and `make fix` is to run the `cucu lint` command that checks for code style issues of `.feature` files.
-
+- Add a summart to the change log for each PR, incrementing the version number if needed.
