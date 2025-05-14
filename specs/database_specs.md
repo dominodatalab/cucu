@@ -16,11 +16,11 @@ We want to have cucu create a database to store all relevant `cucu run` test dat
 ## Tables
 The table layout should be the following, with appropriate primary keys and foriegn keys linking them.
 All tables entries have an ID column with the naming convention of `{tablename}_ID`.
-1. CucuRun - there should be one master entry per `cucu run`, even with multiple workers.
-2. Feature - maps to a feature file. Features don't actually run, but their Scenarios do.
-3. Scenario - maps to a scenario in a feature file. 
-4. Section - maps to a special step and provides grouping to steps that follow it (see section steps). Sections could have sub-sections. Each sub-section has a link back to the parent section. 
-5. Step - maps to the step (except section steps) in the scenario. Steps could have multiple sub-steps.
+1. CucuRun - there should be one master entry per `cucu run`, even with multiple workers. This should have all the data generated in the run_details.json, but shouldn't load it from the file.
+2. Feature - maps to a feature file. Features don't actually run, but their Scenarios do. Include the feature description.
+3. Scenario - maps to a scenario in a feature file. Include all the tags, with tags inheirited from the feature. Also scenario description.
+4. Section - maps to a special step and provides grouping to steps that follow it (see section steps). Sections could have sub-sections. Each sub-section has a link back to the parent section. Add the section level.
+5. Step - maps to the step (except section steps) in the scenario. Steps could have multiple sub-steps. Add the step level with link to parent.
 6. StepRun - Steps can be retried so we need to support recording each retry as a separate row. These can also be associated with a screenshot
 7. StepPost - ocurrs at the end of of a StepRun which takes a screenshot after the last StepRun
 
