@@ -17,15 +17,9 @@ def section_step(ctx, heading_level, section_text):
         * #### Deep subsection
 
     The number of # characters determines the heading level (1-4).
-    This step is a no-op but provides structure in the HTML report
-    and database (when database functionality is enabled).
+    This step is a no-op but provides structure in the HTML report.
     """
-    # Store the heading level (1-4) based on number of # characters
-    ctx.section_level = len(heading_level)
-    ctx.section_text = section_text
 
-    # Additional metadata can be stored here when database functionality is implemented
-    # This would include parent-child relationships between sections
     pass
 
 
