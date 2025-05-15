@@ -199,8 +199,11 @@ def generate(results, basepath, only_failures=False):
                 image_dir = get_step_image_dir(step_index, step["name"])
                 image_dirpath = os.path.join(scenario_filepath, image_dir)
 
+                # Handle section headings with different levels (# to ####)
                 if step["name"].startswith("#"):
-                    step["heading_level"] = "h4"
+                    # Map the count to the appropriate HTML heading (h2-h5)
+                    # We use h2-h5 instead of h1-h4 so h1 can be reserved for scenario/feature titles
+                    step["heading_level"] = f"h{step["name"][:4].count("#") + 1}"
 
                 if os.path.exists(image_dirpath):
                     _, _, image_names = next(os.walk(image_dirpath))
