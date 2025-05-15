@@ -31,16 +31,16 @@ Feature: Report basics
       """
 
   Scenario: User can run a test and see extended output
-    Given I run the command "cucu run data/features/with_secret/scenario_with_comments.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "1"
+    Given I run the command "cucu run data/features/with_secret/scenario_with_sections.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "1"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
-      And I wait to click the link "Scenario with comments"
+      And I wait to click the link "Scenario with sections"
 
-        * # Can see inline comments
-     Then I wait to see the text "# First comment"
-      And I should see the text "# Second comment"
-      And I should see the text "# Comment about \{MY_SECRET\}"
+        * # Can see inline sections
+     Then I wait to see the text "# First section"
+      And I should see the text "# Second section"
+      And I should see the text "# Section about \{MY_SECRET\}"
 
         * # Can see variable interpolation
       And I wait to see the text "# FOO=\"bar\""

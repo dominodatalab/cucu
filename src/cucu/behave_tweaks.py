@@ -66,7 +66,9 @@ def init_step_hooks(stdout, stderr):
                     # resolve variables in the table values
                     if ctx.table is not None:
                         ctx.table.original = Table(
-                            ctx.table.headings, rows=ctx.table.rows, line=ctx.table.line
+                            ctx.table.headings,
+                            rows=ctx.table.rows,
+                            line=ctx.table.line,
                         )
                         new_rows = []
                         for row in ctx.table.rows:
@@ -123,7 +125,9 @@ def init_step_hooks(stdout, stderr):
 
             return wrapper
 
-        behave.__dict__[decorator_name.title()] = behave.__dict__[decorator_name] = new_decorator
+        behave.__dict__[decorator_name.title()] = behave.__dict__[
+            decorator_name
+        ] = new_decorator
 
 
 _stdout = sys.stdout
