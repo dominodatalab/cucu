@@ -122,7 +122,7 @@ erDiagram
         int total_duration_ms
         string system_info
     }
-    
+
     Feature {
         int feature_id PK
         int cucu_run_id FK
@@ -135,7 +135,7 @@ erDiagram
         string status
         int total_duration_ms
     }
-    
+
     Scenario {
         int scenario_id PK
         int feature_id FK
@@ -148,7 +148,7 @@ erDiagram
         int total_duration_ms
         string error_message
     }
-    
+
     ScenarioPost {
         int scenario_post_id PK
         int scenario_id FK
@@ -157,7 +157,7 @@ erDiagram
         string details
         string status
     }
-    
+
     Section {
         int section_id PK
         int scenario_id FK
@@ -167,7 +167,7 @@ erDiagram
         timestamp timestamp
         int order_index
     }
-    
+
     Step {
         int step_id PK
         int scenario_id FK
@@ -182,7 +182,7 @@ erDiagram
         string file_path
         int line_number
     }
-    
+
     StepRun {
         int step_run_id PK
         int step_id FK
@@ -195,7 +195,7 @@ erDiagram
         string stack_trace
         bool is_final_attempt
     }
-    
+
     StepPost {
         int step_post_id PK
         int step_run_id FK
@@ -203,7 +203,7 @@ erDiagram
         string action_type
         string details
     }
-    
+
     Artifact {
         int artifact_id PK
         int cucu_run_id FK
@@ -352,4 +352,3 @@ This structure enables efficient querying of test execution data organized by se
    - Benchmark performance impact of database operations during test runs
    - Test with multi-worker parallel execution to validate concurrency handling
    - Test recovery from unexpected termination scenarios
-

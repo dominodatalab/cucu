@@ -70,18 +70,18 @@ Feature: Sample feature showing section headings
     * # Main Section
     * This step belongs to the main section
     * So does this one
-    
+
     * ## Subsection A
     * This step belongs to Subsection A
     * And so does this one
-    
+
     * ## Subsection B
     * This step is in Subsection B
-    
+
     * ### Deeper subsection
     * A step in the deeper section
     * Another step in the deeper section
-    
+
     * ## Back to level 2
     * This step is in a new level 2 section
 ```
