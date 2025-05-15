@@ -2,7 +2,7 @@
 # nopycln: file
 import cucu.hooks
 
-import cucu.steps.section_steps
+import cucu.steps.comment_steps
 import cucu.steps.base_steps
 
 import cucu.steps.browser_steps
