@@ -5,6 +5,8 @@ import socket
 import sys
 from datetime import datetime
 
+import duckdb
+
 from cucu import (
     behave_tweaks,
     init_global_hook_variables,
@@ -180,28 +182,45 @@ def behave(
     return result
 
 
-def write_run_details(results, filepath):
-    """
-    writes a JSON file with run details to the results directory which can be
-    used to figure out any runtime details that would otherwise be lost and
-    difficult to figure out.
-    """
+def write_run_info(results, run_locals):
     run_details_filepath = os.path.join(results, "run_details.json")
-
     if os.path.exists(run_details_filepath):
-        return
+        raise RuntimeError("Should not overwrite run_details.json")
 
     if CONFIG["CUCU_RECORD_ENV_VARS"]:
         env_values = dict(os.environ)
     else:
-        env_values = "To enable use the --record-env-vars flag"
+        env_values = {"info": "To enable use the --record-env-vars flag"}
 
-    run_details = {
-        "filepath": filepath,
-        "full_arguments": sys.argv,
+    run_info = {
+        "run_locals": run_locals,
+        "cmd_args": sys.argv,
         "env": env_values,
-        "date": datetime.now().isoformat(),
+        "start_timestamp": datetime.now().isoformat(),
     }
 
     with open(run_details_filepath, "w", encoding="utf8") as output:
-        output.write(json.dumps(run_details, indent=2, sort_keys=True))
+        output.write(json.dumps(run_info, indent=2, sort_keys=True))
+
+    CONFIG["RESULTS_DB_PATH"] = os.path.join(results, "results.db")
+    if os.path.exists(CONFIG["RESULTS_DB_PATH"]):
+        return
+
+    # TODO: explicitly create the cucu_run table
+    with duckdb.connect(CONFIG["RESULTS_DB_PATH"]) as conn:
+                # (run_id INTEGER PRIMARY KEY,
+                # run_locals VARCHAR[],
+                # cmd_args STRUCT,
+                # env STRUCT,
+                # start_timestamp TIMESTAMP)
+        conn.sql("CREATE SEQUENCE seq_run_id START 1;")
+        conn.sql(f"""
+            CREATE TABLE cucu_run
+            AS SELECT
+                nextval('seq_run_id') AS run_id,
+                * 
+                FROM read_json('{run_details_filepath}');
+        """)
+        # conn.sql("ALTER TABLE cucu_run ADD COLUMN run_id INTEGER PRIMARY KEY;")
+        print(conn.sql(f"from cucu_run;"))
+        print(conn.sql(f"show tables;"))
