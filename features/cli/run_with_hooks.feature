@@ -329,7 +329,7 @@ Feature: Run with hooks
           Given I echo "Hello"
             And I echo "World"
       """
-     * # The --show-skips argument is necessary for both the `cucu run` command and the `cucu report` command
+        * # The --show-skips argument is necessary for both the `cucu run` command and the `cucu report` command
      When I run the command "cucu run {CUCU_RESULTS_DIR}/custom_hooks/echo.feature --show-skips --results {CUCU_RESULTS_DIR}/custom_hooks_results/ -l debug --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      When I run the command "cucu report {CUCU_RESULTS_DIR}/custom_hooks_results --show-skips --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
@@ -337,7 +337,7 @@ Feature: Run with hooks
      Then I should see a table that contains rows matching the following
         | .* | Feature that simply echoes "Hello World" | This is a scenario that simply echoes hello world | .* | errored | .* |
       And I wait to click the link "This is a scenario that simply echoes hello world"
-     * # Additional check of the log file itself here, when QE-16733 is resolved
+        * # Additional check of the log file itself here, when QE-16733 is resolved
      # When I wait to click the link "Logs"
      #  And I wait to click the link "cucu.debug.console.log"
      # Then I wait to see the text "This error should be logged and reported."

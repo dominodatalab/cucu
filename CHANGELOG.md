@@ -8,6 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 1.2.0
 - Add - levels 2-4 to section step
 - Change - rename comment step to section step
+- Add - linting for section step
 - Change - min python to 3.10
 
 ## 1.1.2
