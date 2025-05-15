@@ -19,7 +19,6 @@ def section_step(ctx, heading_level, section_text):
     The number of # characters determines the heading level (1-4).
     This step is a no-op but provides structure in the HTML report.
     """
-
     pass
 
 
