@@ -202,12 +202,12 @@ def write_run_info(results, run_locals):
     with open(run_details_filepath, "w", encoding="utf8") as output:
         output.write(json.dumps(run_info, indent=2, sort_keys=True))
 
-    CONFIG["RESULTS_DB_PATH"] = os.path.join(results, "results.db")
-    if os.path.exists(CONFIG["RESULTS_DB_PATH"]):
+    CONFIG["DATABASE_FILE"] = os.path.join(results, "results.db")
+    if os.path.exists(CONFIG["DATABASE_FILE"]):
         return
 
     # TODO: explicitly create the cucu_run table
-    with duckdb.connect(CONFIG["RESULTS_DB_PATH"]) as conn:
+    with duckdb.connect(CONFIG["DATABASE_FILE"]) as conn:
         # (run_id INTEGER PRIMARY KEY,
         # run_locals VARCHAR[],
         # cmd_args STRUCT,
