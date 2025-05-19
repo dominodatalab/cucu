@@ -17,6 +17,7 @@ import psutil
 from click import ClickException
 from mpire import WorkerPool
 from tabulate import tabulate
+import duckdb
 
 from cucu import (
     fuzzy,
@@ -43,6 +44,40 @@ def main():
     cucu e2e testing framework
     """
     pass
+
+
+@main.command("dbq")
+@click.option(
+    "--db",
+    required=False,
+    default=os.path.join("results", "results.db"),
+    help="path to the results.db file",
+)
+@click.argument("sql", nargs=1)
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+def db_query(db: str, sql: str, logging_level: str):
+    """
+    execute a SQL query against the results database
+    """
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
+
+    if not os.path.exists(db):
+        logger.error(f"Database file not found: {db}")
+        sys.exit(1)
+
+    with duckdb.connect(db) as conn:
+        try:
+            result = conn.sql(sql)
+            click.echo(result)
+        except Exception as e:
+            logger.error(f"Error executing query: {str(e)}")
+            sys.exit(1)
 
 
 @main.command()
@@ -204,10 +239,16 @@ def main():
     default=None,
     help="the HTTP url for a selenium hub setup to run the browser tests on",
 )
+@click.option(
+    "--database/--no-database",
+    default=False,
+    help="enable/disable database functionality",
+)
 def run(
     filepath,
     browser,
     color_output,
+    database,
     dry_run,
     env,
     generate_report,
@@ -293,6 +334,9 @@ def run(
 
     if record_env_vars:
         os.environ["CUCU_RECORD_ENV_VARS"] = "true"
+    
+    if database:
+        os.environ["DATABASE_ENABLED"] = "true"
 
     if not dry_run:
         write_run_info(results, locals())

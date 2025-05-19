@@ -23,6 +23,8 @@ from tenacity import retry as retrying
 from cucu import logger
 from cucu.browser.core import Browser
 from cucu.config import CONFIG
+from cucu.database.hooks import record_screenshot_artifact
+
 
 GHERKIN_TABLEFORMAT = TableFormat(
     lineabove=None,
@@ -269,5 +271,8 @@ def take_screenshot(ctx, step_name, label="", element=None):
 
     if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
+
+    if CONFIG.get("DATABASE_ENABLED", False) and hasattr(ctx, "database"):
+        record_screenshot_artifact(ctx, filepath)
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] += 1

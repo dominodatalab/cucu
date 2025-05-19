@@ -202,6 +202,14 @@ def write_run_info(results, run_locals):
     with open(run_details_filepath, "w", encoding="utf8") as output:
         output.write(json.dumps(run_info, indent=2, sort_keys=True))
 
+
+    if not CONFIG["DATABASE_ENABLED"]:
+        return
+
+    # Initialize database if enabled
+    init_database(results_dir)
+    init_database_in_before_all(ctx)
+
     CONFIG["DATABASE_FILE"] = os.path.join(results, "results.db")
     if os.path.exists(CONFIG["DATABASE_FILE"]):
         return

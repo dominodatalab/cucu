@@ -9,6 +9,17 @@ from functools import partial
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
+from cucu.database.connection import init_database
+from cucu.database.hooks import (
+    create_feature_in_before_feature,
+    create_scenario_in_before_scenario,
+    create_step_in_before_step,
+    finalize_database_in_after_all,
+    init_database_in_before_all,
+    update_feature_in_after_feature,
+    update_scenario_in_after_scenario,
+    update_step_in_after_step,
+)
 from cucu.page_checks import init_page_checks
 from cucu.utils import ellipsize_filename, take_screenshot
 
@@ -46,6 +57,11 @@ def before_all(ctx):
     CONFIG["__CUCU_CTX"] = ctx
     CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
+
+    # Record start time for duration calculations
+    ctx.start_time = time.time()
+
+    # Run registered hooks
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
         hook(ctx)
 
@@ -54,6 +70,13 @@ def after_all(ctx):
     # run the after all hooks
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
         hook(ctx)
+
+    # Finalize database if enabled
+    if CONFIG["DATABASE_ENABLED"]:
+        finalize_database_in_after_all(ctx)
+        from cucu.database.connection import close_database
+
+        close_database()
 
 
 def before_feature(ctx, feature):
@@ -64,9 +87,18 @@ def before_feature(ctx, feature):
         )
         CONFIG["FEATURE_RESULTS_DIR"] = ctx.feature_dir
 
+    # Store feature start time for duration calculation
+    feature.start_time = time.time()
+
+    # Create database record if enabled
+    if CONFIG["DATABASE_ENABLED"]:
+        create_feature_in_before_feature(ctx, feature)
+
 
 def after_feature(ctx, feature):
-    pass
+    # Update database record if enabled
+    if CONFIG["DATABASE_ENABLED"]:
+        update_feature_in_after_feature(ctx, feature)
 
 
 def before_scenario(ctx, scenario):
@@ -125,6 +157,13 @@ def before_scenario(ctx, scenario):
     CONFIG["SCENARIO_RUN_ID"] = hashlib.sha256(
         str(time.perf_counter()).encode("utf-8")
     ).hexdigest()[:7]
+
+    # Store scenario start time for duration calculation
+    scenario.start_time = time.time()
+
+    # Create database record if enabled
+    if CONFIG["DATABASE_ENABLED"]:
+        create_scenario_in_before_scenario(ctx, scenario)
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
@@ -187,6 +226,10 @@ def after_scenario(ctx, scenario):
     with open(cucu_config_filepath, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
 
+    # Update database record if enabled
+    if CONFIG["DATABASE_ENABLED"]:
+        update_scenario_in_after_scenario(ctx, scenario)
+
 
 def download_mht_data(ctx):
     if not ctx.browsers:
@@ -240,6 +283,10 @@ def before_step(ctx, step):
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
+    # Create database record if enabled
+    if CONFIG["DATABASE_ENABLED"]:
+        create_step_in_before_step(ctx, step)
+
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
         hook(ctx)
@@ -277,6 +324,10 @@ def after_step(ctx, step):
         pdb.post_mortem(step.exc_traceback)
 
     CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
+
+    # Update database record if enabled
+    if CONFIG["DATABASE_ENABLED"]:
+        update_step_in_after_step(ctx, step)
 
     # run after all step hooks
     for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:

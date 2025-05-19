@@ -416,7 +416,26 @@ CONFIG.define(
     "when set to 'True' skips adding a border to highlight found element in screenshots",
     default=True,
 )
-
+CONFIG.define(
+    "DATABASE_ENABLED",
+    "Whether to enable database functionality",
+    default=False,
+)
+CONFIG.define(
+    "DATABASE_FILE",
+    "Path to the database file",
+    default=None,
+)
+CONFIG.define(
+    "DATABASE_CONNECTION_TIMEOUT",
+    "Timeout in seconds for database connections",
+    default=5,
+)
+CONFIG.define(
+    "DATABASE_RETRY_COUNT",
+    "Number of times to retry failed database operations",
+    default=3,
+)
 
 # define re_map here instead of in utils.py to avoid circular import
 def leaf_map(data, value_func, parent=None, key=None):
