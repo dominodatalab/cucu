@@ -8,6 +8,7 @@ Cucu needs to create and maintain a structured database to store all relevant te
 - [Overview](#overview) <!-- omit from toc -->
 - [Prerequisites](#prerequisites)
 - [Core Requirements](#core-requirements)
+  - [Out of scope](#out-of-scope)
 - [Database Schema](#database-schema)
   - [Tables Structure](#tables-structure)
   - [Tables Definition](#tables-definition)
@@ -22,9 +23,6 @@ Cucu needs to create and maintain a structured database to store all relevant te
 - [Integration with Lifecycle Hooks](#integration-with-lifecycle-hooks)
 - [Failure Recovery](#failure-recovery)
 - [Example Queries](#example-queries)
-- [Database Migration Strategy](#database-migration-strategy)
-- [Database Size Management](#database-size-management)
-- [User Interface Considerations](#user-interface-considerations)
 
 ## Prerequisites
 
@@ -255,6 +253,10 @@ erDiagram
         string env_vars
         string system_info
         string status
+        int worker_count
+        timestamp start_time
+        timestamp end_time
+        float total_duration
     }
     Feature {
         int feature_id PK
@@ -266,12 +268,14 @@ erDiagram
         string filename
         json tags
         string status
+        timestamp start_time
+        timestamp end_time
     }
     Scenario {
         int scenario_id PK
         int feature_id FK
-        timestamp created_at
-        timestamp updated_at
+        timestamp db_created_at
+        timestamp db_updated_at
         string name
         string description
         string filename
@@ -279,30 +283,33 @@ erDiagram
         json tags
         float duration
         string status
-        bool cleanup_performed
+        text cleanup_log
+        timestamp start_time
+        timestamp end_time
+        string worker_id
     }
     StepDef {
         int step_def_id PK
         int scenario_id FK
-        int parent_step_id FK "Null if top-level step"
-        timestamp created_at
-        timestamp updated_at
+        int parent_step_def_id FK "Null if top-level step"
+        timestamp db_created_at
+        timestamp db_updated_at
         string name
         string kind "Given/When/Then/And/Section"
         string filename
         int line_number
-        int header_level "0-4, 0 for regular steps"
+        int section_level "0-4, 0 for regular steps"
         int step_order "Order within parent"
         int step_level "Nesting level"
     }
     StepRun {
         int step_run_id PK
         int step_def_id FK
-        timestamp created_at
-        timestamp updated_at
+        timestamp db_created_at
+        timestamp db_updated_at
         timestamp started_at
         timestamp ended_at
-        int attempt_number
+        int attempt
         float duration
         string status
         text debug_log
@@ -315,8 +322,8 @@ erDiagram
     Artifact {
         int artifact_id PK
         int step_run_id FK
-        timestamp created_at
-        timestamp updated_at
+        timestamp db_created_at
+        timestamp db_updated_at
         string name
         string path
         string type "screenshot, log, html, etc."
