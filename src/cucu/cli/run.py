@@ -253,12 +253,13 @@ def write_run_info(results, run_locals):
                 schema_created = create_schema(conn)
                 if schema_created:
                     logger.info("🗄️ DB: schema created successfully")
-                    logger.debug(conn.query('show tables'))
-                    logger.debug(conn.query('show CucuRun'))
-                    
+                    logger.debug(conn.query("show tables"))
+                    logger.debug(conn.query("show CucuRun"))
 
             # Create a new CucuRun record
-            run_id = conn.query("select nextval('seq_cucu_run_id')").fetchone()[0]
+            run_id = conn.query(
+                "select nextval('seq_cucu_run_id')"
+            ).fetchone()[0]
             logger.info(f"🗄️ DB: Starting CucuRun ID: {run_id}")
             conn.execute(
                 """
@@ -285,15 +286,17 @@ def write_run_info(results, run_locals):
                     datetime.now(),
                     browser,
                     headless,
-                    results
-                )
+                    results,
+                ),
             )
-            logger.debug(conn.query('from CucuRun'))
+            logger.debug(conn.query("from CucuRun"))
 
             CONFIG["CUCU_RUN_ID"] = run_id
-            logger.debug(f"Created CucuRun record with ID {run_id}")
+            logger.debug(f"🗄️ DB: Created CucuRun record with ID {run_id}")
 
     except Exception as e:
-        raise(RuntimeError(
-            "Failed to initialize database. Check your configuration."
-        )) from e
+        raise (
+            RuntimeError(
+                "🗄️ DB: Failed to initialize database. Check your configuration."
+            )
+        ) from e
