@@ -21,9 +21,6 @@ _local_connections = threading.local()
 
 
 def close_database() -> None:
-    """
-    Close all database connections and clean up resources.
-    """
     global _connection_pool
 
     if _connection_pool is None:
@@ -37,12 +34,6 @@ def close_database() -> None:
 
 
 def get_connection_pool() -> ThreadPoolExecutor:
-    """
-    Get or create the database connection pool.
-
-    Returns:
-        A ThreadPoolExecutor for database operations
-    """
     global _connection_pool
 
     if _connection_pool is not None:
@@ -65,15 +56,6 @@ def get_connection_pool() -> ThreadPoolExecutor:
 def get_connection(
     timeout: Optional[float] = None,
 ) -> duckdb.DuckDBPyConnection:
-    """
-    Get a database connection from the pool.
-
-    Args:
-        timeout: Timeout in seconds, or None to use the default
-
-    Returns:
-        A DuckDB connection
-    """
     if not Path(CONFIG.get("DB_PATH")).exists():
         return None
 

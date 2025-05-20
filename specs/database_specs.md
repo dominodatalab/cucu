@@ -33,7 +33,7 @@ This specification depends on the implementation of the enhanced section steps f
 - **CLI Configuration**:
   - Add `--database/--no-database` flag to enable/disable database functionality (disabled by default)
   - Add `--db-path` option to specify the database file location (default: `./cucu_results.duckdb`)
- 
+
 - **Implementation Approach**:
   - Keep existing output artifacts (PNG files, directory structures, JSON, logs, etc.)
   - Create a single DuckDB database file at the start of a test run (if it doesn't exist)
@@ -402,48 +402,47 @@ Below are example SQL queries that demonstrate how to use the database for analy
 
 ```sql
 -- Find failing scenarios across runs
-SELECT 
-    c.command_line, 
-    f.name AS feature_name, 
+SELECT
+    c.command_line,
+    f.name AS feature_name,
     s.name AS scenario_name,
     s.status,
     s.duration
-FROM 
+FROM
     Scenario s
     JOIN Feature f ON s.feature_id = f.feature_id
     JOIN CucuRun c ON f.cucu_run_id = c.cucu_run_id
-WHERE 
+WHERE
     s.status = 'failed'
-ORDER BY 
+ORDER BY
     c.created_at DESC;
 
 -- Find steps with the longest average duration
-SELECT 
+SELECT
     sd.name AS step_name,
     AVG(sr.duration) AS avg_duration,
     COUNT(*) AS execution_count
-FROM 
+FROM
     StepRun sr
     JOIN StepDef sd ON sr.step_def_id = sd.step_def_id
-GROUP BY 
+GROUP BY
     sd.name
-ORDER BY 
+ORDER BY
     avg_duration DESC
 LIMIT 10;
 
 -- Find runs with the most failures
-SELECT 
+SELECT
     c.cucu_run_id,
     c.created_at,
     COUNT(s.scenario_id) AS total_scenarios,
     SUM(CASE WHEN s.status = 'failed' THEN 1 ELSE 0 END) AS failed_scenarios
-FROM 
+FROM
     CucuRun c
     JOIN Feature f ON c.cucu_run_id = f.cucu_run_id
     JOIN Scenario s ON f.feature_id = s.feature_id
-GROUP BY 
+GROUP BY
     c.cucu_run_id, c.created_at
-ORDER BY 
+ORDER BY
     failed_scenarios DESC;
 ```
-

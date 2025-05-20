@@ -21,3 +21,7 @@
 - Avoid 1-line code comments where the code is self-explanatory
 - In general use the CONFIG to store values that are used in multiple places and ctx to store values that are shared in a scenario run
 - Avoid docstrings for functions that are obvious
+- Only import at the top of the file
+- Do not use relative imports
+- Use guard clauses to avoid indentation
+- Don't bulletproof code and instead let exceptions happen

@@ -9,17 +9,8 @@ from functools import partial
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
-from cucu.database.hooks import (
-    create_feature_in_before_feature,
-    create_scenario_in_before_scenario,
-    create_step_in_before_step,
-    finalize_database_in_after_all,
-    update_feature_in_after_feature,
-    update_scenario_in_after_scenario,
-    update_step_in_after_step,
-)
-from cucu.page_checks import init_page_checks
 from cucu.database.connection import get_connection
+from cucu.page_checks import init_page_checks
 from cucu.utils import ellipsize_filename, take_screenshot
 
 CONFIG.define(

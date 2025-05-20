@@ -9,7 +9,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import duckdb
 
 from cucu import logger
-from cucu.database.schema import create_schema
 
 
 def execute_with_retry(
@@ -18,18 +17,6 @@ def execute_with_retry(
     params: Optional[Tuple] = None,
     retry_count: int = 3,
 ) -> Any:
-    """
-    Execute a database query with retry logic.
-
-    Args:
-        conn: Database connection
-        query: SQL query to execute
-        params: Query parameters
-        retry_count: Number of retry attempts
-
-    Returns:
-        Query result
-    """
     last_error = None
 
     for attempt in range(retry_count):
@@ -113,18 +100,6 @@ def update_cucu_run(
     status: str,
     total_duration_ms: Optional[int] = None,
 ) -> bool:
-    """
-    Update an existing CucuRun record.
-
-    Args:
-        conn: Database connection
-        cucu_run_id: CucuRun ID to update
-        status: New status value
-        total_duration_ms: Total duration in milliseconds
-
-    Returns:
-        True if the record was updated successfully
-    """
     query = """
     UPDATE CucuRun
     SET end_time = CURRENT_TIMESTAMP,
@@ -148,20 +123,6 @@ def create_feature(
     filepath: str,
     tags: Optional[List[str]] = None,
 ) -> int:
-    """
-    Create a new Feature record.
-
-    Args:
-        conn: Database connection
-        cucu_run_id: Parent CucuRun ID
-        name: Feature name
-        description: Feature description
-        filepath: Feature file path
-        tags: Feature tags
-
-    Returns:
-        The ID of the new Feature record
-    """
     query = """
     INSERT INTO Feature (
         cucu_run_id, name, description, filepath, tags, start_time, status
@@ -189,18 +150,6 @@ def update_feature(
     status: str,
     total_duration_ms: Optional[int] = None,
 ) -> bool:
-    """
-    Update an existing Feature record.
-
-    Args:
-        conn: Database connection
-        feature_id: Feature ID to update
-        status: New status value
-        total_duration_ms: Total duration in milliseconds
-
-    Returns:
-        True if the record was updated successfully
-    """
     query = """
     UPDATE Feature
     SET end_time = CURRENT_TIMESTAMP,
@@ -223,19 +172,6 @@ def create_scenario(
     description: Optional[str],
     tags: Optional[List[str]] = None,
 ) -> int:
-    """
-    Create a new Scenario record.
-
-    Args:
-        conn: Database connection
-        feature_id: Parent Feature ID
-        name: Scenario name
-        description: Scenario description
-        tags: Scenario tags
-
-    Returns:
-        The ID of the new Scenario record
-    """
     query = """
     INSERT INTO Scenario (
         feature_id, name, description, tags, start_time, status
@@ -264,19 +200,6 @@ def update_scenario(
     total_duration_ms: Optional[int] = None,
     error_message: Optional[str] = None,
 ) -> bool:
-    """
-    Update an existing Scenario record.
-
-    Args:
-        conn: Database connection
-        scenario_id: Scenario ID to update
-        status: New status value
-        total_duration_ms: Total duration in milliseconds
-        error_message: Error message if failed
-
-    Returns:
-        True if the record was updated successfully
-    """
     query = """
     UPDATE Scenario
     SET end_time = CURRENT_TIMESTAMP,
@@ -301,20 +224,6 @@ def create_section(
     parent_section_id: Optional[int] = None,
     order_index: Optional[int] = None,
 ) -> int:
-    """
-    Create a new Section record.
-
-    Args:
-        conn: Database connection
-        scenario_id: Parent Scenario ID
-        text: Section text
-        level: Heading level (1-4)
-        parent_section_id: Parent Section ID for nested sections
-        order_index: Order index within parent
-
-    Returns:
-        The ID of the new Section record
-    """
     query = """
     INSERT INTO Section (
         scenario_id, parent_section_id, text, level, timestamp, order_index
@@ -345,25 +254,6 @@ def create_step(
     file_path: Optional[str] = None,
     line_number: Optional[int] = None,
 ) -> int:
-    """
-    Create a new Step record.
-
-    Args:
-        conn: Database connection
-        scenario_id: Parent Scenario ID
-        keyword: Step keyword (Given, When, Then, etc.)
-        text: Step text
-        step_type: Type of step
-        section_id: Parent Section ID
-        parent_step_id: Parent Step ID for substeps
-        level: Step nesting level
-        order_index: Order index within parent
-        file_path: Source file path
-        line_number: Source line number
-
-    Returns:
-        The ID of the new Step record
-    """
     query = """
     INSERT INTO Step (
         scenario_id, section_id, parent_step_id, keyword, text, level,
@@ -399,18 +289,6 @@ def create_step_run(
     attempt_number: int,
     is_final_attempt: bool = False,
 ) -> int:
-    """
-    Create a new StepRun record.
-
-    Args:
-        conn: Database connection
-        step_id: Parent Step ID
-        attempt_number: Attempt number (1-based)
-        is_final_attempt: Whether this is the final attempt
-
-    Returns:
-        The ID of the new StepRun record
-    """
     query = """
     INSERT INTO StepRun (
         step_id, start_time, status, attempt_number, is_final_attempt
@@ -436,20 +314,6 @@ def update_step_run(
     error_message: Optional[str] = None,
     stack_trace: Optional[str] = None,
 ) -> bool:
-    """
-    Update an existing StepRun record.
-
-    Args:
-        conn: Database connection
-        step_run_id: StepRun ID to update
-        status: New status value
-        duration_ms: Duration in milliseconds
-        error_message: Error message if failed
-        stack_trace: Stack trace if failed
-
-    Returns:
-        True if the record was updated successfully
-    """
     query = """
     UPDATE StepRun
     SET end_time = CURRENT_TIMESTAMP,
@@ -473,18 +337,6 @@ def create_step_post(
     action_type: str,
     details: Optional[str] = None,
 ) -> int:
-    """
-    Create a new StepPost record.
-
-    Args:
-        conn: Database connection
-        step_run_id: Parent StepRun ID
-        action_type: Type of post-step action
-        details: Details about the action
-
-    Returns:
-        The ID of the new StepPost record
-    """
     query = """
     INSERT INTO StepPost (
         step_run_id, timestamp, action_type, details
@@ -509,19 +361,6 @@ def create_scenario_post(
     details: Optional[str] = None,
     status: Optional[str] = None,
 ) -> int:
-    """
-    Create a new ScenarioPost record.
-
-    Args:
-        conn: Database connection
-        scenario_id: Parent Scenario ID
-        action_type: Type of post-scenario action
-        details: Details about the action
-        status: Status of the post-scenario action
-
-    Returns:
-        The ID of the new ScenarioPost record
-    """
     query = """
     INSERT INTO ScenarioPost (
         scenario_id, timestamp, action_type, details, status
@@ -552,25 +391,6 @@ def create_artifact(
     step_run_id: Optional[int] = None,
     scenario_post_id: Optional[int] = None,
 ) -> int:
-    """
-    Create a new Artifact record.
-
-    Args:
-        conn: Database connection
-        filepath: Path to the artifact file
-        artifact_type: Type of artifact (screenshot, log, etc.)
-        file_size: Size of the file in bytes
-        file_hash: Hash of the file contents
-        metadata: Additional metadata about the artifact
-        cucu_run_id: Parent CucuRun ID
-        feature_id: Parent Feature ID
-        scenario_id: Parent Scenario ID
-        step_run_id: Parent StepRun ID
-        scenario_post_id: Parent ScenarioPost ID
-
-    Returns:
-        The ID of the new Artifact record
-    """
     query = """
     INSERT INTO Artifact (
         filepath, artifact_type, file_size, file_hash, created_at, metadata,
@@ -598,3 +418,163 @@ def create_artifact(
 
     logger.debug(f"Created Artifact record with ID {artifact_id}")
     return artifact_id
+
+
+def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
+    # Check if tables already exist
+    tables_exist = conn.execute(
+        """
+        SELECT count(*)
+        FROM information_schema.tables
+        WHERE table_name = 'CucuRun'
+        """
+    ).fetchone()[0]
+
+    if tables_exist > 0:
+        raise RuntimeError(
+            "🗄️ DB: Schema already exists. Please delete the database file to recreate it."
+        )
+
+    # 1. CucuRun table - master record for each test execution
+    conn.execute("""
+    CREATE TABLE CucuRun (
+        cucu_run_id INTEGER PRIMARY KEY,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        command_line TEXT NOT NULL,
+        env_vars TEXT NOT NULL,
+        system_info TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'running',
+        worker_count INTEGER DEFAULT 1,
+        start_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        end_time TIMESTAMP,
+        total_duration FLOAT,
+        browser TEXT,
+        headless BOOLEAN,
+        results_dir TEXT
+    )
+    """)
+
+    # 2. Feature table - maps to a feature file
+    conn.execute("""
+    CREATE TABLE Feature (
+        feature_id INTEGER PRIMARY KEY,
+        cucu_run_id INTEGER NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        name TEXT NOT NULL,
+        description TEXT,
+        filename TEXT NOT NULL,
+        tags TEXT,
+        status TEXT NOT NULL DEFAULT 'not started',
+        start_time TIMESTAMP,
+        end_time TIMESTAMP,
+        FOREIGN KEY (cucu_run_id) REFERENCES CucuRun(cucu_run_id)
+    )
+    """)
+
+    # 3. Scenario table - maps to a scenario within a feature file
+    conn.execute("""
+    CREATE TABLE Scenario (
+        scenario_id INTEGER PRIMARY KEY,
+        feature_id INTEGER NOT NULL,
+        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        name TEXT NOT NULL,
+        description TEXT,
+        filename TEXT NOT NULL,
+        line_number INTEGER NOT NULL,
+        tags TEXT,
+        status TEXT NOT NULL DEFAULT 'not started',
+        duration FLOAT,
+        start_time TIMESTAMP,
+        end_time TIMESTAMP,
+        cleanup_log TEXT,
+        worker_id TEXT,
+        FOREIGN KEY (feature_id) REFERENCES Feature(feature_id)
+    )
+    """)
+
+    # 4. StepDef table - maps to steps or sections within a scenario
+    conn.execute("""
+    CREATE TABLE StepDef (
+        step_def_id INTEGER PRIMARY KEY,
+        scenario_id INTEGER NOT NULL,
+        parent_step_def_id INTEGER,
+        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        name TEXT NOT NULL,
+        kind TEXT NOT NULL,
+        filename TEXT,
+        line_number INTEGER,
+        section_level INTEGER NOT NULL DEFAULT 0,
+        step_order INTEGER NOT NULL,
+        step_level INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (scenario_id) REFERENCES Scenario(scenario_id),
+        FOREIGN KEY (parent_step_def_id) REFERENCES StepDef(step_def_id)
+    )
+    """)
+
+    # 5. StepRun table - records each execution attempt of a step
+    conn.execute("""
+    CREATE TABLE StepRun (
+        step_run_id INTEGER PRIMARY KEY,
+        step_def_id INTEGER NOT NULL,
+        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        attempt INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'not started',
+        started_at TIMESTAMP,
+        ended_at TIMESTAMP,
+        duration FLOAT,
+        debug_log TEXT,
+        browser_url TEXT,
+        browser_title TEXT,
+        browser_tab INTEGER,
+        browser_total_tabs INTEGER,
+        browser_log TEXT,
+        FOREIGN KEY (step_def_id) REFERENCES StepDef(step_def_id)
+    )
+    """)
+
+    # 6. Artifact table - records file-based outputs
+    conn.execute("""
+    CREATE TABLE Artifact (
+        artifact_id INTEGER PRIMARY KEY,
+        step_run_id INTEGER NOT NULL,
+        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        name TEXT NOT NULL,
+        path TEXT NOT NULL,
+        type TEXT NOT NULL,
+        mime_type TEXT,
+        file_size INTEGER,
+        hash TEXT,
+        artifact_order INTEGER NOT NULL,
+        FOREIGN KEY (step_run_id) REFERENCES StepRun(step_run_id)
+    )
+    """)
+
+    # Create indexes for performance optimization
+    conn.execute(
+        "CREATE INDEX idx_feature_cucu_run_id ON Feature(cucu_run_id)"
+    )
+    conn.execute(
+        "CREATE INDEX idx_scenario_feature_id ON Scenario(feature_id)"
+    )
+    conn.execute(
+        "CREATE INDEX idx_stepdef_scenario_id ON StepDef(scenario_id)"
+    )
+    conn.execute(
+        "CREATE INDEX idx_stepdef_parent_id ON StepDef(parent_step_def_id)"
+    )
+    conn.execute("CREATE INDEX idx_steprun_stepdef_id ON StepRun(step_def_id)")
+    conn.execute(
+        "CREATE INDEX idx_artifact_step_run_id ON Artifact(step_run_id)"
+    )
+    conn.execute("CREATE SEQUENCE seq_cucu_run_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_feature_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_scenario_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_parent_step_def_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_step_def_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_step_run_id START 1; ")
