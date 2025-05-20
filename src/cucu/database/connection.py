@@ -2,11 +2,11 @@
 Database connection management for cucu.
 """
 
-from pathlib import Path
 import os
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from typing import Optional
 
 import duckdb
@@ -44,7 +44,7 @@ def get_connection_pool() -> ThreadPoolExecutor:
         A ThreadPoolExecutor for database operations
     """
     global _connection_pool
-    
+
     if _connection_pool is not None:
         return _connection_pool
 

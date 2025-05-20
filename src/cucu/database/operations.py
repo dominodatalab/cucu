@@ -3,16 +3,13 @@
 """
 
 import json
-import os
-import platform
-import socket
-import sys
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
 import duckdb
 
 from cucu import logger
+from cucu.database.schema import create_schema
 
 
 def execute_with_retry(
@@ -55,69 +52,58 @@ def execute_with_retry(
                 raise last_error
 
 
+def init_schema(conn: duckdb.DuckDBPyConnection) -> None:
+    schema_created = create_schema(conn)
+    if schema_created:
+        logger.info("🗄️ DB: schema created successfully")
+        logger.debug(conn.query("show tables"))
+        logger.debug(conn.query("show CucuRun"))
+
+
 def create_cucu_run(
     conn: duckdb.DuckDBPyConnection,
-    command_args: str,
-    browser: str,
-    worker_count: int,
-    headless: bool,
-    results_dir: str,
+    command_line,
+    env_vars,
+    system_info,
+    status,
+    worker_count,
+    start_time,
+    browser,
+    headless,
+    results_dir,
 ) -> int:
-    """
-    Create a new CucuRun record.
-
-    Args:
-        conn: Database connection
-        command_args: Command line arguments
-        browser: Browser name
-        worker_count: Number of workers
-        headless: Whether running in headless mode
-        results_dir: Results directory path
-
-    Returns:
-        The ID of the new CucuRun record
-    """
-    # Collect system information
-    system_info = {
-        "platform": platform.platform(),
-        "python_version": sys.version,
-        "hostname": socket.gethostname(),
-        "processor": platform.processor(),
-        "memory": os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
-        if hasattr(os, "sysconf")
-        else None,
-    }
-
-    # Collect relevant environment variables
-    env_vars = {
-        k: v
-        for k, v in os.environ.items()
-        if k.startswith(("CUCU_", "BEHAVE_", "PYTHONPATH"))
-    }
-
-    query = """
-    INSERT INTO CucuRun (
-        start_time, command_args, browser, environment_vars, 
-        worker_count, headless, results_dir, status, system_info
-    ) VALUES (
-        CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, 'running', ?
-    ) RETURNING cucu_run_id
-    """
-
-    params = (
-        command_args,
-        browser,
-        json.dumps(env_vars, sort_keys=True),
-        worker_count,
-        headless,
-        results_dir,
-        json.dumps(system_info, sort_keys=True),
+    # Create a new CucuRun record
+    cucu_run_id = conn.query("select nextval('seq_cucu_run_id')").fetchone()[0]
+    conn.execute(
+        """
+            INSERT INTO CucuRun (
+                cucu_run_id,
+                command_line,
+                env_vars,
+                system_info,
+                status,
+                worker_count,
+                start_time,
+                browser,
+                headless,
+                results_dir
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            cucu_run_id,
+            command_line,
+            env_vars,
+            system_info,
+            status,
+            worker_count,
+            start_time,
+            browser,
+            headless,
+            results_dir,
+        ),
     )
-
-    result = execute_with_retry(conn, query, params)
-    cucu_run_id = result.fetchone()[0]
-
-    logger.debug(f"Created CucuRun record with ID {cucu_run_id}")
+    logger.info(f"🗄️ DB: Starting CucuRun ID: {cucu_run_id}")
+    logger.debug(conn.query("from CucuRun"))
     return cucu_run_id
 
 

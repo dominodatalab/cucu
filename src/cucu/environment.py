@@ -59,15 +59,14 @@ def before_all(ctx):
 
     # Record start time for duration calculations
     ctx.start_time = time.time()
-    
+
     # Initialize database if enabled
 
     try:
-        db_path = CONFIG.get("DB_PATH")
-        conn = get_connection()
+        ctx.db_conn = get_connection()
         logger.info(f"🗄️ Using existing CucuRun ID: {CONFIG['CUCU_RUN_ID']}")
 
-    except Exception as e:
+    except Exception:
         raise RuntimeError(
             "🗄️ Failed to initialize database. Check your configuration."
         )
@@ -84,7 +83,6 @@ def after_all(ctx):
 
     # Finalize database if enabled
     # finalize_database_in_after_all(ctx)
-    from cucu.database.connection import close_database
 
 
 def before_feature(ctx, feature):

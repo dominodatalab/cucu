@@ -16,6 +16,7 @@ from cucu import (
 )
 from cucu.browser import selenium
 from cucu.config import CONFIG
+from cucu.database import operations
 from cucu.page_checks import init_page_checks
 
 
@@ -243,51 +244,24 @@ def write_run_info(results, run_locals):
             if db_exists:
                 logger.info("🗄️ DB: Already exists, skipping schema creation")
             if not db_exists:
-                from cucu.database.schema import create_schema
+                operations.init_schema(conn)
 
-                schema_created = create_schema(conn)
-                if schema_created:
-                    logger.info("🗄️ DB: schema created successfully")
-                    logger.debug(conn.query("show tables"))
-                    logger.debug(conn.query("show CucuRun"))
-
-            # Create a new CucuRun record
-            run_id = conn.query(
-                "select nextval('seq_cucu_run_id')"
-            ).fetchone()[0]
-            logger.info(f"🗄️ DB: Starting CucuRun ID: {run_id}")
-            conn.execute(
-                """
-                INSERT INTO CucuRun (
-                    cucu_run_id,
-                    command_line,
-                    env_vars,
-                    system_info,
-                    status,
-                    worker_count,
-                    start_time,
-                    browser,
-                    headless,
-                    results_dir
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-                (
-                    run_id,
-                    command_line,
-                    json.dumps(env_values),
-                    json.dumps(system_info),
-                    "running",
-                    worker_count,
-                    datetime.now(),
-                    browser,
-                    headless,
-                    results,
-                ),
+            CONFIG["CUCU_RUN_ID"] = operations.create_cucu_run(
+                conn,
+                command_line,
+                json.dumps(env_values),
+                json.dumps(system_info),
+                "running",
+                worker_count,
+                datetime.now(),
+                browser,
+                headless,
+                results,
             )
-            logger.debug(conn.query("from CucuRun"))
 
-            CONFIG["CUCU_RUN_ID"] = run_id
-            logger.debug(f"🗄️ DB: Created CucuRun record with ID {run_id}")
+            logger.debug(
+                f"🗄️ DB: Created CucuRun record with ID {CONFIG['CUCU_RUN_ID']}"
+            )
 
     except Exception as e:
         raise (
