@@ -2,6 +2,7 @@
 Database connection management for cucu.
 """
 
+from pathlib import Path
 import os
 import threading
 import time
@@ -17,40 +18,6 @@ from cucu.config import CONFIG
 _connection_pool = None
 _connection_pool_lock = threading.Lock()
 _local_connections = threading.local()
-
-
-def init_database(db_path: Optional[str] = None) -> str:
-    """
-    Initialize the database if it's enabled.
-
-    Args:
-        db_path: Optional path to the database file. If not provided,
-                 uses the path from CONFIG["DB_PATH"]
-
-    Returns:
-        The path to the database file, or None if database is disabled
-    """
-    # Get database path from parameter or config
-    db_file = db_path or CONFIG.get("DB_PATH")
-
-    if not db_file:
-        raise ValueError(
-            "Database path not configured. Set DB_PATH in config."
-        )
-
-    # Ensure database directory exists
-    os.makedirs(os.path.dirname(os.path.abspath(db_file)), exist_ok=True)
-
-    logger.info(f"Initializing database connection at {db_file}")
-
-    # Create the database file if it doesn't exist
-    conn = duckdb.connect(db_file)
-    conn.close()
-
-    # Initialize the connection pool
-    get_connection_pool()
-
-    return db_file
 
 
 def close_database() -> None:
@@ -77,22 +44,20 @@ def get_connection_pool() -> ThreadPoolExecutor:
         A ThreadPoolExecutor for database operations
     """
     global _connection_pool
+    
+    if _connection_pool is not None:
+        return _connection_pool
 
-    if not CONFIG["DATABASE_ENABLED"]:
-        return None
-
-    if _connection_pool is None:
-        with _connection_pool_lock:
-            if _connection_pool is None:
-                # Create a new connection pool with a reasonable number of workers
-                max_workers = min(32, (os.cpu_count() or 4) * 4)
-                _connection_pool = ThreadPoolExecutor(
-                    max_workers=max_workers,
-                    thread_name_prefix="db-worker",
-                )
-                logger.debug(
-                    f"Created database connection pool with {max_workers} workers"
-                )
+    with _connection_pool_lock:
+        # Create a new connection pool with a reasonable number of workers
+        max_workers = min(32, (os.cpu_count() or 4) * 4)
+        _connection_pool = ThreadPoolExecutor(
+            max_workers=max_workers,
+            thread_name_prefix="db-worker",
+        )
+        logger.debug(
+            f"Created database connection pool with {max_workers} workers"
+        )
 
     return _connection_pool
 
@@ -109,12 +74,12 @@ def get_connection(
     Returns:
         A DuckDB connection
     """
-    if not CONFIG["DATABASE_ENABLED"] or CONFIG.get("DB_PATH") is None:
+    if not Path(CONFIG.get("DB_PATH")).exists():
         return None
 
     # Use thread-local connections to avoid concurrent access issues
     if not hasattr(_local_connections, "conn"):
-        db_file = CONFIG.get("DB_PATH")
+        db_file = Path(CONFIG.get("DB_PATH"))
         retry_count = CONFIG["DATABASE_RETRY_COUNT"]
         timeout = timeout or CONFIG["DATABASE_CONNECTION_TIMEOUT"]
 

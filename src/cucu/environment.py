@@ -19,6 +19,7 @@ from cucu.database.hooks import (
     update_step_in_after_step,
 )
 from cucu.page_checks import init_page_checks
+from cucu.database.connection import get_connection
 from cucu.utils import ellipsize_filename, take_screenshot
 
 CONFIG.define(
@@ -58,6 +59,18 @@ def before_all(ctx):
 
     # Record start time for duration calculations
     ctx.start_time = time.time()
+    
+    # Initialize database if enabled
+
+    try:
+        db_path = CONFIG.get("DB_PATH")
+        conn = get_connection()
+        logger.info(f"🗄️ Using existing CucuRun ID: {CONFIG['CUCU_RUN_ID']}")
+
+    except Exception as e:
+        raise RuntimeError(
+            "🗄️ Failed to initialize database. Check your configuration."
+        )
 
     # Run registered hooks
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
@@ -70,11 +83,8 @@ def after_all(ctx):
         hook(ctx)
 
     # Finalize database if enabled
-    if CONFIG["DATABASE_ENABLED"]:
-        finalize_database_in_after_all(ctx)
-        from cucu.database.connection import close_database
-
-        close_database()
+    # finalize_database_in_after_all(ctx)
+    from cucu.database.connection import close_database
 
 
 def before_feature(ctx, feature):
@@ -88,15 +98,12 @@ def before_feature(ctx, feature):
     # Store feature start time for duration calculation
     feature.start_time = time.time()
 
-    # Create database record if enabled
-    if CONFIG["DATABASE_ENABLED"]:
-        create_feature_in_before_feature(ctx, feature)
+    # create_feature_in_before_feature(ctx, feature)
 
 
 def after_feature(ctx, feature):
-    # Update database record if enabled
-    if CONFIG["DATABASE_ENABLED"]:
-        update_feature_in_after_feature(ctx, feature)
+    # update_feature_in_after_feature(ctx, feature)
+    pass
 
 
 def before_scenario(ctx, scenario):
@@ -159,9 +166,7 @@ def before_scenario(ctx, scenario):
     # Store scenario start time for duration calculation
     scenario.start_time = time.time()
 
-    # Create database record if enabled
-    if CONFIG["DATABASE_ENABLED"]:
-        create_scenario_in_before_scenario(ctx, scenario)
+    # create_scenario_in_before_scenario(ctx, scenario)
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
@@ -224,9 +229,7 @@ def after_scenario(ctx, scenario):
     with open(cucu_config_filepath, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
 
-    # Update database record if enabled
-    if CONFIG["DATABASE_ENABLED"]:
-        update_scenario_in_after_scenario(ctx, scenario)
+    # update_scenario_in_after_scenario(ctx, scenario)
 
 
 def download_mht_data(ctx):
@@ -281,9 +284,7 @@ def before_step(ctx, step):
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
-    # Create database record if enabled
-    if CONFIG["DATABASE_ENABLED"]:
-        create_step_in_before_step(ctx, step)
+    # create_step_in_before_step(ctx, step)
 
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
@@ -323,9 +324,7 @@ def after_step(ctx, step):
 
     CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
 
-    # Update database record if enabled
-    if CONFIG["DATABASE_ENABLED"]:
-        update_step_in_after_step(ctx, step)
+    # update_step_in_after_step(ctx, step)
 
     # run after all step hooks
     for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:

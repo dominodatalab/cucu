@@ -23,13 +23,11 @@ def section_step(ctx, heading_level, section_text):
     # Count the number of # characters to determine heading level (1-4)
     level = len(heading_level)
 
-    # Record section in database if enabled
-    if CONFIG.get("DATABASE_ENABLED", False):
-        from cucu.database.hooks import create_section_in_section_step
+    from cucu.database.hooks import create_section_in_section_step
 
-        create_section_in_section_step(
-            ctx, level, section_text, ctx.step_index
-        )
+    create_section_in_section_step(
+        ctx, level, section_text, ctx.step_index
+    )
 
 
 use_step_matcher("parse")  # set this back to cucu's default matcher parser

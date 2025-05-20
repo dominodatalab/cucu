@@ -271,7 +271,6 @@ def take_screenshot(ctx, step_name, label="", element=None):
     if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
 
-    if CONFIG.get("DATABASE_ENABLED", False) and hasattr(ctx, "database"):
-        record_screenshot_artifact(ctx, filepath)
+    record_screenshot_artifact(ctx, filepath)
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] += 1

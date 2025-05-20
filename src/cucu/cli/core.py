@@ -239,16 +239,10 @@ def db_query(db: str, sql: str, logging_level: str):
     default=None,
     help="the HTTP url for a selenium hub setup to run the browser tests on",
 )
-@click.option(
-    "--database/--no-database",
-    default=False,
-    help="enable/disable database functionality",
-)
 def run(
     filepath,
     browser,
     color_output,
-    database,
     dry_run,
     env,
     generate_report,
@@ -334,9 +328,6 @@ def run(
 
     if record_env_vars:
         os.environ["CUCU_RECORD_ENV_VARS"] = "true"
-
-    if database:
-        os.environ["DATABASE_ENABLED"] = "true"
 
     if not dry_run:
         write_run_info(results, locals())

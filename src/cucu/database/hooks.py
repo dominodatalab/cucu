@@ -31,9 +31,6 @@ def init_database_in_before_all(ctx):
     Args:
         ctx: The behave context
     """
-    if not CONFIG["DATABASE_ENABLED"]:
-        return
-
     # Add database key to context for state tracking
     ctx.database = {
         "cucu_run_id": None,
@@ -79,8 +76,6 @@ def finalize_database_in_after_all(ctx):
     Args:
         ctx: The behave context
     """
-    if not CONFIG["DATABASE_ENABLED"] or not hasattr(ctx, "database"):
-        return
 
     if ctx.database.get("cucu_run_id"):
         conn = get_connection()
@@ -119,9 +114,6 @@ def create_feature_in_before_feature(ctx, feature):
         ctx: The behave context
         feature: The behave feature
     """
-    if not CONFIG["DATABASE_ENABLED"] or not hasattr(ctx, "database"):
-        return
-
     if ctx.database.get("cucu_run_id"):
         conn = get_connection()
         if conn:
@@ -156,9 +148,6 @@ def update_feature_in_after_feature(ctx, feature):
         ctx: The behave context
         feature: The behave feature
     """
-    if not CONFIG["DATABASE_ENABLED"] or not hasattr(ctx, "database"):
-        return
-
     if ctx.database.get("current_feature_id"):
         conn = get_connection()
         if conn:
@@ -202,9 +191,6 @@ def create_scenario_in_before_scenario(ctx, scenario):
         ctx: The behave context
         scenario: The behave scenario
     """
-    if not CONFIG["DATABASE_ENABLED"] or not hasattr(ctx, "database"):
-        return
-
     if ctx.database.get("current_feature_id"):
         conn = get_connection()
         if conn:
@@ -241,9 +227,6 @@ def update_scenario_in_after_scenario(ctx, scenario):
         ctx: The behave context
         scenario: The behave scenario
     """
-    if not CONFIG["DATABASE_ENABLED"] or not hasattr(ctx, "database"):
-        return
-
     if ctx.database.get("current_scenario_id"):
         conn = get_connection()
         if conn:
@@ -300,9 +283,6 @@ def create_section_in_section_step(ctx, level, text, order_index=None):
     Returns:
         The section ID if created, None otherwise
     """
-    if not CONFIG["DATABASE_ENABLED"] or not hasattr(ctx, "database"):
-        return None
-
     if ctx.database.get("current_scenario_id"):
         conn = get_connection()
         if conn:
@@ -353,9 +333,6 @@ def create_step_in_before_step(ctx, step):
         ctx: The behave context
         step: The behave step
     """
-    if not CONFIG["DATABASE_ENABLED"] or not hasattr(ctx, "database"):
-        return
-
     if ctx.database.get("current_scenario_id"):
         conn = get_connection()
         if conn:
@@ -417,9 +394,6 @@ def update_step_in_after_step(ctx, step):
         ctx: The behave context
         step: The behave step
     """
-    if not CONFIG["DATABASE_ENABLED"] or not hasattr(ctx, "database"):
-        return
-
     if ctx.database.get("current_step_run_id"):
         conn = get_connection()
         if conn:
@@ -482,9 +456,6 @@ def record_screenshot_artifact(ctx, filepath, step_run_id=None):
     Returns:
         The artifact ID if created, None otherwise
     """
-    if not CONFIG["DATABASE_ENABLED"] or not hasattr(ctx, "database"):
-        return None
-
     conn = get_connection()
     if conn:
         try:

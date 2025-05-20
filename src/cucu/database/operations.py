@@ -1,5 +1,5 @@
 """
-Database operations for storing and retrieving test execution data.
+🗄️ DB:  for storing and retrieving test execution data.
 """
 
 import json
@@ -44,13 +44,13 @@ def execute_with_retry(
         except Exception as e:
             last_error = e
             logger.warning(
-                f"Database operation failed (attempt {attempt+1}/{retry_count}): {str(e)}"
+                f"🗄️ DB: failed (attempt {attempt+1}/{retry_count}): {str(e)}"
             )
             if attempt < retry_count - 1:
                 time.sleep(0.5 * (attempt + 1))  # Exponential backoff
             else:
                 logger.error(
-                    f"Database operation failed after {retry_count} attempts: {str(e)}"
+                    f"🗄️ DB: failed after {retry_count} attempts: {str(e)}"
                 )
                 raise last_error
 

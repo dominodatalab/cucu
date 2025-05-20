@@ -211,9 +211,6 @@ def write_run_info(results, run_locals):
     with open(run_details_filepath, "w", encoding="utf8") as output:
         output.write(json.dumps(run_info, indent=2, sort_keys=True))
 
-    if not CONFIG["DATABASE_ENABLED"]:
-        return
-
     # Use DB_PATH from config or set default
     db_path = CONFIG.get("DB_PATH")
     if not db_path:
@@ -228,14 +225,12 @@ def write_run_info(results, run_locals):
         "hostname": socket.gethostname(),
     }
 
-    # Extract run configuration from the run_locals dictionary
     browser = run_locals.get("browser", "unknown")
     worker_count = run_locals.get("workers", 1)
     headless = run_locals.get("headless", False)
     command_line = " ".join(sys.argv)
 
     try:
-        # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
 
         db_exists = os.path.exists(db_path)

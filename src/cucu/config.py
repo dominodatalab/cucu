@@ -417,11 +417,6 @@ CONFIG.define(
     default=True,
 )
 CONFIG.define(
-    "DATABASE_ENABLED",
-    "Whether to enable database functionality",
-    default=False,
-)
-CONFIG.define(
     "DB_PATH",
     "Path to the database file",
     default=None,
