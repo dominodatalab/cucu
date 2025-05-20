@@ -53,7 +53,7 @@ def before_all(ctx):
 
     try:
         start_time = ctx._root["start_time"]
-        hooks.db_before_all(ctx, start_time)
+        hooks.start_run(ctx, start_time)
     except Exception as e:
         raise RuntimeError(
             f"🗄️ Failed to start run {CONFIG['DB_PATH']} {e}"
@@ -84,7 +84,7 @@ def before_feature(ctx, feature):
     # Store feature start time for duration calculation
     feature.start_time = time.time()
 
-    # create_feature_in_before_feature(ctx, feature)
+    hooks.create_feature_in_before_feature(ctx, feature)
 
 
 def after_feature(ctx, feature):
@@ -152,7 +152,7 @@ def before_scenario(ctx, scenario):
     # Store scenario start time for duration calculation
     scenario.start_time = time.time()
 
-    # create_scenario_in_before_scenario(ctx, scenario)
+    hooks.create_scenario_in_before_scenario(ctx, scenario)
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:

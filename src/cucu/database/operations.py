@@ -3,12 +3,17 @@
 """
 
 import json
+from datetime import datetime
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
 import duckdb
 
 from cucu import logger
+
+
+def _to_timestamp(time_float: float) -> datetime:
+    return datetime.fromtimestamp(time_float)
 
 
 def execute_with_retry(
@@ -25,6 +30,8 @@ def execute_with_retry(
                 return conn.execute(query, params)
             else:
                 return conn.execute(query)
+        except duckdb.ParserException as e:
+            raise
         except Exception as e:
             last_error = e
             logger.warning(
@@ -43,8 +50,8 @@ def init_schema(conn: duckdb.DuckDBPyConnection) -> None:
     schema_created = create_schema(conn)
     if schema_created:
         logger.info("🗄️ DB: schema created successfully")
-        logger.debug(conn.query("show tables"))
-        logger.debug(conn.query("show CucuRun"))
+        logger.info(conn.query("show tables"))
+        logger.info(conn.query("show CucuRun"))
 
 
 def create_cucu_run(
@@ -59,7 +66,6 @@ def create_cucu_run(
     headless,
     results_dir,
 ) -> int:
-    # Create a new CucuRun record
     cucu_run_id = conn.query("select nextval('seq_cucu_run_id')").fetchone()[0]
     conn.execute(
         """
@@ -90,7 +96,7 @@ def create_cucu_run(
         ),
     )
     logger.info(f"🗄️ DB: Starting CucuRun ID: {cucu_run_id}")
-    logger.debug(conn.query("from CucuRun"))
+    logger.info(conn.execute("from CucuRun"))
     return cucu_run_id
 
 
@@ -111,7 +117,7 @@ def update_cucu_run(
     params = (status, total_duration_ms, cucu_run_id)
 
     execute_with_retry(conn, query, params)
-    logger.debug(f"Updated CucuRun record {cucu_run_id} with status {status}")
+    logger.info(f"Updated CucuRun record {cucu_run_id} with status {status}")
     return True
 
 
@@ -120,28 +126,86 @@ def create_feature(
     cucu_run_id: int,
     name: str,
     description: Optional[str],
-    filepath: str,
+    filename: str,
     tags: Optional[List[str]] = None,
 ) -> int:
+    
+    feature_id = conn.query("select nextval('seq_feature_id')").fetchone()[0]
+
     query = """
     INSERT INTO Feature (
-        cucu_run_id, name, description, filepath, tags, start_time, status
+        cucu_run_id, feature_id, name, description, filename, tags, start_time, status
     ) VALUES (
-        ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 'running'
-    ) RETURNING feature_id
+        ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 'running'
+    )
     """
 
-    tags_str = None
-    if tags:
-        tags_str = ",".join(tags)
-
-    params = (cucu_run_id, name, description, filepath, tags_str)
+    tags_str = ",".join(tags)
+    params = (cucu_run_id, feature_id, name, description, filename, tags_str)
 
     result = execute_with_retry(conn, query, params)
     feature_id = result.fetchone()[0]
 
-    logger.debug(f"Created Feature record with ID {feature_id}")
+    logger.info(f"Created Feature record with ID {feature_id}")
+    logger.info(conn.query("from Feature"))
     return feature_id
+
+
+def create_scenario(
+    conn: duckdb.DuckDBPyConnection,
+        feature_id,
+        name,
+        filename,
+        line,
+        tags,
+        status,
+        start_time,
+        worker_id = None,
+) -> int:
+    scenario_id = conn.query("select nextval('seq_scenario_id')").fetchone()[0]
+
+    query = """
+    INSERT INTO Scenario (
+        scenario_id,
+        feature_id,
+        name,
+        filename,
+        line,
+        tags,
+        status,
+        start_time,
+        worker_id
+    ) VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?
+    )
+    """
+
+    tags_str = ",".join(tags)
+
+    params = (
+        scenario_id,
+        feature_id,
+        name,
+        filename,
+        line,
+        tags_str,
+        status,
+        _to_timestamp(start_time),
+        worker_id,
+    )
+
+    execute_with_retry(conn, query, params)
+    logger.info(f"Created Scenario record with ID {scenario_id}")
+    logger.info(conn.query("from Scenario"))
+    return scenario_id
 
 
 def update_feature(
@@ -161,36 +225,9 @@ def update_feature(
     params = (status, total_duration_ms, feature_id)
 
     execute_with_retry(conn, query, params)
-    logger.debug(f"Updated Feature record {feature_id} with status {status}")
+    logger.info(f"Updated Feature record {feature_id} with status {status}")
     return True
 
-
-def create_scenario(
-    conn: duckdb.DuckDBPyConnection,
-    feature_id: int,
-    name: str,
-    description: Optional[str],
-    tags: Optional[List[str]] = None,
-) -> int:
-    query = """
-    INSERT INTO Scenario (
-        feature_id, name, description, tags, start_time, status
-    ) VALUES (
-        ?, ?, ?, ?, CURRENT_TIMESTAMP, 'running'
-    ) RETURNING scenario_id
-    """
-
-    tags_str = None
-    if tags:
-        tags_str = ",".join(tags)
-
-    params = (feature_id, name, description, tags_str)
-
-    result = execute_with_retry(conn, query, params)
-    scenario_id = result.fetchone()[0]
-
-    logger.debug(f"Created Scenario record with ID {scenario_id}")
-    return scenario_id
 
 
 def update_scenario(
@@ -212,7 +249,7 @@ def update_scenario(
     params = (status, total_duration_ms, error_message, scenario_id)
 
     execute_with_retry(conn, query, params)
-    logger.debug(f"Updated Scenario record {scenario_id} with status {status}")
+    logger.info(f"Updated Scenario record {scenario_id} with status {status}")
     return True
 
 
@@ -237,7 +274,7 @@ def create_section(
     result = execute_with_retry(conn, query, params)
     section_id = result.fetchone()[0]
 
-    logger.debug(f"Created Section record with ID {section_id}")
+    logger.info(f"Created Section record with ID {section_id}")
     return section_id
 
 
@@ -252,12 +289,12 @@ def create_step(
     level: Optional[int] = None,
     order_index: Optional[int] = None,
     file_path: Optional[str] = None,
-    line_number: Optional[int] = None,
+    line: Optional[int] = None,
 ) -> int:
     query = """
     INSERT INTO Step (
         scenario_id, section_id, parent_step_id, keyword, text, level,
-        step_type, order_index, created_at, file_path, line_number
+        step_type, order_index, created_at, file_path, line
     ) VALUES (
         ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?
     ) RETURNING step_id
@@ -273,13 +310,13 @@ def create_step(
         step_type,
         order_index,
         file_path,
-        line_number,
+        line,
     )
 
     result = execute_with_retry(conn, query, params)
     step_id = result.fetchone()[0]
 
-    logger.debug(f"Created Step record with ID {step_id}")
+    logger.info(f"Created Step record with ID {step_id}")
     return step_id
 
 
@@ -302,7 +339,7 @@ def create_step_run(
     result = execute_with_retry(conn, query, params)
     step_run_id = result.fetchone()[0]
 
-    logger.debug(f"Created StepRun record with ID {step_run_id}")
+    logger.info(f"Created StepRun record with ID {step_run_id}")
     return step_run_id
 
 
@@ -327,7 +364,7 @@ def update_step_run(
     params = (status, duration_ms, error_message, stack_trace, step_run_id)
 
     execute_with_retry(conn, query, params)
-    logger.debug(f"Updated StepRun record {step_run_id} with status {status}")
+    logger.info(f"Updated StepRun record {step_run_id} with status {status}")
     return True
 
 
@@ -350,7 +387,7 @@ def create_step_post(
     result = execute_with_retry(conn, query, params)
     step_post_id = result.fetchone()[0]
 
-    logger.debug(f"Created StepPost record with ID {step_post_id}")
+    logger.info(f"Created StepPost record with ID {step_post_id}")
     return step_post_id
 
 
@@ -374,13 +411,13 @@ def create_scenario_post(
     result = execute_with_retry(conn, query, params)
     scenario_post_id = result.fetchone()[0]
 
-    logger.debug(f"Created ScenarioPost record with ID {scenario_post_id}")
+    logger.info(f"Created ScenarioPost record with ID {scenario_post_id}")
     return scenario_post_id
 
 
 def create_artifact(
     conn: duckdb.DuckDBPyConnection,
-    filepath: str,
+    filename: str,
     artifact_type: str,
     file_size: int,
     file_hash: Optional[str] = None,
@@ -393,7 +430,7 @@ def create_artifact(
 ) -> int:
     query = """
     INSERT INTO Artifact (
-        filepath, artifact_type, file_size, file_hash, created_at, metadata,
+        filename, artifact_type, file_size, file_hash, created_at, metadata,
         cucu_run_id, feature_id, scenario_id, step_run_id, scenario_post_id
     ) VALUES (
         ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?
@@ -401,7 +438,7 @@ def create_artifact(
     """
 
     params = (
-        filepath,
+        filename,
         artifact_type,
         file_size,
         file_hash,
@@ -416,7 +453,7 @@ def create_artifact(
     result = execute_with_retry(conn, query, params)
     artifact_id = result.fetchone()[0]
 
-    logger.debug(f"Created Artifact record with ID {artifact_id}")
+    logger.info(f"Created Artifact record with ID {artifact_id}")
     return artifact_id
 
 
@@ -444,7 +481,7 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         command_line TEXT NOT NULL,
         env_vars TEXT NOT NULL,
         system_info TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'running',
+        status TEXT NOT NULL DEFAULT 'not_started',
         worker_count INTEGER DEFAULT 1,
         start_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         end_time TIMESTAMP,
@@ -481,9 +518,8 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         name TEXT NOT NULL,
-        description TEXT,
         filename TEXT NOT NULL,
-        line_number INTEGER NOT NULL,
+        line INTEGER NOT NULL,
         tags TEXT,
         status TEXT NOT NULL DEFAULT 'not started',
         duration FLOAT,
@@ -506,7 +542,7 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         name TEXT NOT NULL,
         kind TEXT NOT NULL,
         filename TEXT,
-        line_number INTEGER,
+        line INTEGER,
         section_level INTEGER NOT NULL DEFAULT 0,
         step_order INTEGER NOT NULL,
         step_level INTEGER NOT NULL DEFAULT 0,
@@ -523,7 +559,7 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         attempt INTEGER NOT NULL,
-        status TEXT NOT NULL DEFAULT 'not started',
+        status TEXT NOT NULL DEFAULT 'unset',
         started_at TIMESTAMP,
         ended_at TIMESTAMP,
         duration FLOAT,

@@ -8,60 +8,26 @@ from datetime import datetime
 from cucu import logger
 from cucu.config import CONFIG
 from cucu.database.connection import get_connection
-from cucu.database.operations import (
-    create_artifact,
-    create_feature,
-    create_scenario,
-    create_section,
-    create_step,
-    create_step_post,
-    create_step_run,
-    update_cucu_run,
-    update_feature,
-    update_scenario,
-    update_step_run,
-)
+from cucu.database import operations
 
 
-def db_before_all(ctx, start_time):
+def start_run(ctx, start_time):
+    cucu_run_id = CONFIG["CUCU_RUN_ID"]
     timestamp = datetime.fromtimestamp(start_time)
-    with get_connection() as conn:
-        cucu_run_id = CONFIG["CUCU_RUN_ID"]
-        conn.execute(
-            """
-            UPDATE CucuRun
-            SET start_time = ?
-            WHERE cucu_run_id = ?
-        """,
-            [timestamp, cucu_run_id],
-        )
-        logger.info(conn.query("FROM CucuRun"))
-
-
-def finalize_database_in_after_all(ctx):
     conn = get_connection()
-    # Calculate total duration
-    total_duration_ms = None
-    if hasattr(ctx, "start_time") and ctx.start_time:
-        total_duration_ms = int((time.time() - ctx.start_time) * 1000)
-
-    # Update the CucuRun record
-    status = "passed"
-    if hasattr(ctx, "failed") and ctx.failed:
-        status = "failed"
-
-    update_cucu_run(
-        conn,
-        ctx.database["cucu_run_id"],
-        status,
-        total_duration_ms,
+    conn.execute(
+        """
+        UPDATE CucuRun
+        SET status = 'running', start_time = ?
+        WHERE cucu_run_id = ?
+    """,
+        [timestamp, cucu_run_id],
     )
-    logger.info(
-        f"Updated CucuRun record {ctx.database['cucu_run_id']} with status {status}"
-    )
+    logger.info(conn.query("FROM CucuRun"))
 
 
 def create_feature_in_before_feature(ctx, feature):
+    cucu_run_id = CONFIG["CUCU_RUN_ID"]
     conn = get_connection()
     # Extract feature information
     name = feature.name
@@ -70,16 +36,13 @@ def create_feature_in_before_feature(ctx, feature):
     tags = [tag for tag in feature.tags] if feature.tags else []
 
     # Create the Feature record
-    ctx.database["current_feature_id"] = create_feature(
+    ctx.db_feature_id = operations.create_feature(
         conn,
-        ctx.database["cucu_run_id"],
+        cucu_run_id,
         name,
         description,
         filepath,
         tags,
-    )
-    logger.debug(
-        f"Created Feature record with ID {ctx.database['current_feature_id']}"
     )
 
 
@@ -98,42 +61,33 @@ def update_feature_in_after_feature(ctx, feature):
         status = "skipped"
 
     # Update the Feature record
-    update_feature(
+    operations.update_feature(
         conn,
-        ctx.database["current_feature_id"],
+        CONFIG["current_feature_id"],
         status,
         total_duration_ms,
     )
     logger.debug(
-        f"Updated Feature record {ctx.database['current_feature_id']} with status {status}"
+        f"Updated Feature record {CONFIG['current_feature_id']} with status {status}"
     )
 
     # Clear current feature ID
-    ctx.database["current_feature_id"] = None
+    CONFIG["current_feature_id"] = None
 
 
 def create_scenario_in_before_scenario(ctx, scenario):
     conn = get_connection()
-    # Extract scenario information
-    name = scenario.name
-    description = getattr(scenario, "description", "")
-    tags = [tag for tag in scenario.tags] if scenario.tags else []
-
-    # Create the Scenario record
-    ctx.database["current_scenario_id"] = create_scenario(
+    ctx.db_scenario_id = operations.create_scenario(
         conn,
-        ctx.database["current_feature_id"],
-        name,
-        description,
-        tags,
+        ctx.db_feature_id,
+        scenario.name,
+        scenario.filename,
+        scenario.line,
+        scenario.tags,
+        scenario.status.name,
+        scenario.start_time,
+        #worker_id,
     )
-    logger.debug(
-        f"Created Scenario record with ID {ctx.database['current_scenario_id']}"
-    )
-
-    # Reset section stack for new scenario
-    ctx.database["section_stack"] = []
-    ctx.database["current_section_id"] = None
 
 
 def update_scenario_in_after_scenario(ctx, scenario):
@@ -156,21 +110,21 @@ def update_scenario_in_after_scenario(ctx, scenario):
         status = "skipped"
 
     # Update the Scenario record
-    update_scenario(
+    operations.update_scenario(
         conn,
-        ctx.database["current_scenario_id"],
+        CONFIG["current_scenario_id"],
         status,
         total_duration_ms,
         error_message,
     )
     logger.debug(
-        f"Updated Scenario record {ctx.database['current_scenario_id']} with status {status}"
+        f"Updated Scenario record {CONFIG['current_scenario_id']} with status {status}"
     )
 
     # Clear current scenario ID and section stack
-    ctx.database["current_scenario_id"] = None
-    ctx.database["section_stack"] = []
-    ctx.database["current_section_id"] = None
+    CONFIG["current_scenario_id"] = None
+    CONFIG["section_stack"] = []
+    CONFIG["current_section_id"] = None
 
 
 def create_section_in_section_step(ctx, level, text, order_index=None):
@@ -182,17 +136,17 @@ def create_section_in_section_step(ctx, level, text, order_index=None):
     # Example: If we have ## (level 2) and we encounter # (level 1),
     # we need to reset all sections of level >= 1
     new_stack = []
-    for section_id, section_level in ctx.database["section_stack"]:
+    for section_id, section_level in CONFIG["section_stack"]:
         if section_level < level:
             new_stack.append((section_id, section_level))
             parent_section_id = section_id
 
-    ctx.database["section_stack"] = new_stack
+    CONFIG["section_stack"] = new_stack
 
     # Create the Section record
-    section_id = create_section(
+    section_id = operations.create_section(
         conn,
-        ctx.database["current_scenario_id"],
+        CONFIG["current_scenario_id"],
         text,
         level,
         parent_section_id,
@@ -200,8 +154,8 @@ def create_section_in_section_step(ctx, level, text, order_index=None):
     )
 
     # Update current section ID and add to stack
-    ctx.database["current_section_id"] = section_id
-    ctx.database["section_stack"].append((section_id, level))
+    CONFIG["current_section_id"] = section_id
+    CONFIG["section_stack"].append((section_id, level))
 
     logger.debug(f"Created Section record with ID {section_id}, level {level}")
     return section_id
@@ -215,7 +169,7 @@ def create_step_in_before_step(ctx, step):
     step_type = "regular"  # Default type
 
     # Determine section ID from current section
-    section_id = ctx.database.get("current_section_id")
+    section_id = CONFIG["current_section_id"]
 
     # Extract file information if available
     file_path = None
@@ -225,9 +179,9 @@ def create_step_in_before_step(ctx, step):
         line_number = step.location.line
 
     # Create the Step record
-    ctx.database["current_step_id"] = create_step(
+    CONFIG["current_step_id"] = operations.create_step(
         conn,
-        ctx.database["current_scenario_id"],
+        CONFIG["current_scenario_id"],
         keyword,
         text,
         step_type,
@@ -239,18 +193,18 @@ def create_step_in_before_step(ctx, step):
         line_number,
     )
     logger.debug(
-        f"Created Step record with ID {ctx.database['current_step_id']}"
+        f"Created Step record with ID {CONFIG['current_step_id']}"
     )
 
     # Create the initial StepRun record
-    ctx.database["current_step_run_id"] = create_step_run(
+    CONFIG["current_step_run_id"] = create_step_run(
         conn,
-        ctx.database["current_step_id"],
+        CONFIG["current_step_id"],
         1,  # attempt_number
         True,  # is_final_attempt (assumed true for now)
     )
     logger.debug(
-        f"Created StepRun record with ID {ctx.database['current_step_run_id']}"
+        f"Created StepRun record with ID {CONFIG['current_step_run_id']}"
     )
 
 
@@ -281,21 +235,44 @@ def update_step_in_after_step(ctx, step):
         status = "skipped"
 
     # Update the StepRun record
-    update_step_run(
+    operations.update_step_run(
         conn,
-        ctx.database["current_step_run_id"],
+        CONFIG["current_step_run_id"],
         status,
         duration_ms,
         error_message,
         stack_trace,
     )
     logger.debug(
-        f"Updated StepRun record {ctx.database['current_step_run_id']} with status {status}"
+        f"Updated StepRun record {CONFIG['current_step_run_id']} with status {status}"
     )
 
     # Clear current step IDs
-    ctx.database["current_step_id"] = None
-    ctx.database["current_step_run_id"] = None
+    CONFIG["current_step_id"] = None
+    CONFIG["current_step_run_id"] = None
+
+
+def finalize_database_in_after_all(ctx):
+    conn = get_connection()
+    # Calculate total duration
+    total_duration_ms = None
+    if hasattr(ctx, "start_time") and ctx.start_time:
+        total_duration_ms = int((time.time() - ctx.start_time) * 1000)
+
+    # Update the CucuRun record
+    status = "passed"
+    if hasattr(ctx, "failed") and ctx.failed:
+        status = "failed"
+
+    operations.update_cucu_run(
+        conn,
+        CONFIG["cucu_run_id"],
+        status,
+        total_duration_ms,
+    )
+    logger.info(
+        f"Updated CucuRun record {CONFIG['cucu_run_id']} with status {status}"
+    )
 
 
 def record_screenshot_artifact(ctx, filepath, step_run_id=None):
@@ -314,16 +291,16 @@ def record_screenshot_artifact(ctx, filepath, step_run_id=None):
             file_hash = hashlib.md5(f.read()).hexdigest()
 
     # Determine association IDs
-    cucu_run_id = ctx.database.get("cucu_run_id")
-    feature_id = ctx.database.get("current_feature_id")
-    scenario_id = ctx.database.get("current_scenario_id")
+    cucu_run_id = CONFIG["cucu_run_id"]
+    feature_id = CONFIG["current_feature_id"]
+    scenario_id = CONFIG["current_scenario_id"]
 
     # Use provided step_run_id or current one
     if step_run_id is None:
-        step_run_id = ctx.database.get("current_step_run_id")
+        step_run_id = CONFIG["current_step_run_id"]
 
     # Create the Artifact record
-    artifact_id = create_artifact(
+    artifact_id = operations.create_artifact(
         conn,
         filepath,
         "screenshot",
@@ -342,7 +319,7 @@ def record_screenshot_artifact(ctx, filepath, step_run_id=None):
 
     # Create a StepPost record if this is associated with a step
     if step_run_id:
-        step_post_id = create_step_post(
+        step_post_id = operations.create_step_post(
             conn,
             step_run_id,
             "screenshot",

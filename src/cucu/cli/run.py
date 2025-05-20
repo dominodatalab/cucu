@@ -213,7 +213,7 @@ def write_run_info(results, run_locals):
         output.write(json.dumps(run_info, indent=2, sort_keys=True))
 
     # Use DB_PATH from config or set default
-    db_path = CONFIG.get("DB_PATH")
+    db_path = CONFIG["DB_PATH"]
     if not db_path:
         db_path = os.path.join(results, "results.db")
     CONFIG["DB_PATH"] = db_path
@@ -251,7 +251,7 @@ def write_run_info(results, run_locals):
                 command_line,
                 json.dumps(env_values),
                 json.dumps(system_info),
-                "running",
+                "not_started",
                 worker_count,
                 datetime.now(),
                 browser,

@@ -9,8 +9,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Add - database functionality to store and query test execution data
 - Add - support for hierarchical section steps in the database
 - Add - cucu db command for querying test results
-- Add - screenshot artifact tracking in the database
-- Add - --database/--no-database flag to enable database functionality
+- Add - track screenshot and other artifacts in the database
 
 ## 1.2.0
 - Add - levels 2-4 to section step

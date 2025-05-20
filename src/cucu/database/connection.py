@@ -56,12 +56,12 @@ def get_connection_pool() -> ThreadPoolExecutor:
 def get_connection(
     timeout: Optional[float] = None,
 ) -> duckdb.DuckDBPyConnection:
-    if not Path(CONFIG.get("DB_PATH")).exists():
+    if not Path(CONFIG["DB_PATH"]).exists():
         return None
 
     # Use thread-local connections to avoid concurrent access issues
     if not hasattr(_local_connections, "conn"):
-        db_file = Path(CONFIG.get("DB_PATH"))
+        db_file = Path(CONFIG["DB_PATH"])
         retry_count = CONFIG["DATABASE_RETRY_COUNT"]
         timeout = timeout or CONFIG["DATABASE_CONNECTION_TIMEOUT"]
 
