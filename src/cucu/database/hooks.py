@@ -7,8 +7,8 @@ from datetime import datetime
 
 from cucu import logger
 from cucu.config import CONFIG
-from cucu.database.connection import get_connection
 from cucu.database import operations
+from cucu.database.connection import get_connection
 
 
 def start_run(ctx, start_time):
@@ -86,8 +86,25 @@ def create_scenario_in_before_scenario(ctx, scenario):
         scenario.tags,
         scenario.status.name,
         scenario.start_time,
-        #worker_id,
+        # worker_id,
     )
+
+    step_defs = [
+        {
+            "scenario_id": ctx.db_scenario_id,
+            "step_def_id": 0,
+            "parent_step_def_id": None,
+            "step_order": index+1,
+            "name": step.name,
+            "keyword": step.keyword,
+            "table_data": step.table,
+            "text_data": step.text,
+            "filename": step.filename,
+            "line": step.line,
+        }
+        for index, step in enumerate(scenario.all_steps)
+    ]
+    operations.create_step_defs(conn, step_defs)
 
 
 def update_scenario_in_after_scenario(ctx, scenario):
@@ -192,12 +209,10 @@ def create_step_in_before_step(ctx, step):
         file_path,
         line_number,
     )
-    logger.debug(
-        f"Created Step record with ID {CONFIG['current_step_id']}"
-    )
+    logger.debug(f"Created Step record with ID {CONFIG['current_step_id']}")
 
     # Create the initial StepRun record
-    CONFIG["current_step_run_id"] = create_step_run(
+    CONFIG["current_step_run_id"] = operations.create_step_run(
         conn,
         CONFIG["current_step_id"],
         1,  # attempt_number

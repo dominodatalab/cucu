@@ -2,9 +2,11 @@
 🗄️ DB:  for storing and retrieving test execution data.
 """
 
+
+import pandas
 import json
-from datetime import datetime
 import time
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 import duckdb
@@ -30,7 +32,7 @@ def execute_with_retry(
                 return conn.execute(query, params)
             else:
                 return conn.execute(query)
-        except duckdb.ParserException as e:
+        except duckdb.ParserException:
             raise
         except Exception as e:
             last_error = e
@@ -129,7 +131,6 @@ def create_feature(
     filename: str,
     tags: Optional[List[str]] = None,
 ) -> int:
-    
     feature_id = conn.query("select nextval('seq_feature_id')").fetchone()[0]
 
     query = """
@@ -153,14 +154,14 @@ def create_feature(
 
 def create_scenario(
     conn: duckdb.DuckDBPyConnection,
-        feature_id,
-        name,
-        filename,
-        line,
-        tags,
-        status,
-        start_time,
-        worker_id = None,
+    feature_id,
+    name,
+    filename,
+    line,
+    tags,
+    status,
+    start_time,
+    worker_id=None,
 ) -> int:
     scenario_id = conn.query("select nextval('seq_scenario_id')").fetchone()[0]
 
@@ -208,6 +209,20 @@ def create_scenario(
     return scenario_id
 
 
+def create_step_defs(conn, step_defs: List[Dict]) -> None:
+    for step_def in step_defs:
+        step_def["step_def_id"] = conn.query(
+            "select nextval('seq_step_def_id')"
+        ).fetchone()[0]
+        step_def["db_created_at"] = datetime.now()
+        step_def["db_updated_at"] = datetime.now()
+
+    steps_def_df = pandas.DataFrame(step_defs)
+    conn.register("steps_def_df", steps_def_df)
+    conn.query("INSERT INTO StepDef BY NAME SELECT * FROM steps_def_df")
+    logger.info(conn.query("from StepDef"))
+
+
 def update_feature(
     conn: duckdb.DuckDBPyConnection,
     feature_id: int,
@@ -227,7 +242,6 @@ def update_feature(
     execute_with_retry(conn, query, params)
     logger.info(f"Updated Feature record {feature_id} with status {status}")
     return True
-
 
 
 def update_scenario(
@@ -537,15 +551,17 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         step_def_id INTEGER PRIMARY KEY,
         scenario_id INTEGER NOT NULL,
         parent_step_def_id INTEGER,
-        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        name TEXT NOT NULL,
-        kind TEXT NOT NULL,
-        filename TEXT,
-        line INTEGER,
-        section_level INTEGER NOT NULL DEFAULT 0,
         step_order INTEGER NOT NULL,
         step_level INTEGER NOT NULL DEFAULT 0,
+        section_level INTEGER NOT NULL DEFAULT 0,
+        keyword TEXT NOT NULL,
+        name TEXT NOT NULL,
+        table_data TEXT,
+        text_data TEXT,
+        filename TEXT,
+        line INTEGER,
+        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (scenario_id) REFERENCES Scenario(scenario_id),
         FOREIGN KEY (parent_step_def_id) REFERENCES StepDef(step_def_id)
     )
@@ -556,8 +572,6 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     CREATE TABLE StepRun (
         step_run_id INTEGER PRIMARY KEY,
         step_def_id INTEGER NOT NULL,
-        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         attempt INTEGER NOT NULL,
         status TEXT NOT NULL DEFAULT 'unset',
         started_at TIMESTAMP,
@@ -569,6 +583,8 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         browser_tab INTEGER,
         browser_total_tabs INTEGER,
         browser_log TEXT,
+        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (step_def_id) REFERENCES StepDef(step_def_id)
     )
     """)
