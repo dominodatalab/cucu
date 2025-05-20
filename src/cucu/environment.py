@@ -9,7 +9,7 @@ from functools import partial
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
-from cucu.database.connection import get_connection
+from cucu.database import hooks
 from cucu.page_checks import init_page_checks
 from cucu.utils import ellipsize_filename, take_screenshot
 
@@ -51,16 +51,13 @@ def before_all(ctx):
     # Record start time for duration calculations
     ctx.start_time = time.time()
 
-    # Initialize database if enabled
-
     try:
-        ctx.db_conn = get_connection()
-        logger.info(f"🗄️ Using existing CucuRun ID: {CONFIG['CUCU_RUN_ID']}")
-
-    except Exception:
+        start_time = ctx._root["start_time"]
+        hooks.db_before_all(ctx, start_time)
+    except Exception as e:
         raise RuntimeError(
-            "🗄️ Failed to initialize database. Check your configuration."
-        )
+            f"🗄️ Failed to start run {CONFIG['DB_PATH']} {e}"
+        ) from e
 
     # Run registered hooks
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:

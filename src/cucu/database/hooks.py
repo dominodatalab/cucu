@@ -3,8 +3,10 @@ Database integration with environment hooks.
 """
 
 import time
+from datetime import datetime
 
 from cucu import logger
+from cucu.config import CONFIG
 from cucu.database.connection import get_connection
 from cucu.database.operations import (
     create_artifact,
@@ -19,6 +21,21 @@ from cucu.database.operations import (
     update_scenario,
     update_step_run,
 )
+
+
+def db_before_all(ctx, start_time):
+    timestamp = datetime.fromtimestamp(start_time)
+    with get_connection() as conn:
+        cucu_run_id = CONFIG["CUCU_RUN_ID"]
+        conn.execute(
+            """
+            UPDATE CucuRun
+            SET start_time = ?
+            WHERE cucu_run_id = ?
+        """,
+            [timestamp, cucu_run_id],
+        )
+        logger.info(conn.query("FROM CucuRun"))
 
 
 def finalize_database_in_after_all(ctx):
