@@ -13,30 +13,35 @@ import duckdb
 from cucu import logger
 from cucu.config import CONFIG
 
-
-
 # Global connection pool for database access
 _connection_pool = None
 _connection_pool_lock = threading.Lock()
 _local_connections = threading.local()
 
 
-def init_database() -> str:
+def init_database(db_path: Optional[str] = None) -> str:
     """
     Initialize the database if it's enabled.
+
+    Args:
+        db_path: Optional path to the database file. If not provided,
+                 uses the path from CONFIG["DB_PATH"]
 
     Returns:
         The path to the database file, or None if database is disabled
     """
+    # Get database path from parameter or config
+    db_file = db_path or CONFIG.get("DB_PATH")
 
-    # Ensure results directory exists
-    os.makedirs(results_dir, exist_ok=True)
+    if not db_file:
+        raise ValueError(
+            "Database path not configured. Set DB_PATH in config."
+        )
 
-    # Set the database file path
-    db_file = os.path.join(results_dir, "results.db")
-    CONFIG["DATABASE_FILE"] = db_file
+    # Ensure database directory exists
+    os.makedirs(os.path.dirname(os.path.abspath(db_file)), exist_ok=True)
 
-    logger.info(f"Initializing database at {db_file}")
+    logger.info(f"Initializing database connection at {db_file}")
 
     # Create the database file if it doesn't exist
     conn = duckdb.connect(db_file)
@@ -104,12 +109,12 @@ def get_connection(
     Returns:
         A DuckDB connection
     """
-    if not CONFIG["DATABASE_ENABLED"] or CONFIG["DATABASE_FILE"] is None:
+    if not CONFIG["DATABASE_ENABLED"] or CONFIG.get("DB_PATH") is None:
         return None
 
     # Use thread-local connections to avoid concurrent access issues
     if not hasattr(_local_connections, "conn"):
-        db_file = CONFIG["DATABASE_FILE"]
+        db_file = CONFIG.get("DB_PATH")
         retry_count = CONFIG["DATABASE_RETRY_COUNT"]
         timeout = timeout or CONFIG["DATABASE_CONNECTION_TIMEOUT"]
 

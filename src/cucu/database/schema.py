@@ -27,8 +27,6 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     if conn is None:
         return False
 
-    logger.info("Creating database schema")
-
     # Check if tables already exist
     tables_exist = conn.execute(
         """
@@ -39,7 +37,7 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     ).fetchone()[0]
 
     if tables_exist > 0:
-        logger.debug("Database schema already exists")
+        logger.debug("🗄️ DB: schema already exists")
         return False
 
     # Create tables with proper relationships
@@ -48,17 +46,19 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     conn.execute("""
     CREATE TABLE CucuRun (
         cucu_run_id INTEGER PRIMARY KEY,
-        start_time TIMESTAMP,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        command_line TEXT NOT NULL,
+        env_vars TEXT NOT NULL,
+        system_info TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'running',
+        worker_count INTEGER DEFAULT 1,
+        start_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         end_time TIMESTAMP,
-        command_args TEXT,
+        total_duration FLOAT,
         browser TEXT,
-        environment_vars TEXT,
-        worker_count INTEGER,
         headless BOOLEAN,
-        results_dir TEXT,
-        status TEXT,
-        total_duration_ms INTEGER,
-        system_info TEXT
+        results_dir TEXT
     )
     """)
 
@@ -67,15 +67,16 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     CREATE TABLE Feature (
         feature_id INTEGER PRIMARY KEY,
         cucu_run_id INTEGER NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         name TEXT NOT NULL,
         description TEXT,
-        filepath TEXT NOT NULL,
+        filename TEXT NOT NULL,
         tags TEXT,
+        status TEXT NOT NULL DEFAULT 'not started',
         start_time TIMESTAMP,
         end_time TIMESTAMP,
-        status TEXT,
-        total_duration_ms INTEGER,
-        FOREIGN KEY (cucu_run_id) REFERENCES CucuRun(cucu_run_id) ON DELETE CASCADE
+        FOREIGN KEY (cucu_run_id) REFERENCES CucuRun(cucu_run_id)
     )
     """)
 
@@ -84,116 +85,80 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     CREATE TABLE Scenario (
         scenario_id INTEGER PRIMARY KEY,
         feature_id INTEGER NOT NULL,
+        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         name TEXT NOT NULL,
         description TEXT,
+        filename TEXT NOT NULL,
+        line_number INTEGER NOT NULL,
         tags TEXT,
+        status TEXT NOT NULL DEFAULT 'not started',
+        duration FLOAT,
         start_time TIMESTAMP,
         end_time TIMESTAMP,
-        status TEXT,
-        total_duration_ms INTEGER,
-        error_message TEXT,
-        FOREIGN KEY (feature_id) REFERENCES Feature(feature_id) ON DELETE CASCADE
+        cleanup_log TEXT,
+        worker_id TEXT,
+        FOREIGN KEY (feature_id) REFERENCES Feature(feature_id)
     )
     """)
 
-    # 4. ScenarioPost table - records post-scenario activities
+    # 4. StepDef table - maps to steps or sections within a scenario
     conn.execute("""
-    CREATE TABLE ScenarioPost (
-        scenario_post_id INTEGER PRIMARY KEY,
+    CREATE TABLE StepDef (
+        step_def_id INTEGER PRIMARY KEY,
         scenario_id INTEGER NOT NULL,
-        timestamp TIMESTAMP,
-        action_type TEXT,
-        details TEXT,
-        status TEXT,
-        FOREIGN KEY (scenario_id) REFERENCES Scenario(scenario_id) ON DELETE CASCADE
-    )
-    """)
-
-    # 5. Section table - maps to section steps that organize test steps
-    conn.execute("""
-    CREATE TABLE Section (
-        section_id INTEGER PRIMARY KEY,
-        scenario_id INTEGER NOT NULL,
-        parent_section_id INTEGER,
-        text TEXT NOT NULL,
-        level INTEGER,
-        timestamp TIMESTAMP,
-        order_index INTEGER,
-        FOREIGN KEY (scenario_id) REFERENCES Scenario(scenario_id) ON DELETE CASCADE,
-        FOREIGN KEY (parent_section_id) REFERENCES Section(section_id) ON DELETE CASCADE
-    )
-    """)
-
-    # 6. Step table - maps to individual test steps
-    conn.execute("""
-    CREATE TABLE Step (
-        step_id INTEGER PRIMARY KEY,
-        scenario_id INTEGER NOT NULL,
-        section_id INTEGER,
-        parent_step_id INTEGER,
-        keyword TEXT,
-        text TEXT NOT NULL,
-        level INTEGER,
-        step_type TEXT,
-        order_index INTEGER,
-        created_at TIMESTAMP,
-        file_path TEXT,
+        parent_step_def_id INTEGER,
+        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        name TEXT NOT NULL,
+        kind TEXT NOT NULL,
+        filename TEXT,
         line_number INTEGER,
-        FOREIGN KEY (scenario_id) REFERENCES Scenario(scenario_id) ON DELETE CASCADE,
-        FOREIGN KEY (section_id) REFERENCES Section(section_id) ON DELETE CASCADE,
-        FOREIGN KEY (parent_step_id) REFERENCES Step(step_id) ON DELETE CASCADE
+        section_level INTEGER NOT NULL DEFAULT 0,
+        step_order INTEGER NOT NULL,
+        step_level INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (scenario_id) REFERENCES Scenario(scenario_id),
+        FOREIGN KEY (parent_step_def_id) REFERENCES StepDef(step_def_id)
     )
     """)
 
-    # 7. StepRun table - records each execution attempt of a step
+    # 5. StepRun table - records each execution attempt of a step
     conn.execute("""
     CREATE TABLE StepRun (
         step_run_id INTEGER PRIMARY KEY,
-        step_id INTEGER NOT NULL,
-        start_time TIMESTAMP,
-        end_time TIMESTAMP,
-        status TEXT,
-        duration_ms INTEGER,
-        attempt_number INTEGER,
-        error_message TEXT,
-        stack_trace TEXT,
-        is_final_attempt BOOLEAN,
-        FOREIGN KEY (step_id) REFERENCES Step(step_id) ON DELETE CASCADE
+        step_def_id INTEGER NOT NULL,
+        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        attempt INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'not started',
+        started_at TIMESTAMP,
+        ended_at TIMESTAMP,
+        duration FLOAT,
+        debug_log TEXT,
+        browser_url TEXT,
+        browser_title TEXT,
+        browser_tab INTEGER,
+        browser_total_tabs INTEGER,
+        browser_log TEXT,
+        FOREIGN KEY (step_def_id) REFERENCES StepDef(step_def_id)
     )
     """)
 
-    # 8. StepPost table - records post-step activities
-    conn.execute("""
-    CREATE TABLE StepPost (
-        step_post_id INTEGER PRIMARY KEY,
-        step_run_id INTEGER NOT NULL,
-        timestamp TIMESTAMP,
-        action_type TEXT,
-        details TEXT,
-        FOREIGN KEY (step_run_id) REFERENCES StepRun(step_run_id) ON DELETE CASCADE
-    )
-    """)
-
-    # 9. Artifact table - records file-based outputs
+    # 6. Artifact table - records file-based outputs
     conn.execute("""
     CREATE TABLE Artifact (
         artifact_id INTEGER PRIMARY KEY,
-        cucu_run_id INTEGER,
-        feature_id INTEGER,
-        scenario_id INTEGER,
-        step_run_id INTEGER,
-        scenario_post_id INTEGER,
-        filepath TEXT NOT NULL,
-        artifact_type TEXT,
+        step_run_id INTEGER NOT NULL,
+        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        name TEXT NOT NULL,
+        path TEXT NOT NULL,
+        type TEXT NOT NULL,
+        mime_type TEXT,
         file_size INTEGER,
-        file_hash TEXT,
-        created_at TIMESTAMP,
-        metadata TEXT,
-        FOREIGN KEY (cucu_run_id) REFERENCES CucuRun(cucu_run_id) ON DELETE CASCADE,
-        FOREIGN KEY (feature_id) REFERENCES Feature(feature_id) ON DELETE CASCADE,
-        FOREIGN KEY (scenario_id) REFERENCES Scenario(scenario_id) ON DELETE CASCADE,
-        FOREIGN KEY (step_run_id) REFERENCES StepRun(step_run_id) ON DELETE CASCADE,
-        FOREIGN KEY (scenario_post_id) REFERENCES ScenarioPost(scenario_post_id) ON DELETE CASCADE
+        hash TEXT,
+        artifact_order INTEGER NOT NULL,
+        FOREIGN KEY (step_run_id) REFERENCES StepRun(step_run_id)
     )
     """)
 
@@ -205,35 +170,20 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         "CREATE INDEX idx_scenario_feature_id ON Scenario(feature_id)"
     )
     conn.execute(
-        "CREATE INDEX idx_scenario_post_scenario_id ON ScenarioPost(scenario_id)"
+        "CREATE INDEX idx_stepdef_scenario_id ON StepDef(scenario_id)"
     )
     conn.execute(
-        "CREATE INDEX idx_section_scenario_id ON Section(scenario_id)"
+        "CREATE INDEX idx_stepdef_parent_id ON StepDef(parent_step_def_id)"
     )
-    conn.execute(
-        "CREATE INDEX idx_section_parent_section_id ON Section(parent_section_id)"
-    )
-    conn.execute("CREATE INDEX idx_step_scenario_id ON Step(scenario_id)")
-    conn.execute("CREATE INDEX idx_step_section_id ON Step(section_id)")
-    conn.execute(
-        "CREATE INDEX idx_step_parent_step_id ON Step(parent_step_id)"
-    )
-    conn.execute("CREATE INDEX idx_step_run_step_id ON StepRun(step_id)")
-    conn.execute(
-        "CREATE INDEX idx_step_post_step_run_id ON StepPost(step_run_id)"
-    )
+    conn.execute("CREATE INDEX idx_steprun_stepdef_id ON StepRun(step_def_id)")
     conn.execute(
         "CREATE INDEX idx_artifact_step_run_id ON Artifact(step_run_id)"
     )
-    conn.execute(
-        "CREATE INDEX idx_artifact_scenario_id ON Artifact(scenario_id)"
-    )
-    conn.execute(
-        "CREATE INDEX idx_artifact_feature_id ON Artifact(feature_id)"
-    )
-    conn.execute(
-        "CREATE INDEX idx_artifact_cucu_run_id ON Artifact(cucu_run_id)"
-    )
+    conn.execute("CREATE SEQUENCE seq_cucu_run_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_feature_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_scenario_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_parent_step_def_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_step_def_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_step_run_id START 1; ")
 
-    logger.info("Database schema created successfully")
     return True

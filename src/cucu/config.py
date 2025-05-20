@@ -422,7 +422,7 @@ CONFIG.define(
     default=False,
 )
 CONFIG.define(
-    "DATABASE_FILE",
+    "DB_PATH",
     "Path to the database file",
     default=None,
 )
@@ -436,6 +436,7 @@ CONFIG.define(
     "Number of times to retry failed database operations",
     default=3,
 )
+
 
 # define re_map here instead of in utils.py to avoid circular import
 def leaf_map(data, value_func, parent=None, key=None):

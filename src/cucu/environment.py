@@ -9,13 +9,11 @@ from functools import partial
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
-from cucu.database.connection import init_database
 from cucu.database.hooks import (
     create_feature_in_before_feature,
     create_scenario_in_before_scenario,
     create_step_in_before_step,
     finalize_database_in_after_all,
-    init_database_in_before_all,
     update_feature_in_after_feature,
     update_scenario_in_after_scenario,
     update_step_in_after_step,

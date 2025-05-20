@@ -25,7 +25,6 @@ from cucu.browser.core import Browser
 from cucu.config import CONFIG
 from cucu.database.hooks import record_screenshot_artifact
 
-
 GHERKIN_TABLEFORMAT = TableFormat(
     lineabove=None,
     linebelowheader=None,

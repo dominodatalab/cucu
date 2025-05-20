@@ -13,11 +13,11 @@ from threading import Timer
 
 import click
 import coverage
+import duckdb
 import psutil
 from click import ClickException
 from mpire import WorkerPool
 from tabulate import tabulate
-import duckdb
 
 from cucu import (
     fuzzy,
@@ -334,7 +334,7 @@ def run(
 
     if record_env_vars:
         os.environ["CUCU_RECORD_ENV_VARS"] = "true"
-    
+
     if database:
         os.environ["DATABASE_ENABLED"] = "true"
 

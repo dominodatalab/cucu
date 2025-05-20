@@ -1,6 +1,7 @@
 import contextlib
 import json
 import os
+import platform
 import socket
 import sys
 from datetime import datetime
@@ -10,6 +11,7 @@ import duckdb
 from cucu import (
     behave_tweaks,
     init_global_hook_variables,
+    logger,
     register_before_retry_hook,
 )
 from cucu.browser import selenium
@@ -183,6 +185,13 @@ def behave(
 
 
 def write_run_info(results, run_locals):
+    """
+    Write run information to a JSON file and initialize the database if enabled.
+
+    Args:
+        results: Path to the results directory
+        run_locals: Dictionary of local variables from the run command
+    """
     run_details_filepath = os.path.join(results, "run_details.json")
     if os.path.exists(run_details_filepath):
         raise RuntimeError("Should not overwrite run_details.json")
@@ -202,33 +211,89 @@ def write_run_info(results, run_locals):
     with open(run_details_filepath, "w", encoding="utf8") as output:
         output.write(json.dumps(run_info, indent=2, sort_keys=True))
 
-
     if not CONFIG["DATABASE_ENABLED"]:
         return
 
-    # Initialize database if enabled
-    init_database(results_dir)
-    init_database_in_before_all(ctx)
+    # Use DB_PATH from config or set default
+    db_path = CONFIG.get("DB_PATH")
+    if not db_path:
+        db_path = os.path.join(results, "results.db")
+    CONFIG["DB_PATH"] = db_path
 
-    CONFIG["DATABASE_FILE"] = os.path.join(results, "results.db")
-    if os.path.exists(CONFIG["DATABASE_FILE"]):
-        return
+    # Prepare system information for the run record
+    system_info = {
+        "os_name": os.name,
+        "platform": platform.platform(),
+        "python_version": platform.python_version(),
+        "hostname": socket.gethostname(),
+    }
 
-    # TODO: explicitly create the cucu_run table
-    with duckdb.connect(CONFIG["DATABASE_FILE"]) as conn:
-        # (run_id INTEGER PRIMARY KEY,
-        # run_locals VARCHAR[],
-        # cmd_args STRUCT,
-        # env STRUCT,
-        # start_timestamp TIMESTAMP)
-        conn.sql("CREATE SEQUENCE seq_run_id START 1;")
-        conn.sql(f"""
-            CREATE TABLE cucu_run
-            AS SELECT
-                nextval('seq_run_id') AS run_id,
-                *
-                FROM read_json('{run_details_filepath}');
-        """)
-        # conn.sql("ALTER TABLE cucu_run ADD COLUMN run_id INTEGER PRIMARY KEY;")
-        print(conn.sql("from cucu_run;"))
-        print(conn.sql("show tables;"))
+    # Extract run configuration from the run_locals dictionary
+    browser = run_locals.get("browser", "unknown")
+    worker_count = run_locals.get("workers", 1)
+    headless = run_locals.get("headless", False)
+    command_line = " ".join(sys.argv)
+
+    try:
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
+
+        db_exists = os.path.exists(db_path)
+        logger.info(
+            f"{'Using' if db_exists else 'Creating'} database at {db_path}"
+        )
+
+        # Connect to the database
+        with duckdb.connect(db_path) as conn:
+            if db_exists:
+                logger.info("🗄️ DB: Already exists, skipping schema creation")
+            if not db_exists:
+                from cucu.database.schema import create_schema
+
+                schema_created = create_schema(conn)
+                if schema_created:
+                    logger.info("🗄️ DB: schema created successfully")
+                    logger.debug(conn.query('show tables'))
+                    logger.debug(conn.query('show CucuRun'))
+                    
+
+            # Create a new CucuRun record
+            run_id = conn.query("select nextval('seq_cucu_run_id')").fetchone()[0]
+            logger.info(f"🗄️ DB: Starting CucuRun ID: {run_id}")
+            conn.execute(
+                """
+                INSERT INTO CucuRun (
+                    cucu_run_id,
+                    command_line,
+                    env_vars,
+                    system_info,
+                    status,
+                    worker_count,
+                    start_time,
+                    browser,
+                    headless,
+                    results_dir
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+                (
+                    run_id,
+                    command_line,
+                    json.dumps(env_values),
+                    json.dumps(system_info),
+                    "running",
+                    worker_count,
+                    datetime.now(),
+                    browser,
+                    headless,
+                    results
+                )
+            )
+            logger.debug(conn.query('from CucuRun'))
+
+            CONFIG["CUCU_RUN_ID"] = run_id
+            logger.debug(f"Created CucuRun record with ID {run_id}")
+
+    except Exception as e:
+        raise(RuntimeError(
+            "Failed to initialize database. Check your configuration."
+        )) from e

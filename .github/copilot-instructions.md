@@ -18,3 +18,4 @@
 - Keep the spec file updated
 - Avoid having much in the `__init__.py` file
 - Keep commands implemented in the `cli/core.py` file
+- Avoid 1-line code comments where the code is self-explanatory
