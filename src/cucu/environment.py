@@ -310,7 +310,7 @@ def after_step(ctx, step):
 
     CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
 
-    # update_step_in_after_step(ctx, step)
+    hooks.update_step_in_after_step(ctx, step)
 
     # run after all step hooks
     for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:

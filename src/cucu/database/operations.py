@@ -51,8 +51,8 @@ def init_schema(conn: duckdb.DuckDBPyConnection) -> None:
     schema_created = create_schema(conn)
     if schema_created:
         logger.info("🗄️ DB: schema created successfully")
-        logger.info(conn.query("show tables"))
-        logger.info(conn.query("show CucuRun"))
+        logger.debug(conn.query("show tables"))
+        logger.debug(conn.query("show CucuRun"))
 
 
 def create_cucu_run(
@@ -97,7 +97,7 @@ def create_cucu_run(
         ),
     )
     logger.info(f"🗄️ DB: Starting CucuRun ID: {cucu_run_id}")
-    logger.info(
+    logger.debug(
         conn.query("FROM CucuRun WHERE cucu_run_id = ?", params=[cucu_run_id])
     )
     return cucu_run_id
@@ -149,7 +149,7 @@ def create_feature(
     feature_id = result.fetchone()[0]
 
     logger.info(f"🗄️ DB: Created Feature record with ID {feature_id}")
-    logger.info(
+    logger.debug(
         conn.query("FROM Feature WHERE feature_id = ?", params=[feature_id])
     )
 
@@ -209,7 +209,7 @@ def create_scenario(
 
     execute_with_retry(conn, query, params)
     logger.info(f"🗄️ DB: Created Scenario record with ID {scenario_id}")
-    logger.info(
+    logger.debug(
         conn.query("FROM Scenario WHERE scenario_id = ?", params=[scenario_id])
     )
     return scenario_id
@@ -227,7 +227,7 @@ def create_step_defs(conn, step_defs: List[Dict]) -> None:
 
     step_def_ids = [x["step_def_id"] for x in step_defs]
     logger.info(f"🗄️ DB: Created Step Defs {step_def_ids}")
-    logger.info(
+    logger.debug(
         conn.query(
             "FROM StepDef WHERE step_def_id in ?", params=[step_def_ids]
         )
@@ -297,7 +297,7 @@ def create_step_run(
     params = (step_run_id, step_def_id, attempt, status, start_time)
     execute_with_retry(conn, query, params)
     logger.info(f"🗄️ DB: Created StepRun record with ID {step_run_id}")
-    logger.info(
+    logger.debug(
         conn.query("FROM StepRun WHERE step_run_id = ?", params=[step_run_id])
     )
 
@@ -308,24 +308,34 @@ def update_step_run(
     conn: duckdb.DuckDBPyConnection,
     step_run_id: int,
     status: str,
-    duration_ms: Optional[int] = None,
-    error_message: Optional[str] = None,
-    stack_trace: Optional[str] = None,
+    duration: float,
+    end_time: datetime,
+    debug_log: str,
 ) -> bool:
     query = """
     UPDATE StepRun
-    SET end_time = CURRENT_TIMESTAMP,
-        status = ?,
-        duration_ms = ?,
-        error_message = ?,
-        stack_trace = ?
+    SET status = ?,
+        duration = ?,
+        end_time = ?,
+        debug_log = ?,
     WHERE step_run_id = ?
     """
 
-    params = (status, duration_ms, error_message, stack_trace, step_run_id)
+    params = (
+        status,
+        duration,
+        end_time,
+        debug_log,
+        step_run_id,
+    )
 
     execute_with_retry(conn, query, params)
-    logger.info(f"Updated StepRun record {step_run_id} with status {status}")
+    logger.info(
+        f"🗄️ DB: Updated StepRun record {step_run_id} with status {status}"
+    )
+    logger.info(
+        conn.query("FROM StepRun WHERE step_run_id = ?", params=[step_run_id])
+    )
     return True
 
 

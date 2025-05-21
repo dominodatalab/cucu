@@ -3,7 +3,7 @@ Database integration with environment hooks.
 """
 
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from cucu import logger
 from cucu.config import CONFIG
@@ -154,41 +154,18 @@ def create_step_in_before_step(ctx, step):
 
 def update_step_in_after_step(ctx, step):
     conn = get_connection()
-    duration_ms = None
-    if hasattr(step, "duration") and step.duration is not None:
-        duration_ms = int(step.duration * 1000)
-
-    status = "passed"
-    error_message = None
-    stack_trace = None
-
-    if step.status == "failed":
-        status = "failed"
-        if hasattr(step, "exception") and step.exception:
-            error_message = str(step.exception)
-            if hasattr(step.exception, "__traceback__"):
-                import traceback
-
-                stack_trace = "".join(
-                    traceback.format_tb(step.exception.__traceback__)
-                )
-    elif step.status == "skipped":
-        status = "skipped"
+    end_time = datetime.fromisoformat(step.start_timestamp) + timedelta(
+        seconds=step.duration
+    )
 
     operations.update_step_run(
         conn,
-        CONFIG["current_step_run_id"],
-        status,
-        duration_ms,
-        error_message,
-        stack_trace,
+        step.db_step_run_id,
+        step.status.name,
+        step.duration,
+        end_time,
+        step.stdout,
     )
-    logger.debug(
-        f"Updated StepRun record {CONFIG['current_step_run_id']} with status {status}"
-    )
-
-    CONFIG["current_step_id"] = None
-    CONFIG["current_step_run_id"] = None
 
 
 def finalize_database_in_after_all(ctx):
