@@ -2,14 +2,13 @@
 🗄️ DB:  for storing and retrieving test execution data.
 """
 
-
-import pandas
 import json
 import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 import duckdb
+import pandas
 
 from cucu import logger
 
@@ -98,7 +97,9 @@ def create_cucu_run(
         ),
     )
     logger.info(f"🗄️ DB: Starting CucuRun ID: {cucu_run_id}")
-    logger.info(conn.execute("from CucuRun"))
+    logger.info(
+        conn.query("FROM CucuRun WHERE cucu_run_id = ?", params=[cucu_run_id])
+    )
     return cucu_run_id
 
 
@@ -147,8 +148,11 @@ def create_feature(
     result = execute_with_retry(conn, query, params)
     feature_id = result.fetchone()[0]
 
-    logger.info(f"Created Feature record with ID {feature_id}")
-    logger.info(conn.query("from Feature"))
+    logger.info(f"🗄️ DB: Created Feature record with ID {feature_id}")
+    logger.info(
+        conn.query("FROM Feature WHERE feature_id = ?", params=[feature_id])
+    )
+
     return feature_id
 
 
@@ -204,8 +208,10 @@ def create_scenario(
     )
 
     execute_with_retry(conn, query, params)
-    logger.info(f"Created Scenario record with ID {scenario_id}")
-    logger.info(conn.query("from Scenario"))
+    logger.info(f"🗄️ DB: Created Scenario record with ID {scenario_id}")
+    logger.info(
+        conn.query("FROM Scenario WHERE scenario_id = ?", params=[scenario_id])
+    )
     return scenario_id
 
 
@@ -214,13 +220,19 @@ def create_step_defs(conn, step_defs: List[Dict]) -> None:
         step_def["step_def_id"] = conn.query(
             "select nextval('seq_step_def_id')"
         ).fetchone()[0]
-        step_def["db_created_at"] = datetime.now()
-        step_def["db_updated_at"] = datetime.now()
 
     steps_def_df = pandas.DataFrame(step_defs)
     conn.register("steps_def_df", steps_def_df)
     conn.query("INSERT INTO StepDef BY NAME SELECT * FROM steps_def_df")
-    logger.info(conn.query("from StepDef"))
+
+    step_def_ids = [x["step_def_id"] for x in step_defs]
+    logger.info(f"🗄️ DB: Created Step Defs {step_def_ids}")
+    logger.info(
+        conn.query(
+            "FROM StepDef WHERE step_def_id in ?", params=[step_def_ids]
+        )
+    )
+    return step_defs
 
 
 def update_feature(
@@ -267,93 +279,28 @@ def update_scenario(
     return True
 
 
-def create_section(
-    conn: duckdb.DuckDBPyConnection,
-    scenario_id: int,
-    text: str,
-    level: int,
-    parent_section_id: Optional[int] = None,
-    order_index: Optional[int] = None,
-) -> int:
-    query = """
-    INSERT INTO Section (
-        scenario_id, parent_section_id, text, level, timestamp, order_index
-    ) VALUES (
-        ?, ?, ?, ?, CURRENT_TIMESTAMP, ?
-    ) RETURNING section_id
-    """
-
-    params = (scenario_id, parent_section_id, text, level, order_index)
-
-    result = execute_with_retry(conn, query, params)
-    section_id = result.fetchone()[0]
-
-    logger.info(f"Created Section record with ID {section_id}")
-    return section_id
-
-
-def create_step(
-    conn: duckdb.DuckDBPyConnection,
-    scenario_id: int,
-    keyword: str,
-    text: str,
-    step_type: str,
-    section_id: Optional[int] = None,
-    parent_step_id: Optional[int] = None,
-    level: Optional[int] = None,
-    order_index: Optional[int] = None,
-    file_path: Optional[str] = None,
-    line: Optional[int] = None,
-) -> int:
-    query = """
-    INSERT INTO Step (
-        scenario_id, section_id, parent_step_id, keyword, text, level,
-        step_type, order_index, created_at, file_path, line
-    ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?
-    ) RETURNING step_id
-    """
-
-    params = (
-        scenario_id,
-        section_id,
-        parent_step_id,
-        keyword,
-        text,
-        level,
-        step_type,
-        order_index,
-        file_path,
-        line,
-    )
-
-    result = execute_with_retry(conn, query, params)
-    step_id = result.fetchone()[0]
-
-    logger.info(f"Created Step record with ID {step_id}")
-    return step_id
-
-
 def create_step_run(
     conn: duckdb.DuckDBPyConnection,
-    step_id: int,
-    attempt_number: int,
-    is_final_attempt: bool = False,
+    step_def_id: int,
+    attempt: int,
+    status: str,
+    start_time: datetime,
 ) -> int:
+    step_run_id = conn.query("select nextval('seq_step_run_id')").fetchone()[0]
     query = """
     INSERT INTO StepRun (
-        step_id, start_time, status, attempt_number, is_final_attempt
+        step_run_id, step_def_id, attempt, status, start_time
     ) VALUES (
-        ?, CURRENT_TIMESTAMP, 'running', ?, ?
-    ) RETURNING step_run_id
+        ?, ?, ?, ?, ?
+    )
     """
+    params = (step_run_id, step_def_id, attempt, status, start_time)
+    execute_with_retry(conn, query, params)
+    logger.info(f"🗄️ DB: Created StepRun record with ID {step_run_id}")
+    logger.info(
+        conn.query("FROM StepRun WHERE step_run_id = ?", params=[step_run_id])
+    )
 
-    params = (step_id, attempt_number, is_final_attempt)
-
-    result = execute_with_retry(conn, query, params)
-    step_run_id = result.fetchone()[0]
-
-    logger.info(f"Created StepRun record with ID {step_run_id}")
     return step_run_id
 
 
@@ -490,8 +437,6 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     conn.execute("""
     CREATE TABLE CucuRun (
         cucu_run_id INTEGER PRIMARY KEY,
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         command_line TEXT NOT NULL,
         env_vars TEXT NOT NULL,
         system_info TEXT NOT NULL,
@@ -502,7 +447,7 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         total_duration FLOAT,
         browser TEXT,
         headless BOOLEAN,
-        results_dir TEXT
+        results_dir TEXT,
     )
     """)
 
@@ -511,8 +456,6 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     CREATE TABLE Feature (
         feature_id INTEGER PRIMARY KEY,
         cucu_run_id INTEGER NOT NULL,
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         name TEXT NOT NULL,
         description TEXT,
         filename TEXT NOT NULL,
@@ -529,8 +472,6 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     CREATE TABLE Scenario (
         scenario_id INTEGER PRIMARY KEY,
         feature_id INTEGER NOT NULL,
-        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         name TEXT NOT NULL,
         filename TEXT NOT NULL,
         line INTEGER NOT NULL,
@@ -560,8 +501,6 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         text_data TEXT,
         filename TEXT,
         line INTEGER,
-        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (scenario_id) REFERENCES Scenario(scenario_id),
         FOREIGN KEY (parent_step_def_id) REFERENCES StepDef(step_def_id)
     )
@@ -574,8 +513,8 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         step_def_id INTEGER NOT NULL,
         attempt INTEGER NOT NULL,
         status TEXT NOT NULL DEFAULT 'unset',
-        started_at TIMESTAMP,
-        ended_at TIMESTAMP,
+        start_time TIMESTAMP,
+        end_time TIMESTAMP,
         duration FLOAT,
         debug_log TEXT,
         browser_url TEXT,
@@ -583,8 +522,6 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         browser_tab INTEGER,
         browser_total_tabs INTEGER,
         browser_log TEXT,
-        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (step_def_id) REFERENCES StepDef(step_def_id)
     )
     """)
@@ -594,8 +531,6 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     CREATE TABLE Artifact (
         artifact_id INTEGER PRIMARY KEY,
         step_run_id INTEGER NOT NULL,
-        db_created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        db_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         name TEXT NOT NULL,
         path TEXT NOT NULL,
         type TEXT NOT NULL,
