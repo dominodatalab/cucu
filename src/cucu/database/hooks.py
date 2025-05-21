@@ -2,6 +2,8 @@
 Database integration with environment hooks.
 """
 
+import hashlib
+import os
 import time
 from datetime import datetime, timedelta
 
@@ -147,6 +149,7 @@ def create_step_in_before_step(ctx, step):
         step.status.name,  # from behave
         datetime.fromisoformat(step.start_timestamp),
     )
+    step.db_step_run_artifact_order = 1  # reset for each step run
     logger.debug(
         f"🗄️ DB: created step run {step.db_step_run_id} for attempt {attempt} of {step.name}"
     )
@@ -189,50 +192,23 @@ def finalize_database_in_after_all(ctx):
     )
 
 
-def record_screenshot_artifact(ctx, filepath, step_run_id=None):
+def record_screenshot_artifact(ctx, step, filepath):
     conn = get_connection()
-    import os
-
     file_size = os.path.getsize(filepath) if os.path.exists(filepath) else 0
-
     file_hash = None
     if file_size > 0:
-        import hashlib
-
         with open(filepath, "rb") as f:
             file_hash = hashlib.md5(f.read()).hexdigest()
 
-    cucu_run_id = CONFIG["cucu_run_id"]
-    feature_id = CONFIG["current_feature_id"]
-    scenario_id = CONFIG["current_scenario_id"]
-
-    if step_run_id is None:
-        step_run_id = CONFIG["current_step_run_id"]
-
     artifact_id = operations.create_artifact(
         conn,
+        step.db_step_run_id,
+        step.db_step_run_artifact_order,
         filepath,
         "screenshot",
         file_size,
         file_hash,
-        {"type": "screenshot"},
-        cucu_run_id,
-        feature_id,
-        scenario_id,
-        step_run_id,
     )
 
-    logger.debug(
-        f"Created Artifact record with ID {artifact_id} for screenshot {filepath}"
-    )
-
-    if step_run_id:
-        step_post_id = operations.create_step_post(
-            conn,
-            step_run_id,
-            "screenshot",
-            f"Screenshot saved to {filepath}",
-        )
-        logger.debug(f"Created StepPost record with ID {step_post_id}")
-
+    step.db_step_run_artifact_order += 1
     return artifact_id

@@ -2,7 +2,6 @@
 🗄️ DB:  for storing and retrieving test execution data.
 """
 
-import json
 import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
@@ -339,29 +338,6 @@ def update_step_run(
     return True
 
 
-def create_step_post(
-    conn: duckdb.DuckDBPyConnection,
-    step_run_id: int,
-    action_type: str,
-    details: Optional[str] = None,
-) -> int:
-    query = """
-    INSERT INTO StepPost (
-        step_run_id, timestamp, action_type, details
-    ) VALUES (
-        ?, CURRENT_TIMESTAMP, ?, ?
-    ) RETURNING step_post_id
-    """
-
-    params = (step_run_id, action_type, details)
-
-    result = execute_with_retry(conn, query, params)
-    step_post_id = result.fetchone()[0]
-
-    logger.info(f"Created StepPost record with ID {step_post_id}")
-    return step_post_id
-
-
 def create_scenario_post(
     conn: duckdb.DuckDBPyConnection,
     scenario_id: int,
@@ -388,43 +364,44 @@ def create_scenario_post(
 
 def create_artifact(
     conn: duckdb.DuckDBPyConnection,
-    filename: str,
-    artifact_type: str,
-    file_size: int,
-    file_hash: Optional[str] = None,
-    metadata: Optional[Dict] = None,
-    cucu_run_id: Optional[int] = None,
-    feature_id: Optional[int] = None,
-    scenario_id: Optional[int] = None,
-    step_run_id: Optional[int] = None,
-    scenario_post_id: Optional[int] = None,
+    step_run_id: int,
+    artifact_order: int,
+    filepath: str,
+    type,
+    file_size,
+    hash,
 ) -> int:
+    artifact_id = conn.query("select nextval('seq_artifact_id')").fetchone()[0]
+
     query = """
     INSERT INTO Artifact (
-        filename, artifact_type, file_size, file_hash, created_at, metadata,
-        cucu_run_id, feature_id, scenario_id, step_run_id, scenario_post_id
+        artifact_id,
+        step_run_id,
+        artifact_order,
+        filepath,
+        type,
+        file_size,
+        hash
     ) VALUES (
-        ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?
-    ) RETURNING artifact_id
+        ?, ?, ?, ?, ?, ?, ?
+    )
     """
 
     params = (
-        filename,
-        artifact_type,
-        file_size,
-        file_hash,
-        json.dumps(metadata, sort_keys=True),
-        cucu_run_id,
-        feature_id,
-        scenario_id,
+        artifact_id,
         step_run_id,
-        scenario_post_id,
+        artifact_order,
+        filepath,
+        type,
+        file_size,
+        hash,
     )
+    execute_with_retry(conn, query, params)
 
-    result = execute_with_retry(conn, query, params)
-    artifact_id = result.fetchone()[0]
-
-    logger.info(f"Created Artifact record with ID {artifact_id}")
+    logger.info(f"🗄️ DB: Created Artifact record with ID {artifact_id}")
+    logger.info(
+        conn.query("FROM Artifact WHERE artifact_id = ?", params=[artifact_id])
+    )
     return artifact_id
 
 
@@ -541,13 +518,11 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     CREATE TABLE Artifact (
         artifact_id INTEGER PRIMARY KEY,
         step_run_id INTEGER NOT NULL,
-        name TEXT NOT NULL,
-        path TEXT NOT NULL,
+        artifact_order INTEGER NOT NULL,
+        filepath TEXT NOT NULL,
         type TEXT NOT NULL,
-        mime_type TEXT,
         file_size INTEGER,
         hash TEXT,
-        artifact_order INTEGER NOT NULL,
         FOREIGN KEY (step_run_id) REFERENCES StepRun(step_run_id)
     )
     """)
@@ -575,3 +550,4 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
     conn.execute("CREATE SEQUENCE seq_parent_step_def_id START 1; ")
     conn.execute("CREATE SEQUENCE seq_step_def_id START 1; ")
     conn.execute("CREATE SEQUENCE seq_step_run_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_artifact_id START 1; ")
