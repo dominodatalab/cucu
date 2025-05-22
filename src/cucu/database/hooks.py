@@ -4,7 +4,6 @@ Database integration with environment hooks.
 
 import hashlib
 import os
-import time
 from datetime import datetime, timedelta
 
 from cucu import logger
@@ -156,10 +155,11 @@ def update_feature_in_after_feature(ctx, feature):
 
 
 def finalize_database_in_after_all(ctx):
-    conn = get_connection()
+    # conn = get_connection()
     # operations.update_cucu_run(
     #     conn,
     #     CONFIG["cucu_run_id"],
     #     ctx.status,
     #     ctx.duration,
     # )
+    pass

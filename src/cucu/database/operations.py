@@ -123,6 +123,7 @@ def update_cucu_run(
         conn.query("FROM CucuRun WHERE cucu_run_id = ?", params=[cucu_run_id])
     )
 
+
 def create_feature(
     conn: duckdb.DuckDBPyConnection,
     cucu_run_id: int,
