@@ -2,7 +2,6 @@ from behave.model_core import Status
 from behave.reporter.base import Reporter
 
 from cucu.database import operations
-from cucu.database.connection import get_connection
 
 
 class CucuDBReporter(Reporter):
@@ -20,21 +19,17 @@ class CucuDBReporter(Reporter):
                 if scenario.status == Status.executing:
                     scenario.status = Status.failed
 
-                    conn = get_connection()
                     operations.update_scenario(
-                        conn,
                         scenario.db_scenario_id,
                         "termiated",
                         scenario.duration,
                     )
 
     def end(self):
-        conn = get_connection()
         if self.status == Status.undefined:
             self.status = Status.passed
 
         operations.update_cucu_run(
-            conn,
             self.cucu_run_id,
             self.status.name,
         )

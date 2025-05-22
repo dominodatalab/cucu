@@ -9,33 +9,22 @@ from datetime import datetime, timedelta
 from cucu import logger
 from cucu.config import CONFIG
 from cucu.database import operations, reporter
-from cucu.database.connection import get_connection
 
 
 def start_run(ctx, start_time):
     cucu_run_id = CONFIG["CUCU_RUN_ID"]
     timestamp = datetime.fromtimestamp(start_time)
-    conn = get_connection()
-    conn.execute(
-        """
-        UPDATE CucuRun
-        SET status = 'running', start_time = ?
-        WHERE cucu_run_id = ?
-    """,
-        [timestamp, cucu_run_id],
-    )
+    operations.update_cucu_run(cucu_run_id, timestamp)
 
 
 def create_feature_in_before_feature(ctx, feature):
     cucu_run_id = CONFIG["CUCU_RUN_ID"]
-    conn = get_connection()
     name = feature.name
     description = feature.description
     filepath = feature.filename
     tags = [tag for tag in feature.tags] if feature.tags else []
 
     feature.db_feature_id = ctx.db_feature_id = operations.create_feature(
-        conn,
         cucu_run_id,
         name,
         description,
@@ -45,9 +34,7 @@ def create_feature_in_before_feature(ctx, feature):
 
 
 def create_scenario_in_before_scenario(ctx, scenario):
-    conn = get_connection()
     scenario.db_scenario_id = ctx.db_scenario_id = operations.create_scenario(
-        conn,
         ctx.db_feature_id,
         scenario.name,
         scenario.filename,
@@ -72,7 +59,7 @@ def create_scenario_in_before_scenario(ctx, scenario):
         }
         for index, step in enumerate(scenario.all_steps)
     ]
-    updated_step_defs = operations.create_step_defs(conn, step_defs)
+    updated_step_defs = operations.create_step_defs(step_defs)
     for index, step in enumerate(scenario.all_steps):
         step.db_step_def_id = updated_step_defs[index]["step_def_id"]
 
@@ -80,12 +67,9 @@ def create_scenario_in_before_scenario(ctx, scenario):
 
 
 def create_step_in_before_step(ctx, step):
-    conn = get_connection()
-
     attempt = step.db_attempt = 1  # modify behave object
 
     step.db_step_run_id = operations.create_step_run(
-        conn,
         step.db_step_def_id,
         attempt,
         step.status.name,  # from behave
@@ -95,7 +79,6 @@ def create_step_in_before_step(ctx, step):
 
 
 def record_screenshot_artifact(ctx, step, filepath):
-    conn = get_connection()
     file_size = os.path.getsize(filepath) if os.path.exists(filepath) else 0
     file_hash = None
     if file_size > 0:
@@ -103,7 +86,6 @@ def record_screenshot_artifact(ctx, step, filepath):
             file_hash = hashlib.md5(f.read()).hexdigest()
 
     artifact_id = operations.create_artifact(
-        conn,
         step.db_step_run_id,
         step.db_step_run_artifact_order,
         filepath,
@@ -117,13 +99,11 @@ def record_screenshot_artifact(ctx, step, filepath):
 
 
 def update_step_in_after_step(ctx, step):
-    conn = get_connection()
     end_time = datetime.fromisoformat(step.start_timestamp) + timedelta(
         seconds=step.duration
     )
 
     operations.update_step_run(
-        conn,
         step.db_step_run_id,
         step.status.name,
         step.duration,
@@ -133,10 +113,7 @@ def update_step_in_after_step(ctx, step):
 
 
 def update_scenario_in_after_scenario(ctx, scenario):
-    conn = get_connection()
-
     operations.update_scenario(
-        conn,
         ctx.db_scenario_id,
         scenario.status.name,
         scenario.duration,
@@ -144,10 +121,7 @@ def update_scenario_in_after_scenario(ctx, scenario):
 
 
 def update_feature_in_after_feature(ctx, feature):
-    conn = get_connection()
-
     operations.update_feature(
-        conn,
         ctx.db_feature_id,
         feature.status.name,
         feature.duration,

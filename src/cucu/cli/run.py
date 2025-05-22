@@ -6,8 +6,6 @@ import socket
 import sys
 from datetime import datetime
 
-import duckdb
-
 from cucu import (
     behave_tweaks,
     init_global_hook_variables,
@@ -240,28 +238,26 @@ def write_run_info(results, run_locals):
         )
 
         # Connect to the database
-        with duckdb.connect(db_path) as conn:
-            if db_exists:
-                logger.info("🗄️ DB: Already exists, skipping schema creation")
-            if not db_exists:
-                operations.init_schema(conn)
+        if db_exists:
+            logger.info("🗄️ DB: Already exists, skipping schema creation")
+        if not db_exists:
+            operations.init_schema()
 
-            CONFIG["CUCU_RUN_ID"] = operations.create_cucu_run(
-                conn,
-                command_line,
-                json.dumps(env_values),
-                json.dumps(system_info),
-                "not_started",
-                worker_count,
-                datetime.now(),
-                browser,
-                headless,
-                results,
-            )
+        CONFIG["CUCU_RUN_ID"] = operations.create_cucu_run(
+            command_line,
+            json.dumps(env_values),
+            json.dumps(system_info),
+            "not_started",
+            worker_count,
+            datetime.now(),
+            browser,
+            headless,
+            results,
+        )
 
-            logger.debug(
-                f"🗄️ DB: Created CucuRun record with ID {CONFIG['CUCU_RUN_ID']}"
-            )
+        logger.debug(
+            f"🗄️ DB: Created CucuRun record with ID {CONFIG['CUCU_RUN_ID']}"
+        )
 
     except Exception as e:
         raise (
