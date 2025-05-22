@@ -88,6 +88,7 @@ jobs:
             set -euxo pipefail
             export COVERAGE_PROCESS_START=${CIRCLE_WORKING_DIRECTORY}/pyproject.toml
             uv run cucu run features --workers 8 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<<parameters.browser>>"
+            mv results results-<<parameters.browser>>
       - run:
           name: run unit tests
           command: uv run coverage run -m pytest --junit-xml=results/unit-tests.xml
@@ -106,6 +107,7 @@ jobs:
           paths:
             - coverage-<<parameters.browser>>.xml
             - .coverage.<<parameters.browser>>
+            - results-<<parameters.browser>>
       - run:
           name: tar up results and reporting
           command: |
@@ -139,6 +141,7 @@ jobs:
           name: Combine coverage reports
           command: |
             set -euxo pipefail
+            ls -al
             uv run coverage combine
             uv run coverage xml
             uv run coverage html
