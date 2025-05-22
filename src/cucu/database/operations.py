@@ -116,7 +116,9 @@ def update_cucu_run(
     params = (status, cucu_run_id)
 
     execute_with_retry(conn, query, params)
-    logger.info(f"Updated CucuRun record {cucu_run_id} with status {status}")
+    logger.info(
+        f"🗄️ DB: Updated CucuRun record {cucu_run_id} with status {status}"
+    )
     logger.debug(
         conn.query("FROM CucuRun WHERE cucu_run_id = ?", params=[cucu_run_id])
     )

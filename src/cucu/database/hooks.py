@@ -34,7 +34,7 @@ def create_feature_in_before_feature(ctx, feature):
     filepath = feature.filename
     tags = [tag for tag in feature.tags] if feature.tags else []
 
-    ctx.db_feature_id = operations.create_feature(
+    feature.db_feature_id = ctx.db_feature_id = operations.create_feature(
         conn,
         cucu_run_id,
         name,
@@ -46,7 +46,7 @@ def create_feature_in_before_feature(ctx, feature):
 
 def create_scenario_in_before_scenario(ctx, scenario):
     conn = get_connection()
-    ctx.db_scenario_id = operations.create_scenario(
+    scenario.db_scenario_id = ctx.db_scenario_id = operations.create_scenario(
         conn,
         ctx.db_feature_id,
         scenario.name,
@@ -154,6 +154,6 @@ def update_feature_in_after_feature(ctx, feature):
     )
 
 
-def register_db_reporter_in_after_all(ctx):
+def register_db_reporter_in_before_all(ctx):
     dbreporter = reporter.CucuDBReporter(ctx.config, CONFIG["CUCU_RUN_ID"])
     ctx.config.reporters.append(dbreporter)

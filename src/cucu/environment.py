@@ -63,13 +63,13 @@ def before_all(ctx):
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
         hook(ctx)
 
+    hooks.register_db_reporter_in_before_all(ctx)
+
 
 def after_all(ctx):
     # run the after all hooks
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
         hook(ctx)
-
-    hooks.register_db_reporter_in_after_all(ctx)
 
 
 def before_feature(ctx, feature):

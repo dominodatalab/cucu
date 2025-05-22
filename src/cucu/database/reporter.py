@@ -12,8 +12,21 @@ class CucuDBReporter(Reporter):
         self.cucu_run_id = cucu_run_id
 
     def feature(self, feature):
-        if feature.status.name not in (Status.passed, Status.skipped):
+        if feature.status not in (Status.passed, Status.skipped):
             self.status = Status.failed
+
+        if feature.status == Status.executing:
+            for scenario in feature.scenarios:
+                if scenario.status == Status.executing:
+                    scenario.status = Status.failed
+
+                    conn = get_connection()
+                    operations.update_scenario(
+                        conn,
+                        scenario.db_scenario_id,
+                        "termiated",
+                        scenario.duration,
+                    )
 
     def end(self):
         conn = get_connection()
