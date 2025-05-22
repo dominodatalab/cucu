@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 from cucu import logger
 from cucu.config import CONFIG
-from cucu.database import operations
+from cucu.database import operations, reporter
 from cucu.database.connection import get_connection
 
 
@@ -154,12 +154,6 @@ def update_feature_in_after_feature(ctx, feature):
     )
 
 
-def finalize_database_in_after_all(ctx):
-    # conn = get_connection()
-    # operations.update_cucu_run(
-    #     conn,
-    #     CONFIG["cucu_run_id"],
-    #     ctx.status,
-    #     ctx.duration,
-    # )
-    pass
+def register_db_reporter_in_after_all(ctx):
+    dbreporter = reporter.CucuDBReporter(ctx.config, CONFIG["CUCU_RUN_ID"])
+    ctx.config.reporters.append(dbreporter)

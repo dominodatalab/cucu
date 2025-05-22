@@ -106,16 +106,14 @@ def update_cucu_run(
     conn: duckdb.DuckDBPyConnection,
     cucu_run_id: int,
     status: str,
-    duration: float,
 ):
     query = """
     UPDATE CucuRun
-    SET status = ?,
-        duration = ?
+    SET status = ?
     WHERE cucu_run_id = ?
     """
 
-    params = (status, duration, cucu_run_id)
+    params = (status, cucu_run_id)
 
     execute_with_retry(conn, query, params)
     logger.info(f"Updated CucuRun record {cucu_run_id} with status {status}")

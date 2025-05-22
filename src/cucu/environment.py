@@ -69,7 +69,7 @@ def after_all(ctx):
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
         hook(ctx)
 
-    hooks.finalize_database_in_after_all(ctx)
+    hooks.register_db_reporter_in_after_all(ctx)
 
 
 def before_feature(ctx, feature):
