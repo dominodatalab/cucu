@@ -45,31 +45,6 @@ def create_feature_in_before_feature(ctx, feature):
     )
 
 
-def update_feature_in_after_feature(ctx, feature):
-    conn = get_connection()
-    total_duration_ms = None
-    if hasattr(feature, "start_time") and feature.start_time:
-        total_duration_ms = int((time.time() - feature.start_time) * 1000)
-
-    status = "passed"
-    if feature.status == "failed":
-        status = "failed"
-    elif feature.status == "skipped":
-        status = "skipped"
-
-    operations.update_feature(
-        conn,
-        CONFIG["current_feature_id"],
-        status,
-        total_duration_ms,
-    )
-    logger.debug(
-        f"Updated Feature record {CONFIG['current_feature_id']} with status {status}"
-    )
-
-    CONFIG["current_feature_id"] = None
-
-
 def create_scenario_in_before_scenario(ctx, scenario):
     conn = get_connection()
     ctx.db_scenario_id = operations.create_scenario(
@@ -105,38 +80,6 @@ def create_scenario_in_before_scenario(ctx, scenario):
     logger.debug("Updated behave step objects with step_def_id")
 
 
-def update_scenario_in_after_scenario(ctx, scenario):
-    conn = get_connection()
-    total_duration_ms = None
-    if hasattr(scenario, "start_time") and scenario.start_time:
-        total_duration_ms = int((time.time() - scenario.start_time) * 1000)
-
-    status = "passed"
-    error_message = None
-
-    if scenario.status == "failed":
-        status = "failed"
-        if hasattr(scenario, "exception") and scenario.exception:
-            error_message = str(scenario.exception)
-    elif scenario.status == "skipped":
-        status = "skipped"
-
-    operations.update_scenario(
-        conn,
-        CONFIG["current_scenario_id"],
-        status,
-        total_duration_ms,
-        error_message,
-    )
-    logger.debug(
-        f"Updated Scenario record {CONFIG['current_scenario_id']} with status {status}"
-    )
-
-    CONFIG["current_scenario_id"] = None
-    CONFIG["section_stack"] = []
-    CONFIG["current_section_id"] = None
-
-
 def create_step_in_before_step(ctx, step):
     conn = get_connection()
 
@@ -150,46 +93,6 @@ def create_step_in_before_step(ctx, step):
         datetime.fromisoformat(step.start_timestamp),
     )
     step.db_step_run_artifact_order = 1  # reset for each step run
-    logger.debug(
-        f"🗄️ DB: created step run {step.db_step_run_id} for attempt {attempt} of {step.name}"
-    )
-
-
-def update_step_in_after_step(ctx, step):
-    conn = get_connection()
-    end_time = datetime.fromisoformat(step.start_timestamp) + timedelta(
-        seconds=step.duration
-    )
-
-    operations.update_step_run(
-        conn,
-        step.db_step_run_id,
-        step.status.name,
-        step.duration,
-        end_time,
-        step.stdout,
-    )
-
-
-def finalize_database_in_after_all(ctx):
-    conn = get_connection()
-    total_duration_ms = None
-    if hasattr(ctx, "start_time") and ctx.start_time:
-        total_duration_ms = int((time.time() - ctx.start_time) * 1000)
-
-    status = "passed"
-    if hasattr(ctx, "failed") and ctx.failed:
-        status = "failed"
-
-    operations.update_cucu_run(
-        conn,
-        CONFIG["cucu_run_id"],
-        status,
-        total_duration_ms,
-    )
-    logger.info(
-        f"Updated CucuRun record {CONFIG['cucu_run_id']} with status {status}"
-    )
 
 
 def record_screenshot_artifact(ctx, step, filepath):
@@ -212,3 +115,51 @@ def record_screenshot_artifact(ctx, step, filepath):
 
     step.db_step_run_artifact_order += 1
     return artifact_id
+
+
+def update_step_in_after_step(ctx, step):
+    conn = get_connection()
+    end_time = datetime.fromisoformat(step.start_timestamp) + timedelta(
+        seconds=step.duration
+    )
+
+    operations.update_step_run(
+        conn,
+        step.db_step_run_id,
+        step.status.name,
+        step.duration,
+        end_time,
+        step.stdout,
+    )
+
+
+def update_scenario_in_after_scenario(ctx, scenario):
+    conn = get_connection()
+
+    operations.update_scenario(
+        conn,
+        ctx.db_scenario_id,
+        scenario.status.name,
+        scenario.duration,
+    )
+
+
+def update_feature_in_after_feature(ctx, feature):
+    conn = get_connection()
+
+    operations.update_feature(
+        conn,
+        ctx.db_feature_id,
+        feature.status.name,
+        feature.duration,
+    )
+
+
+def finalize_database_in_after_all(ctx):
+    conn = get_connection()
+    # operations.update_cucu_run(
+    #     conn,
+    #     CONFIG["cucu_run_id"],
+    #     ctx.status,
+    #     ctx.duration,
+    # )

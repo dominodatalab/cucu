@@ -106,22 +106,22 @@ def update_cucu_run(
     conn: duckdb.DuckDBPyConnection,
     cucu_run_id: int,
     status: str,
-    total_duration_ms: Optional[int] = None,
-) -> bool:
+    duration: float,
+):
     query = """
     UPDATE CucuRun
-    SET end_time = CURRENT_TIMESTAMP,
-        status = ?,
-        total_duration_ms = ?
+    SET status = ?,
+        duration = ?
     WHERE cucu_run_id = ?
     """
 
-    params = (status, total_duration_ms, cucu_run_id)
+    params = (status, duration, cucu_run_id)
 
     execute_with_retry(conn, query, params)
     logger.info(f"Updated CucuRun record {cucu_run_id} with status {status}")
-    return True
-
+    logger.debug(
+        conn.query("FROM CucuRun WHERE cucu_run_id = ?", params=[cucu_run_id])
+    )
 
 def create_feature(
     conn: duckdb.DuckDBPyConnection,
@@ -169,27 +169,27 @@ def create_scenario(
     scenario_id = conn.query("select nextval('seq_scenario_id')").fetchone()[0]
 
     query = """
-    INSERT INTO Scenario (
-        scenario_id,
-        feature_id,
-        name,
-        filename,
-        line,
-        tags,
-        status,
-        start_time,
-        worker_id
-    ) VALUES (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?
-    )
+        INSERT INTO Scenario (
+            scenario_id,
+            feature_id,
+            name,
+            filename,
+            line,
+            tags,
+            status,
+            start_time,
+            worker_id
+        ) VALUES (
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?
+        )
     """
 
     tags_str = ",".join(tags)
@@ -238,44 +238,49 @@ def update_feature(
     conn: duckdb.DuckDBPyConnection,
     feature_id: int,
     status: str,
-    total_duration_ms: Optional[int] = None,
-) -> bool:
+    duration: float,
+):
     query = """
-    UPDATE Feature
-    SET end_time = CURRENT_TIMESTAMP,
-        status = ?,
-        total_duration_ms = ?
-    WHERE feature_id = ?
+        UPDATE Feature
+        SET end_time = CURRENT_TIMESTAMP,
+            status = ?,
+            duration = ?
+        WHERE feature_id = ?
     """
 
-    params = (status, total_duration_ms, feature_id)
+    params = (status, duration, feature_id)
 
     execute_with_retry(conn, query, params)
-    logger.info(f"Updated Feature record {feature_id} with status {status}")
-    return True
+    logger.info(
+        f"🗄️ DB: Updated Feature record {feature_id} with status {status}"
+    )
+    logger.debug(
+        conn.query("FROM Feature WHERE feature_id = ?", params=[feature_id])
+    )
 
 
 def update_scenario(
     conn: duckdb.DuckDBPyConnection,
     scenario_id: int,
     status: str,
-    total_duration_ms: Optional[int] = None,
-    error_message: Optional[str] = None,
-) -> bool:
+    duration: float,
+):
     query = """
     UPDATE Scenario
-    SET end_time = CURRENT_TIMESTAMP,
-        status = ?,
-        total_duration_ms = ?,
-        error_message = ?
+    SET status = ?,
+        duration = ?
     WHERE scenario_id = ?
     """
 
-    params = (status, total_duration_ms, error_message, scenario_id)
+    params = [status, duration, scenario_id]
 
     execute_with_retry(conn, query, params)
-    logger.info(f"Updated Scenario record {scenario_id} with status {status}")
-    return True
+    logger.info(
+        f"🗄️ DB: Updated Scenario record {scenario_id} with status {status}"
+    )
+    logger.debug(
+        conn.query("FROM Scenario WHERE scenario_id = ?", params=[scenario_id])
+    )
 
 
 def create_step_run(
@@ -295,7 +300,7 @@ def create_step_run(
     """
     params = (step_run_id, step_def_id, attempt, status, start_time)
     execute_with_retry(conn, query, params)
-    logger.info(f"🗄️ DB: Created StepRun record with ID {step_run_id}")
+    logger.debug(f"🗄️ DB: created step run {step_run_id} for attempt {attempt}")
     logger.debug(
         conn.query("FROM StepRun WHERE step_run_id = ?", params=[step_run_id])
     )
@@ -332,7 +337,7 @@ def update_step_run(
     logger.info(
         f"🗄️ DB: Updated StepRun record {step_run_id} with status {status}"
     )
-    logger.info(
+    logger.debug(
         conn.query("FROM StepRun WHERE step_run_id = ?", params=[step_run_id])
     )
     return True
@@ -399,7 +404,7 @@ def create_artifact(
     execute_with_retry(conn, query, params)
 
     logger.info(f"🗄️ DB: Created Artifact record with ID {artifact_id}")
-    logger.info(
+    logger.debug(
         conn.query("FROM Artifact WHERE artifact_id = ?", params=[artifact_id])
     )
     return artifact_id
@@ -429,9 +434,9 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         system_info TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'not_started',
         worker_count INTEGER DEFAULT 1,
-        start_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        duration FLOAT,
+        start_time TIMESTAMP NOT NULL,
         end_time TIMESTAMP,
-        total_duration FLOAT,
         browser TEXT,
         headless BOOLEAN,
         results_dir TEXT,
@@ -448,6 +453,7 @@ def create_schema(conn: Optional[duckdb.DuckDBPyConnection] = None) -> bool:
         filename TEXT NOT NULL,
         tags TEXT,
         status TEXT NOT NULL DEFAULT 'not started',
+        duration FLOAT,
         start_time TIMESTAMP,
         end_time TIMESTAMP,
         FOREIGN KEY (cucu_run_id) REFERENCES CucuRun(cucu_run_id)

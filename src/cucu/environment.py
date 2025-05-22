@@ -69,8 +69,7 @@ def after_all(ctx):
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
         hook(ctx)
 
-    # Finalize database if enabled
-    # finalize_database_in_after_all(ctx)
+    hooks.finalize_database_in_after_all(ctx)
 
 
 def before_feature(ctx, feature):
@@ -88,8 +87,7 @@ def before_feature(ctx, feature):
 
 
 def after_feature(ctx, feature):
-    # update_feature_in_after_feature(ctx, feature)
-    pass
+    hooks.update_feature_in_after_feature(ctx, feature)
 
 
 def before_scenario(ctx, scenario):
@@ -215,7 +213,7 @@ def after_scenario(ctx, scenario):
     with open(cucu_config_filepath, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
 
-    # update_scenario_in_after_scenario(ctx, scenario)
+    hooks.update_scenario_in_after_scenario(ctx, scenario)
 
 
 def download_mht_data(ctx):
