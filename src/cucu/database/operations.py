@@ -120,7 +120,7 @@ def create_cucu_run(
             results_dir,
         ),
     )
-    logger.info(f"🗄️ DB: Starting CucuRun ID: {cucu_run_id}")
+    logger.info(f"🗄️ DB: Starting CucuRun {cucu_run_id}")
     logger.debug(
         _conn.query("FROM CucuRun WHERE cucu_run_id = ?", params=[cucu_run_id])
     )
@@ -153,9 +153,7 @@ def update_cucu_run(
     params = (status, cucu_run_id)
 
     execute_with_retry(query, params)
-    logger.info(
-        f"🗄️ DB: Updated CucuRun record {cucu_run_id} with status {status}"
-    )
+    logger.info(f"🗄️ DB: Updated CucuRun {cucu_run_id} as {status}")
     logger.debug(
         _conn.query("FROM CucuRun WHERE cucu_run_id = ?", params=[cucu_run_id])
     )
@@ -185,7 +183,7 @@ def create_feature(
     result = execute_with_retry(query, params)
     feature_id = result.fetchone()[0]
 
-    logger.info(f"🗄️ DB: Created Feature record with ID {feature_id}")
+    logger.info(f"🗄️ DB: Created Feature {feature_id}")
     logger.debug(
         _conn.query("FROM Feature WHERE feature_id = ?", params=[feature_id])
     )
@@ -247,7 +245,7 @@ def create_scenario(
     )
 
     execute_with_retry(query, params)
-    logger.info(f"🗄️ DB: Created Scenario record with ID {scenario_id}")
+    logger.info(f"🗄️ DB: Created Scenario {scenario_id}")
     logger.debug(
         _conn.query(
             "FROM Scenario WHERE scenario_id = ?", params=[scenario_id]
@@ -294,9 +292,7 @@ def update_feature(
     params = (status, duration, feature_id)
 
     execute_with_retry(query, params)
-    logger.info(
-        f"🗄️ DB: Updated Feature record {feature_id} with status {status}"
-    )
+    logger.info(f"🗄️ DB: Updated Feature {feature_id} as {status}")
     logger.debug(
         _conn.query("FROM Feature WHERE feature_id = ?", params=[feature_id])
     )
@@ -318,9 +314,7 @@ def update_scenario(
     params = [status, duration, scenario_id]
 
     execute_with_retry(query, params)
-    logger.info(
-        f"🗄️ DB: Updated Scenario record {scenario_id} with status {status}"
-    )
+    logger.info(f"🗄️ DB: Updated Scenario {scenario_id} as {status}")
     logger.debug(
         _conn.query(
             "FROM Scenario WHERE scenario_id = ?", params=[scenario_id]
@@ -381,37 +375,11 @@ def update_step_run(
     )
 
     execute_with_retry(query, params)
-    logger.info(
-        f"🗄️ DB: Updated StepRun record {step_run_id} with status {status}"
-    )
+    logger.info(f"🗄️ DB: Updated StepRun {step_run_id} as {status}")
     logger.debug(
         _conn.query("FROM StepRun WHERE step_run_id = ?", params=[step_run_id])
     )
     return True
-
-
-@locked
-def create_scenario_post(
-    scenario_id: int,
-    action_type: str,
-    details: Optional[str] = None,
-    status: Optional[str] = None,
-) -> int:
-    query = """
-    INSERT INTO ScenarioPost (
-        scenario_id, timestamp, action_type, details, status
-    ) VALUES (
-        ?, CURRENT_TIMESTAMP, ?, ?, ?
-    ) RETURNING scenario_post_id
-    """
-
-    params = (scenario_id, action_type, details, status)
-
-    result = execute_with_retry(query, params)
-    scenario_post_id = result.fetchone()[0]
-
-    logger.info(f"Created ScenarioPost record with ID {scenario_post_id}")
-    return scenario_post_id
 
 
 @locked
@@ -452,7 +420,7 @@ def create_artifact(
     )
     execute_with_retry(query, params)
 
-    logger.info(f"🗄️ DB: Created Artifact record with ID {artifact_id}")
+    logger.info(f"🗄️ DB: Created Artifact {artifact_id}")
     logger.debug(
         _conn.query(
             "FROM Artifact WHERE artifact_id = ?", params=[artifact_id]
@@ -476,7 +444,7 @@ def init_schema() -> None:
             "🗄️ DB: Schema already exists. Please delete the database file to recreate it."
         )
 
-    # 1. CucuRun table - master record for each test execution
+    # 1. CucuRun table - master for each test execution
     _conn.execute("""
     CREATE TABLE CucuRun (
         cucu_run_id INTEGER PRIMARY KEY,
@@ -613,4 +581,3 @@ def init_schema() -> None:
 
     logger.info("🗄️ DB: schema created successfully")
     logger.debug(_conn.query("show tables"))
-    logger.debug(_conn.query("show CucuRun"))
