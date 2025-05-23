@@ -417,19 +417,14 @@ CONFIG.define(
     default=True,
 )
 CONFIG.define(
-    "DB_PATH",
+    "CUCU_DB_PATH",
     "Path to the database file",
     default=None,
 )
 CONFIG.define(
-    "DATABASE_CONNECTION_TIMEOUT",
-    "Timeout in seconds for database connections",
-    default=5,
-)
-CONFIG.define(
-    "DATABASE_RETRY_COUNT",
-    "Number of times to retry failed database operations",
-    default=3,
+    "CUCU_RUN_ID",
+    "Run ID for the current cucu run",
+    default="",
 )
 
 

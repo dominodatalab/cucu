@@ -5,62 +5,48 @@
 import functools
 import time
 from datetime import datetime
-from pathlib import Path
+
+# from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import duckdb
 import pandas
-import portalocker
 
+# import portalocker
 from cucu import logger
 from cucu.config import CONFIG
-
-_path = None
-_conn = None
-_lock = None
-
-
-def _init(db_path):
-    global _path, _conn, _lock
-    _path = db_path
-    _lock = portalocker.Lock(Path(db_path).parent / "db_lock")
-    _conn = duckdb.connect(db_path)
-
-
-def get_lock():
-    if _lock is None:
-        _init(CONFIG["DB_PATH"])
-
-    return _lock
 
 
 def _to_timestamp(time_float: float) -> datetime:
     return datetime.fromtimestamp(time_float)
 
 
-def locked(func):
+def locked_conn(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        with get_lock():
-            return func(*args, **kwargs)
+        db_path = CONFIG["CUCU_DB_PATH"]
+        # lock = portalocker.Lock(Path(db_path).parent / "db_lock")
+        with duckdb.connect(db_path) as conn:
+            return func(*args, **kwargs, conn=conn)
 
     return wrapper
 
 
-@locked
+@locked_conn
 def execute_with_retry(
     query: str,
     params: Optional[Tuple] = None,
     retry_count: int = 3,
+    conn: Optional[duckdb.DuckDBPyConnection] = None,
 ) -> Any:
     last_error = None
 
     for attempt in range(retry_count):
         try:
             if params:
-                return _conn.execute(query, params)
+                return conn.execute(query, params)
             else:
-                return _conn.execute(query)
+                return conn.execute(query)
         except duckdb.ParserException:
             raise
         except Exception as e:
@@ -77,7 +63,7 @@ def execute_with_retry(
                 raise last_error
 
 
-@locked
+# @locked_conn
 def create_cucu_run(
     command_line,
     env_vars,
@@ -88,11 +74,11 @@ def create_cucu_run(
     browser,
     headless,
     results_dir,
+    conn: Optional[duckdb.DuckDBPyConnection] = None,
 ) -> int:
-    cucu_run_id = _conn.query("select nextval('seq_cucu_run_id')").fetchone()[
-        0
-    ]
-    _conn.execute(
+    conn = duckdb.connect(CONFIG["CUCU_DB_PATH"])
+    cucu_run_id = conn.query("select nextval('seq_cucu_run_id')").fetchone()[0]
+    conn.execute(
         """
             INSERT INTO CucuRun (
                 cucu_run_id,
@@ -122,15 +108,16 @@ def create_cucu_run(
     )
     logger.info(f"🗄️ DB: Starting CucuRun {cucu_run_id}")
     logger.debug(
-        _conn.query("FROM CucuRun WHERE cucu_run_id = ?", params=[cucu_run_id])
+        conn.query("FROM CucuRun WHERE cucu_run_id = ?", params=[cucu_run_id])
     )
     return cucu_run_id
 
 
-@locked
+@locked_conn
 def update_cucu_run(
     cucu_run_id: int,
     status: str,
+    conn: Optional[duckdb.DuckDBPyConnection] = None,
 ):
     query = """
     UPDATE CucuRun
@@ -143,19 +130,20 @@ def update_cucu_run(
     execute_with_retry(query, params)
     logger.info(f"🗄️ DB: Updated CucuRun {cucu_run_id} as {status}")
     logger.debug(
-        _conn.query("FROM CucuRun WHERE cucu_run_id = ?", params=[cucu_run_id])
+        conn.query("FROM CucuRun WHERE cucu_run_id = ?", params=[cucu_run_id])
     )
 
 
-@locked
+@locked_conn
 def create_feature(
     cucu_run_id: int,
     name: str,
     description: Optional[str],
     filename: str,
     tags: Optional[List[str]] = None,
+    conn: Optional[duckdb.DuckDBPyConnection] = None,
 ) -> int:
-    feature_id = _conn.query("select nextval('seq_feature_id')").fetchone()[0]
+    feature_id = conn.query("select nextval('seq_feature_id')").fetchone()[0]
 
     query = """
     INSERT INTO Feature (
@@ -172,13 +160,13 @@ def create_feature(
 
     logger.info(f"🗄️ DB: Created Feature {feature_id}")
     logger.debug(
-        _conn.query("FROM Feature WHERE feature_id = ?", params=[feature_id])
+        conn.query("FROM Feature WHERE feature_id = ?", params=[feature_id])
     )
 
     return feature_id
 
 
-@locked
+@locked_conn
 def create_scenario(
     feature_id,
     name,
@@ -188,10 +176,9 @@ def create_scenario(
     status,
     start_time,
     worker_id=None,
+    conn: Optional[duckdb.DuckDBPyConnection] = None,
 ) -> int:
-    scenario_id = _conn.query("select nextval('seq_scenario_id')").fetchone()[
-        0
-    ]
+    scenario_id = conn.query("select nextval('seq_scenario_id')").fetchone()[0]
 
     query = """
         INSERT INTO Scenario (
@@ -234,39 +221,41 @@ def create_scenario(
     execute_with_retry(query, params)
     logger.info(f"🗄️ DB: Created Scenario {scenario_id}")
     logger.debug(
-        _conn.query(
-            "FROM Scenario WHERE scenario_id = ?", params=[scenario_id]
-        )
+        conn.query("FROM Scenario WHERE scenario_id = ?", params=[scenario_id])
     )
     return scenario_id
 
 
-@locked
-def create_step_defs(step_defs: List[Dict]) -> None:
+@locked_conn
+def create_step_defs(
+    step_defs: List[Dict],
+    conn: Optional[duckdb.DuckDBPyConnection] = None,
+) -> None:
     for step_def in step_defs:
-        step_def["step_def_id"] = _conn.query(
+        step_def["step_def_id"] = conn.query(
             "select nextval('seq_step_def_id')"
         ).fetchone()[0]
 
     steps_def_df = pandas.DataFrame(step_defs)
-    _conn.register("steps_def_df", steps_def_df)
-    _conn.query("INSERT INTO StepDef BY NAME SELECT * FROM steps_def_df")
+    conn.register("steps_def_df", steps_def_df)
+    conn.query("INSERT INTO StepDef BY NAME SELECT * FROM steps_def_df")
 
     step_def_ids = [x["step_def_id"] for x in step_defs]
     logger.info(f"🗄️ DB: Created Step Defs {step_def_ids}")
     logger.debug(
-        _conn.query(
+        conn.query(
             "FROM StepDef WHERE step_def_id in ?", params=[step_def_ids]
         )
     )
     return step_defs
 
 
-@locked
+@locked_conn
 def update_feature(
     feature_id: int,
     status: str,
     duration: float,
+    conn: Optional[duckdb.DuckDBPyConnection] = None,
 ):
     query = """
         UPDATE Feature
@@ -281,15 +270,16 @@ def update_feature(
     execute_with_retry(query, params)
     logger.info(f"🗄️ DB: Updated Feature {feature_id} as {status}")
     logger.debug(
-        _conn.query("FROM Feature WHERE feature_id = ?", params=[feature_id])
+        conn.query("FROM Feature WHERE feature_id = ?", params=[feature_id])
     )
 
 
-@locked
+@locked_conn
 def update_scenario(
     scenario_id: int,
     status: str,
     duration: float,
+    conn: Optional[duckdb.DuckDBPyConnection] = None,
 ):
     query = """
     UPDATE Scenario
@@ -303,22 +293,19 @@ def update_scenario(
     execute_with_retry(query, params)
     logger.info(f"🗄️ DB: Updated Scenario {scenario_id} as {status}")
     logger.debug(
-        _conn.query(
-            "FROM Scenario WHERE scenario_id = ?", params=[scenario_id]
-        )
+        conn.query("FROM Scenario WHERE scenario_id = ?", params=[scenario_id])
     )
 
 
-@locked
+@locked_conn
 def create_step_run(
     step_def_id: int,
     attempt: int,
     status: str,
     start_time: datetime,
+    conn: Optional[duckdb.DuckDBPyConnection] = None,
 ) -> int:
-    step_run_id = _conn.query("select nextval('seq_step_run_id')").fetchone()[
-        0
-    ]
+    step_run_id = conn.query("select nextval('seq_step_run_id')").fetchone()[0]
     query = """
     INSERT INTO StepRun (
         step_run_id, step_def_id, attempt, status, start_time
@@ -330,19 +317,20 @@ def create_step_run(
     execute_with_retry(query, params)
     logger.debug(f"🗄️ DB: created step run {step_run_id} for attempt {attempt}")
     logger.debug(
-        _conn.query("FROM StepRun WHERE step_run_id = ?", params=[step_run_id])
+        conn.query("FROM StepRun WHERE step_run_id = ?", params=[step_run_id])
     )
 
     return step_run_id
 
 
-@locked
+@locked_conn
 def update_step_run(
     step_run_id: int,
     status: str,
     duration: float,
     end_time: datetime,
     debug_log: str,
+    conn: Optional[duckdb.DuckDBPyConnection] = None,
 ) -> bool:
     query = """
     UPDATE StepRun
@@ -364,12 +352,12 @@ def update_step_run(
     execute_with_retry(query, params)
     logger.info(f"🗄️ DB: Updated StepRun {step_run_id} as {status}")
     logger.debug(
-        _conn.query("FROM StepRun WHERE step_run_id = ?", params=[step_run_id])
+        conn.query("FROM StepRun WHERE step_run_id = ?", params=[step_run_id])
     )
     return True
 
 
-@locked
+@locked_conn
 def create_artifact(
     step_run_id: int,
     artifact_order: int,
@@ -377,10 +365,9 @@ def create_artifact(
     type,
     file_size,
     hash,
+    conn: Optional[duckdb.DuckDBPyConnection] = None,
 ) -> int:
-    artifact_id = _conn.query("select nextval('seq_artifact_id')").fetchone()[
-        0
-    ]
+    artifact_id = conn.query("select nextval('seq_artifact_id')").fetchone()[0]
 
     query = """
     INSERT INTO Artifact (
@@ -409,16 +396,17 @@ def create_artifact(
 
     logger.info(f"🗄️ DB: Created Artifact {artifact_id}")
     logger.debug(
-        _conn.query(
-            "FROM Artifact WHERE artifact_id = ?", params=[artifact_id]
-        )
+        conn.query("FROM Artifact WHERE artifact_id = ?", params=[artifact_id])
     )
     return artifact_id
 
 
-@locked
-def init_schema() -> None:
-    tables_exist = _conn.execute(
+# @locked_conn
+def init_schema(
+    conn: Optional[duckdb.DuckDBPyConnection] = None,
+) -> None:
+    conn = duckdb.connect(CONFIG["CUCU_DB_PATH"])
+    tables_exist = conn.execute(
         """
         SELECT count(*)
         FROM information_schema.tables
@@ -432,7 +420,7 @@ def init_schema() -> None:
         )
 
     # 1. CucuRun table - master for each test execution
-    _conn.execute("""
+    conn.execute("""
     CREATE TABLE CucuRun (
         cucu_run_id INTEGER PRIMARY KEY,
         command_line TEXT NOT NULL,
@@ -450,7 +438,7 @@ def init_schema() -> None:
     """)
 
     # 2. Feature table - maps to a feature file
-    _conn.execute("""
+    conn.execute("""
     CREATE TABLE Feature (
         feature_id INTEGER PRIMARY KEY,
         cucu_run_id INTEGER NOT NULL,
@@ -467,7 +455,7 @@ def init_schema() -> None:
     """)
 
     # 3. Scenario table - maps to a scenario within a feature file
-    _conn.execute("""
+    conn.execute("""
     CREATE TABLE Scenario (
         scenario_id INTEGER PRIMARY KEY,
         feature_id INTEGER NOT NULL,
@@ -486,7 +474,7 @@ def init_schema() -> None:
     """)
 
     # 4. StepDef table - maps to steps or sections within a scenario
-    _conn.execute("""
+    conn.execute("""
     CREATE TABLE StepDef (
         step_def_id INTEGER PRIMARY KEY,
         scenario_id INTEGER NOT NULL,
@@ -506,7 +494,7 @@ def init_schema() -> None:
     """)
 
     # 5. StepRun table - records each execution attempt of a step
-    _conn.execute("""
+    conn.execute("""
     CREATE TABLE StepRun (
         step_run_id INTEGER PRIMARY KEY,
         step_def_id INTEGER NOT NULL,
@@ -526,7 +514,7 @@ def init_schema() -> None:
     """)
 
     # 6. Artifact table - records file-based outputs
-    _conn.execute("""
+    conn.execute("""
     CREATE TABLE Artifact (
         artifact_id INTEGER PRIMARY KEY,
         step_run_id INTEGER NOT NULL,
@@ -540,31 +528,29 @@ def init_schema() -> None:
     """)
 
     # Create indexes for performance optimization
-    _conn.execute(
+    conn.execute(
         "CREATE INDEX idx_feature_cucu_run_id ON Feature(cucu_run_id)"
     )
-    _conn.execute(
+    conn.execute(
         "CREATE INDEX idx_scenario_feature_id ON Scenario(feature_id)"
     )
-    _conn.execute(
+    conn.execute(
         "CREATE INDEX idx_stepdef_scenario_id ON StepDef(scenario_id)"
     )
-    _conn.execute(
+    conn.execute(
         "CREATE INDEX idx_stepdef_parent_id ON StepDef(parent_step_def_id)"
     )
-    _conn.execute(
-        "CREATE INDEX idx_steprun_stepdef_id ON StepRun(step_def_id)"
-    )
-    _conn.execute(
+    conn.execute("CREATE INDEX idx_steprun_stepdef_id ON StepRun(step_def_id)")
+    conn.execute(
         "CREATE INDEX idx_artifact_step_run_id ON Artifact(step_run_id)"
     )
-    _conn.execute("CREATE SEQUENCE seq_cucu_run_id START 1; ")
-    _conn.execute("CREATE SEQUENCE seq_feature_id START 1; ")
-    _conn.execute("CREATE SEQUENCE seq_scenario_id START 1; ")
-    _conn.execute("CREATE SEQUENCE seq_parent_step_def_id START 1; ")
-    _conn.execute("CREATE SEQUENCE seq_step_def_id START 1; ")
-    _conn.execute("CREATE SEQUENCE seq_step_run_id START 1; ")
-    _conn.execute("CREATE SEQUENCE seq_artifact_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_cucu_run_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_feature_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_scenario_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_parent_step_def_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_step_def_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_step_run_id START 1; ")
+    conn.execute("CREATE SEQUENCE seq_artifact_id START 1; ")
 
     logger.info("🗄️ DB: schema created successfully")
-    logger.debug(_conn.query("show tables"))
+    logger.debug(conn.query("show tables"))

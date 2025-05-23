@@ -211,10 +211,10 @@ def write_run_info(results, run_locals):
         output.write(json.dumps(run_info, indent=2, sort_keys=True))
 
     # Use DB_PATH from config or set default
-    db_path = CONFIG["DB_PATH"]
+    db_path = CONFIG["CUCU_DB_PATH"]
     if not db_path:
         db_path = os.path.join(results, "results.db")
-    CONFIG["DB_PATH"] = db_path
+        os.environ["CUCU_DB_PATH"] = CONFIG["CUCU_DB_PATH"] = db_path
 
     # Prepare system information for the run record
     system_info = {
@@ -254,6 +254,7 @@ def write_run_info(results, run_locals):
             headless,
             results,
         )
+        os.environ["CUCU_RUN_ID"] = str(CONFIG["CUCU_RUN_ID"])
 
         logger.debug(
             f"🗄️ DB: Created CucuRun record with ID {CONFIG['CUCU_RUN_ID']}"
