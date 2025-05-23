@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.3.0
+- Change - add step param to take_screenshot
+- Add - database functionality to store and query test execution data
+- Add - support for hierarchical section steps in the database
+- Add - cucu db command for querying test results
+- Add - track screenshot and other artifacts in the database
+
 ## 1.2.0
 - Add - levels 2-4 to section step
 - Change - rename comment step to section step

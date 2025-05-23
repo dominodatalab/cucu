@@ -9,6 +9,7 @@ from functools import partial
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
+from cucu.database import hooks
 from cucu.page_checks import init_page_checks
 from cucu.utils import ellipsize_filename, take_screenshot
 
@@ -46,8 +47,23 @@ def before_all(ctx):
     CONFIG["__CUCU_CTX"] = ctx
     CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
+
+    # Record start time for duration calculations
+    ctx.start_time = time.time()
+
+    try:
+        start_time = ctx._root["start_time"]
+        hooks.start_run(ctx, start_time)
+    except Exception as e:
+        raise RuntimeError(
+            f"🗄️ Failed to start run {CONFIG['DB_PATH']} {e}"
+        ) from e
+
+    # Run registered hooks
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
         hook(ctx)
+
+    hooks.register_db_reporter_in_before_all(ctx)
 
 
 def after_all(ctx):
@@ -64,9 +80,14 @@ def before_feature(ctx, feature):
         )
         CONFIG["FEATURE_RESULTS_DIR"] = ctx.feature_dir
 
+    # Store feature start time for duration calculation
+    feature.start_time = time.time()
+
+    hooks.create_feature_in_before_feature(ctx, feature)
+
 
 def after_feature(ctx, feature):
-    pass
+    hooks.update_feature_in_after_feature(ctx, feature)
 
 
 def before_scenario(ctx, scenario):
@@ -125,6 +146,11 @@ def before_scenario(ctx, scenario):
     CONFIG["SCENARIO_RUN_ID"] = hashlib.sha256(
         str(time.perf_counter()).encode("utf-8")
     ).hexdigest()[:7]
+
+    # Store scenario start time for duration calculation
+    scenario.start_time = time.time()
+
+    hooks.create_scenario_in_before_scenario(ctx, scenario)
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
@@ -187,6 +213,8 @@ def after_scenario(ctx, scenario):
     with open(cucu_config_filepath, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
 
+    hooks.update_scenario_in_after_scenario(ctx, scenario)
+
 
 def download_mht_data(ctx):
     if not ctx.browsers:
@@ -240,6 +268,8 @@ def before_step(ctx, step):
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
+    hooks.create_step_in_before_step(ctx, step)
+
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
         hook(ctx)
@@ -262,7 +292,7 @@ def after_step(ctx, step):
     # and this step has no substeps as in the reporting the substeps that
     # may actually do something on the browser take their own screenshots
     if ctx.browser is not None and ctx.current_step.has_substeps is False:
-        take_screenshot(ctx, step.name, label=f"After {step.name}")
+        take_screenshot(ctx, step, step.name, label=f"After {step.name}")
 
     # if the step has substeps from using `run_steps` then we already moved
     # the step index in the run_steps method and shouldn't do it here
@@ -277,6 +307,8 @@ def after_step(ctx, step):
         pdb.post_mortem(step.exc_traceback)
 
     CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
+
+    hooks.update_step_in_after_step(ctx, step)
 
     # run after all step hooks
     for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
