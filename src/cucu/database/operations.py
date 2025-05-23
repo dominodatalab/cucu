@@ -128,18 +128,6 @@ def create_cucu_run(
 
 
 @locked
-def start_cucu_run(timestamp, cucu_run_id) -> None:
-    _conn.execute(
-        """
-        UPDATE CucuRun
-        SET status = 'running', start_time = ?
-        WHERE cucu_run_id = ?
-    """,
-        [timestamp, cucu_run_id],
-    )
-
-
-@locked
 def update_cucu_run(
     cucu_run_id: int,
     status: str,
@@ -180,8 +168,7 @@ def create_feature(
     tags_str = ",".join(tags)
     params = (cucu_run_id, feature_id, name, description, filename, tags_str)
 
-    result = execute_with_retry(query, params)
-    feature_id = result.fetchone()[0]
+    execute_with_retry(query, params)
 
     logger.info(f"🗄️ DB: Created Feature {feature_id}")
     logger.debug(

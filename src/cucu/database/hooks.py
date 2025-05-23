@@ -122,7 +122,7 @@ def update_scenario_in_after_scenario(ctx, scenario):
 
 def update_feature_in_after_feature(ctx, feature):
     operations.update_feature(
-        ctx.db_feature_id,
+        feature.db_feature_id,
         feature.status.name,
         feature.duration,
     )
