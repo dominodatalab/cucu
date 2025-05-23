@@ -333,7 +333,7 @@ def run(
         write_run_info(results, locals())
 
     try:
-        if workers is None or workers == 1:
+        if workers is None:  # or workers == 1:
             if runtime_timeout:
                 logger.debug("setting up runtime timeout timer")
 
