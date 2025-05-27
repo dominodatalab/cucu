@@ -23,6 +23,7 @@ from tenacity import retry as retrying
 from cucu import logger
 from cucu.browser.core import Browser
 from cucu.config import CONFIG
+from cucu.database import hooks
 
 GHERKIN_TABLEFORMAT = TableFormat(
     lineabove=None,
@@ -214,13 +215,14 @@ def take_saw_element_screenshot(ctx, thing, name, index, element=None):
 
     take_screenshot(
         ctx,
+        ctx.current_step,
         ctx.current_step.name,
         label=f'{observed} {prefix}{thing} "{name}"',
         element=element,
     )
 
 
-def take_screenshot(ctx, step_name, label="", element=None):
+def take_screenshot(ctx, step, step_name, label="", element=None):
     screenshot_dir = os.path.join(
         ctx.scenario_dir, get_step_image_dir(ctx.step_index, step_name)
     )
@@ -269,5 +271,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
 
     if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
+
+    hooks.record_screenshot_artifact(ctx, step, filepath)
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] += 1
