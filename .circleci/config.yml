@@ -31,14 +31,14 @@ workflows:
 jobs:
   build:
     docker:
-      - image: cimg/python:3.12@sha256:12ecf4f4bc4d76e6c76e631124196490ddd7f9f5887aacd6080f8a9facbca8ab
+      - image: cimg/python:3.13@sha256:a00bfa949271c5519c63d623c6c5ab61fa0868f88ffa3a66b0983bf7df376f3d
     resource_class: medium
     steps:
       - checkout
       - inline-orb-uv/setup-uv
       - run:
-          name: install cucu with Python 3.12
-          command: uv sync -p 3.12 --dev
+          name: install cucu with Python 3.13
+          command: uv sync -p 3.13 --dev
       - run:
           name: run pre-commit validations
           command: uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
@@ -55,10 +55,7 @@ jobs:
         type: string
         default: "chrome"
     docker:
-      - image: cimg/python:3.12@sha256:12ecf4f4bc4d76e6c76e631124196490ddd7f9f5887aacd6080f8a9facbca8ab
-        environment:
-          # Starting with python 3.12 coverage could be 2x slower so use experimental COVERAGE_CORE=sysmon
-          COVERAGE_CORE: sysmon
+      - image: cimg/python:3.13@sha256:a00bfa949271c5519c63d623c6c5ab61fa0868f88ffa3a66b0983bf7df376f3d
       - image: selenium/standalone-<<parameters.browser>>:126.0
         environment:
           SE_ENABLE_TRACING: false
@@ -87,9 +84,10 @@ jobs:
           command: curl --retry 60 --retry-delay 5 --retry-connrefused http://localhost:4444
       - run:
           name: run_functional_tests
-          command: uv run cucu run features --workers 8 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<<parameters.browser>>"
-          environment:
-            COVERAGE_PROCESS_START: pyproject.toml  # set to config file
+          command: |
+            set -euxo pipefail
+            export COVERAGE_PROCESS_START=${CIRCLE_WORKING_DIRECTORY}/pyproject.toml
+            uv run cucu run features --workers 8 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<<parameters.browser>>"
       - run:
           name: run unit tests
           command: uv run coverage run -m pytest --junit-xml=results/unit-tests.xml
@@ -130,7 +128,7 @@ jobs:
 
   coverage:
     docker:
-      - image: cimg/python:3.12@sha256:12ecf4f4bc4d76e6c76e631124196490ddd7f9f5887aacd6080f8a9facbca8ab
+      - image: cimg/python:3.13@sha256:a00bfa949271c5519c63d623c6c5ab61fa0868f88ffa3a66b0983bf7df376f3d
     resource_class: small
     steps:
       - checkout

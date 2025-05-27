@@ -3,9 +3,13 @@
 #      writing while not interfering with the way behave does its own log
 #      capturing
 #
+import os
 import sys
 import warnings
 from functools import wraps
+
+# set env var BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON=yes before importing behave
+os.environ["BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON"] = "yes"
 
 import behave
 from behave.__main__ import main as original_behave_main
@@ -62,7 +66,9 @@ def init_step_hooks(stdout, stderr):
                     # resolve variables in the table values
                     if ctx.table is not None:
                         ctx.table.original = Table(
-                            ctx.table.headings, rows=ctx.table.rows
+                            ctx.table.headings,
+                            rows=ctx.table.rows,
+                            line=ctx.table.line,
                         )
                         new_rows = []
                         for row in ctx.table.rows:
@@ -119,7 +125,9 @@ def init_step_hooks(stdout, stderr):
 
             return wrapper
 
-        behave.__dict__[decorator_name] = new_decorator
+        behave.__dict__[decorator_name.title()] = behave.__dict__[
+            decorator_name
+        ] = new_decorator
 
 
 _stdout = sys.stdout

@@ -8,6 +8,7 @@ import sys
 import time
 import xml.etree.ElementTree as ET
 from importlib.metadata import version
+from pathlib import Path
 from threading import Timer
 
 import click
@@ -90,10 +91,10 @@ def main():
 )
 @click.option("-n", "--name", help="used to specify the exact scenario to run")
 @click.option(
-    "-i",
-    "--ipdb-on-failure/--no-ipdb-on-failure",
+    "-d",
+    "--debug-on-failure/--no-debug-on-failure",
     default=False,
-    help="on failure drop into the ipdb debug shell",
+    help="on failure drop into the debug shell",
 )
 @click.option(
     "-j",
@@ -213,7 +214,7 @@ def run(
     fail_fast,
     headless,
     name,
-    ipdb_on_failure,
+    debug_on_failure,
     junit,
     junit_with_stacktrace,
     logging_level,
@@ -323,7 +324,7 @@ def run(
                 fail_fast,
                 headless,
                 name,
-                ipdb_on_failure,
+                debug_on_failure,
                 junit,
                 results,
                 secrets,
@@ -415,7 +416,7 @@ def run(
                             fail_fast,
                             headless,
                             name,
-                            ipdb_on_failure,
+                            debug_on_failure,
                             junit,
                             results,
                             secrets,
@@ -468,7 +469,9 @@ def run(
                     time.sleep(1)
 
                 if timeout_reached:
-                    logger.warning("Timeout reached, send kill signal to workers")
+                    logger.warning(
+                        "Timeout reached, send kill signal to workers"
+                    )
                     kill_workers()
 
                 task_failed.update(async_results)
@@ -763,6 +766,39 @@ def vars(filepath):
     )
 
     print(tabulate(variables, tablefmt="fancy_grid"))
+
+
+@main.command()
+@click.argument("filepath", default="")
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+def init(filepath, logging_level):
+    """
+    initialize cucu in the current directory
+
+    Copies the `init_data` directory to the current directory
+    """
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
+
+    init_data_dir = Path(__file__).parent.parent / "init_data"
+
+    logger.debug(f"cucu init: copy example directory from {init_data_dir=}")
+    repo_dir = filepath if filepath.strip() else os.path.join(os.getcwd())
+
+    features_dir = os.path.join(repo_dir, "features")
+    if os.path.exists(features_dir):
+        answer = input("Overwrite existing files? [y/N]:")
+        if answer.lower() != "y":
+            print("Aborted!")
+            return
+
+    shutil.copytree(init_data_dir, repo_dir, dirs_exist_ok=True)
+    print("You can now start writing your tests")
 
 
 @main.command()
