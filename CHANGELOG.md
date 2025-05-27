@@ -5,10 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-<<<<<<< HEAD
-## 1.0.14
-- Add - logging for tab index and url while switching tabs
-=======
 ## 1.2.0
 - Add - levels 2-4 to section step
 - Change - rename comment step to section step
@@ -27,7 +23,6 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - use stdlib pdb instead of unsupported ipdb
 - Change - rename CUCU_IPDB_ON_FAILURE => to CUCU_DEBUG_ON_FAILURE
 - Chore - bump selenium lib to 4.31.0
->>>>>>> main
 
 ## 1.0.13
 - Change - rename logger.warn to logger.warning
