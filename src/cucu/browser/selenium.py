@@ -63,6 +63,8 @@ class Selenium(Browser):
         ignore_ssl_certificate_errors = config.CONFIG[
             "CUCU_IGNORE_SSL_CERTIFICATE_ERRORS"
         ]
+        proxy_host = config.CONFIG.get("CUCU_PROXY_HOST")
+        proxy_port = config.CONFIG.get("CUCU_PROXY_PORT")
 
         if browser.startswith("chrome"):
             options = ChromeOptions()
@@ -73,6 +75,12 @@ class Selenium(Browser):
 
             options.add_argument(f"--window-size={width},{height}")
             options.add_argument("--disable-dev-shm-usage")
+
+            if proxy_host and proxy_port:
+                print(f"Using proxy: {proxy_host}:{proxy_port}")
+                options.add_argument(f"--proxy-server={proxy_host}:{proxy_port}")
+            else:
+                print("Not using a proxy")
 
             if headless:
                 options.add_argument("--headless")
