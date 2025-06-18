@@ -416,6 +416,11 @@ CONFIG.define(
     "when set to 'True' skips adding a border to highlight found element in screenshots",
     default=True,
 )
+CONFIG.define(
+    "CUCU_LOG_TAB_INFO_TO_CONSOLE",
+    "When set to 'True', tab information (number of tabs, title, and URL) is logged to the browser's console logs",
+    default=False,
+)
 
 
 # define re_map here instead of in utils.py to avoid circular import
