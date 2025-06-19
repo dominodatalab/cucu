@@ -272,7 +272,7 @@ def after_step(ctx, step):
                 f"url: {tab_info['current_url']}"
             )
             logger.debug(log_message)
-            
+
     # if the step has substeps from using `run_steps` then we already moved
     # the step index in the run_steps method and shouldn't do it here
     if not step.has_substeps:
