@@ -283,4 +283,3 @@ def get_tab_information(ctx):
         "current_title": driver.title,
         "current_url": driver.current_url,
     }
-
