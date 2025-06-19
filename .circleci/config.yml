@@ -31,7 +31,7 @@ workflows:
 jobs:
   build:
     docker:
-      - image: cimg/python:3.13@sha256:a00bfa949271c5519c63d623c6c5ab61fa0868f88ffa3a66b0983bf7df376f3d
+      - image: cimg/python:3.13@sha256:c37425b967401ee5193f0a367374f220c784f092dec8dfaa96ff2fa30dad79c5
     resource_class: medium
     steps:
       - checkout
@@ -55,7 +55,7 @@ jobs:
         type: string
         default: "chrome"
     docker:
-      - image: cimg/python:3.13@sha256:a00bfa949271c5519c63d623c6c5ab61fa0868f88ffa3a66b0983bf7df376f3d
+      - image: cimg/python:3.13@sha256:c37425b967401ee5193f0a367374f220c784f092dec8dfaa96ff2fa30dad79c5
       - image: selenium/standalone-<<parameters.browser>>:126.0
         environment:
           SE_ENABLE_TRACING: false
@@ -128,7 +128,7 @@ jobs:
 
   coverage:
     docker:
-      - image: cimg/python:3.13@sha256:a00bfa949271c5519c63d623c6c5ab61fa0868f88ffa3a66b0983bf7df376f3d
+      - image: cimg/python:3.13@sha256:c37425b967401ee5193f0a367374f220c784f092dec8dfaa96ff2fa30dad79c5
     resource_class: small
     steps:
       - checkout
