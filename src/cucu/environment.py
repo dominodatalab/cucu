@@ -267,7 +267,7 @@ def after_step(ctx, step):
         if CONFIG["CUCU_LOG_TAB_INFO_TO_CONSOLE"]:
             tab_info = get_tab_information(ctx)
             log_message = (
-                f"Tab Info -> total open tabs: {tab_info['window_count']}, "
+                f"Tab Info -> total tabs: {tab_info['window_count']}, "
                 f"current tab: {tab_info['current_index'] + 1}, "
                 f"title: {tab_info['current_title']}, "
                 f"url: {tab_info['current_url']}"

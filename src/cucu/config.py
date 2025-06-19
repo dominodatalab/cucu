@@ -418,7 +418,7 @@ CONFIG.define(
 )
 CONFIG.define(
     "CUCU_LOG_TAB_INFO_TO_CONSOLE",
-    "When set to 'True', tab information (number of tabs, title, and URL) is logged to the browser's console logs",
+    "When set to 'True', tab information (number of tabs, current tab, title, and URL) is logged to the cucu debug console logs",
     default=False,
 )
 
