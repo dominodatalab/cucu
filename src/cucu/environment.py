@@ -263,7 +263,7 @@ def after_step(ctx, step):
     # may actually do something on the browser take their own screenshots
     if ctx.browser is not None and ctx.current_step.has_substeps is False:
         take_screenshot(ctx, step.name, label=f"After {step.name}")
-        if CONFIG["CUCU_LOG_TAB_INFO_TO_CONSOLE"]:
+        if CONFIG["CUCU_LOG_TAB_INFO_TO_CONSOLE"] == "true":
             tab_info = get_tab_information(ctx)
             log_message = (
                 f"Tab Info -> total tabs: {tab_info['window_count']}, "
