@@ -75,7 +75,7 @@ def should_see_matches_the_following(ctx, this):
     that = ctx.text
 
     if re.match(that, this) is None:
-        raise RuntimeError(f"{this}\ndoes not match:\n{that}")
+        raise RuntimeError(f"\n{this}\ndoes not match:\n{that}")
 
 
 @step('I should see "{this}" does not match the following')

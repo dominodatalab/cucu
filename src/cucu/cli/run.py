@@ -1,6 +1,7 @@
 import contextlib
 import json
 import os
+import platform
 import socket
 import sys
 from datetime import datetime
@@ -8,10 +9,12 @@ from datetime import datetime
 from cucu import (
     behave_tweaks,
     init_global_hook_variables,
+    logger,
     register_before_retry_hook,
 )
 from cucu.browser import selenium
 from cucu.config import CONFIG
+from cucu.database import operations
 from cucu.page_checks import init_page_checks
 
 
@@ -180,28 +183,85 @@ def behave(
     return result
 
 
-def write_run_details(results, filepath):
+def write_run_info(results, run_locals):
     """
-    writes a JSON file with run details to the results directory which can be
-    used to figure out any runtime details that would otherwise be lost and
-    difficult to figure out.
+    Write run information to a JSON file and initialize the database if enabled.
+
+    Args:
+        results: Path to the results directory
+        run_locals: Dictionary of local variables from the run command
     """
     run_details_filepath = os.path.join(results, "run_details.json")
-
     if os.path.exists(run_details_filepath):
-        return
+        raise RuntimeError("Should not overwrite run_details.json")
 
     if CONFIG["CUCU_RECORD_ENV_VARS"]:
         env_values = dict(os.environ)
     else:
-        env_values = "To enable use the --record-env-vars flag"
+        env_values = {"info": "To enable use the --record-env-vars flag"}
 
-    run_details = {
-        "filepath": filepath,
-        "full_arguments": sys.argv,
+    run_info = {
+        "run_locals": run_locals,
+        "cmd_args": sys.argv,
         "env": env_values,
-        "date": datetime.now().isoformat(),
+        "start_timestamp": datetime.now().isoformat(),
     }
 
     with open(run_details_filepath, "w", encoding="utf8") as output:
-        output.write(json.dumps(run_details, indent=2, sort_keys=True))
+        output.write(json.dumps(run_info, indent=2, sort_keys=True))
+
+    # Use DB_PATH from config or set default
+    db_path = CONFIG["DB_PATH"]
+    if not db_path:
+        db_path = os.path.join(results, "results.db")
+    CONFIG["DB_PATH"] = db_path
+
+    # Prepare system information for the run record
+    system_info = {
+        "os_name": os.name,
+        "platform": platform.platform(),
+        "python_version": platform.python_version(),
+        "hostname": socket.gethostname(),
+    }
+
+    browser = run_locals.get("browser", "unknown")
+    worker_count = run_locals.get("workers", 1)
+    headless = run_locals.get("headless", False)
+    command_line = " ".join(sys.argv)
+
+    try:
+        os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
+
+        db_exists = os.path.exists(db_path)
+        logger.info(
+            f"{'Using' if db_exists else 'Creating'} database at {db_path}"
+        )
+
+        # Connect to the database
+        if db_exists:
+            logger.info("🗄️ DB: Already exists, skipping schema creation")
+        if not db_exists:
+            operations.init_schema()
+
+        CONFIG["CUCU_RUN_ID"] = operations.create_cucu_run(
+            command_line,
+            json.dumps(env_values),
+            json.dumps(system_info),
+            "not_started",
+            worker_count,
+            datetime.now(),
+            browser,
+            headless,
+            results,
+        )
+
+        logger.debug(
+            f"🗄️ DB: Created CucuRun record with ID {CONFIG['CUCU_RUN_ID']}"
+        )
+
+    except Exception as e:
+        raise (
+            RuntimeError(
+                "🗄️ DB: Failed to initialize database. Check your configuration."
+            )
+        ) from e

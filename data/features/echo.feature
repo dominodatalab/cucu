@@ -1,5 +1,10 @@
+@feature-tag
 Feature: Echo
+My feature description
+Line 2
+Another lint
 
+  @scenario-tag
   Scenario: Echo an environment variable
     Given I echo "current shell is '{SHELL}'"
       And I echo the following:
