@@ -263,15 +263,23 @@ def after_step(ctx, step):
     # may actually do something on the browser take their own screenshots
     if ctx.browser is not None and ctx.current_step.has_substeps is False:
         take_screenshot(ctx, step.name, label=f"After {step.name}")
-        if CONFIG["CUCU_LOG_TAB_INFO_TO_CONSOLE"] == "true":
-            tab_info = get_tab_information(ctx)
-            log_message = (
-                f"Tab Info -> total tabs: {tab_info['window_count']}, "
-                f"current tab: {tab_info['current_index'] + 1}, "
-                f"title: {tab_info['current_title']}, "
-                f"url: {tab_info['current_url']}"
-            )
-            logger.debug(log_message)
+
+        tab_info = get_tab_information(ctx)
+        total_tabs = tab_info['window_count']
+        current_tab = tab_info['current_index'] + 1
+        title = tab_info['current_title']
+        url = tab_info['current_url']
+        log_message = (
+        f"\ntab({current_tab} of {total_tabs}): {title}\n"
+        f"url: {url}\n"
+        )
+        logger.debug(log_message)
+
+        # Add tab info to step.stdout so it shows up in the HTML report
+        step.stdout += (
+        f"\ntab({current_tab} of {total_tabs}): {title}\n"
+        f"url: {url}\n"
+        )
 
     # if the step has substeps from using `run_steps` then we already moved
     # the step index in the run_steps method and shouldn't do it here

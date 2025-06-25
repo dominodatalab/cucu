@@ -30,6 +30,24 @@ Feature: Report basics
       [\s\S]*
       """
 
+  Scenario: User can run a browser test and see tab information in html report
+    Given I run the command "cucu run data/features/scenario_with_browser_tabs.feature --results {CUCU_RESULTS_DIR}/browser-tab-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-tab-results --output {CUCU_RESULTS_DIR}/browser-tab-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-tab-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     Then I wait to click the link "Browser tab management"
+     When I wait to click the link "User can open multiple tabs and switch between them"
+     Then I wait to see the button "Given I start a webserver at directory \"data/www\" and save the port to the variable \"PORT\""
+      And I wait to click the button "Then I should see the browser title is \"Links!\""
+     Then I wait to see the text "tab(1 of 1): Links!"
+      And I should see text matching the regex "url: */links.html" on the current page
+      And I wait to click the button "Then I should see the browser title is \"Links!\""
+      And I wait to click the button "Then I should see the browser title is \"Buttons!\""
+     Then I wait to see the text "tab(2 of 2): Buttons!"
+      And I wait to click the button "Then I should see the browser title is \"Buttons!\""
+      And I wait to click the button "When I switch to the previous browser tab"
+     Then I wait to see the text "tab(1 of 2): Links!"
+      
   Scenario: User can run a test and see extended output
     Given I run the command "cucu run data/features/with_secret/scenario_with_sections.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "1"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"

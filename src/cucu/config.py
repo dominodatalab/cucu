@@ -416,11 +416,6 @@ CONFIG.define(
     "when set to 'True' skips adding a border to highlight found element in screenshots",
     default=True,
 )
-CONFIG.define(
-    "CUCU_LOG_TAB_INFO_TO_CONSOLE",
-    "When set to 'True', tab information (number of tabs, current tab, title, and URL) is logged to the cucu debug console logs",
-    default="false",
-)
 
 # define re_map here instead of in utils.py to avoid circular import
 def leaf_map(data, value_func, parent=None, key=None):

@@ -22,5 +22,5 @@ Feature: Browser console logs
       """
       And I should see the file at "{CUCU_RESULTS_DIR}/console-logging/Feature with console logs/Scenario logging tab information to cucu console logs/logs/cucu.debug.console.log" contains the following:
       """
-      DEBUG Tab Info -> total tabs: 1, current tab: 1, title: Console Logging!
+      tab(1 of 1): Console Logging!
       """
