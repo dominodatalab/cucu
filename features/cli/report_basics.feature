@@ -47,7 +47,7 @@ Feature: Report basics
       And I wait to click the button "Then I should see the browser title is \"Buttons!\""
       And I wait to click the button "When I switch to the previous browser tab"
      Then I wait to see the text "tab(1 of 2): Links!"
-      
+
   Scenario: User can run a test and see extended output
     Given I run the command "cucu run data/features/with_secret/scenario_with_sections.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "1"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"

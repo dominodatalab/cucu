@@ -265,10 +265,10 @@ def after_step(ctx, step):
         take_screenshot(ctx, step.name, label=f"After {step.name}")
 
         tab_info = get_tab_information(ctx)
-        total_tabs = tab_info['window_count']
-        current_tab = tab_info['current_index'] + 1
-        title = tab_info['current_title']
-        url = tab_info['current_url']
+        total_tabs = tab_info["window_count"]
+        current_tab = tab_info["current_index"] + 1
+        title = tab_info["current_title"]
+        url = tab_info["current_url"]
         log_message = (
         f"\ntab({current_tab} of {total_tabs}): {title}\n"
         f"url: {url}\n"
