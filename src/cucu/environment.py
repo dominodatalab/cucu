@@ -10,7 +10,7 @@ from functools import partial
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
-from cucu.utils import ellipsize_filename, take_screenshot
+from cucu.utils import ellipsize_filename, get_tab_information, take_screenshot
 
 CONFIG.define(
     "FEATURE_RESULTS_DIR",
@@ -24,7 +24,7 @@ CONFIG.define(
 )
 CONFIG.define(
     "SCENARIO_DOWNLOADS_DIR",
-    "the browser downloads directory for the currently " "executing scenario",
+    "the browser downloads directory for the currently executing scenario",
     default=None,
 )
 
@@ -263,6 +263,21 @@ def after_step(ctx, step):
     # may actually do something on the browser take their own screenshots
     if ctx.browser is not None and ctx.current_step.has_substeps is False:
         take_screenshot(ctx, step.name, label=f"After {step.name}")
+
+        tab_info = get_tab_information(ctx)
+        total_tabs = tab_info["window_count"]
+        current_tab = tab_info["current_index"] + 1
+        title = tab_info["current_title"]
+        url = tab_info["current_url"]
+        log_message = (
+            f"\ntab({current_tab} of {total_tabs}): {title}\nurl: {url}\n"
+        )
+        logger.debug(log_message)
+
+        # Add tab info to step.stdout so it shows up in the HTML report
+        step.stdout += (
+            f"\ntab({current_tab} of {total_tabs}): {title}\nurl: {url}\n"
+        )
 
     # if the step has substeps from using `run_steps` then we already moved
     # the step index in the run_steps method and shouldn't do it here

@@ -215,7 +215,6 @@ class Selenium(Browser):
 
         if window_handle_index == len(window_handles) - 1:
             raise RuntimeError("no next browser tab available")
-
         self.driver.switch_to.window(window_handles[window_handle_index + 1])
 
     def switch_to_previous_tab(self):
@@ -225,7 +224,6 @@ class Selenium(Browser):
 
         if window_handle_index == 0:
             raise RuntimeError("no previous browser tab available")
-
         self.driver.switch_to.window(window_handles[window_handle_index - 1])
 
     def back(self):
