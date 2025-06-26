@@ -24,7 +24,7 @@ CONFIG.define(
 )
 CONFIG.define(
     "SCENARIO_DOWNLOADS_DIR",
-    "the browser downloads directory for the currently " "executing scenario",
+    "the browser downloads directory for the currently executing scenario",
     default=None,
 )
 
@@ -270,15 +270,13 @@ def after_step(ctx, step):
         title = tab_info["current_title"]
         url = tab_info["current_url"]
         log_message = (
-        f"\ntab({current_tab} of {total_tabs}): {title}\n"
-        f"url: {url}\n"
+            f"\ntab({current_tab} of {total_tabs}): {title}\nurl: {url}\n"
         )
         logger.debug(log_message)
 
         # Add tab info to step.stdout so it shows up in the HTML report
         step.stdout += (
-        f"\ntab({current_tab} of {total_tabs}): {title}\n"
-        f"url: {url}\n"
+            f"\ntab({current_tab} of {total_tabs}): {title}\nurl: {url}\n"
         )
 
     # if the step has substeps from using `run_steps` then we already moved

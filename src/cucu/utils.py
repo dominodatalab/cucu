@@ -272,6 +272,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] += 1
 
+
 def get_tab_information(ctx):
     driver = ctx.browser.driver
     window_handles = driver.window_handles
