@@ -306,7 +306,7 @@ def get_table_cell_value(ctx, table, row, column, variable_name):
         cell_value = tables[table][row][column]
     except IndexError:
         raise RuntimeError(
-            f"Cannot find table:{table+1},row:{row+1},column:{column+1}. Please check your table data."
+            f"Cannot find table:{table + 1},row:{row + 1},column:{column + 1}. Please check your table data."
         )
     config.CONFIG[variable_name] = cell_value
 
@@ -343,7 +343,7 @@ def find_table_element(ctx, nth=1):
         return ctx.browser.css_find_elements("table")[nth]
     except IndexError:
         raise RuntimeError(
-            f"Cannot find table:{nth+1}. Please check your table data."
+            f"Cannot find table:{nth + 1}. Please check your table data."
         )
 
 
@@ -364,7 +364,7 @@ def click_table_cell(ctx, row, column, table):
         cell = row.find_elements(By.CSS_SELECTOR, "td")[column]
     except IndexError:
         raise RuntimeError(
-            f"Cannot find table:{table+1},row:{row+1},column:{column+1}. Please check your table data."
+            f"Cannot find table:{table + 1},row:{row + 1},column:{column + 1}. Please check your table data."
         )
     ctx.browser.click(cell)
 
@@ -409,7 +409,7 @@ def wait_click_table_cell_matching_text(ctx, column, match_text, table):
             cell = row[0].find_elements(By.CSS_SELECTOR, "td")[column]
         except IndexError:
             raise RuntimeError(
-                f"Cannot find table:{table+1},column:{column+1},text:{match_text}. Please check your table data."
+                f"Cannot find table:{table + 1},column:{column + 1},text:{match_text}. Please check your table data."
             )
 
         ctx.browser.click(cell)
@@ -431,7 +431,7 @@ def wait_table_row_count(ctx, row_count, table):
             return
         else:
             raise RuntimeError(
-                f"Unable to find {row_count} rows in table {table+1}. Please check your table data."
+                f"Unable to find {row_count} rows in table {table + 1}. Please check your table data."
             )
 
     retry(find_table_row_count)(ctx, row_count, table)

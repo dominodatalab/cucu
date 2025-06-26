@@ -176,7 +176,7 @@ class CucuJSONFormatter(Formatter):
                         for (key, value) in step_variables.items()
                     ]
                 )
-                padding = f"    {' '*(len('Given')-len(step.keyword))}"
+                padding = f"    {' ' * (len('Given') - len(step.keyword))}"
                 step.stdout.insert(
                     0, f"{padding}# {CONFIG.hide_secrets(expanded)}\n"
                 )
