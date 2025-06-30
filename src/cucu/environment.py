@@ -10,7 +10,7 @@ from functools import partial
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
-from cucu.utils import ellipsize_filename, take_screenshot
+from cucu.utils import ellipsize_filename, get_tab_information, take_screenshot
 
 CONFIG.define(
     "FEATURE_RESULTS_DIR",
@@ -24,7 +24,7 @@ CONFIG.define(
 )
 CONFIG.define(
     "SCENARIO_DOWNLOADS_DIR",
-    "the browser downloads directory for the currently " "executing scenario",
+    "the browser downloads directory for the currently executing scenario",
     default=None,
 )
 
@@ -159,7 +159,7 @@ def run_after_scenario_hook(ctx, scenario, hook):
 
 def after_scenario(ctx, scenario):
     for timer_name in ctx.step_timers:
-        logger.warn(f'timer "{timer_name}" was never stopped/recorded')
+        logger.warning(f'timer "{timer_name}" was never stopped/recorded')
 
     run_after_scenario_hook(ctx, scenario, download_mht_data)
 
@@ -264,17 +264,32 @@ def after_step(ctx, step):
     if ctx.browser is not None and ctx.current_step.has_substeps is False:
         take_screenshot(ctx, step.name, label=f"After {step.name}")
 
+        tab_info = get_tab_information(ctx)
+        total_tabs = tab_info["window_count"]
+        current_tab = tab_info["current_index"] + 1
+        title = tab_info["current_title"]
+        url = tab_info["current_url"]
+        log_message = (
+            f"\ntab({current_tab} of {total_tabs}): {title}\nurl: {url}\n"
+        )
+        logger.debug(log_message)
+
+        # Add tab info to step.stdout so it shows up in the HTML report
+        step.stdout += (
+            f"\ntab({current_tab} of {total_tabs}): {title}\nurl: {url}\n"
+        )
+
     # if the step has substeps from using `run_steps` then we already moved
     # the step index in the run_steps method and shouldn't do it here
     if not step.has_substeps:
         ctx.step_index += 1
         CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
-    if CONFIG.bool("CUCU_IPDB_ON_FAILURE") and step.status == "failed":
+    if CONFIG.bool("CUCU_DEBUG_ON_FAILURE") and step.status == "failed":
         ctx._runner.stop_capture()
-        import ipdb
+        import pdb
 
-        ipdb.post_mortem(step.exc_traceback)
+        pdb.post_mortem(step.exc_traceback)
 
     CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
 

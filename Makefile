@@ -23,6 +23,7 @@ fix:
 lint:
 	# make lint
 	# lint code
+	uv run ruff format . --check
 	uv run ruff check .
 	# pre-commit
 	SKIP=makefile uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
@@ -58,7 +59,7 @@ coverage: src/* tests/*
 	# this makes it so all of the underlying `cucu` command calls are run
 	# with the coverage enabled even when spawned as a separate process for the
 	# underlying `uv run coverage run` process...
-	COVERAGE_PROCESS_START=.coveragerc uv run cucu run features --workers 6
+	COVERAGE_PROCESS_START=${MKDIR}pyproject.toml uv run cucu run features --workers 6
 	uv run coverage run -m pytest
 	uv run coverage combine .coverage.*
 	uv run coverage html
@@ -68,3 +69,6 @@ coverage: src/* tests/*
 
 # disable caching for all make targets
 .PHONY: all help fix lint ci-lint test build coverage
+
+# get the directory of the current makefile
+MKDIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))

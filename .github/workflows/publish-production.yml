@@ -13,12 +13,12 @@ jobs:
       contents: read  # For non-public repo
     steps:
       - name: checkout main
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           ref: main
           fetch-depth: 0
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v2
+        uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6
         with:
           enable-cache: true
       - name: Install cucu with Python 3.12
@@ -28,4 +28,4 @@ jobs:
         run: |
           uv build
       - name: publish to pypi.org
-        uses: pypa/gh-action-pypi-publish@v1.12.4
+        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4

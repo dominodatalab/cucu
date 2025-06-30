@@ -79,7 +79,7 @@ def generate(results, basepath, only_failures=False):
             except Exception as exception:
                 if show_status:
                     print("")  # add a newline before logger
-                logger.warn(
+                logger.warning(
                     f"unable to read file {run_json_filepath}, got error: {exception}"
                 )
 
@@ -152,7 +152,7 @@ def generate(results, basepath, only_failures=False):
                 try:
                     CONFIG.load(scenario_configpath)
                 except Exception as e:
-                    logger.warn(
+                    logger.warning(
                         f"Could not reload config: {scenario_configpath}: {e}"
                     )
             else:
@@ -170,8 +170,8 @@ def generate(results, basepath, only_failures=False):
                 try:
                     sub_headers.append(handler(scenario))
                 except Exception:
-                    logger.warn(
-                        f"Exception while trying to run sub_headers hook for scenario: \"{scenario['name']}\"\n{traceback.format_exc()}"
+                    logger.warning(
+                        f'Exception while trying to run sub_headers hook for scenario: "{scenario["name"]}"\n{traceback.format_exc()}'
                     )
             scenario["sub_headers"] = "<br/>".join(sub_headers)
 
@@ -199,8 +199,13 @@ def generate(results, basepath, only_failures=False):
                 image_dir = get_step_image_dir(step_index, step["name"])
                 image_dirpath = os.path.join(scenario_filepath, image_dir)
 
+                # Handle section headings with different levels (# to ####)
                 if step["name"].startswith("#"):
-                    step["heading_level"] = "h4"
+                    # Map the count to the appropriate HTML heading (h2-h5)
+                    # We use h2-h5 instead of h1-h4 so h1 can be reserved for scenario/feature titles
+                    step["heading_level"] = (
+                        f"h{step['name'][:4].count('#') + 1}"
+                    )
 
                 if os.path.exists(image_dirpath):
                     _, _, image_names = next(os.walk(image_dirpath))
@@ -417,7 +422,7 @@ def generate(results, basepath, only_failures=False):
         )
 
         feature_output_filepath = os.path.join(
-            basepath, f'{feature["name"]}.html'
+            basepath, f"{feature['name']}.html"
         )
 
         with open(feature_output_filepath, "wb") as output:

@@ -20,3 +20,7 @@ Feature: Browser console logs
       And I should see the file at "{CUCU_RESULTS_DIR}/console-logging/Feature with console logs/Scenario without console logs/logs/browser_console.log.txt" is equal to the following:
       """
       """
+      And I should see the file at "{CUCU_RESULTS_DIR}/console-logging/Feature with console logs/Scenario logging tab information to cucu console logs/logs/cucu.debug.console.log" contains the following:
+      """
+      tab(1 of 1): Console Logging!
+      """

@@ -80,8 +80,8 @@ def info(*args, **kwargs):
     logging.info(*args, **kwargs)
 
 
-@wraps(logging.warn)
-def warn(*args, **kwargs):
+@wraps(logging.warning)
+def warning(*args, **kwargs):
     console_handler = logging.getLogger().handlers[0]
     logging_level = console_handler.level
 

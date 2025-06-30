@@ -66,7 +66,7 @@ class CucuFormatter(Formatter):
     # -- IMPLEMENT-INTERFACE FOR: Formatter
     def feature(self, feature):
         self.write_tags(feature.tags, for_feature=True)
-        text = f'{self.colorize(feature.keyword, "magenta")}: {feature.name}\n'
+        text = f"{self.colorize(feature.keyword, 'magenta')}: {feature.name}\n"
         self.stream.write(text)
 
     def colorize(self, text, color):
@@ -171,6 +171,10 @@ class CucuFormatter(Formatter):
             text = self.colorize(
                 f"{indent}{prefix}{keyword} {step.name}\n", "cyan"
             )
+        else:
+            text = self.colorize(
+                f"{indent}{prefix}{keyword} {step.name}\n", "yellow"
+            )
 
         if self.monochrome:
             self.stream.write(f"{text}")
@@ -189,7 +193,7 @@ class CucuFormatter(Formatter):
             status_text_padding = (
                 max_line_length - len(current_step_text) - len(prefix)
             )
-            status_text = f'{" " * status_text_padding}{status_text}'
+            status_text = f"{' ' * status_text_padding}{status_text}"
             status_text = self.colorize(status_text, "yellow")
 
             self.stream.write(f"{status_text}\n")
@@ -223,7 +227,7 @@ class CucuFormatter(Formatter):
                     ]
                 )
 
-                padding = f"    {' '*(len('Given')-len(step.keyword))}"
+                padding = f"    {' ' * (len('Given') - len(step.keyword))}"
                 variable_line = f"{padding}# {expanded}\n"
                 # hide secrets before we do anything to add color which could
                 # modify the output and result in not being able to correctly

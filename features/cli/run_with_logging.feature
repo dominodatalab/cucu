@@ -10,10 +10,10 @@ Feature: Run with logging
 
         Scenario: Logging at various levels
       .* INFO hello
-          Given I log "hello" at level "info"      # .*
-            And I log "cruel" at level "debug"     # .*
+          Given I log "hello" at level "info" \s*# .*
+            And I log "cruel" at level "debug" \s*# .*
       .* WARNING world
-            And I log "world" at level "warn"      # .*
+            And I log "world" at level "warning" \s*# .*
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
@@ -30,11 +30,11 @@ Feature: Run with logging
 
         Scenario: Logging at various levels
       .* INFO hello
-          Given I log "hello" at level "info"      # .*
+          Given I log "hello" at level "info" \s*# .*
       .* DEBUG cruel
-            And I log "cruel" at level "debug"     # .*
+            And I log "cruel" at level "debug" \s*# .*
       .* WARNING world
-            And I log "world" at level "warn"      # .*
+            And I log "world" at level "warning" \s*# .*
       .* DEBUG No browsers - skipping MHT webpage snapshot
       .* DEBUG HOOK download_mht_data: passed ✅
       .* DEBUG HOOK download_browser_logs: passed ✅

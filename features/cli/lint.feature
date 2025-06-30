@@ -406,9 +406,9 @@ Feature: Lint
       This is just garbage
       """
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/broken_feature_file_lint/broken_feature.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
-      And I should see "{STDOUT}" contains the following:
+      And I should see "{STDOUT}" matches the following:
       """
-      Parser failure in state init, at line 1: "This is just garbage"
+      [\s\S]*Parser failure in state( |=)init(,|ial) at line 1: "This is just garbage"
       """
 
   Scenario: User gets an error when using invalid feature or scenario names

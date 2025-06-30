@@ -10,9 +10,9 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
     - name: Install the latest version of uv
-      uses: astral-sh/setup-uv@v2
+      uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6
       with:
         enable-cache: true
     - name: Install cucu with Python 3.12
@@ -26,9 +26,9 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
     - name: Install the latest version of uv
-      uses: astral-sh/setup-uv@v2
+      uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6
       with:
         enable-cache: true
     - name: Install cucu with Python 3.12
@@ -45,12 +45,12 @@ jobs:
         tar cvfz output.tgz output
     - name: save output
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
       with:
         name: unit-tests
         path: output.tgz
     - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
+      uses: EnricoMi/publish-unit-test-result-action@3a74b2957438d0b6e2e61d67b05318aa25c9e6c6 # v2
       if: always()
       with:
         check_name: "unit results"
@@ -81,9 +81,9 @@ jobs:
           SCREEN_HEIGHT: 768
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
     - name: Install the latest version of uv
-      uses: astral-sh/setup-uv@v2
+      uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6
       with:
         enable-cache: true
     - name: Install Python 3.12
@@ -113,12 +113,12 @@ jobs:
         tar cvfz output.tgz output
     - name: save output
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
       with:
         name: ${{ matrix.browser }}-tests
         path: output.tgz
     - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
+      uses: EnricoMi/publish-unit-test-result-action@3a74b2957438d0b6e2e61d67b05318aa25c9e6c6 # v2
       if: always()
       with:
         check_name: "${{ matrix.browser }} results"

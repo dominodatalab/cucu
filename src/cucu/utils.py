@@ -271,3 +271,16 @@ def take_screenshot(ctx, step_name, label="", element=None):
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] += 1
+
+
+def get_tab_information(ctx):
+    driver = ctx.browser.driver
+    window_handles = driver.window_handles
+    current_window = driver.current_window_handle
+    window_handle_index = window_handles.index(current_window)
+    return {
+        "window_count": len(window_handles),
+        "current_index": window_handle_index,
+        "current_title": driver.title,
+        "current_url": driver.current_url,
+    }

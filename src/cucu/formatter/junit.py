@@ -241,20 +241,31 @@ class CucuJUnitFormatter(Formatter):
                 return
 
         # calculate with the latest data
-        testsuite["tests"] = len(scenarios)
-        testsuite["failures"] = len(
-            [x for x in scenarios.values() if x["status"] == Status.failed]
+        # workaround for beatufulsoup4 removing the attribute if it is set to 0
+        testsuite["tests"] = str(len(scenarios))
+        testsuite["failures"] = str(
+            len(
+                [x for x in scenarios.values() if x["status"] == Status.failed]
+            )
         )
-        testsuite["skipped"] = len(
-            [x for x in scenarios.values() if x["status"] == Status.skipped]
+        testsuite["skipped"] = str(
+            len(
+                [
+                    x
+                    for x in scenarios.values()
+                    if x["status"] == Status.skipped
+                ]
+            )
         )
-        testsuite["errors"] = len(
-            [
-                x
-                for x in scenarios.values()
-                if x["status"]
-                not in (Status.failed, Status.skipped, Status.passed)
-            ]
+        testsuite["errors"] = str(
+            len(
+                [
+                    x
+                    for x in scenarios.values()
+                    if x["status"]
+                    not in (Status.failed, Status.skipped, Status.passed)
+                ]
+            )
         )
 
         if "tags" in results:

@@ -1,0 +1,29 @@
+# This is an example of a lint rule file to ensure every scenario has a unique id
+
+scenario_must_have_one_scenario_tag:
+  message: each scenario must have one sid tag
+  type: error
+  exclude: .*/features/(setup|teardown)/.*
+  current_line:
+    match: '\s+Scenario:.+'
+  previous_line:
+    match: '(?!\s+@sid-\d+)'
+
+feature_must_not_have_scenario_tags:
+  message: features should not have a scenario tag, add tag to scenarios instead
+  type: error
+  exclude: .*/features/(setup|teardown)/.*
+  current_line:
+    match: "Feature:.+"
+  previous_line:
+    match: '^(@sid-.*)'
+
+scenario_id_must_be_unique_across_all_scenarios:
+  message: you must use unique scenario id per scenario across all features
+  exclude: .*/features/(setup|teardown)/.*
+  type: error
+  current_line:
+    match: '\s+Scenario:.+'
+  previous_line:
+    match: '\s+(@sid-\d+)'
+    unique_per_all_scenarios: true

@@ -5,9 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.2.2
+- Chore - make lint also run ruff format --check
+
+## 1.2.1
+- Add - tab information to html report and cucu debug console log
+
+## 1.2.0
+- Add - levels 2-4 to section step
+- Change - rename comment step to section step
+- Add - linting for section step
+- Change - min python to 3.10
+
+## 1.1.2
+- Add - `cucu init` command to setup new projects
+
+## 1.1.1
+- Chore - bump coverage lib from 7.6.12 to 7.8.0
+- Chore - change CI to not use experimental COVERAGE_CORE=sysmon
+
+## 1.1.0
+- Add - now python 3.13 compatible
+- Change - use stdlib pdb instead of unsupported ipdb
+- Change - rename CUCU_IPDB_ON_FAILURE => to CUCU_DEBUG_ON_FAILURE
+- Chore - bump selenium lib to 4.31.0
+
+## 1.0.13
+- Change - rename logger.warn to logger.warning
+
 ## 1.0.12
 - Chore - add coverage badge
 - Chore - add docs on dev automation
+- CI - fix renovate config
+- CI - change renovate to ignore python minor versions
+- CI - fix for bots
+- Chore - bump dep versions
 
 ## 1.0.11
 - Chore - bump psutil

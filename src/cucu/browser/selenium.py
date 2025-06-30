@@ -37,7 +37,7 @@ def init():
 
     if config.CONFIG["CUCU_BROWSER"] == "firefox":
         # https://github.com/mozilla/geckodriver/issues/330
-        logger.warn("browser console logs not available on firefox")
+        logger.warning("browser console logs not available on firefox")
         geckodriver_autoinstaller.install()
 
     if config.CONFIG["CUCU_BROWSER"] == "edge":
@@ -215,7 +215,6 @@ class Selenium(Browser):
 
         if window_handle_index == len(window_handles) - 1:
             raise RuntimeError("no next browser tab available")
-
         self.driver.switch_to.window(window_handles[window_handle_index + 1])
 
     def switch_to_previous_tab(self):
@@ -225,7 +224,6 @@ class Selenium(Browser):
 
         if window_handle_index == 0:
             raise RuntimeError("no previous browser tab available")
-
         self.driver.switch_to.window(window_handles[window_handle_index - 1])
 
     def back(self):
@@ -277,14 +275,14 @@ class Selenium(Browser):
 
     def download_mht(self, target_filepath):
         if self.driver is None:
-            logger.warn(
+            logger.warning(
                 "No active browser; will not attempt to download .mht file."
             )
             return
 
         browser_name = self.driver.name.lower()
         if "chrome" not in browser_name:
-            logger.warn(
+            logger.warning(
                 "The web driver is not using Chrome as a web browser"
                 f", but {browser_name}. This browser does not support"
                 "dowloading .mht files; will not attempt to download one."
@@ -311,7 +309,7 @@ class Selenium(Browser):
             mht_data = mht_response.get("data")
 
         if mht_data is None:
-            logger.warn(
+            logger.warning(
                 "Something unexpected has happened: fetched MHT data, but that data was empty. Not writing MHT file."
             )
             return
