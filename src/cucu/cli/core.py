@@ -15,6 +15,8 @@ from threading import Timer
 import click
 import coverage
 import psutil
+from behave.model_core import FileLocation
+from behave.runner_util import parse_features
 from click import ClickException
 from mpire import WorkerPool
 from tabulate import tabulate
@@ -803,45 +805,6 @@ def init(filepath, logging_level):
 
 
 @main.command()
-@click.argument("filepath", default="features")
-def tags(filepath):
-    """
-    print list of defined tags
-    """
-    init_global_hook_variables()
-
-    # TODO: this is waaaaay too naive and won't work
-    # instead need to use the behave parse_file helper (or find some other state that's loaded in behave)
-    # maybe call behave_init with each file and pop some state from the library?
-    tags = _find_unique_tags(root_dir=filepath, pattern="*.feature", string_capture="^\(@[\w-]+\)")
-
-    print(tabulate(tags, tablefmt="fancy_grid"))
-
-def _find_unique_tags(root_dir, pattern, string_capture):
-    """
-    Recursively searches files matching a pattern, extracting unique pattern matches.
-
-    Args:
-        root_dir: The root directory to start the search from.
-        pattern: The file pattern to match (e.g., "*.feature").
-        string_capture: The pattern to find strings within the files (e.g., r'"(.*?)"').
-
-    Returns:
-        A set of unique regex captures found in the files.
-    """
-    unique = set()
-    for filename in glob.iglob(os.path.join(root_dir, "**", pattern), recursive=True):
-        try:
-            with open(filename, "r") as f:
-                content = f.read()
-                matches = re.findall(string_capture, content)
-                unique.update(matches)
-        except Exception as e:
-            print(f"Error processing file {filename}: {e}")
-    return unique
-
-
-@main.command()
 @click.option(
     "-b",
     "--browser",
@@ -889,6 +852,61 @@ def debug(browser, url, detach, logging_level):
             # detect when there are changes to the cucu javascript library
             # and reload it in the currently running browser.
             time.sleep(5)
+
+
+@main.command()
+@click.argument("filepath", default="features")
+def tags(filepath):
+    """
+    print list of defined tags using proper behave parsing
+    """
+    init_global_hook_variables()
+
+    # Get all feature files
+    if os.path.isdir(filepath):
+        pattern = os.path.join(filepath, "**", "*.feature")
+        feature_files = glob.glob(pattern, recursive=True)
+    else:
+        feature_files = [filepath]
+
+    # Convert to FileLocation objects for behave
+    file_locations = [FileLocation(os.path.abspath(f)) for f in feature_files]
+
+    # Use behave's built-in parser
+    features = parse_features(file_locations)
+
+    # Count scenarios affected by each tag
+    tag_scenarios = {}
+    
+    for feature in features:
+        for scenario in feature.scenarios:
+            # Collect all tags that affect this scenario (feature + scenario tags)
+            affecting_tags = set()
+            
+            # Feature-level tags affect all scenarios in the feature
+            for tag in feature.tags:
+                tag_name = tag.name if hasattr(tag, 'name') else str(tag)
+                affecting_tags.add(tag_name)
+            
+            # Scenario-level tags
+            for tag in scenario.tags:
+                tag_name = tag.name if hasattr(tag, 'name') else str(tag)
+                affecting_tags.add(tag_name)
+            
+            # Count this scenario for each unique tag that affects it
+            for tag_name in affecting_tags:
+                if tag_name not in tag_scenarios:
+                    tag_scenarios[tag_name] = 0
+                tag_scenarios[tag_name] += 1
+
+    # Format for table output
+    formatted_tags = [["Tag", "Scenarios Affected"]]
+    
+    # Sort by tag name
+    for tag_name in sorted(tag_scenarios.keys()):
+        formatted_tags.append([tag_name, str(tag_scenarios[tag_name])])
+
+    print(tabulate(formatted_tags, headers="firstrow", tablefmt="fancy_grid"))
 
 
 if __name__ == "__main__":
