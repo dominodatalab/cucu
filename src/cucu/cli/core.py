@@ -7,6 +7,7 @@ import signal
 import sys
 import time
 import xml.etree.ElementTree as ET
+from collections import Counter
 from importlib.metadata import version
 from pathlib import Path
 from threading import Timer
@@ -14,6 +15,8 @@ from threading import Timer
 import click
 import coverage
 import psutil
+from behave.model_core import FileLocation
+from behave.runner_util import parse_features
 from click import ClickException
 from mpire import WorkerPool
 from tabulate import tabulate
@@ -849,6 +852,69 @@ def debug(browser, url, detach, logging_level):
             # detect when there are changes to the cucu javascript library
             # and reload it in the currently running browser.
             time.sleep(5)
+
+
+@main.command()
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
+@click.argument("filepath", default="features")
+def tags(filepath, logging_level):
+    """
+    print a table of tags and affected scenario counts
+    """
+    init_global_hook_variables()
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
+
+    try:
+        # Get all feature files
+        feature_files = (
+            glob.glob(
+                os.path.join(filepath, "**", "*.feature"), recursive=True
+            )
+            if os.path.isdir(filepath)
+            else [filepath]
+        )
+
+        if not feature_files:
+            print("No feature files found.")
+            return
+
+        # Convert to FileLocation objects and parse features
+        file_locations = [
+            FileLocation(os.path.abspath(f)) for f in feature_files
+        ]
+        features = parse_features(file_locations)
+
+        if not features:
+            print("No valid features found.")
+            return
+
+        tag_scenarios = Counter()
+
+        for feature in features:
+            for scenario in feature.scenarios:
+                affecting_tags = set(feature.tags + scenario.tags)
+                tag_scenarios.update(affecting_tags)
+
+        if not tag_scenarios:
+            print("No tags found in feature files.")
+            return
+
+        table_data = [["Tag", "Scenarios Affected"]] + [
+            [tag_name, str(count)]
+            for tag_name, count in sorted(tag_scenarios.items(), key=lambda x: x[0].lower())
+        ]
+
+        print(tabulate(table_data, headers="firstrow", tablefmt="fancy_grid"))
+
+    except Exception as e:
+        logger.error(f"Error processing feature files: {e}")
+        raise ClickException(f"Failed to process tags: {e}")
 
 
 if __name__ == "__main__":
