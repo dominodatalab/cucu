@@ -1,5 +1,5 @@
 Feature: Tags
-  As a developer I want the user to
+  As a developer I want the user to run the tags command
 
   @cli
   Scenario: User can run the tags command
