@@ -2,12 +2,12 @@
 import glob
 import json
 import os
-import re
 import shutil
 import signal
 import sys
 import time
 import xml.etree.ElementTree as ET
+from collections import Counter
 from importlib.metadata import version
 from pathlib import Path
 from threading import Timer
@@ -855,58 +855,66 @@ def debug(browser, url, detach, logging_level):
 
 
 @main.command()
+@click.option(
+    "-l",
+    "--logging-level",
+    default="INFO",
+    help="set logging level to one of debug, warn or info (default)",
+)
 @click.argument("filepath", default="features")
-def tags(filepath):
+def tags(filepath, logging_level):
     """
-    print list of defined tags using proper behave parsing
+    print a table of tags and affected scenario counts
     """
     init_global_hook_variables()
+    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
+    logger.init_logging(logging_level.upper())
 
-    # Get all feature files
-    if os.path.isdir(filepath):
-        pattern = os.path.join(filepath, "**", "*.feature")
-        feature_files = glob.glob(pattern, recursive=True)
-    else:
-        feature_files = [filepath]
+    try:
+        # Get all feature files
+        feature_files = (
+            glob.glob(
+                os.path.join(filepath, "**", "*.feature"), recursive=True
+            )
+            if os.path.isdir(filepath)
+            else [filepath]
+        )
 
-    # Convert to FileLocation objects for behave
-    file_locations = [FileLocation(os.path.abspath(f)) for f in feature_files]
+        if not feature_files:
+            print("No feature files found.")
+            return
 
-    # Use behave's built-in parser
-    features = parse_features(file_locations)
+        # Convert to FileLocation objects and parse features
+        file_locations = [
+            FileLocation(os.path.abspath(f)) for f in feature_files
+        ]
+        features = parse_features(file_locations)
 
-    # Count scenarios affected by each tag
-    tag_scenarios = {}
-    
-    for feature in features:
-        for scenario in feature.scenarios:
-            # Collect all tags that affect this scenario (feature + scenario tags)
-            affecting_tags = set()
-            
-            # Feature-level tags affect all scenarios in the feature
-            for tag in feature.tags:
-                tag_name = tag.name if hasattr(tag, 'name') else str(tag)
-                affecting_tags.add(tag_name)
-            
-            # Scenario-level tags
-            for tag in scenario.tags:
-                tag_name = tag.name if hasattr(tag, 'name') else str(tag)
-                affecting_tags.add(tag_name)
-            
-            # Count this scenario for each unique tag that affects it
-            for tag_name in affecting_tags:
-                if tag_name not in tag_scenarios:
-                    tag_scenarios[tag_name] = 0
-                tag_scenarios[tag_name] += 1
+        if not features:
+            print("No valid features found.")
+            return
 
-    # Format for table output
-    formatted_tags = [["Tag", "Scenarios Affected"]]
-    
-    # Sort by tag name
-    for tag_name in sorted(tag_scenarios.keys()):
-        formatted_tags.append([tag_name, str(tag_scenarios[tag_name])])
+        tag_scenarios = Counter()
 
-    print(tabulate(formatted_tags, headers="firstrow", tablefmt="fancy_grid"))
+        for feature in features:
+            for scenario in feature.scenarios:
+                affecting_tags = set(feature.tags + scenario.tags)
+                tag_scenarios.update(affecting_tags)
+
+        if not tag_scenarios:
+            print("No tags found in feature files.")
+            return
+
+        table_data = [["Tag", "Scenarios Affected"]] + [
+            [tag_name, str(count)]
+            for tag_name, count in sorted(tag_scenarios.items(), key=lambda x: x[0].lower())
+        ]
+
+        print(tabulate(table_data, headers="firstrow", tablefmt="fancy_grid"))
+
+    except Exception as e:
+        logger.error(f"Error processing feature files: {e}")
+        raise ClickException(f"Failed to process tags: {e}")
 
 
 if __name__ == "__main__":
