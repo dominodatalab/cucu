@@ -8,7 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 1.3.0
 
 - Add logging to provide more insight into what Fuzzy is doing
- 
+
 ## 1.2.2
 - Chore - make lint also run ruff format --check
 
