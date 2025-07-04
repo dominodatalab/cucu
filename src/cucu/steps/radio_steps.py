@@ -34,7 +34,7 @@ def find_radio_button(ctx, name, index=0):
         index=index,
         direction=fuzzy.Direction.RIGHT_TO_LEFT,
     )
-  
+
     take_saw_element_screenshot(ctx, "radio button", name, index, element)
 
     return element
@@ -78,7 +78,7 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
     """
     ctx.check_browser_initialized()
     radio = find_n_assert_radio_button(ctx, name, index=index)
-     
+
     if base_steps.is_disabled(radio):
         raise RuntimeError(
             "unable to select the radio button, as it is disabled"
@@ -136,8 +136,9 @@ def select_radio_button(ctx, radiobox):
     if size["width"] == 0 and size["height"] == 0:
         click_parent_label(ctx, radiobox)
         return
-        
+
     ctx.browser.click(radiobox)
+
 
 def click_parent_label(ctx, radio):
     """
