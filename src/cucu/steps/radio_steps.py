@@ -91,7 +91,7 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
             return
 
         raise Exception(f'radio button "{name}" already selected')
-    
+
     # @QE-17746
     size = radio.size
     if size["width"] == 0 and size["height"] == 0:
@@ -143,20 +143,20 @@ def select_radio_button(ctx, radiobox):
 def click_parent_label(ctx, radio):
     """
     Clicks the nearest parent <label> of a radio input (if input is visually hidden or size is zero).
-    """    
+    """
     try:
         # Find the closest ancestor <label> element
         label = radio.find_element(By.XPATH, "ancestor::label[1]")
-        
+
         if label and label.is_displayed():
             ctx.browser.click(label)
             logger.debug("Successfully clicked the parent label.")
         else:
             logger.warning("Parent label is not displayed or not found.")
-            
+
     except Exception as e:
         logger.error(f"Click on parent label failed (possibly missing label ancestor): {e}")
- 
+
 
 helpers.define_should_see_thing_with_name_steps(
     "radio button", find_radio_button
