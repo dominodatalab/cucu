@@ -1,8 +1,8 @@
+from selenium.webdriver.common.by import By
+
 from cucu import fuzzy, helpers, logger, retry, step
 from cucu.config import CONFIG
 from cucu.utils import take_saw_element_screenshot
-
-from selenium.webdriver.common.by import By
 
 from . import base_steps
 
@@ -94,7 +94,7 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
     
     # @QE-17746
     size = radio.size
-    if size['width'] == 0 and size['height'] == 0:
+    if size["width"] == 0 and size["height"] == 0:
         click_parent_label(ctx, radio)
         return
 
@@ -133,7 +133,7 @@ def select_radio_button(ctx, radiobox):
     
     # @QE-17746
     size = radiobox.size
-    if size['width'] == 0 and size['height'] == 0:
+    if size["width"] == 0 and size["height"] == 0:
         click_parent_label(ctx, radiobox)
         return
         
