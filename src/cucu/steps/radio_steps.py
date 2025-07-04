@@ -130,7 +130,7 @@ def select_radio_button(ctx, radiobox):
 
     if selected:
         raise Exception("radiobox already selected")
-    
+
     # @QE-17746
     size = radiobox.size
     if size["width"] == 0 and size["height"] == 0:
