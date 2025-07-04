@@ -1,6 +1,14 @@
 <html>
   <head>
     <title>Radio Buttons!</title>
+    <style>
+      .size0 {
+        width: 0;
+        height: 0;
+        opacity: 0;
+        position: absolute;
+      }
+    </style>
   </head>
   <body>
 
@@ -29,5 +37,32 @@
   <input disabled type="radio" id="red" name="favorite_color" value="red"><label>red</label>
   <input disabled type="radio" id="green" name="favorite_color" value="green"><label>green</label>
   <input disabled type="radio" id="blue" name="favorite_color" value="blue"><label>blue</label>
+
+  <!-- Radio Buttons with size 0 - click anywhere in label triggers update -->
+<div>
+  <label>
+    <input class="size0" type="radio" name="size_0" value="true" onchange="updateSelectedTab()">
+    <div aria-label="create finding tab">True</div>
+  </label>
+
+  <label>
+    <input class="size0" type="radio" name="size_0" value="false" onchange="updateSelectedTab()">
+    <div aria-label="create finding tab">False</div>
+  </label>
+</div>
+
+<!-- Where selected value is displayed -->
+<div id="selectedTabDisplay" style="margin-top: 10px; font-weight: bold;"></div>
+
+<!-- Script to update display -->
+<script>
+  function updateSelectedTab() {
+    const selected = document.querySelector('input[name="size_0"]:checked');
+    document.getElementById("selectedTabDisplay").textContent = "Selected tab: " + selected.value;
+  }
+
+  // Optional: show default selection on load
+  window.onload = updateSelectedTab;
+</script>
 
 </html>

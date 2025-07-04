@@ -37,3 +37,11 @@ Feature: Radio Buttons
      When I select the radio button "Newyork" if it is not selected
      Then I should see the radio button "Chicago" is not selected
       And I should see the radio button "Newyork" is selected
+
+  Scenario: User can select radio button with size 0 by clicking on the label
+    Given I should see the radio button "True" is not selected
+      And I should see the radio button "False" is not selected
+     When I select the radio button "True"
+     Then I should see the radio button "False" is not selected
+      And I should see the radio button "True" is selected
+      And I should see the text "Selected tab: true"

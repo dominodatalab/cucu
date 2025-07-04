@@ -1,4 +1,6 @@
-from cucu import fuzzy, helpers, retry, step
+from selenium.webdriver.common.by import By
+
+from cucu import fuzzy, helpers, logger, retry, step
 from cucu.config import CONFIG
 from cucu.utils import take_saw_element_screenshot
 
@@ -90,6 +92,12 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
 
         raise Exception(f'radio button "{name}" already selected')
 
+    # @QE-17746
+    size = radio.size
+    if size["width"] == 0 and size["height"] == 0:
+        click_parent_label(ctx, radio)
+        return
+
     ctx.browser.click(radio)
 
 
@@ -123,7 +131,31 @@ def select_radio_button(ctx, radiobox):
     if selected:
         raise Exception("radiobox already selected")
 
+    # @QE-17746
+    size = radiobox.size
+    if size["width"] == 0 and size["height"] == 0:
+        click_parent_label(ctx, radiobox)
+        return
+
     ctx.browser.click(radiobox)
+
+
+def click_parent_label(ctx, radio):
+    """
+    Clicks the nearest parent <label> of a radio input (if input is visually hidden or size is zero).
+    """
+    try:
+        # Find the closest ancestor <label> element
+        label = radio.find_element(By.XPATH, "ancestor::label[1]")
+
+        if label and label.is_displayed():
+            ctx.browser.click(label)
+            logger.debug("Successfully clicked the parent label.")
+        else:
+            logger.warning("Parent label is not displayed or not found.")
+
+    except Exception as e:
+        logger.error(f"Click on parent label failed (possibly missing label ancestor): {e}")
 
 
 helpers.define_should_see_thing_with_name_steps(
