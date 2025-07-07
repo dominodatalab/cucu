@@ -302,7 +302,9 @@ def find_n_click_input_parent_label(ctx, input_element):
             logger.warning("Parent label is not displayed or not found.")
 
     except Exception as e:
-        logger.error(f"Click on parent label failed (possibly missing label ancestor): {e}")
+        logger.error(
+            f"Click on parent label failed (possibly missing label ancestor): {e}"
+        )
 
 
 def is_element_size_zero(element):
