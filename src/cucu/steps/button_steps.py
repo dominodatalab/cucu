@@ -70,7 +70,7 @@ def click_button(ctx, button):
 
     if base_steps.is_disabled(button):
         raise RuntimeError("unable to click the button, as it is disabled")
-    
+
     # @QE-17746
     if is_element_size_zero(button):
         find_n_click_input_parent_label(ctx, button)
