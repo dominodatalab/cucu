@@ -8,9 +8,8 @@ import os
 import pkgutil
 import shutil
 
-from selenium.webdriver.common.by import By
-
 import humanize
+from selenium.webdriver.common.by import By
 from tabulate import DataRow, TableFormat, tabulate
 from tenacity import (
     after_log,
@@ -286,6 +285,7 @@ def get_tab_information(ctx):
         "current_title": driver.title,
         "current_url": driver.current_url,
     }
+
 
 def find_n_click_input_parent_label(ctx, input_element):
     """
