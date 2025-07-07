@@ -8,6 +8,8 @@ import os
 import pkgutil
 import shutil
 
+from selenium.webdriver.common.by import By
+
 import humanize
 from tabulate import DataRow, TableFormat, tabulate
 from tenacity import (
@@ -284,3 +286,25 @@ def get_tab_information(ctx):
         "current_title": driver.title,
         "current_url": driver.current_url,
     }
+
+def find_n_click_input_parent_label(ctx, input_element):
+    """
+    Clicks the nearest parent <label> of an input elemnt (if input is visually hidden or size is zero).
+    """
+    try:
+        # Find the closest ancestor <label> element
+        label = input_element.find_element(By.XPATH, "ancestor::label[1]")
+
+        if label and label.is_displayed():
+            ctx.browser.click(label)
+            logger.debug("Successfully clicked the parent label.")
+        else:
+            logger.warning("Parent label is not displayed or not found.")
+
+    except Exception as e:
+        logger.error(f"Click on parent label failed (possibly missing label ancestor): {e}")
+
+
+def is_element_size_zero(element):
+    size = element.size
+    return size["width"] == 0 and size["height"] == 0

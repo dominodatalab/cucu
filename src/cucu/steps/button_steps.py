@@ -1,5 +1,9 @@
 from cucu import fuzzy, helpers
-from cucu.utils import take_saw_element_screenshot
+from cucu.utils import (
+    find_n_click_input_parent_label,
+    is_element_size_zero,
+    take_saw_element_screenshot,
+)
 
 from . import base_steps
 
@@ -66,6 +70,11 @@ def click_button(ctx, button):
 
     if base_steps.is_disabled(button):
         raise RuntimeError("unable to click the button, as it is disabled")
+    
+    # @QE-17746
+    if is_element_size_zero(button):
+        find_n_click_input_parent_label(ctx, button)
+        return
 
     ctx.browser.click(button)
 

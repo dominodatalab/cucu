@@ -1,5 +1,9 @@
 from cucu import fuzzy, helpers
-from cucu.utils import take_saw_element_screenshot
+from cucu.utils import (
+    find_n_click_input_parent_label,
+    is_element_size_zero,
+    take_saw_element_screenshot,
+)
 
 from . import base_steps
 
@@ -66,6 +70,11 @@ def check_checkbox(ctx, checkbox):
     if base_steps.is_disabled(checkbox):
         raise RuntimeError("unable to check the checkbox, as it is disabled")
 
+    # @QE-17746
+    if is_element_size_zero(checkbox):
+        find_n_click_input_parent_label(ctx, checkbox)
+        return
+
     ctx.browser.click(checkbox)
 
 
@@ -77,6 +86,11 @@ def uncheck_checkbox(ctx, checkbox):
 
     if is_not_checked(checkbox):
         raise Exception("checkbox already unchecked")
+
+    # @QE-17746
+    if is_element_size_zero(checkbox):
+        find_n_click_input_parent_label(ctx, checkbox)
+        return
 
     ctx.browser.click(checkbox)
 
