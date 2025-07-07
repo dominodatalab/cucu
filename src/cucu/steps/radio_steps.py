@@ -1,6 +1,10 @@
 from cucu import fuzzy, helpers, retry, step
 from cucu.config import CONFIG
-from cucu.utils import take_saw_element_screenshot
+from cucu.utils import (
+    find_n_click_input_parent_label,
+    is_element_size_zero,
+    take_saw_element_screenshot,
+)
 
 from . import base_steps
 
@@ -90,6 +94,10 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
 
         raise Exception(f'radio button "{name}" already selected')
 
+    if is_element_size_zero(radio):
+        find_n_click_input_parent_label(ctx, radio)
+        return
+
     ctx.browser.click(radio)
 
 
@@ -122,6 +130,10 @@ def select_radio_button(ctx, radiobox):
 
     if selected:
         raise Exception("radiobox already selected")
+
+    if is_element_size_zero(radiobox):
+        find_n_click_input_parent_label(ctx, radiobox)
+        return
 
     ctx.browser.click(radiobox)
 
