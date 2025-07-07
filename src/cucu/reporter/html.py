@@ -171,7 +171,7 @@ def generate(results, basepath, only_failures=False):
                     sub_headers.append(handler(scenario))
                 except Exception:
                     logger.warning(
-                        f"Exception while trying to run sub_headers hook for scenario: \"{scenario['name']}\"\n{traceback.format_exc()}"
+                        f'Exception while trying to run sub_headers hook for scenario: "{scenario["name"]}"\n{traceback.format_exc()}'
                     )
             scenario["sub_headers"] = "<br/>".join(sub_headers)
 
@@ -204,7 +204,7 @@ def generate(results, basepath, only_failures=False):
                     # Map the count to the appropriate HTML heading (h2-h5)
                     # We use h2-h5 instead of h1-h4 so h1 can be reserved for scenario/feature titles
                     step["heading_level"] = (
-                        f"h{step["name"][:4].count("#") + 1}"
+                        f"h{step['name'][:4].count('#') + 1}"
                     )
 
                 if os.path.exists(image_dirpath):
@@ -422,7 +422,7 @@ def generate(results, basepath, only_failures=False):
         )
 
         feature_output_filepath = os.path.join(
-            basepath, f'{feature["name"]}.html'
+            basepath, f"{feature['name']}.html"
         )
 
         with open(feature_output_filepath, "wb") as output:

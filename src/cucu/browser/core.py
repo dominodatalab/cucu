@@ -76,5 +76,5 @@ class Browser:
                 start = time.time()
                 hook(self)
                 logger.debug(
-                    f'executed page check "{name}" in {round(time.time()-start, 3)}s'
+                    f'executed page check "{name}" in {round(time.time() - start, 3)}s'
                 )

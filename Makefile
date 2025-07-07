@@ -23,6 +23,7 @@ fix:
 lint:
 	# make lint
 	# lint code
+	uv run ruff format . --check
 	uv run ruff check .
 	# pre-commit
 	SKIP=makefile uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
