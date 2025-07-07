@@ -94,7 +94,6 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
 
         raise Exception(f'radio button "{name}" already selected')
 
-    # @QE-17746
     if is_element_size_zero(radio):
         find_n_click_input_parent_label(ctx, radio)
         return
@@ -132,7 +131,6 @@ def select_radio_button(ctx, radiobox):
     if selected:
         raise Exception("radiobox already selected")
 
-    # @QE-17746
     if is_element_size_zero(radiobox):
         find_n_click_input_parent_label(ctx, radiobox)
         return

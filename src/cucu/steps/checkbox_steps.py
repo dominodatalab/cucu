@@ -70,7 +70,6 @@ def check_checkbox(ctx, checkbox):
     if base_steps.is_disabled(checkbox):
         raise RuntimeError("unable to check the checkbox, as it is disabled")
 
-    # @QE-17746
     if is_element_size_zero(checkbox):
         find_n_click_input_parent_label(ctx, checkbox)
         return
@@ -87,7 +86,6 @@ def uncheck_checkbox(ctx, checkbox):
     if is_not_checked(checkbox):
         raise Exception("checkbox already unchecked")
 
-    # @QE-17746
     if is_element_size_zero(checkbox):
         find_n_click_input_parent_label(ctx, checkbox)
         return
