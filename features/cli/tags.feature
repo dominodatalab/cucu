@@ -13,3 +13,11 @@ Feature: Tags
       [\s\S]*feature3.*1.*
       [\s\S]*scenario1.*3
       """
+
+  @cli
+  Scenario: User gets an error when no feature files are found
+    Given I run the command "cucu tags boo/nothing" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     Then I should see "{STDERR}" matches the following:
+      """
+      Error: No feature files found.
+      """
