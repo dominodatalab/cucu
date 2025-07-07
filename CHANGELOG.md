@@ -8,6 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.2.2
 - Chore - make lint also run ruff format --check
+- Add - tags command to list tags and affected scenario counts
 - Add - click parent label of an input element when the size of the input element is zero
 
 ## 1.2.1
