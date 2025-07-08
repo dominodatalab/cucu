@@ -2,7 +2,6 @@ import contextlib
 import json
 import os
 import socket
-import sqlite3
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -14,6 +13,7 @@ from cucu import (
 )
 from cucu.browser import selenium
 from cucu.config import CONFIG
+from cucu.db import create_run_database
 from cucu.page_checks import init_page_checks
 from cucu.utils import generate_short_id
 
@@ -185,7 +185,6 @@ def behave(
 def create_run(results, filepath):
     results_path = Path(results)
     run_json_filepath = results_path / "run.json"
-    run_db_filepath = results_path / "run.db"
 
     if run_json_filepath.exists():
         return
@@ -200,7 +199,6 @@ def create_run(results, filepath):
 
     run_details = {
         "cucu_run_id": cucu_run_id,
-        "filepath": filepath,
         "full_arguments": sys.argv,
         "env": env_values,
         "date": datetime.now().isoformat(),
@@ -210,37 +208,5 @@ def create_run(results, filepath):
         json.dumps(run_details, indent=2, sort_keys=True), encoding="utf8"
     )
 
-    with sqlite3.connect(run_db_filepath) as conn:
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS run_details (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                cucu_run_id TEXT UNIQUE,
-                filepath TEXT,
-                full_arguments TEXT,
-                env TEXT,
-                date TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-
-        cursor.execute(
-            """
-            INSERT INTO run_details (cucu_run_id, filepath, full_arguments, env, date)
-            VALUES (?, ?, ?, ?, ?)
-        """,
-            (
-                run_details["cucu_run_id"],
-                run_details["filepath"],
-                json.dumps(run_details["full_arguments"]),
-                json.dumps(run_details["env"])
-                if isinstance(run_details["env"], dict)
-                else run_details["env"],
-                run_details["date"],
-            ),
-        )
-
-        conn.commit()
-
-    CONFIG["RUN_DB_FILEPATH"] = run_db_filepath
+    db_filepath = create_run_database(results)
+    CONFIG["RUN_DB_FILEPATH"] = db_filepath
