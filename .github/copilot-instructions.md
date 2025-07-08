@@ -11,9 +11,7 @@
 - Files, tests and supporting files in the `/src/init_data` directory are used by `cucu init` and validated by test in the `/features` directory.
 
 ## Coding standards
-- Use `make lint` to check for code style issues.
-- Use `make fix` to fix code style issues.
-- Part of `make lint` and `make fix` is to run the `cucu lint` command that checks for code style issues of `.feature` files.
+- Use `make fix` to check and fix code style issues.
 - Add a summary to the change log for each PR, incrementing the version number if needed.
 - Keep the spec file updated
 - Avoid having much in the `__init__.py` file
