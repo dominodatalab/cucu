@@ -16,7 +16,7 @@
 - Keep the spec file updated
 - Avoid having much in the `__init__.py` file
 - Keep commands implemented in the `cli/core.py` file
-- Avoid 1-line code comments where the code is self-explanatory
+- Avoid comments where the code is self-explanatory, including obvious single-line comments
 - In general use the CONFIG to store values that are used in multiple places and ctx to store values that are shared in a scenario run
 - Avoid docstrings for functions that are obvious
 - Only import at the top of the file
