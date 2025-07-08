@@ -1,16 +1,22 @@
-import datetime
-import hashlib
 import json
 import os
+import sqlite3
 import sys
 import time
 import traceback
+from datetime import datetime
 from functools import partial
+from pathlib import Path
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
-from cucu.utils import ellipsize_filename, get_tab_information, take_screenshot
+from cucu.utils import (
+    ellipsize_filename,
+    generate_short_id,
+    get_tab_information,
+    take_screenshot,
+)
 
 CONFIG.define(
     "FEATURE_RESULTS_DIR",
@@ -46,6 +52,67 @@ def before_all(ctx):
     CONFIG["__CUCU_CTX"] = ctx
     CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
+
+    # Create worker run ID
+    CONFIG["WORKER_RUN_ID"] = worker_run_id = generate_short_id()
+
+    # Create worker-specific database file
+    if CONFIG["CUCU_RESULTS_DIR"] is not None:
+        results_path = Path(CONFIG["CUCU_RESULTS_DIR"])
+        worker_db_filepath = results_path / f"run_{worker_run_id}.db"
+
+        # Create run details for the worker database
+        env_values = (
+            dict(os.environ)
+            if CONFIG["CUCU_RECORD_ENV_VARS"]
+            else "To enable use the --record-env-vars flag"
+        )
+
+        run_details = {
+            "worker_run_id": worker_run_id,
+            "cucu_run_id": CONFIG.get("CUCU_RUN_ID", ""),
+            "filepath": getattr(ctx, "feature_filename", ""),
+            "full_arguments": sys.argv,
+            "env": env_values,
+            "date": datetime.now().isoformat(),
+        }
+
+        # Create the worker database and table
+        with sqlite3.connect(worker_db_filepath) as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS run_details (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    worker_run_id TEXT UNIQUE,
+                    cucu_run_id TEXT,
+                    filepath TEXT,
+                    full_arguments TEXT,
+                    env TEXT,
+                    date TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
+            cursor.execute(
+                """
+                INSERT INTO run_details (worker_run_id, cucu_run_id, filepath, full_arguments, env, date)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """,
+                (
+                    run_details["worker_run_id"],
+                    run_details["cucu_run_id"],
+                    run_details["filepath"],
+                    json.dumps(run_details["full_arguments"]),
+                    json.dumps(run_details["env"])
+                    if isinstance(run_details["env"], dict)
+                    else run_details["env"],
+                    run_details["date"],
+                ),
+            )
+
+            conn.commit()
+
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
         hook(ctx)
 
@@ -122,9 +189,7 @@ def before_scenario(ctx, scenario):
         logger.init_debug_logger(ctx.scenario_debug_log_file)
 
     # internal cucu config variables
-    CONFIG["SCENARIO_RUN_ID"] = hashlib.sha256(
-        str(time.perf_counter()).encode("utf-8")
-    ).hexdigest()[:7]
+    CONFIG["SCENARIO_RUN_ID"] = generate_short_id()
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
@@ -229,7 +294,7 @@ def download_browser_logs(ctx):
 
 def before_step(ctx, step):
     # trims the last 3 digits of the microseconds
-    step.start_timestamp = datetime.datetime.now().isoformat()[:-3]
+    step.start_timestamp = datetime.now().isoformat()[:-3]
 
     sys.stdout.captured()
     sys.stderr.captured()

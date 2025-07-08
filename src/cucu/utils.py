@@ -3,10 +3,12 @@ various cucu utilities can be placed here and then exposed publicly through
 the src/cucu/__init__.py
 """
 
+import hashlib
 import logging
 import os
 import pkgutil
 import shutil
+import time
 
 import humanize
 from selenium.webdriver.common.by import By
@@ -39,6 +41,16 @@ GHERKIN_TABLEFORMAT = TableFormat(
 
 class StopRetryException(Exception):
     pass
+
+
+def generate_short_id():
+    """
+    Generate a short 7-character ID based on current performance counter.
+    Used for both cucu_run_id and scenario_run_id.
+    """
+    return hashlib.sha256(
+        str(time.perf_counter()).encode("utf-8")
+    ).hexdigest()[:7]
 
 
 def format_gherkin_table(table, headings=[], prefix=""):

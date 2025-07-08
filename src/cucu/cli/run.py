@@ -1,11 +1,9 @@
 import contextlib
-import hashlib
 import json
 import os
 import socket
 import sqlite3
 import sys
-import time
 from datetime import datetime
 from pathlib import Path
 
@@ -17,6 +15,7 @@ from cucu import (
 from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
+from cucu.utils import generate_short_id
 
 
 def get_feature_name(file_path):
@@ -191,9 +190,7 @@ def create_run(results, filepath):
     if run_json_filepath.exists():
         return
 
-    CONFIG["CUCU_RUN_ID"] = cucu_run_id = hashlib.sha256(
-        str(time.perf_counter()).encode("utf-8")
-    ).hexdigest()[:7]
+    CONFIG["CUCU_RUN_ID"] = cucu_run_id = generate_short_id()
 
     env_values = (
         dict(os.environ)
@@ -245,3 +242,5 @@ def create_run(results, filepath):
         )
 
         conn.commit()
+
+    CONFIG["RUN_DB_FILEPATH"] = run_db_filepath
