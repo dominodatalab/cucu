@@ -25,3 +25,5 @@
 - Do not use relative imports
 - Use guard clauses to avoid indentation
 - Don't bulletproof code and instead let exceptions happen
+- Don't extract helper functions
+- Prefer using more modern python stdlib features like `pathlib`
