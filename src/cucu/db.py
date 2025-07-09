@@ -50,6 +50,51 @@ def create_run_database(results_dir):
     return str(db_filepath)
 
 
+def record_feature(feature):
+    """
+    Record a feature in the database.
+
+    Args:
+        feature: The feature object containing name, filename, and other details
+    """
+    db_filepath = CONFIG.get("RUN_DB_FILEPATH")
+    if not db_filepath:
+        return
+
+    with sqlite3.connect(db_filepath) as conn:
+        cursor = conn.cursor()
+
+        # Create features table if it doesn't exist
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS features (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                cucu_run_id TEXT,
+                worker_run_id TEXT,
+                name TEXT,
+                filename TEXT,
+                start_time TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (cucu_run_id) REFERENCES run_details (cucu_run_id)
+            )
+        """)
+
+        cursor.execute(
+            """
+            INSERT INTO features (cucu_run_id, worker_run_id, name, filename, start_time)
+            VALUES (?, ?, ?, ?, ?)
+        """,
+            (
+                CONFIG["CUCU_RUN_ID"],
+                CONFIG["WORKER_RUN_ID"],
+                feature.name,
+                feature.filename,
+                datetime.now().isoformat(),
+            ),
+        )
+
+        conn.commit()
+
+
 def _get_env_values():
     """Get environment values based on configuration."""
     return (

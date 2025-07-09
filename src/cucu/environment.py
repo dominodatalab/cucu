@@ -8,7 +8,7 @@ from functools import partial
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
-from cucu.db import create_run_database
+from cucu.db import create_run_database, record_feature
 from cucu.page_checks import init_page_checks
 from cucu.utils import (
     ellipsize_filename,
@@ -52,7 +52,8 @@ def before_all(ctx):
     CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
 
-    create_run_database(CONFIG["CUCU_RESULTS_DIR"])
+    db_filepath = create_run_database(CONFIG["CUCU_RESULTS_DIR"])
+    CONFIG["RUN_DB_FILEPATH"] = db_filepath
 
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
         hook(ctx)
@@ -65,6 +66,8 @@ def after_all(ctx):
 
 
 def before_feature(ctx, feature):
+    record_feature(feature)
+
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         results_dir = config.CONFIG["CUCU_RESULTS_DIR"]
         ctx.feature_dir = os.path.join(
