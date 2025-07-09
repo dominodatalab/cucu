@@ -25,3 +25,4 @@
 - Don't bulletproof code and instead let exceptions happen
 - Don't extract helper functions
 - Prefer using more modern python stdlib features like `pathlib`
+- Use the default results folder and don't use the `--results` argument in examples and tests
