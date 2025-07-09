@@ -184,7 +184,7 @@ def behave(
 
 def create_run(results, filepath):
     results_path = Path(results)
-    run_json_filepath = results_path / "run.json"
+    run_json_filepath = results_path / "run_details.json"
 
     if run_json_filepath.exists():
         return
@@ -199,6 +199,7 @@ def create_run(results, filepath):
 
     run_details = {
         "cucu_run_id": cucu_run_id,
+        "filepath": filepath,
         "full_arguments": sys.argv,
         "env": env_values,
         "date": datetime.now().isoformat(),
