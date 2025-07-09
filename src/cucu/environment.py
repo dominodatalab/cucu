@@ -52,8 +52,7 @@ def before_all(ctx):
     CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
 
-    if CONFIG["CUCU_RESULTS_DIR"] is not None:
-        create_run_database(CONFIG["CUCU_RESULTS_DIR"])
+    create_run_database(CONFIG["CUCU_RESULTS_DIR"])
 
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
         hook(ctx)
