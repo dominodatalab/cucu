@@ -3,7 +3,6 @@ Database creation and management utilities for cucu.
 """
 
 import json
-import os
 import sqlite3
 import sys
 from datetime import datetime
@@ -41,7 +40,6 @@ def create_run_database(results_dir):
         "cucu_run_id": cucu_run_id,
         "worker_run_id": worker_run_id,
         "full_arguments": sys.argv,
-        "env": _get_env_values(),
         "date": datetime.now().isoformat(),
     }
 
@@ -61,30 +59,30 @@ def record_feature(feature):
     if not db_filepath:
         return
 
+    feature_run_id = generate_short_id()
+
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
         # Create features table if it doesn't exist
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS features (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                cucu_run_id TEXT,
+                feature_run_id TEXT PRIMARY KEY,
                 worker_run_id TEXT,
                 name TEXT,
                 filename TEXT,
-                start_time TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (cucu_run_id) REFERENCES run_details (cucu_run_id)
+                started_at TIMESTAMP,
+                FOREIGN KEY (worker_run_id) REFERENCES workers (worker_run_id)
             )
         """)
 
         cursor.execute(
             """
-            INSERT INTO features (cucu_run_id, worker_run_id, name, filename, start_time)
+            INSERT INTO features (feature_run_id, worker_run_id, name, filename, started_at)
             VALUES (?, ?, ?, ?, ?)
         """,
             (
-                CONFIG["CUCU_RUN_ID"],
+                feature_run_id,
                 CONFIG["WORKER_RUN_ID"],
                 feature.name,
                 feature.filename,
@@ -95,44 +93,50 @@ def record_feature(feature):
         conn.commit()
 
 
-def _get_env_values():
-    """Get environment values based on configuration."""
-    return (
-        dict(os.environ)
-        if CONFIG["CUCU_RECORD_ENV_VARS"]
-        else "To enable use the --record-env-vars flag"
-    )
-
-
 def _create_run_database_table(db_filepath, run_details):
     """Create a run database with run details using unified table structure."""
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS run_details (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                cucu_run_id TEXT,
-                worker_run_id TEXT,
+            CREATE TABLE IF NOT EXISTS cucu_run (
+                cucu_run_id TEXT PRIMARY KEY,
                 full_arguments TEXT,
-                env TEXT,
                 date TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                started_at TIMESTAMP
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS workers (
+                worker_run_id TEXT PRIMARY KEY,
+                cucu_run_id TEXT,
+                started_at TIMESTAMP,
+                FOREIGN KEY (cucu_run_id) REFERENCES cucu_run (cucu_run_id)
             )
         """)
 
         cursor.execute(
             """
-            INSERT INTO run_details (cucu_run_id, worker_run_id, full_arguments, env, date)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO cucu_run (cucu_run_id, full_arguments, date, started_at)
+            VALUES (?, ?, ?, ?)
         """,
             (
                 run_details["cucu_run_id"],
-                run_details["worker_run_id"],
                 json.dumps(run_details["full_arguments"]),
-                json.dumps(run_details["env"])
-                if isinstance(run_details["env"], dict)
-                else run_details["env"],
+                run_details["date"],
+                run_details["date"],
+            ),
+        )
+
+        cursor.execute(
+            """
+            INSERT INTO workers (worker_run_id, cucu_run_id, started_at)
+            VALUES (?, ?, ?)
+        """,
+            (
+                run_details["worker_run_id"],
+                run_details["cucu_run_id"],
                 run_details["date"],
             ),
         )
