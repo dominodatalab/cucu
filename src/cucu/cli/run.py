@@ -189,7 +189,7 @@ def create_run(results, filepath):
     if run_json_filepath.exists():
         return
 
-    CONFIG["CUCU_RUN_ID"] = cucu_run_id = generate_short_id()
+    cucu_run_id = CONFIG["CUCU_RUN_ID"]
 
     env_values = (
         dict(os.environ)

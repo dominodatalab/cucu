@@ -51,11 +51,10 @@ def before_all(ctx):
     CONFIG["__CUCU_CTX"] = ctx
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
 
-    CONFIG["CUCU_RUN_ID"] = generate_short_id()
-    CONFIG.snapshot()
     CONFIG["WORKER_RUN_ID"] = generate_short_id()
     db_filepath = create_run_database(CONFIG["CUCU_RESULTS_DIR"])
     CONFIG["RUN_DB_FILEPATH"] = db_filepath
+    CONFIG.snapshot()
 
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
         hook(ctx)
