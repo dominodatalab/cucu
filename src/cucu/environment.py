@@ -72,7 +72,7 @@ def after_all(ctx):
 
 
 def before_feature(ctx, feature):
-    CONFIG["FEATURE_RUN_ID"] = generate_short_id()
+    CONFIG["FEATURE_RUN_ID"] = feature.feature_run_id = generate_short_id()
     record_feature(feature)
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
@@ -139,7 +139,7 @@ def before_scenario(ctx, scenario):
         sys.stderr.set_other_stream(ctx.scenario_debug_log_file)
         logger.init_debug_logger(ctx.scenario_debug_log_file)
 
-    CONFIG["SCENARIO_RUN_ID"] = generate_short_id()
+    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id()
     record_scenario(scenario)
 
     # run before all scenario hooks
@@ -246,6 +246,7 @@ def download_browser_logs(ctx):
 def before_step(ctx, step):
     # trims the last 3 digits of the microseconds
     step.start_timestamp = datetime.now().isoformat()[:-3]
+    step.step_run_id = generate_short_id()
 
     sys.stdout.captured()
     sys.stderr.captured()
@@ -313,4 +314,4 @@ def after_step(ctx, step):
     for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
         hook(ctx)
 
-    record_step(step, step.status.name, ctx.previous_step_duration)
+    record_step(ctx.scenario, step, ctx.previous_step_duration)

@@ -50,8 +50,6 @@ def record_feature(feature):
     if not db_filepath:
         return
 
-    feature_run_id = CONFIG["FEATURE_RUN_ID"]
-
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
@@ -72,7 +70,7 @@ def record_feature(feature):
             VALUES (?, ?, ?, ?, ?)
         """,
             (
-                feature_run_id,
+                feature.feature_run_id,
                 CONFIG["WORKER_RUN_ID"],
                 feature.name,
                 feature.filename,
@@ -94,8 +92,6 @@ def record_scenario(scenario):
     if not db_filepath:
         return
 
-    scenario_run_id = CONFIG["SCENARIO_RUN_ID"]
-
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
@@ -115,8 +111,8 @@ def record_scenario(scenario):
             VALUES (?, ?, ?, ?)
         """,
             (
-                scenario_run_id,
-                CONFIG.get("FEATURE_RUN_ID"),
+                scenario.scenario_run_id,
+                scenario.feature.feature_run_id,
                 scenario.name,
                 datetime.now().isoformat(),
             ),
@@ -125,22 +121,17 @@ def record_scenario(scenario):
         conn.commit()
 
 
-def record_step(step, status, duration):
+def record_step(scenario, step, duration):
     """
     Record a step in the database.
 
     Args:
         step: The step object containing name and other details
-        status: The step status (passed, failed, skipped, etc.)
         duration: The step duration in seconds
     """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
     if not db_filepath:
         return
-
-    from cucu.utils import generate_short_id
-
-    step_run_id = generate_short_id()
 
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
@@ -163,10 +154,10 @@ def record_step(step, status, duration):
             VALUES (?, ?, ?, ?, ?, ?)
         """,
             (
-                step_run_id,
-                CONFIG.get("SCENARIO_RUN_ID"),
+                step.step_run_id,
+                scenario.scenario_run_id,
                 step.name,
-                status,
+                step.status.name,
                 duration,
                 step.start_timestamp
                 if hasattr(step, "start_timestamp")
