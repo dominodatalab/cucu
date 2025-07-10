@@ -10,9 +10,10 @@ from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.db import (
     create_run_database,
+    finish_step_record,
     record_feature,
     record_scenario,
-    record_step,
+    start_step_record,
 )
 from cucu.page_checks import init_page_checks
 from cucu.utils import (
@@ -257,6 +258,8 @@ def before_step(ctx, step):
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
+    start_step_record(ctx.scenario, step)
+
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
         hook(ctx)
@@ -314,4 +317,4 @@ def after_step(ctx, step):
     for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
         hook(ctx)
 
-    record_step(ctx.scenario, step, ctx.previous_step_duration)
+    finish_step_record(step, ctx.previous_step_duration)

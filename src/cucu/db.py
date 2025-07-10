@@ -121,13 +121,13 @@ def record_scenario(scenario):
         conn.commit()
 
 
-def record_step(scenario, step, duration):
+def start_step_record(scenario, step):
     """
-    Record a step in the database.
+    Start recording a step in the database.
 
     Args:
+        scenario: The scenario object containing scenario_run_id
         step: The step object containing name and other details
-        duration: The step duration in seconds
     """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
     if not db_filepath:
@@ -144,21 +144,20 @@ def record_step(scenario, step, duration):
                 status TEXT,
                 duration REAL,
                 started_at TIMESTAMP,
+                finished_at TIMESTAMP,
                 FOREIGN KEY (scenario_run_id) REFERENCES scenarios (scenario_run_id)
             )
         """)
 
         cursor.execute(
             """
-            INSERT INTO steps (step_run_id, scenario_run_id, name, status, duration, started_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO steps (step_run_id, scenario_run_id, name, started_at)
+            VALUES (?, ?, ?, ?)
         """,
             (
                 step.step_run_id,
                 scenario.scenario_run_id,
                 step.name,
-                step.status.name,
-                duration,
                 step.start_timestamp
                 if hasattr(step, "start_timestamp")
                 else datetime.now().isoformat(),
@@ -166,6 +165,39 @@ def record_step(scenario, step, duration):
         )
 
         conn.commit()
+
+
+def finish_step_record(step, duration):
+    """
+    Finish recording a step in the database by updating status, duration, and finished_at.
+
+    Args:
+        step: The step object containing step_run_id, status and other details
+        duration: The step duration in seconds
+    """
+    db_filepath = CONFIG.get("RUN_DB_FILEPATH")
+    if not db_filepath:
+        return
+
+    with sqlite3.connect(db_filepath) as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            UPDATE steps 
+            SET status = ?, duration = ?, finished_at = ?
+            WHERE step_run_id = ?
+        """,
+            (
+                step.status.name,
+                duration,
+                datetime.now().isoformat(),
+                step.step_run_id,
+            ),
+        )
+
+        conn.commit()
+
 
 
 def _create_run_database_table(db_filepath, run_details):
