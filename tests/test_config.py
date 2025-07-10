@@ -44,13 +44,99 @@ def test_config_resolve_leaves_unresolved_variables():
     assert CONFIG.resolve("{NOT_SET}") == ""
 
 
-def test_config_snapshot_and_restore_works():
+def test_config_push_and_pop_works():
     CONFIG["FOO"] = None
-    CONFIG.snapshot()
+    CONFIG.push()
     CONFIG["FOO"] = "bar"
     assert CONFIG["FOO"] == "bar"
-    CONFIG.restore()
+    CONFIG.pop()
     assert CONFIG["FOO"] is None
+
+
+def test_config_nested_push_and_pop():
+    CONFIG["VAR1"] = "original1"
+    CONFIG["VAR2"] = "original2"
+
+    # First level
+    CONFIG.push()
+    CONFIG["VAR1"] = "level1_1"
+    CONFIG["VAR2"] = "level1_2"
+    assert CONFIG["VAR1"] == "level1_1"
+    assert CONFIG["VAR2"] == "level1_2"
+
+    # Second level
+    CONFIG.push()
+    CONFIG["VAR1"] = "level2_1"
+    CONFIG["VAR3"] = "level2_3"
+    assert CONFIG["VAR1"] == "level2_1"
+    assert CONFIG["VAR2"] == "level1_2"  # Should maintain from previous level
+    assert CONFIG["VAR3"] == "level2_3"
+
+    # Pop back to first level
+    CONFIG.pop()
+    assert CONFIG["VAR1"] == "level1_1"
+    assert CONFIG["VAR2"] == "level1_2"
+    assert CONFIG["VAR3"] is None  # Should be cleared
+
+    # Pop back to original
+    CONFIG.pop()
+    assert CONFIG["VAR1"] == "original1"
+    assert CONFIG["VAR2"] == "original2"
+
+
+def test_config_pop_empty_stack_raises_error():
+    # Clear any existing stack
+    while CONFIG.snapshot_stack:
+        CONFIG.snapshot_stack.pop()
+
+    with pytest.raises(
+        RuntimeError, match="No config snapshots available to pop"
+    ):
+        CONFIG.pop()
+
+
+def test_config_multiple_push_pop_operations():
+    CONFIG["TEST"] = "initial"
+
+    # Test multiple push/pop cycles
+    for i in range(3):
+        CONFIG.push()
+        CONFIG["TEST"] = f"level_{i}"
+        assert CONFIG["TEST"] == f"level_{i}"
+
+    # Pop them all back
+    for i in range(2, -1, -1):
+        CONFIG.pop()
+        if i > 0:
+            assert CONFIG["TEST"] == f"level_{i - 1}"
+        else:
+            assert CONFIG["TEST"] == "initial"
+
+
+def test_config_push_preserves_all_variables():
+    # Set multiple variables
+    CONFIG["A"] = "value_a"
+    CONFIG["B"] = "value_b"
+    CONFIG["C"] = "value_c"
+
+    CONFIG.push()
+
+    # Modify some, add new ones
+    CONFIG["A"] = "new_a"
+    CONFIG["D"] = "new_d"
+    del CONFIG["B"]  # Remove one
+
+    assert CONFIG["A"] == "new_a"
+    assert CONFIG["B"] is None
+    assert CONFIG["C"] == "value_c"
+    assert CONFIG["D"] == "new_d"
+
+    # Pop should restore everything
+    CONFIG.pop()
+    assert CONFIG["A"] == "value_a"
+    assert CONFIG["B"] == "value_b"
+    assert CONFIG["C"] == "value_c"
+    assert CONFIG["D"] is None
 
 
 def test_config_can_load_an_empty_config():

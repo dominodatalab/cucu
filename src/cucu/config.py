@@ -15,6 +15,7 @@ class Config(dict):
         self.resolving = False
         self.defined_variables = {}
         self.variable_lookups = {}
+        self.snapshot_stack = []
 
     def define(self, name, description, default=None):
         """
@@ -255,19 +256,23 @@ class Config(dict):
 
         return string
 
-    def snapshot(self):
+    def push(self):
         """
-        make a shallow copy of the current config values which can later be
-        restored using the `restore` method.
+        Push the current config values onto a stack for later restoration
+        using the `pop` method.
         """
-        self.snapshot_data = self.copy()
+        self.snapshot_stack.append(self.copy())
 
-    def restore(self):
+    def pop(self):
         """
-        restore a previous `snapshot`
+        Restore the most recent `push` from the stack.
         """
+        if not self.snapshot_stack:
+            raise RuntimeError("No config snapshots available to pop")
+
+        snapshot_data = self.snapshot_stack.pop()
         self.clear()
-        self.update(**self.snapshot_data)
+        self.update(**snapshot_data)
 
     def register_custom_variable_handling(self, regex, lookup):
         """

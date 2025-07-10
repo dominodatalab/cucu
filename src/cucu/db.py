@@ -55,7 +55,6 @@ def record_feature(feature):
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
-        # Create features table if it doesn't exist
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS features (
                 feature_run_id TEXT PRIMARY KEY,
@@ -100,7 +99,6 @@ def record_scenario(scenario):
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
-        # Create scenarios table if it doesn't exist
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS scenarios (
                 scenario_run_id TEXT PRIMARY KEY,
@@ -121,6 +119,58 @@ def record_scenario(scenario):
                 CONFIG.get("FEATURE_RUN_ID"),
                 scenario.name,
                 datetime.now().isoformat(),
+            ),
+        )
+
+        conn.commit()
+
+
+def record_step(step, status, duration):
+    """
+    Record a step in the database.
+
+    Args:
+        step: The step object containing name and other details
+        status: The step status (passed, failed, skipped, etc.)
+        duration: The step duration in seconds
+    """
+    db_filepath = CONFIG.get("RUN_DB_FILEPATH")
+    if not db_filepath:
+        return
+
+    from cucu.utils import generate_short_id
+
+    step_run_id = generate_short_id()
+
+    with sqlite3.connect(db_filepath) as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS steps (
+                step_run_id TEXT PRIMARY KEY,
+                scenario_run_id TEXT,
+                name TEXT,
+                status TEXT,
+                duration REAL,
+                started_at TIMESTAMP,
+                FOREIGN KEY (scenario_run_id) REFERENCES scenarios (scenario_run_id)
+            )
+        """)
+
+        cursor.execute(
+            """
+            INSERT INTO steps (step_run_id, scenario_run_id, name, status, duration, started_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """,
+            (
+                step_run_id,
+                CONFIG.get("SCENARIO_RUN_ID"),
+                step.name,
+                status,
+                duration,
+                step.start_timestamp
+                if hasattr(step, "start_timestamp")
+                else datetime.now().isoformat(),
             ),
         )
 
