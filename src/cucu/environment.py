@@ -59,14 +59,13 @@ def before_all(ctx):
     CONFIG["WORKER_RUN_ID"] = generate_short_id()
     db_filepath = create_run_database(CONFIG["CUCU_RESULTS_DIR"])
     CONFIG["RUN_DB_FILEPATH"] = db_filepath
-    CONFIG.push()
+    CONFIG.snapshot()
 
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
         hook(ctx)
 
 
 def after_all(ctx):
-    CONFIG.pop()
     # run the after all hooks
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
         hook(ctx)
@@ -83,17 +82,15 @@ def before_feature(ctx, feature):
         )
         CONFIG["FEATURE_RESULTS_DIR"] = ctx.feature_dir
 
-    CONFIG.push()
-
 
 def after_feature(ctx, feature):
-    CONFIG.pop()
+    pass
 
 
 def before_scenario(ctx, scenario):
     # we want every scenario to start with the exact same reinitialized config
     # values and not really bleed values between scenario runs
-    CONFIG.push()
+    CONFIG.restore()
 
     # we should load any cucurc.yml files in the path to the feature file
     # we are about to run so that the config values set for this feature are
@@ -205,8 +202,6 @@ def after_scenario(ctx, scenario):
     )
     with open(cucu_config_filepath, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
-
-    CONFIG.pop()
 
 
 def download_mht_data(ctx):
