@@ -15,7 +15,6 @@ from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.db import create_run_database
 from cucu.page_checks import init_page_checks
-from cucu.utils import generate_short_id
 
 
 def get_feature_name(file_path):
