@@ -1,7 +1,6 @@
 import json
 import os
 import sys
-import time
 import traceback
 from datetime import datetime
 from functools import partial
@@ -10,6 +9,7 @@ from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.db import (
     create_run_database,
+    finish_scenario_record,
     finish_step_record,
     record_feature,
     record_scenario,
@@ -107,6 +107,7 @@ def before_scenario(ctx, scenario):
 
     # reset the step timer dictionary
     ctx.step_timers = {}
+    scenario.start_time = datetime.now().isoformat()[:-3]
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         ctx.scenario_dir = os.path.join(
@@ -204,6 +205,9 @@ def after_scenario(ctx, scenario):
     with open(cucu_config_filepath, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
 
+    scenario.end_time = datetime.now().isoformat()[:-3]
+    finish_scenario_record(scenario)
+
 
 def download_mht_data(ctx):
     if not ctx.browsers:
@@ -245,16 +249,14 @@ def download_browser_logs(ctx):
 
 
 def before_step(ctx, step):
-    # trims the last 3 digits of the microseconds
-    step.start_timestamp = datetime.now().isoformat()[:-3]
     step.step_run_id = generate_short_id()
+    step.start_time = datetime.now().isoformat()[:-3]
 
     sys.stdout.captured()
     sys.stderr.captured()
 
     ctx.current_step = step
     ctx.current_step.has_substeps = False
-    ctx.start_time = time.monotonic()
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
@@ -269,8 +271,12 @@ def after_step(ctx, step):
     step.stdout = sys.stdout.captured()
     step.stderr = sys.stderr.captured()
 
-    ctx.end_time = time.monotonic()
-    ctx.previous_step_duration = ctx.end_time - ctx.start_time
+    step.end_time = datetime.now().isoformat()[:-3]
+
+    # calculate duration from ISO timestamps
+    start_dt = datetime.fromisoformat(step.start_time)
+    end_dt = datetime.fromisoformat(step.end_time)
+    ctx.previous_step_duration = (end_dt - start_dt).total_seconds()
 
     # when set this means we're running in parallel mode using --workers and
     # we want to see progress reported using simply dots

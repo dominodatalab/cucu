@@ -100,7 +100,10 @@ def record_scenario(scenario):
                 scenario_run_id TEXT PRIMARY KEY,
                 feature_run_id TEXT,
                 name TEXT,
+                status TEXT,
+                duration REAL,
                 started_at TIMESTAMP,
+                finished_at TIMESTAMP,
                 FOREIGN KEY (feature_run_id) REFERENCES features (feature_run_id)
             )
         """)
@@ -114,7 +117,7 @@ def record_scenario(scenario):
                 scenario.scenario_run_id,
                 scenario.feature.feature_run_id,
                 scenario.name,
-                datetime.now().isoformat(),
+                scenario.start_time,
             ),
         )
 
@@ -158,9 +161,7 @@ def start_step_record(scenario, step):
                 step.step_run_id,
                 scenario.scenario_run_id,
                 step.name,
-                step.start_timestamp
-                if hasattr(step, "start_timestamp")
-                else datetime.now().isoformat(),
+                step.start_time,
             ),
         )
 
@@ -191,13 +192,48 @@ def finish_step_record(step, duration):
             (
                 step.status.name,
                 duration,
-                datetime.now().isoformat(),
+                step.end_time,
                 step.step_run_id,
             ),
         )
 
         conn.commit()
 
+
+def finish_scenario_record(scenario):
+    """
+    Finish recording a scenario in the database by updating status, duration, and finished_at.
+
+    Args:
+        scenario: The scenario object containing scenario_run_id, status and other details
+    """
+    db_filepath = CONFIG.get("RUN_DB_FILEPATH")
+    if not db_filepath:
+        return
+
+    # calculate duration from ISO timestamps
+    start_dt = datetime.fromisoformat(scenario.start_time)
+    end_dt = datetime.fromisoformat(scenario.end_time)
+    duration = (end_dt - start_dt).total_seconds()
+
+    with sqlite3.connect(db_filepath) as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            UPDATE scenarios 
+            SET status = ?, duration = ?, finished_at = ?
+            WHERE scenario_run_id = ?
+        """,
+            (
+                scenario.status.name,
+                duration,
+                scenario.end_time,
+                scenario.scenario_run_id,
+            ),
+        )
+
+        conn.commit()
 
 
 def _create_run_database_table(db_filepath, run_details):
