@@ -9,7 +9,6 @@ from datetime import datetime
 from pathlib import Path
 
 from cucu.config import CONFIG
-from cucu.utils import generate_short_id
 
 
 def create_run_database(results_dir):
@@ -24,16 +23,9 @@ def create_run_database(results_dir):
     """
     results_path = Path(results_dir)
 
-    # Get or create cucu run ID
-    cucu_run_id = CONFIG.get("CUCU_RUN_ID")
-    if not cucu_run_id:
-        CONFIG["CUCU_RUN_ID"] = cucu_run_id = generate_short_id()
 
-    # Generate worker run ID
-    worker_run_id = generate_short_id()
-    CONFIG["WORKER_RUN_ID"] = worker_run_id
-
-    # Create database filepath
+    worker_run_id = CONFIG["WORKER_RUN_ID"]
+    cucu_run_id = CONFIG["CUCU_RUN_ID"]
     db_filepath = results_path / f"run_{cucu_run_id}_{worker_run_id}.db"
 
     run_details = {
@@ -59,7 +51,7 @@ def record_feature(feature):
     if not db_filepath:
         return
 
-    feature_run_id = generate_short_id()
+    feature_run_id = CONFIG["FEATURE_RUN_ID"]
 
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
@@ -86,6 +78,49 @@ def record_feature(feature):
                 CONFIG["WORKER_RUN_ID"],
                 feature.name,
                 feature.filename,
+                datetime.now().isoformat(),
+            ),
+        )
+
+        conn.commit()
+
+
+def record_scenario(scenario):
+    """
+    Record a scenario in the database.
+
+    Args:
+        scenario: The scenario object containing name and other details
+    """
+    db_filepath = CONFIG.get("RUN_DB_FILEPATH")
+    if not db_filepath:
+        return
+
+    scenario_run_id = CONFIG["SCENARIO_RUN_ID"]
+
+    with sqlite3.connect(db_filepath) as conn:
+        cursor = conn.cursor()
+
+        # Create scenarios table if it doesn't exist
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS scenarios (
+                scenario_run_id TEXT PRIMARY KEY,
+                feature_run_id TEXT,
+                name TEXT,
+                started_at TIMESTAMP,
+                FOREIGN KEY (feature_run_id) REFERENCES features (feature_run_id)
+            )
+        """)
+
+        cursor.execute(
+            """
+            INSERT INTO scenarios (scenario_run_id, feature_run_id, name, started_at)
+            VALUES (?, ?, ?, ?)
+        """,
+            (
+                scenario_run_id,
+                CONFIG.get("FEATURE_RUN_ID"),
+                scenario.name,
                 datetime.now().isoformat(),
             ),
         )

@@ -8,7 +8,7 @@ from functools import partial
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
-from cucu.db import create_run_database, record_feature
+from cucu.db import create_run_database, record_feature, record_scenario
 from cucu.page_checks import init_page_checks
 from cucu.utils import (
     ellipsize_filename,
@@ -49,9 +49,11 @@ def check_browser_initialized(ctx):
 
 def before_all(ctx):
     CONFIG["__CUCU_CTX"] = ctx
-    CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
 
+    CONFIG["CUCU_RUN_ID"] = generate_short_id()
+    CONFIG.snapshot()
+    CONFIG["WORKER_RUN_ID"] = generate_short_id()
     db_filepath = create_run_database(CONFIG["CUCU_RESULTS_DIR"])
     CONFIG["RUN_DB_FILEPATH"] = db_filepath
 
@@ -66,6 +68,7 @@ def after_all(ctx):
 
 
 def before_feature(ctx, feature):
+    CONFIG["FEATURE_RUN_ID"] = generate_short_id()
     record_feature(feature)
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
@@ -132,8 +135,8 @@ def before_scenario(ctx, scenario):
         sys.stderr.set_other_stream(ctx.scenario_debug_log_file)
         logger.init_debug_logger(ctx.scenario_debug_log_file)
 
-    # internal cucu config variables
     CONFIG["SCENARIO_RUN_ID"] = generate_short_id()
+    record_scenario(scenario)
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
