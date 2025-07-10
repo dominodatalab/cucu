@@ -23,7 +23,6 @@ def create_run_database(results_dir):
     """
     results_path = Path(results_dir)
 
-
     worker_run_id = CONFIG["WORKER_RUN_ID"]
     cucu_run_id = CONFIG["CUCU_RUN_ID"]
     db_filepath = results_path / f"run_{cucu_run_id}_{worker_run_id}.db"
