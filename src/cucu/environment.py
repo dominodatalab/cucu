@@ -9,8 +9,10 @@ from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.db import (
     create_run_database,
+    finish_feature_record,
     finish_scenario_record,
     finish_step_record,
+    finish_worker_record,
     record_feature,
     record_scenario,
     start_step_record,
@@ -70,6 +72,8 @@ def after_all(ctx):
     # run the after all hooks
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
         hook(ctx)
+    
+    finish_worker_record()
 
 
 def before_feature(ctx, feature):
@@ -85,7 +89,7 @@ def before_feature(ctx, feature):
 
 
 def after_feature(ctx, feature):
-    pass
+    finish_feature_record(feature)
 
 
 def before_scenario(ctx, scenario):
@@ -107,7 +111,7 @@ def before_scenario(ctx, scenario):
 
     # reset the step timer dictionary
     ctx.step_timers = {}
-    scenario.start_time = datetime.now().isoformat()[:-3]
+    scenario.start_at = datetime.now().isoformat()[:-3]
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         ctx.scenario_dir = os.path.join(
@@ -205,7 +209,7 @@ def after_scenario(ctx, scenario):
     with open(cucu_config_filepath, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
 
-    scenario.end_time = datetime.now().isoformat()[:-3]
+    scenario.end_at = datetime.now().isoformat()[:-3]
     finish_scenario_record(scenario)
 
 
@@ -250,7 +254,7 @@ def download_browser_logs(ctx):
 
 def before_step(ctx, step):
     step.step_run_id = generate_short_id()
-    step.start_time = datetime.now().isoformat()[:-3]
+    step.start_at = datetime.now().isoformat()[:-3]
 
     sys.stdout.captured()
     sys.stderr.captured()
@@ -271,12 +275,12 @@ def after_step(ctx, step):
     step.stdout = sys.stdout.captured()
     step.stderr = sys.stderr.captured()
 
-    step.end_time = datetime.now().isoformat()[:-3]
+    step.end_at = datetime.now().isoformat()[:-3]
 
     # calculate duration from ISO timestamps
-    start_dt = datetime.fromisoformat(step.start_time)
-    end_dt = datetime.fromisoformat(step.end_time)
-    ctx.previous_step_duration = (end_dt - start_dt).total_seconds()
+    start_at = datetime.fromisoformat(step.start_at)
+    end_at = datetime.fromisoformat(step.end_at)
+    ctx.previous_step_duration = (end_at - start_at).total_seconds()
 
     # when set this means we're running in parallel mode using --workers and
     # we want to see progress reported using simply dots

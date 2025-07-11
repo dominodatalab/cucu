@@ -59,14 +59,15 @@ def record_feature(feature):
                 worker_run_id TEXT,
                 name TEXT,
                 filename TEXT,
-                started_at TIMESTAMP,
+                start_at TIMESTAMP,
+                end_at TIMESTAMP,
                 FOREIGN KEY (worker_run_id) REFERENCES workers (worker_run_id)
             )
         """)
 
         cursor.execute(
             """
-            INSERT INTO features (feature_run_id, worker_run_id, name, filename, started_at)
+            INSERT INTO features (feature_run_id, worker_run_id, name, filename, start_at)
             VALUES (?, ?, ?, ?, ?)
         """,
             (
@@ -102,22 +103,22 @@ def record_scenario(scenario):
                 name TEXT,
                 status TEXT,
                 duration REAL,
-                started_at TIMESTAMP,
-                finished_at TIMESTAMP,
+                start_at TIMESTAMP,
+                end_at TIMESTAMP,
                 FOREIGN KEY (feature_run_id) REFERENCES features (feature_run_id)
             )
         """)
 
         cursor.execute(
             """
-            INSERT INTO scenarios (scenario_run_id, feature_run_id, name, started_at)
+            INSERT INTO scenarios (scenario_run_id, feature_run_id, name, start_at)
             VALUES (?, ?, ?, ?)
         """,
             (
                 scenario.scenario_run_id,
                 scenario.feature.feature_run_id,
                 scenario.name,
-                scenario.start_time,
+                scenario.start_at,
             ),
         )
 
@@ -146,22 +147,22 @@ def start_step_record(scenario, step):
                 name TEXT,
                 status TEXT,
                 duration REAL,
-                started_at TIMESTAMP,
-                finished_at TIMESTAMP,
+                start_at TIMESTAMP,
+                end_at TIMESTAMP,
                 FOREIGN KEY (scenario_run_id) REFERENCES scenarios (scenario_run_id)
             )
         """)
 
         cursor.execute(
             """
-            INSERT INTO steps (step_run_id, scenario_run_id, name, started_at)
+            INSERT INTO steps (step_run_id, scenario_run_id, name, start_at)
             VALUES (?, ?, ?, ?)
         """,
             (
                 step.step_run_id,
                 scenario.scenario_run_id,
                 step.name,
-                step.start_time,
+                step.start_at,
             ),
         )
 
@@ -170,7 +171,7 @@ def start_step_record(scenario, step):
 
 def finish_step_record(step, duration):
     """
-    Finish recording a step in the database by updating status, duration, and finished_at.
+    Finish recording a step in the database by updating status, duration, and end_at.
 
     Args:
         step: The step object containing step_run_id, status and other details
@@ -186,13 +187,13 @@ def finish_step_record(step, duration):
         cursor.execute(
             """
             UPDATE steps 
-            SET status = ?, duration = ?, finished_at = ?
+            SET status = ?, duration = ?, end_at = ?
             WHERE step_run_id = ?
         """,
             (
                 step.status.name,
                 duration,
-                step.end_time,
+                step.end_at,
                 step.step_run_id,
             ),
         )
@@ -202,7 +203,7 @@ def finish_step_record(step, duration):
 
 def finish_scenario_record(scenario):
     """
-    Finish recording a scenario in the database by updating status, duration, and finished_at.
+    Finish recording a scenario in the database by updating status, duration, and end_at.
 
     Args:
         scenario: The scenario object containing scenario_run_id, status and other details
@@ -212,8 +213,8 @@ def finish_scenario_record(scenario):
         return
 
     # calculate duration from ISO timestamps
-    start_dt = datetime.fromisoformat(scenario.start_time)
-    end_dt = datetime.fromisoformat(scenario.end_time)
+    start_dt = datetime.fromisoformat(scenario.start_at)
+    end_dt = datetime.fromisoformat(scenario.end_at)
     duration = (end_dt - start_dt).total_seconds()
 
     with sqlite3.connect(db_filepath) as conn:
@@ -222,14 +223,69 @@ def finish_scenario_record(scenario):
         cursor.execute(
             """
             UPDATE scenarios 
-            SET status = ?, duration = ?, finished_at = ?
+            SET status = ?, duration = ?, end_at = ?
             WHERE scenario_run_id = ?
         """,
             (
                 scenario.status.name,
                 duration,
-                scenario.end_time,
+                scenario.end_at,
                 scenario.scenario_run_id,
+            ),
+        )
+
+        conn.commit()
+
+
+def finish_feature_record(feature):
+    """
+    Finish recording a feature in the database by updating end_at timestamp.
+
+    Args:
+        feature: The feature object containing feature_run_id and other details
+    """
+    db_filepath = CONFIG.get("RUN_DB_FILEPATH")
+    if not db_filepath:
+        return
+
+    with sqlite3.connect(db_filepath) as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            UPDATE features 
+            SET end_at = ?
+            WHERE feature_run_id = ?
+        """,
+            (
+                datetime.now().isoformat(),
+                feature.feature_run_id,
+            ),
+        )
+
+        conn.commit()
+
+
+def finish_worker_record():
+    """
+    Finish recording a worker in the database by updating end_at timestamp.
+    """
+    db_filepath = CONFIG.get("RUN_DB_FILEPATH")
+    if not db_filepath:
+        return
+
+    with sqlite3.connect(db_filepath) as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            UPDATE workers 
+            SET end_at = ?
+            WHERE worker_run_id = ?
+        """,
+            (
+                datetime.now().isoformat(),
+                CONFIG["WORKER_RUN_ID"],
             ),
         )
 
@@ -246,7 +302,7 @@ def _create_run_database_table(db_filepath, run_details):
                 cucu_run_id TEXT PRIMARY KEY,
                 full_arguments TEXT,
                 date TEXT,
-                started_at TIMESTAMP
+                start_at TIMESTAMP
             )
         """)
 
@@ -254,14 +310,15 @@ def _create_run_database_table(db_filepath, run_details):
             CREATE TABLE IF NOT EXISTS workers (
                 worker_run_id TEXT PRIMARY KEY,
                 cucu_run_id TEXT,
-                started_at TIMESTAMP,
+                start_at TIMESTAMP,
+                end_at TIMESTAMP,
                 FOREIGN KEY (cucu_run_id) REFERENCES cucu_run (cucu_run_id)
             )
         """)
 
         cursor.execute(
             """
-            INSERT INTO cucu_run (cucu_run_id, full_arguments, date, started_at)
+            INSERT INTO cucu_run (cucu_run_id, full_arguments, date, start_at)
             VALUES (?, ?, ?, ?)
         """,
             (
@@ -274,7 +331,7 @@ def _create_run_database_table(db_filepath, run_details):
 
         cursor.execute(
             """
-            INSERT INTO workers (worker_run_id, cucu_run_id, started_at)
+            INSERT INTO workers (worker_run_id, cucu_run_id, start_at)
             VALUES (?, ?, ?)
         """,
             (

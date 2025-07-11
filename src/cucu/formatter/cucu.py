@@ -185,7 +185,7 @@ class CucuFormatter(Formatter):
             max_line_length = self.calculate_max_line_length()
             status_text = ""
             if self.show_timings:
-                start = step.start_time
+                start = step.start_at
                 duration = f"{step.duration:.3f}"
                 status_text += f" # started at {start} took {duration}s"
 
