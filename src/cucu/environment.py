@@ -1,16 +1,29 @@
-import datetime
-import hashlib
 import json
 import os
 import sys
-import time
 import traceback
+from datetime import datetime
 from functools import partial
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
+from cucu.db import (
+    create_run_database,
+    finish_feature_record,
+    finish_scenario_record,
+    finish_step_record,
+    finish_worker_record,
+    record_feature,
+    record_scenario,
+    start_step_record,
+)
 from cucu.page_checks import init_page_checks
-from cucu.utils import ellipsize_filename, get_tab_information, take_screenshot
+from cucu.utils import (
+    ellipsize_filename,
+    generate_short_id,
+    get_tab_information,
+    take_screenshot,
+)
 
 CONFIG.define(
     "FEATURE_RESULTS_DIR",
@@ -44,8 +57,13 @@ def check_browser_initialized(ctx):
 
 def before_all(ctx):
     CONFIG["__CUCU_CTX"] = ctx
-    CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
+
+    CONFIG["WORKER_RUN_ID"] = generate_short_id()
+    db_filepath = create_run_database(CONFIG["CUCU_RESULTS_DIR"])
+    CONFIG["RUN_DB_FILEPATH"] = db_filepath
+    CONFIG.snapshot()
+
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
         hook(ctx)
 
@@ -55,8 +73,13 @@ def after_all(ctx):
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
         hook(ctx)
 
+    finish_worker_record()
+
 
 def before_feature(ctx, feature):
+    CONFIG["FEATURE_RUN_ID"] = feature.feature_run_id = generate_short_id()
+    record_feature(feature)
+
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         results_dir = config.CONFIG["CUCU_RESULTS_DIR"]
         ctx.feature_dir = os.path.join(
@@ -66,7 +89,7 @@ def before_feature(ctx, feature):
 
 
 def after_feature(ctx, feature):
-    pass
+    finish_feature_record(feature)
 
 
 def before_scenario(ctx, scenario):
@@ -83,11 +106,13 @@ def before_scenario(ctx, scenario):
 
     ctx.scenario = scenario
     ctx.step_index = 0
+    ctx.scenario_index = ctx.feature.scenarios.index(scenario) + 1
     ctx.browsers = []
     ctx.browser = None
 
     # reset the step timer dictionary
     ctx.step_timers = {}
+    scenario.start_at = datetime.now().isoformat()[:-3]
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         ctx.scenario_dir = os.path.join(
@@ -121,10 +146,8 @@ def before_scenario(ctx, scenario):
         sys.stderr.set_other_stream(ctx.scenario_debug_log_file)
         logger.init_debug_logger(ctx.scenario_debug_log_file)
 
-    # internal cucu config variables
-    CONFIG["SCENARIO_RUN_ID"] = hashlib.sha256(
-        str(time.perf_counter()).encode("utf-8")
-    ).hexdigest()[:7]
+    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id()
+    record_scenario(ctx)
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
@@ -187,6 +210,9 @@ def after_scenario(ctx, scenario):
     with open(cucu_config_filepath, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
 
+    scenario.end_at = datetime.now().isoformat()[:-3]
+    finish_scenario_record(scenario)
+
 
 def download_mht_data(ctx):
     if not ctx.browsers:
@@ -228,17 +254,18 @@ def download_browser_logs(ctx):
 
 
 def before_step(ctx, step):
-    # trims the last 3 digits of the microseconds
-    step.start_timestamp = datetime.datetime.now().isoformat()[:-3]
+    step.step_run_id = generate_short_id()
+    step.start_at = datetime.now().isoformat()[:-3]
 
     sys.stdout.captured()
     sys.stderr.captured()
 
     ctx.current_step = step
     ctx.current_step.has_substeps = False
-    ctx.start_time = time.monotonic()
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
+
+    start_step_record(ctx, step)
 
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
@@ -249,8 +276,12 @@ def after_step(ctx, step):
     step.stdout = sys.stdout.captured()
     step.stderr = sys.stderr.captured()
 
-    ctx.end_time = time.monotonic()
-    ctx.previous_step_duration = ctx.end_time - ctx.start_time
+    step.end_at = datetime.now().isoformat()[:-3]
+
+    # calculate duration from ISO timestamps
+    start_at = datetime.fromisoformat(step.start_at)
+    end_at = datetime.fromisoformat(step.end_at)
+    ctx.previous_step_duration = (end_at - start_at).total_seconds()
 
     # when set this means we're running in parallel mode using --workers and
     # we want to see progress reported using simply dots
@@ -296,3 +327,5 @@ def after_step(ctx, step):
     # run after all step hooks
     for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
         hook(ctx)
+
+    finish_step_record(step, ctx.previous_step_duration)

@@ -30,10 +30,11 @@ from cucu import (
     reporter,
 )
 from cucu.cli import thread_dumper
-from cucu.cli.run import behave, behave_init, write_run_details
+from cucu.cli.run import behave, behave_init, create_run
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.config import CONFIG
 from cucu.lint import linter
+from cucu.utils import generate_short_id
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
@@ -297,8 +298,10 @@ def run(
     if record_env_vars:
         os.environ["CUCU_RECORD_ENV_VARS"] = "true"
 
+    CONFIG["CUCU_RUN_ID"] = generate_short_id()
+    CONFIG["WORKER_RUN_ID"] = "parent"
     if not dry_run:
-        write_run_details(results, filepath)
+        create_run(results, filepath)
 
     try:
         if workers is None or workers == 1:

@@ -3,10 +3,12 @@ various cucu utilities can be placed here and then exposed publicly through
 the src/cucu/__init__.py
 """
 
+import hashlib
 import logging
 import os
 import pkgutil
 import shutil
+import time
 
 import humanize
 from selenium.webdriver.common.by import By
@@ -39,6 +41,16 @@ GHERKIN_TABLEFORMAT = TableFormat(
 
 class StopRetryException(Exception):
     pass
+
+
+def generate_short_id():
+    """
+    Generate a short 7-character ID based on current performance counter.
+    Used for both cucu_run_id and scenario_run_id.
+    """
+    return hashlib.sha256(
+        str(time.perf_counter()).encode("utf-8")
+    ).hexdigest()[:7]
 
 
 def format_gherkin_table(table, headings=[], prefix=""):
@@ -76,7 +88,7 @@ def run_steps(ctx, steps_text):
     steps = ctx.feature.parser.parse_steps(steps_text)
 
     current_step = ctx.current_step
-    current_step_start_time = ctx.start_time
+    current_step_start_at = current_step.start_at
 
     # XXX: I want to get back to this and find a slightly better way to handle
     #      these substeps without mucking around with so much state in behave
@@ -101,7 +113,7 @@ def run_steps(ctx, steps_text):
             ctx.text = original_text
     finally:
         ctx.current_step = current_step
-        ctx.start_time = current_step_start_time
+        ctx.current_step.start_at = current_step_start_at
 
     return True
 
