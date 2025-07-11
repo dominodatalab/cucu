@@ -186,7 +186,7 @@ def finish_step_record(step, duration):
 
         cursor.execute(
             """
-            UPDATE steps 
+            UPDATE steps
             SET status = ?, duration = ?, end_at = ?
             WHERE step_run_id = ?
         """,
@@ -222,7 +222,7 @@ def finish_scenario_record(scenario):
 
         cursor.execute(
             """
-            UPDATE scenarios 
+            UPDATE scenarios
             SET status = ?, duration = ?, end_at = ?
             WHERE scenario_run_id = ?
         """,
@@ -253,7 +253,7 @@ def finish_feature_record(feature):
 
         cursor.execute(
             """
-            UPDATE features 
+            UPDATE features
             SET end_at = ?
             WHERE feature_run_id = ?
         """,
@@ -279,7 +279,7 @@ def finish_worker_record():
 
         cursor.execute(
             """
-            UPDATE workers 
+            UPDATE workers
             SET end_at = ?
             WHERE worker_run_id = ?
         """,
