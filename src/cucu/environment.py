@@ -72,7 +72,7 @@ def after_all(ctx):
     # run the after all hooks
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
         hook(ctx)
-    
+
     finish_worker_record()
 
 
