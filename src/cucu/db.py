@@ -125,12 +125,12 @@ def record_scenario(scenario):
         conn.commit()
 
 
-def start_step_record(scenario, step):
+def start_step_record(ctx, step):
     """
     Start recording a step in the database.
 
     Args:
-        scenario: The scenario object containing scenario_run_id
+        ctx: The context object containing step_index
         step: The step object containing name and other details
     """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
@@ -144,7 +144,11 @@ def start_step_record(scenario, step):
             CREATE TABLE IF NOT EXISTS steps (
                 step_run_id TEXT PRIMARY KEY,
                 scenario_run_id TEXT,
+                step_order INTEGER,
+                keyword TEXT,
                 name TEXT,
+                location TEXT,
+                is_substep BOOLEAN,
                 status TEXT,
                 duration REAL,
                 start_at TIMESTAMP,
@@ -155,13 +159,17 @@ def start_step_record(scenario, step):
 
         cursor.execute(
             """
-            INSERT INTO steps (step_run_id, scenario_run_id, name, start_at)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO steps (step_run_id, scenario_run_id, step_order, keyword, name, location, is_substep, start_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
             (
                 step.step_run_id,
-                scenario.scenario_run_id,
+                ctx.scenario.scenario_run_id,
+                ctx.step_index + 1,  # Convert 0-based to 1-based index
+                getattr(step, "keyword", ""),
                 step.name,
+                str(getattr(step, "location", "")),
+                getattr(step, "has_substeps", False),
                 step.start_at,
             ),
         )

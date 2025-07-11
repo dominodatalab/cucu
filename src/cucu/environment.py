@@ -264,7 +264,7 @@ def before_step(ctx, step):
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
-    start_step_record(ctx.scenario, step)
+    start_step_record(ctx, step)
 
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
