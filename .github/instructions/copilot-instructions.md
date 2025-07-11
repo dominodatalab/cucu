@@ -1,3 +1,7 @@
+---
+applyTo: '**'
+---
+
 # Project coding standards
 
 ## Definitions
