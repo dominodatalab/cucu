@@ -88,7 +88,7 @@ def run_steps(ctx, steps_text):
     steps = ctx.feature.parser.parse_steps(steps_text)
 
     current_step = ctx.current_step
-    current_step_start_time = ctx.start_time
+    current_step_start_at = current_step.start_at
 
     # XXX: I want to get back to this and find a slightly better way to handle
     #      these substeps without mucking around with so much state in behave
@@ -113,7 +113,7 @@ def run_steps(ctx, steps_text):
             ctx.text = original_text
     finally:
         ctx.current_step = current_step
-        ctx.start_time = current_step_start_time
+        ctx.current_step.start_at = current_step_start_at
 
     return True
 
