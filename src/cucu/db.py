@@ -102,7 +102,7 @@ def record_scenario(ctx):
                 scenario_run_id TEXT PRIMARY KEY,
                 feature_run_id TEXT,
                 name TEXT,
-                order_in_feature INTEGER,
+                seq INTEGER,
                 tags TEXT,
                 status TEXT,
                 duration REAL,
@@ -114,7 +114,7 @@ def record_scenario(ctx):
 
         cursor.execute(
             """
-            INSERT INTO scenarios (scenario_run_id, feature_run_id, name, order_in_feature, tags, start_at)
+            INSERT INTO scenarios (scenario_run_id, feature_run_id, name, seq, tags, start_at)
             VALUES (?, ?, ?, ?, ?, ?)
         """,
             (
@@ -149,7 +149,7 @@ def start_step_record(ctx, step):
             CREATE TABLE IF NOT EXISTS steps (
                 step_run_id TEXT PRIMARY KEY,
                 scenario_run_id TEXT,
-                step_order INTEGER,
+                seq INTEGER,
                 keyword TEXT,
                 name TEXT,
                 location TEXT,
@@ -164,7 +164,7 @@ def start_step_record(ctx, step):
 
         cursor.execute(
             """
-            INSERT INTO steps (step_run_id, scenario_run_id, step_order, keyword, name, location, is_substep, start_at)
+            INSERT INTO steps (step_run_id, scenario_run_id, seq, keyword, name, location, is_substep, start_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
             (
