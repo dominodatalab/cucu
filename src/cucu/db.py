@@ -59,6 +59,8 @@ def record_feature(feature):
                 worker_run_id TEXT,
                 name TEXT,
                 filename TEXT,
+                description TEXT,
+                tags TEXT,
                 start_at TIMESTAMP,
                 end_at TIMESTAMP,
                 FOREIGN KEY (worker_run_id) REFERENCES workers (worker_run_id)
@@ -67,14 +69,19 @@ def record_feature(feature):
 
         cursor.execute(
             """
-            INSERT INTO features (feature_run_id, worker_run_id, name, filename, start_at)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO features (feature_run_id, worker_run_id, name, filename, description, tags, start_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
             (
                 feature.feature_run_id,
                 CONFIG["WORKER_RUN_ID"],
                 feature.name,
                 feature.filename,
+                "\n".join(getattr(feature, "description", []))
+                if hasattr(feature, "description")
+                and isinstance(feature.description, list)
+                else str(getattr(feature, "description", "")),
+                " ".join(f"@{tag}" for tag in getattr(feature, "tags", [])),
                 datetime.now().isoformat(),
             ),
         )
@@ -82,13 +89,7 @@ def record_feature(feature):
         conn.commit()
 
 
-def record_scenario(scenario):
-    """
-    Record a scenario in the database.
-
-    Args:
-        scenario: The scenario object containing name and other details
-    """
+def record_scenario(ctx):
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
     if not db_filepath:
         return
@@ -101,6 +102,8 @@ def record_scenario(scenario):
                 scenario_run_id TEXT PRIMARY KEY,
                 feature_run_id TEXT,
                 name TEXT,
+                order_in_feature INTEGER,
+                tags TEXT,
                 status TEXT,
                 duration REAL,
                 start_at TIMESTAMP,
@@ -111,14 +114,16 @@ def record_scenario(scenario):
 
         cursor.execute(
             """
-            INSERT INTO scenarios (scenario_run_id, feature_run_id, name, start_at)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO scenarios (scenario_run_id, feature_run_id, name, order_in_feature, tags, start_at)
+            VALUES (?, ?, ?, ?, ?, ?)
         """,
             (
-                scenario.scenario_run_id,
-                scenario.feature.feature_run_id,
-                scenario.name,
-                scenario.start_at,
+                ctx.scenario.scenario_run_id,
+                ctx.scenario.feature.feature_run_id,
+                ctx.scenario.name,
+                ctx.scenario_index,
+                ",".join(ctx.scenario.tags),
+                ctx.scenario.start_at,
             ),
         )
 

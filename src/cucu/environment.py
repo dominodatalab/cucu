@@ -106,6 +106,7 @@ def before_scenario(ctx, scenario):
 
     ctx.scenario = scenario
     ctx.step_index = 0
+    ctx.scenario_index = ctx.feature.scenarios.index(scenario) + 1
     ctx.browsers = []
     ctx.browser = None
 
@@ -146,7 +147,7 @@ def before_scenario(ctx, scenario):
         logger.init_debug_logger(ctx.scenario_debug_log_file)
 
     CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id()
-    record_scenario(scenario)
+    record_scenario(ctx)
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
