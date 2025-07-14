@@ -261,12 +261,14 @@ class Selenium(Browser):
         tabs_info = []
         handles = self.driver.window_handles
         for idx, handle in enumerate(handles):
-                self.driver.switch_to.window(handle)
-                tabs_info.append({
+            self.driver.switch_to.window(handle)
+            tabs_info.append(
+                {
                     "index": idx,
                     "title": self.driver.title,
-                    "url": self.driver.current_url
-                })
+                    "url": self.driver.current_url,
+                }
+            )
 
         return tabs_info
 
@@ -360,8 +362,6 @@ class Selenium(Browser):
 
         with open(target_filepath, "w") as mht_file:
             mht_file.write(mht_data)
-
-
 
     def quit(self):
         self.driver.quit()

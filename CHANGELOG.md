@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.2.3
 - Add - additional tab information steps
+
 ## 1.2.2
 - Chore - make lint also run ruff format --check
 - Add - tags command to list tags and affected scenario counts
