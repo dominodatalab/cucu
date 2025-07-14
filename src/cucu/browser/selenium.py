@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 
 import chromedriver_autoinstaller
 import geckodriver_autoinstaller
@@ -225,6 +226,51 @@ class Selenium(Browser):
         if window_handle_index == 0:
             raise RuntimeError("no previous browser tab available")
         self.driver.switch_to.window(window_handles[window_handle_index - 1])
+
+    def switch_to_nth_tab(self, tab_number):
+        print(f"tab_number, {tab_number}")
+        window_handles = self.driver.window_handles
+        total_tabs = len(window_handles)
+        if tab_number > total_tabs:
+            raise RuntimeError(f"no {tab_number} browser tab available")
+        self.driver.switch_to.window(window_handles[tab_number])
+
+    def switch_to_tab_that_matches_regex(self, title_pattern):
+        window_handles = self.driver.window_handles
+
+        for handle in window_handles:
+            self.driver.switch_to.window(handle)
+            if re.search(title_pattern, self.driver.title):
+                return
+
+        raise Exception(f"No tab title matches pattern: {title_pattern}")
+
+    def get_tab_info(self):
+        window_handles = self.driver.window_handles
+        current_window = self.driver.current_window_handle
+        window_handle_index = window_handles.index(current_window)
+
+        return {
+            "tab_count": len(window_handles),
+            "index": window_handle_index,
+            "title": self.driver.title,
+            "url": self.driver.current_url,
+        }
+
+    def get_all_tabs_info(self):
+        tabs_info = []
+        handles = self.driver.window_handles
+        for idx, handle in enumerate(handles):
+            self.driver.switch_to.window(handle)
+            tabs_info.append(
+                {
+                    "index": idx,
+                    "title": self.driver.title,
+                    "url": self.driver.current_url,
+                }
+            )
+
+        return tabs_info
 
     def back(self):
         self.driver.back()
