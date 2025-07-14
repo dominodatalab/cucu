@@ -378,7 +378,7 @@ def create_flat_view(db_filepath):
 
         cursor.execute("""
             CREATE VIEW IF NOT EXISTS flat AS
-            SELECT 
+            SELECT
                 w.cucu_run_id,
                 s.start_at,
                 s.duration,
