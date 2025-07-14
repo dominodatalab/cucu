@@ -35,6 +35,7 @@ def create_run_database(results_dir):
     }
 
     _create_run_database_table(db_filepath, run_details)
+    create_flat_view(db_filepath)
 
     return str(db_filepath)
 
@@ -81,7 +82,7 @@ def record_feature(feature):
                 if hasattr(feature, "description")
                 and isinstance(feature.description, list)
                 else str(getattr(feature, "description", "")),
-                " ".join(f"@{tag}" for tag in getattr(feature, "tags", [])),
+                " ".join(getattr(feature, "tags", [])),
                 datetime.now().isoformat(),
             ),
         )
@@ -122,7 +123,7 @@ def record_scenario(ctx):
                 ctx.scenario.feature.feature_run_id,
                 ctx.scenario.name,
                 ctx.scenario_index,
-                ",".join(ctx.scenario.tags),
+                " ".join(ctx.scenario.tags),
                 ctx.scenario.start_at,
             ),
         )
@@ -353,5 +354,40 @@ def _create_run_database_table(db_filepath, run_details):
                 run_details["date"],
             ),
         )
+
+        conn.commit()
+
+
+def create_flat_view(db_filepath):
+    """
+    Create a flat view that combines data from cucu_run, features, and scenarios tables.
+
+    The view provides the following columns:
+    - cucu_run_id: From the cucu_run table
+    - start_at: Scenario start timestamp
+    - duration: Scenario duration in seconds
+    - feature_name: Name of the feature
+    - scenario_name: Name of the scenario
+    - tags: Combined tags from feature and scenario
+
+    Args:
+        db_filepath (str): The database filepath
+    """
+    with sqlite3.connect(db_filepath) as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            CREATE VIEW IF NOT EXISTS flat AS
+            SELECT 
+                w.cucu_run_id,
+                s.start_at,
+                s.duration,
+                f.name AS feature_name,
+                s.name AS scenario_name,
+                f.tags || ' ' || s.tags AS tags
+            FROM scenarios s
+            JOIN features f ON s.feature_run_id = f.feature_run_id
+            JOIN workers w ON f.worker_run_id = w.worker_run_id
+        """)
 
         conn.commit()
