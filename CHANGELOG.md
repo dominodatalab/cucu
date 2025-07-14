@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.2.3
 - Add - additional tab information steps
+- Change - retry open a browser
 
 ## 1.2.2
 - Chore - make lint also run ruff format --check

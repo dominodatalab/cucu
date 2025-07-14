@@ -32,7 +32,7 @@ def open_a_browser(ctx, url):
         Given I open a browser at the url "https://www.google.com"
     """
     if ctx.browser is None:
-        ctx.browser = open_browser(ctx)
+        ctx.browser = retry(open_browser)(ctx)
         ctx.browsers.append(ctx.browser)
     else:
         logger.debug("browser already open so using existing instance")
@@ -43,7 +43,7 @@ def open_a_browser(ctx, url):
 
 @step('I open a new browser at the url "{url}"')
 def open_a_new_browser(ctx, url):
-    ctx.browser = open_browser(ctx)
+    ctx.browser = retry(open_browser)(ctx)
     ctx.browsers.append(ctx.browser)
     logger.debug(f"navigating to url #{url}")
     ctx.browser.navigate(url)
