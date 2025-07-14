@@ -236,7 +236,7 @@ def wait_to_switch_to_nth_browser_tab(ctx, nth):
 
 def switch_to_tab_matching_regex(ctx, regex):
     ctx.check_browser_initialized()
-    ctx.browser.switch_to_tab_that_matches_regex(regex)  
+    ctx.browser.switch_to_tab_that_matches_regex(regex)
 
 
 @step('I switch to the browser tab that matches "{regex}"')

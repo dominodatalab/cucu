@@ -54,16 +54,16 @@ class Browser:
 
     def close_window(self):
         raise RuntimeError("implement me")
-    
+
     def get_tab_info(self):
         raise RuntimeError("implement me")
-    
+
     def get_all_tabs_info(self):
         raise RuntimeError("implement me")
-    
+
     def switch_to_nth_tab(self, tab_index):
         raise RuntimeError("implement me")
-    
+
     def switch_to_tab_that_matches_regex(self, text):
         raise RuntimeError("implement me")    
 
