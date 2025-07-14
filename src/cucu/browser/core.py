@@ -65,7 +65,7 @@ class Browser:
         raise RuntimeError("implement me")
 
     def switch_to_tab_that_matches_regex(self, text):
-        raise RuntimeError("implement me")    
+        raise RuntimeError("implement me")
 
     def quit(self):
         raise RuntimeError("implement me")
