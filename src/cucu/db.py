@@ -109,6 +109,7 @@ def record_scenario(ctx):
                 duration REAL,
                 start_at TIMESTAMP,
                 end_at TIMESTAMP,
+                log_files JSON,
                 FOREIGN KEY (feature_run_id) REFERENCES features (feature_run_id)
             )
         """)
@@ -231,19 +232,33 @@ def finish_scenario_record(scenario):
     end_dt = datetime.fromisoformat(scenario.end_at)
     duration = (end_dt - start_dt).total_seconds()
 
+    # collect log files from the scenario logs directory
+    scenario_logs_dir = CONFIG.get("SCENARIO_LOGS_DIR")
+    if not scenario_logs_dir or not Path(scenario_logs_dir).exists():
+        log_files_json = "[]"
+    else:
+        logs_path = Path(scenario_logs_dir)
+        log_files = [
+            str(file.relative_to(logs_path))
+            for file in logs_path.rglob("*")
+            if file.is_file()
+        ]
+        log_files_json = json.dumps(sorted(log_files))
+
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
         cursor.execute(
             """
             UPDATE scenarios
-            SET status = ?, duration = ?, end_at = ?
+            SET status = ?, duration = ?, end_at = ?, log_files = ?
             WHERE scenario_run_id = ?
         """,
             (
                 scenario.status.name,
                 duration,
                 scenario.end_at,
+                log_files_json,
                 scenario.scenario_run_id,
             ),
         )
@@ -369,6 +384,7 @@ def create_flat_view(db_filepath):
     - feature_name: Name of the feature
     - scenario_name: Name of the scenario
     - tags: Combined tags from feature and scenario
+    - log_files: JSON array of log file paths
 
     Args:
         db_filepath (str): The database filepath
@@ -384,7 +400,8 @@ def create_flat_view(db_filepath):
                 s.duration,
                 f.name AS feature_name,
                 s.name AS scenario_name,
-                f.tags || ' ' || s.tags AS tags
+                f.tags || ' ' || s.tags AS tags,
+                s.log_files
             FROM scenarios s
             JOIN features f ON s.feature_run_id = f.feature_run_id
             JOIN workers w ON f.worker_run_id = w.worker_run_id

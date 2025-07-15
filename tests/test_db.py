@@ -108,6 +108,7 @@ def test_flat_view_creation_and_query():
                 feature_name,
                 scenario_name,
                 tags,
+                log_files,
             ) = result
 
             assert cucu_run_id == "run_123"
@@ -116,6 +117,7 @@ def test_flat_view_creation_and_query():
             assert feature_name == "Login Feature"
             assert scenario_name == "Valid login"
             assert tags == "login auth smoke positive"
+            assert log_files == "[]"  # No log files in test
 
 
 def test_flat_view_with_empty_tags():
@@ -155,9 +157,10 @@ def test_flat_view_with_empty_tags():
 
         with sqlite3.connect(db_filepath) as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT tags FROM flat")
+            cursor.execute("SELECT tags, log_files FROM flat")
             result = cursor.fetchone()
             assert result[0] == " "
+            assert result[1] == "[]"  # No log files in test
 
 
 def test_flat_view_with_partial_tags():
@@ -224,12 +227,14 @@ def test_flat_view_with_partial_tags():
         with sqlite3.connect(db_filepath) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT scenario_name, tags FROM flat ORDER BY scenario_name"
+                "SELECT scenario_name, tags, log_files FROM flat ORDER BY scenario_name"
             )
             results = cursor.fetchall()
 
             assert len(results) == 2
             assert results[1][0] == "No scenario tags"
             assert results[1][1] == "feature-tag1 feature-tag2 "
+            assert results[1][2] == "[]"  # No log files in test
             assert results[0][0] == "Has scenario tags"
             assert results[0][1] == " scenario-tag1 scenario-tag2"
+            assert results[0][2] == "[]"  # No log files in test
