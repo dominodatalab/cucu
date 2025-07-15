@@ -19,6 +19,7 @@ from cucu.db import (
 )
 from cucu.page_checks import init_page_checks
 from cucu.utils import (
+    TeeStream,
     ellipsize_filename,
     generate_short_id,
     take_screenshot,
@@ -137,13 +138,15 @@ def before_scenario(ctx, scenario):
             cucu_debug_filepath, "w", encoding=sys.stdout.encoding
         )
 
+        ctx.scenario_debug_log_tee = TeeStream(ctx.scenario_debug_log_file)
+
         # redirect stdout, stderr and setup a logger at debug level to fill
         # the scenario cucu.debug.log file which makes it possible to have
         # debug logging for every single scenario run without polluting the
         # console logs at runtime.
-        sys.stdout.set_other_stream(ctx.scenario_debug_log_file)
-        sys.stderr.set_other_stream(ctx.scenario_debug_log_file)
-        logger.init_debug_logger(ctx.scenario_debug_log_file)
+        sys.stdout.set_other_stream(ctx.scenario_debug_log_tee)
+        sys.stderr.set_other_stream(ctx.scenario_debug_log_tee)
+        logger.init_debug_logger(ctx.scenario_debug_log_tee)
 
     CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id()
     record_scenario(ctx)
@@ -259,6 +262,10 @@ def before_step(ctx, step):
     sys.stdout.captured()
     sys.stderr.captured()
 
+    # Reset the debug log buffer for this step
+    if hasattr(ctx, "scenario_debug_log_tee"):
+        ctx.scenario_debug_log_tee.clear()
+
     ctx.current_step = step
     ctx.current_step.has_substeps = False
 
@@ -274,6 +281,12 @@ def before_step(ctx, step):
 def after_step(ctx, step):
     step.stdout = sys.stdout.captured()
     step.stderr = sys.stderr.captured()
+
+    # Capture debug output from the TeeStream for this step
+    if hasattr(ctx, "scenario_debug_log_tee"):
+        step.debug_output = ctx.scenario_debug_log_tee.getvalue()
+    else:
+        step.debug_output = ""
 
     step.end_at = datetime.now().isoformat()[:-3]
 
