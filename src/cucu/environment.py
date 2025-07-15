@@ -295,11 +295,11 @@ def after_step(ctx, step):
     if ctx.browser is not None and ctx.current_step.has_substeps is False:
         take_screenshot(ctx, step.name, label=f"After {step.name}")
 
-        tab_info = get_tab_information(ctx)
-        total_tabs = tab_info["window_count"]
-        current_tab = tab_info["current_index"] + 1
-        title = tab_info["current_title"]
-        url = tab_info["current_url"]
+        tab_info = ctx.browser.get_tab_info()
+        total_tabs = tab_info["tab_count"]
+        current_tab = tab_info["index"] + 1
+        title = tab_info["title"]
+        url = tab_info["url"]
         log_message = (
             f"\ntab({current_tab} of {total_tabs}): {title}\nurl: {url}\n"
         )

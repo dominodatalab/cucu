@@ -32,7 +32,7 @@ def open_a_browser(ctx, url):
         Given I open a browser at the url "https://www.google.com"
     """
     if ctx.browser is None:
-        ctx.browser = open_browser(ctx)
+        ctx.browser = retry(open_browser)(ctx)
         ctx.browsers.append(ctx.browser)
     else:
         logger.debug("browser already open so using existing instance")
@@ -43,7 +43,7 @@ def open_a_browser(ctx, url):
 
 @step('I open a new browser at the url "{url}"')
 def open_a_new_browser(ctx, url):
-    ctx.browser = open_browser(ctx)
+    ctx.browser = retry(open_browser)(ctx)
     ctx.browsers.append(ctx.browser)
     logger.debug(f"navigating to url #{url}")
     ctx.browser.navigate(url)
@@ -217,6 +217,68 @@ def switch_to_previous_browser_tab(ctx):
 @step("I wait to switch to the previous browser tab")
 def wait_to_switch_to_previous_browser_tab(ctx):
     retry(switch_to_previous_tab)(ctx)
+
+
+def switch_to_nth_tab(ctx, tab_number):
+    ctx.check_browser_initialized()
+    ctx.browser.switch_to_nth_tab(tab_number)
+
+
+@step('I switch to the "{nth:nth}" browser tab')
+def switch_to_nth_browser_tab(ctx, nth):
+    switch_to_nth_tab(ctx, nth)
+
+
+@step('I wait to switch to the "{nth:nth}" browser tab')
+def wait_to_switch_to_nth_browser_tab(ctx, nth):
+    retry(switch_to_nth_tab)(ctx, nth)
+
+
+def switch_to_tab_matching_regex(ctx, regex):
+    ctx.check_browser_initialized()
+    ctx.browser.switch_to_tab_that_matches_regex(regex)
+
+
+@step('I switch to the browser tab that matches "{regex}"')
+def switch_to_browser_tab_matching_regex(ctx, regex):
+    switch_to_tab_matching_regex(ctx, regex)
+
+
+@step('I wait to switch to the browser tab that matches "{regex}"')
+def wait_to_switch_to_browser_tab_matching_regex(ctx, regex):
+    retry(switch_to_tab_matching_regex)(ctx, regex)
+
+
+@step('I save the browser tabs info to the variable "{variable}"')
+def save_browser_tabs_info_to_variable(ctx, variable):
+    ctx.check_browser_initialized()
+    tabs_info = ctx.browser.get_all_tabs_info()
+    lst_tab_info = [
+        f"tab({tab['index'] + 1}): {tab['title']}, url: {tab['url']}"
+        for tab in tabs_info
+    ]
+    config.CONFIG[variable] = lst_tab_info
+
+
+@step("I list the current browser tab info")
+def list_current_browser_tab_info(ctx):
+    ctx.check_browser_initialized()
+    tab_info = ctx.browser.get_tab_info()
+    current_tab = tab_info["index"] + 1
+    title = tab_info["title"]
+    url = tab_info["url"]
+    print(f"\ntab({current_tab}): {title}\nurl: {url}\n")
+
+
+@step("I list all browser tabs info")
+def list_browser_tabs_info(ctx):
+    ctx.check_browser_initialized()
+    all_tabs_info = ctx.browser.get_all_tabs_info()
+    for tab in all_tabs_info:
+        tab_index = tab["index"] + 1
+        title = tab["title"]
+        url = tab["url"]
+        print(f"\ntab({tab_index}): {title}\nurl: {url}\n")
 
 
 def save_downloaded_file(ctx, filename):
