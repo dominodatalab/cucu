@@ -21,7 +21,6 @@ from cucu.page_checks import init_page_checks
 from cucu.utils import (
     ellipsize_filename,
     generate_short_id,
-    get_tab_information,
     take_screenshot,
 )
 
