@@ -254,8 +254,8 @@ def save_browser_tabs_info_to_variable(ctx, variable):
     ctx.check_browser_initialized()
     tabs_info = ctx.browser.get_all_tabs_info()
     lst_tab_info = [
-        f"tab({tab['index'] + 1}): {tab['title']}, url: {tab['url']}"
-        for tab in tabs_info
+        f"tab({index + 1}): {tab['title']}, url: {tab['url']}"
+        for index, tab in enumerate(tabs_info)
     ]
     config.CONFIG[variable] = lst_tab_info
 
