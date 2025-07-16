@@ -109,6 +109,7 @@ def record_scenario(ctx):
                 start_at TIMESTAMP,
                 end_at TIMESTAMP,
                 log_files JSON,
+                cucu_config JSON,
                 FOREIGN KEY (feature_run_id) REFERENCES features (feature_run_id)
             )
         """)
@@ -256,7 +257,7 @@ def finish_scenario_record(scenario):
         cursor.execute(
             """
             UPDATE scenarios
-            SET status = ?, duration = ?, end_at = ?, log_files = ?
+            SET status = ?, duration = ?, end_at = ?, log_files = ?, cucu_config = ?
             WHERE scenario_run_id = ?
         """,
             (
@@ -264,6 +265,7 @@ def finish_scenario_record(scenario):
                 duration,
                 scenario.end_at,
                 log_files_json,
+                scenario.cucu_config_json,
                 scenario.scenario_run_id,
             ),
         )

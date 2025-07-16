@@ -5,6 +5,8 @@ from datetime import datetime
 from functools import partial
 from pathlib import Path
 
+import yaml
+
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.db import (
@@ -208,6 +210,10 @@ def after_scenario(ctx, scenario):
     cucu_config_path = ctx.scenario_logs_dir / "cucu.config.yaml.txt"
     with open(cucu_config_path, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
+
+    scenario.cucu_config_json = json.dumps(
+        yaml.safe_load(CONFIG.to_yaml_without_secrets())
+    )
 
     scenario.end_at = datetime.now().isoformat()[:-3]
     finish_scenario_record(scenario)
