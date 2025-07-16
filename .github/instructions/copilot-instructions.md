@@ -27,6 +27,7 @@ applyTo: '**'
 - Do not use relative imports
 - Use guard clauses to avoid indentation
 - Don't bulletproof code and instead let exceptions happen
+- Avoid unnecessary defensive programming like `getattr(obj, "attr", default)` when you have full control over the object attributes
 - Don't extract helper functions
 - Prefer using more modern python stdlib features like `pathlib`
 - Use the default results folder and don't use the `--results` argument in examples and tests
