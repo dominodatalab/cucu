@@ -125,11 +125,10 @@ def before_scenario(ctx, scenario):
         CONFIG["SCENARIO_LOGS_DIR"] = ctx.scenario_logs_dir
         ctx.scenario_logs_dir.mkdir(parents=True, exist_ok=True)
 
-        cucu_debug_path = ctx.scenario_logs_dir / "cucu.debug.console.log"
+        cucu_debug_log_path = ctx.scenario_logs_dir / "cucu.debug.console.log"
         ctx.scenario_debug_log_file = open(
-            cucu_debug_path, "w", encoding=sys.stdout.encoding
+            cucu_debug_log_path, "w", encoding=sys.stdout.encoding
         )
-
         ctx.scenario_debug_log_tee = TeeStream(ctx.scenario_debug_log_file)
 
         # redirect stdout, stderr and setup a logger at debug level to fill
@@ -139,6 +138,14 @@ def before_scenario(ctx, scenario):
         sys.stdout.set_other_stream(ctx.scenario_debug_log_tee)
         sys.stderr.set_other_stream(ctx.scenario_debug_log_tee)
         logger.init_debug_logger(ctx.scenario_debug_log_tee)
+
+        # capture browser logs using TeeStream since each call clears the log
+        ctx.browser_log_file = open(
+            ctx.scenario_logs_dir / "browser_console.log.txt",
+            "w",
+            encoding="utf-8",
+        )
+        ctx.browser_log_tee = TeeStream(ctx.browser_log_file)
 
     CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id()
     record_scenario(ctx)
@@ -227,14 +234,9 @@ def download_browser_log(ctx):
     # session
 
     for browser in ctx.browsers:
-        # save the browser logs to the current scenarios results directory
-        browser_log_path = ctx.scenario_logs_dir / "browser_console.log.txt"
-
-        with open(browser_log_path, "w") as output:
-            for log in browser.get_log():
-                output.write(f"{json.dumps(log)}\n")
-
         browser.quit()
+
+    ctx.browser_log_file.close()
 
     ctx.browsers = []
 
@@ -323,5 +325,9 @@ def after_step(ctx, step):
     # run after all step hooks
     for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
         hook(ctx)
+
+    if ctx.browser:
+        for log in ctx.browser.get_log():
+            ctx.browser_log_tee.write(f"{json.dumps(log)}\n")
 
     finish_step_record(step, ctx.previous_step_duration)
