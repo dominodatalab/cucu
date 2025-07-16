@@ -41,7 +41,7 @@ Feature: Browser window management
   Scenario: User gets appropriate error when checking browser title
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
      When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/links.html"
-     Then I expect the following step to fail with "unexpected browser title, got "Links!""
+     Then I expect the following step to fail with "unexpected browser title, got "Links!"
      """
      Then I should see the browser title is "foo"
      """
