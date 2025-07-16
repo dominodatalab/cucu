@@ -4,6 +4,7 @@ import sys
 import traceback
 from datetime import datetime
 from functools import partial
+from pathlib import Path
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
@@ -81,10 +82,8 @@ def before_feature(ctx, feature):
     record_feature(feature)
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
-        results_dir = config.CONFIG["CUCU_RESULTS_DIR"]
-        ctx.feature_dir = os.path.join(
-            results_dir, ellipsize_filename(feature.name)
-        )
+        results_dir = Path(config.CONFIG["CUCU_RESULTS_DIR"])
+        ctx.feature_dir = results_dir / ellipsize_filename(feature.name)
         CONFIG["FEATURE_RESULTS_DIR"] = ctx.feature_dir
 
 
@@ -115,27 +114,21 @@ def before_scenario(ctx, scenario):
     scenario.start_at = datetime.now().isoformat()[:-3]
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
-        ctx.scenario_dir = os.path.join(
-            ctx.feature_dir, ellipsize_filename(scenario.name)
-        )
+        ctx.scenario_dir = ctx.feature_dir / ellipsize_filename(scenario.name)
         CONFIG["SCENARIO_RESULTS_DIR"] = ctx.scenario_dir
         os.makedirs(ctx.scenario_dir, exist_ok=True)
 
-        ctx.scenario_downloads_dir = os.path.join(
-            ctx.scenario_dir, "downloads"
-        )
+        ctx.scenario_downloads_dir = ctx.scenario_dir / "downloads"
         CONFIG["SCENARIO_DOWNLOADS_DIR"] = ctx.scenario_downloads_dir
         os.makedirs(ctx.scenario_downloads_dir, exist_ok=True)
 
-        ctx.scenario_logs_dir = os.path.join(ctx.scenario_dir, "logs")
+        ctx.scenario_logs_dir = ctx.scenario_dir / "logs"
         CONFIG["SCENARIO_LOGS_DIR"] = ctx.scenario_logs_dir
         os.makedirs(ctx.scenario_logs_dir, exist_ok=True)
 
-        cucu_debug_filepath = os.path.join(
-            ctx.scenario_logs_dir, "cucu.debug.console.log"
-        )
+        cucu_debug_path = ctx.scenario_logs_dir / "cucu.debug.console.log"
         ctx.scenario_debug_log_file = open(
-            cucu_debug_filepath, "w", encoding=sys.stdout.encoding
+            cucu_debug_path, "w", encoding=sys.stdout.encoding
         )
 
         ctx.scenario_debug_log_tee = TeeStream(ctx.scenario_debug_log_file)
@@ -206,10 +199,8 @@ def after_scenario(ctx, scenario):
 
         run_after_scenario_hook(ctx, scenario, download_browser_log)
 
-    cucu_config_filepath = os.path.join(
-        ctx.scenario_logs_dir, "cucu.config.yaml.txt"
-    )
-    with open(cucu_config_filepath, "w") as config_file:
+    cucu_config_path = ctx.scenario_logs_dir / "cucu.config.yaml.txt"
+    with open(cucu_config_path, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
 
     scenario.end_at = datetime.now().isoformat()[:-3]
@@ -226,10 +217,7 @@ def download_mht_data(ctx):
             mht_filename = (
                 f"browser{index if len(ctx.browsers) > 1 else ''}_snapshot.mht"
             )
-            mht_pathname = os.path.join(
-                CONFIG["SCENARIO_LOGS_DIR"],
-                mht_filename,
-            )
+            mht_pathname = CONFIG["SCENARIO_LOGS_DIR"] / mht_filename
             logger.debug(f"Saving MHT webpage snapshot: {mht_filename}")
             browser.download_mht(mht_pathname)
 
@@ -241,12 +229,10 @@ def download_browser_log(ctx):
 
     for browser in ctx.browsers:
         # save the browser logs to the current scenarios results directory
-        browser_log_filepath = os.path.join(
-            ctx.scenario_logs_dir, "browser_console.log.txt"
-        )
+        browser_log_path = ctx.scenario_logs_dir / "browser_console.log.txt"
 
         os.makedirs(ctx.scenario_logs_dir, exist_ok=True)
-        with open(browser_log_filepath, "w") as output:
+        with open(browser_log_path, "w") as output:
             for log in browser.get_log():
                 output.write(f"{json.dumps(log)}\n")
 
