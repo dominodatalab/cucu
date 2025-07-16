@@ -298,7 +298,7 @@ def run(
     if record_env_vars:
         os.environ["CUCU_RECORD_ENV_VARS"] = "true"
 
-    CONFIG["CUCU_RUN_ID"] = generate_short_id()
+    os.environ["CUCU_RUN_ID"] = CONFIG["CUCU_RUN_ID"] = generate_short_id()
     CONFIG["WORKER_RUN_ID"] = "parent"
     if not dry_run:
         create_run(results, filepath)
