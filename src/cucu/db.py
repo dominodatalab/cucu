@@ -161,6 +161,7 @@ def start_step_record(ctx, step):
                 start_at TIMESTAMP,
                 end_at TIMESTAMP,
                 debug_output TEXT,
+                browser_logs TEXT,
                 FOREIGN KEY (scenario_run_id) REFERENCES scenarios (scenario_run_id)
             )
         """)
@@ -203,7 +204,7 @@ def finish_step_record(step, duration):
         cursor.execute(
             """
             UPDATE steps
-            SET status = ?, duration = ?, end_at = ?, debug_output = ?
+            SET status = ?, duration = ?, end_at = ?, debug_output = ?, browser_logs = ?
             WHERE step_run_id = ?
         """,
             (
@@ -211,6 +212,7 @@ def finish_step_record(step, duration):
                 duration,
                 step.end_at,
                 step.debug_output,
+                step.browser_logs,
                 step.step_run_id,
             ),
         )

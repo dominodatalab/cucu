@@ -326,8 +326,14 @@ def after_step(ctx, step):
     for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
         hook(ctx)
 
+    # Capture browser logs for this step
+    step.browser_logs = ""
     if ctx.browser:
+        browser_logs = []
         for log in ctx.browser.get_log():
-            ctx.browser_log_tee.write(f"{json.dumps(log)}\n")
+            log_entry = json.dumps(log)
+            browser_logs.append(log_entry)
+            ctx.browser_log_tee.write(f"{log_entry}\n")
+        step.browser_logs = "\n".join(browser_logs)
 
     finish_step_record(step, ctx.previous_step_duration)
