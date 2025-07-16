@@ -262,11 +262,10 @@ class Selenium(Browser):
         current_window = self.driver.current_window_handle
         tabs_info = []
 
-        for idx, handle in enumerate(window_handles):
+        for handle in window_handles:
             self.driver.switch_to.window(handle)
             tabs_info.append(
                 {
-                    "index": idx,
                     "title": self.driver.title,
                     "url": self.driver.current_url,
                 }
