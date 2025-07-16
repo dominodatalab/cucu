@@ -50,6 +50,7 @@ def _create_scenario_finish_mock(scenario_id, status, start_at, end_at):
     scenario_mock.status.name = status
     scenario_mock.start_at = start_at
     scenario_mock.end_at = end_at
+    scenario_mock.cucu_config_json = "{}"
     return scenario_mock
 
 
