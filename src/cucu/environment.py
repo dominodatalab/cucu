@@ -1,5 +1,4 @@
 import json
-import os
 import sys
 import traceback
 from datetime import datetime
@@ -116,15 +115,15 @@ def before_scenario(ctx, scenario):
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         ctx.scenario_dir = ctx.feature_dir / ellipsize_filename(scenario.name)
         CONFIG["SCENARIO_RESULTS_DIR"] = ctx.scenario_dir
-        os.makedirs(ctx.scenario_dir, exist_ok=True)
+        ctx.scenario_dir.mkdir(parents=True, exist_ok=True)
 
         ctx.scenario_downloads_dir = ctx.scenario_dir / "downloads"
         CONFIG["SCENARIO_DOWNLOADS_DIR"] = ctx.scenario_downloads_dir
-        os.makedirs(ctx.scenario_downloads_dir, exist_ok=True)
+        ctx.scenario_downloads_dir.mkdir(parents=True, exist_ok=True)
 
         ctx.scenario_logs_dir = ctx.scenario_dir / "logs"
         CONFIG["SCENARIO_LOGS_DIR"] = ctx.scenario_logs_dir
-        os.makedirs(ctx.scenario_logs_dir, exist_ok=True)
+        ctx.scenario_logs_dir.mkdir(parents=True, exist_ok=True)
 
         cucu_debug_path = ctx.scenario_logs_dir / "cucu.debug.console.log"
         ctx.scenario_debug_log_file = open(
@@ -231,7 +230,6 @@ def download_browser_log(ctx):
         # save the browser logs to the current scenarios results directory
         browser_log_path = ctx.scenario_logs_dir / "browser_console.log.txt"
 
-        os.makedirs(ctx.scenario_logs_dir, exist_ok=True)
         with open(browser_log_path, "w") as output:
             for log in browser.get_log():
                 output.write(f"{json.dumps(log)}\n")
