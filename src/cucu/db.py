@@ -78,11 +78,10 @@ def record_feature(feature):
                 CONFIG["WORKER_RUN_ID"],
                 feature.name,
                 feature.filename,
-                "\n".join(getattr(feature, "description", []))
-                if hasattr(feature, "description")
-                and isinstance(feature.description, list)
-                else str(getattr(feature, "description", "")),
-                " ".join(getattr(feature, "tags", [])),
+                "\n".join(feature.description)
+                if isinstance(feature.description, list)
+                else str(feature.description),
+                " ".join(feature.tags),
                 datetime.now().isoformat(),
             ),
         )
@@ -162,6 +161,7 @@ def start_step_record(ctx, step):
                 end_at TIMESTAMP,
                 debug_output TEXT,
                 browser_logs TEXT,
+                browser_info JSON,
                 FOREIGN KEY (scenario_run_id) REFERENCES scenarios (scenario_run_id)
             )
         """)
@@ -175,10 +175,10 @@ def start_step_record(ctx, step):
                 step.step_run_id,
                 ctx.scenario.scenario_run_id,
                 ctx.step_index + 1,  # Convert 0-based to 1-based index
-                getattr(step, "keyword", ""),
+                step.keyword,
                 step.name,
-                str(getattr(step, "location", "")),
-                getattr(step, "has_substeps", False),
+                str(step.location),
+                step.has_substeps,
                 step.start_at,
             ),
         )
@@ -204,7 +204,7 @@ def finish_step_record(step, duration):
         cursor.execute(
             """
             UPDATE steps
-            SET status = ?, duration = ?, end_at = ?, debug_output = ?, browser_logs = ?
+            SET status = ?, duration = ?, end_at = ?, debug_output = ?, browser_logs = ?, browser_info = ?
             WHERE step_run_id = ?
         """,
             (
@@ -213,6 +213,7 @@ def finish_step_record(step, duration):
                 step.end_at,
                 step.debug_output,
                 step.browser_logs,
+                step.browser_info,
                 step.step_run_id,
             ),
         )
@@ -259,9 +260,7 @@ def finish_scenario_record(scenario):
             WHERE scenario_run_id = ?
         """,
             (
-                scenario.status.name
-                if hasattr(scenario.status, "name")
-                else str(scenario.status),
+                scenario.status.name,
                 duration,
                 scenario.end_at,
                 log_files_json,
