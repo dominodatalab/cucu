@@ -48,9 +48,6 @@ def record_feature(feature):
         feature: The feature object containing name, filename, and other details
     """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
-    if not db_filepath:
-        return
-
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
@@ -91,9 +88,6 @@ def record_feature(feature):
 
 def record_scenario(ctx):
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
-    if not db_filepath:
-        return
-
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
@@ -141,9 +135,6 @@ def start_step_record(ctx, step):
         step: The step object containing name and other details
     """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
-    if not db_filepath:
-        return
-
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
@@ -196,9 +187,6 @@ def finish_step_record(step, duration):
         duration: The step duration in seconds
     """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
-    if not db_filepath:
-        return
-
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
@@ -230,9 +218,6 @@ def finish_scenario_record(scenario):
         scenario: The scenario object containing scenario_run_id, status and other details
     """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
-    if not db_filepath:
-        return
-
     # calculate duration from ISO timestamps
     start_dt = datetime.fromisoformat(scenario.start_at)
     end_dt = datetime.fromisoformat(scenario.end_at)
@@ -281,9 +266,6 @@ def finish_feature_record(feature):
         feature: The feature object containing feature_run_id and other details
     """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
-    if not db_filepath:
-        return
-
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
@@ -307,9 +289,6 @@ def finish_worker_record():
     Finish recording a worker in the database by updating end_at timestamp.
     """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
-    if not db_filepath:
-        return
-
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
