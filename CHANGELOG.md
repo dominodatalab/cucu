@@ -10,6 +10,12 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Chore - add copilot instructions
 - Chore - change to use uv-build packaging
 
+## 1.2.4
+- Fix - restore state after tab info
+- Change - replace offset with start time in step html report
+- Change - make CONFIG yaml dump more robust
+- Chore - change to use uv-build packaging
+
 ## 1.2.3
 - Add - additional tab information steps
 - Change - retry open a browser

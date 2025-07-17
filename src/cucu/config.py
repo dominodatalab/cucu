@@ -315,8 +315,10 @@ class Config(dict):
 
         # Resolve non-atomic classes to their string representation
         yaml.representer.SafeRepresenter.add_representer(
-            None, 
-            lambda dumper, data: dumper.represent_scalar('tag:yaml.org,2002:str', str(data)) 
+            None,
+            lambda dumper, data: dumper.represent_scalar(
+                "tag:yaml.org,2002:str", str(data)
+            ),
         )
         return yaml.safe_dump(config)
 
