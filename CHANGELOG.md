@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.2.4
 - Fix - restore state after tab info
+- Change - replace offset with start time in step html report
 - Change - make CONFIG yaml dump more robust
 - Chore - change to use uv-build packaging
 
