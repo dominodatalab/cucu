@@ -59,7 +59,9 @@ def test_flat_view_creation_and_query():
     with tempfile.TemporaryDirectory() as temp_dir:
         with mock.patch("cucu.db.CONFIG") as config_mock:
             db_filepath = f"{temp_dir}/run_run_123_worker_456.db"
-            _setup_config_mock(config_mock, "run_123", "worker_456", db_filepath)
+            _setup_config_mock(
+                config_mock, "run_123", "worker_456", db_filepath
+            )
             create_database_file(db_filepath)
             record_cucu_run()
             config_mock.get.return_value = db_filepath
@@ -126,7 +128,9 @@ def test_flat_view_with_empty_tags():
     with tempfile.TemporaryDirectory() as temp_dir:
         with mock.patch("cucu.db.CONFIG") as config_mock:
             db_filepath = f"{temp_dir}/run_run_456_worker_789.db"
-            _setup_config_mock(config_mock, "run_456", "worker_789", db_filepath)
+            _setup_config_mock(
+                config_mock, "run_456", "worker_789", db_filepath
+            )
             create_database_file(db_filepath)
             record_cucu_run()
             config_mock.get.return_value = db_filepath
@@ -169,7 +173,9 @@ def test_flat_view_with_partial_tags():
     with tempfile.TemporaryDirectory() as temp_dir:
         with mock.patch("cucu.db.CONFIG") as config_mock:
             db_filepath = f"{temp_dir}/run_run_789_worker_101.db"
-            _setup_config_mock(config_mock, "run_789", "worker_101", db_filepath)
+            _setup_config_mock(
+                config_mock, "run_789", "worker_101", db_filepath
+            )
             create_database_file(db_filepath)
             record_cucu_run()
             config_mock.get.return_value = db_filepath

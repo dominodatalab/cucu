@@ -68,7 +68,7 @@ def before_all(ctx):
     worker_run_id = CONFIG["WORKER_RUN_ID"]
     cucu_run_id = CONFIG["CUCU_RUN_ID"]
     CONFIG["RUN_DB_PATH"] = run_db_path = (
-        results_path / f"run_{cucu_run_id}_{worker_run_id}.db" 
+        results_path / f"run_{cucu_run_id}_{worker_run_id}.db"
     )
     create_database_file(run_db_path)
     record_cucu_run()
