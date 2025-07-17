@@ -313,7 +313,14 @@ class Config(dict):
                     v = f"'{v}'"
                 config[k] = v
 
-        return yaml.dump(config)
+        # Resolve non-atomic classes to their string representation
+        yaml.representer.SafeRepresenter.add_representer(
+            None,
+            lambda dumper, data: dumper.represent_scalar(
+                "tag:yaml.org,2002:str", str(data)
+            ),
+        )
+        return yaml.safe_dump(config)
 
 
 # global config object

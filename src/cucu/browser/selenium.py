@@ -258,17 +258,21 @@ class Selenium(Browser):
         }
 
     def get_all_tabs_info(self):
+        window_handles = self.driver.window_handles
+        current_window = self.driver.current_window_handle
         tabs_info = []
-        handles = self.driver.window_handles
-        for idx, handle in enumerate(handles):
+
+        for handle in window_handles:
             self.driver.switch_to.window(handle)
             tabs_info.append(
                 {
-                    "index": idx,
                     "title": self.driver.title,
                     "url": self.driver.current_url,
                 }
             )
+
+        # Switch back to the original window
+        self.driver.switch_to.window(current_window)
 
         return tabs_info
 
