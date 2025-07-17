@@ -3,7 +3,6 @@ import tempfile
 from unittest import mock
 
 from cucu.db import (
-    create_flat_view,
     create_run_database,
     finish_scenario_record,
     record_feature,
@@ -87,8 +86,6 @@ def test_flat_view_creation_and_query():
             )
             finish_scenario_record(scenario_mock)
 
-        create_flat_view(db_filepath)
-
         with sqlite3.connect(db_filepath) as conn:
             cursor = conn.cursor()
 
@@ -153,8 +150,6 @@ def test_flat_view_with_empty_tags():
                 "2024-01-01T10:02:00",
             )
             finish_scenario_record(scenario_mock)
-
-        create_flat_view(db_filepath)
 
         with sqlite3.connect(db_filepath) as conn:
             cursor = conn.cursor()
@@ -222,8 +217,6 @@ def test_flat_view_with_partial_tags():
                 "2024-01-01T10:03:00",
             )
             finish_scenario_record(scenario_mock2)
-
-        create_flat_view(db_filepath)
 
         with sqlite3.connect(db_filepath) as conn:
             cursor = conn.cursor()

@@ -35,35 +35,14 @@ def create_run_database(results_dir):
     }
 
     _create_run_database_table(db_filepath, run_details)
-    create_flat_view(db_filepath)
 
     return str(db_filepath)
 
 
 def record_feature(feature):
-    """
-    Record a feature in the database.
-
-    Args:
-        feature: The feature object containing name, filename, and other details
-    """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
-
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS features (
-                feature_run_id TEXT PRIMARY KEY,
-                worker_run_id TEXT,
-                name TEXT,
-                filename TEXT,
-                description TEXT,
-                tags TEXT,
-                start_at TIMESTAMP,
-                end_at TIMESTAMP,
-                FOREIGN KEY (worker_run_id) REFERENCES workers (worker_run_id)
-            )
-        """)
 
         cursor.execute(
             """
@@ -91,23 +70,6 @@ def record_scenario(ctx):
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS scenarios (
-                scenario_run_id TEXT PRIMARY KEY,
-                feature_run_id TEXT,
-                name TEXT,
-                seq INTEGER,
-                tags TEXT,
-                status TEXT,
-                duration REAL,
-                start_at TIMESTAMP,
-                end_at TIMESTAMP,
-                log_files JSON,
-                cucu_config JSON,
-                FOREIGN KEY (feature_run_id) REFERENCES features (feature_run_id)
-            )
-        """)
-
         cursor.execute(
             """
             INSERT INTO scenarios (scenario_run_id, feature_run_id, name, seq, tags, start_at)
@@ -127,36 +89,9 @@ def record_scenario(ctx):
 
 
 def start_step_record(ctx, step):
-    """
-    Start recording a step in the database.
-
-    Args:
-        ctx: The context object containing step_index
-        step: The step object containing name and other details
-    """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
-
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS steps (
-                step_run_id TEXT PRIMARY KEY,
-                scenario_run_id TEXT,
-                seq INTEGER,
-                keyword TEXT,
-                name TEXT,
-                location TEXT,
-                is_substep BOOLEAN,
-                status TEXT,
-                duration REAL,
-                start_at TIMESTAMP,
-                end_at TIMESTAMP,
-                debug_output TEXT,
-                browser_logs TEXT,
-                browser_info JSON,
-                FOREIGN KEY (scenario_run_id) REFERENCES scenarios (scenario_run_id)
-            )
-        """)
 
         cursor.execute(
             """
@@ -166,7 +101,7 @@ def start_step_record(ctx, step):
             (
                 step.step_run_id,
                 ctx.scenario.scenario_run_id,
-                ctx.step_index + 1,  # Convert 0-based to 1-based index
+                ctx.step_index + 1,
                 step.keyword,
                 step.name,
                 str(step.location),
@@ -179,13 +114,6 @@ def start_step_record(ctx, step):
 
 
 def finish_step_record(step, duration):
-    """
-    Finish recording a step in the database by updating status, duration, and end_at.
-
-    Args:
-        step: The step object containing step_run_id, status and other details
-        duration: The step duration in seconds
-    """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
@@ -211,19 +139,11 @@ def finish_step_record(step, duration):
 
 
 def finish_scenario_record(scenario):
-    """
-    Finish recording a scenario in the database by updating status, duration, and end_at.
-
-    Args:
-        scenario: The scenario object containing scenario_run_id, status and other details
-    """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
-    # calculate duration from ISO timestamps
     start_dt = datetime.fromisoformat(scenario.start_at)
     end_dt = datetime.fromisoformat(scenario.end_at)
     duration = (end_dt - start_dt).total_seconds()
 
-    # collect log files from the scenario logs directory
     scenario_logs_dir = CONFIG.get("SCENARIO_LOGS_DIR")
     if not scenario_logs_dir or not Path(scenario_logs_dir).exists():
         log_files_json = "[]"
@@ -259,12 +179,6 @@ def finish_scenario_record(scenario):
 
 
 def finish_feature_record(feature):
-    """
-    Finish recording a feature in the database by updating end_at timestamp.
-
-    Args:
-        feature: The feature object containing feature_run_id and other details
-    """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
@@ -285,9 +199,6 @@ def finish_feature_record(feature):
 
 
 def finish_worker_record():
-    """
-    Finish recording a worker in the database by updating end_at timestamp.
-    """
     db_filepath = CONFIG.get("RUN_DB_FILEPATH")
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
@@ -308,28 +219,10 @@ def finish_worker_record():
 
 
 def _create_run_database_table(db_filepath, run_details):
-    """Create a run database with run details using unified table structure."""
     with sqlite3.connect(db_filepath) as conn:
+        _create_database_schema(conn)
+        
         cursor = conn.cursor()
-
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS cucu_run (
-                cucu_run_id TEXT PRIMARY KEY,
-                full_arguments TEXT,
-                date TEXT,
-                start_at TIMESTAMP
-            )
-        """)
-
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS workers (
-                worker_run_id TEXT PRIMARY KEY,
-                cucu_run_id TEXT,
-                start_at TIMESTAMP,
-                end_at TIMESTAMP,
-                FOREIGN KEY (cucu_run_id) REFERENCES cucu_run (cucu_run_id)
-            )
-        """)
 
         cursor.execute(
             """
@@ -359,38 +252,93 @@ def _create_run_database_table(db_filepath, run_details):
         conn.commit()
 
 
-def create_flat_view(db_filepath):
-    """
-    Create a flat view that combines data from cucu_run, features, and scenarios tables.
-
-    The view provides the following columns:
-    - cucu_run_id: From the cucu_run table
-    - start_at: Scenario start timestamp
-    - duration: Scenario duration in seconds
-    - feature_name: Name of the feature
-    - scenario_name: Name of the scenario
-    - tags: Combined tags from feature and scenario
-    - log_files: JSON array of log file paths
-
-    Args:
-        db_filepath (str): The database filepath
-    """
-    with sqlite3.connect(db_filepath) as conn:
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            CREATE VIEW IF NOT EXISTS flat AS
-            SELECT
-                w.cucu_run_id,
-                s.start_at,
-                s.duration,
-                f.name AS feature_name,
-                s.name AS scenario_name,
-                f.tags || ' ' || s.tags AS tags,
-                s.log_files
-            FROM scenarios s
-            JOIN features f ON s.feature_run_id = f.feature_run_id
-            JOIN workers w ON f.worker_run_id = w.worker_run_id
-        """)
-
-        conn.commit()
+def _create_database_schema(conn):
+    """Create all database tables and views in a single method."""
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS cucu_run (
+            cucu_run_id TEXT PRIMARY KEY,
+            full_arguments TEXT,
+            date TEXT,
+            start_at TIMESTAMP
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS workers (
+            worker_run_id TEXT PRIMARY KEY,
+            cucu_run_id TEXT,
+            start_at TIMESTAMP,
+            end_at TIMESTAMP,
+            FOREIGN KEY (cucu_run_id) REFERENCES cucu_run (cucu_run_id)
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS features (
+            feature_run_id TEXT PRIMARY KEY,
+            worker_run_id TEXT,
+            name TEXT,
+            filename TEXT,
+            description TEXT,
+            tags TEXT,
+            start_at TIMESTAMP,
+            end_at TIMESTAMP,
+            FOREIGN KEY (worker_run_id) REFERENCES workers (worker_run_id)
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS scenarios (
+            scenario_run_id TEXT PRIMARY KEY,
+            feature_run_id TEXT,
+            name TEXT,
+            seq INTEGER,
+            tags TEXT,
+            status TEXT,
+            duration REAL,
+            start_at TIMESTAMP,
+            end_at TIMESTAMP,
+            log_files JSON,
+            cucu_config JSON,
+            FOREIGN KEY (feature_run_id) REFERENCES features (feature_run_id)
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS steps (
+            step_run_id TEXT PRIMARY KEY,
+            scenario_run_id TEXT,
+            seq INTEGER,
+            keyword TEXT,
+            name TEXT,
+            location TEXT,
+            is_substep BOOLEAN,
+            status TEXT,
+            duration REAL,
+            start_at TIMESTAMP,
+            end_at TIMESTAMP,
+            debug_output TEXT,
+            browser_logs TEXT,
+            browser_info JSON,
+            FOREIGN KEY (scenario_run_id) REFERENCES scenarios (scenario_run_id)
+        )
+    """)
+    
+    cursor.execute("""
+        CREATE VIEW IF NOT EXISTS flat AS
+        SELECT
+            w.cucu_run_id,
+            s.start_at,
+            s.duration,
+            f.name AS feature_name,
+            s.name AS scenario_name,
+            f.tags || ' ' || s.tags AS tags,
+            s.log_files
+        FROM scenarios s
+        JOIN features f ON s.feature_run_id = f.feature_run_id
+        JOIN workers w ON f.worker_run_id = w.worker_run_id
+    """)
+    
+    conn.commit()
