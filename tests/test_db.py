@@ -3,8 +3,9 @@ import tempfile
 from unittest import mock
 
 from cucu.db import (
-    create_run_database,
+    create_database_file,
     finish_scenario_record,
+    record_cucu_run,
     record_feature,
     record_scenario,
 )
@@ -14,6 +15,7 @@ def _setup_config_mock(config_mock, run_id, worker_id, db_filepath):
     config_mock.__getitem__.side_effect = lambda key: {
         "WORKER_RUN_ID": worker_id,
         "CUCU_RUN_ID": run_id,
+        "RUN_DB_PATH": db_filepath,
     }[key]
     if db_filepath:
         config_mock.get.return_value = db_filepath
@@ -56,8 +58,10 @@ def _create_scenario_finish_mock(scenario_id, status, start_at, end_at):
 def test_flat_view_creation_and_query():
     with tempfile.TemporaryDirectory() as temp_dir:
         with mock.patch("cucu.db.CONFIG") as config_mock:
-            _setup_config_mock(config_mock, "run_123", "worker_456", None)
-            db_filepath = create_run_database(temp_dir)
+            db_filepath = f"{temp_dir}/run_run_123_worker_456.db"
+            _setup_config_mock(config_mock, "run_123", "worker_456", db_filepath)
+            create_database_file(db_filepath)
+            record_cucu_run()
             config_mock.get.return_value = db_filepath
 
             feature_mock = _create_feature_mock(
@@ -121,8 +125,10 @@ def test_flat_view_creation_and_query():
 def test_flat_view_with_empty_tags():
     with tempfile.TemporaryDirectory() as temp_dir:
         with mock.patch("cucu.db.CONFIG") as config_mock:
-            _setup_config_mock(config_mock, "run_456", "worker_789", None)
-            db_filepath = create_run_database(temp_dir)
+            db_filepath = f"{temp_dir}/run_run_456_worker_789.db"
+            _setup_config_mock(config_mock, "run_456", "worker_789", db_filepath)
+            create_database_file(db_filepath)
+            record_cucu_run()
             config_mock.get.return_value = db_filepath
 
             feature_mock = _create_feature_mock(
@@ -162,8 +168,10 @@ def test_flat_view_with_empty_tags():
 def test_flat_view_with_partial_tags():
     with tempfile.TemporaryDirectory() as temp_dir:
         with mock.patch("cucu.db.CONFIG") as config_mock:
-            _setup_config_mock(config_mock, "run_789", "worker_101", None)
-            db_filepath = create_run_database(temp_dir)
+            db_filepath = f"{temp_dir}/run_run_789_worker_101.db"
+            _setup_config_mock(config_mock, "run_789", "worker_101", db_filepath)
+            create_database_file(db_filepath)
+            record_cucu_run()
             config_mock.get.return_value = db_filepath
 
             feature_mock1 = _create_feature_mock(

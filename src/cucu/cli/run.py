@@ -13,7 +13,7 @@ from cucu import (
 )
 from cucu.browser import selenium
 from cucu.config import CONFIG
-from cucu.db import create_run_database
+from cucu.db import create_database_file, record_cucu_run
 from cucu.page_checks import init_page_checks
 
 
@@ -188,8 +188,6 @@ def create_run(results, filepath):
     if run_json_filepath.exists():
         return
 
-    cucu_run_id = CONFIG["CUCU_RUN_ID"]
-
     env_values = (
         dict(os.environ)
         if CONFIG["CUCU_RECORD_ENV_VARS"]
@@ -197,7 +195,7 @@ def create_run(results, filepath):
     )
 
     run_details = {
-        "cucu_run_id": cucu_run_id,
+        "cucu_run_id": CONFIG["CUCU_RUN_ID"],
         "filepath": filepath,
         "full_arguments": sys.argv,
         "env": env_values,
@@ -207,6 +205,8 @@ def create_run(results, filepath):
     run_json_filepath.write_text(
         json.dumps(run_details, indent=2, sort_keys=True), encoding="utf8"
     )
+    CONFIG["RUN_DB_PATH"] = run_db_path = results_path / "run.db"
+    if not run_db_path.exists():
+        create_database_file(run_db_path)
 
-    db_filepath = create_run_database(results)
-    CONFIG["RUN_DB_FILEPATH"] = db_filepath
+    record_cucu_run()
