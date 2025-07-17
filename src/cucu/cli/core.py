@@ -33,6 +33,7 @@ from cucu.cli import thread_dumper
 from cucu.cli.run import behave, behave_init, create_run
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.config import CONFIG
+from cucu.db import consolidate_database_files
 from cucu.lint import linter
 from cucu.utils import generate_short_id
 
@@ -492,6 +493,8 @@ def run(
         if dumper is not None:
             dumper.stop()
 
+        consolidate_database_files(results)
+
         if generate_report:
             _generate_report(
                 results,
@@ -502,7 +505,10 @@ def run(
 
 
 def _generate_report(
-    filepath: str, output: str, only_failures: False, junit: str | None = None
+    results_dir: str,
+    output: str,
+    only_failures: False,
+    junit: str | None = None,
 ):
     """
     helper method to handle report generation so it can be used by the `cucu report`
@@ -511,7 +517,7 @@ def _generate_report(
 
 
     parameters:
-        filepath(string): the results directory containing the previous test run
+        results_dir(string): the results directory containing the previous test run
         output(string): the directory where we'll generate the report
         only_failures(bool, optional): if only report failures. The default is False.
         junit(str|None, optional): the directory of the JUnit files. The default if None.
@@ -521,8 +527,10 @@ def _generate_report(
 
     os.makedirs(output)
 
+    consolidate_database_files(results_dir)
+
     report_location = reporter.generate(
-        filepath, output, only_failures=only_failures
+        results_dir, output, only_failures=only_failures
     )
     print(f"HTML test report at {report_location}")
 

@@ -326,3 +326,40 @@ def create_database_file(db_filepath):
         """)
 
         conn.commit()
+
+
+def consolidate_database_files(results_dir):
+    results_path = Path(results_dir)
+    target_db_path = results_path / "run.db"
+
+    db_files = [
+        db for db in results_path.glob("**/*.db") if db.name != "run.db"
+    ]
+
+    if not target_db_path.exists() and db_files:
+        create_database_file(target_db_path)
+
+    tables_to_copy = ["cucu_run", "workers", "features", "scenarios", "steps"]
+
+    with sqlite3.connect(target_db_path) as target_conn:
+        target_cursor = target_conn.cursor()
+
+        for db_file in db_files:
+            with sqlite3.connect(db_file) as source_conn:
+                source_cursor = source_conn.cursor()
+
+                for table_name in tables_to_copy:
+                    source_cursor.execute(f"SELECT * FROM {table_name}")
+                    rows = source_cursor.fetchall()
+
+                    source_cursor.execute(f"PRAGMA table_info({table_name})")
+                    columns = [col[1] for col in source_cursor.fetchall()]
+                    placeholders = ",".join(["?" for _ in columns])
+
+                    target_cursor.executemany(
+                        f"INSERT OR REPLACE INTO {table_name} VALUES ({placeholders})",
+                        rows,
+                    )
+                    target_conn.commit()
+
+            db_file.unlink()
