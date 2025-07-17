@@ -8,7 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 1.3.0
 - Add - record test run to local db
 - Chore - add copilot instructions
-- Chore - change to use uv-build packaging
+- Add - TeeStream utility class
 
 ## 1.2.4
 - Fix - restore state after tab info
