@@ -55,6 +55,7 @@ Feature: Run with hooks
       [\s\S]*
       .* DEBUG just logging some stuff from my before all hook
       Feature: Feature that simply echo's "Hello World"
+      [\s\S]*
       .* DEBUG just logging some stuff from my before scenario hook
       .* DEBUG HOOK before_scenario_log: passed ✅
 
@@ -73,9 +74,10 @@ Feature: Run with hooks
       .* DEBUG HOOK download_mht_data: passed ✅
       .* DEBUG just logging some stuff from my after scenario hook
       .* DEBUG HOOK after_scenario_log: passed ✅
-      .* DEBUG HOOK download_browser_logs: passed ✅
+      .* DEBUG HOOK download_browser_log: passed ✅
 
       .* DEBUG just logging some stuff from my after all hook
+      [\s\S]*
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
       2 steps passed, 0 failed, 0 skipped, 0 undefined
@@ -121,6 +123,7 @@ Feature: Run with hooks
       """
       [\s\S]*
       Feature: Feature that runs after this scenario hooks in LIFO order.
+      [\s\S]*
 
         Scenario: This is a scenario that runs after this scenario hooks in LIFO order
           Given I run the following steps after the current scenario-1     # .*
@@ -131,8 +134,9 @@ Feature: Run with hooks
       .* DEBUG HOOK after_this_scenario_2: passed ✅
       .* DEBUG just logging some stuff from first_after_this_scenario_hook_1
       .* DEBUG HOOK after_this_scenario_1: passed ✅
-      .* DEBUG HOOK download_browser_logs: passed ✅
+      .* DEBUG HOOK download_browser_log: passed ✅
 
+      [\s\S]*
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
       2 steps passed, 0 failed, 0 skipped, 0 undefined

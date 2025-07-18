@@ -3,10 +3,12 @@ various cucu utilities can be placed here and then exposed publicly through
 the src/cucu/__init__.py
 """
 
+import hashlib
 import logging
 import os
 import pkgutil
 import shutil
+import time
 
 import humanize
 from selenium.webdriver.common.by import By
@@ -39,6 +41,16 @@ GHERKIN_TABLEFORMAT = TableFormat(
 
 class StopRetryException(Exception):
     pass
+
+
+def generate_short_id():
+    """
+    Generate a short 7-character ID based on current performance counter.
+    Used for both cucu_run_id and scenario_run_id.
+    """
+    return hashlib.sha256(
+        str(time.perf_counter()).encode("utf-8")
+    ).hexdigest()[:7]
 
 
 def format_gherkin_table(table, headings=[], prefix=""):
@@ -76,7 +88,7 @@ def run_steps(ctx, steps_text):
     steps = ctx.feature.parser.parse_steps(steps_text)
 
     current_step = ctx.current_step
-    current_step_start_time = ctx.start_time
+    current_step_start_at = current_step.start_at
 
     # XXX: I want to get back to this and find a slightly better way to handle
     #      these substeps without mucking around with so much state in behave
@@ -101,7 +113,7 @@ def run_steps(ctx, steps_text):
             ctx.text = original_text
     finally:
         ctx.current_step = current_step
-        ctx.start_time = current_step_start_time
+        ctx.current_step.start_at = current_step_start_at
 
     return True
 
@@ -222,6 +234,10 @@ def take_saw_element_screenshot(ctx, thing, name, index, element=None):
 
 
 def take_screenshot(ctx, step_name, label="", element=None):
+    step = ctx.current_step
+    if not hasattr(step, "screenshots"):
+        step.screenshots = []
+
     screenshot_dir = os.path.join(
         ctx.scenario_dir, get_step_image_dir(ctx.step_index, step_name)
     )
@@ -268,6 +284,20 @@ def take_screenshot(ctx, step_name, label="", element=None):
         """
         ctx.browser.execute(clear_highlight, element)
 
+    screenshot = {
+        "step_name": step_name,
+        "label": label,
+        "element": element,
+        "location": f"({element.location['x']},{element.location['y']})"
+        if element
+        else "",
+        "size": f"({element.size['width']},{element.size['height']})"
+        if element
+        else "",
+        "filepath": filepath,
+    }
+    step.screenshots.append(screenshot)
+
     if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])
 
@@ -297,3 +327,31 @@ def find_n_click_input_parent_label(ctx, input_element):
 def is_element_size_zero(element):
     size = element.size
     return size["width"] == 0 and size["height"] == 0
+
+
+class TeeStream:
+    """
+    A stream that writes to both a file stream and captures content in an internal buffer.
+    Provides file-like accessors to read the captured content.
+    """
+
+    def __init__(self, file_stream):
+        self.file_stream = file_stream
+        self.string_buffer = []
+
+    def write(self, data):
+        self.file_stream.write(data)
+        self.string_buffer.append(data)
+
+    def flush(self):
+        self.file_stream.flush()
+
+    def getvalue(self):
+        return "".join(self.string_buffer)
+
+    def read(self):
+        return self.getvalue()
+
+    def clear(self):
+        """Clear the internal buffer."""
+        self.string_buffer = []

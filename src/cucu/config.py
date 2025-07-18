@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import re
 import socket
@@ -15,6 +16,7 @@ class Config(dict):
         self.resolving = False
         self.defined_variables = {}
         self.variable_lookups = {}
+        self.snapshots = []
 
     def define(self, name, description, default=None):
         """
@@ -255,19 +257,37 @@ class Config(dict):
 
         return string
 
-    def snapshot(self):
-        """
-        make a shallow copy of the current config values which can later be
-        restored using the `restore` method.
-        """
-        self.snapshot_data = self.copy()
+    def snapshot(self, name=None):
+        if name is None:
+            name = f"snapshot_{len(self.snapshots)}"
 
-    def restore(self):
-        """
-        restore a previous `snapshot`
-        """
+        snapshot_data = {"name": name, "config": self.copy()}
+        self.snapshots.append(snapshot_data)
+
+        logging.debug(
+            f"CONFIG: snapshot taken '{name}' (stack depth: {len(self.snapshots)})"
+        )
+
+    def restore(self, with_pop=False):
+        if not self.snapshots:
+            return
+
+        if with_pop:
+            latest_snapshot = self.snapshots.pop()
+            action = "popped and restored"
+        else:
+            latest_snapshot = self.snapshots[-1]
+            action = "restored to"
+
         self.clear()
-        self.update(**self.snapshot_data)
+        self.update(**latest_snapshot["config"])
+
+        logging.debug(
+            f"CONFIG: {action} snapshot '{latest_snapshot['name']}' (stack depth: {len(self.snapshots)})"
+        )
+
+    def list_snapshots(self):
+        return [snapshot["name"] for snapshot in self.snapshots]
 
     def register_custom_variable_handling(self, regex, lookup):
         """

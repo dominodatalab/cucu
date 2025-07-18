@@ -18,6 +18,7 @@ fix:
 	uv sync
 	uv run ruff format .
 	uv run ruff check . --fix
+	SKIP=makefile uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
 	uv run cucu lint --fix features
 
 lint:

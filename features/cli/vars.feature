@@ -25,7 +25,7 @@ Feature: Vars
       # can see a built in variable
      Then I should see "{STDOUT}" contains the following:
       """
-      FEATURE_RESULTS_DIR
+      SCENARIO_DOWNLOADS_DIR
       """
       # can see a custom variable defined in the underlying project
       And I should see "{STDOUT}" contains the following:
