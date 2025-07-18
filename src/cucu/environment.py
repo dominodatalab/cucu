@@ -56,6 +56,7 @@ def check_browser_initialized(ctx):
 def before_all(ctx):
     CONFIG["__CUCU_CTX"] = ctx
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
+    ctx.worker_custom_data = {}
 
     CONFIG["WORKER_RUN_ID"] = generate_short_id()
 
@@ -78,12 +79,13 @@ def after_all(ctx):
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
         hook(ctx)
 
-    finish_worker_record()
+    finish_worker_record(ctx.worker_custom_data)
     CONFIG.restore(with_pop=True)
 
 
 def before_feature(ctx, feature):
     feature.feature_run_id = generate_short_id()
+    feature.custom_data = {}
     record_feature(feature)
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:

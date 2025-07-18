@@ -219,17 +219,20 @@ def finish_scenario_record(scenario):
 
 def finish_feature_record(feature):
     db_filepath = CONFIG["RUN_DB_PATH"]
+    custom_data_json = json.dumps(feature.custom_data)
+
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
         cursor.execute(
             """
             UPDATE features
-            SET end_at = ?
+            SET end_at = ?, custom_data = ?
             WHERE feature_run_id = ?
         """,
             (
                 datetime.now().isoformat(),
+                custom_data_json,
                 feature.feature_run_id,
             ),
         )
@@ -237,19 +240,22 @@ def finish_feature_record(feature):
         conn.commit()
 
 
-def finish_worker_record():
+def finish_worker_record(custom_data=None):
     db_filepath = CONFIG["RUN_DB_PATH"]
+    custom_data_json = json.dumps(custom_data) if custom_data else "{}"
+
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
         cursor.execute(
             """
             UPDATE workers
-            SET end_at = ?
+            SET end_at = ?, custom_data = ?
             WHERE worker_run_id = ?
         """,
             (
                 datetime.now().isoformat(),
+                custom_data_json,
                 CONFIG["WORKER_RUN_ID"],
             ),
         )
@@ -276,6 +282,7 @@ def create_database_file(db_filepath):
                 cucu_run_id TEXT,
                 start_at TIMESTAMP,
                 end_at TIMESTAMP,
+                custom_data JSON,
                 FOREIGN KEY (cucu_run_id) REFERENCES cucu_run (cucu_run_id)
             )
         """)
@@ -290,6 +297,7 @@ def create_database_file(db_filepath):
                 tags TEXT,
                 start_at TIMESTAMP,
                 end_at TIMESTAMP,
+                custom_data JSON,
                 FOREIGN KEY (worker_run_id) REFERENCES workers (worker_run_id)
             )
         """)
