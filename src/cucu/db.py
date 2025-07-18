@@ -237,7 +237,6 @@ def finish_worker_record():
 
 def create_database_file(db_filepath):
     with sqlite3.connect(db_filepath) as conn:
-        """Create all database tables and views in a single method."""
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -335,9 +334,6 @@ def consolidate_database_files(results_dir):
     db_files = [
         db for db in results_path.glob("**/*.db") if db.name != "run.db"
     ]
-
-    if not target_db_path.exists() and db_files:
-        create_database_file(target_db_path)
 
     tables_to_copy = ["cucu_run", "workers", "features", "scenarios", "steps"]
 

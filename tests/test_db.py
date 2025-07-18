@@ -123,7 +123,7 @@ def test_flat_view_creation_and_query():
             assert feature_name == "Login Feature"
             assert scenario_name == "Valid login"
             assert tags == "login auth smoke positive"
-            assert log_files == "[]"  # No log files in test
+            assert log_files == "[]"
 
 
 def test_flat_view_with_empty_tags():
@@ -168,7 +168,7 @@ def test_flat_view_with_empty_tags():
             cursor.execute("SELECT tags, log_files FROM flat")
             result = cursor.fetchone()
             assert result[0] == " "
-            assert result[1] == "[]"  # No log files in test
+            assert result[1] == "[]"
 
 
 def test_flat_view_with_partial_tags():
@@ -244,10 +244,10 @@ def test_flat_view_with_partial_tags():
             assert len(results) == 2
             assert results[1][0] == "No scenario tags"
             assert results[1][1] == "feature-tag1 feature-tag2 "
-            assert results[1][2] == "[]"  # No log files in test
+            assert results[1][2] == "[]"
             assert results[0][0] == "Has scenario tags"
             assert results[0][1] == " scenario-tag1 scenario-tag2"
-            assert results[0][2] == "[]"  # No log files in test
+            assert results[0][2] == "[]"
 
 
 @mock.patch("cucu.db.CONFIG")
@@ -267,11 +267,9 @@ def test_consolidate_database_files(config_mock):
         # Create worker database 2
         worker2_db_path = results_dir / "worker_002.db"
         create_database_file(worker2_db_path)
-
-        # Setup config for worker 1 data
+        
         _setup_config_mock(config_mock, "run_001", "worker_001", str(worker1_db_path))
-
-        # Add data to worker 1
+        
         with sqlite3.connect(worker1_db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -291,11 +289,9 @@ def test_consolidate_database_files(config_mock):
                 ("scenario_001", "feature_001", "Test Scenario 1", 1, "tag1", "2024-01-01T10:00:00"),
             )
             conn.commit()
-
-        # Setup config for worker 2 data
+        
         _setup_config_mock(config_mock, "run_001", "worker_002", str(worker2_db_path))
-
-        # Add data to worker 2
+        
         with sqlite3.connect(worker2_db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -311,30 +307,23 @@ def test_consolidate_database_files(config_mock):
                 ("scenario_002", "feature_002", "Test Scenario 2", 1, "tag2", "2024-01-01T10:01:00"),
             )
             conn.commit()
-
-        # Verify worker databases exist
+        
         assert worker1_db_path.exists()
         assert worker2_db_path.exists()
-
-        # Run consolidation
+        
         consolidate_database_files(str(results_dir))
-
-        # Verify worker databases are deleted
+        
         assert not worker1_db_path.exists()
         assert not worker2_db_path.exists()
-
-        # Verify main database still exists
+        
         assert main_db_path.exists()
-
-        # Verify consolidated data in main database
+        
         with sqlite3.connect(main_db_path) as conn:
             cursor = conn.cursor()
-
-            # Check cucu_run table - should have 1 record (workers share same run)
+            
             cursor.execute("SELECT COUNT(*) FROM cucu_run")
             assert cursor.fetchone()[0] == 1
-
-            # Check workers table
+            
             cursor.execute("SELECT COUNT(*) FROM workers")
             assert cursor.fetchone()[0] == 2
 
@@ -342,17 +331,15 @@ def test_consolidate_database_files(config_mock):
             workers = cursor.fetchall()
             assert workers[0][0] == "worker_001"
             assert workers[1][0] == "worker_002"
-
-            # Check features table
+            
             cursor.execute("SELECT COUNT(*) FROM features")
             assert cursor.fetchone()[0] == 2
-
+            
             cursor.execute("SELECT name FROM features ORDER BY name")
             features = cursor.fetchall()
             assert features[0][0] == "Test Feature 1"
             assert features[1][0] == "Test Feature 2"
-
-            # Check scenarios table
+            
             cursor.execute("SELECT COUNT(*) FROM scenarios")
             assert cursor.fetchone()[0] == 2
 
@@ -372,13 +359,11 @@ def test_consolidate_database_files_with_subdirectories(config_mock):
         main_db_path = results_dir / "run.db"
         create_database_file(main_db_path)
 
-        # Create subdirectory with worker database
         sub_dir = results_dir / "worker_logs"
         sub_dir.mkdir()
         worker_db_path = sub_dir / "worker_001.db"
         create_database_file(worker_db_path)
-
-        # Setup config and add data
+        
         _setup_config_mock(config_mock, "run_001", "worker_001", str(worker_db_path))
 
         with sqlite3.connect(worker_db_path) as conn:
@@ -388,14 +373,11 @@ def test_consolidate_database_files_with_subdirectories(config_mock):
                 ("worker_001", "run_001", "2024-01-01T10:00:00"),
             )
             conn.commit()
-
-        # Run consolidation
+        
         consolidate_database_files(str(results_dir))
-
-        # Verify worker database is deleted
+        
         assert not worker_db_path.exists()
-
-        # Verify data was consolidated
+        
         with sqlite3.connect(main_db_path) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT COUNT(*) FROM workers")
@@ -408,21 +390,16 @@ def test_consolidate_database_files_empty_tables(config_mock):
     with tempfile.TemporaryDirectory() as temp_dir:
         results_dir = Path(temp_dir)
 
-        # Create main run.db
         main_db_path = results_dir / "run.db"
         create_database_file(main_db_path)
-
-        # Create worker database with empty tables
+        
         worker_db_path = results_dir / "worker_001.db"
         create_database_file(worker_db_path)
-
-        # Run consolidation (no data in worker database)
+        
         consolidate_database_files(str(results_dir))
-
-        # Verify worker database is deleted even with no data
+        
         assert not worker_db_path.exists()
-
-        # Verify main database still exists and is valid
+        
         assert main_db_path.exists()
         with sqlite3.connect(main_db_path) as conn:
             cursor = conn.cursor()
