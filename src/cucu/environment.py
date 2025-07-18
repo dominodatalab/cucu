@@ -29,11 +29,6 @@ from cucu.utils import (
 )
 
 CONFIG.define(
-    "FEATURE_RESULTS_DIR",
-    "the results directory for the currently executing feature",
-    default=None,
-)
-CONFIG.define(
     "SCENARIO_RESULTS_DIR",
     "the results directory for the currently executing scenario",
     default=None,
@@ -87,13 +82,12 @@ def after_all(ctx):
 
 
 def before_feature(ctx, feature):
-    CONFIG["FEATURE_RUN_ID"] = feature.feature_run_id = generate_short_id()
+    feature.feature_run_id = generate_short_id()
     record_feature(feature)
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         results_dir = Path(config.CONFIG["CUCU_RESULTS_DIR"])
         ctx.feature_dir = results_dir / ellipsize_filename(feature.name)
-        CONFIG["FEATURE_RESULTS_DIR"] = ctx.feature_dir
 
 
 def after_feature(ctx, feature):
