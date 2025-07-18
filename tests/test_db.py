@@ -36,12 +36,13 @@ def _create_feature_mock(feature_id, name, filename, description, tags):
 
 
 def _create_scenario_context_mock(
-    scenario_id, feature_id, name, tags, start_at, index=1
+    scenario_id, feature_id, name, tags, start_at, index=1, line_number=1
 ):
     ctx_mock = mock.MagicMock()
     ctx_mock.scenario.scenario_run_id = scenario_id
     ctx_mock.scenario.feature.feature_run_id = feature_id
     ctx_mock.scenario.name = name
+    ctx_mock.scenario.line = line_number
     ctx_mock.scenario.tags = tags
     ctx_mock.scenario.start_at = start_at
     ctx_mock.scenario_index = index
@@ -302,11 +303,12 @@ def test_consolidate_database_files(config_mock):
                 ),
             )
             cursor.execute(
-                "INSERT INTO scenarios (scenario_run_id, feature_run_id, name, seq, tags, start_at) VALUES (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO scenarios (scenario_run_id, feature_run_id, name, line_number, seq, tags, start_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 (
                     "scenario_001",
                     "feature_001",
                     "Test Scenario 1",
+                    10,
                     1,
                     "tag1",
                     "2024-01-01T10:00:00",
@@ -337,11 +339,12 @@ def test_consolidate_database_files(config_mock):
                 ),
             )
             cursor.execute(
-                "INSERT INTO scenarios (scenario_run_id, feature_run_id, name, seq, tags, start_at) VALUES (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO scenarios (scenario_run_id, feature_run_id, name, line_number, seq, tags, start_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 (
                     "scenario_002",
                     "feature_002",
                     "Test Scenario 2",
+                    20,
                     1,
                     "tag2",
                     "2024-01-01T10:01:00",

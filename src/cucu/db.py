@@ -89,13 +89,14 @@ def record_scenario(ctx):
 
         cursor.execute(
             """
-            INSERT INTO scenarios (scenario_run_id, feature_run_id, name, seq, tags, start_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO scenarios (scenario_run_id, feature_run_id, name, line_number, seq, tags, start_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
             (
                 ctx.scenario.scenario_run_id,
                 ctx.scenario.feature.feature_run_id,
                 ctx.scenario.name,
+                ctx.scenario.line,
                 ctx.scenario_index,
                 " ".join(ctx.scenario.tags),
                 ctx.scenario.start_at,
@@ -295,6 +296,7 @@ def create_database_file(db_filepath):
                 scenario_run_id TEXT PRIMARY KEY,
                 feature_run_id TEXT,
                 name TEXT,
+                line_number INTEGER,
                 seq INTEGER,
                 tags TEXT,
                 status TEXT,
