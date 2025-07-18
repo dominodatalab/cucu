@@ -107,6 +107,7 @@ def before_scenario(ctx, scenario):
 
     init_scenario_hook_variables()
 
+    scenario.custom_data = {}
     ctx.scenario = scenario
     ctx.step_index = 0
     ctx.scenario_index = ctx.feature.scenarios.index(scenario) + 1

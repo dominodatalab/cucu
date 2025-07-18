@@ -192,13 +192,15 @@ def finish_scenario_record(scenario):
         ]
         log_files_json = json.dumps(sorted(log_files))
 
+    custom_data_json = json.dumps(scenario.custom_data)
+
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
         cursor.execute(
             """
             UPDATE scenarios
-            SET status = ?, duration = ?, end_at = ?, log_files = ?, cucu_config = ?
+            SET status = ?, duration = ?, end_at = ?, log_files = ?, cucu_config = ?, custom_data = ?
             WHERE scenario_run_id = ?
         """,
             (
@@ -207,6 +209,7 @@ def finish_scenario_record(scenario):
                 scenario.end_at,
                 log_files_json,
                 scenario.cucu_config_json,
+                custom_data_json,
                 scenario.scenario_run_id,
             ),
         )
@@ -305,6 +308,7 @@ def create_database_file(db_filepath):
                 end_at TIMESTAMP,
                 log_files JSON,
                 cucu_config JSON,
+                custom_data JSON,
                 FOREIGN KEY (feature_run_id) REFERENCES features (feature_run_id)
             )
         """)
