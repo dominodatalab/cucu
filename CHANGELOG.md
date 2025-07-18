@@ -16,7 +16,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Chore - add copilot instructions
 - Add - TeeStream utility class
 - Change - make fix more like lint
-- Add - CONFIG now can save multiple snapshots in a stack 
+- Add - CONFIG now can save multiple snapshots in a stack
 
 ## 1.2.4
 - Fix - restore state after tab info
