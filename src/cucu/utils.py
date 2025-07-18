@@ -234,6 +234,10 @@ def take_saw_element_screenshot(ctx, thing, name, index, element=None):
 
 
 def take_screenshot(ctx, step_name, label="", element=None):
+    step = ctx.current_step
+    if not hasattr(step, "screenshots"):
+        step.screenshots = []
+
     screenshot_dir = os.path.join(
         ctx.scenario_dir, get_step_image_dir(ctx.step_index, step_name)
     )
@@ -279,6 +283,20 @@ def take_screenshot(ctx, step_name, label="", element=None):
             })();
         """
         ctx.browser.execute(clear_highlight, element)
+
+    screenshot = {
+        "step_name": step_name,
+        "label": label,
+        "element": element,
+        "location": f"({element.location['x']},{element.location['y']})"
+        if element
+        else "",
+        "size": f"({element.size['width']},{element.size['height']})"
+        if element
+        else "",
+        "filepath": filepath,
+    }
+    step.screenshots.append(screenshot)
 
     if CONFIG["CUCU_MONITOR_PNG"]:
         shutil.copyfile(filepath, CONFIG["CUCU_MONITOR_PNG"])

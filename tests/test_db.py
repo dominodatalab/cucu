@@ -7,9 +7,11 @@ from cucu.db import (
     consolidate_database_files,
     create_database_file,
     finish_scenario_record,
+    finish_step_record,
     record_cucu_run,
     record_feature,
     record_scenario,
+    start_step_record,
 )
 
 
@@ -448,3 +450,338 @@ def test_consolidate_database_files_empty_tables(config_mock):
             cursor = conn.cursor()
             cursor.execute("SELECT COUNT(*) FROM workers")
             assert cursor.fetchone()[0] == 0
+
+
+def test_step_screenshots_recording():
+    """Test that step screenshots are properly recorded in JSON format"""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        with mock.patch("cucu.db.CONFIG") as config_mock:
+            db_filepath = f"{temp_dir}/run_run_123_worker_456.db"
+            _setup_config_mock(
+                config_mock, "run_123", "worker_456", db_filepath
+            )
+            create_database_file(db_filepath)
+            record_cucu_run()
+            config_mock.get.return_value = db_filepath
+
+            # Create feature and scenario
+            feature_mock = _create_feature_mock(
+                "feature_789",
+                "Screenshot Feature",
+                "screenshot.feature",
+                "Test screenshot functionality",
+                ["screenshot"],
+            )
+            record_feature(feature_mock)
+
+            ctx_mock = _create_scenario_context_mock(
+                "scenario_101",
+                "feature_789",
+                "Screenshot scenario",
+                ["test"],
+                "2024-01-01T10:01:30",
+            )
+            ctx_mock.step_index = 0  # Add step index
+            record_scenario(ctx_mock)
+
+            # Create a step mock with screenshots
+            step_mock = mock.MagicMock()
+            step_mock.step_run_id = "step_001"
+            step_mock.keyword = "Given"
+            step_mock.name = "I take screenshots"
+            step_mock.location = "screenshot.feature:5"
+            step_mock.has_substeps = False
+            step_mock.start_at = "2024-01-01T10:01:30"
+
+            # Mock screenshots data
+            step_mock.screenshots = [
+                {
+                    "step_name": "I take screenshots",
+                    "label": "first screenshot",
+                    "location": "(100,200)",
+                    "size": "(300,400)",
+                    "filepath": "/path/to/screenshot1.png",
+                },
+                {
+                    "step_name": "I take screenshots",
+                    "label": "second screenshot",
+                    "location": "(150,250)",
+                    "size": "(400,500)",
+                    "filepath": "/path/to/screenshot2.png",
+                },
+            ]
+
+            # Record the step
+            start_step_record(ctx_mock, step_mock)
+
+            # Finish the step
+            step_mock.status.name = "passed"
+            step_mock.end_at = "2024-01-01T10:01:31"
+            step_mock.debug_output = ""
+            step_mock.browser_logs = ""
+            step_mock.browser_info = "{}"
+
+            finish_step_record(step_mock, 1.0)
+
+            # Verify screenshots are stored as JSON
+            with sqlite3.connect(db_filepath) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT screenshots FROM steps WHERE step_run_id = ?",
+                    ("step_001",),
+                )
+                result = cursor.fetchone()
+
+                assert result is not None
+                screenshots_json = result[0]
+                assert screenshots_json is not None
+
+                # Parse and verify the JSON
+                import json
+
+                screenshots = json.loads(screenshots_json)
+                assert len(screenshots) == 2
+
+                # Verify first screenshot
+                assert screenshots[0]["step_name"] == "I take screenshots"
+                assert screenshots[0]["label"] == "first screenshot"
+                assert screenshots[0]["location"] == "(100,200)"
+                assert screenshots[0]["size"] == "(300,400)"
+                assert screenshots[0]["filepath"] == "/path/to/screenshot1.png"
+
+                # Verify second screenshot
+                assert screenshots[1]["step_name"] == "I take screenshots"
+                assert screenshots[1]["label"] == "second screenshot"
+                assert screenshots[1]["location"] == "(150,250)"
+                assert screenshots[1]["size"] == "(400,500)"
+                assert screenshots[1]["filepath"] == "/path/to/screenshot2.png"
+
+
+def test_step_no_screenshots_recording():
+    """Test that steps without screenshots have empty JSON array"""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        with mock.patch("cucu.db.CONFIG") as config_mock:
+            db_filepath = f"{temp_dir}/run_run_123_worker_456.db"
+            _setup_config_mock(
+                config_mock, "run_123", "worker_456", db_filepath
+            )
+            create_database_file(db_filepath)
+            record_cucu_run()
+            config_mock.get.return_value = db_filepath
+
+            # Create feature and scenario
+            feature_mock = _create_feature_mock(
+                "feature_789",
+                "No Screenshot Feature",
+                "noscreenshot.feature",
+                "Test no screenshot functionality",
+                ["test"],
+            )
+            record_feature(feature_mock)
+
+            ctx_mock = _create_scenario_context_mock(
+                "scenario_101",
+                "feature_789",
+                "No screenshot scenario",
+                ["test"],
+                "2024-01-01T10:01:30",
+            )
+            ctx_mock.step_index = 0  # Add step index
+            record_scenario(ctx_mock)
+
+            # Create a step mock without screenshots
+            step_mock = mock.MagicMock()
+            step_mock.step_run_id = "step_002"
+            step_mock.keyword = "Given"
+            step_mock.name = "I do not take screenshots"
+            step_mock.location = "noscreenshot.feature:5"
+            step_mock.has_substeps = False
+            step_mock.start_at = "2024-01-01T10:01:30"
+
+            # No screenshots attribute
+            if hasattr(step_mock, "screenshots"):
+                delattr(step_mock, "screenshots")
+
+            # Record the step
+            start_step_record(ctx_mock, step_mock)
+
+            # Finish the step
+            step_mock.status.name = "passed"
+            step_mock.end_at = "2024-01-01T10:01:31"
+            step_mock.debug_output = ""
+            step_mock.browser_logs = ""
+            step_mock.browser_info = "{}"
+
+            finish_step_record(step_mock, 1.0)
+
+            # Verify screenshots is empty JSON array
+            with sqlite3.connect(db_filepath) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT screenshots FROM steps WHERE step_run_id = ?",
+                    ("step_002",),
+                )
+                result = cursor.fetchone()
+
+                assert result is not None
+                screenshots_json = result[0]
+                assert screenshots_json == "[]"
+
+
+def test_step_screenshots_json_column():
+    with tempfile.TemporaryDirectory() as temp_dir:
+        with mock.patch("cucu.db.CONFIG") as config_mock:
+            db_filepath = f"{temp_dir}/run_run_123_worker_456.db"
+            _setup_config_mock(
+                config_mock, "run_123", "worker_456", db_filepath
+            )
+            create_database_file(db_filepath)
+            record_cucu_run()
+
+            # Create feature and scenario
+            feature_mock = _create_feature_mock(
+                "feature_789",
+                "Login Feature",
+                "login.feature",
+                "Test login functionality",
+                ["login", "auth"],
+            )
+            record_feature(feature_mock)
+
+            ctx_mock = _create_scenario_context_mock(
+                "scenario_101",
+                "feature_789",
+                "Valid login",
+                ["smoke", "positive"],
+                "2024-01-01T10:01:30",
+            )
+            record_scenario(ctx_mock)
+
+            # Create step mock with screenshots
+            step_mock = mock.MagicMock()
+            step_mock.step_run_id = "step_001"
+            step_mock.keyword = "Given"
+            step_mock.name = "I open a browser"
+            step_mock.location = "login.feature:5"
+            step_mock.has_substeps = False
+            step_mock.start_at = "2024-01-01T10:01:30"
+            step_mock.status.name = "passed"
+            step_mock.end_at = "2024-01-01T10:01:31"
+            step_mock.debug_output = "Debug info"
+            step_mock.browser_logs = "[]"
+            step_mock.browser_info = "{}"
+
+            # Add screenshots data
+            step_mock.screenshots = [
+                {
+                    "step_name": "I open a browser",
+                    "label": "screenshot 1",
+                    "location": "(100,200)",
+                    "size": "(800,600)",
+                    "filepath": "/path/to/screenshot1.png",
+                },
+                {
+                    "step_name": "I open a browser",
+                    "label": "screenshot 2",
+                    "location": "(150,250)",
+                    "size": "(1024,768)",
+                    "filepath": "/path/to/screenshot2.png",
+                },
+            ]
+
+            ctx_mock.step_index = 0
+            start_step_record(ctx_mock, step_mock)
+            finish_step_record(step_mock, 1.0)
+
+            # Verify screenshots JSON was saved correctly
+            with sqlite3.connect(db_filepath) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT screenshots FROM steps WHERE step_run_id = ?",
+                    ("step_001",),
+                )
+                result = cursor.fetchone()
+
+                assert result is not None
+                screenshots_json = result[0]
+
+                import json
+
+                screenshots = json.loads(screenshots_json)
+                assert len(screenshots) == 2
+
+                assert screenshots[0]["step_name"] == "I open a browser"
+                assert screenshots[0]["label"] == "screenshot 1"
+                assert screenshots[0]["location"] == "(100,200)"
+                assert screenshots[0]["size"] == "(800,600)"
+                assert screenshots[0]["filepath"] == "/path/to/screenshot1.png"
+
+                assert screenshots[1]["step_name"] == "I open a browser"
+                assert screenshots[1]["label"] == "screenshot 2"
+                assert screenshots[1]["location"] == "(150,250)"
+                assert screenshots[1]["size"] == "(1024,768)"
+                assert screenshots[1]["filepath"] == "/path/to/screenshot2.png"
+
+
+def test_step_without_screenshots():
+    with tempfile.TemporaryDirectory() as temp_dir:
+        with mock.patch("cucu.db.CONFIG") as config_mock:
+            db_filepath = f"{temp_dir}/run_run_123_worker_456.db"
+            _setup_config_mock(
+                config_mock, "run_123", "worker_456", db_filepath
+            )
+            create_database_file(db_filepath)
+            record_cucu_run()
+
+            # Create feature and scenario
+            feature_mock = _create_feature_mock(
+                "feature_789",
+                "Login Feature",
+                "login.feature",
+                "Test login functionality",
+                ["login", "auth"],
+            )
+            record_feature(feature_mock)
+
+            ctx_mock = _create_scenario_context_mock(
+                "scenario_101",
+                "feature_789",
+                "Valid login",
+                ["smoke", "positive"],
+                "2024-01-01T10:01:30",
+            )
+            record_scenario(ctx_mock)
+
+            # Create step mock without screenshots
+            step_mock = mock.MagicMock()
+            step_mock.step_run_id = "step_002"
+            step_mock.keyword = "When"
+            step_mock.name = "I click submit"
+            step_mock.location = "login.feature:6"
+            step_mock.has_substeps = False
+            step_mock.start_at = "2024-01-01T10:01:31"
+            step_mock.status.name = "passed"
+            step_mock.end_at = "2024-01-01T10:01:32"
+            step_mock.debug_output = "Debug info"
+            step_mock.browser_logs = "[]"
+            step_mock.browser_info = "{}"
+
+            # No screenshots attribute
+            del step_mock.screenshots
+
+            ctx_mock.step_index = 1
+            start_step_record(ctx_mock, step_mock)
+            finish_step_record(step_mock, 1.0)
+
+            # Verify empty screenshots JSON was saved
+            with sqlite3.connect(db_filepath) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT screenshots FROM steps WHERE step_run_id = ?",
+                    ("step_002",),
+                )
+                result = cursor.fetchone()
+
+                assert result is not None
+                screenshots_json = result[0]
+                assert screenshots_json == "[]"

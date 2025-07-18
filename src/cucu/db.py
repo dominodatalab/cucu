@@ -132,13 +132,30 @@ def start_step_record(ctx, step):
 
 def finish_step_record(step, duration):
     db_filepath = CONFIG["RUN_DB_PATH"]
+
+    # Serialize screenshots to JSON, handling any WebDriver elements
+    screenshots_json = "[]"
+    if hasattr(step, "screenshots") and step.screenshots:
+        # Convert screenshots to JSON-serializable format
+        serializable_screenshots = []
+        for screenshot in step.screenshots:
+            serializable_screenshot = {
+                "step_name": screenshot.get("step_name"),
+                "label": screenshot.get("label"),
+                "location": screenshot.get("location"),
+                "size": screenshot.get("size"),
+                "filepath": screenshot.get("filepath"),
+            }
+            serializable_screenshots.append(serializable_screenshot)
+        screenshots_json = json.dumps(serializable_screenshots)
+
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
 
         cursor.execute(
             """
             UPDATE steps
-            SET status = ?, duration = ?, end_at = ?, debug_output = ?, browser_logs = ?, browser_info = ?
+            SET status = ?, duration = ?, end_at = ?, debug_output = ?, browser_logs = ?, browser_info = ?, screenshots = ?
             WHERE step_run_id = ?
         """,
             (
@@ -148,6 +165,7 @@ def finish_step_record(step, duration):
                 step.debug_output,
                 step.browser_logs,
                 step.browser_info,
+                screenshots_json,
                 step.step_run_id,
             ),
         )
@@ -305,6 +323,7 @@ def create_database_file(db_filepath):
                 debug_output TEXT,
                 browser_logs TEXT,
                 browser_info JSON,
+                screenshots JSON,
                 FOREIGN KEY (scenario_run_id) REFERENCES scenarios (scenario_run_id)
             )
         """)
