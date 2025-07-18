@@ -79,6 +79,7 @@ def after_all(ctx):
         hook(ctx)
 
     finish_worker_record()
+    CONFIG.restore(with_pop=True)
 
 
 def before_feature(ctx, feature):

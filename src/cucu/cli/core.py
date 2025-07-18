@@ -304,6 +304,8 @@ def run(
     if not dry_run:
         create_run(results, filepath)
 
+    CONFIG.snapshot()
+
     try:
         if workers is None or workers == 1:
             if runtime_timeout:
@@ -490,6 +492,8 @@ def run(
                         "there are failures, see above for details"
                     )
     finally:
+        CONFIG.restore(with_pop=True)
+
         if dumper is not None:
             dumper.stop()
 
