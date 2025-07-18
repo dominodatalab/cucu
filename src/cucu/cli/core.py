@@ -493,7 +493,8 @@ def run(
         if dumper is not None:
             dumper.stop()
 
-        consolidate_database_files(results)
+        if not dry_run and os.path.exists(results):
+            consolidate_database_files(results)
 
         if generate_report:
             _generate_report(
@@ -527,7 +528,8 @@ def _generate_report(
 
     os.makedirs(output)
 
-    consolidate_database_files(results_dir)
+    if os.path.exists(results_dir):
+        consolidate_database_files(results_dir)
 
     report_location = reporter.generate(
         results_dir, output, only_failures=only_failures
