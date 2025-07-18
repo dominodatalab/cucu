@@ -304,7 +304,7 @@ def run(
     if not dry_run:
         create_run(results, filepath)
 
-    CONFIG.snapshot()
+    CONFIG.snapshot("core_run")
 
     try:
         if workers is None or workers == 1:

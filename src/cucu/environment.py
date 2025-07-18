@@ -67,7 +67,7 @@ def before_all(ctx):
     )
     create_database_file(run_db_path)
     record_cucu_run()
-    CONFIG.snapshot()
+    CONFIG.snapshot("before_all")
 
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
         hook(ctx)
