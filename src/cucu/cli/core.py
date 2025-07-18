@@ -33,7 +33,7 @@ from cucu.cli import thread_dumper
 from cucu.cli.run import behave, behave_init, create_run
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.config import CONFIG
-from cucu.db import consolidate_database_files
+from cucu.db import consolidate_database_files, finish_worker_record
 from cucu.lint import linter
 from cucu.utils import generate_short_id
 
@@ -494,6 +494,7 @@ def run(
             dumper.stop()
 
         if not dry_run and os.path.exists(results):
+            finish_worker_record()
             consolidate_database_files(results)
 
         if generate_report:
