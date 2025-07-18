@@ -65,7 +65,7 @@ Download  = "https://pypi.org/project/cucu/"
 cucu = "cucu.cli:main"
 
 [build-system]
-requires = ["uv_build>=0.7.19,<0.8.0"]
+requires = ["uv_build>=0.8.0,<0.9.0"]
 build-backend = "uv_build"
 
 [tool.hatch.build.targets.sdist]
