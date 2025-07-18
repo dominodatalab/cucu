@@ -267,14 +267,21 @@ def test_consolidate_database_files(config_mock):
         # Create worker database 2
         worker2_db_path = results_dir / "worker_002.db"
         create_database_file(worker2_db_path)
-        
-        _setup_config_mock(config_mock, "run_001", "worker_001", str(worker1_db_path))
-        
+
+        _setup_config_mock(
+            config_mock, "run_001", "worker_001", str(worker1_db_path)
+        )
+
         with sqlite3.connect(worker1_db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO cucu_run (cucu_run_id, full_arguments, date, start_at) VALUES (?, ?, ?, ?)",
-                ("run_001", '["test1"]', "2024-01-01T10:00:00", "2024-01-01T10:00:00"),
+                (
+                    "run_001",
+                    '["test1"]',
+                    "2024-01-01T10:00:00",
+                    "2024-01-01T10:00:00",
+                ),
             )
             cursor.execute(
                 "INSERT INTO workers (worker_run_id, cucu_run_id, start_at) VALUES (?, ?, ?)",
@@ -282,16 +289,33 @@ def test_consolidate_database_files(config_mock):
             )
             cursor.execute(
                 "INSERT INTO features (feature_run_id, worker_run_id, name, filename, description, tags, start_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                ("feature_001", "worker_001", "Test Feature 1", "test1.feature", "Description 1", "tag1", "2024-01-01T10:00:00"),
+                (
+                    "feature_001",
+                    "worker_001",
+                    "Test Feature 1",
+                    "test1.feature",
+                    "Description 1",
+                    "tag1",
+                    "2024-01-01T10:00:00",
+                ),
             )
             cursor.execute(
                 "INSERT INTO scenarios (scenario_run_id, feature_run_id, name, seq, tags, start_at) VALUES (?, ?, ?, ?, ?, ?)",
-                ("scenario_001", "feature_001", "Test Scenario 1", 1, "tag1", "2024-01-01T10:00:00"),
+                (
+                    "scenario_001",
+                    "feature_001",
+                    "Test Scenario 1",
+                    1,
+                    "tag1",
+                    "2024-01-01T10:00:00",
+                ),
             )
             conn.commit()
-        
-        _setup_config_mock(config_mock, "run_001", "worker_002", str(worker2_db_path))
-        
+
+        _setup_config_mock(
+            config_mock, "run_001", "worker_002", str(worker2_db_path)
+        )
+
         with sqlite3.connect(worker2_db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -300,46 +324,63 @@ def test_consolidate_database_files(config_mock):
             )
             cursor.execute(
                 "INSERT INTO features (feature_run_id, worker_run_id, name, filename, description, tags, start_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                ("feature_002", "worker_002", "Test Feature 2", "test2.feature", "Description 2", "tag2", "2024-01-01T10:01:00"),
+                (
+                    "feature_002",
+                    "worker_002",
+                    "Test Feature 2",
+                    "test2.feature",
+                    "Description 2",
+                    "tag2",
+                    "2024-01-01T10:01:00",
+                ),
             )
             cursor.execute(
                 "INSERT INTO scenarios (scenario_run_id, feature_run_id, name, seq, tags, start_at) VALUES (?, ?, ?, ?, ?, ?)",
-                ("scenario_002", "feature_002", "Test Scenario 2", 1, "tag2", "2024-01-01T10:01:00"),
+                (
+                    "scenario_002",
+                    "feature_002",
+                    "Test Scenario 2",
+                    1,
+                    "tag2",
+                    "2024-01-01T10:01:00",
+                ),
             )
             conn.commit()
-        
+
         assert worker1_db_path.exists()
         assert worker2_db_path.exists()
-        
+
         consolidate_database_files(str(results_dir))
-        
+
         assert not worker1_db_path.exists()
         assert not worker2_db_path.exists()
-        
+
         assert main_db_path.exists()
-        
+
         with sqlite3.connect(main_db_path) as conn:
             cursor = conn.cursor()
-            
+
             cursor.execute("SELECT COUNT(*) FROM cucu_run")
             assert cursor.fetchone()[0] == 1
-            
+
             cursor.execute("SELECT COUNT(*) FROM workers")
             assert cursor.fetchone()[0] == 2
 
-            cursor.execute("SELECT worker_run_id FROM workers ORDER BY worker_run_id")
+            cursor.execute(
+                "SELECT worker_run_id FROM workers ORDER BY worker_run_id"
+            )
             workers = cursor.fetchall()
             assert workers[0][0] == "worker_001"
             assert workers[1][0] == "worker_002"
-            
+
             cursor.execute("SELECT COUNT(*) FROM features")
             assert cursor.fetchone()[0] == 2
-            
+
             cursor.execute("SELECT name FROM features ORDER BY name")
             features = cursor.fetchall()
             assert features[0][0] == "Test Feature 1"
             assert features[1][0] == "Test Feature 2"
-            
+
             cursor.execute("SELECT COUNT(*) FROM scenarios")
             assert cursor.fetchone()[0] == 2
 
@@ -363,8 +404,10 @@ def test_consolidate_database_files_with_subdirectories(config_mock):
         sub_dir.mkdir()
         worker_db_path = sub_dir / "worker_001.db"
         create_database_file(worker_db_path)
-        
-        _setup_config_mock(config_mock, "run_001", "worker_001", str(worker_db_path))
+
+        _setup_config_mock(
+            config_mock, "run_001", "worker_001", str(worker_db_path)
+        )
 
         with sqlite3.connect(worker_db_path) as conn:
             cursor = conn.cursor()
@@ -373,11 +416,11 @@ def test_consolidate_database_files_with_subdirectories(config_mock):
                 ("worker_001", "run_001", "2024-01-01T10:00:00"),
             )
             conn.commit()
-        
+
         consolidate_database_files(str(results_dir))
-        
+
         assert not worker_db_path.exists()
-        
+
         with sqlite3.connect(main_db_path) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT COUNT(*) FROM workers")
@@ -392,14 +435,14 @@ def test_consolidate_database_files_empty_tables(config_mock):
 
         main_db_path = results_dir / "run.db"
         create_database_file(main_db_path)
-        
+
         worker_db_path = results_dir / "worker_001.db"
         create_database_file(worker_db_path)
-        
+
         consolidate_database_files(str(results_dir))
-        
+
         assert not worker_db_path.exists()
-        
+
         assert main_db_path.exists()
         with sqlite3.connect(main_db_path) as conn:
             cursor = conn.cursor()
