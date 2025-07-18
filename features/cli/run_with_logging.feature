@@ -6,8 +6,7 @@ Feature: Run with logging
     Given I run the command "cucu run data/features/feature_with_logging.feature --results {CUCU_RESULTS_DIR}/default-logging-results --no-color-output" and save stdout to "STDOUT" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
-      [\s\S]*
-      Feature: Feature with logging
+      [\s\S]*Feature: Feature with logging
 
         Scenario: Logging at various levels
       .* INFO hello
