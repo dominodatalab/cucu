@@ -3,6 +3,7 @@ import sqlite3
 import tempfile
 from pathlib import Path
 from unittest import mock
+
 import pytest_check as check
 
 from cucu.db import (
@@ -102,7 +103,10 @@ def cucu_test_db_setup(run_id, worker_id, db_filename=None):
 
 
 def test_flat_view_creation_and_query():
-    with cucu_test_db_setup("run_123", "worker_456") as (db_filepath, config_mock):
+    with cucu_test_db_setup("run_123", "worker_456") as (
+        db_filepath,
+        config_mock,
+    ):
         feature_mock = _create_feature_mock(
             "feature_789",
             "Login Feature",
@@ -854,7 +858,9 @@ def test_feature_custom_data_recording():
             check.equal(custom_data["priority"], "high")
             check.equal(custom_data["metadata"]["created_by"], "test_suite")
             check.equal(custom_data["metadata"]["version"], "1.2.3")
-            check.equal(custom_data["execution_context"]["parallel_workers"], 4)
+            check.equal(
+                custom_data["execution_context"]["parallel_workers"], 4
+            )
 
 
 def test_feature_empty_custom_data():
@@ -973,7 +979,7 @@ def test_scenario_custom_data_recording():
             custom_data = json.loads(custom_data_json)
             check.equal(
                 custom_data["test_data"]["expected_outcome"],
-                "successful_login"
+                "successful_login",
             )
             check.equal(
                 custom_data["performance_metrics"]["response_time_ms"], 1250
@@ -986,7 +992,7 @@ def test_scenario_custom_data_recording():
                 custom_data["execution_metadata"]["environment_variables"][
                     "TEST_ENV"
                 ],
-                "staging"
+                "staging",
             )
 
 
@@ -1124,14 +1130,19 @@ def test_custom_data_with_various_data_types():
             check.is_true(feature_data["boolean_true"])
             check.is_false(feature_data["boolean_false"])
             check.is_none(feature_data["null_value"])
-            check.equal(feature_data["list_value"], [
-                1,
-                "two",
-                3.0,
-                True,
-                None,
-            ])
-            check.equal(feature_data["nested_object"]["inner_string"], "nested")
+            check.equal(
+                feature_data["list_value"],
+                [
+                    1,
+                    "two",
+                    3.0,
+                    True,
+                    None,
+                ],
+            )
+            check.equal(
+                feature_data["nested_object"]["inner_string"], "nested"
+            )
 
             # Check scenario custom_data
             cursor.execute(
@@ -1150,7 +1161,7 @@ def test_custom_data_with_various_data_types():
             )
             check.equal(
                 scenario_data["deeply_nested"]["level1"]["level2"]["level3"],
-                "deep_value"
+                "deep_value",
             )
 
 
@@ -1250,7 +1261,9 @@ def test_custom_data_in_consolidated_database():
                 custom_data = json.loads(custom_data_json)
                 check.equal(custom_data["feature_index"], i)
                 check.equal(custom_data["feature_name"], f"Feature {i}")
-                check.equal(custom_data["batch_info"]["batch_id"], f"batch_{i}")
+                check.equal(
+                    custom_data["batch_info"]["batch_id"], f"batch_{i}"
+                )
 
             # Check scenarios custom_data
             cursor.execute(
@@ -1267,7 +1280,9 @@ def test_custom_data_in_consolidated_database():
                 custom_data = json.loads(custom_data_json)
                 check.equal(custom_data["scenario_index"], i)
                 check.equal(custom_data["scenario_name"], f"Scenario {i}")
-                check.equal(custom_data["execution_info"]["worker"], f"worker_{i}")
+                check.equal(
+                    custom_data["execution_info"]["worker"], f"worker_{i}"
+                )
 
         # Verify original files were cleaned up
         for db_file in db_files:
@@ -1360,7 +1375,7 @@ def test_step_text_and_table_recording():
             check.equal(name, "I have a step with text")
             check.equal(
                 text,
-                "This is some text content\nWith multiple lines\nAnd more text"
+                "This is some text content\nWith multiple lines\nAnd more text",
             )
             check.is_none(table_data)
             check.equal(is_substep, 0)  # SQLite stores False as 0
@@ -1381,11 +1396,14 @@ def test_step_text_and_table_recording():
             import json
 
             table_data_parsed = json.loads(table_data)
-            check.equal(table_data_parsed, [
-                ["header1", "header2", "header3"],
-                ["value1", "value2", "value3"],
-                ["data1", "data2", "data3"],
-            ])
+            check.equal(
+                table_data_parsed,
+                [
+                    ["header1", "header2", "header3"],
+                    ["value1", "value2", "value3"],
+                    ["data1", "data2", "data3"],
+                ],
+            )
             check.equal(is_substep, 0)  # SQLite stores False as 0
             check.is_true(has_substeps)  # SQLite stores True as 1
 
