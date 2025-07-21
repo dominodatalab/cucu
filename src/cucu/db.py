@@ -115,7 +115,6 @@ def start_step_record(ctx, step):
         else:
             table = [step.table.headings]
             table.extend([row.cells for row in step.table.rows])
-            
 
         cursor.execute(
             """

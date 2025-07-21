@@ -61,7 +61,17 @@ def _create_scenario_finish_mock(scenario_id, status, start_at, end_at):
     return scenario_mock
 
 
-def _create_step_mock(step_id, keyword, name, location, start_at, has_substeps=False, is_substep=False, text=None, table=None):
+def _create_step_mock(
+    step_id,
+    keyword,
+    name,
+    location,
+    start_at,
+    has_substeps=False,
+    is_substep=False,
+    text=None,
+    table=None,
+):
     step_mock = mock.MagicMock()
     step_mock.step_run_id = step_id
     step_mock.keyword = keyword
@@ -1338,31 +1348,33 @@ def test_step_text_and_table_recording():
     with tempfile.TemporaryDirectory() as temp_dir:
         with mock.patch("cucu.db.CONFIG") as config_mock:
             db_filepath = f"{temp_dir}/test_step_text_table.db"
-            _setup_config_mock(config_mock, "run_123", "worker_456", db_filepath)
-            
+            _setup_config_mock(
+                config_mock, "run_123", "worker_456", db_filepath
+            )
+
             create_database_file(db_filepath)
             record_cucu_run()
-            
+
             # Create feature and scenario
             feature_mock = _create_feature_mock(
                 "feature_text",
                 "Text Feature",
                 "text.feature",
                 "Test text and table functionality",
-                ["text", "table"]
+                ["text", "table"],
             )
             record_feature(feature_mock)
-            
+
             ctx_mock = _create_scenario_context_mock(
                 "scenario_text",
                 "feature_text",
                 "Text scenario",
                 ["test"],
-                "2024-01-01T10:00:00"
+                "2024-01-01T10:00:00",
             )
             ctx_mock.step_index = 0
             record_scenario(ctx_mock)
-            
+
             # Test step with text content
             step_with_text = _create_step_mock(
                 "step_with_text",
@@ -1372,18 +1384,18 @@ def test_step_text_and_table_recording():
                 "2024-01-01T10:00:00",
                 has_substeps=False,
                 is_substep=False,
-                text="This is some text content\nWith multiple lines\nAnd more text"
+                text="This is some text content\nWith multiple lines\nAnd more text",
             )
             start_step_record(ctx_mock, step_with_text)
-            
+
             # Test step with table data
             table_mock = mock.MagicMock()
             table_mock.headings = ["header1", "header2", "header3"]
             table_mock.rows = [
                 mock.MagicMock(cells=["value1", "value2", "value3"]),
-                mock.MagicMock(cells=["data1", "data2", "data3"])
+                mock.MagicMock(cells=["data1", "data2", "data3"]),
             ]
-            
+
             ctx_mock.step_index = 1
             step_with_table = _create_step_mock(
                 "step_with_table",
@@ -1393,10 +1405,10 @@ def test_step_text_and_table_recording():
                 "2024-01-01T10:01:00",
                 has_substeps=True,
                 is_substep=False,
-                table=table_mock
+                table=table_mock,
             )
             start_step_record(ctx_mock, step_with_table)
-            
+
             # Test substep
             ctx_mock.step_index = 2
             substep = _create_step_mock(
@@ -1406,32 +1418,35 @@ def test_step_text_and_table_recording():
                 "text.feature:20",
                 "2024-01-01T10:02:00",
                 has_substeps=False,
-                is_substep=True
+                is_substep=True,
             )
             start_step_record(ctx_mock, substep)
-            
+
             # Verify the data was recorded correctly
             with sqlite3.connect(db_filepath) as conn:
                 cursor = conn.cursor()
-                
+
                 # Check step with text
                 cursor.execute(
                     "SELECT name, text, table_data, is_substep, has_substeps FROM steps WHERE step_run_id = ?",
-                    ("step_with_text",)
+                    ("step_with_text",),
                 )
                 result = cursor.fetchone()
                 assert result is not None
                 name, text, table_data, is_substep, has_substeps = result
                 assert name == "I have a step with text"
-                assert text == "This is some text content\nWith multiple lines\nAnd more text"
+                assert (
+                    text
+                    == "This is some text content\nWith multiple lines\nAnd more text"
+                )
                 assert table_data is None
                 assert is_substep == 0  # SQLite stores False as 0
                 assert has_substeps == 0  # SQLite stores False as 0
-                
+
                 # Check step with table
                 cursor.execute(
                     "SELECT name, text, table_data, is_substep, has_substeps FROM steps WHERE step_run_id = ?",
-                    ("step_with_table",)
+                    ("step_with_table",),
                 )
                 result = cursor.fetchone()
                 assert result is not None
@@ -1439,21 +1454,22 @@ def test_step_text_and_table_recording():
                 assert name == "I have a step with table"
                 assert text is None
                 assert table_data is not None
-                
+
                 import json
+
                 table_data_parsed = json.loads(table_data)
                 assert table_data_parsed == [
                     ["header1", "header2", "header3"],
                     ["value1", "value2", "value3"],
-                    ["data1", "data2", "data3"]
+                    ["data1", "data2", "data3"],
                 ]
                 assert is_substep == 0  # SQLite stores False as 0
                 assert has_substeps == 1  # SQLite stores True as 1
-                
+
                 # Check substep
                 cursor.execute(
                     "SELECT name, text, table_data, is_substep, has_substeps FROM steps WHERE step_run_id = ?",
-                    ("substep_001",)
+                    ("substep_001",),
                 )
                 result = cursor.fetchone()
                 assert result is not None
