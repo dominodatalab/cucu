@@ -110,11 +110,17 @@ def start_step_record(ctx, step):
     db_filepath = CONFIG["RUN_DB_PATH"]
     with sqlite3.connect(db_filepath) as conn:
         cursor = conn.cursor()
+        if not step.table:
+            table = None
+        else:
+            table = [step.table.headings]
+            table.extend([row.cells for row in step.table.rows])
+            
 
         cursor.execute(
             """
-            INSERT INTO steps (step_run_id, scenario_run_id, seq, keyword, name, location, is_substep, start_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO steps (step_run_id, scenario_run_id, seq, keyword, name, text, table_data, location, is_substep, has_substeps, start_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
             (
                 step.step_run_id,
@@ -122,7 +128,10 @@ def start_step_record(ctx, step):
                 ctx.step_index + 1,
                 step.keyword,
                 step.name,
+                step.text if step.text else None,
+                json.dumps(table) if step.table else None,
                 str(step.location),
+                step.is_substep,
                 step.has_substeps,
                 step.start_at,
             ),
@@ -156,10 +165,11 @@ def finish_step_record(step, duration):
         cursor.execute(
             """
             UPDATE steps
-            SET status = ?, duration = ?, end_at = ?, debug_output = ?, browser_logs = ?, browser_info = ?, screenshots = ?
+            SET has_substeps = ?, status = ?, duration = ?, end_at = ?, debug_output = ?, browser_logs = ?, browser_info = ?, screenshots = ?
             WHERE step_run_id = ?
         """,
             (
+                step.has_substeps,
                 step.status.name,
                 duration,
                 step.end_at,
@@ -328,8 +338,11 @@ def create_database_file(db_filepath):
                 seq INTEGER,
                 keyword TEXT,
                 name TEXT,
+                text TEXT,
+                table_data JSON,
                 location TEXT,
                 is_substep BOOLEAN,
+                has_substeps BOOLEAN,
                 status TEXT,
                 duration REAL,
                 start_at TIMESTAMP,

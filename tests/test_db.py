@@ -61,6 +61,20 @@ def _create_scenario_finish_mock(scenario_id, status, start_at, end_at):
     return scenario_mock
 
 
+def _create_step_mock(step_id, keyword, name, location, start_at, has_substeps=False, is_substep=False, text=None, table=None):
+    step_mock = mock.MagicMock()
+    step_mock.step_run_id = step_id
+    step_mock.keyword = keyword
+    step_mock.name = name
+    step_mock.text = text
+    step_mock.table = table
+    step_mock.location = location
+    step_mock.is_substep = is_substep
+    step_mock.has_substeps = has_substeps
+    step_mock.start_at = start_at
+    return step_mock
+
+
 def test_flat_view_creation_and_query():
     with tempfile.TemporaryDirectory() as temp_dir:
         with mock.patch("cucu.db.CONFIG") as config_mock:
@@ -493,7 +507,10 @@ def test_step_screenshots_recording():
             step_mock.step_run_id = "step_001"
             step_mock.keyword = "Given"
             step_mock.name = "I take screenshots"
+            step_mock.text = None
+            step_mock.table = None
             step_mock.location = "screenshot.feature:5"
+            step_mock.is_substep = False
             step_mock.has_substeps = False
             step_mock.start_at = "2024-01-01T10:01:30"
 
@@ -598,7 +615,10 @@ def test_step_no_screenshots_recording():
             step_mock.step_run_id = "step_002"
             step_mock.keyword = "Given"
             step_mock.name = "I do not take screenshots"
+            step_mock.text = None
+            step_mock.table = None
             step_mock.location = "noscreenshot.feature:5"
+            step_mock.is_substep = False
             step_mock.has_substeps = False
             step_mock.start_at = "2024-01-01T10:01:30"
 
@@ -666,7 +686,10 @@ def test_step_screenshots_json_column():
             step_mock.step_run_id = "step_001"
             step_mock.keyword = "Given"
             step_mock.name = "I open a browser"
+            step_mock.text = None
+            step_mock.table = None
             step_mock.location = "login.feature:5"
+            step_mock.is_substep = False
             step_mock.has_substeps = False
             step_mock.start_at = "2024-01-01T10:01:30"
             step_mock.status.name = "passed"
@@ -761,7 +784,10 @@ def test_step_without_screenshots():
             step_mock.step_run_id = "step_002"
             step_mock.keyword = "When"
             step_mock.name = "I click submit"
+            step_mock.text = None
+            step_mock.table = None
             step_mock.location = "login.feature:6"
+            step_mock.is_substep = False
             step_mock.has_substeps = False
             step_mock.start_at = "2024-01-01T10:01:31"
             step_mock.status.name = "passed"
@@ -1306,3 +1332,134 @@ def test_custom_data_in_consolidated_database():
         # Verify original files were cleaned up
         for db_file in db_files:
             assert not db_file.exists()
+
+
+def test_step_text_and_table_recording():
+    with tempfile.TemporaryDirectory() as temp_dir:
+        with mock.patch("cucu.db.CONFIG") as config_mock:
+            db_filepath = f"{temp_dir}/test_step_text_table.db"
+            _setup_config_mock(config_mock, "run_123", "worker_456", db_filepath)
+            
+            create_database_file(db_filepath)
+            record_cucu_run()
+            
+            # Create feature and scenario
+            feature_mock = _create_feature_mock(
+                "feature_text",
+                "Text Feature",
+                "text.feature",
+                "Test text and table functionality",
+                ["text", "table"]
+            )
+            record_feature(feature_mock)
+            
+            ctx_mock = _create_scenario_context_mock(
+                "scenario_text",
+                "feature_text",
+                "Text scenario",
+                ["test"],
+                "2024-01-01T10:00:00"
+            )
+            ctx_mock.step_index = 0
+            record_scenario(ctx_mock)
+            
+            # Test step with text content
+            step_with_text = _create_step_mock(
+                "step_with_text",
+                "Given",
+                "I have a step with text",
+                "text.feature:10",
+                "2024-01-01T10:00:00",
+                has_substeps=False,
+                is_substep=False,
+                text="This is some text content\nWith multiple lines\nAnd more text"
+            )
+            start_step_record(ctx_mock, step_with_text)
+            
+            # Test step with table data
+            table_mock = mock.MagicMock()
+            table_mock.headings = ["header1", "header2", "header3"]
+            table_mock.rows = [
+                mock.MagicMock(cells=["value1", "value2", "value3"]),
+                mock.MagicMock(cells=["data1", "data2", "data3"])
+            ]
+            
+            ctx_mock.step_index = 1
+            step_with_table = _create_step_mock(
+                "step_with_table",
+                "When",
+                "I have a step with table",
+                "text.feature:15",
+                "2024-01-01T10:01:00",
+                has_substeps=True,
+                is_substep=False,
+                table=table_mock
+            )
+            start_step_record(ctx_mock, step_with_table)
+            
+            # Test substep
+            ctx_mock.step_index = 2
+            substep = _create_step_mock(
+                "substep_001",
+                "And",
+                "I am a substep",
+                "text.feature:20",
+                "2024-01-01T10:02:00",
+                has_substeps=False,
+                is_substep=True
+            )
+            start_step_record(ctx_mock, substep)
+            
+            # Verify the data was recorded correctly
+            with sqlite3.connect(db_filepath) as conn:
+                cursor = conn.cursor()
+                
+                # Check step with text
+                cursor.execute(
+                    "SELECT name, text, table_data, is_substep, has_substeps FROM steps WHERE step_run_id = ?",
+                    ("step_with_text",)
+                )
+                result = cursor.fetchone()
+                assert result is not None
+                name, text, table_data, is_substep, has_substeps = result
+                assert name == "I have a step with text"
+                assert text == "This is some text content\nWith multiple lines\nAnd more text"
+                assert table_data is None
+                assert is_substep == 0  # SQLite stores False as 0
+                assert has_substeps == 0  # SQLite stores False as 0
+                
+                # Check step with table
+                cursor.execute(
+                    "SELECT name, text, table_data, is_substep, has_substeps FROM steps WHERE step_run_id = ?",
+                    ("step_with_table",)
+                )
+                result = cursor.fetchone()
+                assert result is not None
+                name, text, table_data, is_substep, has_substeps = result
+                assert name == "I have a step with table"
+                assert text is None
+                assert table_data is not None
+                
+                import json
+                table_data_parsed = json.loads(table_data)
+                assert table_data_parsed == [
+                    ["header1", "header2", "header3"],
+                    ["value1", "value2", "value3"],
+                    ["data1", "data2", "data3"]
+                ]
+                assert is_substep == 0  # SQLite stores False as 0
+                assert has_substeps == 1  # SQLite stores True as 1
+                
+                # Check substep
+                cursor.execute(
+                    "SELECT name, text, table_data, is_substep, has_substeps FROM steps WHERE step_run_id = ?",
+                    ("substep_001",)
+                )
+                result = cursor.fetchone()
+                assert result is not None
+                name, text, table_data, is_substep, has_substeps = result
+                assert name == "I am a substep"
+                assert text is None
+                assert table_data is None
+                assert is_substep == 1  # SQLite stores True as 1
+                assert has_substeps == 0  # SQLite stores False as 0
