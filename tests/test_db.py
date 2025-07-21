@@ -74,9 +74,13 @@ def _create_step_mock(
     is_substep=False,
     text=None,
     table=None,
+    seq=0,
+    section_level=None,
+    parent_seq=None,
 ):
     step_mock = mock.MagicMock()
     step_mock.step_run_id = step_id
+    step_mock.seq = seq
     step_mock.keyword = keyword
     step_mock.name = name
     step_mock.text = text
@@ -85,17 +89,36 @@ def _create_step_mock(
     step_mock.is_substep = is_substep
     step_mock.has_substeps = has_substeps
     step_mock.start_at = start_at
+    step_mock.section_level = section_level
+    step_mock.parent_seq = parent_seq
     return step_mock
 
 
 @contextlib.contextmanager
 def cucu_test_db_setup(run_id, worker_id, db_filename=None):
+    import uuid
+
+    # Make run_id unique to avoid UNIQUE constraint violations
+    unique_run_id = f"{run_id}_{uuid.uuid4().hex[:8]}"
+    unique_worker_id = f"{worker_id}_{uuid.uuid4().hex[:8]}"
+
     with tempfile.TemporaryDirectory() as temp_dir:
         with mock.patch("cucu.db.CONFIG") as config_mock:
-            db_filepath = (
-                db_filename or f"{temp_dir}/run_{run_id}_worker_{worker_id}.db"
+            if db_filename:
+                # Make the db_filename unique too
+                base, ext = (
+                    db_filename.rsplit(".", 1)
+                    if "." in db_filename
+                    else (db_filename, "db")
+                )
+                unique_db_filename = f"{base}_{uuid.uuid4().hex[:8]}.{ext}"
+                db_filepath = f"{temp_dir}/{unique_db_filename}"
+            else:
+                db_filepath = f"{temp_dir}/run_{unique_run_id}_worker_{unique_worker_id}.db"
+
+            _setup_config_mock(
+                config_mock, unique_run_id, unique_worker_id, db_filepath
             )
-            _setup_config_mock(config_mock, run_id, worker_id, db_filepath)
             create_database_file(db_filepath)
             record_cucu_run()
             config_mock.get.return_value = db_filepath
@@ -155,7 +178,7 @@ def test_flat_view_creation_and_query():
                 log_files,
             ) = result
 
-            check.equal(cucu_run_id, "run_123")
+            check.equal(cucu_run_id, config_mock["CUCU_RUN_ID"])
             check.equal(start_at, "2024-01-01T10:01:30")
             check.equal(duration, 1.5)
             check.equal(feature_name, "Login Feature")
@@ -507,6 +530,7 @@ def test_step_screenshots_recording():
         # Create a step mock with screenshots
         step_mock = mock.MagicMock()
         step_mock.step_run_id = "step_001"
+        step_mock.seq = 0
         step_mock.keyword = "Given"
         step_mock.name = "I take screenshots"
         step_mock.text = None
@@ -515,6 +539,8 @@ def test_step_screenshots_recording():
         step_mock.is_substep = False
         step_mock.has_substeps = False
         step_mock.start_at = "2024-01-01T10:01:30"
+        step_mock.section_level = None
+        step_mock.parent_seq = None
 
         # Mock screenshots data
         step_mock.screenshots = [
@@ -609,6 +635,7 @@ def test_step_no_screenshots_recording():
         # Create a step mock without screenshots
         step_mock = mock.MagicMock()
         step_mock.step_run_id = "step_002"
+        step_mock.seq = 0
         step_mock.keyword = "Given"
         step_mock.name = "I do not take screenshots"
         step_mock.text = None
@@ -617,6 +644,8 @@ def test_step_no_screenshots_recording():
         step_mock.is_substep = False
         step_mock.has_substeps = False
         step_mock.start_at = "2024-01-01T10:01:30"
+        step_mock.section_level = None
+        step_mock.parent_seq = None
 
         # No screenshots attribute
         if hasattr(step_mock, "screenshots"):
@@ -675,6 +704,7 @@ def test_step_screenshots_json_column():
         # Create step mock with screenshots
         step_mock = mock.MagicMock()
         step_mock.step_run_id = "step_001"
+        step_mock.seq = 0
         step_mock.keyword = "Given"
         step_mock.name = "I open a browser"
         step_mock.text = None
@@ -688,6 +718,8 @@ def test_step_screenshots_json_column():
         step_mock.debug_output = "Debug info"
         step_mock.browser_logs = "[]"
         step_mock.browser_info = "{}"
+        step_mock.section_level = None
+        step_mock.parent_seq = None
 
         # Add screenshots data
         step_mock.screenshots = [
@@ -768,6 +800,7 @@ def test_step_without_screenshots():
         # Create step mock without screenshots
         step_mock = mock.MagicMock()
         step_mock.step_run_id = "step_002"
+        step_mock.seq = 1
         step_mock.keyword = "When"
         step_mock.name = "I click submit"
         step_mock.text = None
@@ -781,6 +814,8 @@ def test_step_without_screenshots():
         step_mock.debug_output = "Debug info"
         step_mock.browser_logs = "[]"
         step_mock.browser_info = "{}"
+        step_mock.section_level = None
+        step_mock.parent_seq = None
 
         # No screenshots attribute
         del step_mock.screenshots
@@ -1322,6 +1357,7 @@ def test_step_text_and_table_recording():
             "2024-01-01T10:00:00",
             has_substeps=False,
             is_substep=False,
+            seq=0,
             text="This is some text content\nWith multiple lines\nAnd more text",
         )
         start_step_record(ctx_mock, step_with_text)
@@ -1341,6 +1377,7 @@ def test_step_text_and_table_recording():
             "I have a step with table",
             "text.feature:15",
             "2024-01-01T10:01:00",
+            seq=1,
             has_substeps=True,
             is_substep=False,
             table=table_mock,
@@ -1357,6 +1394,7 @@ def test_step_text_and_table_recording():
             "2024-01-01T10:02:00",
             has_substeps=False,
             is_substep=True,
+            seq=2,
         )
         start_step_record(ctx_mock, substep)
 

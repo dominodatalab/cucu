@@ -115,6 +115,7 @@ def before_scenario(ctx, scenario):
     ctx.scenario_index = ctx.feature.scenarios.index(scenario) + 1
     ctx.browsers = []
     ctx.browser = None
+    ctx.section_step_stack = []
 
     # reset the step timer dictionary
     ctx.step_timers = {}
@@ -266,6 +267,11 @@ def before_step(ctx, step):
 
     ctx.current_step = step
     ctx.current_step.has_substeps = False
+    ctx.section_level = None
+    step.seq = ctx.step_index + 1
+    step.parent_seq = (
+        ctx.section_step_stack[-1].seq if ctx.section_step_stack else 0
+    )
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
