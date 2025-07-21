@@ -3,6 +3,7 @@ import sqlite3
 import tempfile
 from pathlib import Path
 from unittest import mock
+import pytest_check as check
 
 from cucu.db import (
     consolidate_database_files,
@@ -101,10 +102,7 @@ def cucu_test_db_setup(run_id, worker_id, db_filename=None):
 
 
 def test_flat_view_creation_and_query():
-    with cucu_test_db_setup("run_123", "worker_456") as (
-        db_filepath,
-        config_mock,
-    ):
+    with cucu_test_db_setup("run_123", "worker_456") as (db_filepath, config_mock):
         feature_mock = _create_feature_mock(
             "feature_789",
             "Login Feature",
@@ -137,11 +135,11 @@ def test_flat_view_creation_and_query():
                 "SELECT name FROM sqlite_master WHERE type='view' AND name='flat'"
             )
             view_exists = cursor.fetchone()
-            assert view_exists is not None
+            check.is_true(view_exists is not None)
 
             cursor.execute("SELECT * FROM flat")
             result = cursor.fetchone()
-            assert result is not None
+            check.is_true(result is not None)
 
             (
                 cucu_run_id,
@@ -153,13 +151,13 @@ def test_flat_view_creation_and_query():
                 log_files,
             ) = result
 
-            assert cucu_run_id == "run_123"
-            assert start_at == "2024-01-01T10:01:30"
-            assert duration == 1.5
-            assert feature_name == "Login Feature"
-            assert scenario_name == "Valid login"
-            assert tags == "login auth smoke positive"
-            assert log_files == "[]"
+            check.equal(cucu_run_id, "run_123")
+            check.equal(start_at, "2024-01-01T10:01:30")
+            check.equal(duration, 1.5)
+            check.equal(feature_name, "Login Feature")
+            check.equal(scenario_name, "Valid login")
+            check.equal(tags, "login auth smoke positive")
+            check.equal(log_files, "[]")
 
 
 def test_flat_view_with_empty_tags():
@@ -197,8 +195,8 @@ def test_flat_view_with_empty_tags():
             cursor = conn.cursor()
             cursor.execute("SELECT tags, log_files FROM flat")
             result = cursor.fetchone()
-            assert result[0] == " "
-            assert result[1] == "[]"
+            check.equal(result[0], " ")
+            check.equal(result[1], "[]")
 
 
 def test_flat_view_with_partial_tags():
@@ -265,13 +263,13 @@ def test_flat_view_with_partial_tags():
             )
             results = cursor.fetchall()
 
-            assert len(results) == 2
-            assert results[1][0] == "No scenario tags"
-            assert results[1][1] == "feature-tag1 feature-tag2 "
-            assert results[1][2] == "[]"
-            assert results[0][0] == "Has scenario tags"
-            assert results[0][1] == " scenario-tag1 scenario-tag2"
-            assert results[0][2] == "[]"
+            check.equal(len(results), 2)
+            check.equal(results[1][0], "No scenario tags")
+            check.equal(results[1][1], "feature-tag1 feature-tag2 ")
+            check.equal(results[1][2], "[]")
+            check.equal(results[0][0], "Has scenario tags")
+            check.equal(results[0][1], " scenario-tag1 scenario-tag2")
+            check.equal(results[0][2], "[]")
 
 
 @mock.patch("cucu.db.CONFIG")
@@ -553,29 +551,29 @@ def test_step_screenshots_recording():
             )
             result = cursor.fetchone()
 
-            assert result is not None
+            check.is_true(result is not None)
             screenshots_json = result[0]
-            assert screenshots_json is not None
+            check.is_not_none(screenshots_json)
 
             # Parse and verify the JSON
             import json
 
             screenshots = json.loads(screenshots_json)
-            assert len(screenshots) == 2
+            check.equal(len(screenshots), 2)
 
             # Verify first screenshot
-            assert screenshots[0]["step_name"] == "I take screenshots"
-            assert screenshots[0]["label"] == "first screenshot"
-            assert screenshots[0]["location"] == "(100,200)"
-            assert screenshots[0]["size"] == "(300,400)"
-            assert screenshots[0]["filepath"] == "/path/to/screenshot1.png"
+            check.equal(screenshots[0]["step_name"], "I take screenshots")
+            check.equal(screenshots[0]["label"], "first screenshot")
+            check.equal(screenshots[0]["location"], "(100,200)")
+            check.equal(screenshots[0]["size"], "(300,400)")
+            check.equal(screenshots[0]["filepath"], "/path/to/screenshot1.png")
 
             # Verify second screenshot
-            assert screenshots[1]["step_name"] == "I take screenshots"
-            assert screenshots[1]["label"] == "second screenshot"
-            assert screenshots[1]["location"] == "(150,250)"
-            assert screenshots[1]["size"] == "(400,500)"
-            assert screenshots[1]["filepath"] == "/path/to/screenshot2.png"
+            check.equal(screenshots[1]["step_name"], "I take screenshots")
+            check.equal(screenshots[1]["label"], "second screenshot")
+            check.equal(screenshots[1]["location"], "(150,250)")
+            check.equal(screenshots[1]["size"], "(400,500)")
+            check.equal(screenshots[1]["filepath"], "/path/to/screenshot2.png")
 
 
 def test_step_no_screenshots_recording():
@@ -641,9 +639,9 @@ def test_step_no_screenshots_recording():
             )
             result = cursor.fetchone()
 
-            assert result is not None
+            check.is_true(result is not None)
             screenshots_json = result[0]
-            assert screenshots_json == "[]"
+            check.equal(screenshots_json, "[]")
 
 
 def test_step_screenshots_json_column():
@@ -718,25 +716,25 @@ def test_step_screenshots_json_column():
             )
             result = cursor.fetchone()
 
-            assert result is not None
+            check.is_true(result is not None)
             screenshots_json = result[0]
 
             import json
 
             screenshots = json.loads(screenshots_json)
-            assert len(screenshots) == 2
+            check.equal(len(screenshots), 2)
 
-            assert screenshots[0]["step_name"] == "I open a browser"
-            assert screenshots[0]["label"] == "screenshot 1"
-            assert screenshots[0]["location"] == "(100,200)"
-            assert screenshots[0]["size"] == "(800,600)"
-            assert screenshots[0]["filepath"] == "/path/to/screenshot1.png"
+            check.equal(screenshots[0]["step_name"], "I open a browser")
+            check.equal(screenshots[0]["label"], "screenshot 1")
+            check.equal(screenshots[0]["location"], "(100,200)")
+            check.equal(screenshots[0]["size"], "(800,600)")
+            check.equal(screenshots[0]["filepath"], "/path/to/screenshot1.png")
 
-            assert screenshots[1]["step_name"] == "I open a browser"
-            assert screenshots[1]["label"] == "screenshot 2"
-            assert screenshots[1]["location"] == "(150,250)"
-            assert screenshots[1]["size"] == "(1024,768)"
-            assert screenshots[1]["filepath"] == "/path/to/screenshot2.png"
+            check.equal(screenshots[1]["step_name"], "I open a browser")
+            check.equal(screenshots[1]["label"], "screenshot 2")
+            check.equal(screenshots[1]["location"], "(150,250)")
+            check.equal(screenshots[1]["size"], "(1024,768)")
+            check.equal(screenshots[1]["filepath"], "/path/to/screenshot2.png")
 
 
 def test_step_without_screenshots():
@@ -796,9 +794,9 @@ def test_step_without_screenshots():
             )
             result = cursor.fetchone()
 
-            assert result is not None
+            check.is_true(result is not None)
             screenshots_json = result[0]
-            assert screenshots_json == "[]"
+            check.equal(screenshots_json, "[]")
 
 
 def test_feature_custom_data_recording():
@@ -843,20 +841,20 @@ def test_feature_custom_data_recording():
             )
             result = cursor.fetchone()
 
-            assert result is not None
+            check.is_true(result is not None)
             feature_name, custom_data_json = result
-            assert feature_name == "Feature with Custom Data"
-            assert custom_data_json is not None
+            check.equal(feature_name, "Feature with Custom Data")
+            check.is_not_none(custom_data_json)
 
             # Parse and verify the JSON content
             import json
 
             custom_data = json.loads(custom_data_json)
-            assert custom_data["environment"] == "staging"
-            assert custom_data["priority"] == "high"
-            assert custom_data["metadata"]["created_by"] == "test_suite"
-            assert custom_data["metadata"]["version"] == "1.2.3"
-            assert custom_data["execution_context"]["parallel_workers"] == 4
+            check.equal(custom_data["environment"], "staging")
+            check.equal(custom_data["priority"], "high")
+            check.equal(custom_data["metadata"]["created_by"], "test_suite")
+            check.equal(custom_data["metadata"]["version"], "1.2.3")
+            check.equal(custom_data["execution_context"]["parallel_workers"], 4)
 
 
 def test_feature_empty_custom_data():
@@ -890,9 +888,9 @@ def test_feature_empty_custom_data():
             )
             result = cursor.fetchone()
 
-            assert result is not None
+            check.is_true(result is not None)
             custom_data_json = result[0]
-            assert custom_data_json == "{}"
+            check.equal(custom_data_json, "{}")
 
 
 def test_scenario_custom_data_recording():
@@ -964,31 +962,31 @@ def test_scenario_custom_data_recording():
             )
             result = cursor.fetchone()
 
-            assert result is not None
+            check.is_true(result is not None)
             scenario_name, custom_data_json = result
-            assert scenario_name == "Scenario with Custom Data"
-            assert custom_data_json is not None
+            check.equal(scenario_name, "Scenario with Custom Data")
+            check.is_not_none(custom_data_json)
 
             # Parse and verify the JSON content
             import json
 
             custom_data = json.loads(custom_data_json)
-            assert (
-                custom_data["test_data"]["expected_outcome"]
-                == "successful_login"
+            check.equal(
+                custom_data["test_data"]["expected_outcome"],
+                "successful_login"
             )
-            assert (
-                custom_data["performance_metrics"]["response_time_ms"] == 1250
+            check.equal(
+                custom_data["performance_metrics"]["response_time_ms"], 1250
             )
-            assert custom_data["browser_info"]["viewport"]["width"] == 1920
-            assert (
-                custom_data["execution_metadata"]["worker_id"] == "worker_001"
+            check.equal(custom_data["browser_info"]["viewport"]["width"], 1920)
+            check.equal(
+                custom_data["execution_metadata"]["worker_id"], "worker_001"
             )
-            assert (
+            check.equal(
                 custom_data["execution_metadata"]["environment_variables"][
                     "TEST_ENV"
-                ]
-                == "staging"
+                ],
+                "staging"
             )
 
 
@@ -1039,9 +1037,9 @@ def test_scenario_empty_custom_data():
             )
             result = cursor.fetchone()
 
-            assert result is not None
+            check.is_true(result is not None)
             custom_data_json = result[0]
-            assert custom_data_json == "{}"
+            check.equal(custom_data_json, "{}")
 
 
 def test_custom_data_with_various_data_types():
@@ -1115,25 +1113,25 @@ def test_custom_data_with_various_data_types():
                 ("feature_types_001",),
             )
             feature_result = cursor.fetchone()
-            assert feature_result is not None
+            check.is_true(feature_result is not None)
 
             import json
 
             feature_data = json.loads(feature_result[0])
-            assert feature_data["string_value"] == "test_string"
-            assert feature_data["integer_value"] == 42
-            assert feature_data["float_value"] == 3.14159
-            assert feature_data["boolean_true"] is True
-            assert feature_data["boolean_false"] is False
-            assert feature_data["null_value"] is None
-            assert feature_data["list_value"] == [
+            check.equal(feature_data["string_value"], "test_string")
+            check.equal(feature_data["integer_value"], 42)
+            check.equal(feature_data["float_value"], 3.14159)
+            check.is_true(feature_data["boolean_true"])
+            check.is_false(feature_data["boolean_false"])
+            check.is_none(feature_data["null_value"])
+            check.equal(feature_data["list_value"], [
                 1,
                 "two",
                 3.0,
                 True,
                 None,
-            ]
-            assert feature_data["nested_object"]["inner_string"] == "nested"
+            ])
+            check.equal(feature_data["nested_object"]["inner_string"], "nested")
 
             # Check scenario custom_data
             cursor.execute(
@@ -1141,18 +1139,18 @@ def test_custom_data_with_various_data_types():
                 ("scenario_types_001",),
             )
             scenario_result = cursor.fetchone()
-            assert scenario_result is not None
+            check.is_true(scenario_result is not None)
 
             scenario_data = json.loads(scenario_result[0])
-            assert scenario_data["unicode_string"] == "Hello 世界 🌍"
-            assert scenario_data["large_number"] == 9223372036854775807
-            assert scenario_data["scientific_notation"] == 1.23e-10
-            assert (
-                scenario_data["multiline_string"] == "Line 1\nLine 2\nLine 3"
+            check.equal(scenario_data["unicode_string"], "Hello 世界 🌍")
+            check.equal(scenario_data["large_number"], 9223372036854775807)
+            check.equal(scenario_data["scientific_notation"], 1.23e-10)
+            check.equal(
+                scenario_data["multiline_string"], "Line 1\nLine 2\nLine 3"
             )
-            assert (
-                scenario_data["deeply_nested"]["level1"]["level2"]["level3"]
-                == "deep_value"
+            check.equal(
+                scenario_data["deeply_nested"]["level1"]["level2"]["level3"],
+                "deep_value"
             )
 
 
@@ -1230,7 +1228,7 @@ def test_custom_data_in_consolidated_database():
         consolidate_database_files(str(results_path))
 
         # Verify consolidated data
-        assert consolidated_db.exists()
+        check.is_true(consolidated_db.exists())
 
         with sqlite3.connect(str(consolidated_db)) as conn:
             cursor = conn.cursor()
@@ -1240,40 +1238,40 @@ def test_custom_data_in_consolidated_database():
                 "SELECT feature_run_id, custom_data FROM features ORDER BY feature_run_id"
             )
             feature_results = cursor.fetchall()
-            assert len(feature_results) == 3
+            check.equal(len(feature_results), 3)
 
             import json
 
             for i, (feature_id, custom_data_json) in enumerate(
                 feature_results
             ):
-                assert feature_id == f"feature_{i}"
-                assert custom_data_json is not None
+                check.equal(feature_id, f"feature_{i}")
+                check.is_not_none(custom_data_json)
                 custom_data = json.loads(custom_data_json)
-                assert custom_data["feature_index"] == i
-                assert custom_data["feature_name"] == f"Feature {i}"
-                assert custom_data["batch_info"]["batch_id"] == f"batch_{i}"
+                check.equal(custom_data["feature_index"], i)
+                check.equal(custom_data["feature_name"], f"Feature {i}")
+                check.equal(custom_data["batch_info"]["batch_id"], f"batch_{i}")
 
             # Check scenarios custom_data
             cursor.execute(
                 "SELECT scenario_run_id, custom_data FROM scenarios ORDER BY scenario_run_id"
             )
             scenario_results = cursor.fetchall()
-            assert len(scenario_results) == 3
+            check.equal(len(scenario_results), 3)
 
             for i, (scenario_id, custom_data_json) in enumerate(
                 scenario_results
             ):
-                assert scenario_id == f"scenario_{i}"
-                assert custom_data_json is not None
+                check.equal(scenario_id, f"scenario_{i}")
+                check.is_not_none(custom_data_json)
                 custom_data = json.loads(custom_data_json)
-                assert custom_data["scenario_index"] == i
-                assert custom_data["scenario_name"] == f"Scenario {i}"
-                assert custom_data["execution_info"]["worker"] == f"worker_{i}"
+                check.equal(custom_data["scenario_index"], i)
+                check.equal(custom_data["scenario_name"], f"Scenario {i}")
+                check.equal(custom_data["execution_info"]["worker"], f"worker_{i}")
 
         # Verify original files were cleaned up
         for db_file in db_files:
-            assert not db_file.exists()
+            check.is_false(db_file.exists())
 
 
 def test_step_text_and_table_recording():
@@ -1357,16 +1355,16 @@ def test_step_text_and_table_recording():
                 ("step_with_text",),
             )
             result = cursor.fetchone()
-            assert result is not None
+            check.is_true(result is not None)
             name, text, table_data, is_substep, has_substeps = result
-            assert name == "I have a step with text"
-            assert (
-                text
-                == "This is some text content\nWith multiple lines\nAnd more text"
+            check.equal(name, "I have a step with text")
+            check.equal(
+                text,
+                "This is some text content\nWith multiple lines\nAnd more text"
             )
-            assert table_data is None
-            assert is_substep == 0  # SQLite stores False as 0
-            assert has_substeps == 0  # SQLite stores False as 0
+            check.is_none(table_data)
+            check.equal(is_substep, 0)  # SQLite stores False as 0
+            check.equal(has_substeps, 0)  # SQLite stores False as 0
 
             # Check step with table
             cursor.execute(
@@ -1374,22 +1372,22 @@ def test_step_text_and_table_recording():
                 ("step_with_table",),
             )
             result = cursor.fetchone()
-            assert result is not None
+            check.is_true(result is not None)
             name, text, table_data, is_substep, has_substeps = result
-            assert name == "I have a step with table"
-            assert text is None
-            assert table_data is not None
+            check.equal(name, "I have a step with table")
+            check.is_none(text)
+            check.is_not_none(table_data)
 
             import json
 
             table_data_parsed = json.loads(table_data)
-            assert table_data_parsed == [
+            check.equal(table_data_parsed, [
                 ["header1", "header2", "header3"],
                 ["value1", "value2", "value3"],
                 ["data1", "data2", "data3"],
-            ]
-            assert is_substep == 0  # SQLite stores False as 0
-            assert has_substeps == 1  # SQLite stores True as 1
+            ])
+            check.equal(is_substep, 0)  # SQLite stores False as 0
+            check.is_true(has_substeps)  # SQLite stores True as 1
 
             # Check substep
             cursor.execute(
@@ -1397,10 +1395,10 @@ def test_step_text_and_table_recording():
                 ("substep_001",),
             )
             result = cursor.fetchone()
-            assert result is not None
+            check.is_true(result is not None)
             name, text, table_data, is_substep, has_substeps = result
-            assert name == "I am a substep"
-            assert text is None
-            assert table_data is None
-            assert is_substep == 1  # SQLite stores True as 1
-            assert has_substeps == 0  # SQLite stores False as 0
+            check.equal(name, "I am a substep")
+            check.is_none(text)
+            check.is_none(table_data)
+            check.is_true(is_substep)  # SQLite stores True as 1
+            check.equal(has_substeps, 0)  # SQLite stores False as 0
