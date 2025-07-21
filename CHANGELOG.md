@@ -17,6 +17,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Add - TeeStream utility class
 - Change - make fix more like lint
 - Add - CONFIG now can save multiple snapshots in a stack
+- Chore - CI - fix results to not be deleted by pytest
+- Change - rename .start_timestamp => to .start_at
 
 ## 1.2.4
 - Fix - restore state after tab info
