@@ -6,7 +6,7 @@ from cucu.utils import TeeStream
 
 def test_teestream_writes_to_file_and_buffer():
     """Test that TeeStream writes to both file and internal buffer."""
-    with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
+    with tempfile.NamedTemporaryFile(mode="w+", delete=True) as temp_file:
         tee = TeeStream(temp_file)
 
         test_data = "Hello, World!"

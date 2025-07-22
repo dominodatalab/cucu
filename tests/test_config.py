@@ -58,7 +58,7 @@ def test_config_can_load_an_empty_config():
         CONFIG.load(temp_cucurc.name)
 
 
-def test_confi_validate_defined_variables():
+def test_config_validate_defined_variables():
     for variable in CONFIG.defined_variables:
         print(variable)
 
