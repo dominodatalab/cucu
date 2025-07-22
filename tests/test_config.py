@@ -1,6 +1,7 @@
 import tempfile
 
 import pytest
+import pytest_check as check
 
 import cucu
 from cucu.config import CONFIG, Config, leaf_map
@@ -22,16 +23,27 @@ def test_config_lookup_env_precedes_internal_value():
 
 def test_config_true_method():
     CONFIG["VAR1"] = "true"
-    assert CONFIG.true("VAR1")
-    assert CONFIG.true("INEXISTENT") is False
+    check.is_true(
+        CONFIG.true("VAR1"), "Config should recognize 'true' as true"
+    )
+    check.is_false(
+        CONFIG.true("INEXISTENT"), "Non-existent config should return False"
+    )
 
 
 def test_config_false_method():
     CONFIG["VAR1"] = "false"
-    assert CONFIG.false("VAR1")
+    check.is_true(
+        CONFIG.false("VAR1"), "Config should recognize 'false' as false"
+    )
     CONFIG["VAR1"] = "true"
-    assert CONFIG.false("VAR1") is False
-    assert CONFIG.false("INEXISTENT")
+    check.is_false(
+        CONFIG.false("VAR1"), "Config should not treat 'true' as false"
+    )
+    check.is_true(
+        CONFIG.false("INEXISTENT"),
+        "Non-existent config should return True for false()",
+    )
 
 
 def test_config_resolves_variables():
@@ -58,7 +70,7 @@ def test_config_can_load_an_empty_config():
         CONFIG.load(temp_cucurc.name)
 
 
-def test_confi_validate_defined_variables():
+def test_config_validate_defined_variables():
     for variable in CONFIG.defined_variables:
         print(variable)
 
@@ -90,19 +102,29 @@ def test_config_custom_variable_resolution():
 def test_config_expand_variables_handles_existent_and_non_existent_variables():
     CONFIG["var1"] = "value1"
 
-    assert CONFIG.expand("{var1} and {var2}") == {
+    result = CONFIG.expand("{var1} and {var2}")
+    expected = {
         "var1": "value1",
         "var2": None,
     }
+    check.equal(
+        result,
+        expected,
+        "Expand should handle both existing and non-existing variables",
+    )
 
 
 def test_config_expand_variables_handles_recursive_variable_resolution():
     CONFIG["var1"] = "{var2}"
     CONFIG["var2"] = "value2"
 
-    assert CONFIG.expand("{var1}") == {
+    result = CONFIG.expand("{var1}")
+    expected = {
         "var1": "value2",
     }
+    check.equal(
+        result, expected, "Expand should resolve recursive variable references"
+    )
 
 
 def test_config_expand_with_custom_variable_handling():

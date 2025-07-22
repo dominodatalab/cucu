@@ -14,12 +14,19 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
   - scenarios - includes tags
   - steps - granular details including debug and browser logs, browser and screenshot info
 - Chore - add copilot instructions
-- Add - TeeStream utility class
-- Change - make fix more like lint
+
+## 1.2.5
 - Add - CONFIG now can save multiple snapshots in a stack
-- Chore - CI - fix results to not be deleted by pytest
+- Add - features, scenarios and steps - add various metadata
+- Add - pytest-check for mulitple asserts
+- Add - steps - add browser info and screenshot info
+- Add - steps - add debug log and browser log
+- Add - steps - add section level, seq and parent_seq info
+- Change - extract generate_short_id to utils
 - Change - rename .start_timestamp => to .start_at
-- Change - record section level and parent sequence
+- Change - use pathlib for paths
+- Chore - CI - fix results to not be deleted by pytest
+- Chore - makefile - make fix more like make lint
 
 ## 1.2.4
 - Fix - restore state after tab info
