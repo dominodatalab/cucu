@@ -3,7 +3,7 @@ import tempfile
 import pytest
 
 import cucu
-from cucu.config import CONFIG, leaf_map
+from cucu.config import CONFIG, Config, leaf_map
 
 
 def test_config_lookup_for_inexistent_is_none():
@@ -44,12 +44,12 @@ def test_config_resolve_leaves_unresolved_variables():
     assert CONFIG.resolve("{NOT_SET}") == ""
 
 
-def test_config_snapshot_and_restore_works():
+def test_config_push_and_pop_works():
     CONFIG["FOO"] = None
     CONFIG.snapshot()
     CONFIG["FOO"] = "bar"
     assert CONFIG["FOO"] == "bar"
-    CONFIG.restore()
+    CONFIG.restore(with_pop=True)
     assert CONFIG["FOO"] is None
 
 
@@ -131,3 +131,113 @@ def test_leaf_map():
     }
     actual = leaf_map(data, something)
     assert actual == expected
+
+
+def test_config_push_pop_stack_behavior():
+    config = Config()
+    config["key1"] = "value1"
+    config["key2"] = "value2"
+
+    # Take first snapshot
+    config.snapshot("first")
+    config["key2"] = "modified"
+    config["key3"] = "value3"
+
+    # Take second snapshot
+    config.snapshot("second")
+    config["key1"] = "again_modified"
+
+    # Test stack depth
+    assert len(config.snapshots) == 2
+
+    # Pop should restore to second snapshot
+    config.restore(with_pop=True)
+    assert config["key1"] == "value1"
+    assert config["key2"] == "modified"
+    assert config["key3"] == "value3"
+    assert len(config.snapshots) == 1
+
+    # Pop again should restore to first snapshot
+    config.restore(with_pop=True)
+    assert config["key1"] == "value1"
+    assert config["key2"] == "value2"
+    assert "key3" not in config
+    assert len(config.snapshots) == 0
+
+
+def test_config_restore_functionality():
+    # Test that restore restores to top of stack without popping
+    CONFIG["TEST"] = "initial"
+    CONFIG.snapshot()
+
+    CONFIG["TEST"] = "modified"
+    assert CONFIG["TEST"] == "modified"
+
+    CONFIG.restore()
+    assert CONFIG["TEST"] == "initial"
+
+    # Verify the stack still has the value (not popped)
+    CONFIG["TEST"] = "modified_again"
+    CONFIG.restore()
+    assert CONFIG["TEST"] == "initial"
+
+
+def test_config_empty_stack_operations_graceful():
+    # Clear any existing stack
+    CONFIG.snapshots = []
+
+    # Restore on empty stack should not raise error
+    CONFIG.restore()
+
+    # Pop on empty stack should not raise error
+    CONFIG.restore(with_pop=True)
+
+
+def test_config_named_snapshots():
+    config = Config()
+    config["key1"] = "value1"
+
+    # Take named snapshot
+    config.snapshot("first_snapshot")
+    config["key2"] = "value2"
+
+    # Take another named snapshot
+    config.snapshot("second_snapshot")
+    config["key3"] = "value3"
+
+    # Check snapshot names
+    names = config.list_snapshots()
+    assert names == ["first_snapshot", "second_snapshot"]
+
+    # Pop should restore to second snapshot
+    config.restore(with_pop=True)
+    assert "key3" not in config
+    assert config["key2"] == "value2"
+
+    # Check snapshot names after pop
+    names = config.list_snapshots()
+    assert names == ["first_snapshot"]
+
+
+def test_config_auto_generated_snapshot_names():
+    config = Config()
+    config["key1"] = "value1"
+
+    # Take unnamed snapshots
+    config.snapshot()  # should be snapshot_0
+    config.snapshot()  # should be snapshot_1
+
+    names = config.list_snapshots()
+    assert names == ["snapshot_0", "snapshot_1"]
+
+
+def test_config_empty_snapshots_list():
+    config = Config()
+
+    # Empty snapshots should return empty list
+    names = config.list_snapshots()
+    assert names == []
+
+    # restore and pop should handle empty snapshots gracefully
+    config.restore()  # should not raise
+    config.restore(with_pop=True)  # should not raise
