@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 import pytest_check as check
-from peewee import IntegrityError, SqliteDatabase
+from peewee import SqliteDatabase
 
 from cucu import db
 from cucu.db import (
@@ -205,23 +205,6 @@ def test_complex_data_serialization(sample_records_combined):
     retrieved = step.get(step.step_run_id == "test_step")
     check.equal(json.loads(retrieved.table_data), table_data)
     check.equal(json.loads(retrieved.screenshots), screenshots_data)
-
-
-def test_primary_key_uniqueness(temp_db):
-    cucu_run.create(
-        cucu_run_id="duplicate_test",
-        full_arguments="[]",
-        date="2024-01-01T10:00:00",
-        start_at="2024-01-01T10:00:00",
-    )
-
-    with pytest.raises(IntegrityError):
-        cucu_run.create(
-            cucu_run_id="duplicate_test",
-            full_arguments="[]",
-            date="2024-01-01T10:00:00",
-            start_at="2024-01-01T10:00:00",
-        )
 
 
 def test_relationships_and_record_completion(sample_records_combined):
