@@ -309,3 +309,31 @@ def find_n_click_input_parent_label(ctx, input_element):
 def is_element_size_zero(element):
     size = element.size
     return size["width"] == 0 and size["height"] == 0
+
+
+class TeeStream:
+    """
+    A stream that writes to both a file stream and captures content in an internal buffer.
+    Provides file-like accessors to read the captured content.
+    """
+
+    def __init__(self, file_stream):
+        self.file_stream = file_stream
+        self.string_buffer = []
+
+    def write(self, data):
+        self.file_stream.write(data)
+        self.string_buffer.append(data)
+
+    def flush(self):
+        self.file_stream.flush()
+
+    def getvalue(self):
+        return "".join(self.string_buffer)
+
+    def read(self):
+        return self.getvalue()
+
+    def clear(self):
+        """Clear the internal buffer."""
+        self.string_buffer = []

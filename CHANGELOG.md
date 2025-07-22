@@ -10,6 +10,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Chore - makefile - make fix more like make lint
 - Change - minor update to scenarios
 - Change - rename .start_timestamp => to .start_at
+- Add - debug and browser logs to steps
+- Change - use pathlib for paths
 
 ## 1.2.4
 - Fix - restore state after tab info
