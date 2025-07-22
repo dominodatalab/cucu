@@ -6,16 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 1.2.5
-- Chore - CI - fix results to not be deleted by pytest
-- Chore - makefile - make fix more like make lint
-- Change - minor update to scenarios
-- Change - rename .start_timestamp => to .start_at
-- Add - debug and browser logs to steps
-- Change - use pathlib for paths
-- Add - metadata to features, scenarios and steps
 - Add - CONFIG now can save multiple snapshots in a stack
+- Add - debug and browser logs to steps
+- Add - metadata to features, scenarios and steps
 - Add - section level info to steps
 - Change - extract generate_short_id to utils
+- Change - minor update to scenarios
+- Change - rename .start_timestamp => to .start_at
+- Change - use pathlib for paths
+- Chore - CI - fix results to not be deleted by pytest
+- Chore - makefile - make fix more like make lint
 
 ## 1.2.4
 - Fix - restore state after tab info
