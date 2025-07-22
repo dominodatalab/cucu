@@ -226,7 +226,7 @@ def download_browser_logs(ctx):
 
 def before_step(ctx, step):
     # trims the last 3 digits of the microseconds
-    step.start_timestamp = datetime.datetime.now().isoformat()[:-3]
+    step.start_at = datetime.datetime.now().isoformat()[:-3]
 
     sys.stdout.captured()
     sys.stderr.captured()

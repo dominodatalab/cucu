@@ -9,6 +9,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Chore - CI - fix results to not be deleted by pytest
 - Chore - makefile - make fix more like make lint
 - Change - minor update to scenarios
+- Change - rename .start_timestamp => to .start_at
 
 ## 1.2.4
 - Fix - restore state after tab info
