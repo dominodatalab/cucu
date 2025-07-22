@@ -14,8 +14,14 @@ def test_teestream_writes_to_file_and_buffer():
     tee.write(test_data)
 
     # Check both outputs with soft assertions to see all results
-    check.equal(file_stream.getvalue(), test_data, "File stream should contain the written data")
-    check.equal(tee.getvalue(), test_data, "Buffer should contain the written data")
+    check.equal(
+        file_stream.getvalue(),
+        test_data,
+        "File stream should contain the written data",
+    )
+    check.equal(
+        tee.getvalue(), test_data, "Buffer should contain the written data"
+    )
 
 
 def test_teestream_multiple_writes():
@@ -30,7 +36,11 @@ def test_teestream_multiple_writes():
     expected = "Line 1\nLine 2\nLine 3\n"
 
     # Check both outputs with soft assertions
-    check.equal(file_stream.getvalue(), expected, "File stream should contain all writes")
+    check.equal(
+        file_stream.getvalue(),
+        expected,
+        "File stream should contain all writes",
+    )
     check.equal(tee.getvalue(), expected, "Buffer should contain all writes")
 
 
@@ -48,6 +58,12 @@ def test_teestream_content_consistency():
     file_content = file_stream.getvalue()
     buffer_content = tee.getvalue()
     expected = "First chunk Second chunk Third chunk"
-    
-    check.equal(file_content, buffer_content, "File and buffer content should be identical")
-    check.equal(file_content, expected, "Content should match expected concatenation")
+
+    check.equal(
+        file_content,
+        buffer_content,
+        "File and buffer content should be identical",
+    )
+    check.equal(
+        file_content, expected, "Content should match expected concatenation"
+    )

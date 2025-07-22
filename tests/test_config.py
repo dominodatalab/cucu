@@ -23,16 +23,27 @@ def test_config_lookup_env_precedes_internal_value():
 
 def test_config_true_method():
     CONFIG["VAR1"] = "true"
-    check.is_true(CONFIG.true("VAR1"), "Config should recognize 'true' as true")
-    check.is_false(CONFIG.true("INEXISTENT"), "Non-existent config should return False")
+    check.is_true(
+        CONFIG.true("VAR1"), "Config should recognize 'true' as true"
+    )
+    check.is_false(
+        CONFIG.true("INEXISTENT"), "Non-existent config should return False"
+    )
 
 
 def test_config_false_method():
     CONFIG["VAR1"] = "false"
-    check.is_true(CONFIG.false("VAR1"), "Config should recognize 'false' as false")
+    check.is_true(
+        CONFIG.false("VAR1"), "Config should recognize 'false' as false"
+    )
     CONFIG["VAR1"] = "true"
-    check.is_false(CONFIG.false("VAR1"), "Config should not treat 'true' as false")
-    check.is_true(CONFIG.false("INEXISTENT"), "Non-existent config should return True for false()")
+    check.is_false(
+        CONFIG.false("VAR1"), "Config should not treat 'true' as false"
+    )
+    check.is_true(
+        CONFIG.false("INEXISTENT"),
+        "Non-existent config should return True for false()",
+    )
 
 
 def test_config_resolves_variables():
@@ -96,7 +107,11 @@ def test_config_expand_variables_handles_existent_and_non_existent_variables():
         "var1": "value1",
         "var2": None,
     }
-    check.equal(result, expected, "Expand should handle both existing and non-existing variables")
+    check.equal(
+        result,
+        expected,
+        "Expand should handle both existing and non-existing variables",
+    )
 
 
 def test_config_expand_variables_handles_recursive_variable_resolution():
@@ -107,7 +122,9 @@ def test_config_expand_variables_handles_recursive_variable_resolution():
     expected = {
         "var1": "value2",
     }
-    check.equal(result, expected, "Expand should resolve recursive variable references")
+    check.equal(
+        result, expected, "Expand should resolve recursive variable references"
+    )
 
 
 def test_config_expand_with_custom_variable_handling():
