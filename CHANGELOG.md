@@ -15,6 +15,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - replace offset with start time in step html report
 - Change - make CONFIG yaml dump more robust
 - Chore - change to use uv-build packaging
+- Change - extract generate_short_id to utils
 
 ## 1.2.3
 - Add - additional tab information steps

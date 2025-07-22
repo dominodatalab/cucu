@@ -1,5 +1,4 @@
 import datetime
-import hashlib
 import json
 import os
 import sys
@@ -10,7 +9,7 @@ from functools import partial
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
-from cucu.utils import ellipsize_filename, take_screenshot
+from cucu.utils import ellipsize_filename, generate_short_id, take_screenshot
 
 CONFIG.define(
     "FEATURE_RESULTS_DIR",
@@ -122,9 +121,7 @@ def before_scenario(ctx, scenario):
         logger.init_debug_logger(ctx.scenario_debug_log_file)
 
     # internal cucu config variables
-    CONFIG["SCENARIO_RUN_ID"] = hashlib.sha256(
-        str(time.perf_counter()).encode("utf-8")
-    ).hexdigest()[:7]
+    CONFIG["SCENARIO_RUN_ID"] = generate_short_id()
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
