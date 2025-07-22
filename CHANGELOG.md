@@ -7,11 +7,11 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.2.5
 - Add - CONFIG now can save multiple snapshots in a stack
-- Add - steps - add debug log and browser log
-- Add - steps - add browser info and screenshot info
 - Add - features, scenarios and steps - add various metadata
-- Add - steps - add section level, seq and parent_seq info
 - Add - pytest-check for mulitple asserts
+- Add - steps - add browser info and screenshot info
+- Add - steps - add debug log and browser log
+- Add - steps - add section level, seq and parent_seq info
 - Change - extract generate_short_id to utils
 - Change - rename .start_timestamp => to .start_at
 - Change - use pathlib for paths
