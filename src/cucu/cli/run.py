@@ -4,6 +4,7 @@ import os
 import socket
 import sys
 from datetime import datetime
+from pathlib import Path
 
 from cucu import (
     behave_tweaks,
@@ -16,13 +17,12 @@ from cucu.page_checks import init_page_checks
 
 
 def get_feature_name(file_path):
-    with open(file_path, "r") as file:
-        text = file.read()
-        lines = text.split("\n")
-        for line in lines:
-            if "Feature:" in line:
-                feature_name = line.replace("Feature:", "").strip()
-                return feature_name
+    text = Path(file_path).read_text(encoding="utf8")
+    lines = text.split("\n")
+    for line in lines:
+        if "Feature:" in line:
+            feature_name = line.replace("Feature:", "").strip()
+            return feature_name
 
 
 def behave_init(filepath="features"):
@@ -104,7 +104,7 @@ def behave(
     run_json_filename = "run.json"
     if redirect_output:
         feature_name = get_feature_name(filepath)
-        run_json_filename = f"{feature_name + '-run.json'}"
+        run_json_filename = f"{feature_name}-run.json"
 
     if dry_run:
         args += [
@@ -120,7 +120,7 @@ def behave(
             "--no-logcapture",
             # generate a JSON file containing the exact details of the whole run
             "--format=cucu.formatter.json:CucuJSONFormatter",
-            f"--outfile={results}/{run_json_filename}",
+            f"--outfile={Path(results) / run_json_filename}",
             # console formatter
             "--format=cucu.formatter.cucu:CucuFormatter",
             f"--logging-level={os.environ['CUCU_LOGGING_LEVEL'].upper()}",
@@ -148,8 +148,8 @@ def behave(
     try:
         if redirect_output:
             feature_name = get_feature_name(filepath)
-            log_filename = f"{feature_name + '.log'}"
-            log_filepath = os.path.join(results, log_filename)
+            log_filename = f"{feature_name}.log"
+            log_filepath = Path(results) / log_filename
 
             CONFIG["__CUCU_PARENT_STDOUT"] = sys.stdout
 
@@ -161,7 +161,7 @@ def behave(
             # provide progress feedback on screen
             register_before_retry_hook(retry_progress)
 
-            with open(log_filepath, "w", encoding="utf8") as output:
+            with log_filepath.open("w", encoding="utf8") as output:
                 with contextlib.redirect_stderr(output):
                     with contextlib.redirect_stdout(output):
                         # intercept the stdout/stderr so we can do things such
@@ -180,28 +180,27 @@ def behave(
     return result
 
 
-def write_run_details(results, filepath):
-    """
-    writes a JSON file with run details to the results directory which can be
-    used to figure out any runtime details that would otherwise be lost and
-    difficult to figure out.
-    """
-    run_details_filepath = os.path.join(results, "run_details.json")
+def create_run(results, filepath):
+    results_path = Path(results)
+    run_json_filepath = results_path / "run_details.json"
 
-    if os.path.exists(run_details_filepath):
+    if run_json_filepath.exists():
         return
 
-    if CONFIG["CUCU_RECORD_ENV_VARS"]:
-        env_values = dict(os.environ)
-    else:
-        env_values = "To enable use the --record-env-vars flag"
+    env_values = (
+        dict(os.environ)
+        if CONFIG["CUCU_RECORD_ENV_VARS"]
+        else "To enable use the --record-env-vars flag"
+    )
 
     run_details = {
+        "cucu_run_id": CONFIG["CUCU_RUN_ID"],
         "filepath": filepath,
         "full_arguments": sys.argv,
         "env": env_values,
         "date": datetime.now().isoformat(),
     }
 
-    with open(run_details_filepath, "w", encoding="utf8") as output:
-        output.write(json.dumps(run_details, indent=2, sort_keys=True))
+    run_json_filepath.write_text(
+        json.dumps(run_details, indent=2, sort_keys=True), encoding="utf8"
+    )
