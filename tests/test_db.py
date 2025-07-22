@@ -2,7 +2,6 @@
 Tests for the cucu database module using Peewee ORM.
 """
 
-import json
 import tempfile
 from pathlib import Path
 
@@ -53,7 +52,7 @@ def sample_records_combined(temp_db):
     """Create sample records for testing database operations."""
     cucu_run_obj = cucu_run.create(
         cucu_run_id="test_run",
-        full_arguments=json.dumps(["arg1", "arg2"]),
+        full_arguments=["arg1", "arg2"],
         date="2024-01-01T10:00:00",
         start_at="2024-01-01T10:00:00",
     )
@@ -62,7 +61,7 @@ def sample_records_combined(temp_db):
         worker_run_id="test_worker",
         cucu_run_id="test_run",
         start_at="2024-01-01T10:00:00",
-        custom_data=json.dumps({"key": "value", "number": 123}),
+        custom_data={"key": "value", "number": 123},
     )
 
     feature_obj = feature.create(
@@ -99,7 +98,7 @@ def sample_records_combined(temp_db):
 
     cucu_run.create(
         cucu_run_id="consistency_test",
-        full_arguments="[]",
+        full_arguments=[],
         date="2024-01-01T10:00:00",
         start_at="2024-01-01T10:00:00",
     )
@@ -160,7 +159,7 @@ def sample_records_combined(temp_db):
 def test_json_serialization_and_tags_formatting(sample_records_combined):
     retrieved_worker = worker.get(worker.worker_run_id == "test_worker")
     expected_data = {"key": "value", "number": 123}
-    check.equal(json.loads(retrieved_worker.custom_data), expected_data)
+    check.equal(retrieved_worker.custom_data, expected_data)
 
     check.equal(sample_records_combined["feature"].tags, "tag1 tag2 tag3")
     check.equal(sample_records_combined["scenario"].tags, "smoke critical")
@@ -171,7 +170,7 @@ def test_datetime_iso_format(temp_db):
 
     cucu_run_obj = cucu_run.create(
         cucu_run_id="iso_test",
-        full_arguments="[]",
+        full_arguments=[],
         date=iso_datetime,
         start_at=iso_datetime,
     )
@@ -198,13 +197,13 @@ def test_complex_data_serialization(sample_records_combined):
     ]
 
     step.update(
-        table_data=json.dumps(table_data),
-        screenshots=json.dumps(screenshots_data),
+        table_data=table_data,
+        screenshots=screenshots_data,
     ).where(step.step_run_id == "test_step").execute()
 
     retrieved = step.get(step.step_run_id == "test_step")
-    check.equal(json.loads(retrieved.table_data), table_data)
-    check.equal(json.loads(retrieved.screenshots), screenshots_data)
+    check.equal(retrieved.table_data, table_data)
+    check.equal(retrieved.screenshots, screenshots_data)
 
 
 def test_relationships_and_record_completion(sample_records_combined):
