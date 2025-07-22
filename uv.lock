@@ -269,6 +269,7 @@ dependencies = [
     { name = "jinja2" },
     { name = "lsprotocol" },
     { name = "mpire" },
+    { name = "peewee" },
     { name = "psutil" },
     { name = "pygls" },
     { name = "pyyaml" },
@@ -300,6 +301,7 @@ requires-dist = [
     { name = "jinja2", specifier = "~=3.1.3" },
     { name = "lsprotocol", specifier = "~=2023.0.1" },
     { name = "mpire", specifier = "~=2.10.2" },
+    { name = "peewee", specifier = ">=3.18.2" },
     { name = "psutil", specifier = ">=6.0" },
     { name = "pygls", specifier = "~=1.3.1" },
     { name = "pyyaml", specifier = "~=6.0.1" },
@@ -625,6 +627,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/17/e9/a3b2ae5f8a8525427
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d5/b3/f6cc950042bfdbe98672e7c834d930f85920fb7d3359f59096e8d2799617/parse_type-0.6.4-py2.py3-none-any.whl", hash = "sha256:83d41144a82d6b8541127bf212dd76c7f01baff680b498ce8a4d052a7a5bce4c", size = 27442, upload-time = "2024-10-03T11:50:58.519Z" },
 ]
+
+[[package]]
+name = "peewee"
+version = "3.18.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/04/89/76f6f1b744c8608e0d416b588b9d63c2a500ff800065ae610f7c80f532d6/peewee-3.18.2.tar.gz", hash = "sha256:77a54263eb61aff2ea72f63d2eeb91b140c25c1884148e28e4c0f7c4f64996a0", size = 949220, upload-time = "2025-07-08T12:52:03.941Z" }
 
 [[package]]
 name = "platformdirs"

@@ -1,1460 +1,299 @@
-import contextlib
-import sqlite3
+"""
+Tests for the cucu database module using Peewee ORM.
+"""
+
+import json
 import tempfile
 from pathlib import Path
-from unittest import mock
 
+import pytest
 import pytest_check as check
+from peewee import IntegrityError, SqliteDatabase
 
+from cucu import db
 from cucu.db import (
-    consolidate_database_files,
-    create_database_file,
-    finish_scenario_record,
-    finish_step_record,
-    record_cucu_run,
-    record_feature,
-    record_scenario,
-    start_step_record,
+    cucu_run,
+    feature,
+    scenario,
+    step,
+    worker,
 )
 
 
-def _setup_config_mock(config_mock, run_id, worker_id, db_filepath):
-    config_mock.__getitem__.side_effect = lambda key: {
-        "WORKER_RUN_ID": worker_id,
-        "CUCU_RUN_ID": run_id,
-        "RUN_DB_PATH": db_filepath,
-    }[key]
-    if db_filepath:
-        config_mock.get.return_value = db_filepath
-
-
-def _create_feature_mock(feature_id, name, filename, description, tags):
-    feature_mock = mock.MagicMock()
-    feature_mock.feature_run_id = feature_id
-    feature_mock.name = name
-    feature_mock.filename = filename
-    feature_mock.description = description
-    feature_mock.tags = tags
-    return feature_mock
-
-
-def _create_scenario_context_mock(
-    scenario_id, feature_id, name, tags, start_at, index=1, line_number=1
-):
-    ctx_mock = mock.MagicMock()
-    ctx_mock.scenario.scenario_run_id = scenario_id
-    ctx_mock.scenario.feature.feature_run_id = feature_id
-    ctx_mock.scenario.name = name
-    ctx_mock.scenario.line = line_number
-    ctx_mock.scenario.tags = tags
-    ctx_mock.scenario.start_at = start_at
-    ctx_mock.scenario_index = index
-    return ctx_mock
-
-
-def _create_scenario_finish_mock(scenario_id, status, start_at, end_at):
-    scenario_mock = mock.MagicMock()
-    scenario_mock.scenario_run_id = scenario_id
-    scenario_mock.status = mock.MagicMock()
-    scenario_mock.status.name = status
-    scenario_mock.start_at = start_at
-    scenario_mock.end_at = end_at
-    scenario_mock.cucu_config_json = "{}"
-    scenario_mock.custom_data = {}
-    return scenario_mock
-
-
-def _create_step_mock(
-    step_id,
-    keyword,
-    name,
-    location,
-    start_at,
-    has_substeps=False,
-    is_substep=False,
-    text=None,
-    table=None,
-    seq=0,
-    section_level=None,
-    parent_seq=None,
-):
-    step_mock = mock.MagicMock()
-    step_mock.step_run_id = step_id
-    step_mock.seq = seq
-    step_mock.keyword = keyword
-    step_mock.name = name
-    step_mock.text = text
-    step_mock.table = table
-    step_mock.location = location
-    step_mock.is_substep = is_substep
-    step_mock.has_substeps = has_substeps
-    step_mock.start_at = start_at
-    step_mock.section_level = section_level
-    step_mock.parent_seq = parent_seq
-    return step_mock
-
-
-@contextlib.contextmanager
-def cucu_test_db_setup(run_id, worker_id, db_filename=None):
-    import uuid
-
-    # Make run_id unique to avoid UNIQUE constraint violations
-    unique_run_id = f"{run_id}_{uuid.uuid4().hex[:8]}"
-    unique_worker_id = f"{worker_id}_{uuid.uuid4().hex[:8]}"
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        with mock.patch("cucu.db.CONFIG") as config_mock:
-            if db_filename:
-                # Make the db_filename unique too
-                base, ext = (
-                    db_filename.rsplit(".", 1)
-                    if "." in db_filename
-                    else (db_filename, "db")
-                )
-                unique_db_filename = f"{base}_{uuid.uuid4().hex[:8]}.{ext}"
-                db_filepath = f"{temp_dir}/{unique_db_filename}"
-            else:
-                db_filepath = f"{temp_dir}/run_{unique_run_id}_worker_{unique_worker_id}.db"
-
-            _setup_config_mock(
-                config_mock, unique_run_id, unique_worker_id, db_filepath
-            )
-            create_database_file(db_filepath)
-            record_cucu_run()
-            config_mock.get.return_value = db_filepath
-            yield db_filepath, config_mock
-
-
-def test_flat_view_creation_and_query():
-    with cucu_test_db_setup("run_123", "worker_456") as (
-        db_filepath,
-        config_mock,
-    ):
-        feature_mock = _create_feature_mock(
-            "feature_789",
-            "Login Feature",
-            "login.feature",
-            "Test login functionality",
-            ["login", "auth"],
-        )
-        record_feature(feature_mock)
-
-        ctx_mock = _create_scenario_context_mock(
-            "scenario_101",
-            "feature_789",
-            "Valid login",
-            ["smoke", "positive"],
-            "2024-01-01T10:01:30",
-        )
-        record_scenario(ctx_mock)
-
-        scenario_mock = _create_scenario_finish_mock(
-            "scenario_101",
-            "passed",
-            "2024-01-01T10:01:30",
-            "2024-01-01T10:01:31.5",
-        )
-        finish_scenario_record(scenario_mock)
-
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='view' AND name='flat'"
-            )
-            view_exists = cursor.fetchone()
-            check.is_true(view_exists is not None)
-
-            cursor.execute("SELECT * FROM flat")
-            result = cursor.fetchone()
-            check.is_true(result is not None)
-
-            (
-                cucu_run_id,
-                start_at,
-                duration,
-                feature_name,
-                scenario_name,
-                tags,
-                log_files,
-            ) = result
-
-            check.equal(cucu_run_id, config_mock["CUCU_RUN_ID"])
-            check.equal(start_at, "2024-01-01T10:01:30")
-            check.equal(duration, 1.5)
-            check.equal(feature_name, "Login Feature")
-            check.equal(scenario_name, "Valid login")
-            check.equal(tags, "login auth smoke positive")
-            check.equal(log_files, "[]")
-
-
-def test_flat_view_with_empty_tags():
-    with cucu_test_db_setup("run_456", "worker_789") as (
-        db_filepath,
-        config_mock,
-    ):
-        feature_mock = _create_feature_mock(
-            "feature_101",
-            "Empty Tags Feature",
-            "empty.feature",
-            "No tags",
-            [],
-        )
-        record_feature(feature_mock)
-
-        ctx_mock = _create_scenario_context_mock(
-            "scenario_202",
-            "feature_101",
-            "Empty tags scenario",
-            [],
-            "2024-01-01T10:01:30",
-        )
-        record_scenario(ctx_mock)
-
-        scenario_mock = _create_scenario_finish_mock(
-            "scenario_202",
-            "passed",
-            "2024-01-01T10:01:30",
-            "2024-01-01T10:02:00",
-        )
-        finish_scenario_record(scenario_mock)
-
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT tags, log_files FROM flat")
-            result = cursor.fetchone()
-            check.equal(result[0], " ")
-            check.equal(result[1], "[]")
-
-
-def test_flat_view_with_partial_tags():
-    with cucu_test_db_setup("run_789", "worker_101") as (
-        db_filepath,
-        config_mock,
-    ):
-        feature_mock1 = _create_feature_mock(
-            "feature_202",
-            "Feature Only Tags",
-            "partial.feature",
-            "Only feature tags",
-            ["feature-tag1", "feature-tag2"],
-        )
-        record_feature(feature_mock1)
-
-        ctx_mock1 = _create_scenario_context_mock(
-            "scenario_303",
-            "feature_202",
-            "No scenario tags",
-            [],
-            "2024-01-01T10:01:30",
-        )
-        record_scenario(ctx_mock1)
-
-        feature_mock2 = _create_feature_mock(
-            "feature_303",
-            "Scenario Only Tags",
-            "partial2.feature",
-            "Only scenario tags",
-            [],
-        )
-        record_feature(feature_mock2)
-
-        ctx_mock2 = _create_scenario_context_mock(
-            "scenario_404",
-            "feature_303",
-            "Has scenario tags",
-            ["scenario-tag1", "scenario-tag2"],
-            "2024-01-01T10:02:30",
-        )
-        record_scenario(ctx_mock2)
-
-        scenario_mock1 = _create_scenario_finish_mock(
-            "scenario_303",
-            "passed",
-            "2024-01-01T10:01:30",
-            "2024-01-01T10:02:00",
-        )
-        finish_scenario_record(scenario_mock1)
-
-        scenario_mock2 = _create_scenario_finish_mock(
-            "scenario_404",
-            "passed",
-            "2024-01-01T10:02:30",
-            "2024-01-01T10:03:00",
-        )
-        finish_scenario_record(scenario_mock2)
-
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT scenario_name, tags, log_files FROM flat ORDER BY scenario_name"
-            )
-            results = cursor.fetchall()
-
-            check.equal(len(results), 2)
-            check.equal(results[1][0], "No scenario tags")
-            check.equal(results[1][1], "feature-tag1 feature-tag2 ")
-            check.equal(results[1][2], "[]")
-            check.equal(results[0][0], "Has scenario tags")
-            check.equal(results[0][1], " scenario-tag1 scenario-tag2")
-            check.equal(results[0][2], "[]")
-
-
-@mock.patch("cucu.db.CONFIG")
-def test_consolidate_database_files(config_mock):
-    """Test database consolidation merges multiple worker databases into run.db"""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        results_dir = Path(temp_dir)
-
-        # Create main run.db
-        main_db_path = results_dir / "run.db"
-        create_database_file(main_db_path)
-
-        # Create worker database 1
-        worker1_db_path = results_dir / "worker_001.db"
-        create_database_file(worker1_db_path)
-
-        # Create worker database 2
-        worker2_db_path = results_dir / "worker_002.db"
-        create_database_file(worker2_db_path)
-
-        _setup_config_mock(
-            config_mock, "run_001", "worker_001", str(worker1_db_path)
-        )
-
-        with sqlite3.connect(worker1_db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "INSERT INTO cucu_run (cucu_run_id, full_arguments, date, start_at) VALUES (?, ?, ?, ?)",
-                (
-                    "run_001",
-                    '["test1"]',
-                    "2024-01-01T10:00:00",
-                    "2024-01-01T10:00:00",
-                ),
-            )
-            cursor.execute(
-                "INSERT INTO workers (worker_run_id, cucu_run_id, start_at) VALUES (?, ?, ?)",
-                ("worker_001", "run_001", "2024-01-01T10:00:00"),
-            )
-            cursor.execute(
-                "INSERT INTO features (feature_run_id, worker_run_id, name, filename, description, tags, start_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (
-                    "feature_001",
-                    "worker_001",
-                    "Test Feature 1",
-                    "test1.feature",
-                    "Description 1",
-                    "tag1",
-                    "2024-01-01T10:00:00",
-                ),
-            )
-            cursor.execute(
-                "INSERT INTO scenarios (scenario_run_id, feature_run_id, name, line_number, seq, tags, start_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (
-                    "scenario_001",
-                    "feature_001",
-                    "Test Scenario 1",
-                    10,
-                    1,
-                    "tag1",
-                    "2024-01-01T10:00:00",
-                ),
-            )
-            conn.commit()
-
-        _setup_config_mock(
-            config_mock, "run_001", "worker_002", str(worker2_db_path)
-        )
-
-        with sqlite3.connect(worker2_db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "INSERT INTO workers (worker_run_id, cucu_run_id, start_at) VALUES (?, ?, ?)",
-                ("worker_002", "run_001", "2024-01-01T10:01:00"),
-            )
-            cursor.execute(
-                "INSERT INTO features (feature_run_id, worker_run_id, name, filename, description, tags, start_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (
-                    "feature_002",
-                    "worker_002",
-                    "Test Feature 2",
-                    "test2.feature",
-                    "Description 2",
-                    "tag2",
-                    "2024-01-01T10:01:00",
-                ),
-            )
-            cursor.execute(
-                "INSERT INTO scenarios (scenario_run_id, feature_run_id, name, line_number, seq, tags, start_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (
-                    "scenario_002",
-                    "feature_002",
-                    "Test Scenario 2",
-                    20,
-                    1,
-                    "tag2",
-                    "2024-01-01T10:01:00",
-                ),
-            )
-            conn.commit()
-
-        assert worker1_db_path.exists()
-        assert worker2_db_path.exists()
-
-        consolidate_database_files(str(results_dir))
-
-        assert not worker1_db_path.exists()
-        assert not worker2_db_path.exists()
-
-        assert main_db_path.exists()
-
-        with sqlite3.connect(main_db_path) as conn:
-            cursor = conn.cursor()
-
-            cursor.execute("SELECT COUNT(*) FROM cucu_run")
-            assert cursor.fetchone()[0] == 1
-
-            cursor.execute("SELECT COUNT(*) FROM workers")
-            assert cursor.fetchone()[0] == 2
-
-            cursor.execute(
-                "SELECT worker_run_id FROM workers ORDER BY worker_run_id"
-            )
-            workers = cursor.fetchall()
-            assert workers[0][0] == "worker_001"
-            assert workers[1][0] == "worker_002"
-
-            cursor.execute("SELECT COUNT(*) FROM features")
-            assert cursor.fetchone()[0] == 2
-
-            cursor.execute("SELECT name FROM features ORDER BY name")
-            features = cursor.fetchall()
-            assert features[0][0] == "Test Feature 1"
-            assert features[1][0] == "Test Feature 2"
-
-            cursor.execute("SELECT COUNT(*) FROM scenarios")
-            assert cursor.fetchone()[0] == 2
-
-            cursor.execute("SELECT name FROM scenarios ORDER BY name")
-            scenarios = cursor.fetchall()
-            assert scenarios[0][0] == "Test Scenario 1"
-            assert scenarios[1][0] == "Test Scenario 2"
-
-
-@mock.patch("cucu.db.CONFIG")
-def test_consolidate_database_files_with_subdirectories(config_mock):
-    """Test database consolidation finds databases in subdirectories"""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        results_dir = Path(temp_dir)
-
-        # Create main run.db
-        main_db_path = results_dir / "run.db"
-        create_database_file(main_db_path)
-
-        sub_dir = results_dir / "worker_logs"
-        sub_dir.mkdir()
-        worker_db_path = sub_dir / "worker_001.db"
-        create_database_file(worker_db_path)
-
-        _setup_config_mock(
-            config_mock, "run_001", "worker_001", str(worker_db_path)
-        )
-
-        with sqlite3.connect(worker_db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "INSERT INTO workers (worker_run_id, cucu_run_id, start_at) VALUES (?, ?, ?)",
-                ("worker_001", "run_001", "2024-01-01T10:00:00"),
-            )
-            conn.commit()
-
-        consolidate_database_files(str(results_dir))
-
-        assert not worker_db_path.exists()
-
-        with sqlite3.connect(main_db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM workers")
-            assert cursor.fetchone()[0] == 1
-
-
-@mock.patch("cucu.db.CONFIG")
-def test_consolidate_database_files_empty_tables(config_mock):
-    """Test database consolidation handles empty tables gracefully"""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        results_dir = Path(temp_dir)
-
-        main_db_path = results_dir / "run.db"
-        create_database_file(main_db_path)
-
-        worker_db_path = results_dir / "worker_001.db"
-        create_database_file(worker_db_path)
-
-        consolidate_database_files(str(results_dir))
-
-        assert not worker_db_path.exists()
-
-        assert main_db_path.exists()
-        with sqlite3.connect(main_db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM workers")
-            assert cursor.fetchone()[0] == 0
-
-
-def test_step_screenshots_recording():
-    """Test that step screenshots are properly recorded in JSON format"""
-    with cucu_test_db_setup("run_123", "worker_456") as (
-        db_filepath,
-        config_mock,
-    ):
-        # Create feature and scenario
-        feature_mock = _create_feature_mock(
-            "feature_789",
-            "Screenshot Feature",
-            "screenshot.feature",
-            "Test screenshot functionality",
-            ["screenshot"],
-        )
-        record_feature(feature_mock)
-
-        ctx_mock = _create_scenario_context_mock(
-            "scenario_101",
-            "feature_789",
-            "Screenshot scenario",
-            ["test"],
-            "2024-01-01T10:01:30",
-        )
-        ctx_mock.step_index = 0  # Add step index
-        record_scenario(ctx_mock)
-
-        # Create a step mock with screenshots
-        step_mock = mock.MagicMock()
-        step_mock.step_run_id = "step_001"
-        step_mock.seq = 0
-        step_mock.keyword = "Given"
-        step_mock.name = "I take screenshots"
-        step_mock.text = None
-        step_mock.table = None
-        step_mock.location = "screenshot.feature:5"
-        step_mock.is_substep = False
-        step_mock.has_substeps = False
-        step_mock.start_at = "2024-01-01T10:01:30"
-        step_mock.section_level = None
-        step_mock.parent_seq = None
-
-        # Mock screenshots data
-        step_mock.screenshots = [
-            {
-                "step_name": "I take screenshots",
-                "label": "first screenshot",
-                "location": "(100,200)",
-                "size": "(300,400)",
-                "filepath": "/path/to/screenshot1.png",
-            },
-            {
-                "step_name": "I take screenshots",
-                "label": "second screenshot",
-                "location": "(150,250)",
-                "size": "(400,500)",
-                "filepath": "/path/to/screenshot2.png",
-            },
-        ]
-
-        # Record the step
-        start_step_record(ctx_mock, step_mock)
-
-        # Finish the step
-        step_mock.status.name = "passed"
-        step_mock.end_at = "2024-01-01T10:01:31"
-        step_mock.debug_output = ""
-        step_mock.browser_logs = ""
-        step_mock.browser_info = "{}"
-
-        finish_step_record(step_mock, 1.0)
-
-        # Verify screenshots are stored as JSON
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT screenshots FROM steps WHERE step_run_id = ?",
-                ("step_001",),
-            )
-            result = cursor.fetchone()
-
-            check.is_true(result is not None)
-            screenshots_json = result[0]
-            check.is_not_none(screenshots_json)
-
-            # Parse and verify the JSON
-            import json
-
-            screenshots = json.loads(screenshots_json)
-            check.equal(len(screenshots), 2)
-
-            # Verify first screenshot
-            check.equal(screenshots[0]["step_name"], "I take screenshots")
-            check.equal(screenshots[0]["label"], "first screenshot")
-            check.equal(screenshots[0]["location"], "(100,200)")
-            check.equal(screenshots[0]["size"], "(300,400)")
-            check.equal(screenshots[0]["filepath"], "/path/to/screenshot1.png")
-
-            # Verify second screenshot
-            check.equal(screenshots[1]["step_name"], "I take screenshots")
-            check.equal(screenshots[1]["label"], "second screenshot")
-            check.equal(screenshots[1]["location"], "(150,250)")
-            check.equal(screenshots[1]["size"], "(400,500)")
-            check.equal(screenshots[1]["filepath"], "/path/to/screenshot2.png")
-
-
-def test_step_no_screenshots_recording():
-    """Test that steps without screenshots have empty JSON array"""
-    with cucu_test_db_setup("run_123", "worker_456") as (
-        db_filepath,
-        config_mock,
-    ):
-        # Create feature and scenario
-        feature_mock = _create_feature_mock(
-            "feature_789",
-            "No Screenshot Feature",
-            "noscreenshot.feature",
-            "Test no screenshot functionality",
-            ["test"],
-        )
-        record_feature(feature_mock)
-
-        ctx_mock = _create_scenario_context_mock(
-            "scenario_101",
-            "feature_789",
-            "No screenshot scenario",
-            ["test"],
-            "2024-01-01T10:01:30",
-        )
-        ctx_mock.step_index = 0  # Add step index
-        record_scenario(ctx_mock)
-
-        # Create a step mock without screenshots
-        step_mock = mock.MagicMock()
-        step_mock.step_run_id = "step_002"
-        step_mock.seq = 0
-        step_mock.keyword = "Given"
-        step_mock.name = "I do not take screenshots"
-        step_mock.text = None
-        step_mock.table = None
-        step_mock.location = "noscreenshot.feature:5"
-        step_mock.is_substep = False
-        step_mock.has_substeps = False
-        step_mock.start_at = "2024-01-01T10:01:30"
-        step_mock.section_level = None
-        step_mock.parent_seq = None
-
-        # No screenshots attribute
-        if hasattr(step_mock, "screenshots"):
-            delattr(step_mock, "screenshots")
-
-        # Record the step
-        start_step_record(ctx_mock, step_mock)
-
-        # Finish the step
-        step_mock.status.name = "passed"
-        step_mock.end_at = "2024-01-01T10:01:31"
-        step_mock.debug_output = ""
-        step_mock.browser_logs = ""
-        step_mock.browser_info = "{}"
-
-        finish_step_record(step_mock, 1.0)
-
-        # Verify screenshots is empty JSON array
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT screenshots FROM steps WHERE step_run_id = ?",
-                ("step_002",),
-            )
-            result = cursor.fetchone()
-
-            check.is_true(result is not None)
-            screenshots_json = result[0]
-            check.equal(screenshots_json, "[]")
-
-
-def test_step_screenshots_json_column():
-    with cucu_test_db_setup("run_123", "worker_456") as (
-        db_filepath,
-        config_mock,
-    ):
-        # Create feature and scenario
-        feature_mock = _create_feature_mock(
-            "feature_789",
-            "Login Feature",
-            "login.feature",
-            "Test login functionality",
-            ["login", "auth"],
-        )
-        record_feature(feature_mock)
-
-        ctx_mock = _create_scenario_context_mock(
-            "scenario_101",
-            "feature_789",
-            "Valid login",
-            ["smoke", "positive"],
-            "2024-01-01T10:01:30",
-        )
-        record_scenario(ctx_mock)
-
-        # Create step mock with screenshots
-        step_mock = mock.MagicMock()
-        step_mock.step_run_id = "step_001"
-        step_mock.seq = 0
-        step_mock.keyword = "Given"
-        step_mock.name = "I open a browser"
-        step_mock.text = None
-        step_mock.table = None
-        step_mock.location = "login.feature:5"
-        step_mock.is_substep = False
-        step_mock.has_substeps = False
-        step_mock.start_at = "2024-01-01T10:01:30"
-        step_mock.status.name = "passed"
-        step_mock.end_at = "2024-01-01T10:01:31"
-        step_mock.debug_output = "Debug info"
-        step_mock.browser_logs = "[]"
-        step_mock.browser_info = "{}"
-        step_mock.section_level = None
-        step_mock.parent_seq = None
-
-        # Add screenshots data
-        step_mock.screenshots = [
-            {
-                "step_name": "I open a browser",
-                "label": "screenshot 1",
-                "location": "(100,200)",
-                "size": "(800,600)",
-                "filepath": "/path/to/screenshot1.png",
-            },
-            {
-                "step_name": "I open a browser",
-                "label": "screenshot 2",
-                "location": "(150,250)",
-                "size": "(1024,768)",
-                "filepath": "/path/to/screenshot2.png",
-            },
-        ]
-
-        ctx_mock.step_index = 0
-        start_step_record(ctx_mock, step_mock)
-        finish_step_record(step_mock, 1.0)
-
-        # Verify screenshots JSON was saved correctly
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT screenshots FROM steps WHERE step_run_id = ?",
-                ("step_001",),
-            )
-            result = cursor.fetchone()
-
-            check.is_true(result is not None)
-            screenshots_json = result[0]
-
-            import json
-
-            screenshots = json.loads(screenshots_json)
-            check.equal(len(screenshots), 2)
-
-            check.equal(screenshots[0]["step_name"], "I open a browser")
-            check.equal(screenshots[0]["label"], "screenshot 1")
-            check.equal(screenshots[0]["location"], "(100,200)")
-            check.equal(screenshots[0]["size"], "(800,600)")
-            check.equal(screenshots[0]["filepath"], "/path/to/screenshot1.png")
-
-            check.equal(screenshots[1]["step_name"], "I open a browser")
-            check.equal(screenshots[1]["label"], "screenshot 2")
-            check.equal(screenshots[1]["location"], "(150,250)")
-            check.equal(screenshots[1]["size"], "(1024,768)")
-            check.equal(screenshots[1]["filepath"], "/path/to/screenshot2.png")
-
-
-def test_step_without_screenshots():
-    with cucu_test_db_setup("run_123", "worker_456") as (
-        db_filepath,
-        config_mock,
-    ):
-        # Create feature and scenario
-        feature_mock = _create_feature_mock(
-            "feature_789",
-            "Login Feature",
-            "login.feature",
-            "Test login functionality",
-            ["login", "auth"],
-        )
-        record_feature(feature_mock)
-
-        ctx_mock = _create_scenario_context_mock(
-            "scenario_101",
-            "feature_789",
-            "Valid login",
-            ["smoke", "positive"],
-            "2024-01-01T10:01:30",
-        )
-        record_scenario(ctx_mock)
-
-        # Create step mock without screenshots
-        step_mock = mock.MagicMock()
-        step_mock.step_run_id = "step_002"
-        step_mock.seq = 1
-        step_mock.keyword = "When"
-        step_mock.name = "I click submit"
-        step_mock.text = None
-        step_mock.table = None
-        step_mock.location = "login.feature:6"
-        step_mock.is_substep = False
-        step_mock.has_substeps = False
-        step_mock.start_at = "2024-01-01T10:01:31"
-        step_mock.status.name = "passed"
-        step_mock.end_at = "2024-01-01T10:01:32"
-        step_mock.debug_output = "Debug info"
-        step_mock.browser_logs = "[]"
-        step_mock.browser_info = "{}"
-        step_mock.section_level = None
-        step_mock.parent_seq = None
-
-        # No screenshots attribute
-        del step_mock.screenshots
-
-        ctx_mock.step_index = 1
-        start_step_record(ctx_mock, step_mock)
-        finish_step_record(step_mock, 1.0)
-
-        # Verify empty screenshots JSON was saved
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT screenshots FROM steps WHERE step_run_id = ?",
-                ("step_002",),
-            )
-            result = cursor.fetchone()
-
-            check.is_true(result is not None)
-            screenshots_json = result[0]
-            check.equal(screenshots_json, "[]")
-
-
-def test_feature_custom_data_recording():
-    with cucu_test_db_setup(
-        "run_123", "worker_456", db_filename="test_feature_custom_data.db"
-    ) as (db_filepath, config_mock):
-        # Test feature with complex custom_data
-        feature_mock = _create_feature_mock(
-            "feature_custom_001",
-            "Feature with Custom Data",
-            "custom.feature",
-            "Testing custom data storage",
-            ["custom", "test"],
-        )
-        feature_mock.custom_data = {
-            "environment": "staging",
-            "priority": "high",
-            "metadata": {
-                "created_by": "test_suite",
-                "version": "1.2.3",
-                "tags": ["performance", "regression"],
-            },
-            "execution_context": {
-                "parallel_workers": 4,
-                "timeout_seconds": 300,
-            },
+@pytest.fixture
+def temp_db():
+    """Create a temporary database for testing."""
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
+        test_db = SqliteDatabase(tmp.name)
+        original_db = db.db
+
+        # Switch to test database
+        db.db = test_db
+
+        # Set up models to use test database
+        for model in [cucu_run, worker, feature, scenario, step]:
+            model._meta.database = test_db
+
+        test_db.connect()
+        test_db.create_tables([cucu_run, worker, feature, scenario, step])
+
+        yield test_db
+
+        test_db.close()
+        # Restore original database
+        db.db = original_db
+        for model in [cucu_run, worker, feature, scenario, step]:
+            model._meta.database = original_db
+
+        Path(tmp.name).unlink()
+
+
+@pytest.fixture
+def sample_records_combined(temp_db):
+    """Create sample records for testing database operations."""
+    cucu_run_obj = cucu_run.create(
+        cucu_run_id="test_run",
+        full_arguments=json.dumps(["arg1", "arg2"]),
+        date="2024-01-01T10:00:00",
+        start_at="2024-01-01T10:00:00",
+    )
+
+    worker_obj = worker.create(
+        worker_run_id="test_worker",
+        cucu_run_id="test_run",
+        start_at="2024-01-01T10:00:00",
+        custom_data=json.dumps({"key": "value", "number": 123}),
+    )
+
+    feature_obj = feature.create(
+        feature_run_id="test_feature",
+        worker_run_id="test_worker",
+        name="Test Feature",
+        filename="test.feature",
+        description="Test description",
+        tags="tag1 tag2 tag3",
+        start_at="2024-01-01T10:00:00",
+    )
+
+    scenario_obj = scenario.create(
+        scenario_run_id="test_scenario",
+        feature_run_id="test_feature",
+        name="Test Scenario",
+        line_number=10,
+        seq=1,
+        tags="smoke critical",
+        start_at="2024-01-01T10:00:00",
+    )
+
+    step_obj = step.create(
+        step_run_id="test_step",
+        scenario_run_id="test_scenario",
+        seq=1,
+        keyword="Given",
+        name="test step",
+        location="test.feature:10",
+        is_substep=False,
+        has_substeps=False,
+        start_at="2024-01-01T10:00:00",
+    )
+
+    cucu_run.create(
+        cucu_run_id="consistency_test",
+        full_arguments="[]",
+        date="2024-01-01T10:00:00",
+        start_at="2024-01-01T10:00:00",
+    )
+
+    worker_consistency = worker.create(
+        worker_run_id="worker_consistency",
+        cucu_run_id="consistency_test",
+        start_at="2024-01-01T10:00:00",
+        end_at=None,
+        custom_data=None,
+    )
+
+    feature_consistency = feature.create(
+        feature_run_id="feature_consistency",
+        worker_run_id="worker_consistency",
+        name="Consistency Feature",
+        filename="consistency.feature",
+        description="Test description",
+        tags="consistency",
+        start_at="2024-01-01T10:00:00",
+    )
+
+    scenario_consistency = scenario.create(
+        scenario_run_id="scenario_consistency",
+        feature_run_id="feature_consistency",
+        name="Consistency Scenario",
+        line_number=10,
+        seq=1,
+        tags="consistency",
+        start_at="2024-01-01T10:00:00",
+    )
+
+    step_consistency = step.create(
+        step_run_id="step_consistency",
+        scenario_run_id="scenario_consistency",
+        seq=1,
+        keyword="Given",
+        name="consistency step",
+        location="consistency.feature:10",
+        is_substep=False,
+        has_substeps=False,
+        start_at="2024-01-01T10:00:00",
+    )
+
+    return {
+        "cucu_run": cucu_run_obj,
+        "worker": worker_obj,
+        "feature": feature_obj,
+        "scenario": scenario_obj,
+        "step": step_obj,
+        "worker_consistency": worker_consistency,
+        "feature_consistency": feature_consistency,
+        "scenario_consistency": scenario_consistency,
+        "step_consistency": step_consistency,
+    }
+
+
+def test_json_serialization_and_tags_formatting(sample_records_combined):
+    retrieved_worker = worker.get(worker.worker_run_id == "test_worker")
+    expected_data = {"key": "value", "number": 123}
+    check.equal(json.loads(retrieved_worker.custom_data), expected_data)
+
+    check.equal(sample_records_combined["feature"].tags, "tag1 tag2 tag3")
+    check.equal(sample_records_combined["scenario"].tags, "smoke critical")
+
+
+def test_datetime_iso_format(temp_db):
+    iso_datetime = "2024-01-01T10:30:45"
+
+    cucu_run_obj = cucu_run.create(
+        cucu_run_id="iso_test",
+        full_arguments="[]",
+        date=iso_datetime,
+        start_at=iso_datetime,
+    )
+
+    check.equal(cucu_run_obj.start_at, iso_datetime)
+    check.equal(cucu_run_obj.date, iso_datetime)
+
+
+def test_complex_data_serialization(sample_records_combined):
+    table_data = [
+        ["Header1", "Header2"],
+        ["Row1Col1", "Row1Col2"],
+        ["Row2Col1", "Row2Col2"],
+    ]
+
+    screenshots_data = [
+        {
+            "step_name": "test step",
+            "label": "before",
+            "location": "test.feature:10",
+            "size": {"width": 1920, "height": 1080},
+            "filepath": "/path/to/screenshot.png",
         }
+    ]
 
-        record_feature(feature_mock)
+    step.update(
+        table_data=json.dumps(table_data),
+        screenshots=json.dumps(screenshots_data),
+    ).where(step.step_run_id == "test_step").execute()
 
-        # Import here to avoid circular imports in test setup
-        from cucu.db import finish_feature_record
-
-        finish_feature_record(feature_mock)
-
-        # Verify custom_data was stored correctly
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT name, custom_data FROM features WHERE feature_run_id = ?",
-                ("feature_custom_001",),
-            )
-            result = cursor.fetchone()
-
-            check.is_true(result is not None)
-            feature_name, custom_data_json = result
-            check.equal(feature_name, "Feature with Custom Data")
-            check.is_not_none(custom_data_json)
-
-            # Parse and verify the JSON content
-            import json
-
-            custom_data = json.loads(custom_data_json)
-            check.equal(custom_data["environment"], "staging")
-            check.equal(custom_data["priority"], "high")
-            check.equal(custom_data["metadata"]["created_by"], "test_suite")
-            check.equal(custom_data["metadata"]["version"], "1.2.3")
-            check.equal(
-                custom_data["execution_context"]["parallel_workers"], 4
-            )
+    retrieved = step.get(step.step_run_id == "test_step")
+    check.equal(json.loads(retrieved.table_data), table_data)
+    check.equal(json.loads(retrieved.screenshots), screenshots_data)
 
 
-def test_feature_empty_custom_data():
-    with cucu_test_db_setup(
-        "run_123",
-        "worker_456",
-        db_filename="test_feature_empty_custom_data.db",
-    ) as (db_filepath, config_mock):
-        # Test feature with empty custom_data
-        feature_mock = _create_feature_mock(
-            "feature_empty_001",
-            "Feature with Empty Custom Data",
-            "empty.feature",
-            "Testing empty custom data",
-            ["empty"],
+def test_primary_key_uniqueness(temp_db):
+    cucu_run.create(
+        cucu_run_id="duplicate_test",
+        full_arguments="[]",
+        date="2024-01-01T10:00:00",
+        start_at="2024-01-01T10:00:00",
+    )
+
+    with pytest.raises(IntegrityError):
+        cucu_run.create(
+            cucu_run_id="duplicate_test",
+            full_arguments="[]",
+            date="2024-01-01T10:00:00",
+            start_at="2024-01-01T10:00:00",
         )
-        feature_mock.custom_data = {}
 
-        record_feature(feature_mock)
 
-        from cucu.db import finish_feature_record
-
-        finish_feature_record(feature_mock)
-
-        # Verify custom_data is NULL
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT custom_data FROM features WHERE feature_run_id = ?",
-                ("feature_empty_001",),
-            )
-            result = cursor.fetchone()
-
-            check.is_true(result is not None)
-            custom_data_json = result[0]
-            check.equal(custom_data_json, "{}")
-
-
-def test_scenario_custom_data_recording():
-    with cucu_test_db_setup(
-        "run_123", "worker_456", db_filename="test_scenario_custom_data.db"
-    ) as (db_filepath, config_mock):
-        # Create feature first
-        feature_mock = _create_feature_mock(
-            "feature_scenario_001",
-            "Feature for Scenario Custom Data",
-            "scenario_custom.feature",
-            "Testing scenario custom data",
-            ["scenario", "custom"],
-        )
-        record_feature(feature_mock)
-
-        # Create scenario context
-        ctx_mock = _create_scenario_context_mock(
-            "scenario_custom_001",
-            "feature_scenario_001",
-            "Scenario with Custom Data",
-            ["custom", "data"],
-            "2024-01-01T10:00:00",
-            line_number=10,
-        )
-        record_scenario(ctx_mock)
-
-        # Create scenario finish mock with complex custom_data
-        scenario_mock = _create_scenario_finish_mock(
-            "scenario_custom_001",
-            "passed",
-            "2024-01-01T10:00:00",
-            "2024-01-01T10:01:30",
-        )
-        scenario_mock.custom_data = {
-            "test_data": {
-                "input_values": ["user123", "password456"],
-                "expected_outcome": "successful_login",
-                "retry_count": 0,
-            },
-            "performance_metrics": {
-                "response_time_ms": 1250,
-                "memory_usage_mb": 45.2,
-                "cpu_usage_percent": 15.7,
-            },
-            "browser_info": {
-                "user_agent": "Chrome/91.0",
-                "viewport": {"width": 1920, "height": 1080},
-                "cookies_enabled": True,
-            },
-            "execution_metadata": {
-                "worker_id": "worker_001",
-                "attempt_number": 1,
-                "environment_variables": {
-                    "TEST_ENV": "staging",
-                    "DEBUG_MODE": False,
-                },
-            },
-        }
-
-        finish_scenario_record(scenario_mock)
-
-        # Verify custom_data was stored correctly
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT name, custom_data FROM scenarios WHERE scenario_run_id = ?",
-                ("scenario_custom_001",),
-            )
-            result = cursor.fetchone()
-
-            check.is_true(result is not None)
-            scenario_name, custom_data_json = result
-            check.equal(scenario_name, "Scenario with Custom Data")
-            check.is_not_none(custom_data_json)
-
-            # Parse and verify the JSON content
-            import json
-
-            custom_data = json.loads(custom_data_json)
-            check.equal(
-                custom_data["test_data"]["expected_outcome"],
-                "successful_login",
-            )
-            check.equal(
-                custom_data["performance_metrics"]["response_time_ms"], 1250
-            )
-            check.equal(custom_data["browser_info"]["viewport"]["width"], 1920)
-            check.equal(
-                custom_data["execution_metadata"]["worker_id"], "worker_001"
-            )
-            check.equal(
-                custom_data["execution_metadata"]["environment_variables"][
-                    "TEST_ENV"
-                ],
-                "staging",
-            )
-
-
-def test_scenario_empty_custom_data():
-    with cucu_test_db_setup(
-        "run_123",
-        "worker_456",
-        db_filename="test_scenario_empty_custom_data.db",
-    ) as (db_filepath, config_mock):
-        # Create feature first
-        feature_mock = _create_feature_mock(
-            "feature_empty_scenario_001",
-            "Feature for Empty Scenario Custom Data",
-            "empty_scenario.feature",
-            "Testing empty scenario custom data",
-            ["empty"],
-        )
-        record_feature(feature_mock)
-
-        # Create scenario context
-        ctx_mock = _create_scenario_context_mock(
-            "scenario_empty_001",
-            "feature_empty_scenario_001",
-            "Scenario with Empty Custom Data",
-            ["empty"],
-            "2024-01-01T10:00:00",
-            line_number=5,
-        )
-        record_scenario(ctx_mock)
-
-        # Create scenario finish mock with empty custom_data
-        scenario_mock = _create_scenario_finish_mock(
-            "scenario_empty_001",
-            "passed",
-            "2024-01-01T10:00:00",
-            "2024-01-01T10:00:30",
-        )
-        # custom_data already set to {} in _create_scenario_finish_mock
-
-        finish_scenario_record(scenario_mock)
-
-        # Verify custom_data is NULL
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT custom_data FROM scenarios WHERE scenario_run_id = ?",
-                ("scenario_empty_001",),
-            )
-            result = cursor.fetchone()
-
-            check.is_true(result is not None)
-            custom_data_json = result[0]
-            check.equal(custom_data_json, "{}")
-
-
-def test_custom_data_with_various_data_types():
-    with cucu_test_db_setup(
-        "run_123", "worker_456", db_filename="test_custom_data_types.db"
-    ) as (db_filepath, config_mock):
-        # Test feature with various data types
-        feature_mock = _create_feature_mock(
-            "feature_types_001",
-            "Feature with Various Data Types",
-            "types.feature",
-            "Testing various data types",
-            ["types"],
-        )
-        feature_mock.custom_data = {
-            "string_value": "test_string",
-            "integer_value": 42,
-            "float_value": 3.14159,
-            "boolean_true": True,
-            "boolean_false": False,
-            "null_value": None,
-            "list_value": [1, "two", 3.0, True, None],
-            "nested_object": {
-                "inner_string": "nested",
-                "inner_number": 123,
-                "inner_list": ["a", "b", "c"],
-            },
-            "empty_list": [],
-            "empty_object": {},
-        }
-
-        record_feature(feature_mock)
-        from cucu.db import finish_feature_record
-
-        finish_feature_record(feature_mock)
-
-        # Create scenario with similar data types
-        ctx_mock = _create_scenario_context_mock(
-            "scenario_types_001",
-            "feature_types_001",
-            "Scenario with Various Data Types",
-            ["types"],
-            "2024-01-01T10:00:00",
-        )
-        record_scenario(ctx_mock)
-
-        scenario_mock = _create_scenario_finish_mock(
-            "scenario_types_001",
-            "passed",
-            "2024-01-01T10:00:00",
-            "2024-01-01T10:00:15",
-        )
-        scenario_mock.custom_data = {
-            "unicode_string": "Hello 世界 🌍",
-            "large_number": 9223372036854775807,  # Max int64
-            "scientific_notation": 1.23e-10,
-            "special_chars": "!@#$%^&*()_+-=[]{}|;:,.<>?",
-            "multiline_string": "Line 1\nLine 2\nLine 3",
-            "deeply_nested": {"level1": {"level2": {"level3": "deep_value"}}},
-        }
-
-        finish_scenario_record(scenario_mock)
-
-        # Verify both feature and scenario data
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-
-            # Check feature custom_data
-            cursor.execute(
-                "SELECT custom_data FROM features WHERE feature_run_id = ?",
-                ("feature_types_001",),
-            )
-            feature_result = cursor.fetchone()
-            check.is_true(feature_result is not None)
-
-            import json
-
-            feature_data = json.loads(feature_result[0])
-            check.equal(feature_data["string_value"], "test_string")
-            check.equal(feature_data["integer_value"], 42)
-            check.equal(feature_data["float_value"], 3.14159)
-            check.is_true(feature_data["boolean_true"])
-            check.is_false(feature_data["boolean_false"])
-            check.is_none(feature_data["null_value"])
-            check.equal(
-                feature_data["list_value"],
-                [
-                    1,
-                    "two",
-                    3.0,
-                    True,
-                    None,
-                ],
-            )
-            check.equal(
-                feature_data["nested_object"]["inner_string"], "nested"
-            )
-
-            # Check scenario custom_data
-            cursor.execute(
-                "SELECT custom_data FROM scenarios WHERE scenario_run_id = ?",
-                ("scenario_types_001",),
-            )
-            scenario_result = cursor.fetchone()
-            check.is_true(scenario_result is not None)
-
-            scenario_data = json.loads(scenario_result[0])
-            check.equal(scenario_data["unicode_string"], "Hello 世界 🌍")
-            check.equal(scenario_data["large_number"], 9223372036854775807)
-            check.equal(scenario_data["scientific_notation"], 1.23e-10)
-            check.equal(
-                scenario_data["multiline_string"], "Line 1\nLine 2\nLine 3"
-            )
-            check.equal(
-                scenario_data["deeply_nested"]["level1"]["level2"]["level3"],
-                "deep_value",
-            )
-
-
-def test_custom_data_in_consolidated_database():
-    with tempfile.TemporaryDirectory() as temp_dir:
-        results_path = Path(temp_dir)
-
-        # Create multiple database files with custom_data
-        db_files = []
-        for i in range(3):
-            with mock.patch("cucu.db.CONFIG") as config_mock:
-                db_filepath = results_path / f"run_run_{i}_worker_{i}.db"
-                db_files.append(db_filepath)
-                _setup_config_mock(
-                    config_mock, f"run_{i}", f"worker_{i}", str(db_filepath)
-                )
-
-                create_database_file(str(db_filepath))
-                record_cucu_run()
-
-                # Create feature with custom_data
-                feature_mock = _create_feature_mock(
-                    f"feature_{i}",
-                    f"Feature {i}",
-                    f"feature_{i}.feature",
-                    f"Description {i}",
-                    [f"tag{i}"],
-                )
-                feature_mock.custom_data = {
-                    "feature_index": i,
-                    "feature_name": f"Feature {i}",
-                    "batch_info": {
-                        "batch_id": f"batch_{i}",
-                        "created_at": f"2024-01-0{i + 1}",
-                    },
-                }
-                record_feature(feature_mock)
-
-                # Create scenario with custom_data
-                ctx_mock = _create_scenario_context_mock(
-                    f"scenario_{i}",
-                    f"feature_{i}",
-                    f"Scenario {i}",
-                    [f"scenario_tag{i}"],
-                    f"2024-01-0{i + 1}T10:00:00",
-                )
-                record_scenario(ctx_mock)
-
-                scenario_mock = _create_scenario_finish_mock(
-                    f"scenario_{i}",
-                    "passed",
-                    f"2024-01-0{i + 1}T10:00:00",
-                    f"2024-01-0{i + 1}T10:01:00",
-                )
-                scenario_mock.custom_data = {
-                    "scenario_index": i,
-                    "scenario_name": f"Scenario {i}",
-                    "execution_info": {
-                        "worker": f"worker_{i}",
-                        "duration_ms": (i + 1) * 1000,
-                    },
-                }
-
-                finish_scenario_record(scenario_mock)
-
-                from cucu.db import finish_feature_record
-
-                finish_feature_record(feature_mock)
-
-        # Create target database first
-        consolidated_db = results_path / "run.db"
-        create_database_file(str(consolidated_db))
-
-        # Consolidate databases
-        consolidate_database_files(str(results_path))
-
-        # Verify consolidated data
-        check.is_true(consolidated_db.exists())
-
-        with sqlite3.connect(str(consolidated_db)) as conn:
-            cursor = conn.cursor()
-
-            # Check features custom_data
-            cursor.execute(
-                "SELECT feature_run_id, custom_data FROM features ORDER BY feature_run_id"
-            )
-            feature_results = cursor.fetchall()
-            check.equal(len(feature_results), 3)
-
-            import json
-
-            for i, (feature_id, custom_data_json) in enumerate(
-                feature_results
-            ):
-                check.equal(feature_id, f"feature_{i}")
-                check.is_not_none(custom_data_json)
-                custom_data = json.loads(custom_data_json)
-                check.equal(custom_data["feature_index"], i)
-                check.equal(custom_data["feature_name"], f"Feature {i}")
-                check.equal(
-                    custom_data["batch_info"]["batch_id"], f"batch_{i}"
-                )
-
-            # Check scenarios custom_data
-            cursor.execute(
-                "SELECT scenario_run_id, custom_data FROM scenarios ORDER BY scenario_run_id"
-            )
-            scenario_results = cursor.fetchall()
-            check.equal(len(scenario_results), 3)
-
-            for i, (scenario_id, custom_data_json) in enumerate(
-                scenario_results
-            ):
-                check.equal(scenario_id, f"scenario_{i}")
-                check.is_not_none(custom_data_json)
-                custom_data = json.loads(custom_data_json)
-                check.equal(custom_data["scenario_index"], i)
-                check.equal(custom_data["scenario_name"], f"Scenario {i}")
-                check.equal(
-                    custom_data["execution_info"]["worker"], f"worker_{i}"
-                )
-
-        # Verify original files were cleaned up
-        for db_file in db_files:
-            check.is_false(db_file.exists())
-
-
-def test_step_text_and_table_recording():
-    with cucu_test_db_setup(
-        "run_123", "worker_456", db_filename="test_step_text_table.db"
-    ) as (db_filepath, config_mock):
-        # Create feature and scenario
-        feature_mock = _create_feature_mock(
-            "feature_text",
-            "Text Feature",
-            "text.feature",
-            "Test text and table functionality",
-            ["text", "table"],
-        )
-        record_feature(feature_mock)
-
-        ctx_mock = _create_scenario_context_mock(
-            "scenario_text",
-            "feature_text",
-            "Text scenario",
-            ["test"],
-            "2024-01-01T10:00:00",
-        )
-        ctx_mock.step_index = 0
-        record_scenario(ctx_mock)
-
-        # Test step with text content
-        step_with_text = _create_step_mock(
-            "step_with_text",
-            "Given",
-            "I have a step with text",
-            "text.feature:10",
-            "2024-01-01T10:00:00",
-            has_substeps=False,
-            is_substep=False,
-            seq=0,
-            text="This is some text content\nWith multiple lines\nAnd more text",
-        )
-        start_step_record(ctx_mock, step_with_text)
-
-        # Test step with table data
-        table_mock = mock.MagicMock()
-        table_mock.headings = ["header1", "header2", "header3"]
-        table_mock.rows = [
-            mock.MagicMock(cells=["value1", "value2", "value3"]),
-            mock.MagicMock(cells=["data1", "data2", "data3"]),
-        ]
-
-        ctx_mock.step_index = 1
-        step_with_table = _create_step_mock(
-            "step_with_table",
-            "When",
-            "I have a step with table",
-            "text.feature:15",
-            "2024-01-01T10:01:00",
-            seq=1,
-            has_substeps=True,
-            is_substep=False,
-            table=table_mock,
-        )
-        start_step_record(ctx_mock, step_with_table)
-
-        # Test substep
-        ctx_mock.step_index = 2
-        substep = _create_step_mock(
-            "substep_001",
-            "And",
-            "I am a substep",
-            "text.feature:20",
-            "2024-01-01T10:02:00",
-            has_substeps=False,
-            is_substep=True,
-            seq=2,
-        )
-        start_step_record(ctx_mock, substep)
-
-        # Verify the data was recorded correctly
-        with sqlite3.connect(db_filepath) as conn:
-            cursor = conn.cursor()
-
-            # Check step with text
-            cursor.execute(
-                "SELECT name, text, table_data, is_substep, has_substeps FROM steps WHERE step_run_id = ?",
-                ("step_with_text",),
-            )
-            result = cursor.fetchone()
-            check.is_true(result is not None)
-            name, text, table_data, is_substep, has_substeps = result
-            check.equal(name, "I have a step with text")
-            check.equal(
-                text,
-                "This is some text content\nWith multiple lines\nAnd more text",
-            )
-            check.is_none(table_data)
-            check.equal(is_substep, 0)  # SQLite stores False as 0
-            check.equal(has_substeps, 0)  # SQLite stores False as 0
-
-            # Check step with table
-            cursor.execute(
-                "SELECT name, text, table_data, is_substep, has_substeps FROM steps WHERE step_run_id = ?",
-                ("step_with_table",),
-            )
-            result = cursor.fetchone()
-            check.is_true(result is not None)
-            name, text, table_data, is_substep, has_substeps = result
-            check.equal(name, "I have a step with table")
-            check.is_none(text)
-            check.is_not_none(table_data)
-
-            import json
-
-            table_data_parsed = json.loads(table_data)
-            check.equal(
-                table_data_parsed,
-                [
-                    ["header1", "header2", "header3"],
-                    ["value1", "value2", "value3"],
-                    ["data1", "data2", "data3"],
-                ],
-            )
-            check.equal(is_substep, 0)  # SQLite stores False as 0
-            check.is_true(has_substeps)  # SQLite stores True as 1
-
-            # Check substep
-            cursor.execute(
-                "SELECT name, text, table_data, is_substep, has_substeps FROM steps WHERE step_run_id = ?",
-                ("substep_001",),
-            )
-            result = cursor.fetchone()
-            check.is_true(result is not None)
-            name, text, table_data, is_substep, has_substeps = result
-            check.equal(name, "I am a substep")
-            check.is_none(text)
-            check.is_none(table_data)
-            check.is_true(is_substep)  # SQLite stores True as 1
-            check.equal(has_substeps, 0)  # SQLite stores False as 0
+def test_relationships_and_record_completion(sample_records_combined):
+    check.equal(sample_records_combined["worker"].cucu_run_id, "test_run")
+    check.equal(
+        sample_records_combined["feature"].worker_run_id, "test_worker"
+    )
+    check.equal(
+        sample_records_combined["scenario"].feature_run_id, "test_feature"
+    )
+    check.equal(
+        sample_records_combined["step"].scenario_run_id, "test_scenario"
+    )
+
+    check.is_none(sample_records_combined["scenario"].status)
+    check.is_none(sample_records_combined["scenario"].end_at)
+    check.is_none(sample_records_combined["step"].status)
+    check.is_none(sample_records_combined["step"].end_at)
+
+    scenario.update(
+        status="passed", duration=1.5, end_at="2024-01-01T10:00:01.5"
+    ).where(scenario.scenario_run_id == "test_scenario").execute()
+
+    step.update(
+        status="passed", duration=0.5, end_at="2024-01-01T10:00:00.5"
+    ).where(step.step_run_id == "test_step").execute()
+
+    updated_scenario = scenario.get(
+        scenario.scenario_run_id == "test_scenario"
+    )
+    updated_step = step.get(step.step_run_id == "test_step")
+
+    check.equal(updated_scenario.status, "passed")
+    check.equal(updated_scenario.duration, 1.5)
+    check.equal(updated_scenario.end_at, "2024-01-01T10:00:01.5")
+    check.equal(updated_step.status, "passed")
+    check.equal(updated_step.duration, 0.5)
+    check.equal(updated_step.end_at, "2024-01-01T10:00:00.5")
+
+
+def test_data_consistency_and_null_handling(sample_records_combined):
+    check.equal(
+        cucu_run.select()
+        .where(cucu_run.cucu_run_id == "consistency_test")
+        .count(),
+        1,
+    )
+    check.equal(
+        worker.select()
+        .where(worker.cucu_run_id == "consistency_test")
+        .count(),
+        1,
+    )
+    check.equal(
+        feature.select()
+        .where(feature.worker_run_id == "worker_consistency")
+        .count(),
+        1,
+    )
+    check.equal(
+        scenario.select()
+        .where(scenario.feature_run_id == "feature_consistency")
+        .count(),
+        1,
+    )
+    check.equal(
+        step.select()
+        .where(step.scenario_run_id == "scenario_consistency")
+        .count(),
+        1,
+    )
+
+    retrieved_worker = worker.get(worker.worker_run_id == "worker_consistency")
+    check.is_none(retrieved_worker.end_at)
+    check.is_none(retrieved_worker.custom_data)

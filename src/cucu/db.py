@@ -8,147 +8,178 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from peewee import (
+    BooleanField,
+    DateTimeField,
+    FloatField,
+    IntegerField,
+    Model,
+    SqliteDatabase,
+    TextField,
+)
+
 from cucu.config import CONFIG
+
+db_filepath = CONFIG["RUN_DB_PATH"]
+db = SqliteDatabase(db_filepath)
+
+
+class BaseModel(Model):
+    class Meta:
+        database = db
+
+
+class cucu_run(BaseModel):
+    cucu_run_id = TextField(primary_key=True)
+    full_arguments = TextField()
+    date = TextField()
+    start_at = DateTimeField()
+
+
+class worker(BaseModel):
+    worker_run_id = TextField(primary_key=True)
+    cucu_run_id = TextField()
+    start_at = DateTimeField()
+    end_at = DateTimeField(null=True)
+    custom_data = TextField(null=True)
+
+
+class feature(BaseModel):
+    feature_run_id = TextField(primary_key=True)
+    worker_run_id = TextField()
+    name = TextField()
+    filename = TextField()
+    description = TextField()
+    tags = TextField()
+    start_at = DateTimeField()
+    end_at = DateTimeField(null=True)
+    custom_data = TextField(null=True)
+
+
+class scenario(BaseModel):
+    scenario_run_id = TextField(primary_key=True)
+    feature_run_id = TextField()
+    name = TextField()
+    line_number = IntegerField()
+    seq = IntegerField()
+    tags = TextField()
+    status = TextField(null=True)
+    duration = FloatField(null=True)
+    start_at = DateTimeField()
+    end_at = DateTimeField(null=True)
+    log_files = TextField(null=True)
+    cucu_config = TextField(null=True)
+    custom_data = TextField(null=True)
+
+
+class step(BaseModel):
+    step_run_id = TextField(primary_key=True)
+    scenario_run_id = TextField()
+    seq = IntegerField()
+    section_level = IntegerField(null=True)
+    parent_seq = IntegerField(null=True)
+    keyword = TextField()
+    name = TextField()
+    text = TextField(null=True)
+    table_data = TextField(null=True)
+    location = TextField()
+    is_substep = BooleanField()
+    has_substeps = BooleanField()
+    status = TextField(null=True)
+    duration = FloatField(null=True)
+    start_at = DateTimeField()
+    end_at = DateTimeField(null=True)
+    debug_output = TextField(null=True)
+    browser_logs = TextField(null=True)
+    browser_info = TextField(null=True)
+    screenshots = TextField(null=True)
 
 
 def record_cucu_run():
     worker_run_id = CONFIG["WORKER_RUN_ID"]
-    cucu_run_id = CONFIG["CUCU_RUN_ID"]
-    db_filepath = CONFIG["RUN_DB_PATH"]
-
+    cucu_run_id_val = CONFIG["CUCU_RUN_ID"]
     run_details = {
-        "cucu_run_id": cucu_run_id,
+        "cucu_run_id": cucu_run_id_val,
         "worker_run_id": worker_run_id,
         "full_arguments": sys.argv,
         "date": datetime.now().isoformat(),
     }
-
-    with sqlite3.connect(db_filepath) as conn:
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """
-            INSERT INTO cucu_run (cucu_run_id, full_arguments, date, start_at)
-            VALUES (?, ?, ?, ?)
-        """,
-            (
-                cucu_run_id,
-                json.dumps(run_details["full_arguments"]),
-                run_details["date"],
-                run_details["date"],
-            ),
-        )
-
-        cursor.execute(
-            """
-            INSERT INTO workers (worker_run_id, cucu_run_id, start_at)
-            VALUES (?, ?, ?)
-        """,
-            (
-                run_details["worker_run_id"],
-                run_details["cucu_run_id"],
-                run_details["date"],
-            ),
-        )
-
-        conn.commit()
-
+    db.connect(reuse_if_open=True)
+    cucu_run.create(
+        cucu_run_id=cucu_run_id_val,
+        full_arguments=json.dumps(run_details["full_arguments"]),
+        date=run_details["date"],
+        start_at=run_details["date"],
+    )
+    worker.create(
+        worker_run_id=worker_run_id,
+        cucu_run_id=cucu_run_id_val,
+        start_at=run_details["date"],
+    )
+    db.close()
     return str(db_filepath)
 
 
-def record_feature(feature):
-    db_filepath = CONFIG["RUN_DB_PATH"]
-    with sqlite3.connect(db_filepath) as conn:
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """
-            INSERT INTO features (feature_run_id, worker_run_id, name, filename, description, tags, start_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """,
-            (
-                feature.feature_run_id,
-                CONFIG["WORKER_RUN_ID"],
-                feature.name,
-                feature.filename,
-                "\n".join(feature.description)
-                if isinstance(feature.description, list)
-                else str(feature.description),
-                " ".join(feature.tags),
-                datetime.now().isoformat(),
-            ),
-        )
-
-        conn.commit()
+def record_feature(feature_obj):
+    db.connect(reuse_if_open=True)
+    feature.create(
+        feature_run_id=feature_obj.feature_run_id,
+        worker_run_id=CONFIG["WORKER_RUN_ID"],
+        name=feature_obj.name,
+        filename=feature_obj.filename,
+        description="\n".join(feature_obj.description)
+        if isinstance(feature_obj.description, list)
+        else str(feature_obj.description),
+        tags=" ".join(feature_obj.tags),
+        start_at=datetime.now().isoformat(),
+    )
+    db.close()
 
 
 def record_scenario(ctx):
-    db_filepath = CONFIG["RUN_DB_PATH"]
-    with sqlite3.connect(db_filepath) as conn:
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """
-            INSERT INTO scenarios (scenario_run_id, feature_run_id, name, line_number, seq, tags, start_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """,
-            (
-                ctx.scenario.scenario_run_id,
-                ctx.scenario.feature.feature_run_id,
-                ctx.scenario.name,
-                ctx.scenario.line,
-                ctx.scenario_index,
-                " ".join(ctx.scenario.tags),
-                ctx.scenario.start_at,
-            ),
-        )
-
-        conn.commit()
+    db.connect(reuse_if_open=True)
+    scenario.create(
+        scenario_run_id=ctx.scenario.scenario_run_id,
+        feature_run_id=ctx.scenario.feature.feature_run_id,
+        name=ctx.scenario.name,
+        line_number=ctx.scenario.line,
+        seq=ctx.scenario_index,
+        tags=" ".join(ctx.scenario.tags),
+        start_at=ctx.scenario.start_at,
+    )
+    db.close()
 
 
-def start_step_record(ctx, step):
-    db_filepath = CONFIG["RUN_DB_PATH"]
-    with sqlite3.connect(db_filepath) as conn:
-        cursor = conn.cursor()
-        if not step.table:
-            table = None
-        else:
-            table = [step.table.headings]
-            table.extend([row.cells for row in step.table.rows])
-
-        cursor.execute(
-            """
-            INSERT INTO steps (step_run_id, scenario_run_id, seq, keyword, name, text, table_data, location, is_substep, has_substeps, section_level, start_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-            (
-                step.step_run_id,
-                ctx.scenario.scenario_run_id,
-                step.seq,
-                step.keyword,
-                step.name,
-                step.text if step.text else None,
-                json.dumps(table) if step.table else None,
-                str(step.location),
-                step.is_substep,
-                step.has_substeps,
-                getattr(step, "section_level", None),
-                step.start_at,
-            ),
-        )
-
-        conn.commit()
+def start_step_record(ctx, step_obj):
+    db.connect(reuse_if_open=True)
+    if not step_obj.table:
+        table = None
+    else:
+        table = [step_obj.table.headings]
+        table.extend([row.cells for row in step_obj.table.rows])
+    step.create(
+        step_run_id=step_obj.step_run_id,
+        scenario_run_id=ctx.scenario.scenario_run_id,
+        seq=step_obj.seq,
+        keyword=step_obj.keyword,
+        name=step_obj.name,
+        text=step_obj.text if step_obj.text else None,
+        table_data=json.dumps(table) if step_obj.table else None,
+        location=str(step_obj.location),
+        is_substep=step_obj.is_substep,
+        has_substeps=step_obj.has_substeps,
+        section_level=getattr(step_obj, "section_level", None),
+        start_at=step_obj.start_at,
+    )
+    db.close()
 
 
-def finish_step_record(step, duration):
-    db_filepath = CONFIG["RUN_DB_PATH"]
-
-    # Serialize screenshots to JSON, handling any WebDriver elements
+def finish_step_record(step_obj, duration):
+    db.connect(reuse_if_open=True)
     screenshots_json = "[]"
-    if hasattr(step, "screenshots") and step.screenshots:
-        # Convert screenshots to JSON-serializable format
+    if hasattr(step_obj, "screenshots") and step_obj.screenshots:
         serializable_screenshots = []
-        for screenshot in step.screenshots:
+        for screenshot in step_obj.screenshots:
             serializable_screenshot = {
                 "step_name": screenshot.get("step_name"),
                 "label": screenshot.get("label"),
@@ -158,40 +189,26 @@ def finish_step_record(step, duration):
             }
             serializable_screenshots.append(serializable_screenshot)
         screenshots_json = json.dumps(serializable_screenshots)
-
-    with sqlite3.connect(db_filepath) as conn:
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """
-            UPDATE steps
-            SET section_level = ?, parent_seq = ?, has_substeps = ?, status = ?, duration = ?, end_at = ?, debug_output = ?, browser_logs = ?, browser_info = ?, screenshots = ?
-            WHERE step_run_id = ?
-        """,
-            (
-                step.section_level if hasattr(step, "section_level") else None,
-                step.parent_seq,
-                step.has_substeps,
-                step.status.name,
-                duration,
-                step.end_at,
-                step.debug_output,
-                step.browser_logs,
-                step.browser_info,
-                screenshots_json,
-                step.step_run_id,
-            ),
-        )
-
-        conn.commit()
+    step.update(
+        section_level=getattr(step_obj, "section_level", None),
+        parent_seq=step_obj.parent_seq,
+        has_substeps=step_obj.has_substeps,
+        status=step_obj.status.name,
+        duration=duration,
+        end_at=step_obj.end_at,
+        debug_output=step_obj.debug_output,
+        browser_logs=step_obj.browser_logs,
+        browser_info=step_obj.browser_info,
+        screenshots=screenshots_json,
+    ).where(step.step_run_id == step_obj.step_run_id).execute()
+    db.close()
 
 
-def finish_scenario_record(scenario):
-    db_filepath = CONFIG["RUN_DB_PATH"]
-    start_dt = datetime.fromisoformat(scenario.start_at)
-    end_dt = datetime.fromisoformat(scenario.end_at)
+def finish_scenario_record(scenario_obj):
+    db.connect(reuse_if_open=True)
+    start_dt = datetime.fromisoformat(scenario_obj.start_at)
+    end_dt = datetime.fromisoformat(scenario_obj.end_at)
     duration = (end_dt - start_dt).total_seconds()
-
     scenario_logs_dir = CONFIG.get("SCENARIO_LOGS_DIR")
     if not scenario_logs_dir or not Path(scenario_logs_dir).exists():
         log_files_json = "[]"
@@ -203,209 +220,67 @@ def finish_scenario_record(scenario):
             if file.is_file()
         ]
         log_files_json = json.dumps(sorted(log_files))
-
-    custom_data_json = json.dumps(scenario.custom_data)
-
-    with sqlite3.connect(db_filepath) as conn:
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """
-            UPDATE scenarios
-            SET status = ?, duration = ?, end_at = ?, log_files = ?, cucu_config = ?, custom_data = ?
-            WHERE scenario_run_id = ?
-        """,
-            (
-                scenario.status.name,
-                duration,
-                scenario.end_at,
-                log_files_json,
-                scenario.cucu_config_json,
-                custom_data_json,
-                scenario.scenario_run_id,
-            ),
-        )
-
-        conn.commit()
+    custom_data_json = json.dumps(scenario_obj.custom_data)
+    scenario.update(
+        status=scenario_obj.status.name,
+        duration=duration,
+        end_at=scenario_obj.end_at,
+        log_files=log_files_json,
+        cucu_config=scenario_obj.cucu_config_json,
+        custom_data=custom_data_json,
+    ).where(scenario.scenario_run_id == scenario_obj.scenario_run_id).execute()
+    db.close()
 
 
-def finish_feature_record(feature):
-    db_filepath = CONFIG["RUN_DB_PATH"]
-    custom_data_json = json.dumps(feature.custom_data)
-
-    with sqlite3.connect(db_filepath) as conn:
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """
-            UPDATE features
-            SET end_at = ?, custom_data = ?
-            WHERE feature_run_id = ?
-        """,
-            (
-                datetime.now().isoformat(),
-                custom_data_json,
-                feature.feature_run_id,
-            ),
-        )
-
-        conn.commit()
+def finish_feature_record(feature_obj):
+    db.connect(reuse_if_open=True)
+    custom_data_json = json.dumps(feature_obj.custom_data)
+    feature.update(
+        end_at=datetime.now().isoformat(),
+        custom_data=custom_data_json,
+    ).where(feature.feature_run_id == feature_obj.feature_run_id).execute()
+    db.close()
 
 
 def finish_worker_record(custom_data=None):
-    db_filepath = CONFIG["RUN_DB_PATH"]
+    db.connect(reuse_if_open=True)
     custom_data_json = json.dumps(custom_data) if custom_data else "{}"
-
-    with sqlite3.connect(db_filepath) as conn:
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """
-            UPDATE workers
-            SET end_at = ?, custom_data = ?
-            WHERE worker_run_id = ?
-        """,
-            (
-                datetime.now().isoformat(),
-                custom_data_json,
-                CONFIG["WORKER_RUN_ID"],
-            ),
-        )
-
-        conn.commit()
+    worker.update(
+        end_at=datetime.now().isoformat(),
+        custom_data=custom_data_json,
+    ).where(worker.worker_run_id == CONFIG["WORKER_RUN_ID"]).execute()
+    db.close()
 
 
 def create_database_file(db_filepath):
-    with sqlite3.connect(db_filepath) as conn:
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS cucu_run (
-                cucu_run_id TEXT PRIMARY KEY,
-                full_arguments TEXT,
-                date TEXT,
-                start_at TIMESTAMP
-            )
-        """)
-
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS workers (
-                worker_run_id TEXT PRIMARY KEY,
-                cucu_run_id TEXT,
-                start_at TIMESTAMP,
-                end_at TIMESTAMP,
-                custom_data JSON,
-                FOREIGN KEY (cucu_run_id) REFERENCES cucu_run (cucu_run_id)
-            )
-        """)
-
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS features (
-                feature_run_id TEXT PRIMARY KEY,
-                worker_run_id TEXT,
-                name TEXT,
-                filename TEXT,
-                description TEXT,
-                tags TEXT,
-                start_at TIMESTAMP,
-                end_at TIMESTAMP,
-                custom_data JSON,
-                FOREIGN KEY (worker_run_id) REFERENCES workers (worker_run_id)
-            )
-        """)
-
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS scenarios (
-                scenario_run_id TEXT PRIMARY KEY,
-                feature_run_id TEXT,
-                name TEXT,
-                line_number INTEGER,
-                seq INTEGER,
-                tags TEXT,
-                status TEXT,
-                duration REAL,
-                start_at TIMESTAMP,
-                end_at TIMESTAMP,
-                log_files JSON,
-                cucu_config JSON,
-                custom_data JSON,
-                FOREIGN KEY (feature_run_id) REFERENCES features (feature_run_id)
-            )
-        """)
-
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS steps (
-                step_run_id TEXT PRIMARY KEY,
-                scenario_run_id TEXT,
-                seq INTEGER,
-                section_level INTEGER,
-                parent_seq INTEGER,
-                keyword TEXT,
-                name TEXT,
-                text TEXT,
-                table_data JSON,
-                location TEXT,
-                is_substep BOOLEAN,
-                has_substeps BOOLEAN,
-                status TEXT,
-                duration REAL,
-                start_at TIMESTAMP,
-                end_at TIMESTAMP,
-                debug_output TEXT,
-                browser_logs TEXT,
-                browser_info JSON,
-                screenshots JSON,
-                FOREIGN KEY (scenario_run_id) REFERENCES scenarios (scenario_run_id)
-            )
-        """)
-
-        cursor.execute("""
-            CREATE VIEW IF NOT EXISTS flat AS
-            SELECT
-                w.cucu_run_id,
-                s.start_at,
-                s.duration,
-                f.name AS feature_name,
-                s.name AS scenario_name,
-                f.tags || ' ' || s.tags AS tags,
-                s.log_files
-            FROM scenarios s
-            JOIN features f ON s.feature_run_id = f.feature_run_id
-            JOIN workers w ON f.worker_run_id = w.worker_run_id
-        """)
-
-        conn.commit()
+    db.init(db_filepath)
+    db.connect(reuse_if_open=True)
+    db.create_tables([cucu_run, worker, feature, scenario, step])
+    db.close()
 
 
 def consolidate_database_files(results_dir):
+    # This function would need a more advanced approach with peewee, so for now, keep using sqlite3 for consolidation
     results_path = Path(results_dir)
     target_db_path = results_path / "run.db"
-
     db_files = [
         db for db in results_path.glob("**/*.db") if db.name != "run.db"
     ]
-
-    tables_to_copy = ["cucu_run", "workers", "features", "scenarios", "steps"]
-
+    tables_to_copy = ["cucu_run", "worker", "feature", "scenario", "step"]
     with sqlite3.connect(target_db_path) as target_conn:
         target_cursor = target_conn.cursor()
-
         for db_file in db_files:
             with sqlite3.connect(db_file) as source_conn:
                 source_cursor = source_conn.cursor()
-
                 for table_name in tables_to_copy:
                     source_cursor.execute(f"SELECT * FROM {table_name}")
                     rows = source_cursor.fetchall()
-
                     source_cursor.execute(f"PRAGMA table_info({table_name})")
                     columns = [col[1] for col in source_cursor.fetchall()]
                     placeholders = ",".join(["?" for _ in columns])
-
                     target_cursor.executemany(
                         f"INSERT OR REPLACE INTO {table_name} VALUES ({placeholders})",
                         rows,
                     )
                     target_conn.commit()
-
             db_file.unlink()
