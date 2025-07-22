@@ -218,8 +218,8 @@ def after_scenario(ctx, scenario):
     with open(cucu_config_path, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
 
-    scenario.cucu_config_json = json.dumps(
-        yaml.safe_load(CONFIG.to_yaml_without_secrets())
+    scenario.cucu_config_json = yaml.safe_load(
+        CONFIG.to_yaml_without_secrets()
     )
 
     scenario.end_at = datetime.now().isoformat()[:-3]
@@ -365,6 +365,6 @@ def after_step(ctx, step):
             "browser_type": ctx.browser.driver.name,
         }
 
-    step.browser_info = json.dumps(browser_info)
+    step.browser_info = browser_info
 
     finish_step_record(step, ctx.previous_step_duration)

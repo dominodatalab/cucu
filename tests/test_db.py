@@ -319,7 +319,7 @@ def test_flat_view_functionality(sample_records_combined):
     check.equal(row[3], "Test Feature")
     check.equal(row[4], "Test Scenario")
     check.equal(row[5], "tag1 tag2 tag3 smoke critical")
-    check.equal(row[6], '["test.log", "debug.log"]')
+    check.equal(row[6], "[\"test.log\", \"debug.log\"]")
 
     scenario.update(
         status="failed",

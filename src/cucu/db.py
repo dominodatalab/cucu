@@ -2,7 +2,6 @@
 Database creation and management utilities for cucu.
 """
 
-import json
 import sqlite3
 import sys
 from datetime import datetime
@@ -14,14 +13,14 @@ from peewee import (
     FloatField,
     IntegerField,
     Model,
-    SqliteDatabase,
     TextField,
 )
+from playhouse.sqlite_ext import JSONField, SqliteExtDatabase
 
 from cucu.config import CONFIG
 
 db_filepath = CONFIG["RUN_DB_PATH"]
-db = SqliteDatabase(db_filepath)
+db = SqliteExtDatabase(db_filepath)
 
 
 class BaseModel(Model):
@@ -31,7 +30,7 @@ class BaseModel(Model):
 
 class cucu_run(BaseModel):
     cucu_run_id = TextField(primary_key=True)
-    full_arguments = TextField()
+    full_arguments = JSONField()
     date = TextField()
     start_at = DateTimeField()
 
@@ -41,7 +40,7 @@ class worker(BaseModel):
     cucu_run_id = TextField()
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
-    custom_data = TextField(null=True)
+    custom_data = JSONField(null=True)
 
 
 class feature(BaseModel):
@@ -53,7 +52,7 @@ class feature(BaseModel):
     tags = TextField()
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
-    custom_data = TextField(null=True)
+    custom_data = JSONField(null=True)
 
 
 class scenario(BaseModel):
@@ -67,9 +66,9 @@ class scenario(BaseModel):
     duration = FloatField(null=True)
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
-    log_files = TextField(null=True)
-    cucu_config = TextField(null=True)
-    custom_data = TextField(null=True)
+    log_files = JSONField(null=True)
+    cucu_config = JSONField(null=True)
+    custom_data = JSONField(null=True)
 
 
 class step(BaseModel):
@@ -81,7 +80,7 @@ class step(BaseModel):
     keyword = TextField()
     name = TextField()
     text = TextField(null=True)
-    table_data = TextField(null=True)
+    table_data = JSONField(null=True)
     location = TextField()
     is_substep = BooleanField()
     has_substeps = BooleanField()
@@ -89,10 +88,10 @@ class step(BaseModel):
     duration = FloatField(null=True)
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
-    debug_output = TextField(null=True)
+    debug_output = JSONField(null=True)
     browser_logs = TextField(null=True)
-    browser_info = TextField(null=True)
-    screenshots = TextField(null=True)
+    browser_info = JSONField(null=True)
+    screenshots = JSONField(null=True)
 
 
 def record_cucu_run():
@@ -107,7 +106,7 @@ def record_cucu_run():
     db.connect(reuse_if_open=True)
     cucu_run.create(
         cucu_run_id=cucu_run_id_val,
-        full_arguments=json.dumps(run_details["full_arguments"]),
+        full_arguments=run_details["full_arguments"],
         date=run_details["date"],
         start_at=run_details["date"],
     )
@@ -164,7 +163,7 @@ def start_step_record(ctx, step_obj):
         keyword=step_obj.keyword,
         name=step_obj.name,
         text=step_obj.text if step_obj.text else None,
-        table_data=json.dumps(table) if step_obj.table else None,
+        table_data=table if step_obj.table else None,
         location=str(step_obj.location),
         is_substep=step_obj.is_substep,
         has_substeps=step_obj.has_substeps,
@@ -176,19 +175,18 @@ def start_step_record(ctx, step_obj):
 
 def finish_step_record(step_obj, duration):
     db.connect(reuse_if_open=True)
-    screenshots_json = "[]"
+    screenshot_infos = []
     if hasattr(step_obj, "screenshots") and step_obj.screenshots:
-        serializable_screenshots = []
         for screenshot in step_obj.screenshots:
-            serializable_screenshot = {
+            screenshot_info = {
                 "step_name": screenshot.get("step_name"),
                 "label": screenshot.get("label"),
                 "location": screenshot.get("location"),
                 "size": screenshot.get("size"),
                 "filepath": screenshot.get("filepath"),
             }
-            serializable_screenshots.append(serializable_screenshot)
-        screenshots_json = json.dumps(serializable_screenshots)
+            screenshot_infos.append(screenshot_info)
+
     step.update(
         section_level=getattr(step_obj, "section_level", None),
         parent_seq=step_obj.parent_seq,
@@ -199,7 +197,7 @@ def finish_step_record(step_obj, duration):
         debug_output=step_obj.debug_output,
         browser_logs=step_obj.browser_logs,
         browser_info=step_obj.browser_info,
-        screenshots=screenshots_json,
+        screenshots=screenshot_infos,
     ).where(step.step_run_id == step_obj.step_run_id).execute()
     db.close()
 
@@ -219,8 +217,8 @@ def finish_scenario_record(scenario_obj):
             for file in logs_path.rglob("*")
             if file.is_file()
         ]
-        log_files_json = json.dumps(sorted(log_files))
-    custom_data_json = json.dumps(scenario_obj.custom_data)
+        log_files_json = sorted(log_files)
+    custom_data_json = scenario_obj.custom_data
     scenario.update(
         status=scenario_obj.status.name,
         duration=duration,
@@ -234,7 +232,7 @@ def finish_scenario_record(scenario_obj):
 
 def finish_feature_record(feature_obj):
     db.connect(reuse_if_open=True)
-    custom_data_json = json.dumps(feature_obj.custom_data)
+    custom_data_json = feature_obj.custom_data
     feature.update(
         end_at=datetime.now().isoformat(),
         custom_data=custom_data_json,
@@ -244,7 +242,7 @@ def finish_feature_record(feature_obj):
 
 def finish_worker_record(custom_data=None):
     db.connect(reuse_if_open=True)
-    custom_data_json = json.dumps(custom_data) if custom_data else "{}"
+    custom_data_json = custom_data if custom_data else "{}"
     worker.update(
         end_at=datetime.now().isoformat(),
         custom_data=custom_data_json,
