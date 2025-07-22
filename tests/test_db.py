@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 import pytest_check as check
-from peewee import SqliteDatabase
+from playhouse.sqlite_ext import SqliteExtDatabase
 
 from cucu import db
 from cucu.db import (
@@ -24,7 +24,7 @@ from cucu.db import (
 def temp_db():
     """Create a temporary database for testing."""
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
-        test_db = SqliteDatabase(tmp.name)
+        test_db = SqliteExtDatabase(tmp.name)
         original_db = db.db
 
         # Switch to test database
@@ -302,7 +302,7 @@ def test_flat_view_functionality(sample_records_combined):
         status="passed",
         duration=2.5,
         end_at="2024-01-01T10:00:02.5",
-        log_files='["test.log", "debug.log"]',
+        log_files=["test.log", "debug.log"],
     ).where(scenario.scenario_run_id == "test_scenario").execute()
 
     cursor = db.db.execute_sql(
@@ -319,13 +319,13 @@ def test_flat_view_functionality(sample_records_combined):
     check.equal(row[3], "Test Feature")
     check.equal(row[4], "Test Scenario")
     check.equal(row[5], "tag1 tag2 tag3 smoke critical")
-    check.equal(row[6], "[\"test.log\", \"debug.log\"]")
+    check.equal(row[6], '["test.log","debug.log"]')
 
     scenario.update(
         status="failed",
         duration=1.0,
         end_at="2024-01-01T10:00:01.0",
-        log_files='["error.log"]',
+        log_files=["error.log"],
     ).where(scenario.scenario_run_id == "scenario_consistency").execute()
 
     cursor = db.db.execute_sql(
