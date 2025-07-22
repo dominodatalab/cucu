@@ -11,6 +11,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Add - steps - add browser info and screenshot info
 - Add - features, scenarios and steps - add various metadata
 - Add - steps - add section level, seq and parent_seq info
+- Add - pytest-check for mulitple asserts
 - Change - extract generate_short_id to utils
 - Change - rename .start_timestamp => to .start_at
 - Change - use pathlib for paths
