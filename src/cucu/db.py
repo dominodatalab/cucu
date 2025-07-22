@@ -2,6 +2,7 @@
 Database creation and management utilities for cucu.
 """
 
+import logging
 import sqlite3
 import sys
 from datetime import datetime
@@ -21,6 +22,9 @@ from cucu.config import CONFIG
 
 db_filepath = CONFIG["RUN_DB_PATH"]
 db = SqliteExtDatabase(db_filepath)
+
+logger = logging.getLogger("peewee")
+logger.setLevel(logging.WARNING)  # Only show warnings and errors
 
 
 class BaseModel(Model):
