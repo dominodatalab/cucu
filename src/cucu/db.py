@@ -256,6 +256,20 @@ def create_database_file(db_filepath):
     db.init(db_filepath)
     db.connect(reuse_if_open=True)
     db.create_tables([cucu_run, worker, feature, scenario, step])
+    db.execute_sql("""
+            CREATE VIEW IF NOT EXISTS flat AS
+            SELECT
+                w.cucu_run_id,
+                s.start_at,
+                s.duration,
+                f.name AS feature_name,
+                s.name AS scenario_name,
+                f.tags || ' ' || s.tags AS tags,
+                s.log_files
+            FROM scenario s
+            JOIN feature f ON s.feature_run_id = f.feature_run_id
+            JOIN worker w ON f.worker_run_id = w.worker_run_id
+        """)
     db.close()
 
 
