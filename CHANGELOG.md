@@ -12,6 +12,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - rename .start_timestamp => to .start_at
 - Add - debug and browser logs to steps
 - Change - use pathlib for paths
+- Add - metadata to features, scenarios and steps
 
 ## 1.2.4
 - Fix - restore state after tab info

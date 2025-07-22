@@ -5,6 +5,8 @@ from datetime import datetime
 from functools import partial
 from pathlib import Path
 
+import yaml
+
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
@@ -42,8 +44,12 @@ def check_browser_initialized(ctx):
 
 def before_all(ctx):
     CONFIG["__CUCU_CTX"] = ctx
-    CONFIG.snapshot("before_all")
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
+    ctx.worker_custom_data = {}
+
+    CONFIG["WORKER_RUN_ID"] = generate_short_id()
+    CONFIG.snapshot("before_all")
+
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
         hook(ctx)
 
@@ -57,6 +63,9 @@ def after_all(ctx):
 
 
 def before_feature(ctx, feature):
+    feature.feature_run_id = generate_short_id()
+    feature.custom_data = {}
+
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         results_dir = Path(config.CONFIG["CUCU_RESULTS_DIR"])
         ctx.feature_dir = results_dir / ellipsize_filename(feature.name)
@@ -78,14 +87,17 @@ def before_scenario(ctx, scenario):
 
     init_scenario_hook_variables()
 
+    scenario.custom_data = {}
     ctx.scenario = scenario
     ctx.step_index = 0
+    ctx.scenario_index = ctx.feature.scenarios.index(scenario) + 1
     ctx.browsers = []
     ctx.browser = None
     ctx.section_step_stack = []
 
     # reset the step timer dictionary
     ctx.step_timers = {}
+    scenario.start_at = datetime.now().isoformat()[:-3]
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         ctx.scenario_dir = ctx.feature_dir / ellipsize_filename(scenario.name)
@@ -122,7 +134,7 @@ def before_scenario(ctx, scenario):
         )
         ctx.browser_log_tee = TeeStream(ctx.browser_log_file)
 
-    CONFIG["SCENARIO_RUN_ID"] = generate_short_id()
+    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id()
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
@@ -183,6 +195,12 @@ def after_scenario(ctx, scenario):
     with open(cucu_config_path, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
 
+    scenario.cucu_config_json = json.dumps(
+        yaml.safe_load(CONFIG.to_yaml_without_secrets())
+    )
+
+    scenario.end_at = datetime.now().isoformat()[:-3]
+
 
 def download_mht_data(ctx):
     if not ctx.browsers:
@@ -213,6 +231,7 @@ def download_browser_log(ctx):
 
 
 def before_step(ctx, step):
+    step.step_run_id = generate_short_id()
     step.start_at = datetime.now().isoformat()[:-3]
 
     sys.stdout.captured()
