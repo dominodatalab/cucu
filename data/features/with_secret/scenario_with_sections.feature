@@ -23,6 +23,7 @@ Feature: Feature with sections
      When I set the variable "MY_SECRET" to "buzz"
 
         * ### Sub-subsection
+        * ## Just a subsection
         * #### Deep subsection
       And I write "{MY_SECRET}" into the input "input type=text"
      Then I should see the text "{MY_SECRET}"

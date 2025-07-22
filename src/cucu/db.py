@@ -118,8 +118,8 @@ def start_step_record(ctx, step):
 
         cursor.execute(
             """
-            INSERT INTO steps (step_run_id, scenario_run_id, seq, keyword, name, text, table_data, location, is_substep, has_substeps, section_level, parent_seq, start_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO steps (step_run_id, scenario_run_id, seq, keyword, name, text, table_data, location, is_substep, has_substeps, section_level, start_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
             (
                 step.step_run_id,
@@ -133,7 +133,6 @@ def start_step_record(ctx, step):
                 step.is_substep,
                 step.has_substeps,
                 getattr(step, "section_level", None),
-                getattr(step, "parent_seq", None),
                 step.start_at,
             ),
         )
@@ -166,11 +165,12 @@ def finish_step_record(step, duration):
         cursor.execute(
             """
             UPDATE steps
-            SET section_level = ?, has_substeps = ?, status = ?, duration = ?, end_at = ?, debug_output = ?, browser_logs = ?, browser_info = ?, screenshots = ?
+            SET section_level = ?, parent_seq = ?, has_substeps = ?, status = ?, duration = ?, end_at = ?, debug_output = ?, browser_logs = ?, browser_info = ?, screenshots = ?
             WHERE step_run_id = ?
         """,
             (
                 step.section_level if hasattr(step, "section_level") else None,
+                step.parent_seq,
                 step.has_substeps,
                 step.status.name,
                 duration,

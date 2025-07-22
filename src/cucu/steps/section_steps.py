@@ -23,27 +23,22 @@ def section_step(ctx, section_level, section_text):
     """
     step = ctx.current_step
     step.section_level = len(section_level)
-    if not ctx.section_step_stack:
-        ctx.section_step_stack.append(ctx.current_step)
-        logging.debug(
-            f"Section: entering '{step.name}' (level {step.section_level})"
-        )
-    else:
+    step.parent_seq = 0
+
+    while len(ctx.section_step_stack):
         latest_section = ctx.section_step_stack[-1]
-        if latest_section.section_level < ctx.current_step.section_level:
-            ctx.section_step_stack.append(ctx.current_step)
-            logging.debug(
-                f"Section: entering '{step.name}' (level {step.section_level})"
-            )
-        else:
-            ctx.section_step_stack.pop()
-            logging.debug(
-                f"Section: exited '{latest_section.name}' (level {latest_section.section_level})"
-            )
-            ctx.section_step_stack.append(ctx.current_step)
-            logging.debug(
-                f"Section: entering '{step.name}' (level {step.section_level})"
-            )
+        if latest_section.section_level < step.section_level:
+            step.parent_seq = latest_section.seq
+            break
+        ctx.section_step_stack.pop()
+        logging.debug(
+            f"Section: exited '{latest_section.name}' (level {latest_section.section_level})"
+        )
+
+    ctx.section_step_stack.append(ctx.current_step)
+    logging.debug(
+        f"Section: entering '{step.name}' (level {step.section_level})"
+    )
 
 
 use_step_matcher("parse")  # set this back to cucu's default matcher parser
