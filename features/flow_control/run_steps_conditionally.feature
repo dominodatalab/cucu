@@ -16,7 +16,7 @@ Feature: Run steps conditionally
       """
       When I create a file at "{SCENARIO_RESULTS_DIR}/conditional_steps/this-should-exist" with the following:
        '''
-       this file should not have been created
+       this file should have been created
        '''
       """
      Then I should see a file at "{SCENARIO_RESULTS_DIR}/conditional_steps/this-should-exist"
@@ -35,7 +35,7 @@ Feature: Run steps conditionally
       """
       When I create a file at "{SCENARIO_RESULTS_DIR}/conditional_steps/this-should-exist" with the following:
        '''
-       this file should not have been created
+       this file should have been created
        '''
       """
      Then I should see a file at "{SCENARIO_RESULTS_DIR}/conditional_steps/this-should-exist"
@@ -54,7 +54,7 @@ Feature: Run steps conditionally
       """
       When I create a file at "{SCENARIO_RESULTS_DIR}/conditional_steps/this-should-exist" with the following:
        '''
-       this file should not have been created
+       this file should have been created
        '''
       """
      Then I should see a file at "{SCENARIO_RESULTS_DIR}/conditional_steps/this-should-exist"

@@ -1,22 +1,22 @@
-import datetime
-import hashlib
 import json
-import os
 import sys
-import time
 import traceback
+from datetime import datetime
 from functools import partial
+from pathlib import Path
+
+import yaml
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
-from cucu.utils import ellipsize_filename, take_screenshot
-
-CONFIG.define(
-    "FEATURE_RESULTS_DIR",
-    "the results directory for the currently executing feature",
-    default=None,
+from cucu.utils import (
+    TeeStream,
+    ellipsize_filename,
+    generate_short_id,
+    take_screenshot,
 )
+
 CONFIG.define(
     "SCENARIO_RESULTS_DIR",
     "the results directory for the currently executing scenario",
@@ -44,8 +44,12 @@ def check_browser_initialized(ctx):
 
 def before_all(ctx):
     CONFIG["__CUCU_CTX"] = ctx
-    CONFIG.snapshot()
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
+    ctx.worker_custom_data = {}
+
+    CONFIG["WORKER_RUN_ID"] = generate_short_id()
+    CONFIG.snapshot("before_all")
+
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
         hook(ctx)
 
@@ -55,14 +59,16 @@ def after_all(ctx):
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
         hook(ctx)
 
+    CONFIG.restore(with_pop=True)
+
 
 def before_feature(ctx, feature):
+    feature.feature_run_id = generate_short_id()
+    feature.custom_data = {}
+
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
-        results_dir = config.CONFIG["CUCU_RESULTS_DIR"]
-        ctx.feature_dir = os.path.join(
-            results_dir, ellipsize_filename(feature.name)
-        )
-        CONFIG["FEATURE_RESULTS_DIR"] = ctx.feature_dir
+        results_dir = Path(config.CONFIG["CUCU_RESULTS_DIR"])
+        ctx.feature_dir = results_dir / ellipsize_filename(feature.name)
 
 
 def after_feature(ctx, feature):
@@ -81,50 +87,54 @@ def before_scenario(ctx, scenario):
 
     init_scenario_hook_variables()
 
+    scenario.custom_data = {}
     ctx.scenario = scenario
     ctx.step_index = 0
+    ctx.scenario_index = ctx.feature.scenarios.index(scenario) + 1
     ctx.browsers = []
     ctx.browser = None
+    ctx.section_step_stack = []
 
     # reset the step timer dictionary
     ctx.step_timers = {}
+    scenario.start_at = datetime.now().isoformat()[:-3]
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
-        ctx.scenario_dir = os.path.join(
-            ctx.feature_dir, ellipsize_filename(scenario.name)
-        )
+        ctx.scenario_dir = ctx.feature_dir / ellipsize_filename(scenario.name)
         CONFIG["SCENARIO_RESULTS_DIR"] = ctx.scenario_dir
-        os.makedirs(ctx.scenario_dir, exist_ok=True)
+        ctx.scenario_dir.mkdir(parents=True, exist_ok=True)
 
-        ctx.scenario_downloads_dir = os.path.join(
-            ctx.scenario_dir, "downloads"
-        )
+        ctx.scenario_downloads_dir = ctx.scenario_dir / "downloads"
         CONFIG["SCENARIO_DOWNLOADS_DIR"] = ctx.scenario_downloads_dir
-        os.makedirs(ctx.scenario_downloads_dir, exist_ok=True)
+        ctx.scenario_downloads_dir.mkdir(parents=True, exist_ok=True)
 
-        ctx.scenario_logs_dir = os.path.join(ctx.scenario_dir, "logs")
+        ctx.scenario_logs_dir = ctx.scenario_dir / "logs"
         CONFIG["SCENARIO_LOGS_DIR"] = ctx.scenario_logs_dir
-        os.makedirs(ctx.scenario_logs_dir, exist_ok=True)
+        ctx.scenario_logs_dir.mkdir(parents=True, exist_ok=True)
 
-        cucu_debug_filepath = os.path.join(
-            ctx.scenario_logs_dir, "cucu.debug.console.log"
-        )
+        cucu_debug_log_path = ctx.scenario_logs_dir / "cucu.debug.console.log"
         ctx.scenario_debug_log_file = open(
-            cucu_debug_filepath, "w", encoding=sys.stdout.encoding
+            cucu_debug_log_path, "w", encoding=sys.stdout.encoding
         )
+        ctx.scenario_debug_log_tee = TeeStream(ctx.scenario_debug_log_file)
 
         # redirect stdout, stderr and setup a logger at debug level to fill
         # the scenario cucu.debug.log file which makes it possible to have
         # debug logging for every single scenario run without polluting the
         # console logs at runtime.
-        sys.stdout.set_other_stream(ctx.scenario_debug_log_file)
-        sys.stderr.set_other_stream(ctx.scenario_debug_log_file)
-        logger.init_debug_logger(ctx.scenario_debug_log_file)
+        sys.stdout.set_other_stream(ctx.scenario_debug_log_tee)
+        sys.stderr.set_other_stream(ctx.scenario_debug_log_tee)
+        logger.init_debug_logger(ctx.scenario_debug_log_tee)
 
-    # internal cucu config variables
-    CONFIG["SCENARIO_RUN_ID"] = hashlib.sha256(
-        str(time.perf_counter()).encode("utf-8")
-    ).hexdigest()[:7]
+        # capture browser logs using TeeStream since each call clears the log
+        ctx.browser_log_file = open(
+            ctx.scenario_logs_dir / "browser_console.log.txt",
+            "w",
+            encoding="utf-8",
+        )
+        ctx.browser_log_tee = TeeStream(ctx.browser_log_file)
+
+    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id()
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
@@ -179,13 +189,17 @@ def after_scenario(ctx, scenario):
         if len(ctx.browsers) != 0:
             logger.debug("quitting browser between sessions")
 
-        run_after_scenario_hook(ctx, scenario, download_browser_logs)
+        run_after_scenario_hook(ctx, scenario, download_browser_log)
 
-    cucu_config_filepath = os.path.join(
-        ctx.scenario_logs_dir, "cucu.config.yaml.txt"
-    )
-    with open(cucu_config_filepath, "w") as config_file:
+    cucu_config_path = ctx.scenario_logs_dir / "cucu.config.yaml.txt"
+    with open(cucu_config_path, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
+
+    scenario.cucu_config_json = json.dumps(
+        yaml.safe_load(CONFIG.to_yaml_without_secrets())
+    )
+
+    scenario.end_at = datetime.now().isoformat()[:-3]
 
 
 def download_mht_data(ctx):
@@ -198,45 +212,42 @@ def download_mht_data(ctx):
             mht_filename = (
                 f"browser{index if len(ctx.browsers) > 1 else ''}_snapshot.mht"
             )
-            mht_pathname = os.path.join(
-                CONFIG["SCENARIO_LOGS_DIR"],
-                mht_filename,
-            )
+            mht_pathname = CONFIG["SCENARIO_LOGS_DIR"] / mht_filename
             logger.debug(f"Saving MHT webpage snapshot: {mht_filename}")
             browser.download_mht(mht_pathname)
 
 
-def download_browser_logs(ctx):
+def download_browser_log(ctx):
     # close the browser unless someone has set the keep browser alive
     # environment variable which allows tests to reuse the same browser
     # session
 
     for browser in ctx.browsers:
-        # save the browser logs to the current scenarios results directory
-        browser_log_filepath = os.path.join(
-            ctx.scenario_logs_dir, "browser_console.log.txt"
-        )
-
-        os.makedirs(os.path.dirname(browser_log_filepath), exist_ok=True)
-        with open(browser_log_filepath, "w") as output:
-            for log in browser.get_log():
-                output.write(f"{json.dumps(log)}\n")
-
         browser.quit()
+
+    ctx.browser_log_file.close()
 
     ctx.browsers = []
 
 
 def before_step(ctx, step):
-    # trims the last 3 digits of the microseconds
-    step.start_timestamp = datetime.datetime.now().isoformat()[:-3]
+    step.step_run_id = generate_short_id()
+    step.start_at = datetime.now().isoformat()[:-3]
 
     sys.stdout.captured()
     sys.stderr.captured()
 
+    # Reset the debug log buffer for this step
+    if hasattr(ctx, "scenario_debug_log_tee"):
+        ctx.scenario_debug_log_tee.clear()
+
     ctx.current_step = step
     ctx.current_step.has_substeps = False
-    ctx.start_time = time.monotonic()
+    ctx.section_level = None
+    step.seq = ctx.step_index + 1
+    step.parent_seq = (
+        ctx.section_step_stack[-1].seq if ctx.section_step_stack else 0
+    )
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
@@ -249,8 +260,18 @@ def after_step(ctx, step):
     step.stdout = sys.stdout.captured()
     step.stderr = sys.stderr.captured()
 
-    ctx.end_time = time.monotonic()
-    ctx.previous_step_duration = ctx.end_time - ctx.start_time
+    # Capture debug output from the TeeStream for this step
+    if hasattr(ctx, "scenario_debug_log_tee"):
+        step.debug_output = ctx.scenario_debug_log_tee.getvalue()
+    else:
+        step.debug_output = ""
+
+    step.end_at = datetime.now().isoformat()[:-3]
+
+    # calculate duration from ISO timestamps
+    start_at = datetime.fromisoformat(step.start_at)
+    end_at = datetime.fromisoformat(step.end_at)
+    ctx.previous_step_duration = (end_at - start_at).total_seconds()
 
     # when set this means we're running in parallel mode using --workers and
     # we want to see progress reported using simply dots
@@ -296,3 +317,26 @@ def after_step(ctx, step):
     # run after all step hooks
     for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
         hook(ctx)
+
+    # Capture browser logs and info for this step
+    step.browser_logs = ""
+
+    browser_info = {"has_browser": False}
+    if ctx.browser:
+        browser_logs = []
+        for log in ctx.browser.get_log():
+            log_entry = json.dumps(log)
+            browser_logs.append(log_entry)
+            ctx.browser_log_tee.write(f"{log_entry}\n")
+        step.browser_logs = "\n".join(browser_logs)
+
+        tab_info = ctx.browser.get_tab_info()
+        all_tabs = ctx.browser.get_all_tabs_info()
+
+        browser_info = {
+            "current_tab_index": tab_info["index"],
+            "all_tabs": all_tabs,
+            "browser_type": ctx.browser.driver.name,
+        }
+
+    step.browser_info = json.dumps(browser_info)
