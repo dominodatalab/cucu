@@ -8,6 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 1.2.5
 - Chore - CI - fix results to not be deleted by pytest
 - Chore - makefile - make fix more like make lint
+- Change - minor update to scenarios
 
 ## 1.2.4
 - Fix - restore state after tab info
