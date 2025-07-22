@@ -14,6 +14,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - use pathlib for paths
 - Add - metadata to features, scenarios and steps
 - Add - CONFIG now can save multiple snapshots in a stack
+- Add - section level info to steps
 
 ## 1.2.4
 - Fix - restore state after tab info
