@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.2.6
+- Change - core run - allow config to be changed by environment.py import
+
 ## 1.2.5
 - Add - CONFIG now can save multiple snapshots in a stack
 - Add - features, scenarios and steps - add various metadata
