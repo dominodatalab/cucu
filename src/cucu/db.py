@@ -236,20 +236,18 @@ def finish_scenario_record(scenario_obj):
 
 def finish_feature_record(feature_obj):
     db.connect(reuse_if_open=True)
-    custom_data_json = feature_obj.custom_data
     feature.update(
         end_at=datetime.now().isoformat(),
-        custom_data=custom_data_json,
+        custom_data=feature_obj.custom_data,
     ).where(feature.feature_run_id == feature_obj.feature_run_id).execute()
     db.close()
 
 
 def finish_worker_record(custom_data=None):
     db.connect(reuse_if_open=True)
-    custom_data_json = custom_data if custom_data else "{}"
     worker.update(
         end_at=datetime.now().isoformat(),
-        custom_data=custom_data_json,
+        custom_data=custom_data,
     ).where(worker.worker_run_id == CONFIG["WORKER_RUN_ID"]).execute()
     db.close()
 
