@@ -85,6 +85,7 @@ dev-dependencies = [
     "pre-commit>=3.8.0",
     "pytest~=8.4.0",
     "pytest-check>=2.5.3",
+    "pytest-sugar>=1.0.0",
     "ruff>=0.6.4",
 ]
 
