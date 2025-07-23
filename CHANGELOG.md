@@ -9,10 +9,11 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Add - record test run to local db
   This adds db recording of test runs with the following tables:
   - cucu_run - one per `cucu run`
-  - workers - including a "parent" worker"
-  - features - includes tags
-  - scenarios - includes tags
-  - steps - granular details including debug and browser logs, browser and screenshot info
+  - worker - including a "parent" worker"
+  - feature - includes tags
+  - scenario - includes tags
+  - step - granular details including debug and browser logs, browser and screenshot info
+- Add - peewee orm lib
 - Chore - add copilot instructions
 
 ## 1.2.5
