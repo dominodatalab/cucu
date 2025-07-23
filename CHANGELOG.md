@@ -16,6 +16,9 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Add - peewee orm lib
 - Chore - add copilot instructions
 
+## 1.2.6
+- Fix - core run - allow config to be changed by environment.py import
+
 ## 1.2.5
 - Add - CONFIG now can save multiple snapshots in a stack
 - Add - features, scenarios and steps - add various metadata
