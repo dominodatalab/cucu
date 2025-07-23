@@ -164,8 +164,6 @@ Feature: Config
      Then I should see "{STDOUT}" is empty
       And I should see "{STDERR}" contains "yaml.scanner.ScannerError: while scanning a simple key"
 
-
-
   Scenario: User can have a register_custom_variable_handling rely on a CONFIG value defined in enviroment.py at import time
     Given I create a file at "{CUCU_RESULTS_DIR}/defined_in_import/environment.py" with the following:
       """
