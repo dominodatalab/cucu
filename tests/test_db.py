@@ -207,15 +207,20 @@ def test_complex_data_serialization(sample_records_combined):
 
 
 def test_relationships_and_record_completion(sample_records_combined):
-    check.equal(sample_records_combined["worker"].cucu_run_id.cucu_run_id, "test_run")
     check.equal(
-        sample_records_combined["feature"].worker_run_id.worker_run_id, "test_worker"
+        sample_records_combined["worker"].cucu_run_id.cucu_run_id, "test_run"
     )
     check.equal(
-        sample_records_combined["scenario"].feature_run_id.feature_run_id, "test_feature"
+        sample_records_combined["feature"].worker_run_id.worker_run_id,
+        "test_worker",
     )
     check.equal(
-        sample_records_combined["step"].scenario_run_id.scenario_run_id, "test_scenario"
+        sample_records_combined["scenario"].feature_run_id.feature_run_id,
+        "test_feature",
+    )
+    check.equal(
+        sample_records_combined["step"].scenario_run_id.scenario_run_id,
+        "test_scenario",
     )
 
     check.is_none(sample_records_combined["scenario"].status)
