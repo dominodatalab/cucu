@@ -42,7 +42,12 @@ class cucu_run(BaseModel):
 
 class worker(BaseModel):
     worker_run_id = TextField(primary_key=True)
-    cucu_run_id = ForeignKeyField(cucu_run, field='cucu_run_id', backref='workers', column_name='cucu_run_id')
+    cucu_run_id = ForeignKeyField(
+        cucu_run,
+        field="cucu_run_id",
+        backref="workers",
+        column_name="cucu_run_id",
+    )
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
     custom_data = JSONField(null=True)
@@ -50,7 +55,12 @@ class worker(BaseModel):
 
 class feature(BaseModel):
     feature_run_id = TextField(primary_key=True)
-    worker_run_id = ForeignKeyField(worker, field='worker_run_id', backref='features', column_name='worker_run_id')
+    worker_run_id = ForeignKeyField(
+        worker,
+        field="worker_run_id",
+        backref="features",
+        column_name="worker_run_id",
+    )
     name = TextField()
     filename = TextField()
     description = TextField()
@@ -62,7 +72,12 @@ class feature(BaseModel):
 
 class scenario(BaseModel):
     scenario_run_id = TextField(primary_key=True)
-    feature_run_id = ForeignKeyField(feature, field='feature_run_id', backref='scenarios', column_name='feature_run_id')
+    feature_run_id = ForeignKeyField(
+        feature,
+        field="feature_run_id",
+        backref="scenarios",
+        column_name="feature_run_id",
+    )
     name = TextField()
     line_number = IntegerField()
     seq = IntegerField()
@@ -78,7 +93,12 @@ class scenario(BaseModel):
 
 class step(BaseModel):
     step_run_id = TextField(primary_key=True)
-    scenario_run_id = ForeignKeyField(scenario, field='scenario_run_id', backref='steps', column_name='scenario_run_id')
+    scenario_run_id = ForeignKeyField(
+        scenario,
+        field="scenario_run_id",
+        backref="steps",
+        column_name="scenario_run_id",
+    )
     seq = IntegerField()
     section_level = IntegerField(null=True)
     parent_seq = IntegerField(null=True)
