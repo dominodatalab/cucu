@@ -80,3 +80,15 @@ Feature: Browser window management
       """
       # so the next test doesn't end up with a silly tiny browser window
       And I close the current browser
+
+  Scenario: User can save the current browser url to a variable
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+     When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
+     Then I should see the browser title is "Buttons!"
+
+     When I save the current browser url to the variable "CURRENT_URL"
+      And I navigate to the url "http://{HOST_ADDRESS}:{PORT}/inputs.html"
+     Then I should see the browser title is "Inputs!"
+
+     When I navigate to the url "{CURRENT_URL}"
+     Then I should see the browser title is "Buttons!"
