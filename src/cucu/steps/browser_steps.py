@@ -163,6 +163,16 @@ def navigate_to_the_url(ctx, url):
     ctx.browser.navigate(url)
 
 
+@step('I save the current browser url to the variable "{variable}"')
+def save_current_browser_url_to_variable(ctx, variable):
+    ctx.check_browser_initialized()
+    current_url = ctx.browser.get_current_url()
+    config.CONFIG[variable] = current_url
+    logger.debug(
+        f"saved current browser url {current_url} to variable {variable}"
+    )
+
+
 @step("I switch to the previous browser")
 def switch_to_previous_browser(ctx):
     browser_index = ctx.browsers.index(ctx.browser)
