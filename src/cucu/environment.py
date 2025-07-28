@@ -9,6 +9,17 @@ import yaml
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
+from cucu.db import (
+    create_database_file,
+    finish_feature_record,
+    finish_scenario_record,
+    finish_step_record,
+    finish_worker_record,
+    record_cucu_run,
+    record_feature,
+    record_scenario,
+    start_step_record,
+)
 from cucu.page_checks import init_page_checks
 from cucu.utils import (
     TeeStream,
@@ -48,6 +59,15 @@ def before_all(ctx):
     ctx.worker_custom_data = {}
 
     CONFIG["WORKER_RUN_ID"] = generate_short_id()
+
+    results_path = Path(CONFIG["CUCU_RESULTS_DIR"])
+    worker_run_id = CONFIG["WORKER_RUN_ID"]
+    cucu_run_id = CONFIG["CUCU_RUN_ID"]
+    CONFIG["RUN_DB_PATH"] = run_db_path = (
+        results_path / f"run_{cucu_run_id}_{worker_run_id}.db"
+    )
+    create_database_file(run_db_path)
+    record_cucu_run()
     CONFIG.snapshot("before_all")
 
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
@@ -59,12 +79,14 @@ def after_all(ctx):
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
         hook(ctx)
 
+    finish_worker_record(ctx.worker_custom_data)
     CONFIG.restore(with_pop=True)
 
 
 def before_feature(ctx, feature):
     feature.feature_run_id = generate_short_id()
     feature.custom_data = {}
+    record_feature(feature)
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         results_dir = Path(config.CONFIG["CUCU_RESULTS_DIR"])
@@ -72,7 +94,7 @@ def before_feature(ctx, feature):
 
 
 def after_feature(ctx, feature):
-    pass
+    finish_feature_record(feature)
 
 
 def before_scenario(ctx, scenario):
@@ -135,6 +157,7 @@ def before_scenario(ctx, scenario):
         ctx.browser_log_tee = TeeStream(ctx.browser_log_file)
 
     CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id()
+    record_scenario(ctx)
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
@@ -195,11 +218,12 @@ def after_scenario(ctx, scenario):
     with open(cucu_config_path, "w") as config_file:
         config_file.write(CONFIG.to_yaml_without_secrets())
 
-    scenario.cucu_config_json = json.dumps(
-        yaml.safe_load(CONFIG.to_yaml_without_secrets())
+    scenario.cucu_config_json = yaml.safe_load(
+        CONFIG.to_yaml_without_secrets()
     )
 
     scenario.end_at = datetime.now().isoformat()[:-3]
+    finish_scenario_record(scenario)
 
 
 def download_mht_data(ctx):
@@ -250,6 +274,8 @@ def before_step(ctx, step):
     )
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
+
+    start_step_record(ctx, step)
 
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
@@ -339,4 +365,6 @@ def after_step(ctx, step):
             "browser_type": ctx.browser.driver.name,
         }
 
-    step.browser_info = json.dumps(browser_info)
+    step.browser_info = browser_info
+
+    finish_step_record(step, ctx.previous_step_duration)
