@@ -291,6 +291,35 @@ def create_database_file(db_filepath):
             JOIN feature f ON s.feature_run_id = f.feature_run_id
             JOIN worker w ON f.worker_run_id = w.worker_run_id
         """)
+    db.execute_sql("""
+            CREATE VIEW IF NOT EXISTS flat_scenario AS
+            SELECT
+                s.scenario_run_id,
+                f.name AS feature_name,
+                s.name AS scenario_name,
+                f.tags || ' ' || s.tags AS tags,
+                f.filename || ':' || s.line_number AS feature_file_line,
+                s.status,
+                (
+                    SELECT json_group_array(json_object(
+                        'status', st.status,
+                        'duration', st.duration,
+                        'name', st.name
+                    ))
+                    FROM step st
+                    WHERE st.scenario_run_id = s.scenario_run_id
+                    ORDER BY st.seq
+                ) AS steps,
+                (
+                    SELECT st.debug_output
+                    FROM step st
+                    WHERE st.scenario_run_id = s.scenario_run_id
+                    ORDER BY st.seq DESC
+                    LIMIT 1
+                ) AS last_step_debug_log
+            FROM scenario s
+            JOIN feature f ON s.feature_run_id = f.feature_run_id
+        """)
     db.close()
 
 
