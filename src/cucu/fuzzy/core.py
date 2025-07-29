@@ -97,6 +97,7 @@ def find(
         str(index),
         str(direction.value),
         name_within_thing,
+        "true"
     ]
 
     def execute_fuzzy_find():
@@ -104,4 +105,9 @@ def find(
         script = f"return cucu.fuzzy_find({','.join(args)});"
         return browser.execute(script)
 
-    return search_in_all_frames(browser, execute_fuzzy_find)
+    fuzzy_return = search_in_all_frames(browser, execute_fuzzy_find)
+    if fuzzy_return is None:
+        logger.info("Fuzzy found no element.")
+        return None
+    logger.info("Fuzzy found {} by search term {}".format(fuzzy_return[0], fuzzy_return[1]))
+    return fuzzy_return[0]
