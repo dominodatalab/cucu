@@ -212,7 +212,7 @@ def after_scenario(ctx, scenario):
         if len(ctx.browsers) != 0:
             logger.debug("quitting browser between sessions")
 
-        run_after_scenario_hook(ctx, scenario, download_browser_log)
+        run_after_scenario_hook(ctx, scenario, cleanup_browsers)
 
     cucu_config_path = ctx.scenario_logs_dir / "cucu.config.yaml.txt"
     with open(cucu_config_path, "w") as config_file:
@@ -241,7 +241,7 @@ def download_mht_data(ctx):
             browser.download_mht(mht_pathname)
 
 
-def download_browser_log(ctx):
+def cleanup_browsers(ctx):
     # close the browser unless someone has set the keep browser alive
     # environment variable which allows tests to reuse the same browser
     # session
@@ -357,11 +357,12 @@ def after_step(ctx, step):
         step.browser_logs = "\n".join(browser_logs)
 
         tab_info = ctx.browser.get_tab_info()
-        all_tabs = ctx.browser.get_all_tabs_info()
 
         browser_info = {
-            "current_tab_index": tab_info["index"],
-            "all_tabs": all_tabs,
+            "tab_count": tab_info["tab_count"],
+            "tab_number": tab_info["index"] + 1,
+            "tab_title": tab_info["title"],
+            "tab_url": tab_info["url"],
             "browser_type": ctx.browser.driver.name,
         }
 

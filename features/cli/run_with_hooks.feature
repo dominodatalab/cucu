@@ -74,7 +74,7 @@ Feature: Run with hooks
       .* DEBUG HOOK download_mht_data: passed ✅
       .* DEBUG just logging some stuff from my after scenario hook
       .* DEBUG HOOK after_scenario_log: passed ✅
-      .* DEBUG HOOK download_browser_log: passed ✅
+      .* DEBUG HOOK cleanup_browsers: passed ✅
 
       .* DEBUG just logging some stuff from my after all hook
       [\s\S]*
@@ -134,7 +134,7 @@ Feature: Run with hooks
       .* DEBUG HOOK after_this_scenario_2: passed ✅
       .* DEBUG just logging some stuff from first_after_this_scenario_hook_1
       .* DEBUG HOOK after_this_scenario_1: passed ✅
-      .* DEBUG HOOK download_browser_log: passed ✅
+      .* DEBUG HOOK cleanup_browsers: passed ✅
 
       [\s\S]*
       1 feature passed, 0 failed, 0 skipped
