@@ -331,12 +331,13 @@ def after_step(ctx, step):
         step.browser_logs = "\n".join(browser_logs)
 
         tab_info = ctx.browser.get_tab_info()
-        all_tabs = ctx.browser.get_all_tabs_info()
 
         browser_info = {
-            "current_tab_index": tab_info["index"],
-            "all_tabs": all_tabs,
+            "tab_count": tab_info["tab_count"],
+            "tab_number": tab_info["index"] + 1,
+            "tab_title": tab_info["title"],
+            "tab_url": tab_info["url"],
             "browser_type": ctx.browser.driver.name,
         }
 
-    step.browser_info = json.dumps(browser_info)
+    step.browser_info = browser_info
