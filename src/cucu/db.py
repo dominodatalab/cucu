@@ -88,6 +88,7 @@ class scenario(BaseModel):
     end_at = DateTimeField(null=True)
     log_files = JSONField(null=True)
     cucu_config = JSONField(null=True)
+    browser_info = JSONField(null=True)
     custom_data = JSONField(null=True)
 
 
@@ -250,6 +251,7 @@ def finish_scenario_record(scenario_obj):
         end_at=scenario_obj.end_at,
         log_files=log_files_json,
         cucu_config=scenario_obj.cucu_config_json,
+        browser_info=scenario_obj.browser_info,
         custom_data=custom_data_json,
     ).where(scenario.scenario_run_id == scenario_obj.scenario_run_id).execute()
     db.close()

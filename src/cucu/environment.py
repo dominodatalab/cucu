@@ -206,13 +206,23 @@ def after_scenario(ctx, scenario):
 
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 
+
+    browser_info = {"has_browser": False}
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
-    else:
-        if len(ctx.browsers) != 0:
-            logger.debug("quitting browser between sessions")
+    elif len(ctx.browsers) != 0:
+        tab_info = ctx.browser.get_tab_info()
+        all_tabs = ctx.browser.get_all_tabs_info()
+        browser_info = {
+            "current_tab_index": tab_info["index"],
+            "all_tabs": all_tabs,
+            "browser_type": ctx.browser.driver.name,
+        }
 
+        logger.debug("quitting browser between sessions")
         run_after_scenario_hook(ctx, scenario, cleanup_browsers)
+
+    scenario.browser_info = browser_info
 
     cucu_config_path = ctx.scenario_logs_dir / "cucu.config.yaml.txt"
     with open(cucu_config_path, "w") as config_file:
