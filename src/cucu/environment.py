@@ -1,7 +1,7 @@
+import datetime
 import json
 import sys
 import traceback
-from datetime import datetime
 from functools import partial
 from pathlib import Path
 
@@ -97,7 +97,7 @@ def before_scenario(ctx, scenario):
 
     # reset the step timer dictionary
     ctx.step_timers = {}
-    scenario.start_at = datetime.now().isoformat()[:-3]
+    scenario.start_at = datetime.datetime.now().isoformat()[:-3]
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         ctx.scenario_dir = ctx.feature_dir / ellipsize_filename(scenario.name)
@@ -199,7 +199,7 @@ def after_scenario(ctx, scenario):
         yaml.safe_load(CONFIG.to_yaml_without_secrets())
     )
 
-    scenario.end_at = datetime.now().isoformat()[:-3]
+    scenario.end_at = datetime.datetime.now().isoformat()[:-3]
 
 
 def download_mht_data(ctx):
@@ -232,7 +232,7 @@ def download_browser_log(ctx):
 
 def before_step(ctx, step):
     step.step_run_id = generate_short_id()
-    step.start_at = datetime.now().isoformat()[:-3]
+    step.start_at = datetime.datetime.now().isoformat()[:-3]
 
     sys.stdout.captured()
     sys.stderr.captured()
@@ -266,11 +266,11 @@ def after_step(ctx, step):
     else:
         step.debug_output = ""
 
-    step.end_at = datetime.now().isoformat()[:-3]
+    step.end_at = datetime.datetime.now().isoformat()[:-3]
 
     # calculate duration from ISO timestamps
-    start_at = datetime.fromisoformat(step.start_at)
-    end_at = datetime.fromisoformat(step.end_at)
+    start_at = datetime.datetime.fromisoformat(step.start_at)
+    end_at = datetime.datetime.fromisoformat(step.end_at)
     ctx.previous_step_duration = (end_at - start_at).total_seconds()
 
     # when set this means we're running in parallel mode using --workers and
