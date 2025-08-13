@@ -16,6 +16,9 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Add - peewee orm lib
 - Chore - add copilot instructions
 
+## 1.2.8
+- Fix - avoid unfocus event in after_step
+
 ## 1.2.7
 - Add - steps - add step to save the current browser URL to a variable
 
