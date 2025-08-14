@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.3.0
+- Add - record test run to local db
+  This adds db recording of test runs with the following tables:
+  - cucu_run - one per `cucu run`
+  - worker - including a "parent" worker"
+  - feature - includes tags
+  - scenario - includes tags
+  - step - granular details including debug and browser logs, browser and screenshot info
+- Add - peewee orm lib
+- Chore - add copilot instructions
+
 ## 1.2.8
 - Fix - avoid unfocus event in after_step
 
