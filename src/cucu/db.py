@@ -49,6 +49,13 @@ class worker(BaseModel):
         backref="workers",
         column_name="cucu_run_id",
     )
+    parent_id = ForeignKeyField(
+        "self",
+        field="worker_run_id",
+        backref="child_workers",
+        column_name="parent_id",
+        null=True,
+    )
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
     custom_data = JSONField(null=True)
@@ -140,6 +147,7 @@ def record_cucu_run():
     worker.create(
         worker_run_id=worker_run_id,
         cucu_run_id=cucu_run_id_val,
+        parent_id=CONFIG.get("WORKER_PARENT_ID") if CONFIG.get("WORKER_PARENT_ID") != worker_run_id else None,
         start_at=run_details["date"],
     )
     db.close()
@@ -267,12 +275,13 @@ def finish_feature_record(feature_obj):
     db.close()
 
 
-def finish_worker_record(custom_data=None):
+def finish_worker_record(custom_data=None, worker_run_id=None):
     db.connect(reuse_if_open=True)
+    target_worker_run_id = worker_run_id or CONFIG["WORKER_RUN_ID"]
     worker.update(
         end_at=datetime.now().isoformat(),
         custom_data=custom_data,
-    ).where(worker.worker_run_id == CONFIG["WORKER_RUN_ID"]).execute()
+    ).where(worker.worker_run_id == target_worker_run_id).execute()
     db.close()
 
 
