@@ -38,6 +38,7 @@ class cucu_run(BaseModel):
     full_arguments = JSONField()
     date = TextField()
     start_at = DateTimeField()
+    end_at = DateTimeField(null=True)
 
 
 class worker(BaseModel):
@@ -272,6 +273,14 @@ def finish_worker_record(custom_data=None):
         end_at=datetime.now().isoformat(),
         custom_data=custom_data,
     ).where(worker.worker_run_id == CONFIG["WORKER_RUN_ID"]).execute()
+    db.close()
+
+
+def finish_cucu_run_record():
+    db.connect(reuse_if_open=True)
+    cucu_run.update(
+        end_at=datetime.now().isoformat(),
+    ).where(cucu_run.cucu_run_id == CONFIG["CUCU_RUN_ID"]).execute()
     db.close()
 
 

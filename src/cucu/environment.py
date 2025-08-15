@@ -11,6 +11,7 @@ from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.db import (
     create_database_file,
+    finish_cucu_run_record,
     finish_feature_record,
     finish_scenario_record,
     finish_step_record,
@@ -80,6 +81,7 @@ def after_all(ctx):
         hook(ctx)
 
     finish_worker_record(ctx.worker_custom_data)
+    finish_cucu_run_record()
     CONFIG.restore(with_pop=True)
 
 
