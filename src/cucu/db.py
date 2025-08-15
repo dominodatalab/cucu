@@ -114,7 +114,7 @@ class step(BaseModel):
     duration = FloatField(null=True)
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
-    debug_output = JSONField(null=True)
+    debug_output = TextField(null=True)
     browser_logs = TextField(null=True)
     browser_info = JSONField(null=True)
     screenshots = JSONField(null=True)
