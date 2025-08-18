@@ -241,6 +241,8 @@ def run(
 ):
     """
     run a set of feature files
+    
+    Note: All the os.environ variables are set to be available in the child processes
     """
     init_global_hook_variables()
     dumper = None
