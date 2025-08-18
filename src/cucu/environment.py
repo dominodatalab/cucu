@@ -59,16 +59,18 @@ def before_all(ctx):
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
     ctx.worker_custom_data = {}
 
-    CONFIG["WORKER_RUN_ID"] = generate_short_id()
+    if CONFIG["WORKER_RUN_ID"] != CONFIG["WORKER_PARENT_ID"]:
+        CONFIG["WORKER_RUN_ID"] = generate_short_id()
 
-    results_path = Path(CONFIG["CUCU_RESULTS_DIR"])
-    worker_run_id = CONFIG["WORKER_RUN_ID"]
-    cucu_run_id = CONFIG["CUCU_RUN_ID"]
-    CONFIG["RUN_DB_PATH"] = run_db_path = (
-        results_path / f"run_{cucu_run_id}_{worker_run_id}.db"
-    )
-    create_database_file(run_db_path)
-    record_cucu_run()
+        results_path = Path(CONFIG["CUCU_RESULTS_DIR"])
+        worker_run_id = CONFIG["WORKER_RUN_ID"]
+        cucu_run_id = CONFIG["CUCU_RUN_ID"]
+        CONFIG["RUN_DB_PATH"] = run_db_path = (
+            results_path / f"run_{cucu_run_id}_{worker_run_id}.db"
+        )
+        create_database_file(run_db_path)
+        record_cucu_run()
+
     CONFIG.snapshot("before_all")
 
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
