@@ -135,7 +135,6 @@ def record_cucu_run():
 
     db.connect(reuse_if_open=True)
     start_at = datetime.now().isoformat()
-
     cucu_run.create(
         cucu_run_id=cucu_run_id_val,
         full_arguments=sys.argv,
@@ -151,7 +150,6 @@ def record_cucu_run():
         else None,
         start_at=datetime.now().isoformat(),
     )
-
     db.close()
     return str(db_filepath)
 
