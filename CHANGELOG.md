@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 1.3.2
-- Fix - db limit workers to one per process
+- Fix - db map workers to one to one per process
 
 ## 1.3.1
 - Fix - various minor db issues
