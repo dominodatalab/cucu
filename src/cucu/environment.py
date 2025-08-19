@@ -60,7 +60,9 @@ def before_all(ctx):
     ctx.worker_custom_data = {}
 
     if CONFIG["WORKER_RUN_ID"] != CONFIG["WORKER_PARENT_ID"]:
-        logger.debug("Create a new worker db since this isn't the parent process")
+        logger.debug(
+            "Create a new worker db since this isn't the parent process"
+        )
         CONFIG["WORKER_RUN_ID"] = generate_short_id()
 
         results_path = Path(CONFIG["CUCU_RESULTS_DIR"])
