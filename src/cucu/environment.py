@@ -64,7 +64,7 @@ def before_all(ctx):
         logger.debug(
             "Create a new worker db since this isn't the parent process"
         )
-        # unique enough for multiple cucu_runs to be combined
+        # use seed unique enough for multiple cucu_runs to be combined
         worker_id_seed = f"{CONFIG['WORKER_PARENT_ID']}_{os.getpid()}"
         CONFIG["WORKER_RUN_ID"] = generate_short_id(worker_id_seed)
 
@@ -75,6 +75,9 @@ def before_all(ctx):
             results_path / f"run_{cucu_run_id}_{worker_run_id}.db"
         )
         if not run_db_path.exists():
+            logger.debug(
+                f"Creating new run database file: {run_db_path} for {worker_id_seed}"
+            )
             create_database_file(run_db_path)
             record_cucu_run()
 
