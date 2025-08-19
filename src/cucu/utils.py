@@ -43,14 +43,14 @@ class StopRetryException(Exception):
     pass
 
 
-def generate_short_id():
+def generate_short_id(seed=None):
     """
-    Generate a short 7-character ID based on current performance counter.
-    Used for both cucu_run_id and scenario_run_id.
+    Generate a short 7-character ID based on seed (defaults to current performance counter).
     """
-    return hashlib.sha256(
-        str(time.perf_counter()).encode("utf-8")
-    ).hexdigest()[:7]
+    if seed is None:
+        seed = time.perf_counter()
+
+    return hashlib.sha256(str(seed).encode("utf-8")).hexdigest()[:7]
 
 
 def format_gherkin_table(table, headings=[], prefix=""):
