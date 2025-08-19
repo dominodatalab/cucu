@@ -11,6 +11,7 @@ from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.db import (
     create_database_file,
+    finish_cucu_run_record,
     finish_feature_record,
     finish_scenario_record,
     finish_step_record,
@@ -58,16 +59,21 @@ def before_all(ctx):
     ctx.check_browser_initialized = partial(check_browser_initialized, ctx)
     ctx.worker_custom_data = {}
 
-    CONFIG["WORKER_RUN_ID"] = generate_short_id()
+    if CONFIG["WORKER_RUN_ID"] != CONFIG["WORKER_PARENT_ID"]:
+        logger.debug(
+            "Create a new worker db since this isn't the parent process"
+        )
+        CONFIG["WORKER_RUN_ID"] = generate_short_id()
 
-    results_path = Path(CONFIG["CUCU_RESULTS_DIR"])
-    worker_run_id = CONFIG["WORKER_RUN_ID"]
-    cucu_run_id = CONFIG["CUCU_RUN_ID"]
-    CONFIG["RUN_DB_PATH"] = run_db_path = (
-        results_path / f"run_{cucu_run_id}_{worker_run_id}.db"
-    )
-    create_database_file(run_db_path)
-    record_cucu_run()
+        results_path = Path(CONFIG["CUCU_RESULTS_DIR"])
+        worker_run_id = CONFIG["WORKER_RUN_ID"]
+        cucu_run_id = CONFIG["CUCU_RUN_ID"]
+        CONFIG["RUN_DB_PATH"] = run_db_path = (
+            results_path / f"run_{cucu_run_id}_{worker_run_id}.db"
+        )
+        create_database_file(run_db_path)
+        record_cucu_run()
+
     CONFIG.snapshot("before_all")
 
     for hook in CONFIG["__CUCU_BEFORE_ALL_HOOKS"]:
@@ -80,6 +86,7 @@ def after_all(ctx):
         hook(ctx)
 
     finish_worker_record(ctx.worker_custom_data)
+    finish_cucu_run_record()
     CONFIG.restore(with_pop=True)
 
 

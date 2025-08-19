@@ -38,6 +38,7 @@ class cucu_run(BaseModel):
     full_arguments = JSONField()
     date = TextField()
     start_at = DateTimeField()
+    end_at = DateTimeField(null=True)
 
 
 class worker(BaseModel):
@@ -47,6 +48,14 @@ class worker(BaseModel):
         field="cucu_run_id",
         backref="workers",
         column_name="cucu_run_id",
+        null=True,
+    )
+    parent_id = ForeignKeyField(
+        "self",
+        field="worker_run_id",
+        backref="child_workers",
+        column_name="parent_id",
+        null=True,
     )
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
@@ -114,32 +123,32 @@ class step(BaseModel):
     duration = FloatField(null=True)
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
-    debug_output = JSONField(null=True)
+    debug_output = TextField(null=True)
     browser_logs = TextField(null=True)
     browser_info = JSONField(null=True)
     screenshots = JSONField(null=True)
 
 
 def record_cucu_run():
-    worker_run_id = CONFIG["WORKER_RUN_ID"]
     cucu_run_id_val = CONFIG["CUCU_RUN_ID"]
-    run_details = {
-        "cucu_run_id": cucu_run_id_val,
-        "worker_run_id": worker_run_id,
-        "full_arguments": sys.argv,
-        "date": datetime.now().isoformat(),
-    }
+    worker_run_id = CONFIG["WORKER_RUN_ID"]
+
     db.connect(reuse_if_open=True)
+    start_at = datetime.now().isoformat()
     cucu_run.create(
         cucu_run_id=cucu_run_id_val,
-        full_arguments=run_details["full_arguments"],
-        date=run_details["date"],
-        start_at=run_details["date"],
+        full_arguments=sys.argv,
+        date=start_at,
+        start_at=start_at,
     )
+
     worker.create(
         worker_run_id=worker_run_id,
         cucu_run_id=cucu_run_id_val,
-        start_at=run_details["date"],
+        parent_id=CONFIG.get("WORKER_PARENT_ID")
+        if CONFIG.get("WORKER_PARENT_ID") != worker_run_id
+        else None,
+        start_at=datetime.now().isoformat(),
     )
     db.close()
     return str(db_filepath)
@@ -266,12 +275,21 @@ def finish_feature_record(feature_obj):
     db.close()
 
 
-def finish_worker_record(custom_data=None):
+def finish_worker_record(custom_data=None, worker_run_id=None):
     db.connect(reuse_if_open=True)
+    target_worker_run_id = worker_run_id or CONFIG["WORKER_RUN_ID"]
     worker.update(
         end_at=datetime.now().isoformat(),
         custom_data=custom_data,
-    ).where(worker.worker_run_id == CONFIG["WORKER_RUN_ID"]).execute()
+    ).where(worker.worker_run_id == target_worker_run_id).execute()
+    db.close()
+
+
+def finish_cucu_run_record():
+    db.connect(reuse_if_open=True)
+    cucu_run.update(
+        end_at=datetime.now().isoformat(),
+    ).where(cucu_run.cucu_run_id == CONFIG["CUCU_RUN_ID"]).execute()
     db.close()
 
 

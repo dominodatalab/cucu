@@ -241,6 +241,8 @@ def run(
 ):
     """
     run a set of feature files
+
+    Note: All the os.environ variables are set to be available in the child processes
     """
     init_global_hook_variables()
     dumper = None
@@ -300,7 +302,9 @@ def run(
         os.environ["CUCU_RECORD_ENV_VARS"] = "true"
 
     os.environ["CUCU_RUN_ID"] = CONFIG["CUCU_RUN_ID"] = generate_short_id()
-    CONFIG["WORKER_RUN_ID"] = "parent"
+    os.environ["WORKER_PARENT_ID"] = CONFIG["WORKER_RUN_ID"] = (
+        generate_short_id()
+    )
     if not dry_run:
         create_run(results, filepath)
 
@@ -494,7 +498,7 @@ def run(
             dumper.stop()
 
         if not dry_run and os.path.exists(results):
-            finish_worker_record()
+            finish_worker_record(worker_run_id=CONFIG.get("WORKER_PARENT_ID"))
             consolidate_database_files(results)
 
         if generate_report:
