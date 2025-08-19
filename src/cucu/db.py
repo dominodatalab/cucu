@@ -347,6 +347,9 @@ def consolidate_database_files(results_dir):
     # This function would need a more advanced approach with peewee, so for now, keep using sqlite3 for consolidation
     results_path = Path(results_dir)
     target_db_path = results_path / "run.db"
+    if not target_db_path.exists():
+        create_database_file(target_db_path)
+
     db_files = [
         db for db in results_path.glob("**/*.db") if db.name != "run.db"
     ]
