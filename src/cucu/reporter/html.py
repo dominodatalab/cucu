@@ -1,5 +1,4 @@
 import glob
-import json
 import os
 import shutil
 import sys
@@ -14,6 +13,10 @@ import jinja2
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
+from cucu.db import db
+from cucu.db import feature as FeatureModel
+from cucu.db import scenario as ScenarioModel
+from cucu.db import step as StepModel
 from cucu.utils import ellipsize_filename, get_step_image_dir
 
 
@@ -48,7 +51,6 @@ def process_tags(element):
     element["tags"] = " ".join(prepared_tags)
 
 
-# function to left pad duration with '0' for better alphabetical sorting in html reports.
 def left_pad_zeroes(elapsed_time):
     int_decimal = str(round(elapsed_time, 3)).split(".")
     int_decimal[0] = int_decimal[0].zfill(3)
@@ -57,33 +59,113 @@ def left_pad_zeroes(elapsed_time):
 
 
 def generate(results, basepath, only_failures=False):
-    """
-    generate an HTML report for the results provided.
-    """
-
     show_status = CONFIG["CUCU_SHOW_STATUS"] == "true"
 
-    features = []
+    db_path = os.path.join(results, "run.db")
+    if not os.path.exists(db_path):
+        return None
 
-    run_json_filepaths = list(glob.iglob(os.path.join(results, "*run.json")))
-    logger.info(
-        f"Starting to process {len(run_json_filepaths)} files for report"
-    )
+    db.init(db_path)
+    db.connect(reuse_if_open=True)
 
-    for run_json_filepath in run_json_filepaths:
-        with open(run_json_filepath, "rb") as index_input:
-            try:
-                features += json.loads(index_input.read())
-                if show_status:
-                    print("r", end="", flush=True)
-            except Exception as exception:
-                if show_status:
-                    print("")  # add a newline before logger
-                logger.warning(
-                    f"unable to read file {run_json_filepath}, got error: {exception}"
+    try:
+        features = []
+
+        # Query features from database
+        feature_records = FeatureModel.select().order_by(FeatureModel.name)
+        logger.info(
+            f"Starting to process {len(feature_records)} features for report"
+        )
+
+        for feature_record in feature_records:
+            feature_dict = {
+                "name": feature_record.name,
+                "filename": feature_record.filename,
+                "description": feature_record.description,
+                "tags": feature_record.tags.split()
+                if feature_record.tags
+                else [],
+                "status": "passed",
+                "elements": [],
+            }
+
+            scenario_records = (
+                ScenarioModel.select()
+                .where(
+                    ScenarioModel.feature_run_id
+                    == feature_record.feature_run_id
+                )
+                .order_by(ScenarioModel.seq)
+            )
+
+            feature_has_failures = False
+
+            for scenario_record in scenario_records:
+                scenario_dict = {
+                    "name": scenario_record.name,
+                    "line": scenario_record.line_number,
+                    "tags": scenario_record.tags.split()
+                    if scenario_record.tags
+                    else [],
+                    "status": scenario_record.status or "passed",
+                    "steps": [],
+                }
+
+                if scenario_record.status == "failed":
+                    feature_has_failures = True
+
+                step_records = (
+                    StepModel.select()
+                    .where(
+                        StepModel.scenario_run_id
+                        == scenario_record.scenario_run_id
+                    )
+                    .order_by(StepModel.seq)
                 )
 
-    # copy the external dependencies to the reports destination directory
+                for step_record in step_records:
+                    step_dict = {
+                        "keyword": step_record.keyword,
+                        "name": step_record.name,
+                        "result": {
+                            "status": step_record.status or "passed",
+                            "duration": step_record.duration or 0,
+                            "timestamp": step_record.end_at or "",
+                        },
+                    }
+
+                    if step_record.text:
+                        step_dict["text"] = step_record.text
+
+                    if step_record.table_data:
+                        step_dict["table"] = {
+                            "headings": step_record.table_data[0]
+                            if step_record.table_data
+                            else [],
+                            "rows": step_record.table_data[1:]
+                            if len(step_record.table_data) > 1
+                            else [],
+                        }
+
+                    if step_record.status == "failed":
+                        step_dict["result"]["error_message"] = [
+                            step_record.debug_output or ""
+                        ]
+
+                    scenario_dict["steps"].append(step_dict)
+
+                feature_dict["elements"].append(scenario_dict)
+
+            if feature_has_failures:
+                feature_dict["status"] = "failed"
+            elif only_failures and not feature_has_failures:
+                continue
+
+            features.append(feature_dict)
+
+    finally:
+        db.close()
+
     cucu_dir = os.path.dirname(sys.modules["cucu"].__file__)
     external_dir = os.path.join(cucu_dir, "reporter", "external")
     shutil.copytree(external_dir, os.path.join(basepath, "external"))
@@ -92,18 +174,10 @@ def generate(results, basepath, only_failures=False):
         os.path.join(basepath, "favicon.png"),
     )
 
-    #
-    # augment existing test run data with:
-    #  * features & scenarios with `duration` attribute computed by adding all
-    #    step durations.
-    #  * add `image` attribute to a step if it has an underlying .png image.
-    #
     CONFIG.snapshot()
     reported_features = []
     for feature in features:
         feature["folder_name"] = ellipsize_filename(feature["name"])
-        if show_status:
-            print("F", end="", flush=True)
         scenarios = []
 
         if feature["status"] != "untested" and "elements" in feature:
@@ -158,9 +232,6 @@ def generate(results, basepath, only_failures=False):
             else:
                 logger.info(f"No config to reload: {scenario_configpath}")
 
-            if show_status:
-                print("S", end="", flush=True)
-
             process_tags(scenario)
 
             sub_headers = []
@@ -193,8 +264,6 @@ def generate(results, basepath, only_failures=False):
             step_index = 0
             scenario_started_at = None
             for step in scenario["steps"]:
-                if show_status:
-                    print("s", end="", flush=True)
                 total_steps += 1
                 image_dir = get_step_image_dir(step_index, step["name"])
                 image_dirpath = os.path.join(scenario_filepath, image_dir)
@@ -282,8 +351,6 @@ def generate(results, basepath, only_failures=False):
             if os.path.exists(logs_dir):
                 log_files = []
                 for log_file in glob.iglob(os.path.join(logs_dir, "*.*")):
-                    if show_status:
-                        print("l", end="", flush=True)
                     log_filepath = log_file.removeprefix(
                         f"{scenario_filepath}/"
                     )
@@ -315,9 +382,6 @@ def generate(results, basepath, only_failures=False):
                 for log_file in [
                     x for x in log_files if ".console." in x["name"]
                 ]:
-                    if show_status:
-                        print("c", end="", flush=True)
-
                     log_file_filepath = os.path.join(
                         scenario_filepath, "logs", log_file["name"]
                     )

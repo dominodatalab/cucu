@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 1.3.3
-- Change - generate html from db record
+- Change - generate html from run.db
 - Fix - make run_ids more unique
 
 ## 1.3.2
