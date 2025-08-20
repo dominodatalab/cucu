@@ -1,3 +1,4 @@
+import time
 import datetime
 import json
 import os
@@ -98,7 +99,8 @@ def after_all(ctx):
 
 
 def before_feature(ctx, feature):
-    feature.feature_run_id = generate_short_id()
+    feature_run_id_seed = f"{CONFIG['WORKER_RUN_ID']}_{time.perf_counter()}"
+    feature.feature_run_id = generate_short_id(feature_run_id_seed)
     feature.custom_data = {}
     record_feature(feature)
 
@@ -170,7 +172,8 @@ def before_scenario(ctx, scenario):
         )
         ctx.browser_log_tee = TeeStream(ctx.browser_log_file)
 
-    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id()
+    scenario_run_id_seed = f"{ctx.feature.feature_run_id}_{time.perf_counter()}"
+    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id(scenario_run_id_seed)
     record_scenario(ctx)
 
     # run before all scenario hooks
@@ -278,7 +281,8 @@ def cleanup_browsers(ctx):
 
 
 def before_step(ctx, step):
-    step.step_run_id = generate_short_id()
+    step_run_id_seed = f"{ctx.scenario.scenario_run_id}_{time.perf_counter()}"
+    step.step_run_id = generate_short_id(step_run_id_seed)
     step.start_at = datetime.datetime.now().isoformat()[:-3]
 
     sys.stdout.captured()

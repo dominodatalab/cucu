@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.3.3
 - Change - generate html from db record
+- Fix - make run_ids more unique
 
 ## 1.3.2
 - Fix - db map workers to one to one per process
