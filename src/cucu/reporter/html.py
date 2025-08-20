@@ -13,7 +13,7 @@ import jinja2
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
-from cucu.db import db
+from cucu.db import close_html_report_db, init_html_report_db
 from cucu.db import feature as FeatureModel
 from cucu.db import scenario as ScenarioModel
 from cucu.db import step as StepModel
@@ -59,95 +59,90 @@ def left_pad_zeroes(elapsed_time):
 
 
 def generate(results, basepath, only_failures=False):
+    """
+    The current limitation is that this assumes only on cucu_run so the first is used throughout.
+    """
     db_path = os.path.join(results, "run.db")
-    if not os.path.exists(db_path):
-        return None
-
-    db.init(db_path)
-    db.connect(reuse_if_open=True)
 
     try:
+        init_html_report_db(db_path)
         features = []
 
-        # Query features from database
-        feature_records = FeatureModel.select().order_by(FeatureModel.name)
+        db_features = FeatureModel.select().order_by(FeatureModel.name)
         logger.info(
-            f"Starting to process {len(feature_records)} features for report"
+            f"Starting to process {len(db_features)} features for report"
         )
 
-        for feature_record in feature_records:
+        for db_feature in db_features:
             feature_dict = {
-                "name": feature_record.name,
-                "filename": feature_record.filename,
-                "description": feature_record.description,
-                "tags": feature_record.tags.split()
-                if feature_record.tags
-                else [],
+                "name": db_feature.name,
+                "filename": db_feature.filename,
+                "description": db_feature.description,
+                "tags": db_feature.tags.split() if db_feature.tags else [],
                 "status": "passed",
                 "elements": [],
             }
 
-            scenario_records = (
+            db_scenarios = (
                 ScenarioModel.select()
                 .where(
-                    ScenarioModel.feature_run_id
-                    == feature_record.feature_run_id
+                    ScenarioModel.feature_run_id == db_feature.feature_run_id
                 )
                 .order_by(ScenarioModel.seq)
             )
 
             feature_has_failures = False
 
-            for scenario_record in scenario_records:
+            for db_scenario in db_scenarios:
                 scenario_dict = {
-                    "name": scenario_record.name,
-                    "line": scenario_record.line_number,
-                    "tags": scenario_record.tags.split()
-                    if scenario_record.tags
+                    "name": db_scenario.name,
+                    "line": db_scenario.line_number,
+                    "tags": db_scenario.tags.split()
+                    if db_scenario.tags
                     else [],
-                    "status": scenario_record.status or "passed",
+                    "status": db_scenario.status or "passed",
                     "steps": [],
                 }
 
-                if scenario_record.status == "failed":
+                if db_scenario.status == "failed":
                     feature_has_failures = True
 
-                step_records = (
+                db_steps = (
                     StepModel.select()
                     .where(
                         StepModel.scenario_run_id
-                        == scenario_record.scenario_run_id
+                        == db_scenario.scenario_run_id
                     )
                     .order_by(StepModel.seq)
                 )
 
-                for step_record in step_records:
+                for db_step in db_steps:
                     step_dict = {
-                        "keyword": step_record.keyword,
-                        "name": step_record.name,
+                        "keyword": db_step.keyword,
+                        "name": db_step.name,
                         "result": {
-                            "status": step_record.status or "passed",
-                            "duration": step_record.duration or 0,
-                            "timestamp": step_record.end_at or "",
+                            "status": db_step.status or "passed",
+                            "duration": db_step.duration or 0,
+                            "timestamp": db_step.end_at or "",
                         },
                     }
 
-                    if step_record.text:
-                        step_dict["text"] = step_record.text
+                    if db_step.text:
+                        step_dict["text"] = db_step.text
 
-                    if step_record.table_data:
+                    if db_step.table_data:
                         step_dict["table"] = {
-                            "headings": step_record.table_data[0]
-                            if step_record.table_data
+                            "headings": db_step.table_data[0]
+                            if db_step.table_data
                             else [],
-                            "rows": step_record.table_data[1:]
-                            if len(step_record.table_data) > 1
+                            "rows": db_step.table_data[1:]
+                            if len(db_step.table_data) > 1
                             else [],
                         }
 
-                    if step_record.status == "failed":
+                    if db_step.status == "failed":
                         step_dict["result"]["error_message"] = [
-                            step_record.debug_output or ""
+                            db_step.debug_output or ""
                         ]
 
                     scenario_dict["steps"].append(step_dict)
@@ -162,7 +157,7 @@ def generate(results, basepath, only_failures=False):
             features.append(feature_dict)
 
     finally:
-        db.close()
+        close_html_report_db()
 
     cucu_dir = os.path.dirname(sys.modules["cucu"].__file__)
     external_dir = os.path.join(cucu_dir, "reporter", "external")

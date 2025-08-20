@@ -379,3 +379,12 @@ def consolidate_database_files(results_dir):
                     )
                     target_conn.commit()
             db_file.unlink()
+
+
+def init_html_report_db(db_path):
+    db.init(db_path)
+    db.connect(reuse_if_open=True)
+
+
+def close_html_report_db():
+    db.close()
