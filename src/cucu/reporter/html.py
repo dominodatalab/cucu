@@ -145,6 +145,8 @@ def generate(results, basepath, only_failures=False):
                             db_step.debug_output or ""
                         ]
 
+                    step_dict["result"]["stdout"] = db_step.stdout
+                    step_dict["result"]["stderr"] = db_step.stderr
                     scenario_dict["steps"].append(step_dict)
 
                 feature_dict["elements"].append(scenario_dict)

@@ -115,6 +115,8 @@ class step(BaseModel):
     parent_seq = IntegerField(null=True)
     keyword = TextField()
     name = TextField()
+    stdout = TextField(null=True)
+    stderr = TextField(null=True)
     text = TextField(null=True)
     table_data = JSONField(null=True)
     location = TextField()
@@ -225,6 +227,14 @@ def finish_step_record(step_obj, duration):
             }
             screenshot_infos.append(screenshot_info)
 
+    stdout = None
+    if "stdout" in step_obj.__dict__ and step_obj.stdout != []:
+        stdout = CONFIG.hide_secrets("".join(step_obj.stdout).rstrip())
+
+    stderr = None
+    if "stderr" in step_obj.__dict__ and step_obj.stderr != []:
+        stderr = CONFIG.hide_secrets("".join(step_obj.stderr).rstrip())
+
     step.update(
         section_level=getattr(step_obj, "section_level", None),
         parent_seq=step_obj.parent_seq,
@@ -236,6 +246,8 @@ def finish_step_record(step_obj, duration):
         browser_logs=step_obj.browser_logs,
         browser_info=step_obj.browser_info,
         screenshots=screenshot_infos,
+        stdout=stdout,
+        stderr=stderr,
     ).where(step.step_run_id == step_obj.step_run_id).execute()
     db.close()
 

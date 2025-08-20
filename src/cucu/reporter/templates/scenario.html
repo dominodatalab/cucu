@@ -131,7 +131,7 @@
                 <tr class="row"><td style="min-width: 0;" class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
 
                 {% if step['result']['stdout'] %}
-                    <pre style="color: darkgray; margin: 0;">{{ escape("\n".join(step['result']['stdout'])) }}</pre>
+                    <pre style="color: darkgray; margin: 0;">{{ escape(step['result']['stdout']) }}</pre>
                 {% endif %}
 
                 {% if step['images'] is defined %}
