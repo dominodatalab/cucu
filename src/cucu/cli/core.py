@@ -510,22 +510,17 @@ def _generate_report(
     only_failures: False,
     junit: str | None = None,
 ):
-    """
-    helper method to handle report generation so it can be used by the `cucu report`
-    command also the `cucu run` when told to generate a report. If junit is provided, it adds report
-    path to the JUnit files.
-
-
-    parameters:
-        results_dir(string): the results directory containing the previous test run
-        output(string): the directory where we'll generate the report
-        only_failures(bool, optional): if only report failures. The default is False.
-        junit(str|None, optional): the directory of the JUnit files. The default if None.
-    """
     if os.path.exists(output):
         shutil.rmtree(output)
 
     os.makedirs(output)
+
+    run_details_filepath = os.path.join(results_dir, "run_details.json")
+    if os.path.exists(run_details_filepath):
+        with open(run_details_filepath, encoding="utf8") as _input:
+            run_details = json.loads(_input.read())
+
+        behave_init(run_details["filepath"])
 
     if os.path.exists(results_dir):
         consolidate_database_files(results_dir)
@@ -601,19 +596,6 @@ def report(
 
     if show_skips:
         os.environ["CUCU_SHOW_SKIPS"] = "true"
-
-    run_details_filepath = os.path.join(results_dir, "run_details.json")
-
-    if os.path.exists(run_details_filepath):
-        # load the run details at the time of execution for the provided results
-        # directory
-        run_details = {}
-
-        with open(run_details_filepath, encoding="utf8") as _input:
-            run_details = json.loads(_input.read())
-
-        # initialize any underlying custom step code things
-        behave_init(run_details["filepath"])
 
     _generate_report(
         results_dir, output, only_failures=only_failures, junit=junit
