@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.3.3
 - Change - generate html from run.db
+- Remove - --show-status option for report generation
 - Fix - make run_ids more unique
 
 ## 1.3.2

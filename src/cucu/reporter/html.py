@@ -59,8 +59,6 @@ def left_pad_zeroes(elapsed_time):
 
 
 def generate(results, basepath, only_failures=False):
-    show_status = CONFIG["CUCU_SHOW_STATUS"] == "true"
-
     db_path = os.path.join(results, "run.db")
     if not os.path.exists(db_path):
         return None
@@ -426,8 +424,6 @@ def generate(results, basepath, only_failures=False):
 
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)  # nosec
-    if show_status:
-        print("")  # add a newline to end status
 
     def urlencode(string):
         """
