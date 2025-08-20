@@ -556,7 +556,7 @@ def _add_report_path_in_junit(junit_folder, report_folder):
 
 
 @main.command()
-@click.argument("filepath", default="results")
+@click.argument("results_dir", default="results")
 @click.option(
     "--only-failures",
     default=False,
@@ -584,7 +584,7 @@ def _add_report_path_in_junit(junit_folder, report_folder):
     "the same location as --results",
 )
 def report(
-    filepath,
+    results_dir,
     only_failures,
     logging_level,
     show_skips,
@@ -602,7 +602,7 @@ def report(
     if show_skips:
         os.environ["CUCU_SHOW_SKIPS"] = "true"
 
-    run_details_filepath = os.path.join(filepath, "run_details.json")
+    run_details_filepath = os.path.join(results_dir, "run_details.json")
 
     if os.path.exists(run_details_filepath):
         # load the run details at the time of execution for the provided results
@@ -616,7 +616,7 @@ def report(
         behave_init(run_details["filepath"])
 
     _generate_report(
-        filepath, output, only_failures=only_failures, junit=junit
+        results_dir, output, only_failures=only_failures, junit=junit
     )
 
 
