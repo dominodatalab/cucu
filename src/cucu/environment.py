@@ -1,8 +1,8 @@
-import time
 import datetime
 import json
 import os
 import sys
+import time
 import traceback
 from functools import partial
 from pathlib import Path
@@ -172,8 +172,12 @@ def before_scenario(ctx, scenario):
         )
         ctx.browser_log_tee = TeeStream(ctx.browser_log_file)
 
-    scenario_run_id_seed = f"{ctx.feature.feature_run_id}_{time.perf_counter()}"
-    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id(scenario_run_id_seed)
+    scenario_run_id_seed = (
+        f"{ctx.feature.feature_run_id}_{time.perf_counter()}"
+    )
+    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id(
+        scenario_run_id_seed
+    )
     record_scenario(ctx)
 
     # run before all scenario hooks

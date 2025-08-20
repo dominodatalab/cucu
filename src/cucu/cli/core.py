@@ -302,7 +302,9 @@ def run(
         os.environ["CUCU_RECORD_ENV_VARS"] = "true"
 
     cucu_run_id_seed = f"{time.perf_counter()}_{os.getpid()}"
-    os.environ["CUCU_RUN_ID"] = CONFIG["CUCU_RUN_ID"] = generate_short_id(cucu_run_id_seed)
+    os.environ["CUCU_RUN_ID"] = CONFIG["CUCU_RUN_ID"] = generate_short_id(
+        cucu_run_id_seed
+    )
     worker_id_seed = f"{CONFIG['CUCU_RUN_ID']}_{os.getpid()}"
     os.environ["WORKER_PARENT_ID"] = CONFIG["WORKER_RUN_ID"] = (
         generate_short_id(worker_id_seed)
