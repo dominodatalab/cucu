@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 import sys
 import traceback
 from functools import partial
@@ -63,7 +64,9 @@ def before_all(ctx):
         logger.debug(
             "Create a new worker db since this isn't the parent process"
         )
-        CONFIG["WORKER_RUN_ID"] = generate_short_id()
+        # use seed unique enough for multiple cucu_runs to be combined
+        worker_id_seed = f"{CONFIG['WORKER_PARENT_ID']}_{os.getpid()}"
+        CONFIG["WORKER_RUN_ID"] = generate_short_id(worker_id_seed)
 
         results_path = Path(CONFIG["CUCU_RESULTS_DIR"])
         worker_run_id = CONFIG["WORKER_RUN_ID"]
@@ -71,8 +74,12 @@ def before_all(ctx):
         CONFIG["RUN_DB_PATH"] = run_db_path = (
             results_path / f"run_{cucu_run_id}_{worker_run_id}.db"
         )
-        create_database_file(run_db_path)
-        record_cucu_run()
+        if not run_db_path.exists():
+            logger.debug(
+                f"Creating new run database file: {run_db_path} for {worker_id_seed}"
+            )
+            create_database_file(run_db_path)
+            record_cucu_run()
 
     CONFIG.snapshot("before_all")
 

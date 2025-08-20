@@ -8,6 +8,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 1.3.3
 - Change - generate html from db record
 
+## 1.3.2
+- Fix - db map workers to one to one per process
 
 ## 1.3.1
 - Fix - various minor db issues
