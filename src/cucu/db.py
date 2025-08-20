@@ -36,6 +36,7 @@ class BaseModel(Model):
 class cucu_run(BaseModel):
     cucu_run_id = TextField(primary_key=True)
     full_arguments = JSONField()
+    filepath = TextField()
     date = TextField()
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
@@ -130,6 +131,7 @@ class step(BaseModel):
 
 
 def record_cucu_run():
+    filepath = CONFIG["CUCU_FILEPATH"]
     cucu_run_id_val = CONFIG["CUCU_RUN_ID"]
     worker_run_id = CONFIG["WORKER_RUN_ID"]
 
@@ -138,6 +140,7 @@ def record_cucu_run():
     cucu_run.create(
         cucu_run_id=cucu_run_id_val,
         full_arguments=sys.argv,
+        filepath=filepath,
         date=start_at,
         start_at=start_at,
     )
@@ -341,6 +344,11 @@ def create_database_file(db_filepath):
             JOIN feature f ON s.feature_run_id = f.feature_run_id
         """)
     db.close()
+
+
+def get_first_cucu_run_filepath():
+    run_record = cucu_run.select().first()
+    return run_record.filepath
 
 
 def consolidate_database_files(results_dir):

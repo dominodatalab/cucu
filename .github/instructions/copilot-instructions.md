@@ -21,6 +21,8 @@ applyTo: '**'
 - Avoid having much in the `__init__.py` file
 - Keep commands implemented in the `cli/core.py` file
 - Only have direct database interactions in `db.py` - other modules should use functions from the db module
+- No database migrations needed since the database is generated at runtime for each test run
+- Always check the error code returned by the command and stdout and stderr when running commands
 - Avoid comments where the code is self-explanatory, including obvious single-line comments
 - In general use the CONFIG to store values that are used in multiple places and ctx to store values that are shared in a scenario run
 - Avoid docstrings for functions that are obvious

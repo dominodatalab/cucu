@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import glob
-import json
 import os
 import shutil
 import signal
@@ -33,7 +32,12 @@ from cucu.cli import thread_dumper
 from cucu.cli.run import behave, behave_init, create_run
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.config import CONFIG
-from cucu.db import consolidate_database_files, finish_worker_record
+from cucu.db import (
+    consolidate_database_files,
+    db,
+    finish_worker_record,
+    get_first_cucu_run_filepath,
+)
 from cucu.lint import linter
 from cucu.utils import generate_short_id
 
@@ -300,6 +304,7 @@ def run(
         generate_short_id(worker_id_seed)
     )
     if not dry_run:
+        os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = filepath
         create_run(results, filepath)
 
     try:
@@ -515,15 +520,18 @@ def _generate_report(
 
     os.makedirs(output)
 
-    run_details_filepath = os.path.join(results_dir, "run_details.json")
-    if os.path.exists(run_details_filepath):
-        with open(run_details_filepath, encoding="utf8") as _input:
-            run_details = json.loads(_input.read())
-
-        behave_init(run_details["filepath"])
-
     if os.path.exists(results_dir):
         consolidate_database_files(results_dir)
+
+    db_path = os.path.join(results_dir, "run.db")
+
+    try:
+        db.init(db_path)
+        db.connect(reuse_if_open=True)
+        filepath = get_first_cucu_run_filepath()
+        behave_init(filepath)
+    finally:
+        db.close()
 
     report_location = reporter.generate(
         results_dir, output, only_failures=only_failures
