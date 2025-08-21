@@ -65,7 +65,7 @@ def before_all(ctx):
         logger.debug(
             "Create a new worker db since this isn't the parent process"
         )
-        # use seed unique enough for multiple cucu_runs to be combined
+        # use seed unique enough for multiple cucu_runs to be combined but predictable within the same run
         worker_id_seed = f"{CONFIG['WORKER_PARENT_ID']}_{os.getpid()}"
         CONFIG["WORKER_RUN_ID"] = generate_short_id(worker_id_seed)
 
@@ -285,8 +285,10 @@ def cleanup_browsers(ctx):
 
 
 def before_step(ctx, step):
-    step_run_id_seed = f"{ctx.scenario.scenario_run_id}_{time.perf_counter()}"
-    step.step_run_id = generate_short_id(step_run_id_seed)
+    step_run_id_seed = f"{ctx.scenario.scenario_run_id}_{ctx.step_index}_{time.perf_counter()}"
+    step.step_run_id = generate_short_id(
+        step_run_id_seed, length=10
+    )  # up to 10 characters to give two orders of magnitude less chance of collision
     step.start_at = datetime.datetime.now().isoformat()[:-3]
 
     sys.stdout.captured()
