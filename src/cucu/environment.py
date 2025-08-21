@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 import sys
+import time
 import traceback
 from functools import partial
 from pathlib import Path
@@ -64,7 +65,7 @@ def before_all(ctx):
         logger.debug(
             "Create a new worker db since this isn't the parent process"
         )
-        # use seed unique enough for multiple cucu_runs to be combined
+        # use seed unique enough for multiple cucu_runs to be combined but predictable within the same run
         worker_id_seed = f"{CONFIG['WORKER_PARENT_ID']}_{os.getpid()}"
         CONFIG["WORKER_RUN_ID"] = generate_short_id(worker_id_seed)
 
@@ -98,7 +99,8 @@ def after_all(ctx):
 
 
 def before_feature(ctx, feature):
-    feature.feature_run_id = generate_short_id()
+    feature_run_id_seed = f"{CONFIG['WORKER_RUN_ID']}_{time.perf_counter()}"
+    feature.feature_run_id = generate_short_id(feature_run_id_seed)
     feature.custom_data = {}
     record_feature(feature)
 
@@ -170,7 +172,12 @@ def before_scenario(ctx, scenario):
         )
         ctx.browser_log_tee = TeeStream(ctx.browser_log_file)
 
-    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id()
+    scenario_run_id_seed = (
+        f"{ctx.feature.feature_run_id}_{time.perf_counter()}"
+    )
+    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id(
+        scenario_run_id_seed
+    )
     record_scenario(ctx)
 
     # run before all scenario hooks
@@ -278,7 +285,10 @@ def cleanup_browsers(ctx):
 
 
 def before_step(ctx, step):
-    step.step_run_id = generate_short_id()
+    step_run_id_seed = f"{ctx.scenario.scenario_run_id}_{ctx.step_index}_{time.perf_counter()}"
+    step.step_run_id = generate_short_id(
+        step_run_id_seed, length=10
+    )  # up to 10 characters to give two orders of magnitude less chance of collision
     step.start_at = datetime.datetime.now().isoformat()[:-3]
 
     sys.stdout.captured()
