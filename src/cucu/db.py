@@ -254,7 +254,7 @@ def finish_step_record(step_obj, duration):
     if "stdout" in step_obj.__dict__ and step_obj.stdout != []:
         stdout += [CONFIG.hide_secrets("".join(step_obj.stdout).rstrip())]
 
-    stderr = None
+    stderr = []
     if "stderr" in step_obj.__dict__ and step_obj.stderr != []:
         stderr = [CONFIG.hide_secrets("".join(step_obj.stderr).rstrip())]
 
