@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import glob
-import json
 import os
 import shutil
 import signal
@@ -33,7 +32,12 @@ from cucu.cli import thread_dumper
 from cucu.cli.run import behave, behave_init, create_run
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.config import CONFIG
-from cucu.db import consolidate_database_files, finish_worker_record
+from cucu.db import (
+    consolidate_database_files,
+    db,
+    finish_worker_record,
+    get_first_cucu_run_filepath,
+)
 from cucu.lint import linter
 from cucu.utils import generate_short_id
 
@@ -125,12 +129,6 @@ def main():
     default=False,
     is_flag=True,
     help="when set skips are shown",
-)
-@click.option(
-    "--show-status",
-    default=False,
-    is_flag=True,
-    help="when set status output is shown (helpful for CI that wants stdout updates)",
 )
 @click.option(
     "--periodic-thread-dumper",
@@ -233,7 +231,6 @@ def run(
     feature_timeout,
     secrets,
     show_skips,
-    show_status,
     tags,
     selenium_remote_url,
     workers,
@@ -289,9 +286,6 @@ def run(
     if show_skips:
         os.environ["CUCU_SHOW_SKIPS"] = "true"
 
-    if show_status:
-        os.environ["CUCU_SHOW_STATUS"] = "true"
-
     if junit_with_stacktrace:
         os.environ["CUCU_JUNIT_WITH_STACKTRACE"] = "true"
 
@@ -310,6 +304,7 @@ def run(
         generate_short_id(worker_id_seed)
     )
     if not dry_run:
+        os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = filepath
         create_run(results, filepath)
 
     try:
@@ -520,18 +515,6 @@ def _generate_report(
     only_failures: False,
     junit: str | None = None,
 ):
-    """
-    helper method to handle report generation so it can be used by the `cucu report`
-    command also the `cucu run` when told to generate a report. If junit is provided, it adds report
-    path to the JUnit files.
-
-
-    parameters:
-        results_dir(string): the results directory containing the previous test run
-        output(string): the directory where we'll generate the report
-        only_failures(bool, optional): if only report failures. The default is False.
-        junit(str|None, optional): the directory of the JUnit files. The default if None.
-    """
     if os.path.exists(output):
         shutil.rmtree(output)
 
@@ -539,6 +522,16 @@ def _generate_report(
 
     if os.path.exists(results_dir):
         consolidate_database_files(results_dir)
+
+    db_path = os.path.join(results_dir, "run.db")
+
+    try:
+        db.init(db_path)
+        db.connect(reuse_if_open=True)
+        filepath = get_first_cucu_run_filepath()
+        behave_init(filepath)
+    finally:
+        db.close()
 
     report_location = reporter.generate(
         results_dir, output, only_failures=only_failures
@@ -566,7 +559,7 @@ def _add_report_path_in_junit(junit_folder, report_folder):
 
 
 @main.command()
-@click.argument("filepath", default="results")
+@click.argument("results_dir", default="results")
 @click.option(
     "--only-failures",
     default=False,
@@ -585,12 +578,6 @@ def _add_report_path_in_junit(junit_folder, report_folder):
     is_flag=True,
     help="when set skips are shown",
 )
-@click.option(
-    "--show-status",
-    default=False,
-    is_flag=True,
-    help="when set status output is shown (helpful for CI that wants stdout updates)",
-)
 @click.option("-o", "--output", default="report")
 @click.option(
     "-j",
@@ -600,11 +587,10 @@ def _add_report_path_in_junit(junit_folder, report_folder):
     "the same location as --results",
 )
 def report(
-    filepath,
+    results_dir,
     only_failures,
     logging_level,
     show_skips,
-    show_status,
     output,
     junit,
 ):
@@ -619,24 +605,8 @@ def report(
     if show_skips:
         os.environ["CUCU_SHOW_SKIPS"] = "true"
 
-    if show_status:
-        os.environ["CUCU_SHOW_STATUS"] = "true"
-
-    run_details_filepath = os.path.join(filepath, "run_details.json")
-
-    if os.path.exists(run_details_filepath):
-        # load the run details at the time of execution for the provided results
-        # directory
-        run_details = {}
-
-        with open(run_details_filepath, encoding="utf8") as _input:
-            run_details = json.loads(_input.read())
-
-        # initialize any underlying custom step code things
-        behave_init(run_details["filepath"])
-
     _generate_report(
-        filepath, output, only_failures=only_failures, junit=junit
+        results_dir, output, only_failures=only_failures, junit=junit
     )
 
 

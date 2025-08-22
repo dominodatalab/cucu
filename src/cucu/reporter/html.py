@@ -1,5 +1,4 @@
 import glob
-import json
 import os
 import shutil
 import sys
@@ -14,6 +13,10 @@ import jinja2
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
+from cucu.db import close_html_report_db, init_html_report_db
+from cucu.db import feature as FeatureModel
+from cucu.db import scenario as ScenarioModel
+from cucu.db import step as StepModel
 from cucu.utils import ellipsize_filename, get_step_image_dir
 
 
@@ -48,7 +51,6 @@ def process_tags(element):
     element["tags"] = " ".join(prepared_tags)
 
 
-# function to left pad duration with '0' for better alphabetical sorting in html reports.
 def left_pad_zeroes(elapsed_time):
     int_decimal = str(round(elapsed_time, 3)).split(".")
     int_decimal[0] = int_decimal[0].zfill(3)
@@ -58,32 +60,107 @@ def left_pad_zeroes(elapsed_time):
 
 def generate(results, basepath, only_failures=False):
     """
-    generate an HTML report for the results provided.
+    The current limitation is that this assumes only on cucu_run so the first is used throughout.
     """
+    db_path = os.path.join(results, "run.db")
 
-    show_status = CONFIG["CUCU_SHOW_STATUS"] == "true"
+    try:
+        init_html_report_db(db_path)
+        features = []
 
-    features = []
+        db_features = FeatureModel.select().order_by(FeatureModel.name)
+        logger.info(
+            f"Starting to process {len(db_features)} features for report"
+        )
 
-    run_json_filepaths = list(glob.iglob(os.path.join(results, "*run.json")))
-    logger.info(
-        f"Starting to process {len(run_json_filepaths)} files for report"
-    )
+        for db_feature in db_features:
+            feature_dict = {
+                "name": db_feature.name,
+                "filename": db_feature.filename,
+                "description": db_feature.description,
+                "tags": db_feature.tags.split() if db_feature.tags else [],
+                "status": "passed",
+                "elements": [],
+            }
 
-    for run_json_filepath in run_json_filepaths:
-        with open(run_json_filepath, "rb") as index_input:
-            try:
-                features += json.loads(index_input.read())
-                if show_status:
-                    print("r", end="", flush=True)
-            except Exception as exception:
-                if show_status:
-                    print("")  # add a newline before logger
-                logger.warning(
-                    f"unable to read file {run_json_filepath}, got error: {exception}"
+            db_scenarios = (
+                ScenarioModel.select()
+                .where(
+                    ScenarioModel.feature_run_id == db_feature.feature_run_id
+                )
+                .order_by(ScenarioModel.seq)
+            )
+
+            feature_has_failures = False
+
+            for db_scenario in db_scenarios:
+                scenario_dict = {
+                    "name": db_scenario.name,
+                    "line": db_scenario.line_number,
+                    "tags": db_scenario.tags.split()
+                    if db_scenario.tags
+                    else [],
+                    "status": db_scenario.status or "passed",
+                    "steps": [],
+                }
+
+                if db_scenario.status == "failed":
+                    feature_has_failures = True
+
+                db_steps = (
+                    StepModel.select()
+                    .where(
+                        StepModel.scenario_run_id
+                        == db_scenario.scenario_run_id
+                    )
+                    .order_by(StepModel.seq)
                 )
 
-    # copy the external dependencies to the reports destination directory
+                for db_step in db_steps:
+                    step_dict = {
+                        "keyword": db_step.keyword,
+                        "name": db_step.name,
+                        "result": {
+                            "status": db_step.status or "passed",
+                            "duration": db_step.duration or 0,
+                            "timestamp": db_step.end_at or "",
+                        },
+                    }
+
+                    if db_step.text:
+                        step_dict["text"] = db_step.text
+
+                    if db_step.table_data:
+                        step_dict["table"] = {
+                            "headings": db_step.table_data[0]
+                            if db_step.table_data
+                            else [],
+                            "rows": db_step.table_data[1:]
+                            if len(db_step.table_data) > 1
+                            else [],
+                        }
+
+                    if db_step.status == "failed":
+                        step_dict["result"]["error_message"] = [
+                            db_step.debug_output or ""
+                        ]
+
+                    step_dict["result"]["stdout"] = db_step.stdout
+                    step_dict["result"]["stderr"] = db_step.stderr
+                    scenario_dict["steps"].append(step_dict)
+
+                feature_dict["elements"].append(scenario_dict)
+
+            if feature_has_failures:
+                feature_dict["status"] = "failed"
+            elif only_failures and not feature_has_failures:
+                continue
+
+            features.append(feature_dict)
+
+    finally:
+        close_html_report_db()
+
     cucu_dir = os.path.dirname(sys.modules["cucu"].__file__)
     external_dir = os.path.join(cucu_dir, "reporter", "external")
     shutil.copytree(external_dir, os.path.join(basepath, "external"))
@@ -92,18 +169,10 @@ def generate(results, basepath, only_failures=False):
         os.path.join(basepath, "favicon.png"),
     )
 
-    #
-    # augment existing test run data with:
-    #  * features & scenarios with `duration` attribute computed by adding all
-    #    step durations.
-    #  * add `image` attribute to a step if it has an underlying .png image.
-    #
     CONFIG.snapshot()
     reported_features = []
     for feature in features:
         feature["folder_name"] = ellipsize_filename(feature["name"])
-        if show_status:
-            print("F", end="", flush=True)
         scenarios = []
 
         if feature["status"] != "untested" and "elements" in feature:
@@ -158,9 +227,6 @@ def generate(results, basepath, only_failures=False):
             else:
                 logger.info(f"No config to reload: {scenario_configpath}")
 
-            if show_status:
-                print("S", end="", flush=True)
-
             process_tags(scenario)
 
             sub_headers = []
@@ -193,8 +259,6 @@ def generate(results, basepath, only_failures=False):
             step_index = 0
             scenario_started_at = None
             for step in scenario["steps"]:
-                if show_status:
-                    print("s", end="", flush=True)
                 total_steps += 1
                 image_dir = get_step_image_dir(step_index, step["name"])
                 image_dirpath = os.path.join(scenario_filepath, image_dir)
@@ -282,8 +346,6 @@ def generate(results, basepath, only_failures=False):
             if os.path.exists(logs_dir):
                 log_files = []
                 for log_file in glob.iglob(os.path.join(logs_dir, "*.*")):
-                    if show_status:
-                        print("l", end="", flush=True)
                     log_filepath = log_file.removeprefix(
                         f"{scenario_filepath}/"
                     )
@@ -315,9 +377,6 @@ def generate(results, basepath, only_failures=False):
                 for log_file in [
                     x for x in log_files if ".console." in x["name"]
                 ]:
-                    if show_status:
-                        print("c", end="", flush=True)
-
                     log_file_filepath = os.path.join(
                         scenario_filepath, "logs", log_file["name"]
                     )
@@ -362,8 +421,6 @@ def generate(results, basepath, only_failures=False):
 
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)  # nosec
-    if show_status:
-        print("")  # add a newline to end status
 
     def urlencode(string):
         """
