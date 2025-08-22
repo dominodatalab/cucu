@@ -121,8 +121,8 @@ class step(BaseModel):
     location = TextField()
     is_substep = BooleanField()
     has_substeps = BooleanField()
-    stdout = TextField(null=True)
-    stderr = TextField(null=True)
+    stdout = JSONField(null=True)
+    stderr = JSONField(null=True)
     debug_output = TextField(null=True)
     browser_logs = TextField(null=True)
     browser_info = JSONField(null=True)
@@ -227,13 +227,36 @@ def finish_step_record(step_obj, duration):
             }
             screenshot_infos.append(screenshot_info)
 
-    stdout = None
+    stdout = []
+    if step_obj.status.name in ["passed", "failed"]:
+        step_variables = CONFIG.expand(step_obj.name)
+
+        if step_obj.text:
+            step_variables.update(CONFIG.expand(step_obj.text))
+
+        if step_obj.table:
+            for row in step_obj.table.original.rows:
+                for value in row:
+                    step_variables.update(CONFIG.expand(value))
+
+        if step_variables:
+            expanded = " ".join(
+                [
+                    f'{key}="{value}"'
+                    for (key, value) in step_variables.items()
+                ]
+            )
+            padding = f"    {' ' * (len('Given') - len(step_obj.keyword))}"
+            stdout.insert(
+                0, f"{padding}# {CONFIG.hide_secrets(expanded)}\n"
+            )
+
     if "stdout" in step_obj.__dict__ and step_obj.stdout != []:
-        stdout = CONFIG.hide_secrets("".join(step_obj.stdout).rstrip())
+        stdout += [CONFIG.hide_secrets("".join(step_obj.stdout).rstrip())]
 
     stderr = None
     if "stderr" in step_obj.__dict__ and step_obj.stderr != []:
-        stderr = CONFIG.hide_secrets("".join(step_obj.stderr).rstrip())
+        stderr = [CONFIG.hide_secrets("".join(step_obj.stderr).rstrip())]
 
     step.update(
         section_level=getattr(step_obj, "section_level", None),
