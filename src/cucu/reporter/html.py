@@ -1,4 +1,5 @@
 import glob
+import json
 import os
 import shutil
 import sys
@@ -62,8 +63,20 @@ def generate(results, basepath, only_failures=False):
     """
     The current limitation is that this assumes only on cucu_run so the first is used throughout.
     """
-    db_path = os.path.join(results, "run.db")
 
+    features = []
+
+    features_data = []
+    for feature_json_path in Path(results).rglob("*run.json"):
+        try:
+            feature_data = json.loads(feature_json_path.read_text())
+            features_data += feature_data
+        except Exception as exception:
+            logger.warning(
+                f"unable to read file {feature_json_path}, got error: {exception}"
+            )
+
+    db_path = os.path.join(results, "run.db")
     try:
         init_html_report_db(db_path)
         features = []
@@ -140,10 +153,33 @@ def generate(results, basepath, only_failures=False):
                             else [],
                         }
 
-                    if db_step.status == "failed":
-                        step_dict["result"]["error_message"] = [
-                            db_step.debug_output or ""
-                        ]
+                    # if db_step.status == "failed":
+                    #     step_dict["result"]["error_message"] = [
+                    #         db_step.error_message
+                    #     ]
+
+                    #     if db_step.error_message:
+                    #         if error := db_step.exception:
+                    #             if isinstance(error, RetryError):
+                    #                 error = error.last_attempt.exception()
+
+                    #             if len(error.args) > 0 and isinstance(
+                    #                 error.args[0], str
+                    #             ):
+                    #                 error_class_name = error.__class__.__name__
+                    #                 redacted_error_msg = CONFIG.hide_secrets(
+                    #                     error.args[0]
+                    #                 )
+                    #                 error_lines = (
+                    #                     redacted_error_msg.splitlines()
+                    #                 )
+                    #                 error_lines[0] = (
+                    #                     f"{error_class_name}: {error_lines[0]}"
+                    #                 )
+                    #             else:
+                    #                 error_lines = [repr(error)]
+
+                    #             step_dict["result"]["exception"] = error_lines
 
                     step_dict["result"]["stdout"] = db_step.stdout
                     step_dict["result"]["stderr"] = db_step.stderr

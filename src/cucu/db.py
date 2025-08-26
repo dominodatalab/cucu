@@ -18,6 +18,7 @@ from peewee import (
     TextField,
 )
 from playhouse.sqlite_ext import JSONField, SqliteExtDatabase
+from tenacity import RetryError
 
 from cucu.config import CONFIG
 
@@ -123,6 +124,8 @@ class step(BaseModel):
     has_substeps = BooleanField()
     stdout = JSONField(null=True)
     stderr = JSONField(null=True)
+    error_message = TextField(null=True)
+    exception = TextField(null=True)
     debug_output = TextField(null=True)
     browser_logs = TextField(null=True)
     browser_info = JSONField(null=True)
@@ -241,15 +244,10 @@ def finish_step_record(step_obj, duration):
 
         if step_variables:
             expanded = " ".join(
-                [
-                    f'{key}="{value}"'
-                    for (key, value) in step_variables.items()
-                ]
+                [f'{key}="{value}"' for (key, value) in step_variables.items()]
             )
             padding = f"    {' ' * (len('Given') - len(step_obj.keyword))}"
-            stdout.insert(
-                0, f"{padding}# {CONFIG.hide_secrets(expanded)}\n"
-            )
+            stdout.insert(0, f"{padding}# {CONFIG.hide_secrets(expanded)}\n")
 
     if "stdout" in step_obj.__dict__ and step_obj.stdout != []:
         stdout += [CONFIG.hide_secrets("".join(step_obj.stdout).rstrip())]
@@ -257,6 +255,27 @@ def finish_step_record(step_obj, duration):
     stderr = []
     if "stderr" in step_obj.__dict__ and step_obj.stderr != []:
         stderr = [CONFIG.hide_secrets("".join(step_obj.stderr).rstrip())]
+
+    error_message = None
+    exception = None
+    if step_obj.status.name == "failed":
+        breakpoint()
+        error_message = step_obj.error_message
+
+        if error_message:
+            if error := step_obj.exception:
+                if isinstance(error, RetryError):
+                    error = error.last_attempt.exception()
+
+                if len(error.args) > 0 and isinstance(error.args[0], str):
+                    error_class_name = error.__class__.__name__
+                    redacted_error_msg = CONFIG.hide_secrets(error.args[0])
+                    error_lines = redacted_error_msg.splitlines()
+                    error_lines[0] = f"{error_class_name}: {error_lines[0]}"
+                else:
+                    error_lines = [repr(error)]
+
+                exception = error_lines
 
     step.update(
         section_level=getattr(step_obj, "section_level", None),
@@ -271,6 +290,8 @@ def finish_step_record(step_obj, duration):
         screenshots=screenshot_infos,
         stdout=stdout,
         stderr=stderr,
+        error_message=error_message,
+        exception=exception,
     ).where(step.step_run_id == step_obj.step_run_id).execute()
     db.close()
 

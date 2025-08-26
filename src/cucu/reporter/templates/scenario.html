@@ -146,6 +146,10 @@
                     {% endif %}
                     <pre style="color: gray; margin: 0">{{ escape("\n".join(step['result']['error_message'])) }}</pre>
                 {% endif %}
+
+                {% if step['result']['exception'] is defined %}
+                    <pre style="color: darkred; margin: 0">{{ escape("\n".join(step['result']['exception'])) }}</pre>
+                {% endif %}
                 </td></tr>
             {% endif %}
 
