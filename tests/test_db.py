@@ -91,7 +91,6 @@ def sample_records_combined(temp_db):
         keyword="Given",
         name="test step",
         location="test.feature:10",
-        is_substep=False,
         has_substeps=False,
         start_at="2024-01-01T10:00:00",
     )
@@ -138,7 +137,6 @@ def sample_records_combined(temp_db):
         keyword="Given",
         name="consistency step",
         location="consistency.feature:10",
-        is_substep=False,
         has_substeps=False,
         start_at="2024-01-01T10:00:00",
     )
@@ -198,6 +196,7 @@ def test_complex_data_serialization(sample_records_combined):
 
     step.update(
         table_data=table_data,
+        is_substep=False,
         screenshots=screenshots_data,
     ).where(step.step_run_id == "test_step").execute()
 
@@ -233,7 +232,10 @@ def test_relationships_and_record_completion(sample_records_combined):
     ).where(scenario.scenario_run_id == "test_scenario").execute()
 
     step.update(
-        status="passed", duration=0.5, end_at="2024-01-01T10:00:00.5"
+        status="passed",
+        duration=0.5,
+        end_at="2024-01-01T10:00:00.5",
+        is_substep=False,
     ).where(step.step_run_id == "test_step").execute()
 
     updated_scenario = scenario.get(
