@@ -9,6 +9,9 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - remove cli option show-status to simplify code
 - Change - rename default arg on report command
 
+## 1.3.4
+- Fix - access step.is_substep only in after_step
+
 ## 1.3.3
 - Fix - make step run id more unique
 
