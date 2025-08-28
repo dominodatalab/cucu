@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import glob
+import json
 import os
 import shutil
 import signal
@@ -604,6 +605,19 @@ def report(
 
     if show_skips:
         os.environ["CUCU_SHOW_SKIPS"] = "true"
+
+    run_details_filepath = os.path.join(results_dir, "run_details.json")
+
+    if os.path.exists(run_details_filepath):
+        # load the run details at the time of execution for the provided results
+        # directory
+        run_details = {}
+
+        with open(run_details_filepath, encoding="utf8") as _input:
+            run_details = json.loads(_input.read())
+
+        # initialize any underlying custom step code things
+        behave_init(run_details["filepath"])
 
     _generate_report(
         results_dir, output, only_failures=only_failures, junit=junit

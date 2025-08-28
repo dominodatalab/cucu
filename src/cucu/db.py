@@ -120,7 +120,7 @@ class step(BaseModel):
     text = TextField(null=True)
     table_data = JSONField(null=True)
     location = TextField()
-    is_substep = BooleanField()
+    is_substep = BooleanField(null=True)  # info available after step ends
     has_substeps = BooleanField()
     stdout = JSONField(null=True)
     stderr = JSONField(null=True)
@@ -208,7 +208,6 @@ def start_step_record(ctx, step_obj):
         text=step_obj.text if step_obj.text else None,
         table_data=table if step_obj.table else None,
         location=str(step_obj.location),
-        is_substep=step_obj.is_substep,
         has_substeps=step_obj.has_substeps,
         section_level=getattr(step_obj, "section_level", None),
         start_at=step_obj.start_at,
@@ -282,6 +281,7 @@ def finish_step_record(step_obj, duration):
         parent_seq=step_obj.parent_seq,
         has_substeps=step_obj.has_substeps,
         status=step_obj.status.name,
+        is_substep=step_obj.is_substep,
         duration=duration,
         end_at=step_obj.end_at,
         debug_output=step_obj.debug_output,
