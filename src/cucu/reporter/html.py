@@ -215,6 +215,12 @@ def generate(results, basepath, only_failures=False):
         os.path.join(basepath, "favicon.png"),
     )
 
+    #
+    # augment existing test run data with:
+    #  * features & scenarios with `duration` attribute computed by adding all
+    #    step durations.
+    #  * add `image` attribute to a step if it has an underlying .png image.
+    #
     CONFIG.snapshot()
     reported_features = []
     for feature in features:
