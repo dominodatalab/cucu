@@ -61,8 +61,6 @@ def generate(results, basepath, only_failures=False):
     generate an HTML report for the results provided.
     """
 
-    show_status = CONFIG["CUCU_SHOW_STATUS"] == "true"
-
     features = []
 
     run_json_filepaths = list(glob.iglob(os.path.join(results, "*run.json")))
@@ -74,11 +72,7 @@ def generate(results, basepath, only_failures=False):
         with open(run_json_filepath, "rb") as index_input:
             try:
                 features += json.loads(index_input.read())
-                if show_status:
-                    print("r", end="", flush=True)
             except Exception as exception:
-                if show_status:
-                    print("")  # add a newline before logger
                 logger.warning(
                     f"unable to read file {run_json_filepath}, got error: {exception}"
                 )
@@ -102,8 +96,6 @@ def generate(results, basepath, only_failures=False):
     reported_features = []
     for feature in features:
         feature["folder_name"] = ellipsize_filename(feature["name"])
-        if show_status:
-            print("F", end="", flush=True)
         scenarios = []
 
         if feature["status"] != "untested" and "elements" in feature:
@@ -158,9 +150,6 @@ def generate(results, basepath, only_failures=False):
             else:
                 logger.info(f"No config to reload: {scenario_configpath}")
 
-            if show_status:
-                print("S", end="", flush=True)
-
             process_tags(scenario)
 
             sub_headers = []
@@ -193,8 +182,6 @@ def generate(results, basepath, only_failures=False):
             step_index = 0
             scenario_started_at = None
             for step in scenario["steps"]:
-                if show_status:
-                    print("s", end="", flush=True)
                 total_steps += 1
                 image_dir = get_step_image_dir(step_index, step["name"])
                 image_dirpath = os.path.join(scenario_filepath, image_dir)
@@ -282,8 +269,6 @@ def generate(results, basepath, only_failures=False):
             if os.path.exists(logs_dir):
                 log_files = []
                 for log_file in glob.iglob(os.path.join(logs_dir, "*.*")):
-                    if show_status:
-                        print("l", end="", flush=True)
                     log_filepath = log_file.removeprefix(
                         f"{scenario_filepath}/"
                     )
@@ -315,9 +300,6 @@ def generate(results, basepath, only_failures=False):
                 for log_file in [
                     x for x in log_files if ".console." in x["name"]
                 ]:
-                    if show_status:
-                        print("c", end="", flush=True)
-
                     log_file_filepath = os.path.join(
                         scenario_filepath, "logs", log_file["name"]
                     )
@@ -362,8 +344,6 @@ def generate(results, basepath, only_failures=False):
 
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)  # nosec
-    if show_status:
-        print("")  # add a newline to end status
 
     def urlencode(string):
         """

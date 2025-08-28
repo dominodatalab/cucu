@@ -127,12 +127,6 @@ def main():
     help="when set skips are shown",
 )
 @click.option(
-    "--show-status",
-    default=False,
-    is_flag=True,
-    help="when set status output is shown (helpful for CI that wants stdout updates)",
-)
-@click.option(
     "--periodic-thread-dumper",
     default=None,
     help="sets the interval in minutes of when to run the periodic thread dumper",
@@ -233,7 +227,6 @@ def run(
     feature_timeout,
     secrets,
     show_skips,
-    show_status,
     tags,
     selenium_remote_url,
     workers,
@@ -288,9 +281,6 @@ def run(
 
     if show_skips:
         os.environ["CUCU_SHOW_SKIPS"] = "true"
-
-    if show_status:
-        os.environ["CUCU_SHOW_STATUS"] = "true"
 
     if junit_with_stacktrace:
         os.environ["CUCU_JUNIT_WITH_STACKTRACE"] = "true"
@@ -566,7 +556,7 @@ def _add_report_path_in_junit(junit_folder, report_folder):
 
 
 @main.command()
-@click.argument("filepath", default="results")
+@click.argument("results_dir", default="results")
 @click.option(
     "--only-failures",
     default=False,
@@ -585,12 +575,6 @@ def _add_report_path_in_junit(junit_folder, report_folder):
     is_flag=True,
     help="when set skips are shown",
 )
-@click.option(
-    "--show-status",
-    default=False,
-    is_flag=True,
-    help="when set status output is shown (helpful for CI that wants stdout updates)",
-)
 @click.option("-o", "--output", default="report")
 @click.option(
     "-j",
@@ -600,11 +584,10 @@ def _add_report_path_in_junit(junit_folder, report_folder):
     "the same location as --results",
 )
 def report(
-    filepath,
+    results_dir,
     only_failures,
     logging_level,
     show_skips,
-    show_status,
     output,
     junit,
 ):
@@ -619,10 +602,7 @@ def report(
     if show_skips:
         os.environ["CUCU_SHOW_SKIPS"] = "true"
 
-    if show_status:
-        os.environ["CUCU_SHOW_STATUS"] = "true"
-
-    run_details_filepath = os.path.join(filepath, "run_details.json")
+    run_details_filepath = os.path.join(results_dir, "run_details.json")
 
     if os.path.exists(run_details_filepath):
         # load the run details at the time of execution for the provided results
@@ -636,7 +616,7 @@ def report(
         behave_init(run_details["filepath"])
 
     _generate_report(
-        filepath, output, only_failures=only_failures, junit=junit
+        results_dir, output, only_failures=only_failures, junit=junit
     )
 
 
