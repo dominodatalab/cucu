@@ -33,7 +33,12 @@ from cucu.cli import thread_dumper
 from cucu.cli.run import behave, behave_init, create_run
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.config import CONFIG
-from cucu.db import consolidate_database_files, finish_worker_record
+from cucu.db import (
+    consolidate_database_files,
+    db,
+    finish_worker_record,
+    get_first_cucu_run_filepath,
+)
 from cucu.lint import linter
 from cucu.utils import generate_short_id
 
@@ -300,6 +305,7 @@ def run(
         generate_short_id(worker_id_seed)
     )
     if not dry_run:
+        os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = filepath
         create_run(results, filepath)
 
     try:
@@ -510,18 +516,6 @@ def _generate_report(
     only_failures: False,
     junit: str | None = None,
 ):
-    """
-    helper method to handle report generation so it can be used by the `cucu report`
-    command also the `cucu run` when told to generate a report. If junit is provided, it adds report
-    path to the JUnit files.
-
-
-    parameters:
-        results_dir(string): the results directory containing the previous test run
-        output(string): the directory where we'll generate the report
-        only_failures(bool, optional): if only report failures. The default is False.
-        junit(str|None, optional): the directory of the JUnit files. The default if None.
-    """
     if os.path.exists(output):
         shutil.rmtree(output)
 
@@ -529,6 +523,16 @@ def _generate_report(
 
     if os.path.exists(results_dir):
         consolidate_database_files(results_dir)
+
+    db_path = os.path.join(results_dir, "run.db")
+
+    try:
+        db.init(db_path)
+        db.connect(reuse_if_open=True)
+        filepath = get_first_cucu_run_filepath()
+        behave_init(filepath)
+    finally:
+        db.close()
 
     report_location = reporter.generate(
         results_dir, output, only_failures=only_failures
