@@ -56,26 +56,19 @@ def left_pad_zeroes(elapsed_time):
     return padded_duration
 
 
-def generate(results, basepath, only_failures=False):
+def generate(results_dir, basepath, only_failures=False):
     """
     generate an HTML report for the results provided.
     """
 
     features = []
-
-    run_json_filepaths = list(glob.iglob(os.path.join(results, "*run.json")))
-    logger.info(
-        f"Starting to process {len(run_json_filepaths)} files for report"
-    )
-
-    for run_json_filepath in run_json_filepaths:
-        with open(run_json_filepath, "rb") as index_input:
-            try:
-                features += json.loads(index_input.read())
-            except Exception as exception:
-                logger.warning(
-                    f"unable to read file {run_json_filepath}, got error: {exception}"
-                )
+    for feature_json_path in Path(results_dir).rglob("*run.json"):
+        try:
+            features += json.loads(feature_json_path.read_text())
+        except Exception as exception:
+            logger.warning(
+                f"unable to read file {feature_json_path}, got error: {exception}"
+            )
 
     # copy the external dependencies to the reports destination directory
     cucu_dir = os.path.dirname(sys.modules["cucu"].__file__)
@@ -118,7 +111,7 @@ def generate(results, basepath, only_failures=False):
         if feature["status"] not in ["skipped", "untested"]:
             # copy each feature directories contents over to the report directory
             src_feature_filepath = os.path.join(
-                results, feature["folder_name"]
+                results_dir, feature["folder_name"]
             )
             dst_feature_filepath = os.path.join(
                 basepath, feature["folder_name"]
@@ -422,7 +415,7 @@ def generate(results, basepath, only_failures=False):
             )
 
             rendered_scenario_html = scenario_template.render(
-                basepath=results,
+                basepath=results_dir,
                 feature=feature,
                 path_exists=os.path.exists,
                 scenario=scenario,
