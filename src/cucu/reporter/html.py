@@ -52,7 +52,6 @@ def process_tags(element):
     element["tags"] = " ".join(prepared_tags)
 
 
-# function to left pad duration with '0' for better alphabetical sorting in html reports.
 def left_pad_zeroes(elapsed_time):
     int_decimal = str(round(elapsed_time, 3)).split(".")
     int_decimal[0] = int_decimal[0].zfill(3)
@@ -62,7 +61,7 @@ def left_pad_zeroes(elapsed_time):
 
 def generate(results, basepath, only_failures=False):
     """
-    generate an HTML report for the results provided.
+    The current limitation is that this assumes only on cucu_run so the first is used throughout.
     """
 
     features_json = []

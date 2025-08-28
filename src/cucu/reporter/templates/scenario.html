@@ -128,16 +128,13 @@
             {% endif %}
 
             {% if step['result'] is defined %}
-                <tr class="row"><td style="min-width: 0;" class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
+                <tr class="row"><td style="min-width: 0;" class="col-12 collapse multi-collapse pt-0" id="collapsable-row-{{ loop.index }}" colspan="2">
 
                 {% if step['result']['stdout'] %}
                     <pre style="color: darkgray; margin: 0;">{{ escape("\n".join(step['result']['stdout'])) }}</pre>
                 {% endif %}
 
                 {% if step['images'] is defined %}
-                    {% if step['result']['stdout'] %}
-                        <br/>
-                    {% endif %}
                     {% for image in step['images'] %}
                         <img class="mx-auto d-block img-fluid shadow bg-white rounded" style="margin-bottom:15px" alt='{{ image["label"] }}' title='{{ image["label"] }}' src='{{ image["src"] }}'></img>
                     {% endfor %}
@@ -148,6 +145,10 @@
                         <br/>
                     {% endif %}
                     <pre style="color: gray; margin: 0">{{ escape("\n".join(step['result']['error_message'])) }}</pre>
+                {% endif %}
+
+                {% if step['result']['exception'] is defined %}
+                    <pre style="color: darkred; margin: 0">{{ escape("\n".join(step['result']['exception'])) }}</pre>
                 {% endif %}
                 </td></tr>
             {% endif %}
