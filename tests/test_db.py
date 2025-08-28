@@ -53,6 +53,7 @@ def sample_records_combined(temp_db):
     cucu_run_obj = cucu_run.create(
         cucu_run_id="test_run",
         full_arguments=["arg1", "arg2"],
+        filepath="/path/to/test.feature",
         date="2024-01-01T10:00:00",
         start_at="2024-01-01T10:00:00",
     )
@@ -98,6 +99,7 @@ def sample_records_combined(temp_db):
     cucu_run.create(
         cucu_run_id="consistency_test",
         full_arguments=[],
+        filepath="/path/to/consistency.feature",
         date="2024-01-01T10:00:00",
         start_at="2024-01-01T10:00:00",
     )
@@ -169,6 +171,7 @@ def test_datetime_iso_format(temp_db):
     cucu_run_obj = cucu_run.create(
         cucu_run_id="iso_test",
         full_arguments=[],
+        filepath="/path/to/iso_test.feature",
         date=iso_datetime,
         start_at=iso_datetime,
     )
