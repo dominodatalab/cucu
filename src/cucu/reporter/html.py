@@ -18,6 +18,10 @@ from cucu.db import close_html_report_db, init_html_report_db
 from cucu.db import feature as FeatureModel
 from cucu.db import scenario as ScenarioModel
 from cucu.db import step as StepModel
+from cucu.db import close_html_report_db, init_html_report_db
+from cucu.db import feature as FeatureModel
+from cucu.db import scenario as ScenarioModel
+from cucu.db import step as StepModel
 from cucu.utils import ellipsize_filename, get_step_image_dir
 
 
@@ -64,17 +68,23 @@ def generate(results, basepath, only_failures=False):
     The current limitation is that this assumes only on cucu_run so the first is used throughout.
     """
 
-    features = []
+    features_json = []
 
-    features_data = []
-    for feature_json_path in Path(results).rglob("*run.json"):
-        try:
-            feature_data = json.loads(feature_json_path.read_text())
-            features_data += feature_data
-        except Exception as exception:
-            logger.warning(
-                f"unable to read file {feature_json_path}, got error: {exception}"
-            )
+    run_json_filepaths = list(glob.iglob(os.path.join(results, "*run.json")))
+    logger.info(
+        f"Starting to process {len(run_json_filepaths)} files for report"
+    )
+
+    for run_json_filepath in run_json_filepaths:
+        with open(run_json_filepath, "rb") as index_input:
+            try:
+                features_json += json.loads(index_input.read())
+            except Exception as exception:
+                logger.warning(
+                    f"unable to read file {run_json_filepath}, got error: {exception}"
+                )
+
+    features = []
 
     db_path = os.path.join(results, "run.db")
     try:
