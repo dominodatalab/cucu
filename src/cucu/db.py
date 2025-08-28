@@ -258,7 +258,6 @@ def finish_step_record(step_obj, duration):
     error_message = None
     exception = None
     if step_obj.status.name == "failed":
-        breakpoint()
         error_message = step_obj.error_message
 
         if error_message:
