@@ -18,10 +18,6 @@ from cucu.db import close_html_report_db, init_html_report_db
 from cucu.db import feature as FeatureModel
 from cucu.db import scenario as ScenarioModel
 from cucu.db import step as StepModel
-from cucu.db import close_html_report_db, init_html_report_db
-from cucu.db import feature as FeatureModel
-from cucu.db import scenario as ScenarioModel
-from cucu.db import step as StepModel
 from cucu.utils import ellipsize_filename, get_step_image_dir
 
 
