@@ -60,7 +60,7 @@ coverage: src/* tests/*
 	# this makes it so all of the underlying `cucu` command calls are run
 	# with the coverage enabled even when spawned as a separate process for the
 	# underlying `uv run coverage run` process...
-	COVERAGE_PROCESS_START=${MKDIR}pyproject.toml uv run cucu run features --workers 6
+	uv run coverage run -m cucu.cli.core run features --workers 6
 	uv run coverage run -m pytest
 	uv run coverage combine .coverage.*
 	uv run coverage html

@@ -111,6 +111,7 @@ omit = ["results"]
 parallel = true
 relative_files = true
 source = ["src"]
+patch = ["subprocess"]
 
 [tool.coverage.report]
 fail_under = 70
