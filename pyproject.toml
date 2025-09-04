@@ -110,7 +110,7 @@ concurrency = ["multiprocessing"]
 omit = ["results"]
 parallel = true
 relative_files = true
-source = ["src"]
+source = ["src", "src/cucu/init_data"]
 patch = ["subprocess"]
 
 [tool.coverage.report]
