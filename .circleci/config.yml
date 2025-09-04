@@ -86,8 +86,7 @@ jobs:
           name: run_functional_tests
           command: |
             set -euxo pipefail
-            export COVERAGE_PROCESS_START=${CIRCLE_WORKING_DIRECTORY}/pyproject.toml
-            uv run cucu run features --workers 8 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<<parameters.browser>>"
+            uv run coverage run -m cucu.cli.core run features --workers 8 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<<parameters.browser>>"
       - run:
           name: run unit tests
           command: |

@@ -13,7 +13,6 @@ from pathlib import Path
 from threading import Timer
 
 import click
-import coverage
 import psutil
 from behave.model_core import FileLocation
 from behave.runner_util import parse_features
@@ -36,9 +35,6 @@ from cucu.config import CONFIG
 from cucu.db import consolidate_database_files, finish_worker_record
 from cucu.lint import linter
 from cucu.utils import generate_short_id
-
-# will start coverage tracking once COVERAGE_PROCESS_START is set
-coverage.process_startup()
 
 
 @click.group()

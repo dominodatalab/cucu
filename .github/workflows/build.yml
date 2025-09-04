@@ -97,7 +97,6 @@ jobs:
       run: |
         uv run cucu run features --browser "${{ matrix.browser }}" --workers 1 --generate-report --report output/report --junit output/junit --selenium-remote-url http://localhost:4444
       env:
-        COVERAGE_PROCESS_START: pyproject.toml
         SE_NODE_MAX_SESSIONS: 12
         SE_NODE_SESSION_TIMEOUT: 300
         SCREEN_WIDTH: 1366
