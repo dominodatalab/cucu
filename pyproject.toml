@@ -110,7 +110,7 @@ concurrency = ["multiprocessing"]
 omit = ["results"]
 parallel = true
 relative_files = true
-source = ["src", "src/cucu/init_data"]
+source = ["src"]
 
 [tool.coverage.report]
 fail_under = 70
