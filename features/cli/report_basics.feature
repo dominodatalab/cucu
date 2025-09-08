@@ -242,7 +242,7 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
         | Started at | Feature                    | Total.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with mixed results | 6       | 3        | 3        | 0.        | 0         | failed | .*         |
+        | .*         | Feature with mixed results | 6       | 3        | 3        | 0         | 0         | failed | .*         |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
