@@ -18,6 +18,7 @@ from peewee import (
     TextField,
 )
 from playhouse.sqlite_ext import JSONField, SqliteExtDatabase
+from tenacity import RetryError
 
 from cucu.config import CONFIG
 
@@ -36,6 +37,7 @@ class BaseModel(Model):
 class cucu_run(BaseModel):
     cucu_run_id = TextField(primary_key=True)
     full_arguments = JSONField()
+    filepath = TextField()
     date = TextField()
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
@@ -112,6 +114,7 @@ class step(BaseModel):
     seq = IntegerField()
     section_level = IntegerField(null=True)
     parent_seq = IntegerField(null=True)
+    status = TextField(null=True)
     keyword = TextField()
     name = TextField()
     text = TextField(null=True)
@@ -119,17 +122,21 @@ class step(BaseModel):
     location = TextField()
     is_substep = BooleanField(null=True)  # info available after step ends
     has_substeps = BooleanField()
-    status = TextField(null=True)
-    duration = FloatField(null=True)
-    start_at = DateTimeField()
-    end_at = DateTimeField(null=True)
+    stdout = JSONField(null=True)
+    stderr = JSONField(null=True)
+    error_message = TextField(null=True)
+    exception = TextField(null=True)
     debug_output = TextField(null=True)
     browser_logs = TextField(null=True)
     browser_info = JSONField(null=True)
+    duration = FloatField(null=True)
+    start_at = DateTimeField()
+    end_at = DateTimeField(null=True)
     screenshots = JSONField(null=True)
 
 
 def record_cucu_run():
+    filepath = CONFIG["CUCU_FILEPATH"]
     cucu_run_id_val = CONFIG["CUCU_RUN_ID"]
     worker_run_id = CONFIG["WORKER_RUN_ID"]
 
@@ -138,6 +145,7 @@ def record_cucu_run():
     cucu_run.create(
         cucu_run_id=cucu_run_id_val,
         full_arguments=sys.argv,
+        filepath=filepath,
         date=start_at,
         start_at=start_at,
     )
@@ -221,6 +229,52 @@ def finish_step_record(step_obj, duration):
             }
             screenshot_infos.append(screenshot_info)
 
+    stdout = []
+    if step_obj.status.name in ["passed", "failed"]:
+        step_variables = CONFIG.expand(step_obj.name)
+
+        if step_obj.text:
+            step_variables.update(CONFIG.expand(step_obj.text))
+
+        if step_obj.table:
+            for row in step_obj.table.original.rows:
+                for value in row:
+                    step_variables.update(CONFIG.expand(value))
+
+        if step_variables:
+            expanded = " ".join(
+                [f'{key}="{value}"' for (key, value) in step_variables.items()]
+            )
+            padding = f"    {' ' * (len('Given') - len(step_obj.keyword))}"
+            stdout.insert(0, f"{padding}# {CONFIG.hide_secrets(expanded)}\n")
+
+    if "stdout" in step_obj.__dict__ and step_obj.stdout != []:
+        stdout += [CONFIG.hide_secrets("".join(step_obj.stdout).rstrip())]
+
+    stderr = []
+    if "stderr" in step_obj.__dict__ and step_obj.stderr != []:
+        stderr = [CONFIG.hide_secrets("".join(step_obj.stderr).rstrip())]
+
+    error_message = None
+    exception = None
+    if step_obj.status.name == "failed":
+        error_message = step_obj.error_message
+
+        if error_message:
+            if error := step_obj.exception:
+                if isinstance(error, RetryError):
+                    error = error.last_attempt.exception()
+
+                if len(error.args) > 0 and isinstance(error.args[0], str):
+                    error_class_name = error.__class__.__name__
+                    redacted_error_msg = CONFIG.hide_secrets(error.args[0])
+                    error_lines = redacted_error_msg.splitlines()
+                    error_lines[0] = f"{error_class_name}: {error_lines[0]}"
+                else:
+                    error_lines = [repr(error)]
+
+                exception = error_lines
+
     step.update(
         section_level=getattr(step_obj, "section_level", None),
         parent_seq=step_obj.parent_seq,
@@ -233,6 +287,10 @@ def finish_step_record(step_obj, duration):
         browser_logs=step_obj.browser_logs,
         browser_info=step_obj.browser_info,
         screenshots=screenshot_infos,
+        stdout=stdout,
+        stderr=stderr,
+        error_message=error_message,
+        exception=exception,
     ).where(step.step_run_id == step_obj.step_run_id).execute()
     db.close()
 
@@ -343,10 +401,18 @@ def create_database_file(db_filepath):
     db.close()
 
 
+def get_first_cucu_run_filepath():
+    run_record = cucu_run.select().first()
+    return run_record.filepath
+
+
 def consolidate_database_files(results_dir):
     # This function would need a more advanced approach with peewee, so for now, keep using sqlite3 for consolidation
     results_path = Path(results_dir)
     target_db_path = results_path / "run.db"
+    if not target_db_path.exists():
+        create_database_file(target_db_path)
+
     db_files = [
         db for db in results_path.glob("**/*.db") if db.name != "run.db"
     ]
@@ -368,3 +434,12 @@ def consolidate_database_files(results_dir):
                     )
                     target_conn.commit()
             db_file.unlink()
+
+
+def init_html_report_db(db_path):
+    db.init(db_path)
+    db.connect(reuse_if_open=True)
+
+
+def close_html_report_db():
+    db.close()

@@ -14,6 +14,10 @@ import jinja2
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
+from cucu.db import close_html_report_db, init_html_report_db
+from cucu.db import feature as FeatureModel
+from cucu.db import scenario as ScenarioModel
+from cucu.db import step as StepModel
 from cucu.utils import ellipsize_filename, get_step_image_dir
 
 
@@ -61,7 +65,7 @@ def generate(results, basepath, only_failures=False):
     generate an HTML report for the results provided.
     """
 
-    features = []
+    features_json = []
 
     run_json_filepaths = list(glob.iglob(os.path.join(results, "*run.json")))
     logger.info(
@@ -71,13 +75,135 @@ def generate(results, basepath, only_failures=False):
     for run_json_filepath in run_json_filepaths:
         with open(run_json_filepath, "rb") as index_input:
             try:
-                features += json.loads(index_input.read())
+                features_json += json.loads(index_input.read())
             except Exception as exception:
                 logger.warning(
                     f"unable to read file {run_json_filepath}, got error: {exception}"
                 )
 
-    # copy the external dependencies to the reports destination directory
+    features = []
+
+    db_path = os.path.join(results, "run.db")
+    try:
+        init_html_report_db(db_path)
+        features = []
+
+        db_features = FeatureModel.select().order_by(FeatureModel.name)
+        logger.info(
+            f"Starting to process {len(db_features)} features for report"
+        )
+
+        for db_feature in db_features:
+            feature_dict = {
+                "name": db_feature.name,
+                "filename": db_feature.filename,
+                "description": db_feature.description,
+                "tags": db_feature.tags.split() if db_feature.tags else [],
+                "status": "passed",
+                "elements": [],
+            }
+
+            db_scenarios = (
+                ScenarioModel.select()
+                .where(
+                    ScenarioModel.feature_run_id == db_feature.feature_run_id
+                )
+                .order_by(ScenarioModel.seq)
+            )
+
+            feature_has_failures = False
+
+            for db_scenario in db_scenarios:
+                scenario_dict = {
+                    "name": db_scenario.name,
+                    "line": db_scenario.line_number,
+                    "tags": db_scenario.tags.split()
+                    if db_scenario.tags
+                    else [],
+                    "status": db_scenario.status or "passed",
+                    "steps": [],
+                }
+
+                if db_scenario.status == "failed":
+                    feature_has_failures = True
+
+                db_steps = (
+                    StepModel.select()
+                    .where(
+                        StepModel.scenario_run_id
+                        == db_scenario.scenario_run_id
+                    )
+                    .order_by(StepModel.seq)
+                )
+
+                for db_step in db_steps:
+                    step_dict = {
+                        "keyword": db_step.keyword,
+                        "name": db_step.name,
+                        "result": {
+                            "status": db_step.status or "passed",
+                            "duration": db_step.duration or 0,
+                            "timestamp": db_step.end_at or "",
+                        },
+                    }
+
+                    if db_step.text:
+                        step_dict["text"] = db_step.text
+
+                    if db_step.table_data:
+                        step_dict["table"] = {
+                            "headings": db_step.table_data[0]
+                            if db_step.table_data
+                            else [],
+                            "rows": db_step.table_data[1:]
+                            if len(db_step.table_data) > 1
+                            else [],
+                        }
+
+                    # if db_step.status == "failed":
+                    #     step_dict["result"]["error_message"] = [
+                    #         db_step.error_message
+                    #     ]
+
+                    #     if db_step.error_message:
+                    #         if error := db_step.exception:
+                    #             if isinstance(error, RetryError):
+                    #                 error = error.last_attempt.exception()
+
+                    #             if len(error.args) > 0 and isinstance(
+                    #                 error.args[0], str
+                    #             ):
+                    #                 error_class_name = error.__class__.__name__
+                    #                 redacted_error_msg = CONFIG.hide_secrets(
+                    #                     error.args[0]
+                    #                 )
+                    #                 error_lines = (
+                    #                     redacted_error_msg.splitlines()
+                    #                 )
+                    #                 error_lines[0] = (
+                    #                     f"{error_class_name}: {error_lines[0]}"
+                    #                 )
+                    #             else:
+                    #                 error_lines = [repr(error)]
+
+                    #             step_dict["result"]["exception"] = error_lines
+
+                    step_dict["result"]["stdout"] = db_step.stdout
+                    step_dict["result"]["stderr"] = db_step.stderr
+                    scenario_dict["steps"].append(step_dict)
+
+                feature_dict["elements"].append(scenario_dict)
+
+            if feature_has_failures:
+                feature_dict["status"] = "failed"
+            elif only_failures and not feature_has_failures:
+                continue
+
+            features.append(feature_dict)
+
+    finally:
+        close_html_report_db()
+
     cucu_dir = os.path.dirname(sys.modules["cucu"].__file__)
     external_dir = os.path.join(cucu_dir, "reporter", "external")
     shutil.copytree(external_dir, os.path.join(basepath, "external"))
