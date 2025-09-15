@@ -11,6 +11,7 @@ from behave.formatter.base import Formatter
 from cucu import logger
 from cucu.config import CONFIG
 from cucu.db import (
+    close_db,
     create_database_file,
     finish_cucu_run_record,
     finish_feature_record,
@@ -172,7 +173,6 @@ class RundbFormatter(Formatter):
         previous_step_duration = getattr(
             self.this_scenario, "previous_step_duration", 0
         )
-
         finish_step_record(step, previous_step_duration)
         self.step_index += 1
 
@@ -188,14 +188,9 @@ class RundbFormatter(Formatter):
         """
         finish_worker_record(None)
         finish_cucu_run_record()
-        self.close_stream()
+        close_db()
 
-    def close_stream(self):
-        """Close the stream, but only if this is needed.
-        This step is skipped if the stream is sys.stdout.
-        """
-        if self.stream:
-            # -- DELEGATE STREAM-CLOSING: To stream_opener
-            assert self.stream is self.stream_opener.stream
-            self.stream_opener.close()
-        self.stream = None  # -- MARK CLOSED.
+    ## cucu specific formatter methods
+    def insert_step(self, step, index):
+        # used by cucu to insert steps dynamically
+        pass

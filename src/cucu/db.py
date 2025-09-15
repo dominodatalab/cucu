@@ -158,7 +158,6 @@ def record_cucu_run():
         else None,
         start_at=datetime.now().isoformat(),
     )
-    db.close()
     return str(db_filepath)
 
 
@@ -175,7 +174,6 @@ def record_feature(feature_obj):
         tags=" ".join(feature_obj.tags),
         start_at=datetime.now().isoformat(),
     )
-    db.close()
 
 
 def record_scenario(scenario_obj):
@@ -190,7 +188,6 @@ def record_scenario(scenario_obj):
         tags=" ".join(scenario_obj.tags),
         start_at=getattr(scenario_obj, "start_at", None),
     )
-    db.close()
 
 
 def start_step_record(step_obj, scenario_run_id):
@@ -213,7 +210,6 @@ def start_step_record(step_obj, scenario_run_id):
         section_level=getattr(step_obj, "section_level", None),
         start_at=step_obj.start_at,
     )
-    db.close()
 
 
 def finish_step_record(step_obj, duration):
@@ -293,7 +289,6 @@ def finish_step_record(step_obj, duration):
         error_message=error_message,
         exception=exception,
     ).where(step.step_run_id == step_obj.step_run_id).execute()
-    db.close()
 
 
 def finish_scenario_record(scenario_obj):
@@ -322,7 +317,6 @@ def finish_scenario_record(scenario_obj):
         browser_info=scenario_obj.browser_info,
         custom_data=custom_data_json,
     ).where(scenario.scenario_run_id == scenario_obj.scenario_run_id).execute()
-    db.close()
 
 
 def finish_feature_record(feature_obj):
@@ -331,7 +325,6 @@ def finish_feature_record(feature_obj):
         end_at=datetime.now().isoformat(),
         custom_data=feature_obj.custom_data,
     ).where(feature.feature_run_id == feature_obj.feature_run_id).execute()
-    db.close()
 
 
 def finish_worker_record(custom_data=None, worker_run_id=None):
@@ -341,7 +334,6 @@ def finish_worker_record(custom_data=None, worker_run_id=None):
         end_at=datetime.now().isoformat(),
         custom_data=custom_data,
     ).where(worker.worker_run_id == target_worker_run_id).execute()
-    db.close()
 
 
 def finish_cucu_run_record():
@@ -349,7 +341,11 @@ def finish_cucu_run_record():
     cucu_run.update(
         end_at=datetime.now().isoformat(),
     ).where(cucu_run.cucu_run_id == CONFIG["CUCU_RUN_ID"]).execute()
-    db.close()
+
+
+def close_db():
+    if not db.is_closed():
+        db.close()
 
 
 def create_database_file(db_filepath):
@@ -399,7 +395,6 @@ def create_database_file(db_filepath):
             FROM scenario s
             JOIN feature f ON s.feature_run_id = f.feature_run_id
         """)
-    db.close()
 
 
 def get_first_cucu_run_filepath():
