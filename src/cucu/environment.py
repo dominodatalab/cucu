@@ -11,18 +11,19 @@ import yaml
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
-from cucu.db import (
-    create_database_file,
-    finish_cucu_run_record,
-    finish_feature_record,
-    finish_scenario_record,
-    finish_step_record,
-    finish_worker_record,
-    record_cucu_run,
-    record_feature,
-    record_scenario,
-    start_step_record,
-)
+
+# from cucu.db import (
+#     create_database_file,
+#     finish_cucu_run_record,
+#     finish_feature_record,
+#     finish_scenario_record,
+#     finish_step_record,
+#     finish_worker_record,
+#     record_cucu_run,
+#     record_feature,
+#     record_scenario,
+#     start_step_record,
+# )
 from cucu.page_checks import init_page_checks
 from cucu.utils import (
     TeeStream,
@@ -79,8 +80,8 @@ def before_all(ctx):
             logger.debug(
                 f"Creating new run database file: {run_db_path} for {worker_id_seed}"
             )
-            create_database_file(run_db_path)
-            record_cucu_run()
+            # create_database_file(run_db_path)
+            # record_cucu_run()
 
     CONFIG.snapshot("before_all")
 
@@ -93,16 +94,16 @@ def after_all(ctx):
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
         hook(ctx)
 
-    finish_worker_record(ctx.worker_custom_data)
-    finish_cucu_run_record()
+    # finish_worker_record(ctx.worker_custom_data)
+    # finish_cucu_run_record()
     CONFIG.restore(with_pop=True)
 
 
 def before_feature(ctx, feature):
-    feature_run_id_seed = f"{CONFIG['WORKER_RUN_ID']}_{time.perf_counter()}"
-    feature.feature_run_id = generate_short_id(feature_run_id_seed)
-    feature.custom_data = {}
-    record_feature(feature)
+    # feature_run_id_seed = f"{CONFIG['WORKER_RUN_ID']}_{time.perf_counter()}"
+    # feature.feature_run_id = generate_short_id(feature_run_id_seed)
+    # feature.custom_data = {}
+    # record_feature(feature)
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         results_dir = Path(config.CONFIG["CUCU_RESULTS_DIR"])
@@ -110,7 +111,8 @@ def before_feature(ctx, feature):
 
 
 def after_feature(ctx, feature):
-    finish_feature_record(feature)
+    # finish_feature_record(feature)
+    pass
 
 
 def before_scenario(ctx, scenario):
@@ -128,7 +130,7 @@ def before_scenario(ctx, scenario):
     scenario.custom_data = {}
     ctx.scenario = scenario
     ctx.step_index = 0
-    ctx.scenario_index = ctx.feature.scenarios.index(scenario) + 1
+    ctx.scenario_index = scenario.feature.scenarios.index(scenario) + 1
     ctx.browsers = []
     ctx.browser = None
     ctx.section_step_stack = []
@@ -172,13 +174,13 @@ def before_scenario(ctx, scenario):
         )
         ctx.browser_log_tee = TeeStream(ctx.browser_log_file)
 
-    scenario_run_id_seed = (
-        f"{ctx.feature.feature_run_id}_{time.perf_counter()}"
-    )
-    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = generate_short_id(
-        scenario_run_id_seed
-    )
-    record_scenario(ctx)
+    # scenario_run_id_seed = (
+    #     f"{scenario.feature.feature_run_id}_{time.perf_counter()}"
+    # )
+    # scenario.scenario_run_id = generate_short_id(
+    #     scenario_run_id_seed
+    # )
+    # record_scenario(ctx)
 
     # run before all scenario hooks
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
@@ -253,7 +255,7 @@ def after_scenario(ctx, scenario):
     )
 
     scenario.end_at = datetime.datetime.now().isoformat()[:-3]
-    finish_scenario_record(scenario)
+    # finish_scenario_record(scenario)
 
 
 def download_mht_data(ctx):
@@ -299,7 +301,8 @@ def before_step(ctx, step):
         ctx.scenario_debug_log_tee.clear()
 
     ctx.current_step = step
-    ctx.current_step.has_substeps = False
+    step.is_substep = False
+    step.has_substeps = False
     ctx.section_level = None
     step.seq = ctx.step_index + 1
     step.parent_seq = (
@@ -308,7 +311,7 @@ def before_step(ctx, step):
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
-    start_step_record(ctx, step)
+    # start_step_record(ctx, step)
 
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:

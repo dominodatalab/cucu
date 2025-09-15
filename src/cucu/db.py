@@ -178,21 +178,22 @@ def record_feature(feature_obj):
     db.close()
 
 
-def record_scenario(ctx):
+def record_scenario(scenario_obj):
+    scenario_index = scenario_obj.feature.scenarios.index(scenario_obj) + 1
     db.connect(reuse_if_open=True)
     scenario.create(
-        scenario_run_id=ctx.scenario.scenario_run_id,
-        feature_run_id=ctx.scenario.feature.feature_run_id,
-        name=ctx.scenario.name,
-        line_number=ctx.scenario.line,
-        seq=ctx.scenario_index,
-        tags=" ".join(ctx.scenario.tags),
-        start_at=ctx.scenario.start_at,
+        scenario_run_id=scenario_obj.scenario_run_id,
+        feature_run_id=scenario_obj.feature.feature_run_id,
+        name=scenario_obj.name,
+        line_number=scenario_obj.line,
+        seq=scenario_index,
+        tags=" ".join(scenario_obj.tags),
+        start_at=getattr(scenario_obj, "start_at", None),
     )
     db.close()
 
 
-def start_step_record(ctx, step_obj):
+def start_step_record(step_obj, scenario_run_id):
     db.connect(reuse_if_open=True)
     if not step_obj.table:
         table = None
@@ -201,14 +202,14 @@ def start_step_record(ctx, step_obj):
         table.extend([row.cells for row in step_obj.table.rows])
     step.create(
         step_run_id=step_obj.step_run_id,
-        scenario_run_id=ctx.scenario.scenario_run_id,
-        seq=step_obj.seq,
+        scenario_run_id=scenario_run_id,
+        seq=getattr(step_obj, "seq", -1),
         keyword=step_obj.keyword,
         name=step_obj.name,
         text=step_obj.text if step_obj.text else None,
         table_data=table if step_obj.table else None,
         location=str(step_obj.location),
-        has_substeps=step_obj.has_substeps,
+        has_substeps=getattr(step_obj, "has_substeps", False),
         section_level=getattr(step_obj, "section_level", None),
         start_at=step_obj.start_at,
     )
@@ -277,15 +278,15 @@ def finish_step_record(step_obj, duration):
 
     step.update(
         section_level=getattr(step_obj, "section_level", None),
-        parent_seq=step_obj.parent_seq,
-        has_substeps=step_obj.has_substeps,
+        parent_seq=getattr(step_obj, "parent_seq", None),
+        has_substeps=getattr(step_obj, "has_substeps", False),
         status=step_obj.status.name,
-        is_substep=step_obj.is_substep,
+        is_substep=getattr(step_obj, "is_substep", False),
         duration=duration,
         end_at=step_obj.end_at,
-        debug_output=step_obj.debug_output,
-        browser_logs=step_obj.browser_logs,
-        browser_info=step_obj.browser_info,
+        debug_output=getattr(step_obj, "debug_output", ""),
+        browser_logs=getattr(step_obj, "browser_logs", ""),
+        browser_info=getattr(step_obj, "browser_info", ""),
         screenshots=screenshot_infos,
         stdout=stdout,
         stderr=stderr,
