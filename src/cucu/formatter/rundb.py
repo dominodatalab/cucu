@@ -12,8 +12,10 @@ from cucu import logger
 from cucu.config import CONFIG
 from cucu.db import (
     create_database_file,
+    finish_cucu_run_record,
     finish_feature_record,
     finish_step_record,
+    finish_worker_record,
     record_cucu_run,
     record_feature,
     record_scenario,
@@ -124,6 +126,9 @@ class RundbFormatter(Formatter):
 
         :param scenario:  Scenario object (as :class:`behave.model.Scenario`)
         """
+        # if self.this_scenario is not None:
+        #     finishe_scenario_record(self.this_scenario)
+
         self.this_scenario = scenario
         self.step_index = 0
         self.next_start_at = datetime.datetime.now().isoformat()[:-3]
@@ -172,12 +177,16 @@ class RundbFormatter(Formatter):
 
     def eof(self):
         """Called after processing a feature (or a feature file)."""
-        pass
+        # need to finish the last scenario
+        # if self.this_scenario is not None:
+        #     finishe_scenario_record(self.this_scenario)
 
     def close(self):
         """Called before the formatter is no longer used
         (stream/io compatibility).
         """
+        finish_worker_record(None)
+        finish_cucu_run_record()
         self.close_stream()
 
     def close_stream(self):
