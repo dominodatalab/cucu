@@ -32,17 +32,17 @@ def expect_the_following_step_to_fail(ctx, message):
 
 @step('I should see the previous step took less than "{seconds}" seconds')
 def should_see_previous_step_took_less_than(ctx, seconds):
-    if ctx.previous_step_duration > float(seconds):
+    if ctx.scenario.previous_step_duration > float(seconds):
         raise RuntimeError(
-            f"previous step took {ctx.previous_step_duration}, which is more than {seconds}"
+            f"previous step took {ctx.scenario.previous_step_duration}, which is more than {seconds}"
         )
 
 
 @step('I should see the previous step took more than "{seconds}" seconds')
 def should_see_previous_step_took_more_than(ctx, seconds):
-    if ctx.previous_step_duration < float(seconds):
+    if ctx.scenario.previous_step_duration < float(seconds):
         raise RuntimeError(
-            f"previous step took {ctx.previous_step_duration}, which is less than {seconds}"
+            f"previous step took {ctx.scenario.previous_step_duration}, which is less than {seconds}"
         )
 
 

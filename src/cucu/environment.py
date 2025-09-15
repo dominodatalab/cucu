@@ -330,7 +330,7 @@ def after_step(ctx, step):
     # calculate duration from ISO timestamps
     start_at = datetime.datetime.fromisoformat(step.start_at)
     end_at = datetime.datetime.fromisoformat(step.end_at)
-    ctx.previous_step_duration = (end_at - start_at).total_seconds()
+    ctx.scenario.previous_step_duration = (end_at - start_at).total_seconds()
 
     # when set this means we're running in parallel mode using --workers and
     # we want to see progress reported using simply dots
@@ -401,4 +401,4 @@ def after_step(ctx, step):
 
     step.browser_info = browser_info
 
-    finish_step_record(step, ctx.previous_step_duration)
+    finish_step_record(step, ctx.scenario.previous_step_duration)
