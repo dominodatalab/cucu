@@ -95,7 +95,7 @@ class scenario(BaseModel):
     tags = TextField()
     status = TextField(null=True)
     duration = FloatField(null=True)
-    start_at = DateTimeField()
+    start_at = DateTimeField(null=True)
     end_at = DateTimeField(null=True)
     log_files = JSONField(null=True)
     cucu_config = JSONField(null=True)

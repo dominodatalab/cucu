@@ -110,7 +110,7 @@ def behave(
     if dry_run:
         args += [
             "--dry-run",
-            # console formater
+            # console formatter
             "--format=cucu.formatter.cucu:CucuFormatter",
         ]
 

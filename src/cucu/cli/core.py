@@ -264,12 +264,11 @@ def run(
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())
 
-    if not dry_run:
-        if not preserve_results:
-            if os.path.exists(results):
-                shutil.rmtree(results)
+    if not preserve_results:
+        if os.path.exists(results):
+            shutil.rmtree(results)
 
-        os.makedirs(results, exist_ok=True)
+    os.makedirs(results, exist_ok=True)
 
     if selenium_remote_url is not None:
         os.environ["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
@@ -304,9 +303,10 @@ def run(
     os.environ["WORKER_PARENT_ID"] = CONFIG["WORKER_RUN_ID"] = (
         generate_short_id(worker_id_seed)
     )
-    if not dry_run:
-        os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = filepath
-        create_run(results, filepath)
+
+    os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = filepath
+
+    create_run(results, filepath)
 
     try:
         if workers is None or workers == 1:
@@ -497,7 +497,7 @@ def run(
         if dumper is not None:
             dumper.stop()
 
-        if not dry_run and os.path.exists(results):
+        if os.path.exists(results):
             finish_worker_record(worker_run_id=CONFIG.get("WORKER_PARENT_ID"))
             consolidate_database_files(results)
 
