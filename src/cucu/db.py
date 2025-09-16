@@ -196,7 +196,7 @@ def start_step_record(step_obj, scenario_run_id):
         table = None
     else:
         table = [step_obj.table.headings]
-        table.extend([row.cells for row in step_obj.table.rows])
+        table.extend([row for row in step_obj.table.rows])
     step.create(
         step_run_id=step_obj.step_run_id,
         scenario_run_id=scenario_run_id,
