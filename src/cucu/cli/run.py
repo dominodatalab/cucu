@@ -110,8 +110,10 @@ def behave(
     if dry_run:
         args += [
             "--dry-run",
-            # console formater
+            # console formatter
             "--format=cucu.formatter.cucu:CucuFormatter",
+            # run.db formatter
+            "--format=cucu.formatter.rundb:RundbFormatter",
         ]
 
     else:
@@ -128,6 +130,8 @@ def behave(
             # disable behave's junit output in favor of our own formatter
             "--no-junit",
             "--format=cucu.formatter.junit:CucuJUnitFormatter",
+            # run.db formatter
+            "--format=cucu.formatter.rundb:RundbFormatter",
         ]
 
     for tag in tags:
