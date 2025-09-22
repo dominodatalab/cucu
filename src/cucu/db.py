@@ -117,7 +117,7 @@ class step(BaseModel):
     status = TextField(null=True)
     keyword = TextField()
     name = TextField()
-    text = TextField(null=True)
+    text = JSONField(null=True)
     table_data = JSONField(null=True)
     location = TextField()
     is_substep = BooleanField(null=True)  # info available after step ends
@@ -203,7 +203,7 @@ def start_step_record(step_obj, scenario_run_id):
         seq=getattr(step_obj, "seq", -1),
         keyword=step_obj.keyword,
         name=step_obj.name,
-        text=step_obj.text if step_obj.text else None,
+        text=step_obj.text.splitlines() if step_obj.text else [],
         table_data=table if step_obj.table else None,
         location=str(step_obj.location),
         has_substeps=getattr(step_obj, "has_substeps", False),
