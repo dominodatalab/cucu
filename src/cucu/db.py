@@ -124,8 +124,8 @@ class step(BaseModel):
     has_substeps = BooleanField()
     stdout = JSONField(null=True)
     stderr = JSONField(null=True)
-    error_message = TextField(null=True)
-    exception = TextField(null=True)
+    error_message = JSONField(null=True)
+    exception = JSONField(null=True)
     debug_output = TextField(null=True)
     browser_logs = TextField(null=True)
     browser_info = JSONField(null=True)
@@ -253,24 +253,23 @@ def finish_step_record(step_obj, duration):
         stderr = [CONFIG.hide_secrets("".join(step_obj.stderr).rstrip())]
 
     error_message = None
-    exception = None
-    if step_obj.status.name == "failed":
-        error_message = step_obj.error_message
+    exception = []
+    if step.error_message and step_obj.status.name == "failed":
+        error_message = CONFIG.hide_secrets(step_obj.error_message)
 
-        if error_message:
-            if error := step_obj.exception:
-                if isinstance(error, RetryError):
-                    error = error.last_attempt.exception()
+        if error := step_obj.exception:
+            if isinstance(error, RetryError):
+                error = error.last_attempt.exception()
 
-                if len(error.args) > 0 and isinstance(error.args[0], str):
-                    error_class_name = error.__class__.__name__
-                    redacted_error_msg = CONFIG.hide_secrets(error.args[0])
-                    error_lines = redacted_error_msg.splitlines()
-                    error_lines[0] = f"{error_class_name}: {error_lines[0]}"
-                else:
-                    error_lines = [repr(error)]
+            if len(error.args) > 0 and isinstance(error.args[0], str):
+                error_class_name = error.__class__.__name__
+                redacted_error_msg = CONFIG.hide_secrets(error.args[0])
+                error_lines = redacted_error_msg.splitlines()
+                error_lines[0] = f"{error_class_name}: {error_lines[0]}"
+            else:
+                error_lines = [repr(error)]
 
-                exception = error_lines
+            exception = error_lines
 
     step.update(
         section_level=getattr(step_obj, "section_level", None),
