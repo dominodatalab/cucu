@@ -92,7 +92,7 @@ class RundbFormatter(Formatter):
 
         :param uri:  URI or filename (as string).
         """
-        self.stream.write(f"URI: {uri}\n")
+        pass
 
     def feature(self, feature):
         """Called before a feature is executed.
