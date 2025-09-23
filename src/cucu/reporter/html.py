@@ -88,7 +88,7 @@ def generate(results, basepath, only_failures=False):
         init_html_report_db(db_path)
         features = []
 
-        db_features = FeatureModel.select().order_by(FeatureModel.name)
+        db_features = FeatureModel.select().order_by(FeatureModel.start_at)
         logger.info(
             f"Starting to process {len(db_features)} features for report"
         )
