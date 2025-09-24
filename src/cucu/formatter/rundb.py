@@ -168,7 +168,6 @@ class RundbFormatter(Formatter):
         for index, step in enumerate(self.steps):
             if getattr(step, "seq", -1) == -1:
                 step.seq = index + 1  # 1-based sequence
-                step.status = Status.untested
                 finish_step_record(step, None)
 
         finish_scenario_record(self.this_scenario)
