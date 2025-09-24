@@ -7,7 +7,6 @@ import time
 from pathlib import Path
 
 from behave.formatter.base import Formatter
-from behave.model import Status
 
 from cucu import logger
 from cucu.config import CONFIG
