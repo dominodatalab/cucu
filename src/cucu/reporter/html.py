@@ -99,7 +99,7 @@ def generate(results, basepath, only_failures=False):
                 "filename": db_feature.filename,
                 "description": db_feature.description,
                 "tags": db_feature.tags.split() if db_feature.tags else [],
-                "status": "passed",
+                "status": db_feature.status,
                 "elements": [],
             }
 

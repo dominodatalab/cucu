@@ -105,7 +105,6 @@ class RundbFormatter(Formatter):
         feature.custom_data = {}
 
         record_feature(feature)
-        finish_feature_record(feature)
 
     def background(self, background):
         # nothing to do, but we need to implement the method for behave
@@ -178,6 +177,7 @@ class RundbFormatter(Formatter):
         """Called after processing a feature (or a feature file)."""
         # need to finish the last scenario
         self._finish_sceario()
+        finish_feature_record(self.this_feature)
 
     def close(self):
         """Called before the formatter is no longer used

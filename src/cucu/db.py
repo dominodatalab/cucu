@@ -73,12 +73,13 @@ class feature(BaseModel):
         column_name="worker_run_id",
     )
     name = TextField()
-    filename = TextField()
-    description = TextField()
-    tags = TextField()
+    status = TextField(null=True)
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
     custom_data = JSONField(null=True)
+    tags = TextField()
+    filename = TextField()
+    description = TextField()
 
 
 class scenario(BaseModel):
@@ -302,9 +303,19 @@ def finish_step_record(step_obj, duration):
 
 def finish_scenario_record(scenario_obj):
     db.connect(reuse_if_open=True)
-    start_dt = datetime.fromisoformat(scenario_obj.start_at)
-    end_dt = datetime.fromisoformat(scenario_obj.end_at)
-    duration = (end_dt - start_dt).total_seconds()
+    if getattr(scenario_obj, "start_at", None):
+        start_at = datetime.fromisoformat(scenario_obj.start_at)
+    else:
+        start_at = None
+    if getattr(scenario_obj, "end_at", None):
+        end_at = datetime.fromisoformat(scenario_obj.end_at)
+    else:
+        end_at = None
+    if start_at and end_at:
+        duration = (end_at - start_at).total_seconds()
+    else:
+        duration = None
+
     scenario_logs_dir = CONFIG.get("SCENARIO_LOGS_DIR")
     if not scenario_logs_dir or not Path(scenario_logs_dir).exists():
         log_files_json = "[]"
@@ -316,21 +327,22 @@ def finish_scenario_record(scenario_obj):
             if file.is_file()
         ]
         log_files_json = sorted(log_files)
-    custom_data_json = scenario_obj.custom_data
+
     scenario.update(
         status=scenario_obj.status.name,
         duration=duration,
-        end_at=scenario_obj.end_at,
+        end_at=end_at,
         log_files=log_files_json,
-        cucu_config=scenario_obj.cucu_config_json,
-        browser_info=scenario_obj.browser_info,
-        custom_data=custom_data_json,
+        cucu_config=getattr(scenario_obj, "cucu_config_json", dict()),
+        browser_info=getattr(scenario_obj, "browser_info", dict()),
+        custom_data=getattr(scenario_obj, "custom_data", dict()),
     ).where(scenario.scenario_run_id == scenario_obj.scenario_run_id).execute()
 
 
 def finish_feature_record(feature_obj):
     db.connect(reuse_if_open=True)
     feature.update(
+        status=feature_obj.status.name,
         end_at=datetime.now().isoformat(),
         custom_data=feature_obj.custom_data,
     ).where(feature.feature_run_id == feature_obj.feature_run_id).execute()
