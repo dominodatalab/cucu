@@ -130,7 +130,7 @@ class RundbFormatter(Formatter):
         self.insert_step(step, index=-1)
 
     def insert_step(self, step, index):
-        """ cucu specific step insertion method used to add steps here and dynamically """
+        """cucu specific step insertion method used to add steps here and dynamically"""
         next_index = index if index != -1 else len(self.steps)
         step_run_id_seed = f"{self.this_scenario.scenario_run_id}_{next_index}_{time.perf_counter()}"
         step.step_run_id = generate_short_id(
@@ -159,11 +159,11 @@ class RundbFormatter(Formatter):
             self.this_scenario, "previous_step_duration", 0
         )
         finish_step_record(step, previous_step_duration)
-        
+
     def _finish_sceario(self):
         if self.this_scenario is None:
             return
-        
+
         # ensure non-executed steps have correct seq
         for index, step in enumerate(self.steps):
             if getattr(step, "seq", -1) == -1:
@@ -185,4 +185,3 @@ class RundbFormatter(Formatter):
         finish_worker_record(None)
         finish_cucu_run_record()
         close_db()
-

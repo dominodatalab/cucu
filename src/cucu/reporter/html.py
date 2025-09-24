@@ -330,7 +330,9 @@ def generate(results, basepath, only_failures=False):
                                 scenario_started_at = timestamp
                                 scenario["started_at"] = timestamp
                             time_offset = datetime.utcfromtimestamp(
-                                (timestamp - scenario_started_at).total_seconds()
+                                (
+                                    timestamp - scenario_started_at
+                                ).total_seconds()
                             )
                             step["result"]["time_offset"] = time_offset
                         else:

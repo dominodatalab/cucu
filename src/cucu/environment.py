@@ -1,7 +1,6 @@
 import datetime
 import json
 import sys
-import time
 import traceback
 from functools import partial
 from pathlib import Path
@@ -14,7 +13,6 @@ from cucu.page_checks import init_page_checks
 from cucu.utils import (
     TeeStream,
     ellipsize_filename,
-    generate_short_id,
     take_screenshot,
 )
 

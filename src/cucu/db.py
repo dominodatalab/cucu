@@ -201,7 +201,7 @@ def start_step_record(step_obj, scenario_run_id):
             "headings": table.headings,
             "rows": [list(row) for row in table.rows],
         }
-        return table_data    
+        return table_data
 
     table = _make_table(step_obj.table)
 
