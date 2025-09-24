@@ -112,7 +112,7 @@ class RundbFormatter(Formatter):
 
     def scenario(self, scenario):
         """Called before a scenario is executed (or ScenarioOutline scenarios)."""
-        self._finish_sceario()
+        self._finish_scenario()
 
         self.this_scenario = scenario
         self.steps = []
@@ -161,7 +161,7 @@ class RundbFormatter(Formatter):
 
         finish_step_record(step, previous_step_duration)
 
-    def _finish_sceario(self):
+    def _finish_scenario(self):
         if self.this_scenario is None:
             return
 
@@ -176,7 +176,7 @@ class RundbFormatter(Formatter):
     def eof(self):
         """Called after processing a feature (or a feature file)."""
         # need to finish the last scenario
-        self._finish_sceario()
+        self._finish_scenario()
         finish_feature_record(self.this_feature)
 
     def close(self):

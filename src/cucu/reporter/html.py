@@ -113,6 +113,10 @@ def generate(results, basepath, only_failures=False):
 
             feature_has_failures = False
 
+            if len(db_scenarios) == 0:
+                logger.debug(f"Feature {db_feature.name} has no scenarios")
+                continue
+
             for db_scenario in db_scenarios:
                 scenario_dict = {
                     "name": db_scenario.name,
