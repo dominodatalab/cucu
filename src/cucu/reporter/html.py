@@ -151,14 +151,7 @@ def generate(results, basepath, only_failures=False):
                         step_dict["text"] = db_step.text
 
                     if db_step.table_data:
-                        step_dict["table"] = {
-                            "headings": db_step.table_data[0]
-                            if db_step.table_data
-                            else [],
-                            "rows": db_step.table_data[1:]
-                            if len(db_step.table_data) > 1
-                            else [],
-                        }
+                        step_dict["table"] = db_step.table_data
 
                     step_dict["result"]["error_message"] = [
                         db_step.error_message
@@ -327,18 +320,22 @@ def generate(results, basepath, only_failures=False):
 
                 if "result" in step:
                     if step["result"]["status"] in ["failed", "passed"]:
-                        timestamp = datetime.fromisoformat(
-                            step["result"]["timestamp"]
-                        )
-                        step["result"]["timestamp"] = timestamp
+                        if step["result"]["timestamp"]:
+                            timestamp = datetime.fromisoformat(
+                                step["result"]["timestamp"]
+                            )
+                            step["result"]["timestamp"] = timestamp
 
-                        if scenario_started_at is None:
-                            scenario_started_at = timestamp
-                            scenario["started_at"] = timestamp
-                        time_offset = datetime.utcfromtimestamp(
-                            (timestamp - scenario_started_at).total_seconds()
-                        )
-                        step["result"]["time_offset"] = time_offset
+                            if scenario_started_at is None:
+                                scenario_started_at = timestamp
+                                scenario["started_at"] = timestamp
+                            time_offset = datetime.utcfromtimestamp(
+                                (timestamp - scenario_started_at).total_seconds()
+                            )
+                            step["result"]["time_offset"] = time_offset
+                        else:
+                            step["result"]["timestamp"] = ""
+                            step["result"]["time_offset"] = ""
 
                     scenario_duration += step["result"]["duration"]
 

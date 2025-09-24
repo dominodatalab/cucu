@@ -91,7 +91,7 @@ class scenario(BaseModel):
     )
     name = TextField()
     line_number = IntegerField()
-    seq = IntegerField()
+    seq = IntegerField(null=True)
     tags = TextField()
     status = TextField(null=True)
     duration = FloatField(null=True)
@@ -130,7 +130,7 @@ class step(BaseModel):
     browser_logs = TextField(null=True)
     browser_info = JSONField(null=True)
     duration = FloatField(null=True)
-    start_at = DateTimeField()
+    start_at = DateTimeField(null=True)
     end_at = DateTimeField(null=True)
     screenshots = JSONField(null=True)
 
@@ -192,23 +192,31 @@ def record_scenario(scenario_obj):
 
 def start_step_record(step_obj, scenario_run_id):
     db.connect(reuse_if_open=True)
-    if not step_obj.table:
-        table = None
-    else:
-        table = [step_obj.table.headings]
-        table.extend([row for row in step_obj.table.rows])
+
+    def _make_table(table, default=None):
+        if not table:
+            return default
+
+        table_data = {
+            "headings": table.headings,
+            "rows": [list(row) for row in table.rows],
+        }
+        return table_data    
+
+    table = _make_table(step_obj.table)
+
     step.create(
         step_run_id=step_obj.step_run_id,
         scenario_run_id=scenario_run_id,
         seq=getattr(step_obj, "seq", -1),
         keyword=step_obj.keyword,
         name=step_obj.name,
+        status=step_obj.status.name,
         text=step_obj.text.splitlines() if step_obj.text else [],
-        table_data=table if step_obj.table else None,
+        table_data=table,
         location=str(step_obj.location),
         has_substeps=getattr(step_obj, "has_substeps", False),
         section_level=getattr(step_obj, "section_level", None),
-        start_at=step_obj.start_at,
     )
 
 
@@ -272,21 +280,23 @@ def finish_step_record(step_obj, duration):
             exception = error_lines
 
     step.update(
-        section_level=getattr(step_obj, "section_level", None),
-        parent_seq=getattr(step_obj, "parent_seq", None),
-        has_substeps=getattr(step_obj, "has_substeps", False),
-        status=step_obj.status.name,
-        is_substep=getattr(step_obj, "is_substep", False),
+        browser_info=getattr(step_obj, "browser_info", ""),
+        browser_logs=getattr(step_obj, "browser_logs", ""),
+        debug_output=getattr(step_obj, "debug_output", ""),
         duration=duration,
         end_at=step_obj.end_at,
-        debug_output=getattr(step_obj, "debug_output", ""),
-        browser_logs=getattr(step_obj, "browser_logs", ""),
-        browser_info=getattr(step_obj, "browser_info", ""),
-        screenshots=screenshot_infos,
-        stdout=stdout,
-        stderr=stderr,
         error_message=error_message,
         exception=exception,
+        has_substeps=getattr(step_obj, "has_substeps", False),
+        is_substep=getattr(step_obj, "is_substep", False),
+        parent_seq=getattr(step_obj, "parent_seq", None),
+        screenshots=screenshot_infos,
+        section_level=getattr(step_obj, "section_level", None),
+        seq=step_obj.seq,
+        start_at=step_obj.start_at,
+        status=step_obj.status.name,
+        stderr=stderr,
+        stdout=stdout,
     ).where(step.step_run_id == step_obj.step_run_id).execute()
 
 

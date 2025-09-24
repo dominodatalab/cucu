@@ -103,7 +103,6 @@ class RundbFormatter(Formatter):
         self.this_scenario = None
         self.this_background = None
         self.next_start_at = None
-        self.step_index = 0
 
         feature_run_id_seed = (
             f"{CONFIG['WORKER_RUN_ID']}_{time.perf_counter()}"
@@ -132,7 +131,7 @@ class RundbFormatter(Formatter):
             finish_scenario_record(self.this_scenario)
 
         self.this_scenario = scenario
-        self.step_index = 0
+        self.steps = []
         self.next_start_at = datetime.datetime.now().isoformat()[:-3]
         scenario_run_id_seed = (
             f"{scenario.feature.feature_run_id}_{time.perf_counter()}"
@@ -146,7 +145,24 @@ class RundbFormatter(Formatter):
 
         :param step: Step object (as :class:`behave.model.Step`)
         """
+        # calc step_index from scenario since steps can be added dynamically
+        step_index = self.this_scenario.steps.index(step) + 1        
+        step.step_index = len(self.steps) + 1
+        step_run_id_seed = f"{self.this_scenario.scenario_run_id}_{step.step_index}_{time.perf_counter()}"
+        step.step_run_id = generate_short_id(
+            step_run_id_seed, length=10
+        )  # up to 10 characters to give two orders of magnitude less chance of collision
+        self.steps.append(step)
+        start_step_record(step, self.this_scenario.scenario_run_id)
+
+
+    def insert_step(self, step, index):
+        """
+        cucu specific formatter method to insert steps dynamically
+        this is why we need to recalc step_index in result() below
+        """
         pass
+
 
     def match(self, match):
         """Called when a step was matched against its step implementation.
@@ -160,21 +176,14 @@ class RundbFormatter(Formatter):
 
         :param step:  Step object with result (after being executed/skipped).
         """
-        step_run_id_seed = f"{self.this_scenario.scenario_run_id}_{self.step_index}_{time.perf_counter()}"
-        step.step_run_id = generate_short_id(
-            step_run_id_seed, length=10
-        )  # up to 10 characters to give two orders of magnitude less chance of collision
-
         step.start_at = self.next_start_at
         self.next_start_at = step.end_at = datetime.datetime.now().isoformat()[
             :-3
         ]
-        start_step_record(step, self.this_scenario.scenario_run_id)
         previous_step_duration = getattr(
             self.this_scenario, "previous_step_duration", 0
         )
         finish_step_record(step, previous_step_duration)
-        self.step_index += 1
 
     def eof(self):
         """Called after processing a feature (or a feature file)."""
@@ -190,7 +199,3 @@ class RundbFormatter(Formatter):
         finish_cucu_run_record()
         close_db()
 
-    ## cucu specific formatter methods
-    def insert_step(self, step, index):
-        # used by cucu to insert steps dynamically
-        pass

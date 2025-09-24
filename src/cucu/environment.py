@@ -235,10 +235,10 @@ def cleanup_browsers(ctx):
 
 
 def before_step(ctx, step):
-    step_run_id_seed = f"{ctx.scenario.scenario_run_id}_{ctx.step_index}_{time.perf_counter()}"
-    step.step_run_id = generate_short_id(
-        step_run_id_seed, length=10
-    )  # up to 10 characters to give two orders of magnitude less chance of collision
+    # step_run_id_seed = f"{ctx.scenario.scenario_run_id}_{ctx.step_index}_{time.perf_counter()}"
+    # step.step_run_id = generate_short_id(
+    #     step_run_id_seed, length=10
+    # )  # up to 10 characters to give two orders of magnitude less chance of collision
     step.start_at = datetime.datetime.now().isoformat()[:-3]
 
     sys.stdout.captured()
