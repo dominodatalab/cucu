@@ -216,6 +216,7 @@ def start_step_record(step_obj, scenario_run_id):
         text=step_obj.text.splitlines() if step_obj.text else [],
         table_data=table,
         location=str(step_obj.location),
+        is_substep=getattr(step_obj, "is_substep", False),
         has_substeps=getattr(step_obj, "has_substeps", False),
         section_level=getattr(step_obj, "section_level", None),
     )
@@ -289,7 +290,6 @@ def finish_step_record(step_obj, duration):
         error_message=error_message,
         exception=exception,
         has_substeps=getattr(step_obj, "has_substeps", False),
-        is_substep=getattr(step_obj, "is_substep", False),
         parent_seq=getattr(step_obj, "parent_seq", None),
         screenshots=screenshot_infos,
         section_level=getattr(step_obj, "section_level", None),

@@ -156,7 +156,7 @@ class RundbFormatter(Formatter):
         previous_step_duration = getattr(
             self.this_scenario, "previous_step_duration", 0
         )
-        if step.status.name == "undefined":
+        if step.status.name in ("untested","undefined"):
             step.seq = self.this_scenario.steps.index(step) + 1
 
         finish_step_record(step, previous_step_duration)

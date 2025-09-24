@@ -243,8 +243,8 @@ def before_step(ctx, step):
         ctx.scenario_debug_log_tee.clear()
 
     ctx.current_step = step
-    step.is_substep = False
-    step.has_substeps = False
+    step.is_substep = getattr(step, "is_substep", False)
+    step.has_substeps = getattr(step, "has_substeps", False)
     ctx.section_level = None
     step.seq = ctx.step_index + 1
     step.parent_seq = (

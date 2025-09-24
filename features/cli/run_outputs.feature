@@ -4,7 +4,7 @@ Feature: Run outputs
 
   Scenario: User can --dry-run a passing scenario
     Given I run the command "cucu run data/features/feature_with_passing_scenario.feature --dry-run --results {CUCU_RESULTS_DIR}/passing_feature_dry_run_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
-     Then I should not see the directory at "{CUCU_RESULTS_DIR}/passing_feature_dry_run_results"
+     Then I should not see the directory at "{CUCU_RESULTS_DIR}/passing_feature_dry_run_results/Just a scenario that passes"
       And I should see "{STDOUT}" matches the following
       """
       [\s\S]*

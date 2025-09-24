@@ -145,6 +145,7 @@ def generate(results, basepath, only_failures=False):
                             "duration": db_step.duration or 0,
                             "timestamp": db_step.end_at or "",
                         },
+                        "substep": db_step.is_substep,
                     }
 
                     if db_step.text:
