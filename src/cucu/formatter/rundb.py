@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 
 from behave.formatter.base import Formatter
+from behave.model import Status
 
 from cucu import logger
 from cucu.config import CONFIG
@@ -59,8 +60,8 @@ class RundbFormatter(Formatter):
 
     def __init__(self, stream_opener, config):
         super(RundbFormatter, self).__init__(stream_opener, config)
-        # -- ENSURE: Output stream is open.
-        self.stream = self.open()
+        # We don't actually use the stream so don't open it.
+        # self.stream = self.open()
         self.config = config
 
         if (
@@ -88,17 +89,11 @@ class RundbFormatter(Formatter):
                 record_cucu_run()
 
     def uri(self, uri):
-        """Called before processing a file (normally a feature file).
-
-        :param uri:  URI or filename (as string).
-        """
+        # nothing to do, but we need to implement the method for behave
         pass
 
     def feature(self, feature):
-        """Called before a feature is executed.
-
-        :param feature:  Feature object (as :class:`behave.model.Feature`)
-        """
+        """Called before a feature is executed."""
         self.this_feature = feature
         self.this_scenario = None
         self.this_background = None
@@ -114,21 +109,12 @@ class RundbFormatter(Formatter):
         finish_feature_record(feature)
 
     def background(self, background):
-        """Called when a (Feature) Background is provided.
-        Called after :method:`feature()` is called.
-        Called before processing any scenarios or scenario outlines.
-
-        :param background:  Background object (as :class:`behave.model.Background`)
-        """
+        # nothing to do, but we need to implement the method for behave
         pass
 
     def scenario(self, scenario):
-        """Called before a scenario is executed (or ScenarioOutline scenarios).
-
-        :param scenario:  Scenario object (as :class:`behave.model.Scenario`)
-        """
-        if self.this_scenario is not None:
-            finish_scenario_record(self.this_scenario)
+        """Called before a scenario is executed (or ScenarioOutline scenarios)."""
+        self._finish_sceario()
 
         self.this_scenario = scenario
         self.steps = []
@@ -140,29 +126,18 @@ class RundbFormatter(Formatter):
         record_scenario(scenario)
 
     def step(self, step):
-        """Called before a step is executed (and matched).
-        NOTE: Normally called before scenario is executed for all its steps.
+        """Called before a step is executed (and matched)."""
+        self.insert_step(step, index=-1)
 
-        :param step: Step object (as :class:`behave.model.Step`)
-        """
-        # calc step_index from scenario since steps can be added dynamically
-        step_index = self.this_scenario.steps.index(step) + 1        
-        step.step_index = len(self.steps) + 1
-        step_run_id_seed = f"{self.this_scenario.scenario_run_id}_{step.step_index}_{time.perf_counter()}"
+    def insert_step(self, step, index):
+        """ cucu specific step insertion method used to add steps here and dynamically """
+        next_index = index if index != -1 else len(self.steps)
+        step_run_id_seed = f"{self.this_scenario.scenario_run_id}_{next_index}_{time.perf_counter()}"
         step.step_run_id = generate_short_id(
             step_run_id_seed, length=10
         )  # up to 10 characters to give two orders of magnitude less chance of collision
-        self.steps.append(step)
+        self.steps.insert(next_index, step)
         start_step_record(step, self.this_scenario.scenario_run_id)
-
-
-    def insert_step(self, step, index):
-        """
-        cucu specific formatter method to insert steps dynamically
-        this is why we need to recalc step_index in result() below
-        """
-        pass
-
 
     def match(self, match):
         """Called when a step was matched against its step implementation.
@@ -184,12 +159,24 @@ class RundbFormatter(Formatter):
             self.this_scenario, "previous_step_duration", 0
         )
         finish_step_record(step, previous_step_duration)
+        
+    def _finish_sceario(self):
+        if self.this_scenario is None:
+            return
+        
+        # ensure non-executed steps have correct seq
+        for index, step in enumerate(self.steps):
+            if getattr(step, "seq", -1) == -1:
+                step.seq = index + 1  # 1-based sequence
+                step.status = Status.untested
+                finish_step_record(step, None)
+
+        finish_scenario_record(self.this_scenario)
 
     def eof(self):
         """Called after processing a feature (or a feature file)."""
         # need to finish the last scenario
-        if self.this_scenario is not None:
-            finish_scenario_record(self.this_scenario)
+        self._finish_sceario()
 
     def close(self):
         """Called before the formatter is no longer used
