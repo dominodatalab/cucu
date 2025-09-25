@@ -147,7 +147,9 @@ class RundbFormatter(Formatter):
                 scenario.seq = index + 1
                 break
             if isinstance(feature_scenario, ScenarioOutline):
-                for sub_index, sub_scenario in enumerate(feature_scenario._scenarios):
+                for sub_index, sub_scenario in enumerate(
+                    feature_scenario._scenarios
+                ):
                     if sub_scenario == scenario:
                         scenario.seq = index + 1 + (sub_index + 1) / 10
                         break
