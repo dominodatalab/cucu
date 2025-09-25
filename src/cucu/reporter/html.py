@@ -98,7 +98,7 @@ def generate(results, basepath, only_failures=False):
                 "name": db_feature.name,
                 "filename": db_feature.filename,
                 "description": db_feature.description,
-                "tags": db_feature.tags.split() if db_feature.tags else [],
+                "tags": db_feature.tags if db_feature.tags else [],
                 "status": db_feature.status,
                 "elements": [],
             }
@@ -121,9 +121,7 @@ def generate(results, basepath, only_failures=False):
                 scenario_dict = {
                     "name": db_scenario.name,
                     "line": db_scenario.line_number,
-                    "tags": db_scenario.tags.split()
-                    if db_scenario.tags
-                    else [],
+                    "tags": db_scenario.tags if db_scenario.tags else [],
                     "status": db_scenario.status or "passed",
                     "steps": [],
                 }

@@ -77,7 +77,7 @@ class feature(BaseModel):
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
     custom_data = JSONField(null=True)
-    tags = TextField()
+    tags = JSONField()
     filename = TextField()
     description = TextField()
 
@@ -96,7 +96,7 @@ class scenario(BaseModel):
     duration = FloatField(null=True)
     start_at = DateTimeField(null=True)
     end_at = DateTimeField(null=True)
-    tags = TextField()
+    tags = JSONField()
     custom_data = JSONField(null=True)
     browser_info = JSONField(null=True)
     cucu_config = JSONField(null=True)
@@ -172,7 +172,7 @@ def record_feature(feature_obj):
         description="\n".join(feature_obj.description)
         if isinstance(feature_obj.description, list)
         else str(feature_obj.description),
-        tags=" ".join(feature_obj.tags),
+        tags=feature_obj.tags,
         start_at=datetime.now().isoformat(),
     )
 
@@ -185,7 +185,7 @@ def record_scenario(scenario_obj):
         name=scenario_obj.name,
         line_number=scenario_obj.line,
         seq=scenario_obj.seq,
-        tags=" ".join(scenario_obj.tags),
+        tags=scenario_obj.tags,
         start_at=getattr(scenario_obj, "start_at", None),
     )
 

@@ -139,6 +139,7 @@ class RundbFormatter(Formatter):
             f"{scenario.feature.feature_run_id}_{time.perf_counter()}"
         )
         scenario.scenario_run_id = generate_short_id(scenario_run_id_seed)
+        scenario.custom_data = {}
 
         # search features.scenarios, which includes scenario outlines and descend into them
         # for scenarios that are part of scenario outlines we combine the outline index and the scenario index
