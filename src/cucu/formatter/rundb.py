@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 
 from behave.formatter.base import Formatter
+from behave.model import ScenarioOutline
 
 from cucu import logger
 from cucu.config import CONFIG
@@ -30,8 +31,13 @@ from cucu.utils import (
 
 class RundbFormatter(Formatter):
     """
-    Record to database formatter.
+    Record to the database using the Formatter Behave API.
+    This is different from hooks as we don't have access to context (ctx) here.
+    Instead we use this class's data and add some data to the passed in objects: feature, scenario, step.
+    Another difference is that we can't rely on hooks to execute, as the step/scenario/feature may be skipped.
+    Also, use cucu's CONFIG for global data since we don't have context (ctx).
 
+    ## Just for reference:
     Processing Logic (simplified, without ScenarioOutline and skip logic)::
 
         for feature in runner.features:
@@ -59,7 +65,7 @@ class RundbFormatter(Formatter):
 
     def __init__(self, stream_opener, config):
         super(RundbFormatter, self).__init__(stream_opener, config)
-        # We don't actually use the stream so don't open it.
+        # We don't actually use the stream provided by Behave, so don't open it.
         # self.stream = self.open()
         self.config = config
 
@@ -110,6 +116,18 @@ class RundbFormatter(Formatter):
         # nothing to do, but we need to implement the method for behave
         pass
 
+    def _finish_scenario(self):
+        if self.this_scenario is None:
+            return
+
+        # ensure non-executed steps have correct seq
+        for index, step in enumerate(self.steps):
+            if getattr(step, "seq", -1) == -1:
+                step.seq = index + 1  # 1-based sequence
+                finish_step_record(step, None)
+
+        finish_scenario_record(self.this_scenario)
+
     def scenario(self, scenario):
         """Called before a scenario is executed (or ScenarioOutline scenarios)."""
         self._finish_scenario()
@@ -121,6 +139,19 @@ class RundbFormatter(Formatter):
             f"{scenario.feature.feature_run_id}_{time.perf_counter()}"
         )
         scenario.scenario_run_id = generate_short_id(scenario_run_id_seed)
+
+        # search features.scenarios, which includes scenario outlines and descend into them
+        # for scenarios that are part of scenario outlines we combine the outline index and the scenario index
+        for index, feature_scenario in enumerate(scenario.feature.scenarios):
+            if feature_scenario == scenario:
+                scenario.seq = index + 1
+                break
+            if isinstance(feature_scenario, ScenarioOutline):
+                for sub_index, sub_scenario in enumerate(feature_scenario._scenarios):
+                    if sub_scenario == scenario:
+                        scenario.seq = index + 1 + (sub_index + 1) / 10
+                        break
+
         record_scenario(scenario)
 
     def step(self, step):
@@ -138,10 +169,7 @@ class RundbFormatter(Formatter):
         start_step_record(step, self.this_scenario.scenario_run_id)
 
     def match(self, match):
-        """Called when a step was matched against its step implementation.
-
-        :param match:  Registered step (as Match), undefined step (as NoMatch).
-        """
+        # nothing to do, but we need to implement the method for behave
         pass
 
     def result(self, step):
@@ -160,18 +188,6 @@ class RundbFormatter(Formatter):
             step.seq = self.this_scenario.steps.index(step) + 1
 
         finish_step_record(step, previous_step_duration)
-
-    def _finish_scenario(self):
-        if self.this_scenario is None:
-            return
-
-        # ensure non-executed steps have correct seq
-        for index, step in enumerate(self.steps):
-            if getattr(step, "seq", -1) == -1:
-                step.seq = index + 1  # 1-based sequence
-                finish_step_record(step, None)
-
-        finish_scenario_record(self.this_scenario)
 
     def eof(self):
         """Called after processing a feature (or a feature file)."""

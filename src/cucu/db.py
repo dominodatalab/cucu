@@ -91,17 +91,17 @@ class scenario(BaseModel):
         column_name="feature_run_id",
     )
     name = TextField()
-    line_number = IntegerField()
-    seq = IntegerField(null=True)
-    tags = TextField()
+    seq = FloatField(null=True)
     status = TextField(null=True)
     duration = FloatField(null=True)
     start_at = DateTimeField(null=True)
     end_at = DateTimeField(null=True)
-    log_files = JSONField(null=True)
-    cucu_config = JSONField(null=True)
-    browser_info = JSONField(null=True)
+    tags = TextField()
     custom_data = JSONField(null=True)
+    browser_info = JSONField(null=True)
+    cucu_config = JSONField(null=True)
+    line_number = IntegerField()
+    log_files = JSONField(null=True)
 
 
 class step(BaseModel):
@@ -112,27 +112,27 @@ class step(BaseModel):
         backref="steps",
         column_name="scenario_run_id",
     )
-    seq = IntegerField()
     section_level = IntegerField(null=True)
+    seq = IntegerField()
     parent_seq = IntegerField(null=True)
-    status = TextField(null=True)
-    keyword = TextField()
-    name = TextField()
-    text = JSONField(null=True)
-    table_data = JSONField(null=True)
-    location = TextField()
     is_substep = BooleanField(null=True)  # info available after step ends
     has_substeps = BooleanField()
+    keyword = TextField()
+    name = TextField()
+    status = TextField(null=True)
+    duration = FloatField(null=True)
+    start_at = DateTimeField(null=True)
+    end_at = DateTimeField(null=True)
     stdout = JSONField(null=True)
     stderr = JSONField(null=True)
     error_message = JSONField(null=True)
     exception = JSONField(null=True)
     debug_output = TextField(null=True)
-    browser_logs = TextField(null=True)
     browser_info = JSONField(null=True)
-    duration = FloatField(null=True)
-    start_at = DateTimeField(null=True)
-    end_at = DateTimeField(null=True)
+    text = JSONField(null=True)
+    table_data = JSONField(null=True)
+    location = TextField()
+    browser_logs = TextField(null=True)
     screenshots = JSONField(null=True)
 
 
@@ -178,14 +178,13 @@ def record_feature(feature_obj):
 
 
 def record_scenario(scenario_obj):
-    scenario_index = scenario_obj.feature.scenarios.index(scenario_obj) + 1
     db.connect(reuse_if_open=True)
     scenario.create(
         scenario_run_id=scenario_obj.scenario_run_id,
         feature_run_id=scenario_obj.feature.feature_run_id,
         name=scenario_obj.name,
         line_number=scenario_obj.line,
-        seq=scenario_index,
+        seq=scenario_obj.seq,
         tags=" ".join(scenario_obj.tags),
         start_at=getattr(scenario_obj, "start_at", None),
     )

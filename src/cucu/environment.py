@@ -72,7 +72,7 @@ def after_feature(ctx, feature):
 
 def before_scenario(ctx, scenario):
     # we want every scenario to start with the exact same reinitialized config
-    # values and not really bleed values between scenario runs
+    # values and not bleed values between scenario runs
     CONFIG.restore()
 
     # we should load any cucurc.yml files in the path to the feature file
@@ -85,7 +85,6 @@ def before_scenario(ctx, scenario):
     scenario.custom_data = {}
     ctx.scenario = scenario
     ctx.step_index = 0
-    ctx.scenario_index = scenario.feature.scenarios.index(scenario) + 1
     ctx.browsers = []
     ctx.browser = None
     ctx.section_step_stack = []
@@ -252,8 +251,6 @@ def before_step(ctx, step):
     )
 
     CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
-
-    # start_step_record(ctx, step)
 
     # run before all step hooks
     for hook in CONFIG["__CUCU_BEFORE_STEP_HOOKS"]:
