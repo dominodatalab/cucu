@@ -193,17 +193,12 @@ def record_scenario(scenario_obj):
 def start_step_record(step_obj, scenario_run_id):
     db.connect(reuse_if_open=True)
 
-    def _make_table(table, default=None):
-        if not table:
-            return default
-
-        table_data = {
-            "headings": table.headings,
-            "rows": [list(row) for row in table.rows],
+    table = None
+    if step_obj.table:
+        table = {
+            "headings": step_obj.table.headings,
+            "rows": [list(row) for row in step_obj.table.rows],
         }
-        return table_data
-
-    table = _make_table(step_obj.table)
 
     step.create(
         step_run_id=step_obj.step_run_id,
