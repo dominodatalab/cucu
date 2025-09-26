@@ -227,7 +227,7 @@ def after_scenario(ctx, scenario):
                 "browser_type": ctx.browser.driver.name,
             }
         except Exception as e:
-            logger.error(f"Error getting browser info: {e}")    
+            logger.error(f"Error getting browser info: {e}")
 
     run_after_scenario_hook(ctx, scenario, download_mht_data)
 
