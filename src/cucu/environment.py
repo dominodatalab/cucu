@@ -222,6 +222,7 @@ def after_scenario(ctx, scenario):
             tab_info = ctx.browser.get_tab_info()
             all_tabs = ctx.browser.get_all_tabs_info()
             browser_info = {
+                "has_browser": True,
                 "current_tab_index": tab_info["index"],
                 "all_tabs": all_tabs,
                 "browser_type": ctx.browser.driver.name,
