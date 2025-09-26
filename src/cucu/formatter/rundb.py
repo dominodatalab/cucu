@@ -86,6 +86,7 @@ class RundbFormatter(Formatter):
             CONFIG["RUN_DB_PATH"] = run_db_path = (
                 results_path / f"run_{cucu_run_id}_{worker_run_id}.db"
             )
+
             if not run_db_path.exists():
                 logger.debug(
                     f"Creating new run database file: {run_db_path} for {worker_id_seed}"
@@ -147,6 +148,7 @@ class RundbFormatter(Formatter):
             if feature_scenario == scenario:
                 scenario.seq = index + 1
                 break
+
             if isinstance(feature_scenario, ScenarioOutline):
                 for sub_index, sub_scenario in enumerate(
                     feature_scenario._scenarios
@@ -176,10 +178,7 @@ class RundbFormatter(Formatter):
         pass
 
     def result(self, step):
-        """Called after processing a step (when the step result is known).
-
-        :param step:  Step object with result (after being executed/skipped).
-        """
+        """Called after processing a step result is known, applies to executed/skipped too."""
         step.start_at = self.next_start_at
         self.next_start_at = step.end_at = datetime.datetime.now().isoformat()[
             :-3
