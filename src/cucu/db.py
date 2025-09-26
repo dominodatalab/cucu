@@ -379,7 +379,12 @@ def create_database_file(db_filepath):
                 s.duration,
                 f.name AS feature_name,
                 s.name AS scenario_name,
-                JSON(REPLACE(f.tags, ']', '') || ',' || REPLACE(f.tags, '[', '')) as tags,
+                CASE
+                    WHEN f.tags = '[]' AND s.tags = '[]' THEN JSON('[]')
+                    WHEN f.tags = '[]' THEN s.tags
+                    WHEN s.tags = '[]' THEN f.tags
+                    ELSE JSON(REPLACE(f.tags, ']', '') || ',' || REPLACE(s.tags, '[', ''))
+                END as tags,
                 s.log_files
             FROM scenario s
             JOIN feature f ON s.feature_run_id = f.feature_run_id
@@ -391,7 +396,12 @@ def create_database_file(db_filepath):
                 s.scenario_run_id,
                 f.name AS feature_name,
                 s.name AS scenario_name,
-                JSON(REPLACE(f.tags, ']', '') || ',' || REPLACE(f.tags, '[', '')) as tags,
+                CASE
+                    WHEN f.tags = '[]' AND s.tags = '[]' THEN JSON('[]')
+                    WHEN f.tags = '[]' THEN s.tags
+                    WHEN s.tags = '[]' THEN f.tags
+                    ELSE JSON(REPLACE(f.tags, ']', '') || ',' || REPLACE(s.tags, '[', ''))
+                END as tags,
                 f.filename || ':' || s.line_number AS feature_file_line,
                 s.status,
                 (
