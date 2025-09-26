@@ -1,5 +1,4 @@
 import glob
-import json
 import os
 import shutil
 import sys
@@ -64,22 +63,6 @@ def generate(results, basepath, only_failures=False):
     """
     generate an HTML report for the results provided.
     """
-
-    features_json = []
-
-    run_json_filepaths = list(glob.iglob(os.path.join(results, "*run.json")))
-    logger.info(
-        f"Starting to process {len(run_json_filepaths)} files for report"
-    )
-
-    for run_json_filepath in run_json_filepaths:
-        with open(run_json_filepath, "rb") as index_input:
-            try:
-                features_json += json.loads(index_input.read())
-            except Exception as exception:
-                logger.warning(
-                    f"unable to read file {run_json_filepath}, got error: {exception}"
-                )
 
     features = []
 
