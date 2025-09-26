@@ -217,7 +217,7 @@ def after_scenario(ctx, scenario):
 
     browser_info = {"has_browser": False}
 
-    if len(ctx.browsers) != 0 and not CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
+    if len(ctx.browsers) != 0:
         try:
             tab_info = ctx.browser.get_tab_info()
             all_tabs = ctx.browser.get_all_tabs_info()
