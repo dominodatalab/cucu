@@ -101,8 +101,8 @@ class CucuFormatter(Formatter):
 
     def insert_step(self, step, index=-1):
         # used to determine how to better handle console output
-        step.has_substeps = False
-        step.is_substep = False
+        step.has_substeps = getattr(step, "has_substeps", False)
+        step.is_substep = getattr(step, "is_substep", False)
 
         if index == -1:
             self.steps.append(step)

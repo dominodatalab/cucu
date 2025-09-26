@@ -73,12 +73,13 @@ class feature(BaseModel):
         column_name="worker_run_id",
     )
     name = TextField()
-    filename = TextField()
-    description = TextField()
-    tags = TextField()
+    status = TextField(null=True)
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
     custom_data = JSONField(null=True)
+    tags = JSONField()
+    filename = TextField()
+    description = TextField()
 
 
 class scenario(BaseModel):
@@ -90,17 +91,17 @@ class scenario(BaseModel):
         column_name="feature_run_id",
     )
     name = TextField()
-    line_number = IntegerField()
-    seq = IntegerField()
-    tags = TextField()
+    seq = FloatField(null=True)
     status = TextField(null=True)
     duration = FloatField(null=True)
-    start_at = DateTimeField()
+    start_at = DateTimeField(null=True)
     end_at = DateTimeField(null=True)
-    log_files = JSONField(null=True)
-    cucu_config = JSONField(null=True)
-    browser_info = JSONField(null=True)
+    tags = JSONField()
     custom_data = JSONField(null=True)
+    browser_info = JSONField(null=True)
+    cucu_config = JSONField(null=True)
+    line_number = IntegerField()
+    log_files = JSONField(null=True)
 
 
 class step(BaseModel):
@@ -111,27 +112,27 @@ class step(BaseModel):
         backref="steps",
         column_name="scenario_run_id",
     )
-    seq = IntegerField()
     section_level = IntegerField(null=True)
+    seq = IntegerField()
     parent_seq = IntegerField(null=True)
-    status = TextField(null=True)
-    keyword = TextField()
-    name = TextField()
-    text = TextField(null=True)
-    table_data = JSONField(null=True)
-    location = TextField()
     is_substep = BooleanField(null=True)  # info available after step ends
     has_substeps = BooleanField()
+    keyword = TextField()
+    name = TextField()
+    status = TextField(null=True)
+    duration = FloatField(null=True)
+    start_at = DateTimeField(null=True)
+    end_at = DateTimeField(null=True)
     stdout = JSONField(null=True)
     stderr = JSONField(null=True)
-    error_message = TextField(null=True)
-    exception = TextField(null=True)
+    error_message = JSONField(null=True)
+    exception = JSONField(null=True)
     debug_output = TextField(null=True)
-    browser_logs = TextField(null=True)
     browser_info = JSONField(null=True)
-    duration = FloatField(null=True)
-    start_at = DateTimeField()
-    end_at = DateTimeField(null=True)
+    text = JSONField(null=True)
+    table_data = JSONField(null=True)
+    location = TextField()
+    browser_logs = TextField(null=True)
     screenshots = JSONField(null=True)
 
 
@@ -158,7 +159,6 @@ def record_cucu_run():
         else None,
         start_at=datetime.now().isoformat(),
     )
-    db.close()
     return str(db_filepath)
 
 
@@ -172,47 +172,48 @@ def record_feature(feature_obj):
         description="\n".join(feature_obj.description)
         if isinstance(feature_obj.description, list)
         else str(feature_obj.description),
-        tags=" ".join(feature_obj.tags),
+        tags=feature_obj.tags,
         start_at=datetime.now().isoformat(),
     )
-    db.close()
 
 
-def record_scenario(ctx):
+def record_scenario(scenario_obj):
     db.connect(reuse_if_open=True)
     scenario.create(
-        scenario_run_id=ctx.scenario.scenario_run_id,
-        feature_run_id=ctx.scenario.feature.feature_run_id,
-        name=ctx.scenario.name,
-        line_number=ctx.scenario.line,
-        seq=ctx.scenario_index,
-        tags=" ".join(ctx.scenario.tags),
-        start_at=ctx.scenario.start_at,
+        scenario_run_id=scenario_obj.scenario_run_id,
+        feature_run_id=scenario_obj.feature.feature_run_id,
+        name=scenario_obj.name,
+        line_number=scenario_obj.line,
+        seq=scenario_obj.seq,
+        tags=scenario_obj.tags,
+        start_at=getattr(scenario_obj, "start_at", None),
     )
-    db.close()
 
 
-def start_step_record(ctx, step_obj):
+def start_step_record(step_obj, scenario_run_id):
     db.connect(reuse_if_open=True)
-    if not step_obj.table:
-        table = None
-    else:
-        table = [step_obj.table.headings]
-        table.extend([row.cells for row in step_obj.table.rows])
+
+    table = None
+    if step_obj.table:
+        table = {
+            "headings": step_obj.table.headings,
+            "rows": [list(row) for row in step_obj.table.rows],
+        }
+
     step.create(
         step_run_id=step_obj.step_run_id,
-        scenario_run_id=ctx.scenario.scenario_run_id,
-        seq=step_obj.seq,
+        scenario_run_id=scenario_run_id,
+        seq=getattr(step_obj, "seq", -1),
         keyword=step_obj.keyword,
         name=step_obj.name,
-        text=step_obj.text if step_obj.text else None,
-        table_data=table if step_obj.table else None,
+        status=step_obj.status.name,
+        text=step_obj.text.splitlines() if step_obj.text else [],
+        table_data=table,
         location=str(step_obj.location),
-        has_substeps=step_obj.has_substeps,
+        is_substep=getattr(step_obj, "is_substep", False),
+        has_substeps=getattr(step_obj, "has_substeps", False),
         section_level=getattr(step_obj, "section_level", None),
-        start_at=step_obj.start_at,
     )
-    db.close()
 
 
 def finish_step_record(step_obj, duration):
@@ -229,77 +230,60 @@ def finish_step_record(step_obj, duration):
             }
             screenshot_infos.append(screenshot_info)
 
-    stdout = []
-    if step_obj.status.name in ["passed", "failed"]:
-        step_variables = CONFIG.expand(step_obj.name)
-
-        if step_obj.text:
-            step_variables.update(CONFIG.expand(step_obj.text))
-
-        if step_obj.table:
-            for row in step_obj.table.original.rows:
-                for value in row:
-                    step_variables.update(CONFIG.expand(value))
-
-        if step_variables:
-            expanded = " ".join(
-                [f'{key}="{value}"' for (key, value) in step_variables.items()]
-            )
-            padding = f"    {' ' * (len('Given') - len(step_obj.keyword))}"
-            stdout.insert(0, f"{padding}# {CONFIG.hide_secrets(expanded)}\n")
-
-    if "stdout" in step_obj.__dict__ and step_obj.stdout != []:
-        stdout += [CONFIG.hide_secrets("".join(step_obj.stdout).rstrip())]
-
-    stderr = []
-    if "stderr" in step_obj.__dict__ and step_obj.stderr != []:
-        stderr = [CONFIG.hide_secrets("".join(step_obj.stderr).rstrip())]
-
     error_message = None
-    exception = None
-    if step_obj.status.name == "failed":
-        error_message = step_obj.error_message
+    exception = []
+    if step.error_message and step_obj.status.name == "failed":
+        error_message = CONFIG.hide_secrets(step_obj.error_message)
 
-        if error_message:
-            if error := step_obj.exception:
-                if isinstance(error, RetryError):
-                    error = error.last_attempt.exception()
+        if error := step_obj.exception:
+            if isinstance(error, RetryError):
+                error = error.last_attempt.exception()
 
-                if len(error.args) > 0 and isinstance(error.args[0], str):
-                    error_class_name = error.__class__.__name__
-                    redacted_error_msg = CONFIG.hide_secrets(error.args[0])
-                    error_lines = redacted_error_msg.splitlines()
-                    error_lines[0] = f"{error_class_name}: {error_lines[0]}"
-                else:
-                    error_lines = [repr(error)]
+            if len(error.args) > 0 and isinstance(error.args[0], str):
+                error_class_name = error.__class__.__name__
+                redacted_error_msg = CONFIG.hide_secrets(error.args[0])
+                error_lines = redacted_error_msg.splitlines()
+                error_lines[0] = f"{error_class_name}: {error_lines[0]}"
+            else:
+                error_lines = [repr(error)]
 
-                exception = error_lines
+            exception = error_lines
 
     step.update(
-        section_level=getattr(step_obj, "section_level", None),
-        parent_seq=step_obj.parent_seq,
-        has_substeps=step_obj.has_substeps,
-        status=step_obj.status.name,
-        is_substep=step_obj.is_substep,
+        browser_info=getattr(step_obj, "browser_info", ""),
+        browser_logs=getattr(step_obj, "browser_logs", ""),
+        debug_output=getattr(step_obj, "debug_output", ""),
         duration=duration,
-        end_at=step_obj.end_at,
-        debug_output=step_obj.debug_output,
-        browser_logs=step_obj.browser_logs,
-        browser_info=step_obj.browser_info,
-        screenshots=screenshot_infos,
-        stdout=stdout,
-        stderr=stderr,
+        end_at=getattr(step_obj, "end_at", None),
         error_message=error_message,
         exception=exception,
+        has_substeps=getattr(step_obj, "has_substeps", False),
+        parent_seq=getattr(step_obj, "parent_seq", None),
+        screenshots=screenshot_infos,
+        section_level=getattr(step_obj, "section_level", None),
+        seq=step_obj.seq,
+        start_at=getattr(step_obj, "start_at", None),
+        status=step_obj.status.name,
+        stderr=getattr(step_obj, "stderr", []),
+        stdout=getattr(step_obj, "stdout", []),
     ).where(step.step_run_id == step_obj.step_run_id).execute()
-    db.close()
 
 
 def finish_scenario_record(scenario_obj):
     db.connect(reuse_if_open=True)
-    start_dt = datetime.fromisoformat(scenario_obj.start_at)
-    end_dt = datetime.fromisoformat(scenario_obj.end_at)
-    duration = (end_dt - start_dt).total_seconds()
+    if getattr(scenario_obj, "start_at", None):
+        start_at = datetime.fromisoformat(scenario_obj.start_at)
+    else:
+        start_at = None
+    if getattr(scenario_obj, "end_at", None):
+        end_at = datetime.fromisoformat(scenario_obj.end_at)
+    else:
+        end_at = None
+    if start_at and end_at:
+        duration = (end_at - start_at).total_seconds()
+    else:
+        duration = None
+
     scenario_logs_dir = CONFIG.get("SCENARIO_LOGS_DIR")
     if not scenario_logs_dir or not Path(scenario_logs_dir).exists():
         log_files_json = "[]"
@@ -311,26 +295,30 @@ def finish_scenario_record(scenario_obj):
             if file.is_file()
         ]
         log_files_json = sorted(log_files)
-    custom_data_json = scenario_obj.custom_data
+
+    if scenario_obj.hook_failed:
+        status = "errored"
+    else:
+        status = scenario_obj.status.name
+
     scenario.update(
-        status=scenario_obj.status.name,
+        status=status,
         duration=duration,
-        end_at=scenario_obj.end_at,
+        end_at=end_at,
         log_files=log_files_json,
-        cucu_config=scenario_obj.cucu_config_json,
-        browser_info=scenario_obj.browser_info,
-        custom_data=custom_data_json,
+        cucu_config=getattr(scenario_obj, "cucu_config_json", dict()),
+        browser_info=getattr(scenario_obj, "browser_info", dict()),
+        custom_data=getattr(scenario_obj, "custom_data", dict()),
     ).where(scenario.scenario_run_id == scenario_obj.scenario_run_id).execute()
-    db.close()
 
 
 def finish_feature_record(feature_obj):
     db.connect(reuse_if_open=True)
     feature.update(
+        status=feature_obj.status.name,
         end_at=datetime.now().isoformat(),
         custom_data=feature_obj.custom_data,
     ).where(feature.feature_run_id == feature_obj.feature_run_id).execute()
-    db.close()
 
 
 def finish_worker_record(custom_data=None, worker_run_id=None):
@@ -340,7 +328,6 @@ def finish_worker_record(custom_data=None, worker_run_id=None):
         end_at=datetime.now().isoformat(),
         custom_data=custom_data,
     ).where(worker.worker_run_id == target_worker_run_id).execute()
-    db.close()
 
 
 def finish_cucu_run_record():
@@ -348,7 +335,11 @@ def finish_cucu_run_record():
     cucu_run.update(
         end_at=datetime.now().isoformat(),
     ).where(cucu_run.cucu_run_id == CONFIG["CUCU_RUN_ID"]).execute()
-    db.close()
+
+
+def close_db():
+    if not db.is_closed():
+        db.close()
 
 
 def create_database_file(db_filepath):
@@ -363,7 +354,12 @@ def create_database_file(db_filepath):
                 s.duration,
                 f.name AS feature_name,
                 s.name AS scenario_name,
-                f.tags || ' ' || s.tags AS tags,
+                CASE
+                    WHEN f.tags = '[]' AND s.tags = '[]' THEN JSON('[]')
+                    WHEN f.tags = '[]' THEN s.tags
+                    WHEN s.tags = '[]' THEN f.tags
+                    ELSE JSON(REPLACE(f.tags, ']', '') || ',' || REPLACE(s.tags, '[', ''))
+                END as tags,
                 s.log_files
             FROM scenario s
             JOIN feature f ON s.feature_run_id = f.feature_run_id
@@ -375,7 +371,12 @@ def create_database_file(db_filepath):
                 s.scenario_run_id,
                 f.name AS feature_name,
                 s.name AS scenario_name,
-                f.tags || ' ' || s.tags AS tags,
+                CASE
+                    WHEN f.tags = '[]' AND s.tags = '[]' THEN JSON('[]')
+                    WHEN f.tags = '[]' THEN s.tags
+                    WHEN s.tags = '[]' THEN f.tags
+                    ELSE JSON(REPLACE(f.tags, ']', '') || ',' || REPLACE(s.tags, '[', ''))
+                END as tags,
                 f.filename || ':' || s.line_number AS feature_file_line,
                 s.status,
                 (
@@ -398,7 +399,6 @@ def create_database_file(db_filepath):
             FROM scenario s
             JOIN feature f ON s.feature_run_id = f.feature_run_id
         """)
-    db.close()
 
 
 def get_first_cucu_run_filepath():

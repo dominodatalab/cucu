@@ -88,7 +88,7 @@ def generate(results, basepath, only_failures=False):
         init_html_report_db(db_path)
         features = []
 
-        db_features = FeatureModel.select().order_by(FeatureModel.name)
+        db_features = FeatureModel.select().order_by(FeatureModel.start_at)
         logger.info(
             f"Starting to process {len(db_features)} features for report"
         )
@@ -98,8 +98,8 @@ def generate(results, basepath, only_failures=False):
                 "name": db_feature.name,
                 "filename": db_feature.filename,
                 "description": db_feature.description,
-                "tags": db_feature.tags.split() if db_feature.tags else [],
-                "status": "passed",
+                "tags": db_feature.tags if db_feature.tags else [],
+                "status": db_feature.status,
                 "elements": [],
             }
 
@@ -113,13 +113,15 @@ def generate(results, basepath, only_failures=False):
 
             feature_has_failures = False
 
+            if len(db_scenarios) == 0:
+                logger.debug(f"Feature {db_feature.name} has no scenarios")
+                continue
+
             for db_scenario in db_scenarios:
                 scenario_dict = {
                     "name": db_scenario.name,
                     "line": db_scenario.line_number,
-                    "tags": db_scenario.tags.split()
-                    if db_scenario.tags
-                    else [],
+                    "tags": db_scenario.tags if db_scenario.tags else [],
                     "status": db_scenario.status or "passed",
                     "steps": [],
                 }
@@ -145,48 +147,20 @@ def generate(results, basepath, only_failures=False):
                             "duration": db_step.duration or 0,
                             "timestamp": db_step.end_at or "",
                         },
+                        "substep": db_step.is_substep,
                     }
 
                     if db_step.text:
                         step_dict["text"] = db_step.text
 
                     if db_step.table_data:
-                        step_dict["table"] = {
-                            "headings": db_step.table_data[0]
-                            if db_step.table_data
-                            else [],
-                            "rows": db_step.table_data[1:]
-                            if len(db_step.table_data) > 1
-                            else [],
-                        }
+                        step_dict["table"] = db_step.table_data
 
-                    # if db_step.status == "failed":
-                    #     step_dict["result"]["error_message"] = [
-                    #         db_step.error_message
-                    #     ]
+                    step_dict["result"]["error_message"] = [
+                        db_step.error_message
+                    ]
 
-                    #     if db_step.error_message:
-                    #         if error := db_step.exception:
-                    #             if isinstance(error, RetryError):
-                    #                 error = error.last_attempt.exception()
-
-                    #             if len(error.args) > 0 and isinstance(
-                    #                 error.args[0], str
-                    #             ):
-                    #                 error_class_name = error.__class__.__name__
-                    #                 redacted_error_msg = CONFIG.hide_secrets(
-                    #                     error.args[0]
-                    #                 )
-                    #                 error_lines = (
-                    #                     redacted_error_msg.splitlines()
-                    #                 )
-                    #                 error_lines[0] = (
-                    #                     f"{error_class_name}: {error_lines[0]}"
-                    #                 )
-                    #             else:
-                    #                 error_lines = [repr(error)]
-
-                    #             step_dict["result"]["exception"] = error_lines
+                    step_dict["result"]["exception"] = db_step.exception
 
                     step_dict["result"]["stdout"] = db_step.stdout
                     step_dict["result"]["stderr"] = db_step.stderr
@@ -349,18 +323,24 @@ def generate(results, basepath, only_failures=False):
 
                 if "result" in step:
                     if step["result"]["status"] in ["failed", "passed"]:
-                        timestamp = datetime.fromisoformat(
-                            step["result"]["timestamp"]
-                        )
-                        step["result"]["timestamp"] = timestamp
+                        if step["result"]["timestamp"]:
+                            timestamp = datetime.fromisoformat(
+                                step["result"]["timestamp"]
+                            )
+                            step["result"]["timestamp"] = timestamp
 
-                        if scenario_started_at is None:
-                            scenario_started_at = timestamp
-                            scenario["started_at"] = timestamp
-                        time_offset = datetime.utcfromtimestamp(
-                            (timestamp - scenario_started_at).total_seconds()
-                        )
-                        step["result"]["time_offset"] = time_offset
+                            if scenario_started_at is None:
+                                scenario_started_at = timestamp
+                                scenario["started_at"] = timestamp
+                            time_offset = datetime.utcfromtimestamp(
+                                (
+                                    timestamp - scenario_started_at
+                                ).total_seconds()
+                            )
+                            step["result"]["time_offset"] = time_offset
+                        else:
+                            step["result"]["timestamp"] = ""
+                            step["result"]["time_offset"] = ""
 
                     scenario_duration += step["result"]["duration"]
 
