@@ -230,31 +230,6 @@ def finish_step_record(step_obj, duration):
             }
             screenshot_infos.append(screenshot_info)
 
-    step_obj.stdout = []
-    if step_obj.status.name in ["passed", "failed"]:
-        step_variables = CONFIG.expand(step_obj.name)
-
-        if step_obj.text:
-            step_variables.update(CONFIG.expand(step_obj.text))
-
-        if step_obj.table:
-            for row in step_obj.table.original.rows:
-                for value in row:
-                    step_variables.update(CONFIG.expand(value))
-
-        if step_variables:
-            expanded = " ".join(
-                [f'{key}="{value}"' for (key, value) in step_variables.items()]
-            )
-            padding = f"    {' ' * (len('Given') - len(step_obj.keyword))}"
-            step_obj.stdout.insert(
-                0, f"{padding}# {CONFIG.hide_secrets(expanded)}\n"
-            )
-
-    stderr = []
-    if "stderr" in step_obj.__dict__ and step_obj.stderr != []:
-        stderr = [CONFIG.hide_secrets("".join(step_obj.stderr).rstrip())]
-
     error_message = None
     exception = []
     if step.error_message and step_obj.status.name == "failed":
@@ -289,8 +264,8 @@ def finish_step_record(step_obj, duration):
         seq=step_obj.seq,
         start_at=getattr(step_obj, "start_at", None),
         status=step_obj.status.name,
-        stderr=stderr,
-        stdout=step_obj.stdout,
+        stderr=getattr(step_obj, "stderr", []),
+        stdout=getattr(step_obj, "stdout", []),
     ).where(step.step_run_id == step_obj.step_run_id).execute()
 
 
