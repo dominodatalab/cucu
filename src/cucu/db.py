@@ -230,7 +230,7 @@ def finish_step_record(step_obj, duration):
             }
             screenshot_infos.append(screenshot_info)
 
-    step_obj.stdout = []
+    stdout = []
     if step_obj.status.name in ["passed", "failed"]:
         step_variables = CONFIG.expand(step_obj.name)
 
@@ -247,9 +247,10 @@ def finish_step_record(step_obj, duration):
                 [f'{key}="{value}"' for (key, value) in step_variables.items()]
             )
             padding = f"    {' ' * (len('Given') - len(step_obj.keyword))}"
-            step_obj.stdout.insert(
-                0, f"{padding}# {CONFIG.hide_secrets(expanded)}\n"
-            )
+            stdout.insert(0, f"{padding}# {CONFIG.hide_secrets(expanded)}\n")
+
+    if "stdout" in step.__dict__ and step_obj.stdout != []:
+        stdout = [CONFIG.hide_secrets("".join(step_obj.stdout).rstrip())]
 
     stderr = []
     if "stderr" in step_obj.__dict__ and step_obj.stderr != []:
@@ -290,7 +291,7 @@ def finish_step_record(step_obj, duration):
         start_at=getattr(step_obj, "start_at", None),
         status=step_obj.status.name,
         stderr=stderr,
-        stdout=step_obj.stdout,
+        stdout=stdout,
     ).where(step.step_run_id == step_obj.step_run_id).execute()
 
 
