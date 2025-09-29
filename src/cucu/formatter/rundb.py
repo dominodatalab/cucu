@@ -122,7 +122,7 @@ class RundbFormatter(Formatter):
             return
 
         # ensure non-executed steps have correct seq
-        for index, step in enumerate(self.steps):
+        for index, step in enumerate(self.this_steps):
             if getattr(step, "seq", -1) == -1:
                 step.seq = index + 1  # 1-based sequence
                 finish_step_record(step, None)
@@ -134,7 +134,7 @@ class RundbFormatter(Formatter):
         self._finish_scenario()
 
         self.this_scenario = scenario
-        self.steps = []
+        self.this_steps = []
         self.next_start_at = datetime.datetime.now().isoformat()[:-3]
         scenario_run_id_seed = (
             f"{scenario.feature.feature_run_id}_{time.perf_counter()}"
@@ -165,12 +165,12 @@ class RundbFormatter(Formatter):
 
     def insert_step(self, step, index):
         """cucu specific step insertion method used to add steps here and dynamically"""
-        next_index = index if index != -1 else len(self.steps)
+        next_index = index if index != -1 else len(self.this_steps)
         step_run_id_seed = f"{self.this_scenario.scenario_run_id}_{next_index}_{time.perf_counter()}"
         step.step_run_id = generate_short_id(
             step_run_id_seed, length=10
         )  # up to 10 characters to give two orders of magnitude less chance of collision
-        self.steps.insert(next_index, step)
+        self.this_steps.insert(next_index, step)
         start_step_record(step, self.this_scenario.scenario_run_id)
 
     def match(self, match):
@@ -187,7 +187,7 @@ class RundbFormatter(Formatter):
             self.this_scenario, "previous_step_duration", 0
         )
         if step.status.name in ("untested", "undefined"):
-            step.seq = self.this_scenario.steps.index(step) + 1
+            step.seq = self.this_steps.index(step) + 1
 
         finish_step_record(step, previous_step_duration)
 
