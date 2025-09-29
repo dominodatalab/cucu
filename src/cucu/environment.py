@@ -230,6 +230,8 @@ def after_scenario(ctx, scenario):
         except Exception as e:
             logger.error(f"Error getting browser info: {e}")
 
+    scenario.browser_info = browser_info
+
     run_after_scenario_hook(ctx, scenario, download_mht_data)
 
     # run after all scenario hooks in 'lifo' order.
@@ -248,7 +250,6 @@ def after_scenario(ctx, scenario):
         logger.debug("quitting browser between sessions")
         run_after_scenario_hook(ctx, scenario, cleanup_browsers)
 
-    scenario.browser_info = browser_info
 
     cucu_config_path = ctx.scenario_logs_dir / "cucu.config.yaml.txt"
     with open(cucu_config_path, "w") as config_file:
