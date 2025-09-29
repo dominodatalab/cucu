@@ -14,7 +14,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Fix - some tests
 - Fix - formatters to not overwrite is_substep
 - Add - missing db fields
-- Chore - update pyproject.toml format change 
+- Chore - update pyproject.toml format change
 
 ## 1.3.5
 - Change - remove cli option show-status to simplify code
