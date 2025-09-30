@@ -142,13 +142,14 @@ class RundbFormatter(Formatter):
         scenario.scenario_run_id = generate_short_id(scenario_run_id_seed)
         scenario.custom_data = {}
 
-        # feature.scenarios is a mix of Scenario and ScenarioOutline objects with scenarios,
-        # so also iterate through their scenarios and add `.x` suffix based on the scenario outline order
+        # feature.scenarios is a mix of Scenario and ScenarioOutline objects with their own scenarios list
         for index, feature_scenario in enumerate(scenario.feature.scenarios):
             if feature_scenario == scenario:
                 scenario.seq = index + 1
                 break
 
+            # Scenarios belonging to a Scenario Outline are included under their Scenario Outline sequence.
+            # Add a suffix to preserve ordering within the Scenario Outline.
             if isinstance(feature_scenario, ScenarioOutline):
                 for sub_index, sub_scenario in enumerate(
                     feature_scenario._scenarios
