@@ -162,6 +162,23 @@ def after_scenario(ctx, scenario):
     for timer_name in ctx.step_timers:
         logger.warning(f'timer "{timer_name}" was never stopped/recorded')
 
+    browser_info = {"has_browser": False}
+
+    if len(ctx.browsers) != 0:
+        try:
+            tab_info = ctx.browser.get_tab_info()
+            all_tabs = ctx.browser.get_all_tabs_info()
+            browser_info = {
+                "has_browser": True,
+                "current_tab_index": tab_info["index"],
+                "all_tabs": all_tabs,
+                "browser_type": ctx.browser.driver.name,
+            }
+        except Exception as e:
+            logger.error(f"Error getting browser info: {e}")
+
+    scenario.browser_info = browser_info
+
     run_after_scenario_hook(ctx, scenario, download_mht_data)
 
     # run after all scenario hooks in 'lifo' order.
@@ -174,22 +191,11 @@ def after_scenario(ctx, scenario):
 
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 
-    browser_info = {"has_browser": False}
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
     elif len(ctx.browsers) != 0:
-        tab_info = ctx.browser.get_tab_info()
-        all_tabs = ctx.browser.get_all_tabs_info()
-        browser_info = {
-            "current_tab_index": tab_info["index"],
-            "all_tabs": all_tabs,
-            "browser_type": ctx.browser.driver.name,
-        }
-
         logger.debug("quitting browser between sessions")
         run_after_scenario_hook(ctx, scenario, cleanup_browsers)
-
-    scenario.browser_info = browser_info
 
     cucu_config_path = ctx.scenario_logs_dir / "cucu.config.yaml.txt"
     with open(cucu_config_path, "w") as config_file:

@@ -16,6 +16,9 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Add - missing db fields
 - Chore - update pyproject.toml format change
 
+## 1.3.6
+- Fix - get tab info before executing hooks
+
 ## 1.3.5
 - Change - remove cli option show-status to simplify code
 - Change - rename default arg on report command
