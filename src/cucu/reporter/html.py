@@ -139,14 +139,21 @@ def generate(results, basepath, only_failures=False):
                     if db_step.table_data:
                         step_dict["table"] = db_step.table_data
 
-                    step_dict["result"]["error_message"] = [
-                        db_step.error_message
-                    ]
-
+                    step_dict["result"]["error_message"] = (
+                        db_step.error_message.splitlines()
+                        if db_step.error_message
+                        else []
+                    )
                     step_dict["result"]["exception"] = db_step.exception
-
                     step_dict["result"]["stdout"] = db_step.stdout
                     step_dict["result"]["stderr"] = db_step.stderr
+                    step_dict["result"]["browser_logs"] = (
+                        db_step.browser_logs.splitlines()
+                    )
+                    step_dict["result"]["debug_output"] = (
+                        db_step.debug_output.splitlines()
+                    )
+
                     scenario_dict["steps"].append(step_dict)
 
                 feature_dict["elements"].append(scenario_dict)
