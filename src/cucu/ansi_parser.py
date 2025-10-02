@@ -25,12 +25,13 @@ TRANSLATION = (
         ESC_SEQ + "55": "",  # ignore HOME (num keypad)
         ESC_SEQ + "56": "",  # ignore UP ARROW (num keypad)
         ESC_SEQ + "57": "",  # ignore PAGE UP (num keypad)
+        ESC_SEQ + "1A": "",  # ignore move cursor up one line
     }
 )
 RE_TO_HTML = re.compile("|".join(map(re.escape, TRANSLATION)))
 
 RE_TO_REMOVE = re.compile(
-    r"\x1b\[(0;)?[0-9A-F]{1,2}m"
+    r"\x1b\[(0;)?[0-9A-F]{1,2}[mA]:?"
 )  # detect hex values, not just decimal digits
 
 

@@ -94,6 +94,11 @@ def sample_records_combined(temp_db):
         location="test.feature:10",
         has_substeps=False,
         start_at="2024-01-01T10:00:00",
+        browser_info="",
+        browser_logs="",
+        debug_output="",
+        stderr=[],
+        stdout=[],
     )
 
     cucu_run.create(
@@ -141,6 +146,11 @@ def sample_records_combined(temp_db):
         location="consistency.feature:10",
         has_substeps=False,
         start_at="2024-01-01T10:00:00",
+        browser_info="",
+        browser_logs="",
+        debug_output="",
+        stderr=[],
+        stdout=[],
     )
 
     return {

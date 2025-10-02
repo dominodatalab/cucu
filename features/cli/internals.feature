@@ -21,6 +21,34 @@ Feature: Internals
       running within cucu but --results was not used
       """
 
+  Scenario: User should not get a warning when using interally defined variables
+  As a developer I expect that each feature have a FEATURE_RUN_ID and each scenario a SCENARIO_RUN_ID
+    Given I create a file at "{CUCU_RESULTS_DIR}/defined_variable_usage/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/defined_variable_usage/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/defined_variable_usage/defined_variable_feature.feature" with the following:
+      """
+      Feature: Feature with internally defined variables
+
+        Scenario: This is a scenario that is using internally defined variables
+          Given I echo "\{FEATURE_RUN_ID\}"
+            And I echo "\{SCENARIO_RUN_ID\}"
+      """
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/defined_variable_usage/defined_variable_feature.feature --results {CUCU_RESULTS_DIR}/defined_variable_results" and save stdout to "STDOUT" and expect exit code "0"
+      And I should see "{STDOUT}" does not contain the following:
+      """
+      WARNING variable "FEATURE_RUN_ID" is undefined
+      """
+      And I should see "{STDOUT}" does not contain the following:
+      """
+      WARNING variable "SCENARIO_RUN_ID" is undefined
+      """
+
   Scenario: User gets a warning when using an undefined variable reference
     Given I create a file at "{CUCU_RESULTS_DIR}/undefined_variable_usage/environment.py" with the following:
       """

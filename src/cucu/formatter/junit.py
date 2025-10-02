@@ -10,6 +10,7 @@ from behave.model_core import Status
 from bs4.formatter import XMLFormatter
 from tenacity import RetryError
 
+from cucu.ansi_parser import remove_ansi
 from cucu.config import CONFIG
 from cucu.utils import ellipsize_filename
 
@@ -286,7 +287,8 @@ class CucuJUnitFormatter(Formatter):
             if scenario["failure"] is not None:
                 failure_message = "\n".join(scenario["failure"])
                 failure = bs4.Tag(name="failure")
-                failure.append(bs4.CData(failure_message))
+                cleaned_failure_message = remove_ansi(failure_message)
+                failure.append(bs4.CData(cleaned_failure_message))
                 testcase.append(failure)
 
             if scenario["skipped"] is not None:

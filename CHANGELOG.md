@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## 1.3.9
+- Fix - re-add CONFIG["SCNEARIO_RUN_ID"]
+- Fix - render skipped steps as untested
+- Fix - db for untested steps
+- Change - ansi_parser scrub move cursor up
+
 ## 1.3.8
 - Add - step level logs to html report
 

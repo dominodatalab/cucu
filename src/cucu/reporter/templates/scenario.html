@@ -87,6 +87,9 @@
             {% endif %}
             {% if step['result'] is defined %}
                 {% set step_status = step['result']['status'] %}
+                {% if step['result']['status'] == 'skipped' %}
+                    {% set step_status = 'untested' %}
+                {% endif %}
                 {% if step['result']['status'] in ('failed', 'passed') and step["result"]["timestamp"] %}
                     {% set step_timing = "{} for {:.3f}s".format(step["result"]["timestamp"].strftime("%H:%M:%S"), step["result"]["duration"]) %}
                     {% set step_start = step["result"]["timestamp"] %}

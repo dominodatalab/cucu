@@ -123,16 +123,16 @@ class step(BaseModel):
     duration = FloatField(null=True)
     start_at = DateTimeField(null=True)
     end_at = DateTimeField(null=True)
-    stdout = JSONField(null=True)
-    stderr = JSONField(null=True)
+    stdout = JSONField()
+    stderr = JSONField()
     error_message = JSONField(null=True)
     exception = JSONField(null=True)
-    debug_output = TextField(null=True)
-    browser_info = JSONField(null=True)
+    debug_output = TextField()
+    browser_info = JSONField()
     text = JSONField(null=True)
     table_data = JSONField(null=True)
     location = TextField()
-    browser_logs = TextField(null=True)
+    browser_logs = TextField()
     screenshots = JSONField(null=True)
 
 
@@ -213,6 +213,11 @@ def start_step_record(step_obj, scenario_run_id):
         is_substep=getattr(step_obj, "is_substep", False),
         has_substeps=getattr(step_obj, "has_substeps", False),
         section_level=getattr(step_obj, "section_level", None),
+        browser_info="",
+        browser_logs="",
+        debug_output="",
+        stderr=[],
+        stdout=[],
     )
 
 
