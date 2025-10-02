@@ -18,7 +18,7 @@ Feature: Run
 
   Scenario: User can stop the test execution upon the first failure
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --fail-fast --results {CUCU_RESULTS_DIR}/fail_fast_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
-     Then I should not see the directory at "{CUCU_RESULTS_DIR}/passing_feature_dry_run_results"
+     Then I should not see the directory at "{CUCU_RESULTS_DIR}/fail_fast_results/Feature with mixed results/Scenario and after-hook both fail"
       And I should see "{STDOUT}" matches the following
       """
       [\s\S]*
@@ -45,7 +45,7 @@ Feature: Run
 
   Scenario: User can run a specific scenario by name
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --name 'Scenario that also passes' --results {CUCU_RESULTS_DIR}/run_by_name_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
-     Then I should not see the directory at "{CUCU_RESULTS_DIR}/passing_feature_dry_run_results"
+     Then I should not see the directory at "{CUCU_RESULTS_DIR}/run_by_name_results/Feature with mixed results/Scenario that passes"
       And I should see "{STDOUT}" matches the following
       """
       [\s\S]*

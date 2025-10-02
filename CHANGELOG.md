@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+
+## 1.3.7
+- Change - use db to generate html report
+- Change - rewrite db recording from hooks to formatter api
+- Change - --dry-run now creates feature folder
+- Change - move some data out of context since formatters don't get context
+- Fix - some tests
+- Fix - formatters to not overwrite is_substep
+- Add - missing db fields
+- Chore - update pyproject.toml format change
+
 ## 1.3.6
 - Fix - get tab info before executing hooks
 
