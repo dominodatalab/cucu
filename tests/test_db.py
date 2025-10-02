@@ -98,7 +98,7 @@ def sample_records_combined(temp_db):
         browser_logs="",
         debug_output="",
         stderr=[],
-        stdout=[],        
+        stdout=[],
     )
 
     cucu_run.create(
