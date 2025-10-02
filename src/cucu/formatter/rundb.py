@@ -108,9 +108,7 @@ class RundbFormatter(Formatter):
         feature_run_id_seed = (
             f"{CONFIG['WORKER_RUN_ID']}_{time.perf_counter()}"
         )
-        CONFIG["FEATURE_RUN_ID"] = feature.feature_run_id = generate_short_id(
-            feature_run_id_seed
-        )
+        feature.feature_run_id = generate_short_id(feature_run_id_seed)
         feature.custom_data = {}
 
         record_feature(feature)
@@ -134,6 +132,8 @@ class RundbFormatter(Formatter):
     def scenario(self, scenario):
         """Called before a scenario is executed (or ScenarioOutline scenarios)."""
         self._finish_scenario()
+        # Set after CONFIG.restore() in environment.before_scenario()
+        CONFIG["FEATURE_RUN_ID"] = scenario.feature.feature_run_id
 
         self.this_scenario = scenario
         self.this_steps = []
