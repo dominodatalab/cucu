@@ -108,7 +108,9 @@ class RundbFormatter(Formatter):
         feature_run_id_seed = (
             f"{CONFIG['WORKER_RUN_ID']}_{time.perf_counter()}"
         )
-        feature.feature_run_id = generate_short_id(feature_run_id_seed)
+        CONFIG["FEATURE_RUN_ID"] = feature.feature_run_id = generate_short_id(
+            feature_run_id_seed
+        )
         feature.custom_data = {}
 
         record_feature(feature)
@@ -139,7 +141,9 @@ class RundbFormatter(Formatter):
         scenario_run_id_seed = (
             f"{scenario.feature.feature_run_id}_{time.perf_counter()}"
         )
-        scenario.scenario_run_id = generate_short_id(scenario_run_id_seed)
+        CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = (
+            generate_short_id(scenario_run_id_seed)
+        )
         scenario.custom_data = {}
 
         # feature.scenarios is a mix of Scenario and ScenarioOutline objects with their own scenarios list
