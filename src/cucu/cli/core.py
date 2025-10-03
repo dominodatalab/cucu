@@ -35,9 +35,7 @@ from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.config import CONFIG
 from cucu.db import (
     consolidate_database_files,
-    db,
     finish_worker_record,
-    get_first_cucu_run_filepath,
 )
 from cucu.lint import linter
 from cucu.utils import generate_short_id
