@@ -35,7 +35,7 @@ Feature: Report with custom subheader
       And I wait to click the link "Feature with custom subheader handling"
       And I click the link "Scenario with a custom subheader handler"
 
-     Then I should see the text "this is a subheader of Scenario with a custom subheader handler"
+     Then I should see the text "this is a subheader of Scenario with a custom subheader handler at {CUCU_RESULTS_DIR}/report_with_custom_subheader_handling/report_with_custom_subheader_handling.feature:3"
 
   Scenario: User can register a custom subheader handler for reporting and use "cucu report" after the run
     Given I create a file at "{CUCU_RESULTS_DIR}/report_with_custom_subheader_handling_cmd/environment.py" with the following:
