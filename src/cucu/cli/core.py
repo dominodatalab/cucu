@@ -35,9 +35,7 @@ from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.config import CONFIG
 from cucu.db import (
     consolidate_database_files,
-    db,
     finish_worker_record,
-    get_first_cucu_run_filepath,
 )
 from cucu.lint import linter
 from cucu.utils import generate_short_id
@@ -523,16 +521,6 @@ def _generate_report(
 
     if os.path.exists(results_dir):
         consolidate_database_files(results_dir)
-
-    db_path = os.path.join(results_dir, "run.db")
-
-    try:
-        db.init(db_path)
-        db.connect(reuse_if_open=True)
-        filepath = get_first_cucu_run_filepath()
-        behave_init(filepath)
-    finally:
-        db.close()
 
     report_location = reporter.generate(
         results_dir, output, only_failures=only_failures

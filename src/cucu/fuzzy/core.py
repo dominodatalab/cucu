@@ -97,7 +97,7 @@ def find(
         str(index),
         str(direction.value),
         name_within_thing,
-        "true"
+        "true",
     ]
 
     def execute_fuzzy_find():
@@ -109,5 +109,7 @@ def find(
     if fuzzy_return is None:
         logger.info("Fuzzy found no element.")
         return None
-    logger.info("Fuzzy found element by search term {}".format(fuzzy_return[1]))
+    logger.info(
+        "Fuzzy found element by search term {}".format(fuzzy_return[1])
+    )
     return fuzzy_return[0]
