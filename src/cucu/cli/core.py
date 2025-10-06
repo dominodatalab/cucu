@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import glob
 import json
 import os
 import shutil
@@ -54,7 +53,9 @@ def main():
 
 
 @main.command()
-@click.argument("filepath")
+@click.argument(
+    "filepath", default="features", type=click.Path(path_type=Path)
+)
 @click.option(
     "-b",
     "--browser",
@@ -110,6 +111,7 @@ def main():
     default=None,
     help="specify the output directory for JUnit XML files, default is "
     "the same location as --results",
+    type=click.Path(path_type=Path),
 )
 @click.option(
     "--junit-with-stacktrace",
@@ -150,6 +152,7 @@ def main():
     "--report",
     default="report",
     help="the location to put the test report when --generate-report is used",
+    type=click.Path(path_type=Path),
 )
 @click.option(
     "--report-only-failures",
@@ -162,6 +165,7 @@ def main():
     "--results",
     default="results",
     help="the results directory used by cucu",
+    type=click.Path(path_type=Path),
 )
 @click.option(
     "--runtime-timeout",
@@ -263,10 +267,10 @@ def run(
     logger.init_logging(logging_level.upper())
 
     if not preserve_results:
-        if os.path.exists(results):
+        if results.exists():
             shutil.rmtree(results)
 
-    os.makedirs(results, exist_ok=True)
+    results.mkdir(parents=True, exist_ok=True)
 
     if selenium_remote_url is not None:
         os.environ["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
@@ -302,7 +306,7 @@ def run(
         generate_short_id(worker_id_seed)
     )
 
-    os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = filepath
+    os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = str(filepath)
 
     create_run(results, filepath)
 
@@ -347,9 +351,8 @@ def run(
                 raise ClickException("test run failed, see above for details")
 
         else:
-            if os.path.isdir(filepath):
-                basepath = os.path.join(filepath, "**/*.feature")
-                feature_filepaths = list(glob.iglob(basepath, recursive=True))
+            if filepath.is_dir():
+                feature_filepaths = list(filepath.rglob("*.feature"))
             else:
                 feature_filepaths = [filepath]
 
@@ -495,7 +498,7 @@ def run(
         if dumper is not None:
             dumper.stop()
 
-        if os.path.exists(results):
+        if results.exists():
             finish_worker_record(worker_run_id=CONFIG.get("WORKER_PARENT_ID"))
             consolidate_database_files(results)
 
@@ -504,51 +507,49 @@ def run(
                 results,
                 report,
                 only_failures=report_only_failures,
-                junit=junit,
+                junit_folder=junit,
             )
 
 
 def _generate_report(
-    results_dir: str,
-    output: str,
+    results_dir: Path,
+    report_folder: Path,
     only_failures: False,
-    junit: str | None = None,
+    junit_folder: Path | None = None,
 ):
-    if os.path.exists(output):
-        shutil.rmtree(output)
+    if report_folder.exists:
+        shutil.rmtree(report_folder)
 
-    os.makedirs(output)
+    report_folder.mkdir(parents=True, exist_ok=True)
 
-    if os.path.exists(results_dir):
+    if results_dir.exists():
         consolidate_database_files(results_dir)
 
     report_location = reporter.generate(
-        results_dir, output, only_failures=only_failures
+        results_dir, report_folder, only_failures=only_failures
     )
     print(f"HTML test report at {report_location}")
 
-    if junit:
-        _add_report_path_in_junit(junit, output)
-
-
-def _add_report_path_in_junit(junit_folder, report_folder):
-    for junit_file in glob.glob(f"{junit_folder}/*.xml", recursive=True):
-        junit = ET.parse(junit_file)
-        test_suite = junit.getroot()
-        ts_folder = test_suite.get("foldername")
-        for test_case in test_suite.iter("testcase"):
-            report_path = os.path.join(
-                report_folder,
-                ts_folder,
-                test_case.get("foldername"),
-                "index.html",
-            )
-            test_case.set("report_path", report_path)
-        junit.write(junit_file, encoding="utf-8", xml_declaration=False)
+    if junit_folder:
+        for junit_file in junit_folder.rglob("*.xml"):
+            junit = ET.parse(junit_file)
+            test_suite = junit.getroot()
+            ts_folder = test_suite.get("foldername")
+            for test_case in test_suite.iter("testcase"):
+                report_path = os.path.join(
+                    report_folder,
+                    ts_folder,
+                    test_case.get("foldername"),
+                    "index.html",
+                )
+                test_case.set("report_path", report_path)
+            junit.write(junit_file, encoding="utf-8", xml_declaration=False)
 
 
 @main.command()
-@click.argument("results_dir", default="results")
+@click.argument(
+    "results_dir", default="results", type=click.Path(path_type=Path)
+)
 @click.option(
     "--only-failures",
     default=False,
@@ -576,7 +577,7 @@ def _add_report_path_in_junit(junit_folder, report_folder):
     "the same location as --results",
 )
 def report(
-    results_dir,
+    results_dir: Path,
     only_failures,
     logging_level,
     show_skips,
@@ -594,7 +595,7 @@ def report(
     if show_skips:
         os.environ["CUCU_SHOW_SKIPS"] = "true"
 
-    run_details_filepath = os.path.join(results_dir, "run_details.json")
+    run_details_filepath = results_dir / "run_details.json"
 
     if os.path.exists(run_details_filepath):
         # load the run details at the time of execution for the provided results
@@ -613,7 +614,9 @@ def report(
 
 
 @main.command()
-@click.argument("filepath", default="features")
+@click.argument(
+    "filepath", default="features", type=click.Path(path_type=Path)
+)
 @click.option(
     "-f",
     "--format",
@@ -639,7 +642,7 @@ def steps(filepath, format):
 
 
 @main.command()
-@click.argument("filepath", nargs=-1)
+@click.argument("filepath", type=click.Path(path_type=Path), nargs=-1)
 @click.option(
     "--fix/--no-fix", default=False, help="fix lint violations, default: False"
 )
@@ -741,7 +744,9 @@ def lsp(logging_level, port):
 
 
 @main.command()
-@click.argument("filepath", default="features")
+@click.argument(
+    "filepath", default="features", type=click.Path(path_type=Path)
+)
 def vars(filepath):
     """
     print built-in cucu variables
@@ -766,14 +771,14 @@ def vars(filepath):
 
 
 @main.command()
-@click.argument("filepath", default="")
+@click.argument("repo_dir", default="", type=click.Path(path_type=Path))
 @click.option(
     "-l",
     "--logging-level",
     default="INFO",
     help="set logging level to one of debug, warn or info (default)",
 )
-def init(filepath, logging_level):
+def init(repo_dir, logging_level):
     """
     initialize cucu in the current directory
 
@@ -785,10 +790,9 @@ def init(filepath, logging_level):
     init_data_dir = Path(__file__).parent.parent / "init_data"
 
     logger.debug(f"cucu init: copy example directory from {init_data_dir=}")
-    repo_dir = filepath if filepath.strip() else os.path.join(os.getcwd())
 
-    features_dir = os.path.join(repo_dir, "features")
-    if os.path.exists(features_dir):
+    features_dir = repo_dir / "features"
+    if features_dir.exists():
         answer = input("Overwrite existing files? [y/N]:")
         if answer.lower() != "y":
             print("Aborted!")
@@ -874,9 +878,7 @@ def tags(filepath, logging_level):
     if not filepath.exists() or not feature_files:
         raise ClickException("No feature files found.")
 
-    file_locations = [
-        FileLocation(os.path.abspath(str(f))) for f in feature_files
-    ]
+    file_locations = [FileLocation(f.absolute()) for f in feature_files]
     features = parse_features(file_locations)
     tag_scenarios = Counter()
 
