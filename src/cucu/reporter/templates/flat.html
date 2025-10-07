@@ -18,11 +18,11 @@
         <thead>
             <tr class="align-text-top">
                 <th class="text-center">Started at</th>
-                <th>Feature</th>
-                <th>Scenario</th>
-                <th class="text-center">Total Steps</th>
+                <th>Features<br/>{{ grand_totals['total_features'] | int }}</th>
+                <th>Scenarios<br/>{{ grand_totals['total_scenarios'] | int }}</th>
+                <th class="text-center">Steps<br/>{{ grand_totals['total_steps'] | int }}</th>
                 <th class="text-center">Status</th>
-                <th class="text-center">Duration (s)</th>
+                <th class="text-center">Duration<br/>{{ grand_totals['duration'] | int }}s</th>
             </tr>
         </thead>
         {% for feature in features %}

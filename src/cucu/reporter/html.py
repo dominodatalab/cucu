@@ -213,9 +213,14 @@ def generate(results, basepath, only_failures=False):
             dst_feature_filepath = os.path.join(
                 basepath, feature["folder_name"]
             )
-            shutil.copytree(
-                src_feature_filepath, dst_feature_filepath, dirs_exist_ok=True
-            )
+            if os.path.exists(src_feature_filepath):
+                shutil.copytree(
+                    src_feature_filepath, dst_feature_filepath, dirs_exist_ok=True
+                )
+            else:
+                logger.warning(
+                    f"Feature directory not found, skipping copy: {src_feature_filepath}"
+                )
 
         for scenario in scenarios:
             CONFIG.restore()
@@ -364,8 +369,8 @@ def generate(results, basepath, only_failures=False):
                 step_index += 1
             logs_dir = os.path.join(scenario_filepath, "logs")
 
+            log_files = []
             if os.path.exists(logs_dir):
-                log_files = []
                 for log_file in glob.iglob(os.path.join(logs_dir, "*.*")):
                     log_filepath = log_file.removeprefix(
                         f"{scenario_filepath}/"
@@ -434,9 +439,10 @@ def generate(results, basepath, only_failures=False):
         "total_scenarios_failed",
         "total_scenarios_skipped",
         "total_scenarios_errored",
+        "total_steps",
         "duration",
     ]
-    grand_totals = {}
+    grand_totals = {"total_features": len(reported_features)}
     for k in keys:
         grand_totals[k] = sum([float(x[k]) for x in reported_features])
 

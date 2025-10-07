@@ -9,6 +9,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 1.3.12
 - Add - generate combined report
 - Chore - use pathlib.Path more
+- Change - UX for combined reports
 
 ## 1.3.11
 - Fix - custom report subheaders
