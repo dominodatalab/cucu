@@ -15,7 +15,7 @@ Feature: Internals
     Given I run the command "cucu run data/features/feature_with_scenario_using_nth_type.feature --results={CUCU_RESULTS_DIR}/with_nth_results" and expect exit code "0"
 
   Scenario: Running cucu in cucu without --results results in exception
-    Given I run the command "cucu run data/features/echo.features" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+    Given I run the command "cucu run data/features/echo.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      Then I should see "{STDERR}" contains the following:
       """
       running within cucu but --results was not used
