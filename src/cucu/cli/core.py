@@ -251,7 +251,7 @@ def run(
         # when cucu is already running it means that we're running inside
         # another cucu process and therefore we should make sure the results
         # directory isn't the default one and throw an exception otherwise
-        if results == "results":
+        if results == Path("results"):
             raise Exception(
                 "running within cucu but --results was not used, "
                 "this would lead to some very difficult to debug "
@@ -504,8 +504,8 @@ def run(
 
         if generate_report:
             _generate_report(
-                results,
-                report,
+                results_dir=results,
+                report_folder=report,
                 only_failures=report_only_failures,
                 junit_folder=junit,
             )
@@ -517,7 +517,7 @@ def _generate_report(
     only_failures: False,
     junit_folder: Path | None = None,
 ):
-    if report_folder.exists:
+    if report_folder.exists():
         shutil.rmtree(report_folder)
 
     report_folder.mkdir(parents=True, exist_ok=True)
@@ -568,21 +568,27 @@ def _generate_report(
     is_flag=True,
     help="when set skips are shown",
 )
-@click.option("-o", "--output", default="report")
+@click.option(
+    "-o",
+    "--output",
+    default="report",
+    type=click.Path(path_type=Path),
+)
 @click.option(
     "-j",
     "--junit",
     default=None,
     help="specify the output directory for JUnit XML files, default is "
     "the same location as --results",
+    type=click.Path(path_type=Path),
 )
 def report(
     results_dir: Path,
     only_failures,
     logging_level,
     show_skips,
-    output,
-    junit,
+    output: Path,
+    junit: Path,
 ):
     """
     generate a test report from a results directory
@@ -609,7 +615,10 @@ def report(
         behave_init(run_details["filepath"])
 
     _generate_report(
-        results_dir, output, only_failures=only_failures, junit=junit
+        results_dir=results_dir,
+        report_folder=output,
+        only_failures=only_failures,
+        junit_folder=junit,
     )
 
 
