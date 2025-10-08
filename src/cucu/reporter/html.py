@@ -215,7 +215,9 @@ def generate(results, basepath, only_failures=False):
             )
             if os.path.exists(src_feature_filepath):
                 shutil.copytree(
-                    src_feature_filepath, dst_feature_filepath, dirs_exist_ok=True
+                    src_feature_filepath,
+                    dst_feature_filepath,
+                    dirs_exist_ok=True,
                 )
             else:
                 logger.warning(
