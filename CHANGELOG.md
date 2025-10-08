@@ -9,7 +9,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 1.3.13
 - Add - generate combined report
 - Chore - use pathlib.Path more
-- Change - UX for combined reports
+- Change - UX for combined reports - add column totals
 - Change - UX scenario report - make step-logs collapsible
 
 ## 1.3.11
