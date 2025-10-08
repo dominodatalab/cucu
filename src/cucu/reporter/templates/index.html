@@ -18,7 +18,7 @@
         <thead>
             <tr class="align-text-top">
                 <th class="text-center">Started at</th>
-                <th>Features</th>
+                <th>Features<br/>{{ grand_totals['total_features'] | int }}</th>
                 <th class="text-center">Scenarios<br/>{{ grand_totals['total_scenarios'] | int }}</th>
                 <th class="text-center">Passed<br/>{{ grand_totals['total_scenarios_passed'] | int}}</th>
                 <th class="text-center">Failed<br/>{{ grand_totals['total_scenarios_failed'] | int }}</th>
