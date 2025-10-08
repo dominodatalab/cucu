@@ -18,8 +18,7 @@ Feature: Run with workers
     Given I run the command "cucu run data/features/slow_features --workers 3 --results {CUCU_RESULTS_DIR}/dots_in_report_with_workers_results" and save stdout to "STDOUT" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following:
      """
-     [\s\S].*
-     .* INFO scheduled feature file .*
+     [\s\S].* INFO scheduled feature file .*
      .* INFO scheduled feature file .*
      .* INFO scheduled feature file .*
      .* INFO scheduled feature file .*
