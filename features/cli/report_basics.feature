@@ -130,7 +130,7 @@ Feature: Report basics
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
         | Started at | Features                   | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with mixed results | 7.          | 3        | 3        | 1         | 0         | failed | .*         |
+        | .*         | Feature with mixed results | 7           | 3        | 3        | 1         | 0         | failed | .*         |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -159,7 +159,7 @@ Feature: Report basics
         | .*         | Feature with background    | 1           | 1        | 0        | 0         | 0         | passed | .*         |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
-        | Offset | Scenarios                           | Steps | Status  | Duration |
+        | Offset | Scenario                            | Steps | Status  | Duration |
         | .*     | Scenario which now has a background | 2     | passed  | .*       |
 
   @show-skips
