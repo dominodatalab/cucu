@@ -303,7 +303,7 @@ def after_step(ctx, step):
 
         # Add tab info to step.stdout so it shows up in the HTML report
         step.stdout.extend(
-            [f"tab({current_tab} of {total_tabs}): {title}", "url: {url}"]
+            [f"tab({current_tab} of {total_tabs}): {title}", f"url: {url}"]
         )
 
     # if the step has substeps from using `run_steps` then we already moved
