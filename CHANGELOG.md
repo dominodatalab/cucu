@@ -7,7 +7,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.3.13
 - Fix - url information display in the report
-
+## 1.3.12
+- Fix - url information display in the report
 ## 1.3.12
 - Chore - bump versions (renovate)
 
