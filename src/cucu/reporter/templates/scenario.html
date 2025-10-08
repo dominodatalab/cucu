@@ -134,30 +134,44 @@
                 <tr class="row"><td style="min-width: 0;" class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
 
                 {% if step['result']['stdout'] %}
-                    <p>stdout ({{ step['result']['stdout']|length }} lines)</p>
-                    <pre style="color: darkgray; margin: 0;">{{ escape("\n".join(step['result']['stdout'])) }}</pre>
+                <details open>
+                    <summary style="color: dimgray;">stdout ({{ step['result']['stdout']|length }} lines)</summary>
+                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['stdout'])) }}</pre>
+                </details>
                 {% endif %}
                 {% if step['result']['stderr'] %}
-                    <p>stderr ({{ step['result']['stderr']|length }} lines)</p>
-                    <pre style="color: darkgray; margin: 0;">{{ escape("\n".join(step['result']['stderr'])) }}</pre>
+                <details open>
+                    <summary style="color: dimgray;">stderr ({{ step['result']['stderr']|length }} lines)</summary>
+                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['stderr'])) }}</pre>
+                </details>
                 {% endif %}
                 {% if step['images'] %}
-                    <p>images ({{ step['images']|length }} images)</p>
-                    {% for image in step['images'] %}
-                        <img class="mx-auto d-block img-fluid shadow bg-white rounded" style="margin-bottom:15px" alt='{{ image["label"] }}' title='{{ image["label"] }}' src='{{ image["src"] }}'></img>
-                    {% endfor %}
+                <details open>
+                    <summary style="color: dimgray;">images ({{ step['images']|length }} images)</summary>
+                    <div style="margin: 10px 0 0 0;">
+                        {% for image in step['images'] %}
+                            <img class="mx-auto d-block img-fluid shadow bg-white rounded" style="margin-bottom:15px" alt='{{ image["label"] }}' title='{{ image["label"] }}' src='{{ image["src"] }}'></img>
+                        {% endfor %}
+                    </div>
+                </details>
                 {% endif %}
                 {% if step['result']['error_message'] %}
-                    <p>error message ({{ step['result']['error_message']|length }} lines)</p>
-                    <pre style="color: gray; margin: 0">{{ escape("\n".join(step['result']['error_message'])) }}</pre>
+                <details open>
+                    <summary style="color: dimgray;">error message ({{ step['result']['error_message']|length }} lines)</summary>
+                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['error_message'])) }}</pre>
+                </details>
                 {% endif %}
                 {% if step['result']['browser_logs'] %}
-                    <p>browser logs ({{ step['result']['browser_logs']|length }} lines)</p>
-                    <pre style="color: gray; margin: 0;">{{ escape("\n".join(step['result']['browser_logs'])) }}</pre>
+                <details open>
+                    <summary style="color: dimgray;">browser logs ({{ step['result']['browser_logs']|length }} lines)</summary>
+                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['browser_logs'])) }}</pre>
+                </details>
                 {% endif %}
                 {% if step['result']['debug_output'] %}
-                    <p>debug output ({{ step['result']['debug_output']|length }} lines)</p>
-                    <pre style="color: gray; margin: 0;">{{ escape("\n".join(step['result']['debug_output'])) }}</pre>
+                <details open>
+                    <summary style="color: dimgray;">debug output ({{ step['result']['debug_output']|length }} lines)</summary>
+                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['debug_output'])) }}</pre>
+                </details>
                 {% endif %}
 
                 </td></tr>
