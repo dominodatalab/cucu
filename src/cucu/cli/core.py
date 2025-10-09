@@ -312,6 +312,9 @@ def run(
 
     try:
         if workers is None or workers == 1:
+            logger.debug(
+                f"Starting cucu_run {CONFIG['CUCU_RUN_ID']} with single worker"
+            )
             if runtime_timeout:
                 logger.debug("setting up runtime timeout timer")
 
@@ -351,6 +354,9 @@ def run(
                 raise ClickException("test run failed, see above for details")
 
         else:
+            logger.debug(
+                f"Starting cucu_run {CONFIG['CUCU_RUN_ID']} with multiple workers: {workers}"
+            )
             if filepath.is_dir():
                 feature_filepaths = list(filepath.rglob("*.feature"))
             else:
