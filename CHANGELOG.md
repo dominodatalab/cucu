@@ -11,6 +11,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Chore - use pathlib.Path more
 - Change - UX for combined reports - add column totals
 - Change - UX scenario report - make step-logs collapsible
+- Change - demote fuzzy logging level
 
 ## 1.3.11
 - Fix - custom report subheaders
