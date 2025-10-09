@@ -490,7 +490,9 @@ def run(
 
                 if task_failed:
                     failing_features = [str(x) for x in task_failed.keys()]
-                    logger.error(f"Failing Features:\n{"\n".join(failing_features)}")
+                    logger.error(
+                        f"Failing Features:\n{'\n'.join(failing_features)}"
+                    )
                     raise RuntimeError(
                         "there are failures, see above for details"
                     )
