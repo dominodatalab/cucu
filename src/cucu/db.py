@@ -459,7 +459,9 @@ def consolidate_database_files(results_dir):
                                 db_path_index = columns.index("db_path")
                                 rows = [
                                     tuple(
-                                        item if idx != db_path_index else str(db_file)
+                                        item
+                                        if idx != db_path_index
+                                        else str(db_file)
                                         for idx, item in enumerate(row)
                                     )
                                     for row in rows
