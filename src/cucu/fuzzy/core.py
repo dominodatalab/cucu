@@ -107,7 +107,7 @@ def find(
 
     fuzzy_return = search_in_all_frames(browser, execute_fuzzy_find)
     if fuzzy_return is None:
-        logger.warning("Fuzzy found no element.")
+        logger.debug("Fuzzy found no element.")
         return None
     logger.debug(
         "Fuzzy found element by search term {}".format(fuzzy_return[1])
