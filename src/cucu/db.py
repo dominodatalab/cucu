@@ -453,17 +453,17 @@ def consolidate_database_files(results_dir):
                         if "run_info" not in columns:
                             columns.append("run_info")
                             rows = [row + (None,) for row in rows]
-                    else:
-                        # Update db_path for multiple cucu_run
-                        if table_name == "cucu_run":
-                            db_path_index = columns.index("db_path")
-                            rows = [
-                                tuple(
-                                    item if idx != db_path_index else str(db_file)
-                                    for idx, item in enumerate(row)
-                                )
-                                for row in rows
-                            ]
+                        else:
+                            # Update db_path for multiple cucu_run
+                            if table_name == "cucu_run":
+                                db_path_index = columns.index("db_path")
+                                rows = [
+                                    tuple(
+                                        item if idx != db_path_index else str(db_file)
+                                        for idx, item in enumerate(row)
+                                    )
+                                    for row in rows
+                                ]
 
                     placeholders = ",".join(["?" for _ in columns])
                     target_cursor.executemany(
