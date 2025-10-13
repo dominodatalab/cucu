@@ -38,10 +38,10 @@ class cucu_run(BaseModel):
     cucu_run_id = TextField(primary_key=True)
     full_arguments = JSONField()
     filepath = TextField()
-    date = TextField()
+    date = TextField(null=True)
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
-
+    db_path = TextField(null=True)
 
 class worker(BaseModel):
     worker_run_id = TextField(primary_key=True)
@@ -147,7 +147,6 @@ def record_cucu_run():
         cucu_run_id=cucu_run_id_val,
         full_arguments=sys.argv,
         filepath=filepath,
-        date=start_at,
         start_at=start_at,
     )
 
