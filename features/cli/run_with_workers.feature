@@ -29,7 +29,7 @@ Feature: Run with workers
   @db
   Scenario: Database records all the workers
     # create the results dir variable
-    Given I set the variable "RESULTS_DIR" to "{CUCU_RESULTS_DIR}/workers_recorded_results"
+    Given I set the variable "RESULTS_DIR" to "{CUCU_RESULTS_DIR}/workers_database_results"
       And I run the command "cucu run data/features/tagged_features --workers 2 --results {RESULTS_DIR} --logging-level=debug" and save stdout to "STDOUT" and expect exit code "0"
 
      Then I should see "{STDOUT}" contains the following:
