@@ -419,7 +419,7 @@ def consolidate_database_files(results_dir):
         create_database_file(target_db_path)
 
     db_files = [
-        db for db in results_path.glob("**/*.db") if db != target_db_path
+        db for db in results_path.glob("**/run*.db") if db.name != "run.db"
     ]
     tables_to_copy = ["cucu_run", "worker", "feature", "scenario", "step"]
     with sqlite3.connect(target_db_path) as target_conn:
