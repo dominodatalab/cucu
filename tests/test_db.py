@@ -10,13 +10,6 @@ import pytest_check as check
 from playhouse.sqlite_ext import SqliteExtDatabase
 
 from cucu import db
-from cucu.db import (
-    cucu_run,
-    feature,
-    scenario,
-    step,
-    worker,
-)
 
 
 @pytest.fixture
@@ -30,18 +23,18 @@ def temp_db():
         db.db = test_db
 
         # Set up models to use test database
-        for model in [cucu_run, worker, feature, scenario, step]:
+        for model in [db.cucu_run, db.worker, db.feature, db.scenario, db.step]:
             model._meta.database = test_db
 
         test_db.connect()
-        test_db.create_tables([cucu_run, worker, feature, scenario, step])
+        test_db.create_tables([db.cucu_run, db.worker, db.feature, db.scenario, db.step])
 
         yield test_db
 
         test_db.close()
         # Restore original database
         db.db = original_db
-        for model in [cucu_run, worker, feature, scenario, step]:
+        for model in [db.cucu_run, db.worker, db.feature, db.scenario, db.step]:
             model._meta.database = original_db
 
         Path(tmp.name).unlink()
@@ -50,7 +43,7 @@ def temp_db():
 @pytest.fixture
 def sample_records_combined(temp_db):
     """Create sample records for testing database operations."""
-    cucu_run_obj = cucu_run.create(
+    cucu_run_obj = db.cucu_run.create(
         cucu_run_id="test_run",
         full_arguments=["arg1", "arg2"],
         filepath="/path/to/test.feature",
@@ -58,14 +51,14 @@ def sample_records_combined(temp_db):
         start_at="2024-01-01T10:00:00",
     )
 
-    worker_obj = worker.create(
+    worker_obj = db.worker.create(
         worker_run_id="test_worker",
         cucu_run_id="test_run",
         start_at="2024-01-01T10:00:00",
         custom_data={"key": "value", "number": 123},
     )
 
-    feature_obj = feature.create(
+    feature_obj = db.feature.create(
         feature_run_id="test_feature",
         worker_run_id="test_worker",
         name="Test Feature",
@@ -75,7 +68,7 @@ def sample_records_combined(temp_db):
         start_at="2024-01-01T10:00:00",
     )
 
-    scenario_obj = scenario.create(
+    scenario_obj = db.scenario.create(
         scenario_run_id="test_scenario",
         feature_run_id="test_feature",
         name="Test Scenario",
@@ -85,7 +78,7 @@ def sample_records_combined(temp_db):
         start_at="2024-01-01T10:00:00",
     )
 
-    step_obj = step.create(
+    step_obj = db.step.create(
         step_run_id="test_step",
         scenario_run_id="test_scenario",
         seq=1,
@@ -101,15 +94,14 @@ def sample_records_combined(temp_db):
         stdout=[],
     )
 
-    cucu_run.create(
+    db.cucu_run.create(
         cucu_run_id="consistency_test",
         full_arguments=[],
         filepath="/path/to/consistency.feature",
-        date="2024-01-01T10:00:00",
         start_at="2024-01-01T10:00:00",
     )
 
-    worker_consistency = worker.create(
+    worker_consistency = db.worker.create(
         worker_run_id="worker_consistency",
         cucu_run_id="consistency_test",
         start_at="2024-01-01T10:00:00",
@@ -117,7 +109,7 @@ def sample_records_combined(temp_db):
         custom_data=None,
     )
 
-    feature_consistency = feature.create(
+    feature_consistency = db.feature.create(
         feature_run_id="feature_consistency",
         worker_run_id="worker_consistency",
         name="Consistency Feature",
@@ -127,7 +119,7 @@ def sample_records_combined(temp_db):
         start_at="2024-01-01T10:00:00",
     )
 
-    scenario_consistency = scenario.create(
+    scenario_consistency = db.scenario.create(
         scenario_run_id="scenario_consistency",
         feature_run_id="feature_consistency",
         name="Consistency Scenario",
@@ -137,7 +129,7 @@ def sample_records_combined(temp_db):
         start_at="2024-01-01T10:00:00",
     )
 
-    step_consistency = step.create(
+    step_consistency = db.step.create(
         step_run_id="step_consistency",
         scenario_run_id="scenario_consistency",
         seq=1,
@@ -167,7 +159,7 @@ def sample_records_combined(temp_db):
 
 
 def test_json_serialization_and_tags_formatting(sample_records_combined):
-    retrieved_worker = worker.get(worker.worker_run_id == "test_worker")
+    retrieved_worker = db.worker.get(db.worker.worker_run_id == "test_worker")
     expected_data = {"key": "value", "number": 123}
     check.equal(retrieved_worker.custom_data, expected_data)
 
@@ -178,7 +170,7 @@ def test_json_serialization_and_tags_formatting(sample_records_combined):
 def test_datetime_iso_format(temp_db):
     iso_datetime = "2024-01-01T10:30:45"
 
-    cucu_run_obj = cucu_run.create(
+    cucu_run_obj = db.cucu_run.create(
         cucu_run_id="iso_test",
         full_arguments=[],
         filepath="/path/to/iso_test.feature",
@@ -207,31 +199,31 @@ def test_complex_data_serialization(sample_records_combined):
         }
     ]
 
-    step.update(
+    db.step.update(
         table_data=table_data,
         is_substep=False,
         screenshots=screenshots_data,
-    ).where(step.step_run_id == "test_step").execute()
+    ).where(db.step.step_run_id == "test_step").execute()
 
-    retrieved = step.get(step.step_run_id == "test_step")
+    retrieved = db.step.get(db.step.step_run_id == "test_step")
     check.equal(retrieved.table_data, table_data)
     check.equal(retrieved.screenshots, screenshots_data)
 
 
 def test_relationships_and_record_completion(sample_records_combined):
     check.equal(
-        sample_records_combined["worker"].cucu_run_id.cucu_run_id, "test_run"
+        sample_records_combined["worker"].cucu_run.cucu_run_id, "test_run"
     )
     check.equal(
-        sample_records_combined["feature"].worker_run_id.worker_run_id,
+        sample_records_combined["feature"].worker.worker_run_id,
         "test_worker",
     )
     check.equal(
-        sample_records_combined["scenario"].feature_run_id.feature_run_id,
+        sample_records_combined["scenario"].feature.feature_run_id,
         "test_feature",
     )
     check.equal(
-        sample_records_combined["step"].scenario_run_id.scenario_run_id,
+        sample_records_combined["step"].scenario.scenario_run_id,
         "test_scenario",
     )
 
@@ -240,21 +232,21 @@ def test_relationships_and_record_completion(sample_records_combined):
     check.is_none(sample_records_combined["step"].status)
     check.is_none(sample_records_combined["step"].end_at)
 
-    scenario.update(
+    db.scenario.update(
         status="passed", duration=1.5, end_at="2024-01-01T10:00:01.5"
-    ).where(scenario.scenario_run_id == "test_scenario").execute()
+    ).where(db.scenario.scenario_run_id == "test_scenario").execute()
 
-    step.update(
+    db.step.update(
         status="passed",
         duration=0.5,
         end_at="2024-01-01T10:00:00.5",
         is_substep=False,
-    ).where(step.step_run_id == "test_step").execute()
+    ).where(db.step.step_run_id == "test_step").execute()
 
-    updated_scenario = scenario.get(
-        scenario.scenario_run_id == "test_scenario"
+    updated_scenario = db.scenario.get(
+        db.scenario.scenario_run_id == "test_scenario"
     )
-    updated_step = step.get(step.step_run_id == "test_step")
+    updated_step = db.step.get(db.step.step_run_id == "test_step")
 
     check.equal(updated_scenario.status, "passed")
     check.equal(updated_scenario.duration, 1.5)
@@ -266,36 +258,36 @@ def test_relationships_and_record_completion(sample_records_combined):
 
 def test_data_consistency_and_null_handling(sample_records_combined):
     check.equal(
-        cucu_run.select()
-        .where(cucu_run.cucu_run_id == "consistency_test")
+        db.cucu_run.select()
+        .where(db.cucu_run.cucu_run_id == "consistency_test")
         .count(),
         1,
     )
     check.equal(
-        worker.select()
-        .where(worker.cucu_run_id == "consistency_test")
+        db.worker.select()
+        .where(db.worker.cucu_run_id == "consistency_test")
         .count(),
         1,
     )
     check.equal(
-        feature.select()
-        .where(feature.worker_run_id == "worker_consistency")
+        db.feature.select()
+        .where(db.feature.worker_run_id == "worker_consistency")
         .count(),
         1,
     )
     check.equal(
-        scenario.select()
-        .where(scenario.feature_run_id == "feature_consistency")
+        db.scenario.select()
+        .where(db.scenario.feature_run_id == "feature_consistency")
         .count(),
         1,
     )
     check.equal(
-        step.select()
-        .where(step.scenario_run_id == "scenario_consistency")
+        db.step.select()
+        .where(db.step.scenario_run_id == "scenario_consistency")
         .count(),
         1,
     )
 
-    retrieved_worker = worker.get(worker.worker_run_id == "worker_consistency")
+    retrieved_worker = db.worker.get(db.worker.worker_run_id == "worker_consistency")
     check.is_none(retrieved_worker.end_at)
     check.is_none(retrieved_worker.custom_data)

@@ -104,7 +104,7 @@ class scenario(BaseModel):
 
 class step(BaseModel):
     step_run_id = TextField(primary_key=True)
-    scenario_run_id = ForeignKeyField(
+    scenario = ForeignKeyField(
         scenario,
         backref="steps",
         column_name="scenario_run_id",
