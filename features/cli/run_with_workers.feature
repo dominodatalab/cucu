@@ -30,14 +30,17 @@ Feature: Run with workers
   Scenario: Database records all the workers
     # create the results dir variable
 
-    Given I run the command "cucu run data/features/tagged_features --workers 2 --results {CUCU_RESULTS_DIR}/workers_database_results --logging-level=debug" and save stdout to "STDOUT" and expect exit code "0"
+    Given I run the command "cucu run data/features/slow_features --workers 5 --results {CUCU_RESULTS_DIR}/workers_database_results --logging-level=debug" and save stdout to "STDOUT" and expect exit code "0"
      Then I should see "{STDOUT}" contains the following:
       """
-      with multiple workers: 2
+      with multiple workers: 5
       """
       And I should see the db "{CUCU_RESULTS_DIR}/workers_database_results/run.db" query "select * from worker" table matches the following:
         | worker_run_id | cucu_run_id | parent_id | start_at | end_at | custom_data |
         | \w+           | \w+         |           | \w+      | \w+    |             |
+        | \w+           | \w+         | \w+       | \w+      | \w+    |             |
+        | \w+           | \w+         | \w+       | \w+      | \w+    |             |
+        | \w+           | \w+         | \w+       | \w+      | \w+    |             |
         | \w+           | \w+         | \w+       | \w+      | \w+    |             |
         | \w+           | \w+         | \w+       | \w+      | \w+    |             |
 
