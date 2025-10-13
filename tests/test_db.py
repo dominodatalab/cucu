@@ -23,18 +23,32 @@ def temp_db():
         db.db = test_db
 
         # Set up models to use test database
-        for model in [db.cucu_run, db.worker, db.feature, db.scenario, db.step]:
+        for model in [
+            db.cucu_run,
+            db.worker,
+            db.feature,
+            db.scenario,
+            db.step,
+        ]:
             model._meta.database = test_db
 
         test_db.connect()
-        test_db.create_tables([db.cucu_run, db.worker, db.feature, db.scenario, db.step])
+        test_db.create_tables(
+            [db.cucu_run, db.worker, db.feature, db.scenario, db.step]
+        )
 
         yield test_db
 
         test_db.close()
         # Restore original database
         db.db = original_db
-        for model in [db.cucu_run, db.worker, db.feature, db.scenario, db.step]:
+        for model in [
+            db.cucu_run,
+            db.worker,
+            db.feature,
+            db.scenario,
+            db.step,
+        ]:
             model._meta.database = original_db
 
         Path(tmp.name).unlink()
@@ -288,6 +302,8 @@ def test_data_consistency_and_null_handling(sample_records_combined):
         1,
     )
 
-    retrieved_worker = db.worker.get(db.worker.worker_run_id == "worker_consistency")
+    retrieved_worker = db.worker.get(
+        db.worker.worker_run_id == "worker_consistency"
+    )
     check.is_none(retrieved_worker.end_at)
     check.is_none(retrieved_worker.custom_data)
