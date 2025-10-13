@@ -448,7 +448,7 @@ def consolidate_database_files(results_dir):
                         rows,
                     )
                     target_conn.commit()
-            db_file.unlink()
+            # db_file.unlink()
 
 
 def init_html_report_db(db_path):
