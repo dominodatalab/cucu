@@ -20,8 +20,8 @@ from peewee import (
 from playhouse.sqlite_ext import JSONField, SqliteExtDatabase
 from tenacity import RetryError
 
-from cucu.config import CONFIG
 from cucu import logger as cucu_logger
+from cucu.config import CONFIG
 
 db_filepath = CONFIG["RUN_DB_PATH"]
 db = SqliteExtDatabase(db_filepath)
@@ -153,14 +153,20 @@ def record_cucu_run():
     )
     cucu_logger.warning(f"Created cucu_run record for {cucu_run_id_val}")
 
-    parent_id = CONFIG.get("WORKER_PARENT_ID") if CONFIG.get("WORKER_PARENT_ID") != worker_run_id else None
+    parent_id = (
+        CONFIG.get("WORKER_PARENT_ID")
+        if CONFIG.get("WORKER_PARENT_ID") != worker_run_id
+        else None
+    )
     worker.create(
         worker_run_id=worker_run_id,
         cucu_run_id=cucu_run_id_val,
         parent_id=parent_id,
         start_at=datetime.now().isoformat(),
     )
-    cucu_logger.warning(f"Created worker record for {worker_run_id} with parent {parent_id}")
+    cucu_logger.warning(
+        f"Created worker record for {worker_run_id} with parent {parent_id}"
+    )
 
     return str(db_filepath)
 
