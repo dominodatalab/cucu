@@ -38,16 +38,16 @@ class cucu_run(BaseModel):
     cucu_run_id = TextField(primary_key=True)
     full_arguments = JSONField()
     filepath = TextField()
-    date = TextField()
     start_at = DateTimeField()
     end_at = DateTimeField(null=True)
+    db_path = TextField(null=True)
+    run_info = JSONField(null=True)
 
 
 class worker(BaseModel):
     worker_run_id = TextField(primary_key=True)
-    cucu_run_id = ForeignKeyField(
+    cucu_run = ForeignKeyField(
         cucu_run,
-        field="cucu_run_id",
         backref="workers",
         column_name="cucu_run_id",
         null=True,
@@ -56,7 +56,7 @@ class worker(BaseModel):
         "self",
         field="worker_run_id",
         backref="child_workers",
-        column_name="parent_id",
+        column_name="parent_run_id",
         null=True,
     )
     start_at = DateTimeField()
@@ -66,9 +66,8 @@ class worker(BaseModel):
 
 class feature(BaseModel):
     feature_run_id = TextField(primary_key=True)
-    worker_run_id = ForeignKeyField(
+    worker = ForeignKeyField(
         worker,
-        field="worker_run_id",
         backref="features",
         column_name="worker_run_id",
     )
@@ -84,9 +83,8 @@ class feature(BaseModel):
 
 class scenario(BaseModel):
     scenario_run_id = TextField(primary_key=True)
-    feature_run_id = ForeignKeyField(
+    feature = ForeignKeyField(
         feature,
-        field="feature_run_id",
         backref="scenarios",
         column_name="feature_run_id",
     )
@@ -106,9 +104,8 @@ class scenario(BaseModel):
 
 class step(BaseModel):
     step_run_id = TextField(primary_key=True)
-    scenario_run_id = ForeignKeyField(
+    scenario = ForeignKeyField(
         scenario,
-        field="scenario_run_id",
         backref="steps",
         column_name="scenario_run_id",
     )
@@ -147,18 +144,21 @@ def record_cucu_run():
         cucu_run_id=cucu_run_id_val,
         full_arguments=sys.argv,
         filepath=filepath,
-        date=start_at,
         start_at=start_at,
     )
 
+    parent_id = (
+        CONFIG.get("WORKER_PARENT_ID")
+        if CONFIG.get("WORKER_PARENT_ID") != worker_run_id
+        else None
+    )
     worker.create(
         worker_run_id=worker_run_id,
         cucu_run_id=cucu_run_id_val,
-        parent_id=CONFIG.get("WORKER_PARENT_ID")
-        if CONFIG.get("WORKER_PARENT_ID") != worker_run_id
-        else None,
+        parent_id=parent_id,
         start_at=datetime.now().isoformat(),
     )
+
     return str(db_filepath)
 
 
@@ -166,7 +166,7 @@ def record_feature(feature_obj):
     db.connect(reuse_if_open=True)
     feature.create(
         feature_run_id=feature_obj.feature_run_id,
-        worker_run_id=CONFIG["WORKER_RUN_ID"],
+        worker=CONFIG["WORKER_RUN_ID"],
         name=feature_obj.name,
         filename=feature_obj.filename,
         description="\n".join(feature_obj.description)
@@ -419,7 +419,7 @@ def consolidate_database_files(results_dir):
         create_database_file(target_db_path)
 
     db_files = [
-        db for db in results_path.glob("**/*.db") if db.name != "run.db"
+        db for db in results_path.glob("**/run*.db") if db.name != "run.db"
     ]
     tables_to_copy = ["cucu_run", "worker", "feature", "scenario", "step"]
     with sqlite3.connect(target_db_path) as target_conn:
@@ -432,13 +432,28 @@ def consolidate_database_files(results_dir):
                     rows = source_cursor.fetchall()
                     source_cursor.execute(f"PRAGMA table_info({table_name})")
                     columns = [col[1] for col in source_cursor.fetchall()]
+
+                    # prep cucu_run for combining multiple runs
+                    if table_name == "cucu_run":
+                        db_path_index = columns.index("db_path")
+                        rows = [
+                            tuple(
+                                item if idx != db_path_index else str(db_file)
+                                for idx, item in enumerate(row)
+                            )
+                            for row in rows
+                        ]
+
                     placeholders = ",".join(["?" for _ in columns])
                     target_cursor.executemany(
                         f"INSERT OR REPLACE INTO {table_name} VALUES ({placeholders})",
                         rows,
                     )
                     target_conn.commit()
-            db_file.unlink()
+
+            if db_file.name != "run.db":
+                # remove the worker db files
+                db_file.unlink()
 
 
 def init_html_report_db(db_path):

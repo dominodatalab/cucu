@@ -104,8 +104,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Feature                    | Total.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with mixed results | 6       | 3        | 3        | 0         | 0         | failed | .*         |
+        | Started at | Features                   | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*         | Feature with mixed results | 6           | 3        | 3        | 0         | 0         | failed | .*         |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -129,8 +129,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Feature                    | Total.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with mixed results | 7       | 3        | 3        | 1         | 0         | failed | .*         |
+        | Started at | Features                   | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*         | Feature with mixed results | 7           | 3        | 3        | 1         | 0         | failed | .*         |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -155,8 +155,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Feature                    | Total.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with background    | 1       | 1        | 0        | 0         | 0         | passed | .*         |
+        | Started at | Features                   | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*         | Feature with background    | 1           | 1        | 0        | 0         | 0         | passed | .*         |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -169,8 +169,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Feature                    | Total.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with background    | 2       | 1        | 0        | 1         | 0         | passed | .*         |
+        | Started at | Features                   | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*         | Feature with background    | 2           | 1        | 0        | 1         | 0         | passed | .*         |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -241,8 +241,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Feature                    | Total.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with mixed results | 6       | 3        | 3        | 0         | 0         | failed | .*         |
+        | Started at | Features                   | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*         | Feature with mixed results | 6           | 3        | 3        | 0         | 0         | failed | .*         |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -264,8 +264,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_background_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Feature                 | Total.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with background | 1       | 1        | 0        | 0         | 0         | passed | .*         |
+        | Started at | Features                | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*         | Feature with background | 1           | 1        | 0        | 0         | 0         | passed | .*         |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -330,8 +330,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_only_failures_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Feature                                | Total.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with failing scenario          | 1       | 0        | 1        | 0         | 0         | failed | .*         |
+        | Started at | Features                               | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*         | Feature with failing scenario          | 1           | 0        | 1        | 0         | 0         | failed | .*         |
         | .*         | Feature with failing to find a table   | 1     | 0      | 1      | 0       | 0       | failed | .*       |
         | .*         | Feature with failing scenario with web | 1     | 0      | 1      | 0       | 0       | failed | .*       |
      When I click the button "Feature with failing scenario with web"

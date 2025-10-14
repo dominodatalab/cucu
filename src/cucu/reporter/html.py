@@ -10,13 +10,10 @@ from xml.sax.saxutils import escape as escape_
 
 import jinja2
 
+import cucu.db as db
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
-from cucu.db import close_html_report_db, init_html_report_db
-from cucu.db import feature as FeatureModel
-from cucu.db import scenario as ScenarioModel
-from cucu.db import step as StepModel
 from cucu.utils import ellipsize_filename, get_step_image_dir
 
 
@@ -68,15 +65,19 @@ def generate(results, basepath, only_failures=False):
 
     db_path = os.path.join(results, "run.db")
     try:
-        init_html_report_db(db_path)
+        db.init_html_report_db(db_path)
         features = []
 
-        db_features = FeatureModel.select().order_by(FeatureModel.start_at)
+        db_features = db.feature.select().order_by(db.feature.start_at)
         logger.info(
             f"Starting to process {len(db_features)} features for report"
         )
 
         for db_feature in db_features:
+            feature_results_dir = results
+            if db_path := db_feature.worker.cucu_run.db_path:
+                feature_results_dir = os.path.dirname(db_path)
+
             feature_dict = {
                 "name": db_feature.name,
                 "filename": db_feature.filename,
@@ -84,14 +85,13 @@ def generate(results, basepath, only_failures=False):
                 "tags": db_feature.tags if db_feature.tags else [],
                 "status": db_feature.status,
                 "elements": [],
+                "results_dir": feature_results_dir,
             }
 
             db_scenarios = (
-                ScenarioModel.select()
-                .where(
-                    ScenarioModel.feature_run_id == db_feature.feature_run_id
-                )
-                .order_by(ScenarioModel.seq)
+                db.scenario.select()
+                .where(db.scenario.feature_run_id == db_feature.feature_run_id)
+                .order_by(db.scenario.seq)
             )
 
             feature_has_failures = False
@@ -113,12 +113,11 @@ def generate(results, basepath, only_failures=False):
                     feature_has_failures = True
 
                 db_steps = (
-                    StepModel.select()
+                    db.step.select()
                     .where(
-                        StepModel.scenario_run_id
-                        == db_scenario.scenario_run_id
+                        db.step.scenario_run_id == db_scenario.scenario_run_id
                     )
-                    .order_by(StepModel.seq)
+                    .order_by(db.step.seq)
                 )
 
                 for db_step in db_steps:
@@ -166,7 +165,7 @@ def generate(results, basepath, only_failures=False):
             features.append(feature_dict)
 
     finally:
-        close_html_report_db()
+        db.close_html_report_db()
 
     cucu_dir = os.path.dirname(sys.modules["cucu"].__file__)
     external_dir = os.path.join(cucu_dir, "reporter", "external")
@@ -208,14 +207,21 @@ def generate(results, basepath, only_failures=False):
         if feature["status"] not in ["skipped", "untested"]:
             # copy each feature directories contents over to the report directory
             src_feature_filepath = os.path.join(
-                results, feature["folder_name"]
+                feature["results_dir"], feature["folder_name"]
             )
             dst_feature_filepath = os.path.join(
                 basepath, feature["folder_name"]
             )
-            shutil.copytree(
-                src_feature_filepath, dst_feature_filepath, dirs_exist_ok=True
-            )
+            if os.path.exists(src_feature_filepath):
+                shutil.copytree(
+                    src_feature_filepath,
+                    dst_feature_filepath,
+                    dirs_exist_ok=True,
+                )
+            else:
+                logger.warning(
+                    f"Feature directory not found, skipping copy: {src_feature_filepath}"
+                )
 
         for scenario in scenarios:
             CONFIG.restore()
@@ -364,8 +370,8 @@ def generate(results, basepath, only_failures=False):
                 step_index += 1
             logs_dir = os.path.join(scenario_filepath, "logs")
 
+            log_files = []
             if os.path.exists(logs_dir):
-                log_files = []
                 for log_file in glob.iglob(os.path.join(logs_dir, "*.*")):
                     log_filepath = log_file.removeprefix(
                         f"{scenario_filepath}/"
@@ -434,9 +440,10 @@ def generate(results, basepath, only_failures=False):
         "total_scenarios_failed",
         "total_scenarios_skipped",
         "total_scenarios_errored",
+        "total_steps",
         "duration",
     ]
-    grand_totals = {}
+    grand_totals = {"total_features": len(reported_features)}
     for k in keys:
         grand_totals[k] = sum([float(x[k]) for x in reported_features])
 

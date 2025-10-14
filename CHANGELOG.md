@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## 1.3.13
+- Change - UX for combined reports - add column totals
+- Change - UX scenario report - make step-logs collapsible
+- Change - demote fuzzy logging level to debug
+- Change - db cucu_run cols
+- Fix - db worker parent id for
+- Chore - db cleanup access names for orm
+- Chore - use db namespace
+- Chore - refactor to use pathlib.Path more
+
 ## 1.3.12
 - Chore - bump versions (renovate)
 - Fix - url information display in the report

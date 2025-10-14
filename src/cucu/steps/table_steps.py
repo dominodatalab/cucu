@@ -70,18 +70,15 @@ def check_table_matches_table(table, expected_table):
     check if table matches the regex patterns in expected table
     """
 
-    if len(table) == len(expected_table):
-        table_matched = True
-
+    table_matched = bool(len(table) == len(expected_table))
+    if table_matched:
         for expected_row, row in zip(expected_table, table):
             for expected_value, value in zip(expected_row, row):
                 if not re.match(expected_value, value):
                     table_matched = False
+                    break
 
-        if table_matched:
-            return True
-
-    return False
+    return table_matched
 
 
 def check_table_contains_table(table, expected_table):

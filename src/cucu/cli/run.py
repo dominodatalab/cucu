@@ -85,8 +85,8 @@ def behave(
     if debug_on_failure:
         os.environ["CUCU_DEBUG_ON_FAILURE"] = "true"
 
-    os.environ["CUCU_RESULTS_DIR"] = results
-    os.environ["CUCU_JUNIT_DIR"] = junit
+    os.environ["CUCU_RESULTS_DIR"] = str(results)
+    os.environ["CUCU_JUNIT_DIR"] = str(junit)
 
     if secrets:
         os.environ["CUCU_SECRETS"] = secrets
@@ -123,7 +123,7 @@ def behave(
             "--no-logcapture",
             # generate a JSON file containing the exact details of the whole run
             "--format=cucu.formatter.json:CucuJSONFormatter",
-            f"--outfile={Path(results) / run_json_filename}",
+            f"--outfile={results / run_json_filename}",
             # console formatter
             "--format=cucu.formatter.cucu:CucuFormatter",
             f"--logging-level={os.environ['CUCU_LOGGING_LEVEL'].upper()}",
@@ -154,7 +154,7 @@ def behave(
         if redirect_output:
             feature_name = get_feature_name(filepath)
             log_filename = f"{feature_name}.log"
-            log_filepath = Path(results) / log_filename
+            log_filepath = results / log_filename
 
             CONFIG["__CUCU_PARENT_STDOUT"] = sys.stdout
 
@@ -185,8 +185,7 @@ def behave(
     return result
 
 
-def create_run(results, filepath):
-    results_path = Path(results)
+def create_run(results_path: Path, filepath: Path):
     run_json_filepath = results_path / "run_details.json"
 
     if run_json_filepath.exists():
@@ -200,7 +199,7 @@ def create_run(results, filepath):
 
     run_details = {
         "cucu_run_id": CONFIG["CUCU_RUN_ID"],
-        "filepath": filepath,
+        "filepath": str(filepath),
         "full_arguments": sys.argv,
         "env": env_values,
         "date": datetime.now().isoformat(),

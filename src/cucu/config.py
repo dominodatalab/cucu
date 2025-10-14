@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import socket
+from pathlib import Path
 
 import yaml
 
@@ -100,7 +101,7 @@ class Config(dict):
                 else:
                     self[key] = config[key]
 
-    def load_cucurc_files(self, filepath):
+    def load_cucurc_files(self, filepath: Path):
         """
         load in order the ~/.cucurc.yml and then subsequent config files
         starting from the current working directory to the filepath provided
