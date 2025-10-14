@@ -19,8 +19,6 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Chore - use db namespace
 - Chore - refactor to use pathlib.Path more
 
-
-
 ## 1.3.11
 - Fix - custom report subheaders
 - Fix - de-dup custom sub-headers in report cmd
