@@ -433,39 +433,16 @@ def consolidate_database_files(results_dir):
                     source_cursor.execute(f"PRAGMA table_info({table_name})")
                     columns = [col[1] for col in source_cursor.fetchall()]
 
-                    # Special handling for cucu_run to remove 'date' column and add 'db_path' column
+                    # prep cucu_run for combining multiple runs
                     if table_name == "cucu_run":
-                        if columns[3] == "date":
-                            # remove the 'date' column in the rows and columns list
-                            date_index = columns.index("date")
-                            columns.pop(date_index)
-                            rows = [
-                                tuple(
-                                    item
-                                    for idx, item in enumerate(row)
-                                    if idx != date_index
-                                )
-                                for row in rows
-                            ]
-                        if "db_path" not in columns:
-                            columns.append("db_path")
-                            rows = [row + (str(db_file),) for row in rows]
-                        if "run_info" not in columns:
-                            columns.append("run_info")
-                            rows = [row + (None,) for row in rows]
-                        else:
-                            # Update db_path for multiple cucu_run
-                            if table_name == "cucu_run":
-                                db_path_index = columns.index("db_path")
-                                rows = [
-                                    tuple(
-                                        item
-                                        if idx != db_path_index
-                                        else str(db_file)
-                                        for idx, item in enumerate(row)
-                                    )
-                                    for row in rows
-                                ]
+                        db_path_index = columns.index("db_path")
+                        rows = [
+                            tuple(
+                                item if idx != db_path_index else str(db_file)
+                                for idx, item in enumerate(row)
+                            )
+                            for row in rows
+                        ]
 
                     placeholders = ",".join(["?" for _ in columns])
                     target_cursor.executemany(

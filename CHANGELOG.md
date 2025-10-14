@@ -10,11 +10,16 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Fix - url information display in the report
 
 ## 1.3.13
-- Add - generate combined report
-- Chore - use pathlib.Path more
 - Change - UX for combined reports - add column totals
 - Change - UX scenario report - make step-logs collapsible
-- Change - demote fuzzy logging level
+- Change - demote fuzzy logging level to debug
+- Change - db cucu_run cols
+- Fix - db worker parent id for  
+- Chore - db cleanup access names for orm
+- Chore - use db namespace
+- Chore - refactor to use pathlib.Path more
+
+
 
 ## 1.3.11
 - Fix - custom report subheaders
