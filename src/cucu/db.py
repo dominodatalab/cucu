@@ -411,16 +411,23 @@ def get_first_cucu_run_filepath():
     return run_record.filepath
 
 
-def consolidate_database_files(results_dir):
+def consolidate_database_files(results_dir, combine=False):
     # This function would need a more advanced approach with peewee, so for now, keep using sqlite3 for consolidation
     results_path = Path(results_dir)
     target_db_path = results_path / "run.db"
     if not target_db_path.exists():
         create_database_file(target_db_path)
 
-    db_files = [
-        db for db in results_path.glob("**/run*.db") if db.name != "run.db"
-    ]
+    if not combine:
+        db_files = [
+            db for db in results_path.glob("**/run*.db") if db.name != "run.db"
+        ]
+    else:
+        # include all run.db files in all subdirectories
+        db_files = [
+            db for db in results_path.rglob("run*.db") if db != Path("run.db")
+        ]
+
     tables_to_copy = ["cucu_run", "worker", "feature", "scenario", "step"]
     with sqlite3.connect(target_db_path) as target_conn:
         target_cursor = target_conn.cursor()
@@ -451,7 +458,7 @@ def consolidate_database_files(results_dir):
                     )
                     target_conn.commit()
 
-            if db_file.name != "run.db":
+            if not combine and db_file.name != "run.db":
                 # remove the worker db files
                 db_file.unlink()
 

@@ -524,6 +524,7 @@ def _generate_report(
     report_folder: Path,
     only_failures: False,
     junit_folder: Path | None = None,
+    combine: bool = False,
 ):
     if report_folder.exists():
         shutil.rmtree(report_folder)
@@ -531,7 +532,7 @@ def _generate_report(
     report_folder.mkdir(parents=True, exist_ok=True)
 
     if results_dir.exists():
-        consolidate_database_files(results_dir)
+        consolidate_database_files(results_dir, combine)
 
     report_location = reporter.generate(
         results_dir, report_folder, only_failures=only_failures
@@ -590,6 +591,12 @@ def _generate_report(
     "the same location as --results",
     type=click.Path(path_type=Path),
 )
+@click.option(
+    "--combine",
+    default=False,
+    is_flag=True,
+    help="combine multiple cucu_runs into a single report",
+)
 def report(
     results_dir: Path,
     only_failures,
@@ -597,6 +604,7 @@ def report(
     show_skips,
     output: Path,
     junit: Path,
+    combine: bool,
 ):
     """
     generate a test report from a results directory
@@ -627,6 +635,7 @@ def report(
         report_folder=output,
         only_failures=only_failures,
         junit_folder=junit,
+        combine=combine,
     )
 
 
