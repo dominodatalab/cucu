@@ -270,15 +270,9 @@
             console.log(element_labels);
         }
 
-        var element = elements[index];
-        // if we found the element at the index, then scroll to innerText
-        if (element !== undefined) {
-            element.scrollIntoView();
-        }
-
         if (elements.length > 0 && insert_label) {
-            return [element, element_labels[index]];
+            return [elements[index], element_labels[index]];
         }
-        return element;
+        return elements[index];
     };
 })();
