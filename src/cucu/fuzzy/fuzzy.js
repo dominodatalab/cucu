@@ -277,7 +277,7 @@
         }
 
         if (elements.length > 0 && insert_label) {
-            return element, element_labels[index]];
+            return element, element_labels[index];
         }
         return element;
     };
