@@ -1,5 +1,6 @@
 import glob
 import os
+import random
 import shutil
 import sys
 import traceback
@@ -15,6 +16,8 @@ from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
 from cucu.utils import ellipsize_filename, get_step_image_dir
+
+HEX_DIGITS = "1234567890abcdef"
 
 
 def escape(data):
@@ -130,6 +133,7 @@ def generate(results, basepath, only_failures=False):
                             "timestamp": db_step.end_at or "",
                         },
                         "substep": db_step.is_substep,
+                        "screenshots": db_step.screenshots,
                     }
 
                     if db_step.text:
@@ -281,8 +285,6 @@ def generate(results, basepath, only_failures=False):
             scenario_started_at = None
             for step in scenario["steps"]:
                 total_steps += 1
-                image_dir = get_step_image_dir(step_index, step["name"])
-                image_dirpath = os.path.join(scenario_filepath, image_dir)
 
                 # Handle section headings with different levels (# to ####)
                 if step["name"].startswith("#"):
@@ -292,32 +294,51 @@ def generate(results, basepath, only_failures=False):
                         f"h{step['name'][:4].count('#') + 1}"
                     )
 
-                if os.path.exists(image_dirpath):
-                    _, _, image_names = next(os.walk(image_dirpath))
-                    images = []
-                    for image_name in image_names:
-                        words = image_name.split("-", 1)
-                        index = words[0].strip()
+                images = []
+                image_dir = get_step_image_dir(step_index, step["name"])
+                image_dirpath = os.path.join(scenario_filepath, image_dir)
+                for index, screenshot in enumerate(step["screenshots"]):
+                    filename = os.path.split(screenshot["filepath"])[-1]
+                    filepath = os.path.join(image_dirpath, filename)
+                    if not os.path.exists(filepath):
+                        continue
+                    label = screenshot.get("label", step["name"])
+                    highlight = None
+                    if (
+                        screenshot["location"]
+                        and not CONFIG["CUCU_SKIP_HIGHLIGHT_BORDER"]
+                    ):
+                        window_height = screenshot["size"]["height"]
+                        window_width = screenshot["size"]["width"]
                         try:
-                            # Images with label should have a name in the form:
-                            # 0000 - This is the image label.png
-                            label, _ = os.path.splitext(words[1].strip())
-                        except IndexError:
-                            # Images with no label should instead look like:
-                            # 0000.png
-                            # so we default to the step name in this case.
-                            label = step["name"]
-
-                        images.append(
-                            {
-                                "src": urllib.parse.quote(
-                                    os.path.join(image_dir, image_name)
-                                ),
-                                "index": index,
-                                "label": label,
+                            highlight = {
+                                "height_ratio": screenshot["location"][
+                                    "height"
+                                ]
+                                / window_height,
+                                "width_ratio": screenshot["location"]["width"]
+                                / window_width,
+                                "top_ratio": screenshot["location"]["y"]
+                                / window_height,
+                                "left_ratio": screenshot["location"]["x"]
+                                / window_width,
                             }
-                        )
-                    step["images"] = sorted(images, key=lambda x: x["index"])
+                        except TypeError:
+                            # If any of the necessary properties is absent,
+                            # then oh well, no highlight this time.
+                            pass
+                    images.append(
+                        {
+                            "src": urllib.parse.quote(
+                                os.path.join(image_dir, filename)
+                            ),
+                            "index": index,
+                            "label": label,
+                            "id": f"step-img-{''.join(random.choices(HEX_DIGITS, k=8))}",
+                            "highlight": highlight,
+                        }
+                    )
+                step["images"] = sorted(images, key=lambda x: x["index"])
 
                 if "result" in step:
                     if step["result"]["status"] in ["failed", "passed"]:

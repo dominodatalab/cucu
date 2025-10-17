@@ -150,7 +150,10 @@
                     <summary style="color: dimgray;">images ({{ step['images']|length }} images)</summary>
                     <div style="margin: 10px 0 0 0;">
                         {% for image in step['images'] %}
-                            <img class="mx-auto d-block img-fluid shadow bg-white rounded" style="margin-bottom:15px" alt='{{ image["label"] }}' title='{{ image["label"] }}' src='{{ image["src"] }}'></img>
+                            <img class="mx-auto d-block img-fluid shadow bg-white rounded" id='{{image['id']}}' style="margin-bottom:15px" alt='{{ image["label"] }}' title='{{ image["label"] }}' src='{{ image["src"] }}'></img>
+                            {% if image['highlight'] %}
+                            <div class="step-image-highlight" id='{{ image["id"]}}-highlight' height-ratio='{{ image['highlight']['height_ratio'] }}' width-ratio='{{ image['highlight']['width_ratio'] }}' top-ratio='{{ image['highlight']['top_ratio'] }}' left-ratio='{{ image['highlight']['left_ratio'] }}'></div>
+                            {% endif %}
                         {% endfor %}
                     </div>
                 </details>
@@ -221,5 +224,70 @@
               attributes: true
             });
         });
+    </script>
+    <script>
+      function fitHighlightToImage(highlightDiv) {
+        console.log(highlightDiv);
+
+        // Every highlight element is expected to have an ID of the form
+        // <image ID>-highlight . Get the image ID here.
+        const sliceEndIndex = highlightDiv.id.length - "-highlight".length;
+
+        const targetImgId = highlightDiv.id.slice(0, sliceEndIndex);
+        const targetImg = document.querySelector(`img#${targetImgId}`);
+        const currImgHeight = targetImg.height;
+        const currImgWidth = targetImg.width;
+
+        const updatedHighlightStyle = [
+          "position:absolute",
+          `height:${currImgHeight * highlightDiv.getAttribute("height-ratio")}px`,
+          `width:${currImgWidth * highlightDiv.getAttribute("width-ratio")}px`,
+          `top:${(currImgHeight * highlightDiv.getAttribute("top-ratio")) + targetImg.offsetTop}px`,
+          `left:${(currImgWidth * highlightDiv.getAttribute("left-ratio")) + targetImg.offsetLeft}px`,
+          "border:2px solid magenta",
+          "border-radius:2px",
+        ].join(";");
+        highlightDiv.style = updatedHighlightStyle;
+        console.log(fitHighlightToImage);
+      };
+
+      function resizeAllHighlights(){
+        const highlights = document.querySelectorAll(".step-image-highlight");
+        highlights.forEach(h => fitHighlightToImage(h));
+      };
+
+      // The <summary> elements make the DOM jump around.
+      // The delayed resizeAllHighlights helps make sure all the highlights
+      // from lower down the page get into the right place after things settle.
+      document.querySelectorAll("summary").forEach(
+        e => {
+          e.addEventListener("click", resizeAllHighlights);
+          e.addEventListener(
+            "click",
+            () => setTimeout(resizeAllHighlights, 10)
+          );
+        }
+      );
+      // The td.data-toggles cause an animation that takes a lot longer than
+      // the one from the <summary> elements. As before, the fast
+      // resizeAllHighlights makes the ones the user can see first jump into
+      // place, then the delayed one helps put the ones lower down into place.
+      document.querySelectorAll("td[data-toggle=collapse").forEach(
+        e => {
+          e.addEventListener(
+            "click",
+            () => setTimeout(resizeAllHighlights, 10)
+          );
+          e.addEventListener(
+            "click",
+            // 400ms value was determined experimentally.
+            // It's approximately the duration of the animation triggered
+            // by clicking on these elements
+            () => setTimeout(resizeAllHighlights, 400)
+          );
+        }
+      );
+      window.onload = resizeAllHighlights;
+      window.onresize = resizeAllHighlights;
     </script>
 {% endblock %}
