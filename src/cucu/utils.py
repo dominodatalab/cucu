@@ -245,56 +245,42 @@ def take_screenshot(ctx, step_name, label="", element=None):
         os.mkdir(screenshot_dir)
 
     if len(label) > 0:
-        label = f" - {CONFIG.hide_secrets(label).replace('/', '_')}"
-    filename = f"{CONFIG['__STEP_SCREENSHOT_COUNT']:0>4}{label}.png"
+        label = CONFIG.hide_secrets(label).replace("/", "_")
+    filename = f"{CONFIG['__STEP_SCREENSHOT_COUNT']:0>4} - {label}.png"
     filename = ellipsize_filename(filename)
     filepath = os.path.join(screenshot_dir, filename)
 
-    if CONFIG["CUCU_SKIP_HIGHLIGHT_BORDER"] or not element:
-        ctx.browser.screenshot(filepath)
-    else:
-        location = element.location
-        border_width = 4
-        x, y = location["x"] - border_width, location["y"] - border_width
-        size = element.size
-        width, height = size["width"], size["height"]
-
-        position_css = f"position: absolute; top: {y}px; left: {x}px; width: {width}px; height: {height}px; z-index: 9001;"
-        visual_css = "border-radius: 4px; border: 4px solid #ff00ff1c; background: #ff00ff05; filter: drop-shadow(magenta 0 0 10px);"
-
-        script = f"""
-            (function() {{ // double curly-brace to escape python f-string
-                var body = document.querySelector('body');
-                var cucu_border = document.createElement('div');
-                cucu_border.setAttribute('id', 'cucu_border');
-                cucu_border.setAttribute('style', '{position_css} {visual_css}');
-                body.append(cucu_border);
-            }})();
-        """
-        ctx.browser.execute(script)
-
-        ctx.browser.screenshot(filepath)
-
-        clear_highlight = """
-            (function() {
-                var body = document.querySelector('body');
-                var cucu_border = document.getElementById('cucu_border');
-                body.removeChild(cucu_border);
-            })();
-        """
-        ctx.browser.execute(clear_highlight, element)
-
+    ctx.browser.screenshot(filepath)
+    element_info = {
+        "x": None,
+        "y": None,
+        "height": None,
+        "width": None,
+    }
+    if element:
+        element_info.update(element.rect)
+    # driver.get_window_size returns the size of the window the OS draws for
+    # the browser, not the window the browser uses to display the DOM.
+    # If we go through JavaScript, we ignore the height of the adress bar
+    # and such.
+    script = """
+        function getDimensionsOfCurrentWindow() {
+          const windowSize = {
+            width: window.innerWidth,
+            height: window.innerHeight,
+          };
+          return windowSize;
+        };
+        return getDimensionsOfCurrentWindow();
+    """
+    browser_window_size = ctx.browser.execute(script)
     screenshot = {
         "step_name": step_name,
         "label": label,
         "element": element,
-        "location": f"({element.location['x']},{element.location['y']})"
-        if element
-        else "",
-        "size": f"({element.size['width']},{element.size['height']})"
-        if element
-        else "",
+        "location": element_info,
         "filepath": filepath,
+        "size": browser_window_size,
     }
     step.screenshots.append(screenshot)
 
