@@ -18,7 +18,7 @@ jobs:
           ref: main
           fetch-depth: 0
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        uses: astral-sh/setup-uv@3259c6206f993105e3a61b142c2d97bf4b9ef83d # v7
         with:
           enable-cache: true
       - name: Install cucu with Python 3.12
