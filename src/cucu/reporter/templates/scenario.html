@@ -235,20 +235,25 @@
 
         const targetImgId = highlightDiv.id.slice(0, sliceEndIndex);
         const targetImg = document.querySelector(`img#${targetImgId}`);
-        const currImgHeight = targetImg.height;
-        const currImgWidth = targetImg.width;
+        const imgViewportRect = targetImg.getBoundingClientRect();
+        // Compute absolute coordinates relative to the whole document
+        const targetDimensions = {
+          height: imgViewportRect["height"],
+          width: imgViewportRect["width"],
+          top: imgViewportRect["top"] + window.pageYOffset,
+          left: imgViewportRect["left"] + window.pageXOffset,
+        };
 
         const updatedHighlightStyle = [
           "position:absolute",
-          `height:${currImgHeight * highlightDiv.getAttribute("height-ratio")}px`,
-          `width:${currImgWidth * highlightDiv.getAttribute("width-ratio")}px`,
-          `top:${(currImgHeight * highlightDiv.getAttribute("top-ratio")) + targetImg.offsetTop}px`,
-          `left:${(currImgWidth * highlightDiv.getAttribute("left-ratio")) + targetImg.offsetLeft}px`,
+          `height:${targetDimensions["height"] * highlightDiv.getAttribute("height-ratio")}px`,
+          `width:${targetDimensions["width"] * highlightDiv.getAttribute("width-ratio")}px`,
+          `top:${(targetDimensions["height"] * highlightDiv.getAttribute("top-ratio")) + targetDimensions["top"]}px`,
+          `left:${(targetDimensions["width"] * highlightDiv.getAttribute("left-ratio")) + targetDimensions["left"]}px`,
           "border:2px solid magenta",
           "border-radius:2px",
         ].join(";");
         highlightDiv.style = updatedHighlightStyle;
-        console.log(fitHighlightToImage);
       };
 
       function resizeAllHighlights(){
