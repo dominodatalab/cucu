@@ -150,7 +150,10 @@
                     <summary style="color: dimgray;">images ({{ step['images']|length }} images)</summary>
                     <div style="margin: 10px 0 0 0;">
                         {% for image in step['images'] %}
-                            <img class="mx-auto d-block img-fluid shadow bg-white rounded" style="margin-bottom:15px" alt='{{ image["label"] }}' title='{{ image["label"] }}' src='{{ image["src"] }}'></img>
+                            <img class="mx-auto d-block img-fluid shadow bg-white rounded" id='{{image['id']}}' style="margin-bottom:15px" alt='{{ image["label"] }}' title='{{ image["label"] }}' src='{{ image["src"] }}'></img>
+                            {% if image['highlight'] %}
+                            <div class="step-image-highlight" id='{{ image["id"]}}-highlight' height-ratio='{{ image['highlight']['height_ratio'] }}' width-ratio='{{ image['highlight']['width_ratio'] }}' top-ratio='{{ image['highlight']['top_ratio'] }}' left-ratio='{{ image['highlight']['left_ratio'] }}'></div>
+                            {% endif %}
                         {% endfor %}
                     </div>
                 </details>
@@ -222,4 +225,5 @@
             });
         });
     </script>
+    <script src="../../external/manage_scenario_highlights.js"></script>
 {% endblock %}

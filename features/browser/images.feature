@@ -14,4 +14,4 @@ Feature: Images
      When I click the button "I should see the button "button with child""
      Then I should not see the image with the alt text "After I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html""
       And I should not see the image with the alt text "After I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html""
-      And I should see the image with the alt text "After I should see the button button with child"
+      And I should see the image with the alt text "After I should see the button "button with child""
