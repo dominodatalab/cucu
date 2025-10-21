@@ -356,3 +356,19 @@ Feature: Report basics
       """
       report_path="results/junit-generate-report/Echo/Echo an environment variable/index.html"
       """
+
+  @db
+  Scenario: User can combine results from multiple runs into a single report
+    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/combined_results/run_1" and expect exit code "0"
+      And I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --results {CUCU_RESULTS_DIR}/combined_results/run_2 --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "0"
+     When I run the command "cucu report --combine {CUCU_RESULTS_DIR}/combined_results --output {CUCU_RESULTS_DIR}/combined_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see "{STDOUT}" matches the following
+      """
+      [\s\S]*INFO Starting to process 2 features for report[\s\S]*
+      """
+     When I start a webserver at directory "{CUCU_RESULTS_DIR}/combined_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     Then I should see a table that matches the following:
+        | Started at | Features                               | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*         | Echo                                   | 1           | 1        | 0        | 0         | 0         | passed | .*         |
+        | .*         | Feature with passing scenario with web | 1           | 1        | 0        | 0         | 0         | passed | .*         |
