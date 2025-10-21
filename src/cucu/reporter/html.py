@@ -1,6 +1,5 @@
 import glob
 import os
-import random
 import shutil
 import sys
 import traceback
@@ -15,9 +14,11 @@ import cucu.db as db
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
-from cucu.utils import ellipsize_filename, get_step_image_dir
-
-HEX_DIGITS = "1234567890abcdef"
+from cucu.utils import (
+    ellipsize_filename,
+    generate_short_id,
+    get_step_image_dir,
+)
 
 
 def escape(data):
@@ -297,7 +298,7 @@ def generate(results, basepath, only_failures=False):
                 images = []
                 image_dir = get_step_image_dir(step_index, step["name"])
                 image_dirpath = os.path.join(scenario_filepath, image_dir)
-                for index, screenshot in enumerate(step["screenshots"]):
+                for screenshot_index, screenshot in enumerate(step["screenshots"]):
                     filename = os.path.split(screenshot["filepath"])[-1]
                     filepath = os.path.join(image_dirpath, filename)
                     if not os.path.exists(filepath):
@@ -327,14 +328,15 @@ def generate(results, basepath, only_failures=False):
                             # If any of the necessary properties is absent,
                             # then oh well, no highlight this time.
                             pass
+                    screenshot_id = f"step-img-{screenshot.get("step_run_id", generate_short_id())}-{screenshot_index:0>4}"
                     images.append(
                         {
                             "src": urllib.parse.quote(
                                 os.path.join(image_dir, filename)
                             ),
-                            "index": index,
+                            "index": screenshot_index,
                             "label": label,
-                            "id": f"step-img-{''.join(random.choices(HEX_DIGITS, k=8))}",
+                            "id": screenshot_id,
                             "highlight": highlight,
                         }
                     )
