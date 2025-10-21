@@ -3,6 +3,8 @@ name: publish-production
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [trigger_publish_test]
 
 jobs:
   publish-production-main:
