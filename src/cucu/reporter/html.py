@@ -63,6 +63,8 @@ def left_pad_zeroes(elapsed_time):
 def generate(results: Path, basepath: Path, only_failures=False):
     db_path = results / "run.db"
 
+    grand_totals = {}
+
     try:
         features = []
         db.init_html_report_db(db_path)
@@ -170,6 +172,10 @@ def generate(results: Path, basepath: Path, only_failures=False):
 
             features.append(feature_dict)
 
+        # query the database for grand totals
+        grand_totals_db = db.db.execute_sql("SELECT * FROM flat_all")
+        keys = tuple([x[0] for x in grand_totals_db.description])
+        grand_totals = dict(zip(keys, grand_totals_db.fetchone()))
     finally:
         db.close_html_report_db()
 
@@ -188,12 +194,6 @@ def generate(results: Path, basepath: Path, only_failures=False):
             continue
 
         feature_duration = 0
-
-        feature["total_scenarios"] = len(scenarios)
-        feature["total_scenarios_passed"] = 0
-        feature["total_scenarios_failed"] = 0
-        feature["total_scenarios_skipped"] = 0
-        feature["total_scenarios_errored"] = 0
 
         reported_features.append(feature)
         process_tags(feature)
@@ -229,34 +229,10 @@ def generate(results: Path, basepath: Path, only_failures=False):
                 feature_started_at = scenario_started_at
                 feature["started_at"] = scenario_started_at
 
-            if "status" not in scenario:
-                feature["total_scenarios_skipped"] += 1
-            elif scenario["status"] == "passed":
-                feature["total_scenarios_passed"] += 1
-            elif scenario["status"] == "failed":
-                feature["total_scenarios_failed"] += 1
-            elif scenario["status"] == "skipped":
-                feature["total_scenarios_skipped"] += 1
-            elif scenario["status"] == "errored":
-                feature["total_scenarios_errored"] += 1
-
         feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
         feature["duration"] = left_pad_zeroes(
             sum([float(x["duration"]) for x in scenarios])
         )
-
-    keys = [
-        "total_scenarios",
-        "total_scenarios_passed",
-        "total_scenarios_failed",
-        "total_scenarios_skipped",
-        "total_scenarios_errored",
-        "total_steps",
-        "duration",
-    ]
-    grand_totals = {"total_features": len(reported_features)}
-    for k in keys:
-        grand_totals[k] = sum([float(x[k]) for x in reported_features])
 
     ## prepare report directory
     cucu_dir = Path(sys.modules["cucu"].__file__).parent

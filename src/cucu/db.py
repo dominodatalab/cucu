@@ -354,6 +354,14 @@ def create_database_file(db_filepath):
     db.create_tables([cucu_run, worker, feature, scenario, step])
     db.execute_sql("""
             CREATE VIEW IF NOT EXISTS flat_all AS
+            WITH scenario_with_steps AS (
+                SELECT 
+                    *,
+                    COUNT(st.step_run_id) AS steps                
+                FROM scenario s
+                LEFT JOIN step st ON s.scenario_run_id = st.scenario_run_id
+                GROUP BY s.scenario_run_id
+            )
             SELECT
                 COUNT(DISTINCT s.feature_run_id) AS features,
                 COUNT(s.scenario_run_id) AS scenarios,
@@ -361,8 +369,9 @@ def create_database_file(db_filepath):
                 SUM(CASE WHEN s.status = 'failed' THEN 1 ELSE 0 END) AS failed,
                 SUM(CASE WHEN s.status = 'skipped' THEN 1 ELSE 0 END) AS skipped,
                 SUM(CASE WHEN s.status = 'errored' THEN 1 ELSE 0 END) AS errored,
-                SUM(s.duration) AS duration
-            FROM scenario s
+                SUM(s.duration) AS duration,
+                SUM(s.steps) AS steps
+            FROM scenario_with_steps s
         """)
     db.execute_sql("""
             CREATE VIEW IF NOT EXISTS flat_feature AS
