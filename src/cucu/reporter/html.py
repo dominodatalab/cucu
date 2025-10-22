@@ -60,15 +60,11 @@ def left_pad_zeroes(elapsed_time):
     return padded_duration
 
 
-def generate(results, basepath, only_failures=False):
-    """
-    generate an HTML report for the results provided.
-    """
+def generate(results: Path, basepath: Path, only_failures=False):
+    db_path = results / "run.db"
 
-    features = []
-
-    db_path = os.path.join(results, "run.db")
     try:
+        features = []
         db.init_html_report_db(db_path)
 
         feature_count = db.feature.select().count()
@@ -93,8 +89,8 @@ def generate(results, basepath, only_failures=False):
                 "description": db_feature.description,
                 "tags": db_feature.tags if db_feature.tags else [],
                 "status": db_feature.status,
-                "elements": [],
-                "results_dir": feature_results_dir,
+                "elements": [],  # scenarios
+                "results_dir": feature_results_dir,  # directory where feature results are stored
             }
 
             db_scenarios = (
@@ -177,15 +173,9 @@ def generate(results, basepath, only_failures=False):
     finally:
         db.close_html_report_db()
 
-    cucu_dir = os.path.dirname(sys.modules["cucu"].__file__)
-    external_dir = os.path.join(cucu_dir, "reporter", "external")
-    shutil.copytree(external_dir, os.path.join(basepath, "external"))
-    shutil.copyfile(
-        os.path.join(cucu_dir, "reporter", "favicon.png"),
-        os.path.join(basepath, "favicon.png"),
-    )
-
     CONFIG.snapshot()
+
+    ## generate global stats
     reported_features = []
     for feature in features:
         feature["folder_name"] = ellipsize_filename(feature["name"])
@@ -212,9 +202,8 @@ def generate(results, basepath, only_failures=False):
             src_feature_filepath = os.path.join(
                 feature["results_dir"], feature["folder_name"]
             )
-            dst_feature_filepath = os.path.join(
-                basepath, feature["folder_name"]
-            )
+            dst_feature_filepath = basepath / feature["folder_name"]
+
             if os.path.exists(src_feature_filepath):
                 shutil.copytree(
                     src_feature_filepath,
@@ -275,9 +264,16 @@ def generate(results, basepath, only_failures=False):
     for k in keys:
         grand_totals[k] = sum([float(x[k]) for x in reported_features])
 
-    package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
-    templates = jinja2.Environment(loader=package_loader)  # nosec
+    ## prepare report directory
+    cucu_dir = Path(sys.modules["cucu"].__file__).parent
+    external_dir = cucu_dir / "reporter/external"
+    shutil.copytree(external_dir, basepath / "external")
+    shutil.copyfile(
+        cucu_dir / "reporter/favicon.png",
+        basepath / "favicon.png",
+    )
 
+    ## Jinja2 templates setup
     def urlencode(string):
         """
         handles encoding specific characters in the names of features/scenarios
@@ -289,7 +285,48 @@ def generate(results, basepath, only_failures=False):
             string.replace('"', "%22").replace("'", "%27").replace("#", "%23")
         )
 
+    package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
+    templates = jinja2.Environment(loader=package_loader)  # nosec
     templates.globals.update(escape=escape, urlencode=urlencode)
+
+    ## features
+    feature_template = templates.get_template("feature.html")
+    for feature in reported_features:
+        if feature["status"] == "untested":
+            logger.debug(f"Skipping untested feature: {feature['name']}")
+            continue
+
+        feature_basepath = basepath / feature["folder_name"]
+        os.makedirs(feature_basepath, exist_ok=True)
+
+        ## scenarios
+        scenario_template = templates.get_template("scenario.html")
+        for scenario in feature["elements"]:
+            scenario_basepath = feature_basepath / scenario["folder_name"]
+            os.makedirs(scenario_basepath, exist_ok=True)
+
+            rendered_scenario_html = scenario_template.render(
+                basepath=results,
+                feature=feature,
+                path_exists=os.path.exists,
+                scenario=scenario,
+                steps=scenario["steps"],
+                title=scenario.get("name", "Cucu results"),
+                dir_depth="../../",
+            )
+            scenario_output_filepath = scenario_basepath / "index.html"
+            scenario_output_filepath.write_text(rendered_scenario_html)
+
+        rendered_feature_html = feature_template.render(
+            feature=feature,
+            scenarios=feature["elements"],
+            dir_depth="",
+            title=feature.get("name", "Cucu results"),
+        )
+        feature_output_filepath = basepath / f"{feature['name']}.html"
+        feature_output_filepath.write_text(rendered_feature_html)
+
+    ## Generate index.html and flat.html
 
     index_template = templates.get_template("index.html")
     rendered_index_html = index_template.render(
@@ -300,9 +337,8 @@ def generate(results, basepath, only_failures=False):
         dir_depth="",
     )
 
-    index_output_filepath = os.path.join(basepath, "index.html")
-    with open(index_output_filepath, "wb") as output:
-        output.write(rendered_index_html.encode("utf8"))
+    html_index_path = basepath / "index.html"
+    html_index_path.write_text(rendered_index_html)
 
     flat_template = templates.get_template("flat.html")
     rendered_flat_html = flat_template.render(
@@ -313,65 +349,104 @@ def generate(results, basepath, only_failures=False):
         dir_depth="",
     )
 
-    flat_output_filepath = os.path.join(basepath, "flat.html")
-    with open(flat_output_filepath, "wb") as output:
-        output.write(rendered_flat_html.encode("utf8"))
+    html_flat_path = basepath / "flat.html"
+    html_flat_path.write_text(rendered_flat_html)
 
-    feature_template = templates.get_template("feature.html")
+    return html_flat_path
 
-    for feature in reported_features:
-        feature_basepath = os.path.join(basepath, feature["folder_name"])
-        os.makedirs(feature_basepath, exist_ok=True)
 
-        scenarios = []
-        if feature["status"] != "untested" and "elements" in feature:
-            scenarios = feature["elements"]
+def process_scenario(
+    scenario, feature_started_at, feature_path: Path, feature
+):
+    CONFIG.restore()
 
-        rendered_feature_html = feature_template.render(
-            feature=feature,
-            scenarios=scenarios,
-            dir_depth="",
-            title=feature.get("name", "Cucu results"),
+    scenario["folder_name"] = ellipsize_filename(scenario["name"])
+    scenario_filepath = feature_path / scenario["folder_name"]
+    scenario_configpath = scenario_filepath / "logs/cucu.config.yaml.txt"
+
+    if scenario_configpath.exists():
+        try:
+            CONFIG.load(scenario_configpath)
+        except Exception as e:
+            logger.warning(
+                f"Could not reload config: {scenario_configpath}: {e}"
+            )
+    else:
+        logger.info(f"No config to reload: {scenario_configpath}")
+
+    process_tags(scenario)
+
+    sub_headers = []
+    for handler in CONFIG["__CUCU_HTML_REPORT_SCENARIO_SUBHEADER_HANDLER"]:
+        try:
+            sub_header = handler(scenario, feature)
+            if sub_header:
+                sub_headers.append(sub_header)
+        except Exception:
+            logger.warning(
+                f'Exception while trying to run sub_headers hook for scenario: "{scenario["name"]}"\n{traceback.format_exc()}'
+            )
+    scenario["sub_headers"] = "<br/>".join(sub_headers)
+
+    scenario_started_at = None
+    scenario_duration = 0
+    total_steps = len(scenario["steps"])
+    for step_index, step in enumerate(scenario["steps"]):
+        step_start_at, step_duration = process_step(
+            scenario_filepath, step, step_index, scenario_started_at
+        )
+        scenario_duration += step_duration
+        if scenario_started_at is None:
+            scenario_started_at = step_start_at
+            scenario["started_at"] = scenario_started_at
+
+    logs_dir = scenario_filepath / "logs"
+
+    log_files = []
+    if os.path.exists(logs_dir):
+        for log_file in glob.iglob(os.path.join(logs_dir, "*.*")):
+            log_filepath = log_file.removeprefix(f"{scenario_filepath}/")
+
+            if ".console." in log_filepath and scenario_started_at:
+                log_filepath += ".html"
+
+            log_files.append(
+                {
+                    "filepath": log_filepath,
+                    "name": os.path.basename(log_file),
+                }
+            )
+
+        scenario["logs"] = log_files
+
+    scenario["total_steps"] = total_steps
+    if scenario_started_at is None:
+        scenario["started_at"] = ""
+    else:
+        if feature_started_at is None:
+            feature_started_at = scenario_started_at
+
+        scenario["time_offset"] = datetime.utcfromtimestamp(
+            (scenario_started_at - feature_started_at).total_seconds()
         )
 
-        feature_output_filepath = os.path.join(
-            basepath, f"{feature['name']}.html"
-        )
+        for log_file in [x for x in log_files if ".console." in x["name"]]:
+            log_file_filepath = scenario_filepath / "logs" / log_file["name"]
 
-        with open(feature_output_filepath, "wb") as output:
-            output.write(rendered_feature_html.encode("utf8"))
-
-        scenario_template = templates.get_template("scenario.html")
-
-        for scenario in scenarios:
-            steps = scenario["steps"]
-            scenario_basepath = os.path.join(
-                feature_basepath, scenario["folder_name"]
-            )
-            os.makedirs(scenario_basepath, exist_ok=True)
-
-            scenario_output_filepath = os.path.join(
-                scenario_basepath, "index.html"
+            input_file = log_file_filepath
+            output_file = log_file_filepath.with_suffix(".html")
+            output_file.write_text(
+                parse_log_to_html(input_file.read_text(encoding="utf-8")),
+                encoding="utf-8",
             )
 
-            rendered_scenario_html = scenario_template.render(
-                basepath=results,
-                feature=feature,
-                path_exists=os.path.exists,
-                scenario=scenario,
-                steps=steps,
-                title=scenario.get("name", "Cucu results"),
-                dir_depth="../../",
-            )
+    scenario["duration"] = left_pad_zeroes(scenario_duration)
 
-            with open(scenario_output_filepath, "wb") as output:
-                output.write(rendered_scenario_html.encode("utf8"))
-
-    return os.path.join(basepath, "flat.html")
+    return scenario_started_at, scenario_duration
 
 
 def process_step(
-    scenario_filepath, step, step_index, scenario_started_at=None
+    scenario_filepath: Path, step, step_index, scenario_started_at=None
 ):
     # Handle section headings with different levels (# to ####)
     if step["name"].startswith("#"):
@@ -380,13 +455,15 @@ def process_step(
         step["heading_level"] = f"h{step['name'][:4].count('#') + 1}"
 
     images = []
-    image_dir = get_step_image_dir(step_index, step["name"])
-    image_dirpath = os.path.join(scenario_filepath, image_dir)
+    image_path = Path(get_step_image_dir(step_index, step["name"]))
+    scenario_image_path = scenario_filepath / image_path
     for screenshot_index, screenshot in enumerate(step["screenshots"]):
         filename = os.path.split(screenshot["filepath"])[-1]
-        filepath = os.path.join(image_dirpath, filename)
+        filepath = scenario_image_path / filename
+
         if not os.path.exists(filepath):
             continue
+
         label = screenshot.get("label", step["name"])
         highlight = None
         if screenshot["location"] and not CONFIG["CUCU_SKIP_HIGHLIGHT_BORDER"]:
@@ -408,7 +485,7 @@ def process_step(
         screenshot_id = f"step-img-{screenshot.get('step_run_id', generate_short_id())}-{screenshot_index:0>4}"
         images.append(
             {
-                "src": urllib.parse.quote(os.path.join(image_dir, filename)),
+                "src": urllib.parse.quote(str(image_path / filename)),
                 "index": screenshot_index,
                 "label": label,
                 "id": screenshot_id,
@@ -465,98 +542,3 @@ def process_step(
         step_duration = 0
         step_start_at = None
     return step_start_at, step_duration
-
-
-def process_scenario(scenario, feature_started_at, feature_path, feature):
-    CONFIG.restore()
-
-    scenario["folder_name"] = ellipsize_filename(scenario["name"])
-    scenario_filepath = feature_path / scenario["folder_name"]
-
-    scenario_configpath = os.path.join(
-        scenario_filepath, "logs", "cucu.config.yaml.txt"
-    )
-    if os.path.exists(scenario_configpath):
-        try:
-            CONFIG.load(scenario_configpath)
-        except Exception as e:
-            logger.warning(
-                f"Could not reload config: {scenario_configpath}: {e}"
-            )
-    else:
-        logger.info(f"No config to reload: {scenario_configpath}")
-
-    process_tags(scenario)
-
-    sub_headers = []
-    for handler in CONFIG["__CUCU_HTML_REPORT_SCENARIO_SUBHEADER_HANDLER"]:
-        try:
-            sub_header = handler(scenario, feature)
-            if sub_header:
-                sub_headers.append(sub_header)
-        except Exception:
-            logger.warning(
-                f'Exception while trying to run sub_headers hook for scenario: "{scenario["name"]}"\n{traceback.format_exc()}'
-            )
-    scenario["sub_headers"] = "<br/>".join(sub_headers)
-
-    scenario_started_at = None
-    scenario_duration = 0
-    total_steps = len(scenario["steps"])
-    for step_index, step in enumerate(scenario["steps"]):
-        step_start_at, step_duration = process_step(
-            scenario_filepath, step, step_index, scenario_started_at
-        )
-        scenario_duration += step_duration
-        if scenario_started_at is None:
-            scenario_started_at = step_start_at
-            scenario["started_at"] = scenario_started_at
-
-    logs_dir = os.path.join(scenario_filepath, "logs")
-
-    log_files = []
-    if os.path.exists(logs_dir):
-        for log_file in glob.iglob(os.path.join(logs_dir, "*.*")):
-            log_filepath = log_file.removeprefix(f"{scenario_filepath}/")
-
-            if ".console." in log_filepath and scenario_started_at:
-                log_filepath += ".html"
-
-            log_files.append(
-                {
-                    "filepath": log_filepath,
-                    "name": os.path.basename(log_file),
-                }
-            )
-
-        scenario["logs"] = log_files
-
-    scenario["total_steps"] = total_steps
-    if scenario_started_at is None:
-        scenario["started_at"] = ""
-    else:
-        if feature_started_at is None:
-            feature_started_at = scenario_started_at
-
-        scenario["time_offset"] = datetime.utcfromtimestamp(
-            (scenario_started_at - feature_started_at).total_seconds()
-        )
-
-        for log_file in [x for x in log_files if ".console." in x["name"]]:
-            log_file_filepath = os.path.join(
-                scenario_filepath, "logs", log_file["name"]
-            )
-
-            input_file = Path(log_file_filepath)
-            output_file = Path(log_file_filepath + ".html")
-            output_file.write_text(
-                parse_log_to_html(input_file.read_text(encoding="utf-8")),
-                encoding="utf-8",
-            )
-
-    scenario["duration"] = left_pad_zeroes(scenario_duration)
-
-    return scenario_started_at, scenario_duration
-
-
-# end of process_scenario
