@@ -179,7 +179,7 @@ def generate(results: Path, basepath: Path, only_failures=False):
     reported_features = []
     for feature in features:
         feature["folder_name"] = ellipsize_filename(feature["name"])
-        scenarios = []
+        scenarios = feature["elements"]
 
         if feature["status"] != "untested" and "elements" in feature:
             scenarios = feature["elements"]
@@ -188,11 +188,12 @@ def generate(results: Path, basepath: Path, only_failures=False):
             continue
 
         feature_duration = 0
-        total_scenarios = 0
-        total_scenarios_passed = 0
-        total_scenarios_failed = 0
-        total_scenarios_skipped = 0
-        total_scenarios_errored = 0
+
+        feature["total_scenarios"] = len(scenarios)
+        feature["total_scenarios_passed"] = 0
+        feature["total_scenarios_failed"] = 0
+        feature["total_scenarios_skipped"] = 0
+        feature["total_scenarios_errored"] = 0
 
         reported_features.append(feature)
         process_tags(feature)
@@ -215,7 +216,6 @@ def generate(results: Path, basepath: Path, only_failures=False):
                     f"Feature directory not found, skipping copy: {src_feature_filepath}"
                 )
 
-        total_scenarios = len(scenarios)
         feature_path = basepath / feature["folder_name"]
 
         feature_started_at = None
@@ -230,26 +230,20 @@ def generate(results: Path, basepath: Path, only_failures=False):
                 feature["started_at"] = scenario_started_at
 
             if "status" not in scenario:
-                total_scenarios_skipped += 1
+                feature["total_scenarios_skipped"] += 1
             elif scenario["status"] == "passed":
-                total_scenarios_passed += 1
+                feature["total_scenarios_passed"] += 1
             elif scenario["status"] == "failed":
-                total_scenarios_failed += 1
+                feature["total_scenarios_failed"] += 1
             elif scenario["status"] == "skipped":
-                total_scenarios_skipped += 1
+                feature["total_scenarios_skipped"] += 1
             elif scenario["status"] == "errored":
-                total_scenarios_errored += 1
+                feature["total_scenarios_errored"] += 1
 
         feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
         feature["duration"] = left_pad_zeroes(
             sum([float(x["duration"]) for x in scenarios])
         )
-
-        feature["total_scenarios"] = total_scenarios
-        feature["total_scenarios_passed"] = total_scenarios_passed
-        feature["total_scenarios_failed"] = total_scenarios_failed
-        feature["total_scenarios_skipped"] = total_scenarios_skipped
-        feature["total_scenarios_errored"] = total_scenarios_errored
 
     keys = [
         "total_scenarios",
