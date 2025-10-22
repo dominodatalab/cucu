@@ -20,6 +20,7 @@ from peewee import (
 from playhouse.sqlite_ext import JSONField, SqliteExtDatabase
 from tenacity import RetryError
 
+from cucu import logger as cucu_logger
 from cucu.config import CONFIG
 
 db_filepath = CONFIG["RUN_DB_PATH"]
@@ -416,7 +417,12 @@ def consolidate_database_files(results_dir, combine=False):
     results_path = Path(results_dir)
     target_db_path = results_path / "run.db"
     if not target_db_path.exists():
+        cucu_logger.info(
+            f"Creating new consolidated database at {target_db_path}"
+        )
         create_database_file(target_db_path)
+    else:
+        cucu_logger.debug(f"Found existing database at {target_db_path}")
 
     if not combine:
         db_files = [
@@ -427,6 +433,14 @@ def consolidate_database_files(results_dir, combine=False):
         db_files = [
             db for db in results_path.rglob("run*.db") if db != Path("run.db")
         ]
+
+    if not db_files:
+        cucu_logger.debug("No database files found to consolidate.")
+        return
+    else:
+        cucu_logger.debug(
+            f"Found {len(db_files)} database files to consolidate."
+        )
 
     tables_to_copy = ["cucu_run", "worker", "feature", "scenario", "step"]
     with sqlite3.connect(target_db_path) as target_conn:

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-import json
 import os
 import shutil
 import signal
+import sqlite3
 import sys
 import time
 import xml.etree.ElementTree as ET
@@ -617,18 +617,19 @@ def report(
     if show_skips:
         os.environ["CUCU_SHOW_SKIPS"] = "true"
 
-    run_details_filepath = results_dir / "run_details.json"
-
-    if os.path.exists(run_details_filepath):
-        # load the run details at the time of execution for the provided results
-        # directory
-        run_details = {}
-
-        with open(run_details_filepath, encoding="utf8") as _input:
-            run_details = json.loads(_input.read())
-
-        # initialize any underlying custom step code things
-        behave_init(run_details["filepath"])
+    run_db_path = results_dir / "run.db"
+    if run_db_path.exists():
+        # query cucu_run to get the original filepath used during the run
+        with sqlite3.connect(run_db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT filepath FROM cucu_run ORDER BY start_at DESC LIMIT 1"
+            )
+            row = cursor.fetchone()
+            if row:
+                filepath = row[0]
+                # initialize any underlying custom step code things
+                behave_init(filepath)
 
     _generate_report(
         results_dir=results_dir,
