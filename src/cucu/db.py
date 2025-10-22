@@ -353,6 +353,37 @@ def create_database_file(db_filepath):
     db.connect(reuse_if_open=True)
     db.create_tables([cucu_run, worker, feature, scenario, step])
     db.execute_sql("""
+            CREATE VIEW IF NOT EXISTS flat_all AS
+            SELECT
+                COUNT(DISTINCT s.feature_run_id) AS features,
+                COUNT(s.scenario_run_id) AS scenarios,
+                SUM(CASE WHEN s.status = 'passed' THEN 1 ELSE 0 END) AS passed,
+                SUM(CASE WHEN s.status = 'failed' THEN 1 ELSE 0 END) AS failed,
+                SUM(CASE WHEN s.status = 'skipped' THEN 1 ELSE 0 END) AS skipped,
+                SUM(CASE WHEN s.status = 'errored' THEN 1 ELSE 0 END) AS errored,
+                SUM(s.duration) AS duration
+            FROM scenario s
+        """)
+    db.execute_sql("""
+            CREATE VIEW IF NOT EXISTS flat_feature AS
+            SELECT
+                w.cucu_run_id,
+                f.start_at,
+                f.name AS feature_name,
+                COUNT(s.scenario_run_id) AS scenarios,
+                SUM(CASE WHEN s.status = 'passed' THEN 1 ELSE 0 END) AS passed,
+                SUM(CASE WHEN s.status = 'failed' THEN 1 ELSE 0 END) AS failed,
+                SUM(CASE WHEN s.status = 'skipped' THEN 1 ELSE 0 END) AS skipped,
+                SUM(CASE WHEN s.status = 'errored' THEN 1 ELSE 0 END) AS errored,
+                SUM(s.duration) AS duration
+            FROM cucu_run r
+            JOIN worker w ON r.cucu_run_id = w.cucu_run_id
+            JOIN feature f ON w.worker_run_id = f.worker_run_id
+            JOIN scenario s ON f.feature_run_id = s.feature_run_id
+            GROUP BY f.feature_run_id
+            ORDER BY f.start_at ASC
+        """)
+    db.execute_sql("""
             CREATE VIEW IF NOT EXISTS flat AS
             SELECT
                 w.cucu_run_id,
