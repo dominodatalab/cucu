@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.3.16
 - Chore - refactor HTML.py
+- Chore - correct CONTRIBUTING.md with -d option
 - Add - more db views
 
 ## 1.3.15
