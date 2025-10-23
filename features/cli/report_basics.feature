@@ -364,7 +364,7 @@ Feature: Report basics
      When I run the command "cucu report --combine {CUCU_RESULTS_DIR}/combined_results --output {CUCU_RESULTS_DIR}/combined_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
-      [\s\S]*INFO Starting to process 2 features for report[\s\S]*
+      [\s\S]*INFO Starting to process 2 features, 2 scenarios, and 8 steps for report[\s\S]*
       """
      When I start a webserver at directory "{CUCU_RESULTS_DIR}/combined_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
