@@ -355,9 +355,9 @@ def create_database_file(db_filepath):
     db.execute_sql("""
             CREATE VIEW IF NOT EXISTS flat_all AS
             WITH scenario_with_steps AS (
-                SELECT 
+                SELECT
                     *,
-                    COUNT(st.step_run_id) AS steps                
+                    COUNT(st.step_run_id) AS steps
                 FROM scenario s
                 LEFT JOIN step st ON s.scenario_run_id = st.scenario_run_id
                 GROUP BY s.scenario_run_id
