@@ -1,4 +1,3 @@
-import glob
 import os
 import shutil
 import sys
@@ -370,24 +369,23 @@ def process_scenario(
             scenario_started_at = step_start_at
             scenario["started_at"] = scenario_started_at
 
-    logs_dir = scenario_filepath / "logs"
+    logs_path = scenario_filepath / "logs"
 
     log_files = []
-    if os.path.exists(logs_dir):
-        for log_file in glob.iglob(os.path.join(logs_dir, "*.*")):
-            log_filepath = log_file.removeprefix(f"{scenario_filepath}/")
+    for log_file in logs_path.glob("*.*"):
+        log_filepath = log_file.relative_to(scenario_filepath)
 
-            if ".console." in log_filepath and scenario_started_at:
-                log_filepath += ".html"
+        if scenario_started_at and ".console." in log_filepath.name:
+            log_filepath = log_filepath.with_suffix(".html")
 
-            log_files.append(
-                {
-                    "filepath": log_filepath,
-                    "name": os.path.basename(log_file),
-                }
-            )
+        log_files.append(
+            {
+                "filepath": log_filepath,
+                "name": os.path.basename(log_file),
+            }
+        )
 
-        scenario["logs"] = log_files
+    scenario["logs"] = log_files
 
     scenario["total_steps"] = total_steps
     if scenario_started_at is None:
