@@ -171,10 +171,17 @@ def generate(results: Path, basepath: Path, only_failures=False):
 
             features.append(feature_dict)
 
-        # query the database for grand totals
+        # query the database for stats
+        feature_stats_db = db.db.execute_sql("SELECT * FROM flat_feature")
+        keys = tuple([x[0] for x in feature_stats_db.description])
+        feature_stats = [
+            dict(zip(keys, x)) for x in feature_stats_db.fetchall()
+        ]
+
         grand_totals_db = db.db.execute_sql("SELECT * FROM flat_all")
         keys = tuple([x[0] for x in grand_totals_db.description])
         grand_totals = dict(zip(keys, grand_totals_db.fetchone()))
+
     finally:
         db.close_html_report_db()
 
@@ -299,7 +306,7 @@ def generate(results: Path, basepath: Path, only_failures=False):
 
     index_template = templates.get_template("index.html")
     rendered_index_html = index_template.render(
-        features=reported_features,
+        feature_stats=feature_stats,
         grand_totals=grand_totals,
         title="Cucu HTML Test Report",
         basepath=basepath,

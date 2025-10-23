@@ -28,17 +28,17 @@
                 <th class="text-center">Duration<br/>{{ grand_totals['duration'] | int }}s</th>
             </tr>
         </thead>
-        {% for feature in features %}
+        {% for feature_stat in feature_stats %}
         <tr>
-            <td class="text-center">{{ feature['started_at'] }}</td>
-            <td><a href="{{ urlencode(escape(feature['name'])) }}.html">{{ escape(feature['name']) }}</a></td>
-            <td class="text-center">{{ feature['total_scenarios'] }}</td>
-            <td class="text-center">{{ feature['total_scenarios_passed'] }}</td>
-            <td class="text-center">{{ feature['total_scenarios_failed'] }}</td>
-            <td class="text-center">{{ feature['total_scenarios_skipped'] }}</td>
-            <td class="text-center">{{ feature['total_scenarios_errored'] }}</td>
-            <td class="text-center"><span class="status-{{ feature['status'] }}">{{ feature['status'] }}</span></td>
-            <td class="text-center">{{ '{:.1f}'.format(feature['duration'] | float ) }}</td>
+            <td class="text-center">{{ feature_stat['start_at'] }}</td>
+            <td><a href="{{ urlencode(escape(feature_stat['feature_name'])) }}.html">{{ escape(feature_stat['feature_name']) }}</a></td>
+            <td class="text-center">{{ feature_stat['scenarios'] }}</td>
+            <td class="text-center">{{ feature_stat['passed'] }}</td>
+            <td class="text-center">{{ feature_stat['failed'] }}</td>
+            <td class="text-center">{{ feature_stat['skipped'] }}</td>
+            <td class="text-center">{{ feature_stat['errored'] }}</td>
+            <td class="text-center"><span class="status-{{ feature_stat['status'] }}">{{ feature_stat['status'] }}</span></td>
+            <td class="text-center">{{ '{:.1f}'.format(feature_stat['duration'] | float ) }}</td>
         </tr>
         {% endfor %}
     </table>
