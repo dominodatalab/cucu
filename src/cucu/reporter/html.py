@@ -59,7 +59,7 @@ def left_pad_zeroes(elapsed_time):
     return padded_duration
 
 
-def generate(results: Path, basepath: Path, only_failures=False):
+def generate(results: Path, basepath: Path):
     db_path = results / "run.db"
 
     grand_totals = {}
@@ -133,7 +133,7 @@ def generate(results: Path, basepath: Path, only_failures=False):
                         "result": {
                             "status": db_step.status or "passed",
                             "duration": db_step.duration or 0,
-                            "timestamp": db_step.end_at or "",
+                            "timestamp": db_step.start_at or "",
                         },
                         "substep": db_step.is_substep,
                         "screenshots": db_step.screenshots,
@@ -166,8 +166,6 @@ def generate(results: Path, basepath: Path, only_failures=False):
 
             if feature_has_failures:
                 feature_dict["status"] = "failed"
-            elif only_failures and not feature_has_failures:
-                continue
 
             features.append(feature_dict)
 
@@ -195,9 +193,6 @@ def generate(results: Path, basepath: Path, only_failures=False):
 
         if feature["status"] != "untested" and "elements" in feature:
             scenarios = feature["elements"]
-
-        if only_failures and feature["status"] != "failed":
-            continue
 
         feature_duration = 0
 
@@ -516,4 +511,5 @@ def process_step(
     else:
         step_duration = 0
         step_start_at = None
+
     return step_start_at, step_duration
