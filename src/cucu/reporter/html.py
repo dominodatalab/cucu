@@ -393,11 +393,11 @@ def process_scenario(
     if not scenario_started_at:
         scenario["started_at"] = ""
     else:
-        if feature_started_at is None:
-            feature_started_at = scenario_started_at
-
         if isinstance(scenario_started_at, str):
             scenario_started_at = datetime.fromisoformat(scenario_started_at)
+
+        if not feature_started_at:
+            feature_started_at = scenario_started_at
 
         scenario["time_offset"] = datetime.utcfromtimestamp(
             (scenario_started_at - feature_started_at).total_seconds()
