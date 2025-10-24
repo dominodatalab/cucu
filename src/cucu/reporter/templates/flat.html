@@ -26,7 +26,7 @@
             </tr>
         </thead>
         {% for feature in features %}
-            {% for scenario in feature["elements"] %}
+            {% for scenario in feature["scenarios"] %}
                 <!--- ignore Backgrounds for the time being -->
                 {% if scenario['keyword'] != 'Background' %}
                 <tr>
