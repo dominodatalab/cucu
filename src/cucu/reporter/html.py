@@ -60,10 +60,36 @@ def left_pad_zeroes(elapsed_time):
 
 
 def generate(results: Path, basepath: Path):
+    ## Jinja2 templates setup
+    def urlencode(string):
+        """
+        handles encoding specific characters in the names of features/scenarios
+        so they can be used in a URL. NOTICE: we're not handling spaces since
+        the browser handles those already.
+
+        """
+        return (
+            string.replace('"', "%22").replace("'", "%27").replace("#", "%23")
+        )
+
+    package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
+    templates = jinja2.Environment(loader=package_loader)  # nosec
+    templates.globals.update(escape=escape, urlencode=urlencode)
+    feature_template = templates.get_template("feature.html")
+    scenario_template = templates.get_template("scenario.html")
+
+    ## prepare report directory
+    cucu_dir = Path(sys.modules["cucu"].__file__).parent
+    external_dir = cucu_dir / "reporter/external"
+    shutil.copytree(external_dir, basepath / "external")
+    shutil.copyfile(
+        cucu_dir / "reporter/favicon.png",
+        basepath / "favicon.png",
+    )
+
+    CONFIG.snapshot()
+
     db_path = results / "run.db"
-
-    grand_totals = {}
-
     try:
         db.init_html_report_db(db_path)
 
@@ -79,8 +105,15 @@ def generate(results: Path, basepath: Path):
         db_features = db.feature.select().order_by(db.feature.start_at)
 
         for db_feature in db_features:
+            if db_feature.status == "untested":
+                logger.debug(f"Skipping untested feature: {db_feature.name}")
+                continue
+
             feature_results_dir = results
             if db_path := db_feature.worker.cucu_run.db_path:
+                logger.debug(
+                    f"Combining cucu_runs, using db_path from worker: {db_path}"
+                )
                 feature_results_dir = os.path.dirname(db_path)
 
             feature_dict = {
@@ -127,6 +160,7 @@ def generate(results: Path, basepath: Path):
                 continue
 
             feature_path = basepath / feature_dict["folder_name"]
+            os.makedirs(feature_path, exist_ok=True)
             feature_duration = 0
             feature_started_at = None
             for db_scenario in db_scenarios:
@@ -136,8 +170,8 @@ def generate(results: Path, basepath: Path):
                     "tags": db_scenario.tags if db_scenario.tags else [],
                     "status": db_scenario.status or "passed",
                     "steps": [],
+                    "folder_name": ellipsize_filename(db_scenario.name),
                 }
-
                 if db_scenario.status == "failed":
                     feature_has_failures = True
 
@@ -199,8 +233,32 @@ def generate(results: Path, basepath: Path):
                     feature_started_at = scenario_started_at
                     feature_dict["started_at"] = scenario_started_at
 
+                scenario_basepath = feature_path / scenario_dict["folder_name"]
+                os.makedirs(scenario_basepath, exist_ok=True)
+
+                rendered_scenario_html = scenario_template.render(
+                    basepath=results,
+                    feature=feature_dict,
+                    path_exists=os.path.exists,
+                    scenario=scenario_dict,
+                    steps=scenario_dict["steps"],
+                    title=scenario_dict.get("name", "Cucu results"),
+                    dir_depth="../../",
+                )
+                scenario_output_filepath = scenario_basepath / "index.html"
+                scenario_output_filepath.write_text(rendered_scenario_html)
+
             if feature_has_failures:
                 feature_dict["status"] = "failed"
+
+            rendered_feature_html = feature_template.render(
+                feature=feature_dict,
+                scenarios=feature_dict["scenarios"],
+                dir_depth="",
+                title=feature_dict.get("name", "Cucu results"),
+            )
+            feature_output_filepath = basepath / f"{feature_dict['name']}.html"
+            feature_output_filepath.write_text(rendered_feature_html)
 
             features.append(feature_dict)
 
@@ -225,70 +283,6 @@ def generate(results: Path, basepath: Path):
     finally:
         db.close_html_report_db()
 
-    CONFIG.snapshot()
-
-    ## prepare report directory
-    cucu_dir = Path(sys.modules["cucu"].__file__).parent
-    external_dir = cucu_dir / "reporter/external"
-    shutil.copytree(external_dir, basepath / "external")
-    shutil.copyfile(
-        cucu_dir / "reporter/favicon.png",
-        basepath / "favicon.png",
-    )
-
-    ## Jinja2 templates setup
-    def urlencode(string):
-        """
-        handles encoding specific characters in the names of features/scenarios
-        so they can be used in a URL. NOTICE: we're not handling spaces since
-        the browser handles those already.
-
-        """
-        return (
-            string.replace('"', "%22").replace("'", "%27").replace("#", "%23")
-        )
-
-    package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
-    templates = jinja2.Environment(loader=package_loader)  # nosec
-    templates.globals.update(escape=escape, urlencode=urlencode)
-
-    ## features
-    feature_template = templates.get_template("feature.html")
-    for feature in features:
-        if feature["status"] == "untested":
-            logger.debug(f"Skipping untested feature: {feature['name']}")
-            continue
-
-        feature_basepath = basepath / feature["folder_name"]
-        os.makedirs(feature_basepath, exist_ok=True)
-
-        ## scenarios
-        scenario_template = templates.get_template("scenario.html")
-        for scenario in feature["scenarios"]:
-            scenario_basepath = feature_basepath / scenario["folder_name"]
-            os.makedirs(scenario_basepath, exist_ok=True)
-
-            rendered_scenario_html = scenario_template.render(
-                basepath=results,
-                feature=feature,
-                path_exists=os.path.exists,
-                scenario=scenario,
-                steps=scenario["steps"],
-                title=scenario.get("name", "Cucu results"),
-                dir_depth="../../",
-            )
-            scenario_output_filepath = scenario_basepath / "index.html"
-            scenario_output_filepath.write_text(rendered_scenario_html)
-
-        rendered_feature_html = feature_template.render(
-            feature=feature,
-            scenarios=feature["scenarios"],
-            dir_depth="",
-            title=feature.get("name", "Cucu results"),
-        )
-        feature_output_filepath = basepath / f"{feature['name']}.html"
-        feature_output_filepath.write_text(rendered_feature_html)
-
     ## Generate index.html and flat.html
 
     index_template = templates.get_template("index.html")
@@ -299,7 +293,6 @@ def generate(results: Path, basepath: Path):
         basepath=basepath,
         dir_depth="",
     )
-
     html_index_path = basepath / "index.html"
     html_index_path.write_text(rendered_index_html)
 
@@ -311,7 +304,6 @@ def generate(results: Path, basepath: Path):
         basepath=basepath,
         dir_depth="",
     )
-
     html_flat_path = basepath / "flat.html"
     html_flat_path.write_text(rendered_flat_html)
 
