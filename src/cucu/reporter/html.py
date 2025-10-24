@@ -65,7 +65,6 @@ def generate(results: Path, basepath: Path):
     grand_totals = {}
 
     try:
-        features = []
         db.init_html_report_db(db_path)
 
         feature_count = db.feature.select().count()
@@ -90,9 +89,30 @@ def generate(results: Path, basepath: Path):
                 "description": db_feature.description,
                 "tags": db_feature.tags if db_feature.tags else [],
                 "status": db_feature.status,
-                "elements": [],  # scenarios
+                "scenarios": [],  # scenarios
                 "results_dir": feature_results_dir,  # directory where feature results are stored
+                "folder_name": ellipsize_filename(db_feature.name),
             }
+
+            process_tags(feature_dict)
+
+            if feature_dict["status"] not in ["skipped", "untested"]:
+                # copy each feature directories contents over to the report directory
+                src_feature_filepath = os.path.join(
+                    feature_dict["results_dir"], feature_dict["folder_name"]
+                )
+                dst_feature_filepath = basepath / feature_dict["folder_name"]
+
+                if os.path.exists(src_feature_filepath):
+                    shutil.copytree(
+                        src_feature_filepath,
+                        dst_feature_filepath,
+                        dirs_exist_ok=True,
+                    )
+                else:
+                    logger.warning(
+                        f"Feature directory not found, skipping copy: {src_feature_filepath}"
+                    )
 
             db_scenarios = (
                 db.scenario.select()
@@ -106,6 +126,9 @@ def generate(results: Path, basepath: Path):
                 logger.debug(f"Feature {db_feature.name} has no scenarios")
                 continue
 
+            feature_path = basepath / feature_dict["folder_name"]
+            feature_duration = 0
+            feature_started_at = None
             for db_scenario in db_scenarios:
                 scenario_dict = {
                     "name": db_scenario.name,
@@ -162,12 +185,31 @@ def generate(results: Path, basepath: Path):
 
                     scenario_dict["steps"].append(step_dict)
 
-                feature_dict["elements"].append(scenario_dict)
+                feature_dict["scenarios"].append(scenario_dict)
+
+                scenario_started_at, scenario_duration = process_scenario(
+                    scenario_dict,
+                    feature_started_at,
+                    feature_path,
+                    feature_dict,
+                )
+                feature_duration += scenario_duration
+
+                if feature_started_at is None:
+                    feature_started_at = scenario_started_at
+                    feature_dict["started_at"] = scenario_started_at
 
             if feature_has_failures:
                 feature_dict["status"] = "failed"
 
             features.append(feature_dict)
+
+        feature_dict["total_steps"] = sum(
+            [x["total_steps"] for x in feature_dict["scenarios"]]
+        )
+        feature_dict["duration"] = left_pad_zeroes(
+            sum([float(x["duration"]) for x in feature_dict["scenarios"]])
+        )
 
         # query the database for stats
         feature_stats_db = db.db.execute_sql("SELECT * FROM flat_feature")
@@ -184,56 +226,6 @@ def generate(results: Path, basepath: Path):
         db.close_html_report_db()
 
     CONFIG.snapshot()
-
-    ## generate global stats
-    reported_features = []
-    for feature in features:
-        feature["folder_name"] = ellipsize_filename(feature["name"])
-        scenarios = feature["elements"]
-
-        if feature["status"] != "untested" and "elements" in feature:
-            scenarios = feature["elements"]
-
-        feature_duration = 0
-
-        reported_features.append(feature)
-        process_tags(feature)
-
-        if feature["status"] not in ["skipped", "untested"]:
-            # copy each feature directories contents over to the report directory
-            src_feature_filepath = os.path.join(
-                feature["results_dir"], feature["folder_name"]
-            )
-            dst_feature_filepath = basepath / feature["folder_name"]
-
-            if os.path.exists(src_feature_filepath):
-                shutil.copytree(
-                    src_feature_filepath,
-                    dst_feature_filepath,
-                    dirs_exist_ok=True,
-                )
-            else:
-                logger.warning(
-                    f"Feature directory not found, skipping copy: {src_feature_filepath}"
-                )
-
-        feature_path = basepath / feature["folder_name"]
-
-        feature_started_at = None
-        for scenario in scenarios:
-            scenario_started_at, scenario_duration = process_scenario(
-                scenario, feature_started_at, feature_path, feature
-            )
-            feature_duration += scenario_duration
-
-            if feature_started_at is None:
-                feature_started_at = scenario_started_at
-                feature["started_at"] = scenario_started_at
-
-        feature["total_steps"] = sum([x["total_steps"] for x in scenarios])
-        feature["duration"] = left_pad_zeroes(
-            sum([float(x["duration"]) for x in scenarios])
-        )
 
     ## prepare report directory
     cucu_dir = Path(sys.modules["cucu"].__file__).parent
@@ -262,7 +254,7 @@ def generate(results: Path, basepath: Path):
 
     ## features
     feature_template = templates.get_template("feature.html")
-    for feature in reported_features:
+    for feature in features:
         if feature["status"] == "untested":
             logger.debug(f"Skipping untested feature: {feature['name']}")
             continue
@@ -272,7 +264,7 @@ def generate(results: Path, basepath: Path):
 
         ## scenarios
         scenario_template = templates.get_template("scenario.html")
-        for scenario in feature["elements"]:
+        for scenario in feature["scenarios"]:
             scenario_basepath = feature_basepath / scenario["folder_name"]
             os.makedirs(scenario_basepath, exist_ok=True)
 
@@ -290,7 +282,7 @@ def generate(results: Path, basepath: Path):
 
         rendered_feature_html = feature_template.render(
             feature=feature,
-            scenarios=feature["elements"],
+            scenarios=feature["scenarios"],
             dir_depth="",
             title=feature.get("name", "Cucu results"),
         )
@@ -313,7 +305,7 @@ def generate(results: Path, basepath: Path):
 
     flat_template = templates.get_template("flat.html")
     rendered_flat_html = flat_template.render(
-        features=reported_features,
+        features=features,
         grand_totals=grand_totals,
         title="Flat HTML Test Report",
         basepath=basepath,
