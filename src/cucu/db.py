@@ -395,10 +395,10 @@ def create_database_file(db_filepath):
             SELECT
                 *,
                 CASE
-                    WHEN scenarios == passed THEN 'passed'
-                    WHEN failed > 0 THEN 'failed'
-                    WHEN skipped > 0 THEN 'skipped'
+                    WHEN failed  > 0 THEN 'failed'
                     WHEN errored > 0 THEN 'errored'
+                    WHEN passed  > 0 THEN 'passed'
+                    WHEN skipped > 0 THEN 'skipped'
                 END AS status
             FROM feature_first_level
             ORDER BY start_at ASC
