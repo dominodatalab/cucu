@@ -165,8 +165,8 @@ def generate(results: Path, basepath: Path):
                 scenario_dict = {
                     "name": db_scenario.name,
                     "line": db_scenario.line_number,
-                    "tags": db_scenario.tags if db_scenario.tags else [],
-                    "status": db_scenario.status or "passed",
+                    "tags": db_scenario.tags,
+                    "status": db_scenario.status,
                     "steps": [],
                     "folder_name": ellipsize_filename(db_scenario.name),
                 }
