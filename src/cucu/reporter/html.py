@@ -390,7 +390,7 @@ def process_scenario(
     scenario["logs"] = log_files
 
     scenario["total_steps"] = total_steps
-    if scenario_started_at is None:
+    if not scenario_started_at:
         scenario["started_at"] = ""
     else:
         if feature_started_at is None:
