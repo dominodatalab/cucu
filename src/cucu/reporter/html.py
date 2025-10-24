@@ -147,10 +147,8 @@ def generate(results: Path, basepath: Path):
                         f"Feature directory not found, skipping copy: {src_feature_filepath}"
                     )
 
-            db_scenarios = (
-                db.scenario.select()
-                .where(db.scenario.feature_run_id == db_feature.feature_run_id)
-                .order_by(db.scenario.seq)
+            db_scenarios = db_feature.scenarios.select().order_by(
+                db.scenario.seq
             )
 
             feature_has_failures = False
@@ -175,13 +173,7 @@ def generate(results: Path, basepath: Path):
                 if db_scenario.status == "failed":
                     feature_has_failures = True
 
-                db_steps = (
-                    db.step.select()
-                    .where(
-                        db.step.scenario_run_id == db_scenario.scenario_run_id
-                    )
-                    .order_by(db.step.seq)
-                )
+                db_steps = db_scenario.steps.select().order_by(db.step.seq)
 
                 for db_step in db_steps:
                     step_dict = {
