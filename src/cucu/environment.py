@@ -268,9 +268,9 @@ def after_step(ctx, step):
 
     # Capture debug output from the TeeStream for this step
     if hasattr(ctx, "scenario_debug_log_tee"):
-        step.debug_output = ctx.scenario_debug_log_tee.getvalue()
+        step.debug_output = ctx.scenario_debug_log_tee.getvalue().splitlines()
     else:
-        step.debug_output = ""
+        step.debug_output = []
 
     step.end_at = datetime.datetime.now().isoformat()[:-3]
 
@@ -325,16 +325,13 @@ def after_step(ctx, step):
         hook(ctx)
 
     # Capture browser logs and info for this step
-    step.browser_logs = ""
-
+    step.browser_logs = []
     browser_info = {"has_browser": False}
     if ctx.browser:
-        browser_logs = []
         for log in ctx.browser.get_log():
             log_entry = json.dumps(log)
-            browser_logs.append(log_entry)
+            step.browser_logs.append(log)
             ctx.browser_log_tee.write(f"{log_entry}\n")
-        step.browser_logs = "\n".join(browser_logs)
 
         tab_info = ctx.browser.get_tab_info()
 

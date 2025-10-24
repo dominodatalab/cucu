@@ -125,7 +125,7 @@ class RundbFormatter(Formatter):
         for index, step in enumerate(self.this_steps):
             if getattr(step, "seq", -1) == -1:
                 step.seq = index + 1  # 1-based sequence
-                finish_step_record(step, None)
+                finish_step_record(step, 0)
 
         finish_scenario_record(self.this_scenario)
 

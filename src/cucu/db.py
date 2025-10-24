@@ -125,12 +125,12 @@ class step(BaseModel):
     stderr = JSONField()
     error_message = JSONField(null=True)
     exception = JSONField(null=True)
-    debug_output = TextField()
+    debug_output = JSONField()
     browser_info = JSONField()
     text = JSONField(null=True)
     table_data = JSONField(null=True)
     location = TextField()
-    browser_logs = TextField()
+    browser_logs = JSONField()
     screenshots = JSONField(null=True)
 
 
@@ -215,8 +215,10 @@ def start_step_record(step_obj, scenario_run_id):
         has_substeps=getattr(step_obj, "has_substeps", False),
         section_level=getattr(step_obj, "section_level", None),
         browser_info="",
-        browser_logs="",
-        debug_output="",
+        browser_logs=[],
+        error_message=[],
+        debug_logs=[],
+        debug_output=[],
         stderr=[],
         stdout=[],
     )
@@ -236,10 +238,12 @@ def finish_step_record(step_obj, duration):
             }
             screenshot_infos.append(screenshot_info)
 
-    error_message = None
+    error_message = []
     exception = []
     if step.error_message and step_obj.status.name == "failed":
-        error_message = CONFIG.hide_secrets(step_obj.error_message)
+        error_message = CONFIG.hide_secrets(
+            step_obj.error_message
+        ).splitlines()
 
         if error := step_obj.exception:
             if isinstance(error, RetryError):
@@ -256,9 +260,9 @@ def finish_step_record(step_obj, duration):
             exception = error_lines
 
     step.update(
-        browser_info=getattr(step_obj, "browser_info", ""),
-        browser_logs=getattr(step_obj, "browser_logs", ""),
-        debug_output=getattr(step_obj, "debug_output", ""),
+        browser_info=getattr(step_obj, "browser_info", {}),
+        browser_logs=getattr(step_obj, "browser_logs", []),
+        debug_output=getattr(step_obj, "debug_output", []),
         duration=duration,
         end_at=getattr(step_obj, "end_at", None),
         error_message=error_message,

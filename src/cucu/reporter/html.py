@@ -188,35 +188,21 @@ def generate(results: Path, basepath: Path):
                         "keyword": db_step.keyword,
                         "name": db_step.name,
                         "result": {
-                            "status": db_step.status or "passed",
-                            "duration": db_step.duration or 0,
-                            "timestamp": db_step.start_at or "",
+                            "status": db_step.status,
+                            "duration": db_step.duration,
+                            "timestamp": db_step.start_at,
+                            "exception": db_step.exception,
+                            "stdout": db_step.stdout,
+                            "stderr": db_step.stderr,
+                            "browser_logs": db_step.browser_logs,
+                            "error_message": db_step.error_message,
+                            "debug_output": db_step.debug_output,
                         },
                         "substep": db_step.is_substep,
                         "screenshots": db_step.screenshots,
+                        "text": db_step.text,
+                        "table": db_step.table_data,
                     }
-
-                    if db_step.text:
-                        step_dict["text"] = db_step.text
-
-                    if db_step.table_data:
-                        step_dict["table"] = db_step.table_data
-
-                    step_dict["result"]["error_message"] = (
-                        db_step.error_message.splitlines()
-                        if db_step.error_message
-                        else []
-                    )
-                    step_dict["result"]["exception"] = db_step.exception
-                    step_dict["result"]["stdout"] = db_step.stdout
-                    step_dict["result"]["stderr"] = db_step.stderr
-                    step_dict["result"]["browser_logs"] = (
-                        db_step.browser_logs.splitlines()
-                    )
-                    step_dict["result"]["debug_output"] = (
-                        db_step.debug_output.splitlines()
-                    )
-
                     scenario_dict["steps"].append(step_dict)
 
                 feature_dict["scenarios"].append(scenario_dict)
@@ -470,11 +456,11 @@ def process_step(
         ] == [None]:
             step["result"]["error_message"] = [""]
 
-    if "text" in step and not isinstance(step["text"], list):
+    if step["text"] and not isinstance(step["text"], list):
         step["text"] = [step["text"]]
 
     # prepare by joining into one big chunk here since we can't do it in the Jinja template
-    if "text" in step:
+    if step["text"]:
         text_indent = "       "
         step["text"] = "\n".join(
             [text_indent + '"""']
@@ -483,7 +469,7 @@ def process_step(
         )
 
     # prepare by joining into one big chunk here since we can't do it in the Jinja template
-    if "table" in step:
+    if step["table"]:
         step["table"] = format_gherkin_table(
             step["table"]["rows"],
             step["table"]["headings"],

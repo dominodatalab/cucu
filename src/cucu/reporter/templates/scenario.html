@@ -161,13 +161,13 @@
                 {% if step['result']['error_message'] %}
                 <details open>
                     <summary style="color: dimgray;">error message ({{ step['result']['error_message']|length }} lines)</summary>
-                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['error_message'])) }}</pre>
+                    <pre style="color: darkgray;">{% for entry in step['result']['error_message'] %}{{ entry }}<br/>{% endfor %}</pre>
                 </details>
                 {% endif %}
                 {% if step['result']['browser_logs'] %}
                 <details open>
-                    <summary style="color: dimgray;">browser logs ({{ step['result']['browser_logs']|length }} lines)</summary>
-                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['browser_logs'])) }}</pre>
+                    <summary style="color: dimgray;">browser logs ({{ step['result']['browser_logs']|length }} entries)</summary>
+                    <pre style="color: darkgray;">{% for entry in step['result']['browser_logs'] %}{{ entry['timestamp'] }} {{ entry['level'] }} {{ entry['source']}}: {{ entry['message'] }}<br/>{% endfor %}</pre>
                 </details>
                 {% endif %}
                 {% if step['result']['debug_output'] %}
