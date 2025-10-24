@@ -378,7 +378,7 @@ def process_scenario(
         log_filepath = log_file.relative_to(scenario_filepath)
 
         if scenario_started_at and ".console." in log_filepath.name:
-            log_filepath = log_filepath.with_suffix(".html")
+            log_filepath = Path(f"{log_filepath.name}.html")
 
         log_files.append(
             {
@@ -404,10 +404,8 @@ def process_scenario(
         )
 
         for log_file in [x for x in log_files if ".console." in x["name"]]:
-            log_file_filepath = scenario_filepath / "logs" / log_file["name"]
-
-            input_file = log_file_filepath
-            output_file = log_file_filepath.with_suffix(".html")
+            input_file = scenario_filepath / "logs" / log_file["name"]
+            output_file = scenario_filepath / "logs" / log_file["filepath"]
             output_file.write_text(
                 parse_log_to_html(input_file.read_text(encoding="utf-8")),
                 encoding="utf-8",
