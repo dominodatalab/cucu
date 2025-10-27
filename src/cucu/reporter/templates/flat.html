@@ -35,7 +35,7 @@
                     <td><a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/index.html"><span>{{ escape(scenario['name']) }}</span></a><br>{{ scenario['tags'] }}</td>
                     <td class="text-center">{{ scenario['total_steps'] }}</td>
                     <td class="text-center"><span class="status-{{ scenario['status'] }}">{{ scenario['status'] }}</span></td>
-                    <td class="text-center">{{ scenario['duration'] }}</td>
+                    <td class="text-center">{{ '{:.1f}'.format(scenario['duration'] | float) }}</td>
                 </tr>
                 {%  endif %}
             {% endfor %}

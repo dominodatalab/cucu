@@ -10,7 +10,7 @@
                   <a class="nav-link" href="index.html" title="go to index report">Index</a>
                 </li>
                 <li class="align-middle">
-                  <div style="padding: 8px">Started {{ feature['started_at'] }} for {{ feature['duration'] }}s</div>
+                  <div style="padding: 8px">Started {{ feature['started_at'] }} for {{ '{:.1f}'.format(feature['duration'] | float) }}s</div>
                 </li>
               </ul>
             </div>
@@ -60,7 +60,7 @@
                 </td>
                 <td class="text-center">{{ scenario['total_steps'] }}</td>
                 <td class="text-center"><span class="status-{{ scenario['status'] }}">{{ scenario['status'] }}</span></td>
-                <td class="text-center">{{ scenario['duration'] }}</td>
+                <td class="text-center">{{ '{:.1f}'.format(scenario['duration'] | float) }}</td>
             </tr>
             {%  endif %}
         {% endfor %}

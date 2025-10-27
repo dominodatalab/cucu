@@ -139,6 +139,8 @@ def generate(results: Path, basepath: Path):
                 "scenarios": [],  # scenarios
                 "results_dir": feature_results_dir,  # directory where feature results are stored
                 "folder_name": ellipsize_filename(db_feature.name),
+                "started_at": None,
+                "duration": 0,
             }
 
             process_tags(feature_dict)
@@ -173,8 +175,6 @@ def generate(results: Path, basepath: Path):
 
             feature_path = basepath / feature_dict["folder_name"]
             os.makedirs(feature_path, exist_ok=True)
-            feature_duration = 0
-            feature_started_at = None
             for db_scenario in db_scenarios:
                 scenario_dict = {
                     "name": db_scenario.name,
@@ -193,17 +193,16 @@ def generate(results: Path, basepath: Path):
                     step_dict = {
                         "keyword": db_step.keyword,
                         "name": db_step.name,
-                        "result": {
-                            "status": db_step.status,
-                            "duration": db_step.duration,
-                            "timestamp": db_step.start_at,
-                            "exception": db_step.exception,
-                            "stdout": db_step.stdout,
-                            "stderr": db_step.stderr,
-                            "browser_logs": db_step.browser_logs,
-                            "error_message": db_step.error_message,
-                            "debug_output": db_step.debug_output,
-                        },
+                        "status": db_step.status,
+                        "duration": db_step.duration,
+                        "start_at": db_step.start_at,
+                        "exception": db_step.exception,
+                        "stdout": db_step.stdout,
+                        "stderr": db_step.stderr,
+                        "browser_logs": db_step.browser_logs,
+                        "error_message": db_step.error_message,
+                        "debug_output": db_step.debug_output,
+                        "end_at": db_step.end_at,
                         "substep": db_step.is_substep,
                         "screenshots": db_step.screenshots,
                         "text": db_step.text,
@@ -211,23 +210,20 @@ def generate(results: Path, basepath: Path):
                     }
                     scenario_dict["steps"].append(step_dict)
 
-                feature_dict["scenarios"].append(scenario_dict)
-
                 scenario_started_at, scenario_duration = process_scenario(
                     scenario_dict,
-                    feature_started_at,
+                    feature_dict["started_at"],
                     feature_path,
                     feature_dict,
                 )
-                feature_duration += scenario_duration
+                feature_dict["duration"] += scenario_duration
 
-                if feature_started_at is None:
-                    feature_started_at = scenario_started_at
+                if feature_dict["started_at"] is None:
                     feature_dict["started_at"] = scenario_started_at
 
+                # render scenario html
                 scenario_basepath = feature_path / scenario_dict["folder_name"]
                 os.makedirs(scenario_basepath, exist_ok=True)
-
                 rendered_scenario_html = scenario_template.render(
                     basepath=results,
                     feature=feature_dict,
@@ -240,9 +236,13 @@ def generate(results: Path, basepath: Path):
                 scenario_output_filepath = scenario_basepath / "index.html"
                 scenario_output_filepath.write_text(rendered_scenario_html)
 
+                # append scenario to feature
+                feature_dict["scenarios"].append(scenario_dict)
+
             if feature_has_failures:
                 feature_dict["status"] = "failed"
 
+            # render feature html
             rendered_feature_html = feature_template.render(
                 feature=feature_dict,
                 scenarios=feature_dict["scenarios"],
@@ -303,12 +303,12 @@ def generate(results: Path, basepath: Path):
 
 
 def process_scenario(
-    scenario, feature_started_at, feature_path: Path, feature
+    scenario_dict, feature_started_at, feature_path: Path, feature
 ):
     CONFIG.restore()
 
-    scenario["folder_name"] = ellipsize_filename(scenario["name"])
-    scenario_filepath = feature_path / scenario["folder_name"]
+    scenario_dict["folder_name"] = ellipsize_filename(scenario_dict["name"])
+    scenario_filepath = feature_path / scenario_dict["folder_name"]
     scenario_configpath = scenario_filepath / "logs/cucu.config.yaml.txt"
 
     if scenario_configpath.exists():
@@ -321,31 +321,31 @@ def process_scenario(
     else:
         logger.info(f"No config to reload: {scenario_configpath}")
 
-    process_tags(scenario)
+    process_tags(scenario_dict)
 
     sub_headers = []
     for handler in CONFIG["__CUCU_HTML_REPORT_SCENARIO_SUBHEADER_HANDLER"]:
         try:
-            sub_header = handler(scenario, feature)
+            sub_header = handler(scenario_dict, feature)
             if sub_header:
                 sub_headers.append(sub_header)
         except Exception:
             logger.warning(
-                f'Exception while trying to run sub_headers hook for scenario: "{scenario["name"]}"\n{traceback.format_exc()}'
+                f'Exception while trying to run sub_headers hook for scenario: "{scenario_dict["name"]}"\n{traceback.format_exc()}'
             )
-    scenario["sub_headers"] = "<br/>".join(sub_headers)
+    scenario_dict["sub_headers"] = "<br/>".join(sub_headers)
 
     scenario_started_at = None
     scenario_duration = 0
-    total_steps = len(scenario["steps"])
-    for step_index, step in enumerate(scenario["steps"]):
+    total_steps = len(scenario_dict["steps"])
+    for step_index, step_dict in enumerate(scenario_dict["steps"]):
         step_start_at, step_duration = process_step(
-            scenario_filepath, step, step_index, scenario_started_at
+            scenario_filepath, step_dict, step_index, scenario_started_at
         )
         scenario_duration += step_duration
         if scenario_started_at is None:
             scenario_started_at = step_start_at
-            scenario["started_at"] = scenario_started_at
+            scenario_dict["started_at"] = scenario_started_at
 
     logs_path = scenario_filepath / "logs"
 
@@ -363,11 +363,11 @@ def process_scenario(
             }
         )
 
-    scenario["logs"] = log_files
+    scenario_dict["logs"] = log_files
 
-    scenario["total_steps"] = total_steps
+    scenario_dict["total_steps"] = total_steps
     if not scenario_started_at:
-        scenario["started_at"] = ""
+        scenario_dict["started_at"] = ""
     else:
         if isinstance(scenario_started_at, str):
             scenario_started_at = datetime.fromisoformat(scenario_started_at)
@@ -375,7 +375,7 @@ def process_scenario(
         if not feature_started_at:
             feature_started_at = scenario_started_at
 
-        scenario["time_offset"] = datetime.utcfromtimestamp(
+        scenario_dict["time_offset"] = datetime.utcfromtimestamp(
             (scenario_started_at - feature_started_at).total_seconds()
         )
 
@@ -387,31 +387,31 @@ def process_scenario(
                 encoding="utf-8",
             )
 
-    scenario["duration"] = left_pad_zeroes(scenario_duration)
+    scenario_dict["duration"] = left_pad_zeroes(scenario_duration)
 
     return scenario_started_at, scenario_duration
 
 
 def process_step(
-    scenario_filepath: Path, step, step_index, scenario_started_at=None
+    scenario_filepath: Path, step_dict, step_index, scenario_started_at=None
 ):
     # Handle section headings with different levels (# to ####)
-    if step["name"].startswith("#"):
+    if step_dict["name"].startswith("#"):
         # Map the count to the appropriate HTML heading (h2-h5)
         # We use h2-h5 instead of h1-h4 so h1 can be reserved for scenario/feature titles
-        step["heading_level"] = f"h{step['name'][:4].count('#') + 1}"
+        step_dict["heading_level"] = f"h{step_dict['name'][:4].count('#') + 1}"
 
     images = []
-    image_path = Path(get_step_image_dir(step_index, step["name"]))
+    image_path = Path(get_step_image_dir(step_index, step_dict["name"]))
     scenario_image_path = scenario_filepath / image_path
-    for screenshot_index, screenshot in enumerate(step["screenshots"]):
+    for screenshot_index, screenshot in enumerate(step_dict["screenshots"]):
         filename = os.path.split(screenshot["filepath"])[-1]
         filepath = scenario_image_path / filename
 
         if not os.path.exists(filepath):
             continue
 
-        label = screenshot.get("label", step["name"])
+        label = screenshot.get("label", step_dict["name"])
         highlight = None
         if screenshot["location"] and not CONFIG["CUCU_SKIP_HIGHLIGHT_BORDER"]:
             window_height = screenshot["size"]["height"]
@@ -439,52 +439,52 @@ def process_step(
                 "highlight": highlight,
             }
         )
-    step["images"] = sorted(images, key=lambda x: x["index"])
+    step_dict["images"] = sorted(images, key=lambda x: x["index"])
 
-    if "result" in step:
-        if step["result"]["status"] in ["failed", "passed"]:
-            if step["result"]["timestamp"]:
-                timestamp = datetime.fromisoformat(step["result"]["timestamp"])
-                step["result"]["timestamp"] = timestamp
+    if step_dict["end_at"]:
+        if step_dict["status"] in ["failed", "passed"]:
+            if step_dict["start_at"]:
+                timestamp = datetime.fromisoformat(step_dict["start_at"])
+                step_dict["timestamp"] = timestamp
 
                 if scenario_started_at is None:
                     scenario_started_at = timestamp
                 time_offset = datetime.utcfromtimestamp(
                     (timestamp - scenario_started_at).total_seconds()
                 )
-                step["result"]["time_offset"] = time_offset
+                step_dict["time_offset"] = time_offset
             else:
-                step["result"]["timestamp"] = ""
-                step["result"]["time_offset"] = ""
+                step_dict["timestamp"] = ""
+                step_dict["time_offset"] = ""
 
-        if "error_message" in step["result"] and step["result"][
-            "error_message"
-        ] == [None]:
-            step["result"]["error_message"] = [""]
+        if "error_message" in step_dict and step_dict["error_message"] == [
+            None
+        ]:
+            step_dict["error_message"] = [""]
 
-    if step["text"] and not isinstance(step["text"], list):
-        step["text"] = [step["text"]]
+    if step_dict["text"] and not isinstance(step_dict["text"], list):
+        step_dict["text"] = [step_dict["text"]]
 
     # prepare by joining into one big chunk here since we can't do it in the Jinja template
-    if step["text"]:
+    if step_dict["text"]:
         text_indent = "       "
-        step["text"] = "\n".join(
+        step_dict["text"] = "\n".join(
             [text_indent + '"""']
-            + [f"{text_indent}{x}" for x in step["text"]]
+            + [f"{text_indent}{x}" for x in step_dict["text"]]
             + [text_indent + '"""']
         )
 
     # prepare by joining into one big chunk here since we can't do it in the Jinja template
-    if step["table"]:
-        step["table"] = format_gherkin_table(
-            step["table"]["rows"],
-            step["table"]["headings"],
+    if step_dict["table"]:
+        step_dict["table"] = format_gherkin_table(
+            step_dict["table"]["rows"],
+            step_dict["table"]["headings"],
             "       ",
         )
 
-    if step["result"]:
-        step_duration = step["result"]["duration"]
-        step_start_at = step["result"]["timestamp"]
+    if step_dict:
+        step_duration = step_dict["duration"]
+        step_start_at = step_dict["timestamp"]
     else:
         step_duration = 0
         step_start_at = None
