@@ -80,7 +80,7 @@
         </tr>
         {% for step in steps %}
             {% set step_name = step['keyword'] + ' ' + escape(step['name']) %}
-            {% if step['substep'] %}
+            {% if step['is_substep'] %}
                 {% set step_prefix = "     ⤷" %}
             {% else %}
                 {% set step_prefix = "" %}
@@ -119,13 +119,13 @@
             </tr>
             {% endif %}
 
-            {% if step['text'] or step['table'] %}
+            {% if step['text'] or step['table_data'] %}
                 <tr class="row"><td style="min-width: 0;" class="col-12" colspan="2">
                 {% if step['text'] %}
                         <pre style="margin: 0;">{{ escape(step['text']) }}</pre>
                 {% endif %}
-                {% if step['table'] %}
-                        <pre style="margin: 0;">{{ escape(step['table']) }}</pre>
+                {% if step['table_data'] %}
+                        <pre style="margin: 0;">{{ escape(step['table_data']) }}</pre>
                 {% endif %}
                 </td></tr>
             {% endif %}

@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from xml.sax.saxutils import escape as escape_
 
+from playhouse import shortcuts
 import jinja2
 
 import cucu.db as db
@@ -190,25 +191,7 @@ def generate(results: Path, basepath: Path):
                 db_steps = db_scenario.steps.select().order_by(db.step.seq)
 
                 for db_step in db_steps:
-                    step_dict = {
-                        "keyword": db_step.keyword,
-                        "name": db_step.name,
-                        "status": db_step.status,
-                        "duration": db_step.duration,
-                        "start_at": db_step.start_at,
-                        "exception": db_step.exception,
-                        "stdout": db_step.stdout,
-                        "stderr": db_step.stderr,
-                        "browser_logs": db_step.browser_logs,
-                        "error_message": db_step.error_message,
-                        "debug_output": db_step.debug_output,
-                        "end_at": db_step.end_at,
-                        "substep": db_step.is_substep,
-                        "screenshots": db_step.screenshots,
-                        "text": db_step.text,
-                        "table": db_step.table_data,
-                    }
-                    scenario_dict["steps"].append(step_dict)
+                    scenario_dict["steps"].append(shortcuts.model_to_dict(db_step))
 
                 scenario_started_at, scenario_duration = process_scenario(
                     scenario_dict,
@@ -475,10 +458,10 @@ def process_step(
         )
 
     # prepare by joining into one big chunk here since we can't do it in the Jinja template
-    if step_dict["table"]:
-        step_dict["table"] = format_gherkin_table(
-            step_dict["table"]["rows"],
-            step_dict["table"]["headings"],
+    if step_dict["table_data"]:
+        step_dict["table_data"] = format_gherkin_table(
+            step_dict["table_data"]["rows"],
+            step_dict["table_data"]["headings"],
             "       ",
         )
 
