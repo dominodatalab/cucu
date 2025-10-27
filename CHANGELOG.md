@@ -7,9 +7,10 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.3.16
 - Change - remove --report-only-failures and --only-failures args
+- Change - html - format browser logs and convert timestamp to datetime
+- Add - more db views
 - Chore - refactor HTML.py
 - Chore - correct CONTRIBUTING.md with -d option
-- Add - more db views
 
 ## 1.3.15
 - Change - refactor HTML report highlighting to use CSS and db

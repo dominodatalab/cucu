@@ -167,7 +167,7 @@
                 {% if step['result']['browser_logs'] %}
                 <details open>
                     <summary style="color: dimgray;">browser logs ({{ step['result']['browser_logs']|length }} entries)</summary>
-                    <pre style="color: darkgray;">{% for entry in step['result']['browser_logs'] %}{{ entry['timestamp'] }} {{ entry['level'] }} {{ entry['source']}}: {{ entry['message'] }}<br/>{% endfor %}</pre>
+                    <pre style="color: darkgray;">{% for entry in step['result']['browser_logs'] %}{{ browser_timestamp_to_datetime(entry['timestamp']) }} {{ entry['level'] }} {{ entry['source']}}: {{ entry['message'] }}<br/>{% endfor %}</pre>
                 </details>
                 {% endif %}
                 {% if step['result']['debug_output'] %}

@@ -72,9 +72,23 @@ def generate(results: Path, basepath: Path):
             string.replace('"', "%22").replace("'", "%27").replace("#", "%23")
         )
 
+    def browser_timestamp_to_datetime(value):
+        """Convert a browser timestamp (in milliseconds since epoch) to a datetime object."""
+        try:
+            timestamp_sec = int(value) / 1000.0
+            return datetime.fromtimestamp(timestamp_sec).strftime(
+                "%Y-%m-%d %H:%M:%S,%f"
+            )[:-3]
+        except (ValueError, TypeError):
+            return None
+
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)  # nosec
-    templates.globals.update(escape=escape, urlencode=urlencode)
+    templates.globals.update(
+        escape=escape,
+        urlencode=urlencode,
+        browser_timestamp_to_datetime=browser_timestamp_to_datetime,
+    )
     feature_template = templates.get_template("feature.html")
     scenario_template = templates.get_template("scenario.html")
 
