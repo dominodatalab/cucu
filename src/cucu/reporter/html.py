@@ -7,8 +7,8 @@ from datetime import datetime
 from pathlib import Path
 from xml.sax.saxutils import escape as escape_
 
-from playhouse import shortcuts
 import jinja2
+from playhouse import shortcuts
 
 import cucu.db as db
 from cucu import format_gherkin_table, logger
@@ -191,7 +191,9 @@ def generate(results: Path, basepath: Path):
                 db_steps = db_scenario.steps.select().order_by(db.step.seq)
 
                 for db_step in db_steps:
-                    scenario_dict["steps"].append(shortcuts.model_to_dict(db_step))
+                    scenario_dict["steps"].append(
+                        shortcuts.model_to_dict(db_step)
+                    )
 
                 scenario_started_at, scenario_duration = process_scenario(
                     scenario_dict,
@@ -430,8 +432,14 @@ def process_step(
                 timestamp = datetime.fromisoformat(step_dict["start_at"])
                 step_dict["timestamp"] = timestamp
 
-                if scenario_started_at is None:
-                    scenario_started_at = timestamp
+                if not scenario_started_at:
+                    scenario_started_at = step_dict["start_at"]
+
+                if isinstance(scenario_started_at, str):
+                    scenario_started_at = datetime.fromisoformat(
+                        scenario_started_at
+                    )
+
                 time_offset = datetime.utcfromtimestamp(
                     (timestamp - scenario_started_at).total_seconds()
                 )
@@ -467,7 +475,7 @@ def process_step(
 
     if step_dict:
         step_duration = step_dict["duration"]
-        step_start_at = step_dict["timestamp"]
+        step_start_at = step_dict["start_at"]
     else:
         step_duration = 0
         step_start_at = None
