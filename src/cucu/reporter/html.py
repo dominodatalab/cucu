@@ -399,27 +399,14 @@ def process_step(
         label = screenshot.get("label", step_dict["name"])
         highlight = None
         if screenshot["location"] and not CONFIG["CUCU_SKIP_HIGHLIGHT_BORDER"]:
-            window_height = screenshot["size"]["height"]
-            window_width = screenshot["size"]["width"]
-            try:
-                highlight = {
-                    "height_ratio": screenshot["location"]["height"]
-                    / window_height,
-                    "width_ratio": screenshot["location"]["width"]
-                    / window_width,
-                    "top_ratio": screenshot["location"]["y"] / window_height,
-                    "left_ratio": screenshot["location"]["x"] / window_width,
-                }
-            except TypeError:
-                # If any of the necessary properties is absent,
-                # then oh well, no highlight this time.
-                pass
+            highlight = screenshot["hightlight"]
+
         screenshot_id = f"step-img-{screenshot.get('step_run_id', generate_short_id())}-{screenshot_index:0>4}"
         images.append(
             {
                 "src": urllib.parse.quote(str(image_path / filename)),
                 "index": screenshot_index,
-                "label": label,
+                "label": label,  # screenshot["label"] or step_dict["name"]
                 "id": screenshot_id,
                 "highlight": highlight,
             }

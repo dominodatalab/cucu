@@ -251,14 +251,14 @@ def take_screenshot(ctx, step_name, label="", element=None):
     filepath = os.path.join(screenshot_dir, filename)
 
     ctx.browser.screenshot(filepath)
-    element_info = {
+    location = {
         "x": None,
         "y": None,
         "height": None,
         "width": None,
     }
     if element:
-        element_info.update(element.rect)
+        location.update(element.rect)
     # driver.get_window_size returns the size of the window the OS draws for
     # the browser, not the window the browser uses to display the DOM.
     # If we go through JavaScript, we ignore the height of the adress bar
@@ -273,14 +273,23 @@ def take_screenshot(ctx, step_name, label="", element=None):
         };
         return getDimensionsOfCurrentWindow();
     """
-    browser_window_size = ctx.browser.execute(script)
+    size = ctx.browser.execute(script)
+
+    hightlight = {
+        "height": location["height"] / size["height"],
+        "width": location["width"] / size["width"],
+        "top": location["y"] / size["height"],
+        "left": location["x"] / size["width"],
+    }
+
     screenshot = {
         "step_name": step_name,
         "label": label,
         "element": element,
-        "location": element_info,
+        "location": location,
         "filepath": filepath,
-        "size": browser_window_size,
+        "size": size,
+        "hightlight": hightlight,
     }
     step.screenshots.append(screenshot)
 
