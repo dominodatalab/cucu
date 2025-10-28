@@ -106,6 +106,7 @@ def sample_records_combined(temp_db):
         debug_output="",
         stderr=[],
         stdout=[],
+        screenshots=[],
     )
 
     db.cucu_run.create(
@@ -157,6 +158,7 @@ def sample_records_combined(temp_db):
         debug_output="",
         stderr=[],
         stdout=[],
+        screenshots=[],
     )
 
     return {
