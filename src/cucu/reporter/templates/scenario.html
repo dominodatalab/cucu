@@ -122,10 +122,10 @@
             {% if step['text'] or step['table_data'] %}
                 <tr class="row"><td style="min-width: 0;" class="col-12" colspan="2">
                 {% if step['text'] %}
-                        <pre style="margin: 0;">{{ escape(step['text']) }}</pre>
+                        <pre style="margin: 0;">{{ escape(step_text_list_to_html(step['text'])) }}</pre>
                 {% endif %}
                 {% if step['table_data'] %}
-                        <pre style="margin: 0;">{{ escape(step['table_data']) }}</pre>
+                        <pre style="margin: 0;">{{ escape(step_table_to_html(step['table_data'])) }}</pre>
                 {% endif %}
                 </td></tr>
             {% endif %}

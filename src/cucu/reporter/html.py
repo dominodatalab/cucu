@@ -80,12 +80,31 @@ def generate(results: Path, basepath: Path):
         except (ValueError, TypeError):
             return None
 
+    def step_text_list_to_html(text):
+        text_indent = " " * 8
+        heredoc_quote = '"""'
+        return "\n".join(
+            [text_indent + heredoc_quote]
+            + [f"{text_indent}{x}" for x in text]
+            + [text_indent + heredoc_quote]
+        )
+
+    def step_table_to_html(table_data):
+        text_indent = " " * 8
+        return format_gherkin_table(
+            table_data["rows"],
+            table_data["headings"],
+            text_indent,
+        )
+
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)  # nosec
     templates.globals.update(
         escape=escape,
         urlencode=urlencode,
         browser_timestamp_to_datetime=browser_timestamp_to_datetime,
+        step_text_list_to_html=step_text_list_to_html,
+        step_table_to_html=step_table_to_html,
     )
     feature_template = templates.get_template("feature.html")
     scenario_template = templates.get_template("scenario.html")
@@ -329,6 +348,7 @@ def process_scenario(
                 f"h{step_dict['name'][:4].count('#') + 1}"
             )
 
+        # process timestamps and time offsets
         if step_dict["end_at"]:
             if step_dict["status"] in ["failed", "passed"]:
                 if step_dict["start_at"]:
@@ -350,31 +370,6 @@ def process_scenario(
                 else:
                     step_dict["timestamp"] = ""
                     step_dict["time_offset"] = ""
-
-            if "error_message" in step_dict and step_dict["error_message"] == [
-                None
-            ]:
-                step_dict["error_message"] = [""]
-
-        if step_dict["text"] and not isinstance(step_dict["text"], list):
-            step_dict["text"] = [step_dict["text"]]
-
-        # prepare by joining into one big chunk here since we can't do it in the Jinja template
-        if step_dict["text"]:
-            text_indent = "       "
-            step_dict["text"] = "\n".join(
-                [text_indent + '"""']
-                + [f"{text_indent}{x}" for x in step_dict["text"]]
-                + [text_indent + '"""']
-            )
-
-        # prepare by joining into one big chunk here since we can't do it in the Jinja template
-        if step_dict["table_data"]:
-            step_dict["table_data"] = format_gherkin_table(
-                step_dict["table_data"]["rows"],
-                step_dict["table_data"]["headings"],
-                "       ",
-            )
 
         scenario_duration += step_dict["duration"]
         if scenario_started_at is None:
