@@ -320,7 +320,7 @@ def process_scenario(
     scenario_started_at = None
     scenario_duration = 0
     total_steps = len(scenario_dict["steps"])
-    for step_index, step_dict in enumerate(scenario_dict["steps"]):
+    for step_dict in scenario_dict["steps"]:
         # Handle section headings with different levels (# to ####)
         if step_dict["name"].startswith("#"):
             # Map the count to the appropriate HTML heading (h2-h5)

@@ -15,7 +15,7 @@ Feature: Text
   Scenario: User can wait for text that isn't there and get appropriate error
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/text.html"
-     When I expect the following step to fail with "unable to find the text "inexistent"":
+     When I expect the following step to fail with "unable to find the text "inexistent":
       """
       Then I wait up to "5" seconds to see the text "inexistent"
       """
