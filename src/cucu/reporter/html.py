@@ -2,7 +2,6 @@ import os
 import shutil
 import sys
 import traceback
-import urllib
 from datetime import datetime
 from pathlib import Path
 from xml.sax.saxutils import escape as escape_
@@ -16,7 +15,6 @@ from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
 from cucu.utils import (
     ellipsize_filename,
-    get_step_image_dir,
 )
 
 
@@ -329,20 +327,6 @@ def process_scenario(
             # We use h2-h5 instead of h1-h4 so h1 can be reserved for scenario/feature titles
             step_dict["heading_level"] = (
                 f"h{step_dict['name'][:4].count('#') + 1}"
-            )
-
-        image_path = Path(get_step_image_dir(step_index, step_dict["name"]))
-        scenario_image_path = scenario_filepath / image_path
-        for screenshot_index, screenshot in enumerate(
-            step_dict["screenshots"]
-        ):
-            filename = os.path.split(screenshot["filepath"])[-1]
-            if not os.path.exists(scenario_image_path / filename):
-                continue
-
-            screenshot["src"] = urllib.parse.quote(str(image_path / filename))
-            screenshot["id"] = (
-                f"step-img-{step_dict['step_run_id']}-{screenshot_index:0>4}"
             )
 
         if step_dict["end_at"]:

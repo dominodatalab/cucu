@@ -9,6 +9,7 @@ import os
 import pkgutil
 import shutil
 import time
+from pathlib import Path
 
 import humanize
 from selenium.webdriver.common.by import By
@@ -246,6 +247,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
 
     if len(label) > 0:
         label = CONFIG.hide_secrets(label).replace("/", "_")
+
     filename = f"{CONFIG['__STEP_SCREENSHOT_COUNT']:0>4} - {label}.png"
     filename = ellipsize_filename(filename)
     filepath = os.path.join(screenshot_dir, filename)
@@ -284,6 +286,14 @@ def take_screenshot(ctx, step_name, label="", element=None):
             "left_ratio": location["x"] / size["width"],
         }
 
+    filename = os.path.split(filepath)[-1]
+    if not getattr(step, "step_image_dir", None):
+        step.step_image_dir = get_step_image_dir(ctx.step_index, step_name)
+
+    screenshot_index = len(step.screenshots) + 1
+    id = f"step-img-{step.step_run_id}-{screenshot_index:0>4}"
+
+    src = Path(step.step_image_dir) / filename
     screenshot = {
         "step_name": step_name,
         "label": label or step_name,
@@ -291,7 +301,9 @@ def take_screenshot(ctx, step_name, label="", element=None):
         "filepath": filepath,
         "size": size,
         "highlight": highlight,
-        "index": len(step.screenshots),
+        "index": screenshot_index,
+        "html_src": str(src),
+        "html_id": id,
     }
     step.screenshots.append(screenshot)
 

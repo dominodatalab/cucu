@@ -132,6 +132,7 @@ class step(BaseModel):
     location = TextField()
     browser_logs = JSONField()
     screenshots = JSONField()
+    image_dir = TextField(null=True)
 
 
 def record_cucu_run():
@@ -266,6 +267,7 @@ def finish_step_record(step_obj, duration):
         status=step_obj.status.name,
         stderr=getattr(step_obj, "stderr", []),
         stdout=getattr(step_obj, "stdout", []),
+        image_dir=getattr(step_obj, "step_image_dir", None),
     ).where(step.step_run_id == step_obj.step_run_id).execute()
 
 
