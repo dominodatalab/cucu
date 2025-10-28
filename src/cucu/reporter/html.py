@@ -393,7 +393,9 @@ def process_step(
             continue
 
         screenshot["src"] = urllib.parse.quote(str(image_path / filename))
-        screenshot["id"] = f"step-img-{step_dict['step_run_id']}-{screenshot_index:0>4}"
+        screenshot["id"] = (
+            f"step-img-{step_dict['step_run_id']}-{screenshot_index:0>4}"
+        )
 
     if step_dict["end_at"]:
         if step_dict["status"] in ["failed", "passed"]:
