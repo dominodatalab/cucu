@@ -251,14 +251,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
     filepath = os.path.join(screenshot_dir, filename)
 
     ctx.browser.screenshot(filepath)
-    location = {
-        "x": None,
-        "y": None,
-        "height": None,
-        "width": None,
-    }
-    if element:
-        location.update(element.rect)
+
     # driver.get_window_size returns the size of the window the OS draws for
     # the browser, not the window the browser uses to display the DOM.
     # If we go through JavaScript, we ignore the height of the adress bar
@@ -275,21 +268,30 @@ def take_screenshot(ctx, step_name, label="", element=None):
     """
     size = ctx.browser.execute(script)
 
-    hightlight = {
-        "height": location["height"] / size["height"],
-        "width": location["width"] / size["width"],
-        "top": location["y"] / size["height"],
-        "left": location["x"] / size["width"],
+    location = {
+        "x": None,
+        "y": None,
+        "height": None,
+        "width": None,
     }
+    highlight = {}
+    if element:
+        location.update(element.rect)
+        highlight = {
+            "height_ratio": location["height"] / size["height"],
+            "width_ratio": location["width"] / size["width"],
+            "top_ratio": location["y"] / size["height"],
+            "left_ratio": location["x"] / size["width"],
+        }
 
     screenshot = {
         "step_name": step_name,
-        "label": label,
-        "element": element,
+        "label": label or step_name,
         "location": location,
         "filepath": filepath,
         "size": size,
-        "hightlight": hightlight,
+        "highlight": highlight,
+        "index": len(step.screenshots),
     }
     step.screenshots.append(screenshot)
 

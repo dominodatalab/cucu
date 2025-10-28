@@ -16,7 +16,6 @@ from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
 from cucu.utils import (
     ellipsize_filename,
-    generate_short_id,
     get_step_image_dir,
 )
 
@@ -386,32 +385,15 @@ def process_step(
         # We use h2-h5 instead of h1-h4 so h1 can be reserved for scenario/feature titles
         step_dict["heading_level"] = f"h{step_dict['name'][:4].count('#') + 1}"
 
-    images = []
     image_path = Path(get_step_image_dir(step_index, step_dict["name"]))
     scenario_image_path = scenario_filepath / image_path
     for screenshot_index, screenshot in enumerate(step_dict["screenshots"]):
         filename = os.path.split(screenshot["filepath"])[-1]
-        filepath = scenario_image_path / filename
-
-        if not os.path.exists(filepath):
+        if not os.path.exists(scenario_image_path / filename):
             continue
 
-        label = screenshot.get("label", step_dict["name"])
-        highlight = None
-        if screenshot["location"] and not CONFIG["CUCU_SKIP_HIGHLIGHT_BORDER"]:
-            highlight = screenshot["hightlight"]
-
-        screenshot_id = f"step-img-{screenshot.get('step_run_id', generate_short_id())}-{screenshot_index:0>4}"
-        images.append(
-            {
-                "src": urllib.parse.quote(str(image_path / filename)),
-                "index": screenshot_index,
-                "label": label,  # screenshot["label"] or step_dict["name"]
-                "id": screenshot_id,
-                "highlight": highlight,
-            }
-        )
-    step_dict["images"] = sorted(images, key=lambda x: x["index"])
+        screenshot["src"] = urllib.parse.quote(str(image_path / filename))
+        screenshot["id"] = f"step-img-{step_dict['step_run_id']}-{screenshot_index:0>4}"
 
     if step_dict["end_at"]:
         if step_dict["status"] in ["failed", "passed"]:

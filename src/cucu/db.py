@@ -131,7 +131,7 @@ class step(BaseModel):
     table_data = JSONField(null=True)
     location = TextField()
     browser_logs = JSONField()
-    screenshots = JSONField(null=True)
+    screenshots = JSONField()
 
 
 def record_cucu_run():
@@ -221,22 +221,12 @@ def start_step_record(step_obj, scenario_run_id):
         debug_output=[],
         stderr=[],
         stdout=[],
+        screenshots=[],
     )
 
 
 def finish_step_record(step_obj, duration):
     db.connect(reuse_if_open=True)
-    screenshot_infos = []
-    if hasattr(step_obj, "screenshots") and step_obj.screenshots:
-        for screenshot in step_obj.screenshots:
-            screenshot_info = {
-                "step_name": screenshot.get("step_name"),
-                "label": screenshot.get("label"),
-                "location": screenshot.get("location"),
-                "size": screenshot.get("size"),
-                "filepath": screenshot.get("filepath"),
-            }
-            screenshot_infos.append(screenshot_info)
 
     error_message = []
     exception = []
@@ -269,7 +259,7 @@ def finish_step_record(step_obj, duration):
         exception=exception,
         has_substeps=getattr(step_obj, "has_substeps", False),
         parent_seq=getattr(step_obj, "parent_seq", None),
-        screenshots=screenshot_infos,
+        screenshots=getattr(step_obj, "screenshots", []),
         section_level=getattr(step_obj, "section_level", None),
         seq=step_obj.seq,
         start_at=getattr(step_obj, "start_at", None),
