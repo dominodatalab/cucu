@@ -323,12 +323,78 @@ def process_scenario(
     scenario_duration = 0
     total_steps = len(scenario_dict["steps"])
     for step_index, step_dict in enumerate(scenario_dict["steps"]):
-        step_start_at, step_duration = process_step(
-            scenario_filepath, step_dict, step_index, scenario_started_at
-        )
-        scenario_duration += step_duration
+        # Handle section headings with different levels (# to ####)
+        if step_dict["name"].startswith("#"):
+            # Map the count to the appropriate HTML heading (h2-h5)
+            # We use h2-h5 instead of h1-h4 so h1 can be reserved for scenario/feature titles
+            step_dict["heading_level"] = (
+                f"h{step_dict['name'][:4].count('#') + 1}"
+            )
+
+        image_path = Path(get_step_image_dir(step_index, step_dict["name"]))
+        scenario_image_path = scenario_filepath / image_path
+        for screenshot_index, screenshot in enumerate(
+            step_dict["screenshots"]
+        ):
+            filename = os.path.split(screenshot["filepath"])[-1]
+            if not os.path.exists(scenario_image_path / filename):
+                continue
+
+            screenshot["src"] = urllib.parse.quote(str(image_path / filename))
+            screenshot["id"] = (
+                f"step-img-{step_dict['step_run_id']}-{screenshot_index:0>4}"
+            )
+
+        if step_dict["end_at"]:
+            if step_dict["status"] in ["failed", "passed"]:
+                if step_dict["start_at"]:
+                    timestamp = datetime.fromisoformat(step_dict["start_at"])
+                    step_dict["timestamp"] = timestamp
+
+                    if not scenario_started_at:
+                        scenario_started_at = step_dict["start_at"]
+
+                    if isinstance(scenario_started_at, str):
+                        scenario_started_at = datetime.fromisoformat(
+                            scenario_started_at
+                        )
+
+                    time_offset = datetime.utcfromtimestamp(
+                        (timestamp - scenario_started_at).total_seconds()
+                    )
+                    step_dict["time_offset"] = time_offset
+                else:
+                    step_dict["timestamp"] = ""
+                    step_dict["time_offset"] = ""
+
+            if "error_message" in step_dict and step_dict["error_message"] == [
+                None
+            ]:
+                step_dict["error_message"] = [""]
+
+        if step_dict["text"] and not isinstance(step_dict["text"], list):
+            step_dict["text"] = [step_dict["text"]]
+
+        # prepare by joining into one big chunk here since we can't do it in the Jinja template
+        if step_dict["text"]:
+            text_indent = "       "
+            step_dict["text"] = "\n".join(
+                [text_indent + '"""']
+                + [f"{text_indent}{x}" for x in step_dict["text"]]
+                + [text_indent + '"""']
+            )
+
+        # prepare by joining into one big chunk here since we can't do it in the Jinja template
+        if step_dict["table_data"]:
+            step_dict["table_data"] = format_gherkin_table(
+                step_dict["table_data"]["rows"],
+                step_dict["table_data"]["headings"],
+                "       ",
+            )
+
+        scenario_duration += step_dict["duration"]
         if scenario_started_at is None:
-            scenario_started_at = step_start_at
+            scenario_started_at = step_dict["start_at"]
             scenario_dict["started_at"] = scenario_started_at
 
     logs_path = scenario_filepath / "logs"
@@ -374,81 +440,3 @@ def process_scenario(
     scenario_dict["duration"] = left_pad_zeroes(scenario_duration)
 
     return scenario_started_at, scenario_duration
-
-
-def process_step(
-    scenario_filepath: Path, step_dict, step_index, scenario_started_at=None
-):
-    # Handle section headings with different levels (# to ####)
-    if step_dict["name"].startswith("#"):
-        # Map the count to the appropriate HTML heading (h2-h5)
-        # We use h2-h5 instead of h1-h4 so h1 can be reserved for scenario/feature titles
-        step_dict["heading_level"] = f"h{step_dict['name'][:4].count('#') + 1}"
-
-    image_path = Path(get_step_image_dir(step_index, step_dict["name"]))
-    scenario_image_path = scenario_filepath / image_path
-    for screenshot_index, screenshot in enumerate(step_dict["screenshots"]):
-        filename = os.path.split(screenshot["filepath"])[-1]
-        if not os.path.exists(scenario_image_path / filename):
-            continue
-
-        screenshot["src"] = urllib.parse.quote(str(image_path / filename))
-        screenshot["id"] = (
-            f"step-img-{step_dict['step_run_id']}-{screenshot_index:0>4}"
-        )
-
-    if step_dict["end_at"]:
-        if step_dict["status"] in ["failed", "passed"]:
-            if step_dict["start_at"]:
-                timestamp = datetime.fromisoformat(step_dict["start_at"])
-                step_dict["timestamp"] = timestamp
-
-                if not scenario_started_at:
-                    scenario_started_at = step_dict["start_at"]
-
-                if isinstance(scenario_started_at, str):
-                    scenario_started_at = datetime.fromisoformat(
-                        scenario_started_at
-                    )
-
-                time_offset = datetime.utcfromtimestamp(
-                    (timestamp - scenario_started_at).total_seconds()
-                )
-                step_dict["time_offset"] = time_offset
-            else:
-                step_dict["timestamp"] = ""
-                step_dict["time_offset"] = ""
-
-        if "error_message" in step_dict and step_dict["error_message"] == [
-            None
-        ]:
-            step_dict["error_message"] = [""]
-
-    if step_dict["text"] and not isinstance(step_dict["text"], list):
-        step_dict["text"] = [step_dict["text"]]
-
-    # prepare by joining into one big chunk here since we can't do it in the Jinja template
-    if step_dict["text"]:
-        text_indent = "       "
-        step_dict["text"] = "\n".join(
-            [text_indent + '"""']
-            + [f"{text_indent}{x}" for x in step_dict["text"]]
-            + [text_indent + '"""']
-        )
-
-    # prepare by joining into one big chunk here since we can't do it in the Jinja template
-    if step_dict["table_data"]:
-        step_dict["table_data"] = format_gherkin_table(
-            step_dict["table_data"]["rows"],
-            step_dict["table_data"]["headings"],
-            "       ",
-        )
-
-    if step_dict:
-        step_duration = step_dict["duration"]
-        step_start_at = step_dict["start_at"]
-    else:
-        step_duration = 0
-        step_start_at = None
-
-    return step_start_at, step_duration
