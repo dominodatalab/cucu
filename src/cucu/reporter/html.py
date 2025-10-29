@@ -152,10 +152,10 @@ def generate(results: Path, basepath: Path):
                 feature_results_dir  # directory where feature results are stored
             )
             feature_dict["folder_name"] = ellipsize_filename(db_feature.name)
-            feature_dict["duration"] = db.db.execute_sql(
-                "SELECT duration FROM flat_feature WHERE feature_name = ?",
-                (db_feature.name,),
-            ).fetchone()[0]
+            feature_dict["duration"] = (
+                datetime.fromisoformat(feature_dict["start_at"])
+                - datetime.fromisoformat(feature_dict["start_at"])
+            ).total_seconds()
 
             process_tags(feature_dict)
 
