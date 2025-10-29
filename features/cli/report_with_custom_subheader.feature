@@ -15,7 +15,7 @@ Feature: Report with custom subheader
 
       def subheader_generator(scenario, feature):
           feature_location = feature["filename"]
-          scenario_line_number = scenario["line"]
+          scenario_line_number = scenario["line_number"]
           return f'<div>this is a subheader of \{scenario["name"]\} at \{feature_location\}:\{scenario_line_number\}</div>'
 
       register_custom_scenario_subheader_in_report_handling(subheader_generator)
@@ -49,7 +49,7 @@ Feature: Report with custom subheader
 
       def subheader_generator(scenario, feature):
           feature_location = feature["filename"]
-          scenario_line_number = scenario["line"]
+          scenario_line_number = scenario["line_number"]
           return f'<div>this is a subheader of \{scenario["name"]\} at \{feature_location\}:\{scenario_line_number\}</div>'
 
       register_custom_scenario_subheader_in_report_handling(subheader_generator)

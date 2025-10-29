@@ -8,6 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 ## 1.3.16
 - Change - remove --report-only-failures and --only-failures args
 - Change - html - format browser logs and convert timestamp to datetime
+- Change - rename col from scenario["line"] => to scenario["line_number"]
 - Add - more db views
 - Chore - refactor HTML.py
 - Chore - correct CONTRIBUTING.md with -d option
