@@ -243,23 +243,27 @@ def generate(results: Path, basepath: Path):
                             f"h{step_dict['name'][:4].count('#') + 1}"
                         )
 
-                    # # process timestamps and time offsets
-                    # if step_dict["end_at"]:
-                    #     if step_dict["start_at"]:
-                    #         timestamp = datetime.fromisoformat(step_dict["start_at"])
-                    #         step_dict["timestamp"] = timestamp
+                    # process timestamps and time offsets
+                    if step_dict["end_at"]:
+                        if step_dict["start_at"]:
+                            timestamp = datetime.fromisoformat(
+                                step_dict["start_at"]
+                            )
+                            step_dict["timestamp"] = timestamp
 
-                    #         time_offset = datetime.utcfromtimestamp(
-                    #             (timestamp - scenario_started_at).total_seconds()
-                    #         )
-                    #         step_dict["time_offset"] = time_offset
-                    #     else:
-                    #         step_dict["timestamp"] = ""
-                    #         step_dict["time_offset"] = ""
-
-                #     scenario_dict["time_offset"] = datetime.utcfromtimestamp(
-                #         (scenario_started_at - feature_dict["start_at"]).total_seconds()
-                #     )
+                            time_offset = datetime.fromtimestamp(
+                                (
+                                    timestamp
+                                    - datetime.fromisoformat(
+                                        scenario_dict["start_at"]
+                                    )
+                                ).total_seconds(),
+                                timezone.utc,
+                            )
+                            step_dict["time_offset"] = time_offset
+                        else:
+                            step_dict["timestamp"] = ""
+                            step_dict["time_offset"] = ""
 
                 logs_path = scenario_filepath / "logs"
 
