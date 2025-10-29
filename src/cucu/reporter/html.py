@@ -2,7 +2,7 @@ import os
 import shutil
 import sys
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from xml.sax.saxutils import escape as escape_
 
@@ -140,6 +140,7 @@ def generate(results: Path, basepath: Path):
                 logger.debug(f"Skipping untested feature: {db_feature.name}")
                 continue
 
+            feature_dict = shortcuts.model_to_dict(db_feature, backrefs=True)
             feature_results_dir = results
             if db_path := db_feature.worker.cucu_run.db_path:
                 logger.debug(
@@ -147,18 +148,14 @@ def generate(results: Path, basepath: Path):
                 )
                 feature_results_dir = os.path.dirname(db_path)
 
-            feature_dict = {
-                "name": db_feature.name,
-                "filename": db_feature.filename,
-                "description": db_feature.description,
-                "tags": db_feature.tags if db_feature.tags else [],
-                "status": db_feature.status,
-                "scenarios": [],  # scenarios
-                "results_dir": feature_results_dir,  # directory where feature results are stored
-                "folder_name": ellipsize_filename(db_feature.name),
-                "started_at": None,
-                "duration": 0,
-            }
+            feature_dict["results_dir"] = (
+                feature_results_dir  # directory where feature results are stored
+            )
+            feature_dict["folder_name"] = ellipsize_filename(db_feature.name)
+            feature_dict["duration"] = db.db.execute_sql(
+                "SELECT duration FROM flat_feature WHERE feature_name = ?",
+                (db_feature.name,),
+            ).fetchone()[0]
 
             process_tags(feature_dict)
 
@@ -184,47 +181,32 @@ def generate(results: Path, basepath: Path):
                 db.scenario.seq
             )
 
-            feature_has_failures = False
-
             if len(db_scenarios) == 0:
                 logger.debug(f"Feature {db_feature.name} has no scenarios")
                 continue
 
             feature_path = basepath / feature_dict["folder_name"]
             os.makedirs(feature_path, exist_ok=True)
-            for db_scenario in db_scenarios:
-                scenario_dict = {
-                    "name": db_scenario.name,
-                    "line": db_scenario.line_number,
-                    "tags": db_scenario.tags,
-                    "status": db_scenario.status,
-                    "steps": [],
-                    "folder_name": ellipsize_filename(db_scenario.name),
-                }
-                if db_scenario.status == "failed":
-                    feature_has_failures = True
-
-                db_steps = db_scenario.steps.select().order_by(db.step.seq)
-
-                for db_step in db_steps:
-                    scenario_dict["steps"].append(
-                        shortcuts.model_to_dict(db_step)
-                    )
-
-                ### process scenario
-                # scenario_started_at, scenario_duration = process_scenario(
-                #     scenario_dict,
-                #     feature_dict["started_at"],
-                #     feature_path,
-                #     feature_dict,
-                # )
-
-
+            for scenario_dict in sorted(
+                feature_dict["scenarios"], key=lambda x: x["seq"]
+            ):
                 CONFIG.restore()
 
-                scenario_dict["folder_name"] = ellipsize_filename(scenario_dict["name"])
+                scenario_dict["folder_name"] = ellipsize_filename(
+                    scenario_dict["name"]
+                )
                 scenario_filepath = feature_path / scenario_dict["folder_name"]
-                scenario_configpath = scenario_filepath / "logs/cucu.config.yaml.txt"
+                scenario_configpath = (
+                    scenario_filepath / "logs/cucu.config.yaml.txt"
+                )
+                scenario_dict["total_steps"] = len(scenario_dict["steps"])
+                offset_seconds = (
+                    datetime.fromisoformat(scenario_dict["start_at"])
+                    - datetime.fromisoformat(feature_dict["start_at"])
+                ).total_seconds()
+                scenario_dict["time_offset"] = datetime.fromtimestamp(
+                    offset_seconds, timezone.utc
+                )
 
                 if scenario_configpath.exists():
                     try:
@@ -239,7 +221,9 @@ def generate(results: Path, basepath: Path):
                 process_tags(scenario_dict)
 
                 sub_headers = []
-                for handler in CONFIG["__CUCU_HTML_REPORT_SCENARIO_SUBHEADER_HANDLER"]:
+                for handler in CONFIG[
+                    "__CUCU_HTML_REPORT_SCENARIO_SUBHEADER_HANDLER"
+                ]:
                     try:
                         sub_header = handler(scenario_dict, feature_dict)
                         if sub_header:
@@ -250,9 +234,6 @@ def generate(results: Path, basepath: Path):
                         )
                 scenario_dict["sub_headers"] = "<br/>".join(sub_headers)
 
-                scenario_started_at = None
-                scenario_duration = 0
-                total_steps = len(scenario_dict["steps"])
                 for step_dict in scenario_dict["steps"]:
                     # Handle section headings with different levels (# to ####)
                     if step_dict["name"].startswith("#"):
@@ -262,32 +243,23 @@ def generate(results: Path, basepath: Path):
                             f"h{step_dict['name'][:4].count('#') + 1}"
                         )
 
-                    # process timestamps and time offsets
-                    if step_dict["end_at"] and step_dict["status"] in ["failed", "passed"]:
-                        if step_dict["start_at"]:
-                            timestamp = datetime.fromisoformat(step_dict["start_at"])
-                            step_dict["timestamp"] = timestamp
+                    # # process timestamps and time offsets
+                    # if step_dict["end_at"]:
+                    #     if step_dict["start_at"]:
+                    #         timestamp = datetime.fromisoformat(step_dict["start_at"])
+                    #         step_dict["timestamp"] = timestamp
 
-                            if not scenario_started_at:
-                                scenario_started_at = step_dict["start_at"]
+                    #         time_offset = datetime.utcfromtimestamp(
+                    #             (timestamp - scenario_started_at).total_seconds()
+                    #         )
+                    #         step_dict["time_offset"] = time_offset
+                    #     else:
+                    #         step_dict["timestamp"] = ""
+                    #         step_dict["time_offset"] = ""
 
-                            if isinstance(scenario_started_at, str):
-                                scenario_started_at = datetime.fromisoformat(
-                                    scenario_started_at
-                                )
-
-                            time_offset = datetime.utcfromtimestamp(
-                                (timestamp - scenario_started_at).total_seconds()
-                            )
-                            step_dict["time_offset"] = time_offset
-                        else:
-                            step_dict["timestamp"] = ""
-                            step_dict["time_offset"] = ""
-
-                    scenario_duration += step_dict["duration"]
-                    if scenario_started_at is None:
-                        scenario_started_at = step_dict["start_at"]
-                        scenario_dict["started_at"] = scenario_started_at
+                #     scenario_dict["time_offset"] = datetime.utcfromtimestamp(
+                #         (scenario_started_at - feature_dict["start_at"]).total_seconds()
+                #     )
 
                 logs_path = scenario_filepath / "logs"
 
@@ -295,7 +267,10 @@ def generate(results: Path, basepath: Path):
                 for log_file in logs_path.glob("*.*"):
                     log_filepath = log_file.relative_to(scenario_filepath)
 
-                    if scenario_started_at and ".console." in log_filepath.name:
+                    if (
+                        scenario_dict["start_at"]
+                        and ".console." in log_filepath.name
+                    ):
                         log_filepath = Path(f"logs/{log_filepath.name}.html")
 
                     log_files.append(
@@ -305,40 +280,20 @@ def generate(results: Path, basepath: Path):
                         }
                     )
 
-                scenario_dict["logs"] = log_files
-
-                scenario_dict["total_steps"] = total_steps
-                if not scenario_started_at:
-                    scenario_dict["started_at"] = ""
-                else:
-                    if isinstance(scenario_started_at, str):
-                        scenario_started_at = datetime.fromisoformat(scenario_started_at)
-
-                    if not feature_dict["started_at"]:
-                        feature_dict["started_at"] = scenario_started_at
-
-                    scenario_dict["time_offset"] = datetime.utcfromtimestamp(
-                        (scenario_started_at - feature_dict["started_at"]).total_seconds()
+                # generate html version of console log
+                for log_file in [
+                    x for x in log_files if ".console." in x["name"]
+                ]:
+                    input_file = scenario_filepath / "logs" / log_file["name"]
+                    output_file = scenario_filepath / log_file["filepath"]
+                    output_file.write_text(
+                        parse_log_to_html(
+                            input_file.read_text(encoding="utf-8")
+                        ),
+                        encoding="utf-8",
                     )
 
-                    for log_file in [x for x in log_files if ".console." in x["name"]]:
-                        input_file = scenario_filepath / "logs" / log_file["name"]
-                        output_file = scenario_filepath / log_file["filepath"]
-                        output_file.write_text(
-                            parse_log_to_html(input_file.read_text(encoding="utf-8")),
-                            encoding="utf-8",
-                        )
-
-                scenario_dict["duration"] = left_pad_zeroes(scenario_duration)
-
-                # return scenario_started_at, scenario_duration
-
-                ### end process scenario
-
-                feature_dict["duration"] += scenario_duration
-
-                if feature_dict["started_at"] is None:
-                    feature_dict["started_at"] = scenario_started_at
+                scenario_dict["logs"] = log_files
 
                 # render scenario html
                 scenario_basepath = feature_path / scenario_dict["folder_name"]
@@ -354,12 +309,6 @@ def generate(results: Path, basepath: Path):
                 )
                 scenario_output_filepath = scenario_basepath / "index.html"
                 scenario_output_filepath.write_text(rendered_scenario_html)
-
-                # append scenario to feature
-                feature_dict["scenarios"].append(scenario_dict)
-
-            if feature_has_failures:
-                feature_dict["status"] = "failed"
 
             # render feature html
             rendered_feature_html = feature_template.render(
@@ -419,4 +368,3 @@ def generate(results: Path, basepath: Path):
     html_flat_path.write_text(rendered_flat_html)
 
     return html_flat_path
-

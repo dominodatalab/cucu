@@ -10,7 +10,7 @@
                   <a class="nav-link" href="index.html" title="go to index report">Index</a>
                 </li>
                 <li class="align-middle">
-                  <div style="padding: 8px">Started {{ feature['started_at'] }} for {{ '{:.1f}'.format(feature['duration'] | float) }}s</div>
+                  <div style="padding: 8px">Start at {{ feature['start_at'] }} for {{ '{:.1f}'.format(feature['duration'] | float) }}s</div>
                 </li>
               </ul>
             </div>
@@ -67,6 +67,6 @@
     </table>
 
     <script>
-    setupReportTables([[1, 'asc']], [{type: 'timestamp', searchable: false}, {type: 'string'}, {type: 'num', searchable: false}, {type: 'html'} , {type: 'timestamp', searchable: false} ])
+    setupReportTables([[]], [{type: 'timestamp', searchable: false}, {type: 'string'}, {type: 'num', searchable: false}, {type: 'html'} , {type: 'timestamp', searchable: false} ])
     </script>
 {% endblock %}

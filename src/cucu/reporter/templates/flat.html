@@ -17,7 +17,7 @@
     <table class="table table-hover datatable">
         <thead>
             <tr class="align-text-top">
-                <th class="text-center">Started at</th>
+                <th class="text-center">Start at</th>
                 <th>Features<br/>{{ grand_totals['features'] | int }}</th>
                 <th>Scenarios<br/>{{ grand_totals['scenarios'] | int }}</th>
                 <th class="text-center">Steps<br/>{{ grand_totals['steps'] | int }}</th>
@@ -30,7 +30,7 @@
                 <!--- ignore Backgrounds for the time being -->
                 {% if scenario['keyword'] != 'Background' %}
                 <tr>
-                    <td class="text-center">{{ scenario['started_at'] }}</td>
+                    <td class="text-center">{{ scenario['start_at'] }}</td>
                     <td><a href="{{ urlencode(escape(feature['name'])) }}.html"><span>{{ escape(feature['name']) }}</span></a><br>{{ feature['tags'] }}</td>
                     <td><a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/index.html"><span>{{ escape(scenario['name']) }}</span></a><br>{{ scenario['tags'] }}</td>
                     <td class="text-center">{{ scenario['total_steps'] }}</td>

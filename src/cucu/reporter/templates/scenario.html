@@ -35,7 +35,7 @@
                     <button class="btn btn-md btn-light" title="scroll to bottom" onclick="window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });" class="nav-link">⬇️ </button>
                 </li>
                 <li class="align-middle">
-                    <div style="padding: 8px">Started {{ scenario["started_at"] }} for {{ '{:.1f}'.format(scenario['duration'] | float) }}s</div>
+                    <div style="padding: 8px">Start at {{ scenario["start_at"] }} for {{ '{:.1f}'.format(scenario['duration'] | float) }}s</div>
                 </li>
               </ul>
             </div>
@@ -115,7 +115,7 @@
                     <a class="anchor" id="step_{{ loop.index}}" href="#step_{{ loop.index }}">🔗</a>
                     <pre class="status-{{ step_status }}">{{ step_keyword }}</pre><span style="display: contents;" title="{{ escape(step['name']) }}"> {{ escape(step['name']) }}</span>
                 </td>
-                <td style="min-width: 0; text-align: right;" class="col-2"><pre style="display: inline; color: gray;" title="{{ step_start }}">{{ step_timing }}</pre></td>
+                <td style="min-width: 0; text-align: right;" class="col-2"><pre style="display: inline; color: gray;" title="{{ step['start_at'] }}">{{ step['start_at'] }}</pre></td>
             </tr>
             {% endif %}
 
