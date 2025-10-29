@@ -90,7 +90,7 @@ class scenario(BaseModel):
         column_name="feature_run_id",
     )
     name = TextField()
-    seq = FloatField(null=True)
+    seq = IntegerField(null=True)
     status = TextField(null=True)
     duration = FloatField(null=True)
     start_at = DateTimeField(null=True)
