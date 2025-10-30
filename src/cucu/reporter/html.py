@@ -49,54 +49,58 @@ def process_tags(element):
     element["tags"] = " ".join(prepared_tags)
 
 
-# function to left pad duration with '0' for better alphabetical sorting in html reports.
+def urlencode(string):
+    """
+    handles encoding specific characters in the names of features/scenarios
+    so they can be used in a URL. NOTICE: we're not handling spaces since
+    the browser handles those already.
+
+    """
+    return string.replace('"', "%22").replace("'", "%27").replace("#", "%23")
+
+
 def left_pad_zeroes(elapsed_time):
+    """left pad duration with '0' for better alphabetical sorting in html reports"""
     int_decimal = str(round(elapsed_time, 3)).split(".")
     int_decimal[0] = int_decimal[0].zfill(3)
     padded_duration = ".".join(int_decimal)
     return padded_duration
 
 
+def browser_timestamp_to_datetime(value):
+    """Convert a browser timestamp (in milliseconds since epoch) to a datetime object"""
+    try:
+        timestamp_sec = int(value) / 1000.0
+        return datetime.fromtimestamp(timestamp_sec).strftime(
+            "%Y-%m-%d %H:%M:%S,%f"
+        )[:-3]
+    except (ValueError, TypeError):
+        return None
+
+
+def step_text_list_to_html(text):
+    """Convert a list of step text lines to an indented HTML heredoc format"""
+    text_indent = " " * 8
+    heredoc_quote = '"""'
+    return "\n".join(
+        [text_indent + heredoc_quote]
+        + [f"{text_indent}{x}" for x in text]
+        + [text_indent + heredoc_quote]
+    )
+
+
+def step_table_to_html(table_data):
+    """Convert a step table data structure to an indented HTML table format"""
+    text_indent = " " * 8
+    return format_gherkin_table(
+        table_data["rows"],
+        table_data["headings"],
+        text_indent,
+    )
+
+
 def generate(results: Path, basepath: Path):
     ## Jinja2 templates setup
-    def urlencode(string):
-        """
-        handles encoding specific characters in the names of features/scenarios
-        so they can be used in a URL. NOTICE: we're not handling spaces since
-        the browser handles those already.
-
-        """
-        return (
-            string.replace('"', "%22").replace("'", "%27").replace("#", "%23")
-        )
-
-    def browser_timestamp_to_datetime(value):
-        """Convert a browser timestamp (in milliseconds since epoch) to a datetime object."""
-        try:
-            timestamp_sec = int(value) / 1000.0
-            return datetime.fromtimestamp(timestamp_sec).strftime(
-                "%Y-%m-%d %H:%M:%S,%f"
-            )[:-3]
-        except (ValueError, TypeError):
-            return None
-
-    def step_text_list_to_html(text):
-        text_indent = " " * 8
-        heredoc_quote = '"""'
-        return "\n".join(
-            [text_indent + heredoc_quote]
-            + [f"{text_indent}{x}" for x in text]
-            + [text_indent + heredoc_quote]
-        )
-
-    def step_table_to_html(table_data):
-        text_indent = " " * 8
-        return format_gherkin_table(
-            table_data["rows"],
-            table_data["headings"],
-            text_indent,
-        )
-
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)  # nosec
     templates.globals.update(
@@ -149,9 +153,7 @@ def generate(results: Path, basepath: Path):
                 )
                 feature_results_dir = os.path.dirname(db_path)
 
-            feature_dict["results_dir"] = (
-                feature_results_dir  # directory where feature results are stored
-            )
+            feature_dict["results_dir"] = feature_results_dir
             feature_dict["folder_name"] = ellipsize_filename(db_feature.name)
             feature_dict["duration"] = (
                 feature_dict["start_at"] - feature_dict["start_at"]
@@ -159,17 +161,18 @@ def generate(results: Path, basepath: Path):
 
             process_tags(feature_dict)
 
+            feature_path = basepath / feature_dict["folder_name"]
+
             if feature_dict["status"] not in ["skipped", "untested"]:
                 # copy each feature directories contents over to the report directory
                 src_feature_filepath = os.path.join(
                     feature_dict["results_dir"], feature_dict["folder_name"]
                 )
-                dst_feature_filepath = basepath / feature_dict["folder_name"]
 
                 if os.path.exists(src_feature_filepath):
                     shutil.copytree(
                         src_feature_filepath,
-                        dst_feature_filepath,
+                        feature_path,
                         dirs_exist_ok=True,
                     )
                 else:
@@ -185,8 +188,6 @@ def generate(results: Path, basepath: Path):
                 logger.debug(f"Feature {db_feature.name} has no scenarios")
                 continue
 
-            feature_path = basepath / feature_dict["folder_name"]
-            os.makedirs(feature_path, exist_ok=True)
             for scenario_dict in sorted(
                 feature_dict["scenarios"], key=lambda x: x["seq"]
             ):
