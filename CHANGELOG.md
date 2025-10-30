@@ -6,13 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 1.3.17
-- Change - remove --report-only-failures and --only-failures args
-- Change - html - format browser logs and convert timestamp to datetime
+- Change - refactor html generation code to rely on db only
+- Fix - some db col types and add changes to support refactor
+- Change - remove feature --report-only-failures and --only-failures args
 - Change - rename col from scenario["line"] => to scenario["line_number"]
-- Change - correct some db col types and add changes to support refactor 
+- Fix - doc CONTRIBUTING.md with -d option
 - Add - more db views
-- Chore - refactor HTML.py to use the db more directly
-- Chore - correct CONTRIBUTING.md with -d option
 - Chore - move highlight data to recording phase
 
 ## 1.3.15
