@@ -67,7 +67,7 @@ def execute_javascript_and_save(ctx, variable):
 def assert_url_is(ctx, value):
     ctx.check_browser_initialized()
     url = ctx.browser.get_current_url()
-    if value == url:
+    if value != url:
         raise RuntimeError(f"current url is {url}, not {value}")
 
 
