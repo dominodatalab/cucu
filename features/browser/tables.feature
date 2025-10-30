@@ -5,7 +5,6 @@ Feature: Tables
   Background: HTML page with tables
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
 
-  @boo
   Scenario: User verify there is an exact table
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
      Then I should see a table that is the following:
@@ -14,14 +13,12 @@ Feature: Tables
         | Joe    | San Francisco | United States |
         | Maria  | Cancun        | Mexico        |
 
-  @boo
   Scenario: User can verify is not an exact table
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
      Then I should not see a table that is the following:
         | Name   | City          |
         | Alfred | Berlin        |
 
-  @boo
   Scenario: User verify there is a matching table
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
      Then I should see a table that matches the following:
