@@ -229,9 +229,9 @@ def generate(results: Path, basepath: Path):
                         sub_header = handler(scenario_dict, feature_dict)
                         if sub_header:
                             sub_headers.append(sub_header)
-                    except Exception:
+                    except Exception as e:
                         logger.warning(
-                            f'Exception while trying to run sub_headers hook for scenario: "{scenario_dict["name"]}"\n{traceback.format_exc()}'
+                            f'Exception while trying to run sub_headers hook for scenario: "{scenario_dict["name"]}": {e}'
                         )
                 scenario_dict["sub_headers"] = "<br/>".join(sub_headers)
 
