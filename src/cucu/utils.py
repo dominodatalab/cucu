@@ -9,6 +9,7 @@ import os
 import pkgutil
 import shutil
 import time
+from datetime import datetime
 from pathlib import Path
 
 import humanize
@@ -364,3 +365,21 @@ class TeeStream:
     def clear(self):
         """Clear the internal buffer."""
         self.string_buffer = []
+
+
+def get_iso_timestamp_with_ms():
+    """
+    Get the current time as an ISO 8601 formatted string with milliseconds precision.
+    """
+    return datetime.now().isoformat()[:-3]
+
+
+def parse_iso_timestamp(iso_timestamp: (str | None)) -> datetime | None:
+    """
+    Parse an ISO 8601 formatted string with milliseconds precision into a datetime object.
+    Returns None if the input is None.
+    """
+    if iso_timestamp is None:
+        return None
+
+    return datetime.fromisoformat(iso_timestamp)

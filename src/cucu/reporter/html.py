@@ -131,14 +131,15 @@ def generate(results: Path, basepath: Path):
             f"Starting to process {feature_count} features, {scenario_count} scenarios, and {step_count} steps for report"
         )
 
-        features = []
-
         db_features = db.feature.select().order_by(db.feature.start_at)
 
+        features = []
         for db_feature in db_features:
             if db_feature.status == "untested":
                 logger.debug(f"Skipping untested feature: {db_feature.name}")
                 continue
+
+            features.append(feature_dict)
 
             feature_dict = shortcuts.model_to_dict(db_feature, backrefs=True)
             feature_results_dir = results
@@ -153,8 +154,7 @@ def generate(results: Path, basepath: Path):
             )
             feature_dict["folder_name"] = ellipsize_filename(db_feature.name)
             feature_dict["duration"] = (
-                datetime.fromisoformat(feature_dict["start_at"])
-                - datetime.fromisoformat(feature_dict["start_at"])
+                feature_dict["start_at"] - feature_dict["start_at"]
             ).total_seconds()
 
             process_tags(feature_dict)
@@ -201,8 +201,7 @@ def generate(results: Path, basepath: Path):
                 )
                 scenario_dict["total_steps"] = len(scenario_dict["steps"])
                 offset_seconds = (
-                    datetime.fromisoformat(scenario_dict["start_at"])
-                    - datetime.fromisoformat(feature_dict["start_at"])
+                    scenario_dict["start_at"] - feature_dict["start_at"]
                 ).total_seconds()
                 scenario_dict["time_offset"] = datetime.fromtimestamp(
                     offset_seconds, timezone.utc
@@ -246,17 +245,12 @@ def generate(results: Path, basepath: Path):
                     # process timestamps and time offsets
                     if step_dict["end_at"]:
                         if step_dict["start_at"]:
-                            timestamp = datetime.fromisoformat(
-                                step_dict["start_at"]
-                            )
+                            timestamp = step_dict["start_at"]
                             step_dict["timestamp"] = timestamp
 
                             time_offset = datetime.fromtimestamp(
                                 (
-                                    timestamp
-                                    - datetime.fromisoformat(
-                                        scenario_dict["start_at"]
-                                    )
+                                    timestamp - scenario_dict["start_at"]
                                 ).total_seconds(),
                                 timezone.utc,
                             )
@@ -324,14 +318,12 @@ def generate(results: Path, basepath: Path):
             feature_output_filepath = basepath / f"{feature_dict['name']}.html"
             feature_output_filepath.write_text(rendered_feature_html)
 
-            features.append(feature_dict)
-
-        feature_dict["total_steps"] = sum(
-            [x["total_steps"] for x in feature_dict["scenarios"]]
-        )
-        feature_dict["duration"] = left_pad_zeroes(
-            sum([float(x["duration"]) for x in feature_dict["scenarios"]])
-        )
+            feature_dict["total_steps"] = sum(
+                [x["total_steps"] for x in feature_dict["scenarios"]]
+            )
+            feature_dict["duration"] = left_pad_zeroes(
+                sum([float(x["duration"]) for x in feature_dict["scenarios"]])
+            )
 
         # query the database for stats
         feature_stats_db = db.db.execute_sql("SELECT * FROM flat_feature")
@@ -344,31 +336,31 @@ def generate(results: Path, basepath: Path):
         keys = tuple([x[0] for x in grand_totals_db.description])
         grand_totals = dict(zip(keys, grand_totals_db.fetchone()))
 
+        ## Generate index.html and flat.html
+
+        index_template = templates.get_template("index.html")
+        rendered_index_html = index_template.render(
+            feature_stats=feature_stats,
+            grand_totals=grand_totals,
+            title="Cucu HTML Test Report",
+            basepath=basepath,
+            dir_depth="",
+        )
+        html_index_path = basepath / "index.html"
+        html_index_path.write_text(rendered_index_html)
+
+        flat_template = templates.get_template("flat.html")
+        rendered_flat_html = flat_template.render(
+            features=features,
+            grand_totals=grand_totals,
+            title="Flat HTML Test Report",
+            basepath=basepath,
+            dir_depth="",
+        )
+        html_flat_path = basepath / "flat.html"
+        html_flat_path.write_text(rendered_flat_html)
+
     finally:
         db.close_html_report_db()
-
-    ## Generate index.html and flat.html
-
-    index_template = templates.get_template("index.html")
-    rendered_index_html = index_template.render(
-        feature_stats=feature_stats,
-        grand_totals=grand_totals,
-        title="Cucu HTML Test Report",
-        basepath=basepath,
-        dir_depth="",
-    )
-    html_index_path = basepath / "index.html"
-    html_index_path.write_text(rendered_index_html)
-
-    flat_template = templates.get_template("flat.html")
-    rendered_flat_html = flat_template.render(
-        features=features,
-        grand_totals=grand_totals,
-        title="Flat HTML Test Report",
-        basepath=basepath,
-        dir_depth="",
-    )
-    html_flat_path = basepath / "flat.html"
-    html_flat_path.write_text(rendered_flat_html)
 
     return html_flat_path

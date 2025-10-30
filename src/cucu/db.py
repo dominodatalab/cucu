@@ -5,7 +5,6 @@ Database creation and management utilities for cucu.
 import logging
 import sqlite3
 import sys
-from datetime import datetime
 from pathlib import Path
 
 from peewee import (
@@ -22,6 +21,7 @@ from tenacity import RetryError
 
 from cucu import logger as cucu_logger
 from cucu.config import CONFIG
+from cucu.utils import get_iso_timestamp_with_ms, parse_iso_timestamp
 
 db_filepath = CONFIG["RUN_DB_PATH"]
 db = SqliteExtDatabase(db_filepath)
@@ -141,12 +141,11 @@ def record_cucu_run():
     worker_run_id = CONFIG["WORKER_RUN_ID"]
 
     db.connect(reuse_if_open=True)
-    start_at = datetime.now().isoformat()
     cucu_run.create(
         cucu_run_id=cucu_run_id_val,
         full_arguments=sys.argv,
         filepath=filepath,
-        start_at=start_at,
+        start_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
     )
 
     parent_id = (
@@ -158,7 +157,7 @@ def record_cucu_run():
         worker_run_id=worker_run_id,
         cucu_run_id=cucu_run_id_val,
         parent_id=parent_id,
-        start_at=datetime.now().isoformat(),
+        start_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
     )
 
     return str(db_filepath)
@@ -175,7 +174,7 @@ def record_feature(feature_obj):
         if isinstance(feature_obj.description, list)
         else str(feature_obj.description),
         tags=feature_obj.tags,
-        start_at=datetime.now().isoformat(),
+        start_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
     )
 
 
@@ -188,7 +187,7 @@ def record_scenario(scenario_obj):
         line_number=scenario_obj.line,
         seq=scenario_obj.seq,
         tags=scenario_obj.tags,
-        start_at=getattr(scenario_obj, "start_at", None),
+        start_at=parse_iso_timestamp(getattr(scenario_obj, "start_at", None)),
     )
 
 
@@ -263,7 +262,7 @@ def finish_step_record(step_obj, duration):
         screenshots=getattr(step_obj, "screenshots", []),
         section_level=getattr(step_obj, "section_level", None),
         seq=step_obj.seq,
-        start_at=getattr(step_obj, "start_at", None),
+        start_at=parse_iso_timestamp(getattr(step_obj, "start_at", None)),
         status=step_obj.status.name,
         stderr=getattr(step_obj, "stderr", []),
         stdout=getattr(step_obj, "stdout", []),
@@ -273,14 +272,8 @@ def finish_step_record(step_obj, duration):
 
 def finish_scenario_record(scenario_obj):
     db.connect(reuse_if_open=True)
-    if getattr(scenario_obj, "start_at", None):
-        start_at = datetime.fromisoformat(scenario_obj.start_at)
-    else:
-        start_at = None
-    if getattr(scenario_obj, "end_at", None):
-        end_at = datetime.fromisoformat(scenario_obj.end_at)
-    else:
-        end_at = None
+    start_at = parse_iso_timestamp(getattr(scenario_obj, "start_at", None))
+    end_at = parse_iso_timestamp(getattr(scenario_obj, "end_at", None))
     if start_at and end_at:
         duration = (end_at - start_at).total_seconds()
     else:
@@ -318,7 +311,7 @@ def finish_feature_record(feature_obj):
     db.connect(reuse_if_open=True)
     feature.update(
         status=feature_obj.status.name,
-        end_at=datetime.now().isoformat(),
+        end_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
         custom_data=feature_obj.custom_data,
     ).where(feature.feature_run_id == feature_obj.feature_run_id).execute()
 
@@ -327,7 +320,7 @@ def finish_worker_record(custom_data=None, worker_run_id=None):
     db.connect(reuse_if_open=True)
     target_worker_run_id = worker_run_id or CONFIG["WORKER_RUN_ID"]
     worker.update(
-        end_at=datetime.now().isoformat(),
+        end_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
         custom_data=custom_data,
     ).where(worker.worker_run_id == target_worker_run_id).execute()
 
@@ -335,7 +328,7 @@ def finish_worker_record(custom_data=None, worker_run_id=None):
 def finish_cucu_run_record():
     db.connect(reuse_if_open=True)
     cucu_run.update(
-        end_at=datetime.now().isoformat(),
+        end_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
     ).where(cucu_run.cucu_run_id == CONFIG["CUCU_RUN_ID"]).execute()
 
 
