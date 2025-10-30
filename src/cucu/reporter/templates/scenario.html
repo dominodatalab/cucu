@@ -35,7 +35,7 @@
                     <button class="btn btn-md btn-light" title="scroll to bottom" onclick="window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });" class="nav-link">⬇️ </button>
                 </li>
                 <li class="align-middle">
-                    <div style="padding: 8px">Started {{ scenario["started_at"] }} for {{ scenario['duration'] }}</div>
+                    <div style="padding: 8px">Start at {{ scenario["start_at"] }} for {{ '{:.1f}'.format(scenario['duration'] | float) }}s</div>
                 </li>
               </ul>
             </div>
@@ -80,19 +80,19 @@
         </tr>
         {% for step in steps %}
             {% set step_name = step['keyword'] + ' ' + escape(step['name']) %}
-            {% if step['substep'] %}
+            {% if step['is_substep'] %}
                 {% set step_prefix = "     ⤷" %}
             {% else %}
                 {% set step_prefix = "" %}
             {% endif %}
-            {% if step['result'] is defined %}
-                {% set step_status = step['result']['status'] %}
-                {% if step['result']['status'] == 'skipped' %}
+            {% if step is defined %}
+                {% set step_status = step['status'] %}
+                {% if step['status'] == 'skipped' %}
                     {% set step_status = 'untested' %}
                 {% endif %}
-                {% if step['result']['status'] in ('failed', 'passed') and step["result"]["timestamp"] %}
-                    {% set step_timing = "{} for {:.3f}s".format(step["result"]["timestamp"].strftime("%H:%M:%S"), step["result"]["duration"]) %}
-                    {% set step_start = step["result"]["timestamp"] %}
+                {% if step['status'] in ('failed', 'passed') and step["timestamp"] %}
+                    {% set step_timing = "{} for {:.3f}s".format(step["timestamp"].strftime("%H:%M:%S"), step["duration"]) %}
+                    {% set step_start = step["timestamp"] %}
                 {% endif %}
             {% else %}
                 {% set step_status = 'untested' %}
@@ -115,65 +115,65 @@
                     <a class="anchor" id="step_{{ loop.index}}" href="#step_{{ loop.index }}">🔗</a>
                     <pre class="status-{{ step_status }}">{{ step_keyword }}</pre><span style="display: contents;" title="{{ escape(step['name']) }}"> {{ escape(step['name']) }}</span>
                 </td>
-                <td style="min-width: 0; text-align: right;" class="col-2"><pre style="display: inline; color: gray;" title="{{ step_start }}">{{ step_timing }}</pre></td>
+                <td style="min-width: 0; text-align: right;" class="col-2"><pre style="display: inline; color: gray;" title="{{ step['start_at'] }}">{{ step_timing }}</pre></td>
             </tr>
             {% endif %}
 
-            {% if step['text'] or step['table'] %}
+            {% if step['text'] or step['table_data'] %}
                 <tr class="row"><td style="min-width: 0;" class="col-12" colspan="2">
                 {% if step['text'] %}
-                        <pre style="margin: 0;">{{ escape(step['text']) }}</pre>
+                        <pre style="margin: 0;">{{ escape(step_text_list_to_html(step['text'])) }}</pre>
                 {% endif %}
-                {% if step['table'] %}
-                        <pre style="margin: 0;">{{ escape(step['table']) }}</pre>
+                {% if step['table_data'] %}
+                        <pre style="margin: 0;">{{ escape(step_table_to_html(step['table_data'])) }}</pre>
                 {% endif %}
                 </td></tr>
             {% endif %}
 
-            {% if step['result'] is defined %}
+            {% if step is defined %}
                 <tr class="row"><td style="min-width: 0;" class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
 
-                {% if step['result']['stdout'] %}
+                {% if step['stdout'] %}
                 <details open>
-                    <summary style="color: dimgray;">stdout ({{ step['result']['stdout']|length }} lines)</summary>
-                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['stdout'])) }}</pre>
+                    <summary style="color: dimgray;">stdout ({{ step['stdout']|length }} lines)</summary>
+                    <pre style="color: darkgray;">{{ escape("\n".join(step['stdout'])) }}</pre>
                 </details>
                 {% endif %}
-                {% if step['result']['stderr'] %}
+                {% if step['stderr'] %}
                 <details open>
-                    <summary style="color: dimgray;">stderr ({{ step['result']['stderr']|length }} lines)</summary>
-                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['stderr'])) }}</pre>
+                    <summary style="color: dimgray;">stderr ({{ step['stderr']|length }} lines)</summary>
+                    <pre style="color: darkgray;">{{ escape("\n".join(step['stderr'])) }}</pre>
                 </details>
                 {% endif %}
-                {% if step['images'] %}
+                {% if step['screenshots'] %}
                 <details open>
-                    <summary style="color: dimgray;">images ({{ step['images']|length }} images)</summary>
+                    <summary style="color: dimgray;">images ({{ step['screenshots']|length }} images)</summary>
                     <div style="margin: 10px 0 0 0;">
-                        {% for image in step['images'] %}
-                            <img class="mx-auto d-block img-fluid shadow bg-white rounded" id='{{image['id']}}' style="margin-bottom:15px" alt='{{ image["label"] }}' title='{{ image["label"] }}' src='{{ image["src"] }}'></img>
+                        {% for image in step['screenshots'] %}
+                            <img class="mx-auto d-block img-fluid shadow bg-white rounded" id="{{ image['html_id'] }}" style="margin-bottom:15px" alt="{{ escape(image['label']) }}" title="{{ escape(image['label']) }}" src="{{ image['html_src'] }}"></img>
                             {% if image['highlight'] %}
-                            <div class="step-image-highlight" id='{{ image["id"]}}-highlight' height-ratio='{{ image['highlight']['height_ratio'] }}' width-ratio='{{ image['highlight']['width_ratio'] }}' top-ratio='{{ image['highlight']['top_ratio'] }}' left-ratio='{{ image['highlight']['left_ratio'] }}'></div>
+                            <div class="step-image-highlight" id="{{ image['id']}}-highlight" height-ratio="{{ image['highlight']['height_ratio'] }}" width-ratio="{{ image['highlight']['width_ratio'] }}" top-ratio="{{ image['highlight']['top_ratio'] }}" left-ratio="{{ image['highlight']['left_ratio'] }}"></div>
                             {% endif %}
                         {% endfor %}
                     </div>
                 </details>
                 {% endif %}
-                {% if step['result']['error_message'] %}
+                {% if step['error_message'] %}
                 <details open>
-                    <summary style="color: dimgray;">error message ({{ step['result']['error_message']|length }} lines)</summary>
-                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['error_message'])) }}</pre>
+                    <summary style="color: dimgray;">error message ({{ step['error_message']|length }} lines)</summary>
+                    <pre style="color: darkgray;">{% for entry in step['error_message'] %}{{ entry }}<br/>{% endfor %}</pre>
                 </details>
                 {% endif %}
-                {% if step['result']['browser_logs'] %}
+                {% if step['browser_logs'] %}
                 <details open>
-                    <summary style="color: dimgray;">browser logs ({{ step['result']['browser_logs']|length }} lines)</summary>
-                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['browser_logs'])) }}</pre>
+                    <summary style="color: dimgray;">browser logs ({{ step['browser_logs']|length }} entries)</summary>
+                    <pre style="color: darkgray;">{% for entry in step['browser_logs'] %}{{ browser_timestamp_to_datetime(entry['timestamp']) }} {{ entry['level'] }} {{ entry['source']}}: {{ entry['message'] }}<br/>{% endfor %}</pre>
                 </details>
                 {% endif %}
-                {% if step['result']['debug_output'] %}
+                {% if step['debug_output'] %}
                 <details open>
-                    <summary style="color: dimgray;">debug output ({{ step['result']['debug_output']|length }} lines)</summary>
-                    <pre style="color: darkgray;">{{ escape("\n".join(step['result']['debug_output'])) }}</pre>
+                    <summary style="color: dimgray;">debug output ({{ step['debug_output']|length }} lines)</summary>
+                    <pre style="color: darkgray;">{{ escape("\n".join(step['debug_output'])) }}</pre>
                 </details>
                 {% endif %}
 

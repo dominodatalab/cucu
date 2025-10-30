@@ -5,7 +5,6 @@ Database creation and management utilities for cucu.
 import logging
 import sqlite3
 import sys
-from datetime import datetime
 from pathlib import Path
 
 from peewee import (
@@ -20,7 +19,9 @@ from peewee import (
 from playhouse.sqlite_ext import JSONField, SqliteExtDatabase
 from tenacity import RetryError
 
+from cucu import logger as cucu_logger
 from cucu.config import CONFIG
+from cucu.utils import get_iso_timestamp_with_ms, parse_iso_timestamp
 
 db_filepath = CONFIG["RUN_DB_PATH"]
 db = SqliteExtDatabase(db_filepath)
@@ -89,7 +90,7 @@ class scenario(BaseModel):
         column_name="feature_run_id",
     )
     name = TextField()
-    seq = FloatField(null=True)
+    seq = IntegerField(null=True)
     status = TextField(null=True)
     duration = FloatField(null=True)
     start_at = DateTimeField(null=True)
@@ -124,13 +125,14 @@ class step(BaseModel):
     stderr = JSONField()
     error_message = JSONField(null=True)
     exception = JSONField(null=True)
-    debug_output = TextField()
+    debug_output = JSONField()
     browser_info = JSONField()
     text = JSONField(null=True)
     table_data = JSONField(null=True)
     location = TextField()
-    browser_logs = TextField()
-    screenshots = JSONField(null=True)
+    browser_logs = JSONField()
+    screenshots = JSONField()
+    image_dir = TextField(null=True)
 
 
 def record_cucu_run():
@@ -139,12 +141,11 @@ def record_cucu_run():
     worker_run_id = CONFIG["WORKER_RUN_ID"]
 
     db.connect(reuse_if_open=True)
-    start_at = datetime.now().isoformat()
     cucu_run.create(
         cucu_run_id=cucu_run_id_val,
         full_arguments=sys.argv,
         filepath=filepath,
-        start_at=start_at,
+        start_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
     )
 
     parent_id = (
@@ -156,7 +157,7 @@ def record_cucu_run():
         worker_run_id=worker_run_id,
         cucu_run_id=cucu_run_id_val,
         parent_id=parent_id,
-        start_at=datetime.now().isoformat(),
+        start_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
     )
 
     return str(db_filepath)
@@ -173,7 +174,7 @@ def record_feature(feature_obj):
         if isinstance(feature_obj.description, list)
         else str(feature_obj.description),
         tags=feature_obj.tags,
-        start_at=datetime.now().isoformat(),
+        start_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
     )
 
 
@@ -186,7 +187,7 @@ def record_scenario(scenario_obj):
         line_number=scenario_obj.line,
         seq=scenario_obj.seq,
         tags=scenario_obj.tags,
-        start_at=getattr(scenario_obj, "start_at", None),
+        start_at=parse_iso_timestamp(getattr(scenario_obj, "start_at", None)),
     )
 
 
@@ -214,31 +215,25 @@ def start_step_record(step_obj, scenario_run_id):
         has_substeps=getattr(step_obj, "has_substeps", False),
         section_level=getattr(step_obj, "section_level", None),
         browser_info="",
-        browser_logs="",
-        debug_output="",
+        browser_logs=[],
+        error_message=[],
+        debug_logs=[],
+        debug_output=[],
         stderr=[],
         stdout=[],
+        screenshots=[],
     )
 
 
 def finish_step_record(step_obj, duration):
     db.connect(reuse_if_open=True)
-    screenshot_infos = []
-    if hasattr(step_obj, "screenshots") and step_obj.screenshots:
-        for screenshot in step_obj.screenshots:
-            screenshot_info = {
-                "step_name": screenshot.get("step_name"),
-                "label": screenshot.get("label"),
-                "location": screenshot.get("location"),
-                "size": screenshot.get("size"),
-                "filepath": screenshot.get("filepath"),
-            }
-            screenshot_infos.append(screenshot_info)
 
-    error_message = None
+    error_message = []
     exception = []
     if step.error_message and step_obj.status.name == "failed":
-        error_message = CONFIG.hide_secrets(step_obj.error_message)
+        error_message = CONFIG.hide_secrets(
+            step_obj.error_message
+        ).splitlines()
 
         if error := step_obj.exception:
             if isinstance(error, RetryError):
@@ -255,35 +250,30 @@ def finish_step_record(step_obj, duration):
             exception = error_lines
 
     step.update(
-        browser_info=getattr(step_obj, "browser_info", ""),
-        browser_logs=getattr(step_obj, "browser_logs", ""),
-        debug_output=getattr(step_obj, "debug_output", ""),
+        browser_info=getattr(step_obj, "browser_info", {}),
+        browser_logs=getattr(step_obj, "browser_logs", []),
+        debug_output=getattr(step_obj, "debug_output", []),
         duration=duration,
         end_at=getattr(step_obj, "end_at", None),
         error_message=error_message,
         exception=exception,
         has_substeps=getattr(step_obj, "has_substeps", False),
         parent_seq=getattr(step_obj, "parent_seq", None),
-        screenshots=screenshot_infos,
+        screenshots=getattr(step_obj, "screenshots", []),
         section_level=getattr(step_obj, "section_level", None),
         seq=step_obj.seq,
-        start_at=getattr(step_obj, "start_at", None),
+        start_at=parse_iso_timestamp(getattr(step_obj, "start_at", None)),
         status=step_obj.status.name,
         stderr=getattr(step_obj, "stderr", []),
         stdout=getattr(step_obj, "stdout", []),
+        image_dir=getattr(step_obj, "step_image_dir", None),
     ).where(step.step_run_id == step_obj.step_run_id).execute()
 
 
 def finish_scenario_record(scenario_obj):
     db.connect(reuse_if_open=True)
-    if getattr(scenario_obj, "start_at", None):
-        start_at = datetime.fromisoformat(scenario_obj.start_at)
-    else:
-        start_at = None
-    if getattr(scenario_obj, "end_at", None):
-        end_at = datetime.fromisoformat(scenario_obj.end_at)
-    else:
-        end_at = None
+    start_at = parse_iso_timestamp(getattr(scenario_obj, "start_at", None))
+    end_at = parse_iso_timestamp(getattr(scenario_obj, "end_at", None))
     if start_at and end_at:
         duration = (end_at - start_at).total_seconds()
     else:
@@ -321,7 +311,7 @@ def finish_feature_record(feature_obj):
     db.connect(reuse_if_open=True)
     feature.update(
         status=feature_obj.status.name,
-        end_at=datetime.now().isoformat(),
+        end_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
         custom_data=feature_obj.custom_data,
     ).where(feature.feature_run_id == feature_obj.feature_run_id).execute()
 
@@ -330,7 +320,7 @@ def finish_worker_record(custom_data=None, worker_run_id=None):
     db.connect(reuse_if_open=True)
     target_worker_run_id = worker_run_id or CONFIG["WORKER_RUN_ID"]
     worker.update(
-        end_at=datetime.now().isoformat(),
+        end_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
         custom_data=custom_data,
     ).where(worker.worker_run_id == target_worker_run_id).execute()
 
@@ -338,7 +328,7 @@ def finish_worker_record(custom_data=None, worker_run_id=None):
 def finish_cucu_run_record():
     db.connect(reuse_if_open=True)
     cucu_run.update(
-        end_at=datetime.now().isoformat(),
+        end_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
     ).where(cucu_run.cucu_run_id == CONFIG["CUCU_RUN_ID"]).execute()
 
 
@@ -351,6 +341,57 @@ def create_database_file(db_filepath):
     db.init(db_filepath)
     db.connect(reuse_if_open=True)
     db.create_tables([cucu_run, worker, feature, scenario, step])
+    db.execute_sql("""
+            CREATE VIEW IF NOT EXISTS flat_all AS
+            WITH scenario_with_steps AS (
+                SELECT
+                    *,
+                    COUNT(st.step_run_id) AS steps
+                FROM scenario s
+                LEFT JOIN step st ON s.scenario_run_id = st.scenario_run_id
+                GROUP BY s.scenario_run_id
+            )
+            SELECT
+                COUNT(DISTINCT s.feature_run_id) AS features,
+                COUNT(s.scenario_run_id) AS scenarios,
+                SUM(CASE WHEN s.status = 'passed' THEN 1 ELSE 0 END) AS passed,
+                SUM(CASE WHEN s.status = 'failed' THEN 1 ELSE 0 END) AS failed,
+                SUM(CASE WHEN s.status = 'skipped' THEN 1 ELSE 0 END) AS skipped,
+                SUM(CASE WHEN s.status = 'errored' THEN 1 ELSE 0 END) AS errored,
+                SUM(s.duration) AS duration,
+                SUM(s.steps) AS steps
+            FROM scenario_with_steps s
+        """)
+    db.execute_sql("""
+            CREATE VIEW IF NOT EXISTS flat_feature AS
+            WITH feature_first_level AS (
+                SELECT
+                    w.cucu_run_id,
+                    f.start_at,
+                    f.name AS feature_name,
+                    COUNT(s.scenario_run_id) AS scenarios,
+                    SUM(CASE WHEN s.status = 'passed' THEN 1 ELSE 0 END) AS passed,
+                    SUM(CASE WHEN s.status = 'failed' THEN 1 ELSE 0 END) AS failed,
+                    SUM(CASE WHEN s.status = 'skipped' THEN 1 ELSE 0 END) AS skipped,
+                    SUM(CASE WHEN s.status = 'errored' THEN 1 ELSE 0 END) AS errored,
+                    SUM(s.duration) AS duration
+                FROM cucu_run r
+                JOIN worker w ON r.cucu_run_id = w.cucu_run_id
+                JOIN feature f ON w.worker_run_id = f.worker_run_id
+                JOIN scenario s ON f.feature_run_id = s.feature_run_id
+                GROUP BY f.feature_run_id
+            )
+            SELECT
+                *,
+                CASE
+                    WHEN failed  > 0 THEN 'failed'
+                    WHEN errored > 0 THEN 'errored'
+                    WHEN passed  > 0 THEN 'passed'
+                    WHEN skipped > 0 THEN 'skipped'
+                END AS status
+            FROM feature_first_level
+            ORDER BY start_at ASC
+        """)
     db.execute_sql("""
             CREATE VIEW IF NOT EXISTS flat AS
             SELECT
@@ -416,7 +457,12 @@ def consolidate_database_files(results_dir, combine=False):
     results_path = Path(results_dir)
     target_db_path = results_path / "run.db"
     if not target_db_path.exists():
+        cucu_logger.info(
+            f"Creating new consolidated database at {target_db_path}"
+        )
         create_database_file(target_db_path)
+    else:
+        cucu_logger.debug(f"Found existing database at {target_db_path}")
 
     if not combine:
         db_files = [
@@ -427,6 +473,14 @@ def consolidate_database_files(results_dir, combine=False):
         db_files = [
             db for db in results_path.rglob("run*.db") if db != Path("run.db")
         ]
+
+    if not db_files:
+        cucu_logger.debug("No database files found to consolidate.")
+        return
+    else:
+        cucu_logger.debug(
+            f"Found {len(db_files)} database files to consolidate."
+        )
 
     tables_to_copy = ["cucu_run", "worker", "feature", "scenario", "step"]
     with sqlite3.connect(target_db_path) as target_conn:

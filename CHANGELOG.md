@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.3.17
+- Change - refactor html generation code to rely on db only
+- Fix - some db col types and add changes to support refactor
+- Change - remove feature --report-only-failures and --only-failures args
+- Change - rename col from scenario["line"] => to scenario["line_number"]
+- Fix - doc CONTRIBUTING.md with -d option
+- Add - more db views
+- Chore - move highlight data to recording phase
+
 ## 1.3.16
 - Fix - fix a typo inverting a condition in assert_url_is
 

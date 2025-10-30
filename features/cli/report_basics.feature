@@ -104,8 +104,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Features                   | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with mixed results | 6           | 3        | 3        | 0         | 0         | failed | .*         |
+        | Start at | Features.*                 | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*       | Feature with mixed results | 6           | 3        | 3        | 0         | 0         | failed | .*         |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -129,8 +129,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Features                   | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with mixed results | 7           | 3        | 3        | 1         | 0         | failed | .*         |
+        | Start at | Features.*                 | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*       | Feature with mixed results | 7           | 3        | 3        | 1         | 0         | failed | .*         |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -155,8 +155,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Features                   | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with background    | 1           | 1        | 0        | 0         | 0         | passed | .*         |
+        | Start at | Features.*                 | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*       | Feature with background    | 1           | 1        | 0        | 0         | 0         | passed | .*         |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -169,8 +169,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Features                   | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with background    | 2           | 1        | 0        | 1         | 0         | passed | .*         |
+        | Start at | Features.*                 | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*       | Feature with background    | 2           | 1        | 0        | 1         | 0         | passed | .*         |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -241,8 +241,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Features                   | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with mixed results | 6           | 3        | 3        | 0         | 0         | failed | .*         |
+        | Start at | Features.*                 | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*       | Feature with mixed results | 6           | 3        | 3        | 0         | 0         | failed | .*         |
      When I click the button "Feature with mixed results"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -264,8 +264,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_background_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Features                | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with background | 1           | 1        | 0        | 0         | 0         | passed | .*         |
+        | Start at | Features.*              | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*       | Feature with background | 1           | 1        | 0        | 0         | 0         | passed | .*         |
      When I click the button "Feature with background"
      Then I should see a table that matches the following:
         | Offset | Scenario                            | Steps | Status  | Duration |
@@ -324,24 +324,6 @@ Feature: Report basics
       """
       And I run the command "cucu run {CUCU_RESULTS_DIR}/highlights --results {CUCU_RESULTS_DIR}/empty_features_results --env CUCU_SKIP_HIGHLIGHT_BORDER='False' --generate-report --report {CUCU_RESULTS_DIR}/highlights_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
 
-  @report-only-failures
-  Scenario: User can generate a report with only failures
-    Given I run the command "cucu run data/features --tags @passing,@failing --report-only-failures --results {CUCU_RESULTS_DIR}/report_only_failures --generate-report --report {CUCU_RESULTS_DIR}/report_only_failures_report" and expect exit code "1"
-      And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_only_failures_report/" and save the port to the variable "PORT"
-      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
-     Then I should see a table that matches the following:
-        | Started at | Features                               | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Feature with failing scenario          | 1           | 0        | 1        | 0         | 0         | failed | .*         |
-        | .*         | Feature with failing to find a table   | 1     | 0      | 1      | 0       | 0       | failed | .*       |
-        | .*         | Feature with failing scenario with web | 1     | 0      | 1      | 0       | 0       | failed | .*       |
-     When I click the button "Feature with failing scenario with web"
-     Then I should see a table that matches the following:
-        | Offset | Scenario                              | Steps | Status | Duration |
-        | .*     | Just a scenario that opens a web page | 3     | failed | .*       |
-     When I click the button "Just a scenario that opens a web page"
-      And I wait to click the button "show images"
-      And I should see the image with the alt text "After I should see the text "inexistent""
-
   Scenario: User can run a basic test and create a report with the report path in JUnit
     Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/junit-results" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/junit-results --output {CUCU_RESULTS_DIR}/junit-report --junit {CUCU_RESULTS_DIR}/junit-results" and expect exit code "0"
@@ -364,11 +346,11 @@ Feature: Report basics
      When I run the command "cucu report --combine {CUCU_RESULTS_DIR}/combined_results --output {CUCU_RESULTS_DIR}/combined_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
-      [\s\S]*INFO Starting to process 2 features for report[\s\S]*
+      [\s\S]*INFO Starting to process 2 features, 2 scenarios, and 8 steps for report[\s\S]*
       """
      When I start a webserver at directory "{CUCU_RESULTS_DIR}/combined_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Started at | Features                               | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
-        | .*         | Echo                                   | 1           | 1        | 0        | 0         | 0         | passed | .*         |
+        | Start at | Features.*                             | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
+        | .*       | Echo                                   | 1           | 1        | 0        | 0         | 0         | passed | .*         |
         | .*         | Feature with passing scenario with web | 1           | 1        | 0        | 0         | 0         | passed | .*         |

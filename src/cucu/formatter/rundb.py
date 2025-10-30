@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-import datetime
 import os
 import time
 from pathlib import Path
@@ -26,6 +25,7 @@ from cucu.db import (
 )
 from cucu.utils import (
     generate_short_id,
+    get_iso_timestamp_with_ms,
 )
 
 
@@ -125,7 +125,7 @@ class RundbFormatter(Formatter):
         for index, step in enumerate(self.this_steps):
             if getattr(step, "seq", -1) == -1:
                 step.seq = index + 1  # 1-based sequence
-                finish_step_record(step, None)
+                finish_step_record(step, 0)
 
         finish_scenario_record(self.this_scenario)
 
@@ -137,7 +137,7 @@ class RundbFormatter(Formatter):
 
         self.this_scenario = scenario
         self.this_steps = []
-        self.next_start_at = datetime.datetime.now().isoformat()[:-3]
+        self.next_start_at = get_iso_timestamp_with_ms()
         scenario_run_id_seed = (
             f"{scenario.feature.feature_run_id}_{time.perf_counter()}"
         )
@@ -185,9 +185,7 @@ class RundbFormatter(Formatter):
     def result(self, step):
         """Called after processing a step result is known, applies to executed/skipped too."""
         step.start_at = self.next_start_at
-        self.next_start_at = step.end_at = datetime.datetime.now().isoformat()[
-            :-3
-        ]
+        self.next_start_at = step.end_at = get_iso_timestamp_with_ms()
         previous_step_duration = getattr(
             self.this_scenario, "previous_step_duration", 0
         )

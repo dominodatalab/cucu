@@ -102,8 +102,7 @@ There are a few reasons for writing the actual tests in `gherkin` including:
 4. [chromedriver-autoinstaller]() / [geckodriver-autoinstaller]() - auto-install for running locally
 5. [Jinja2]() - templates
 6. [pygls]() - language server
-7. [ipdb]() - debugging convience
-8. [jellyfish]() / [humanize]() / [tabulate]() - easier human readablilty
+7. [jellyfish]() / [humanize]() / [tabulate]() - easier human readablilty
 
 # Dev Setup
 The short list
@@ -139,7 +138,7 @@ The short list
 
 ## Debugging cucu
 Here's some options:
-1. drop into an ipdb debugger on failure using the cucu run `-i` argument
+1. drop into an pdb debugger on failure using the cucu run `-d` argument
 2. add a `breakpoint()` call to python code to drop into an ipdb debugger
 3. configure VSCode to launch and connect in debug mode
    1. in VSCode **`Python: Select Interpreter`** as `./.venv/bin/python`

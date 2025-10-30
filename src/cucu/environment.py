@@ -1,4 +1,3 @@
-import datetime
 import json
 import sys
 import traceback
@@ -13,6 +12,8 @@ from cucu.page_checks import init_page_checks
 from cucu.utils import (
     TeeStream,
     ellipsize_filename,
+    get_iso_timestamp_with_ms,
+    parse_iso_timestamp,
     take_screenshot,
 )
 
@@ -90,7 +91,7 @@ def before_scenario(ctx, scenario):
 
     # reset the step timer dictionary
     ctx.step_timers = {}
-    scenario.start_at = datetime.datetime.now().isoformat()[:-3]
+    scenario.start_at = get_iso_timestamp_with_ms()
 
     if config.CONFIG["CUCU_RESULTS_DIR"] is not None:
         ctx.scenario_dir = ctx.feature_dir / ellipsize_filename(scenario.name)
@@ -205,7 +206,7 @@ def after_scenario(ctx, scenario):
         CONFIG.to_yaml_without_secrets()
     )
 
-    scenario.end_at = datetime.datetime.now().isoformat()[:-3]
+    scenario.end_at = get_iso_timestamp_with_ms()
 
 
 def download_mht_data(ctx):
@@ -237,7 +238,7 @@ def cleanup_browsers(ctx):
 
 
 def before_step(ctx, step):
-    step.start_at = datetime.datetime.now().isoformat()[:-3]
+    step.start_at = get_iso_timestamp_with_ms()
 
     sys.stdout.captured()
     sys.stderr.captured()
@@ -268,16 +269,16 @@ def after_step(ctx, step):
 
     # Capture debug output from the TeeStream for this step
     if hasattr(ctx, "scenario_debug_log_tee"):
-        step.debug_output = ctx.scenario_debug_log_tee.getvalue()
+        step.debug_output = ctx.scenario_debug_log_tee.getvalue().splitlines()
     else:
-        step.debug_output = ""
+        step.debug_output = []
 
-    step.end_at = datetime.datetime.now().isoformat()[:-3]
+    step.end_at = get_iso_timestamp_with_ms()
 
     # calculate duration from ISO timestamps
-    start_at = datetime.datetime.fromisoformat(step.start_at)
-    end_at = datetime.datetime.fromisoformat(step.end_at)
-    ctx.scenario.previous_step_duration = (end_at - start_at).total_seconds()
+    ctx.scenario.previous_step_duration = (
+        parse_iso_timestamp(step.end_at) - parse_iso_timestamp(step.start_at)
+    ).total_seconds()
 
     # when set this means we're running in parallel mode using --workers and
     # we want to see progress reported using simply dots
@@ -325,16 +326,13 @@ def after_step(ctx, step):
         hook(ctx)
 
     # Capture browser logs and info for this step
-    step.browser_logs = ""
-
+    step.browser_logs = []
     browser_info = {"has_browser": False}
     if ctx.browser:
-        browser_logs = []
         for log in ctx.browser.get_log():
             log_entry = json.dumps(log)
-            browser_logs.append(log_entry)
+            step.browser_logs.append(log)
             ctx.browser_log_tee.write(f"{log_entry}\n")
-        step.browser_logs = "\n".join(browser_logs)
 
         tab_info = ctx.browser.get_tab_info()
 

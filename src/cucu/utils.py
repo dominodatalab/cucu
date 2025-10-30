@@ -9,6 +9,8 @@ import os
 import pkgutil
 import shutil
 import time
+from datetime import datetime
+from pathlib import Path
 
 import humanize
 from selenium.webdriver.common.by import By
@@ -246,19 +248,13 @@ def take_screenshot(ctx, step_name, label="", element=None):
 
     if len(label) > 0:
         label = CONFIG.hide_secrets(label).replace("/", "_")
+
     filename = f"{CONFIG['__STEP_SCREENSHOT_COUNT']:0>4} - {label}.png"
     filename = ellipsize_filename(filename)
     filepath = os.path.join(screenshot_dir, filename)
 
     ctx.browser.screenshot(filepath)
-    element_info = {
-        "x": None,
-        "y": None,
-        "height": None,
-        "width": None,
-    }
-    if element:
-        element_info.update(element.rect)
+
     # driver.get_window_size returns the size of the window the OS draws for
     # the browser, not the window the browser uses to display the DOM.
     # If we go through JavaScript, we ignore the height of the adress bar
@@ -273,14 +269,42 @@ def take_screenshot(ctx, step_name, label="", element=None):
         };
         return getDimensionsOfCurrentWindow();
     """
-    browser_window_size = ctx.browser.execute(script)
+    size = ctx.browser.execute(script)
+
+    location = {
+        "x": None,
+        "y": None,
+        "height": None,
+        "width": None,
+    }
+    highlight = {}
+    if element:
+        location.update(element.rect)
+        highlight = {
+            "height_ratio": location["height"] / size["height"],
+            "width_ratio": location["width"] / size["width"],
+            "top_ratio": location["y"] / size["height"],
+            "left_ratio": location["x"] / size["width"],
+        }
+
+    filename = os.path.split(filepath)[-1]
+    if not getattr(step, "step_image_dir", None):
+        step.step_image_dir = get_step_image_dir(ctx.step_index, step_name)
+
+    screenshot_index = len(step.screenshots) + 1
+    id = f"step-img-{step.step_run_id}-{screenshot_index:0>4}"
+
+    src = Path(step.step_image_dir) / filename
     screenshot = {
         "step_name": step_name,
-        "label": label,
-        "element": element,
-        "location": element_info,
+        "label": label or step_name,
+        "location": location,
         "filepath": filepath,
-        "size": browser_window_size,
+        "size": size,
+        "highlight": highlight,
+        "index": screenshot_index,
+        "html_src": str(src),
+        "html_id": id,
     }
     step.screenshots.append(screenshot)
 
@@ -341,3 +365,21 @@ class TeeStream:
     def clear(self):
         """Clear the internal buffer."""
         self.string_buffer = []
+
+
+def get_iso_timestamp_with_ms():
+    """
+    Get the current time as an ISO 8601 formatted string with milliseconds precision.
+    """
+    return datetime.now().isoformat()[:-3]
+
+
+def parse_iso_timestamp(iso_timestamp: (str | None)) -> datetime | None:
+    """
+    Parse an ISO 8601 formatted string with milliseconds precision into a datetime object.
+    Returns None if the input is None.
+    """
+    if iso_timestamp is None:
+        return None
+
+    return datetime.fromisoformat(iso_timestamp)

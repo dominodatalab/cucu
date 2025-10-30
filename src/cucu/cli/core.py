@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-import json
 import os
 import shutil
 import signal
+import sqlite3
 import sys
 import time
 import xml.etree.ElementTree as ET
@@ -155,12 +155,6 @@ def main():
     type=click.Path(path_type=Path),
 )
 @click.option(
-    "--report-only-failures",
-    default=False,
-    is_flag=True,
-    help="when set the HTML test report will only contain the failed test results",
-)
-@click.option(
     "-r",
     "--results",
     default="results",
@@ -228,7 +222,6 @@ def run(
     preserve_results,
     record_env_vars,
     report,
-    report_only_failures,
     results,
     runtime_timeout,
     feature_timeout,
@@ -290,9 +283,6 @@ def run(
 
     if junit_with_stacktrace:
         os.environ["CUCU_JUNIT_WITH_STACKTRACE"] = "true"
-
-    if report_only_failures:
-        os.environ["CUCU_REPORT_ONLY_FAILURES"] = "true"
 
     if record_env_vars:
         os.environ["CUCU_RECORD_ENV_VARS"] = "true"
@@ -514,7 +504,6 @@ def run(
             _generate_report(
                 results_dir=results,
                 report_folder=report,
-                only_failures=report_only_failures,
                 junit_folder=junit,
             )
 
@@ -522,7 +511,6 @@ def run(
 def _generate_report(
     results_dir: Path,
     report_folder: Path,
-    only_failures: False,
     junit_folder: Path | None = None,
     combine: bool = False,
 ):
@@ -534,9 +522,7 @@ def _generate_report(
     if results_dir.exists():
         consolidate_database_files(results_dir, combine)
 
-    report_location = reporter.generate(
-        results_dir, report_folder, only_failures=only_failures
-    )
+    report_location = reporter.generate(results_dir, report_folder)
     print(f"HTML test report at {report_location}")
 
     if junit_folder:
@@ -558,12 +544,6 @@ def _generate_report(
 @main.command()
 @click.argument(
     "results_dir", default="results", type=click.Path(path_type=Path)
-)
-@click.option(
-    "--only-failures",
-    default=False,
-    is_flag=True,
-    help="when set the HTML test report will only contain the failed test results",
 )
 @click.option(
     "-l",
@@ -599,7 +579,6 @@ def _generate_report(
 )
 def report(
     results_dir: Path,
-    only_failures,
     logging_level,
     show_skips,
     output: Path,
@@ -617,23 +596,23 @@ def report(
     if show_skips:
         os.environ["CUCU_SHOW_SKIPS"] = "true"
 
-    run_details_filepath = results_dir / "run_details.json"
-
-    if os.path.exists(run_details_filepath):
-        # load the run details at the time of execution for the provided results
-        # directory
-        run_details = {}
-
-        with open(run_details_filepath, encoding="utf8") as _input:
-            run_details = json.loads(_input.read())
-
-        # initialize any underlying custom step code things
-        behave_init(run_details["filepath"])
+    run_db_path = results_dir / "run.db"
+    if run_db_path.exists():
+        # query cucu_run to get the original filepath used during the run
+        with sqlite3.connect(run_db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT filepath FROM cucu_run ORDER BY start_at DESC LIMIT 1"
+            )
+            row = cursor.fetchone()
+            if row:
+                filepath = row[0]
+                # initialize any underlying custom step code things
+                behave_init(filepath)
 
     _generate_report(
         results_dir=results_dir,
         report_folder=output,
-        only_failures=only_failures,
         junit_folder=junit,
         combine=combine,
     )
