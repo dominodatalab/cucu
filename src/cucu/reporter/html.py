@@ -200,12 +200,13 @@ def generate(results: Path, basepath: Path):
                     scenario_filepath / "logs/cucu.config.yaml.txt"
                 )
                 scenario_dict["total_steps"] = len(scenario_dict["steps"])
-                offset_seconds = (
-                    scenario_dict["start_at"] - feature_dict["start_at"]
-                ).total_seconds()
-                scenario_dict["time_offset"] = datetime.fromtimestamp(
-                    offset_seconds, timezone.utc
-                )
+                if scenario_dict["start_at"]:
+                    offset_seconds = (
+                        scenario_dict["start_at"] - feature_dict["start_at"]
+                    ).total_seconds()
+                    scenario_dict["time_offset"] = datetime.fromtimestamp(
+                        offset_seconds, timezone.utc
+                    )
 
                 if scenario_configpath.exists():
                     try:
@@ -322,7 +323,7 @@ def generate(results: Path, basepath: Path):
                 [x["total_steps"] for x in feature_dict["scenarios"]]
             )
             feature_dict["duration"] = left_pad_zeroes(
-                sum([float(x["duration"]) for x in feature_dict["scenarios"]])
+                sum([float(x["duration"]) for x in feature_dict["scenarios"] if x["duration"]])
             )
 
         # query the database for stats
