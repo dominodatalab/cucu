@@ -1,4 +1,3 @@
-import os
 import shutil
 import sys
 import traceback
@@ -151,7 +150,7 @@ def generate(results: Path, basepath: Path):
                 logger.debug(
                     f"Combining cucu_runs, using db_path from worker: {db_path}"
                 )
-                feature_results_dir = os.path.dirname(db_path)
+                feature_results_dir = Path(db_path).parent
 
             feature_dict["results_dir"] = feature_results_dir
             feature_dict["folder_name"] = ellipsize_filename(db_feature.name)
@@ -165,11 +164,12 @@ def generate(results: Path, basepath: Path):
 
             if feature_dict["status"] not in ["skipped", "untested"]:
                 # copy each feature directories contents over to the report directory
-                src_feature_filepath = os.path.join(
-                    feature_dict["results_dir"], feature_dict["folder_name"]
+                src_feature_filepath = (
+                    Path(feature_dict["results_dir"])
+                    / feature_dict["folder_name"]
                 )
 
-                if os.path.exists(src_feature_filepath):
+                if src_feature_filepath.exists():
                     shutil.copytree(
                         src_feature_filepath,
                         feature_path,
@@ -276,7 +276,7 @@ def generate(results: Path, basepath: Path):
                     log_files.append(
                         {
                             "filepath": log_filepath,
-                            "name": os.path.basename(log_file),
+                            "name": log_file.name,
                         }
                     )
 
@@ -297,11 +297,11 @@ def generate(results: Path, basepath: Path):
 
                 # render scenario html
                 scenario_basepath = feature_path / scenario_dict["folder_name"]
-                os.makedirs(scenario_basepath, exist_ok=True)
+                scenario_basepath.mkdir(parents=True, exist_ok=True)
                 rendered_scenario_html = scenario_template.render(
                     basepath=results,
                     feature=feature_dict,
-                    path_exists=os.path.exists,
+                    path_exists=lambda path: Path(path).exists(),
                     scenario=scenario_dict,
                     steps=scenario_dict["steps"],
                     title=scenario_dict.get("name", "Cucu results"),
