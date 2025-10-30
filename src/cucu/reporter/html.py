@@ -209,15 +209,15 @@ def generate(results: Path, basepath: Path):
                         offset_seconds, timezone.utc
                     )
 
-                if scenario_configpath.exists():
+                if not scenario_configpath.exists():
+                    logger.info(f"No config to reload: {scenario_configpath}")
+                else:
                     try:
                         CONFIG.load(scenario_configpath)
                     except Exception as e:
                         logger.warning(
                             f"Could not reload config: {scenario_configpath}: {e}"
                         )
-                else:
-                    logger.info(f"No config to reload: {scenario_configpath}")
 
                 process_tags(scenario_dict)
 
@@ -245,21 +245,24 @@ def generate(results: Path, basepath: Path):
                         )
 
                     # process timestamps and time offsets
-                    if step_dict["end_at"]:
-                        if step_dict["start_at"]:
-                            timestamp = step_dict["start_at"]
-                            step_dict["timestamp"] = timestamp
+                    if not step_dict["end_at"]:
+                        continue
 
-                            time_offset = datetime.fromtimestamp(
-                                (
-                                    timestamp - scenario_dict["start_at"]
-                                ).total_seconds(),
-                                timezone.utc,
-                            )
-                            step_dict["time_offset"] = time_offset
-                        else:
-                            step_dict["timestamp"] = ""
-                            step_dict["time_offset"] = ""
+                    if not step_dict["start_at"]:
+                        step_dict["timestamp"] = ""
+                        step_dict["time_offset"] = ""
+                        continue
+
+                    timestamp = step_dict["start_at"]
+                    step_dict["timestamp"] = timestamp
+
+                    time_offset = datetime.fromtimestamp(
+                        (
+                            timestamp - scenario_dict["start_at"]
+                        ).total_seconds(),
+                        timezone.utc,
+                    )
+                    step_dict["time_offset"] = time_offset
 
                 logs_path = scenario_filepath / "logs"
 
