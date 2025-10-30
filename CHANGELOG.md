@@ -10,7 +10,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - html - format browser logs and convert timestamp to datetime
 - Change - rename col from scenario["line"] => to scenario["line_number"]
 - Add - more db views
-- Chore - refactor HTML.py
+- Chore - refactor HTML.py to use the db more directly
 - Chore - correct CONTRIBUTING.md with -d option
 - Chore - move highlight data to recording phase
 
