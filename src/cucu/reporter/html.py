@@ -139,9 +139,9 @@ def generate(results: Path, basepath: Path):
                 logger.debug(f"Skipping untested feature: {db_feature.name}")
                 continue
 
+            feature_dict = shortcuts.model_to_dict(db_feature, backrefs=True)
             features.append(feature_dict)
 
-            feature_dict = shortcuts.model_to_dict(db_feature, backrefs=True)
             feature_results_dir = results
             if db_path := db_feature.worker.cucu_run.db_path:
                 logger.debug(
