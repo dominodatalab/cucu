@@ -323,7 +323,13 @@ def generate(results: Path, basepath: Path):
                 [x["total_steps"] for x in feature_dict["scenarios"]]
             )
             feature_dict["duration"] = left_pad_zeroes(
-                sum([float(x["duration"]) for x in feature_dict["scenarios"] if x["duration"]])
+                sum(
+                    [
+                        float(x["duration"])
+                        for x in feature_dict["scenarios"]
+                        if x["duration"]
+                    ]
+                )
             )
 
         # query the database for stats
