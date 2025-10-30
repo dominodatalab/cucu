@@ -304,7 +304,7 @@ def generate(results: Path, basepath: Path):
                     path_exists=lambda path: Path(path).exists(),
                     scenario=scenario_dict,
                     steps=scenario_dict["steps"],
-                    title=scenario_dict.get("name", "Cucu results"),
+                    title=scenario_dict["name"],
                     dir_depth="../../",
                 )
                 scenario_output_filepath = scenario_basepath / "index.html"
@@ -315,7 +315,7 @@ def generate(results: Path, basepath: Path):
                 feature=feature_dict,
                 scenarios=feature_dict["scenarios"],
                 dir_depth="",
-                title=feature_dict.get("name", "Cucu results"),
+                title=feature_dict["name"],
             )
             feature_output_filepath = basepath / f"{feature_dict['name']}.html"
             feature_output_filepath.write_text(rendered_feature_html)
