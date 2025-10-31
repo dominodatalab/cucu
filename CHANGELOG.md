@@ -7,6 +7,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.3.18
 - Change - add browser steps to assert url matches regex
+- Fix - html highlighting with html_id
+
 
 ## 1.3.17
 - Change - refactor html generation code to rely on db only
