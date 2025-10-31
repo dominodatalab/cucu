@@ -85,7 +85,7 @@ def wait_to_see_the_current_url_is(ctx, value):
 def assert_url_matches(ctx, regex):
     ctx.check_browser_initialized()
     url = ctx.browser.get_current_url()
-    if not re.match(regex, url):
+    if not re.search(regex, url):
         raise RuntimeError(f"current url {url} does not match {regex}")
 
 
