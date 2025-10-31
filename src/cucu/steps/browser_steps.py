@@ -1,5 +1,6 @@
 import base64
 import os
+import re
 
 from selenium.webdriver.common.keys import Keys
 
@@ -79,6 +80,23 @@ def should_see_the_current_url_is(ctx, value):
 @step('I wait to see the current url is "{value}"')
 def wait_to_see_the_current_url_is(ctx, value):
     retry(assert_url_is)(ctx, value)
+
+
+def assert_url_matches(ctx, regex):
+    ctx.check_browser_initialized()
+    url = ctx.browser.get_current_url()
+    if not re.search(regex, url):
+        raise RuntimeError(f"current url {url} does not match {regex}")
+
+
+@step('I should see the current url matches "{regex}"')
+def should_see_the_current_url_matches(ctx, regex):
+    assert_url_matches(ctx, regex)
+
+
+@step('I wait to see the current url matches "{regex}"')
+def wait_to_see_the_current_url_matches(ctx, regex):
+    retry(assert_url_matches)(ctx, regex)
 
 
 @step('I save the current url to the variable "{variable}"')
