@@ -149,6 +149,28 @@ Feature: Report basics
       And I click the button "Scenario that has an undefined step"
      Then I should see the button "Given I attempt to use an undefined step"
 
+  Scenario: User can run feature with substeps and scenario report is ordered correctly
+    Given I run the command "cucu run data/features/scenario_with_substeps.feature --results {CUCU_RESULTS_DIR}/report_substeps_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/report_substeps_results --output {CUCU_RESULTS_DIR}/report_substeps_report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_substeps_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     When I click the button "Feature with substeps"
+      And I click the button "Scenario that uses a step with substeps"
+     Then I should see a table that matches the following:
+        | Feature.*                      | .* |
+        | Given I echo "first!"          | .* |
+        | .*                             | .* |
+        | And I use a step with substeps | .* |
+        | .*                             | .* |
+        | ⤷ When I do nothing            | .* |
+        | .*                             | .* |
+        | ⤷ And I do nothing             | .* |
+        | .*                             | .* |
+        | ⤷ And I do nothing             | .* |
+        | .*                             | .* |
+        | And I echo "last!"             | .* |
+        | .*                             | .* |
+
   Scenario: User can run feature with background and has all results reported correctly without skips
     Given I run the command "cucu run data/features/feature_with_background.feature --results {CUCU_RESULTS_DIR}/feature_with_background" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/feature_with_background --output {CUCU_RESULTS_DIR}/feature_with_background-report" and expect exit code "0"

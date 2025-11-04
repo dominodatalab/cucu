@@ -234,6 +234,9 @@ def generate(results: Path, basepath: Path):
                             f'Exception while trying to run sub_headers hook for scenario: "{scenario_dict["name"]}"\n{traceback.format_exc()}'
                         )
                 scenario_dict["sub_headers"] = "<br/>".join(sub_headers)
+                scenario_dict["steps"] = sorted(
+                    scenario_dict["steps"], key=lambda x: x["seq"]
+                )
 
                 for step_dict in scenario_dict["steps"]:
                     # Handle section headings with different levels (# to ####)
