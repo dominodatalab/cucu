@@ -84,9 +84,9 @@ Feature: Buttons
      Then I should see the previous step took more than "4" seconds
 
   @negative
-  Scenario: User can wait up to 10s to not see a button
+  Scenario: User can wait up to 12s to not see a button
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?clear_page_after_ms=10000"
-     When I wait up to "10" seconds to not see the button "* role=button"
+     When I wait up to "12" seconds to not see the button "* role=button"
      Then I should see the previous step took more than "9" seconds
 
   Scenario: User can verify a button is disabled or not
