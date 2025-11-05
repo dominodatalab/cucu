@@ -66,7 +66,7 @@ class Browser:
 
     def switch_to_tab_that_matches_regex(self, text):
         raise RuntimeError("implement me")
-    
+
     def get_session_id(self):
         raise RuntimeError("implement me")
 
