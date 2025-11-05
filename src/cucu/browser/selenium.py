@@ -195,6 +195,13 @@ class Selenium(Browser):
             raise Exception(f"unknown browser {browser}")
 
         self.driver.set_window_size(width, height)
+        session_id = self.get_session_id() 
+        logger.debug(f"cucu started Selenium session with ID: {session_id}")
+
+    def get_session_id(self):
+        if self.driver:
+            return getattr(self.driver, "session_id", None)
+        return None    
 
     def get_log(self):
         if config.CONFIG["CUCU_BROWSER"] == "firefox":
