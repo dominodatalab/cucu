@@ -22,7 +22,7 @@ Feature: File steps
      Then I should see the file at "{CUCU_RESULTS_DIR}/create_file_pattern_test.txt" contains the following pattern
       """
       id: [0-9a-f]\{32\}
-      """    
+      """
 
   Scenario: User can create a new file and read the contents to a variable
     Given I create a file at "{CUCU_RESULTS_DIR}/create_file_test.txt" with the following

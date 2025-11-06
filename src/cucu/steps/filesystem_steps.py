@@ -114,7 +114,9 @@ def should_see_file_contains_pattern(ctx, filepath):
         pattern = ctx.text.strip()
         anchored_pattern = rf"^\s*{pattern}\s*$"
 
-        if not re.search(anchored_pattern, file_contents, re.MULTILINE | re.IGNORECASE):
+        if not re.search(
+            anchored_pattern, file_contents, re.MULTILINE | re.IGNORECASE
+        ):
             raise RuntimeError(
                 f"\n{file_contents}\ndoes not match regex pattern:\n{pattern}\n"
             )
