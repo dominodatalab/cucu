@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.3.20
 - Add - emit selinium session id to cucu debug logs
+- Add - step for pattern matching in file contents
 
 ## 1.3.19
 - Fix - html step ordering with substeps
