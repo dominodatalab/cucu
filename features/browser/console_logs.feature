@@ -28,4 +28,3 @@ Feature: Browser console logs
       """
       cucu started Selenium session with ID: [0-9a-f]{32}
       """
-      
