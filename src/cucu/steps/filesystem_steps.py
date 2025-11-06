@@ -104,6 +104,19 @@ def should_see_file_contains_the_following(ctx, filepath):
             raise RuntimeError(
                 f"\n{file_contents}\ndoes not contain\n{ctx.text}\n"
             )
+        
+@step('I should see the file at "{filepath}" contains the following pattern')
+def should_see_file_contains_pattern(ctx, filepath):
+    """Checks if the file contains text matching the given regex pattern."""
+    with open(filepath, "rb") as input_file:
+        file_contents = input_file.read().decode("utf-8")
+
+        pattern = ctx.text.strip()
+
+        if not re.search(pattern, file_contents):
+            raise RuntimeError(
+                f"\n{file_contents}\ndoes not match regex pattern:\n{pattern}\n"
+            )        
 
 
 @step('I should see the file at "{filepath}" matches the following')
