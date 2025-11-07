@@ -174,10 +174,10 @@ def after_scenario(ctx, scenario):
                 "current_tab_index": tab_info["index"],
                 "all_tabs": all_tabs,
                 "browser_type": ctx.browser.driver.name,
+                "session_id": ctx.browser.get_session_id(),
             }
         except Exception as e:
             logger.error(f"Error getting browser info: {e}")
-
     scenario.browser_info = browser_info
 
     run_after_scenario_hook(ctx, scenario, download_mht_data)

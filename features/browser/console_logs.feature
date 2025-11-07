@@ -24,3 +24,7 @@ Feature: Browser console logs
       """
       tab(1 of 1): Console Logging!
       """
+      And I should see the file at "{CUCU_RESULTS_DIR}/console-logging/Feature with console logs/Scenario logging tab information to cucu console logs/logs/cucu.debug.console.log" contains the following pattern:
+      """
+      .*cucu started Selenium session with ID: [0-9a-f]\{32\}
+      """
