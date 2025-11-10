@@ -10,6 +10,7 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.remote.command import Command
 
 from cucu import config, edgedriver_autoinstaller, logger
 from cucu.browser.core import Browser
@@ -207,7 +208,15 @@ class Selenium(Browser):
         if config.CONFIG["CUCU_BROWSER"] == "firefox":
             return []
 
-        return self.driver.get_log("browser")
+        try:
+            # local selenium
+            return self.driver.get_log("browser")
+        except AttributeError:
+            # remote selemium
+            # workaround from https://github.com/SeleniumHQ/selenium/issues/15772#issuecomment-3357920550
+            return self.driver.execute(Command.GET_LOG, {"type": "browser"})[
+                "value"
+            ]
 
     def get_current_url(self):
         return self.driver.current_url
