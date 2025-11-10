@@ -7,6 +7,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.3.22
 - Chore - lib upgrades, includes pytest to 9.0.0
+- Chore - fix build to include LICENSE and CHANGELOG.md
+- 
 - CI - update renovate to ignore behave
 
 ## 1.3.21
