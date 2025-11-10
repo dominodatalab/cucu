@@ -6,6 +6,6 @@ Feature: Lsp
       """
       cucu lsp < /dev/null
       """
-     Then I should see "{STDOUT}" contains "Starting IO server"
-      And I should see "{STDOUT}" contains "Closing the event loop"
+     Then I should see "{STDOUT}" contains "Starting async IO server"
+      And I should see "{STDOUT}" contains "Shutting down the server"
       And I should see "{STDERR}" is empty
