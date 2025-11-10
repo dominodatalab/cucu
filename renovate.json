@@ -4,6 +4,8 @@
   "extends": [
     "config:best-practices"
   ],
+  "dateFormat": "YYMMDD",
+  "additionalBranchPrefix": "{{date}}",
   "ignorePaths": [
     "**/.python-version"
   ],
@@ -20,7 +22,22 @@
         "**"
       ],
       "automerge": true,
-      "platformAutomerge": true
+      "platformAutomerge": true,
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch"
+      ]
+    },
+    {
+      "description": "Ignore behave version updates due to compatibility issues",
+      "matchDatasources": [
+        "pypi"
+      ],
+      "matchPackageNames": [
+        "behave"
+      ],
+      "enabled": false
     },
     {
       "description": "Ignore minor Python version updates",
