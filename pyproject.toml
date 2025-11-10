@@ -1,9 +1,10 @@
 [project]
 name = "cucu"
-version = "1.3.21"
+version = "1.3.22"
 description = "Easy BDD web testing"
 readme = "README.md"
-license = { text = "The Clear BSD License" }
+license = "BSD-3-Clause-Clear"
+license-files = ["LICENSE"]
 keywords = ["cucumber", "selenium", "behave"]
 authors = [
     {name = "Domino Data Lab", email = "open-source@dominodatalab.com"},
@@ -41,7 +42,7 @@ dependencies = [
     "click~=8.3.0",
     "coverage[toml]~=7.8",
     "geckodriver-autoinstaller~=0.1.0",
-    "humanize~=4.13.0",
+    "humanize~=4.14.0",
     "importlib-metadata~=8.7.0",
     "jellyfish>=1.1",
     "jinja2~=3.1.3",
@@ -66,24 +67,16 @@ Download  = "https://pypi.org/project/cucu/"
 cucu = "cucu.cli:main"
 
 [build-system]
-requires = ["uv_build>=0.8.0,<0.9.0"]
+requires = ["uv_build>=0.9.8,<0.10.0"]
 build-backend = "uv_build"
 
-[tool.hatch.build.targets.sdist]
-include = [
-  "/src",
-  "/CHANGELOG.md",
-]
-exclude = [
-  "/data",
-  "/features",
-  "/tests",
-]
+[tool.uv.build-backend]
+source-include = ["CHANGELOG.md"]
 
 [dependency-groups]
 dev = [
     "pre-commit>=3.8.0",
-    "pytest~=8.4.0",
+    "pytest~=9.0.0",
     "pytest-check>=2.5.3",
     "pytest-sugar>=1.0.0",
     "ruff>=0.6.4",

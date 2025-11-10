@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.3.22
+- Chore - lib upgrades, includes pytest to 9.0.0
+- Chore - fix build to include LICENSE and CHANGELOG.md
+- CI - update renovate to ignore behave
+
 ## 1.3.21
 - Chore - upgrade pygls to 2.0.0
 
