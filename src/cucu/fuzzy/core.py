@@ -1,8 +1,6 @@
 import pkgutil
 from enum import Enum
 
-from selenium.webdriver.common.action_chains import ActionChains
-
 from cucu import logger
 from cucu.browser.frames import search_in_all_frames
 
@@ -111,12 +109,7 @@ def find(
     if fuzzy_return is None:
         logger.debug("Fuzzy found no element.")
         return None
-
-    found_element, search_term = fuzzy_return
-    actions = ActionChains(browser.driver)
-    actions.move_to_element(found_element).perform()
     logger.debug(
-        f"Fuzzy found element by search term {search_term} at {found_element.rect=}"
+        "Fuzzy found element by search term {}".format(fuzzy_return[1])
     )
-
-    return found_element
+    return fuzzy_return[0]

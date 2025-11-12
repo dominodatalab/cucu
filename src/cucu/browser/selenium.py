@@ -7,6 +7,7 @@ import geckodriver_autoinstaller
 import urllib3
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
@@ -318,7 +319,8 @@ class Selenium(Browser):
         return self.driver.execute_script(javascript, *args)
 
     def click(self, element):
-        element.click()
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element).click().perform()
         # let cucu's own wait for page to load checks run
         self.wait_for_page_to_load()
 
