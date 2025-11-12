@@ -112,11 +112,11 @@ def find(
         logger.debug("Fuzzy found no element.")
         return None
 
-
     found_element, search_term = fuzzy_return
-    logger.debug(f"Fuzzy found element by search term {search_term}")
-    logger.debug(f"Element {found_element.rect=}")
     actions = ActionChains(browser.driver)
     actions.move_to_element(found_element).perform()
+    logger.debug(
+        f"Fuzzy found element by search term {search_term} at {found_element.rect=}"
+    )
 
     return found_element
