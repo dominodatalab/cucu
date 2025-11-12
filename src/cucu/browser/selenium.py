@@ -319,7 +319,6 @@ class Selenium(Browser):
         return self.driver.execute_script(javascript, *args)
 
     def click(self, element):
-        
         # if Firefox just do normal click
         if config.CONFIG["CUCU_BROWSER"] == "firefox":
             element.click()
