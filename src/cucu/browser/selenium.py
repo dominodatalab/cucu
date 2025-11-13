@@ -77,6 +77,12 @@ class Selenium(Browser):
             options.add_argument(f"--window-size={width},{height}")
             options.add_argument("--disable-dev-shm-usage")
 
+            # Disable the automation message to get back some vertical space
+            options.add_argument("--disable-infobars")  # old way
+            options.add_experimental_option(
+                "excludeSwitches", ["enable-automation"]
+            )  # new way
+
             if headless:
                 options.add_argument("--headless")
 

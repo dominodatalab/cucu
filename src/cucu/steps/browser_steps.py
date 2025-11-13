@@ -425,3 +425,11 @@ def save_browser_cookie(ctx, cookie_name, variable):
 def add_browser_cookie(ctx, name, value):
     ctx.check_browser_initialized()
     ctx.browser.driver.add_cookie({"name": name, "value": value})
+
+
+# step to get the driver window size
+@step('I get the browser window size and save it to the variable "{variable}"')
+def get_browser_window_size(ctx, variable):
+    ctx.check_browser_initialized()
+    size = ctx.browser.driver.get_window_size()
+    config.CONFIG[variable] = f"{size['width']}x{size['height']}"
