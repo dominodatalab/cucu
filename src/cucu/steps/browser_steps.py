@@ -38,7 +38,7 @@ def open_a_browser(ctx, url):
     else:
         logger.debug("browser already open so using existing instance")
 
-    logger.debug(f"navigating to url #{url}")
+    logger.debug(f"navigating to url: {url}")
     ctx.browser.navigate(url)
 
 
@@ -46,7 +46,7 @@ def open_a_browser(ctx, url):
 def open_a_new_browser(ctx, url):
     ctx.browser = retry(open_browser)(ctx)
     ctx.browsers.append(ctx.browser)
-    logger.debug(f"navigating to url #{url}")
+    logger.debug(f"navigating to url: {url}")
     ctx.browser.navigate(url)
 
 
@@ -177,7 +177,7 @@ def close_browser(ctx):
 @step('I navigate to the url "{url}"')
 def navigate_to_the_url(ctx, url):
     ctx.check_browser_initialized()
-    logger.debug(f"navigating to url #{url}")
+    logger.debug(f"navigating to url: {url}")
     ctx.browser.navigate(url)
 
 
@@ -425,3 +425,11 @@ def save_browser_cookie(ctx, cookie_name, variable):
 def add_browser_cookie(ctx, name, value):
     ctx.check_browser_initialized()
     ctx.browser.driver.add_cookie({"name": name, "value": value})
+
+
+# step to get the driver window size
+@step('I get the browser window size and save it to the variable "{variable}"')
+def get_browser_window_size(ctx, variable):
+    ctx.check_browser_initialized()
+    size = ctx.browser.driver.get_window_size()
+    config.CONFIG[variable] = f"{size['width']}x{size['height']}"

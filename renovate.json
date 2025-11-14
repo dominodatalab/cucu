@@ -4,7 +4,6 @@
   "extends": [
     "config:best-practices"
   ],
-  "dateFormat": "YYMMDD",
   "additionalBranchPrefix": "{{date}}",
   "ignorePaths": [
     "**/.python-version"

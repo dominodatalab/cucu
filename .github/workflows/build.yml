@@ -70,10 +70,10 @@ jobs:
       pull-requests: write
     services:
       webserver:
-        image: selenium/standalone-${{ matrix.browser }}:125.0
+        image: selenium/standalone-${{ matrix.browser }}:142.0
         ports:
           - 4444:4444
-        options: --shm-size=4gb
+        options: --shm-size=16gb
         env:
           SE_NODE_MAX_SESSIONS: 12
           SE_NODE_SESSION_TIMEOUT: 300

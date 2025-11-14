@@ -7,9 +7,11 @@ import geckodriver_autoinstaller
 import urllib3
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.remote.command import Command
 
 from cucu import config, edgedriver_autoinstaller, logger
 from cucu.browser.core import Browser
@@ -74,6 +76,12 @@ class Selenium(Browser):
 
             options.add_argument(f"--window-size={width},{height}")
             options.add_argument("--disable-dev-shm-usage")
+
+            # Disable the automation message to get back some vertical space
+            options.add_argument("--disable-infobars")  # old way
+            options.add_experimental_option(
+                "excludeSwitches", ["enable-automation"]
+            )  # new way
 
             if headless:
                 options.add_argument("--headless")
@@ -207,7 +215,15 @@ class Selenium(Browser):
         if config.CONFIG["CUCU_BROWSER"] == "firefox":
             return []
 
-        return self.driver.get_log("browser")
+        try:
+            # local selenium
+            return self.driver.get_log("browser")
+        except AttributeError:
+            # remote selemium
+            # workaround from https://github.com/SeleniumHQ/selenium/issues/15772#issuecomment-3357920550
+            return self.driver.execute(Command.GET_LOG, {"type": "browser"})[
+                "value"
+            ]
 
     def get_current_url(self):
         return self.driver.current_url
@@ -309,7 +325,13 @@ class Selenium(Browser):
         return self.driver.execute_script(javascript, *args)
 
     def click(self, element):
-        element.click()
+        # if Firefox just do normal click
+        if config.CONFIG["CUCU_BROWSER"] == "firefox":
+            element.click()
+        else:
+            actions = ActionChains(self.driver)
+            actions.move_to_element(element).click().perform()
+
         # let cucu's own wait for page to load checks run
         self.wait_for_page_to_load()
 

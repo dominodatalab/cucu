@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.3.23
+- Change - scroll before click for chrome and edge
+- Change - browser dimensions test to use actual window size not viewport size
+- Chore - upgrade selenium py to 4.38.0
+- CI - Chore - upgrade selenium standalone images to 142.0
+
 ## 1.3.22
 - Chore - lib upgrades, includes pytest to 9.0.0
 - Chore - fix build to include LICENSE and CHANGELOG.md
