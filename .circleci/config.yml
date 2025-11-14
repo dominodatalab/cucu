@@ -57,6 +57,7 @@ jobs:
     docker:
       - image: cimg/python:3.13@sha256:4c5f558e80a03c419e81ca27a97d7085824921834fd7df0d36519f6fe7b2c749
       - image: selenium/standalone-<<parameters.browser>>:142.0
+        options: --shm-size=16gb
         environment:
           SE_ENABLE_TRACING: false
           SE_NODE_MAX_SESSIONS: 12
