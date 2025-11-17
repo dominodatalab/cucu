@@ -33,7 +33,7 @@ def run_command(
     if check_exit_code is not None and int(check_exit_code) != return_code:
         logger.error(f"STDOUT:\n{stdout}\n")
         logger.error(f"STDERR:\n{stderr}\n")
-        raise AssertionError(
+        raise RuntimeError(
             f"expected exit code {check_exit_code}, got {return_code}, see above for details"
         )
 
@@ -79,7 +79,7 @@ def run_script(
     if check_exit_code is not None and int(check_exit_code) != return_code:
         logger.error(f"STDOUT:\n{stdout}\n")
         logger.error(f"STDERR:\n{stderr}\n")
-        raise AssertionError(
+        raise RuntimeError(
             f"expected exit code {check_exit_code}, got {return_code}, see above for details"
         )
     else:

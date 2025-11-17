@@ -108,7 +108,7 @@ def run_steps(ctx, steps_text):
                     if "StopRetryException" in step.error_message:
                         raise StopRetryException(step.error_message)
                     else:
-                        raise AssertionError(step.error_message)
+                        raise RuntimeError(step.error_message)
 
             # -- FINALLY: Restore original ctx data for current step.
             ctx.table = original_table

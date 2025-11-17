@@ -7,10 +7,10 @@ Feature: debug
       """
       echo 'quit\n' | cucu run data/features/feature_with_failing_scenario.feature --results {CUCU_RESULTS_DIR}/debug-debugging-results --debug-on-failure
       """
-    # XXX: temporary solution as the debug output contains ansi codes we can't
-    #      seem to make debug output stop producing those.
-    Then I strip ansi codes from "{STDOUT}" and save to the variable "STDOUT"
-    And I should see "{STDOUT}" contains the following
+      # XXX: temporary solution as the debug output contains ansi codes we can't
+      #      seem to make debug output stop producing those.
+     Then I strip ansi codes from "{STDOUT}" and save to the variable "STDOUT"
+      And I should see "{STDOUT}" contains the following
       """
-      -> raise AssertionError("step fails on purpose")
+      -> raise RuntimeError("step fails on purpose")
       """

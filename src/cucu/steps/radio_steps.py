@@ -82,7 +82,7 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
     radio = find_n_assert_radio_button(ctx, name, index=index)
 
     if base_steps.is_disabled(radio):
-        raise AssertionError(
+        raise RuntimeError(
             "unable to select the radio button, as it is disabled"
         )
 
@@ -122,7 +122,7 @@ def select_radio_button(ctx, radiobox):
     ctx.check_browser_initialized()
 
     if base_steps.is_disabled(radiobox):
-        raise AssertionError(
+        raise RuntimeError(
             "unable to select the radio button, as it is disabled"
         )
 

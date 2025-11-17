@@ -117,7 +117,7 @@ def drag_element_to_element(ctx, drag_name, drop_name):
     )
 
     if start_drag_rect == end_drag_rect:
-        raise AssertionError(
+        raise RuntimeError(
             f"Drag element {drag_name.text} position did not change"
         )
     else:

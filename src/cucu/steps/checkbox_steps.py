@@ -68,7 +68,7 @@ def check_checkbox(ctx, checkbox):
         raise Exception("checkbox already checked")
 
     if base_steps.is_disabled(checkbox):
-        raise AssertionError("unable to check the checkbox, as it is disabled")
+        raise RuntimeError("unable to check the checkbox, as it is disabled")
 
     if is_element_size_zero(checkbox):
         find_n_click_input_parent_label(ctx, checkbox)

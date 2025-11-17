@@ -37,7 +37,7 @@ def click_link(ctx, link):
     ctx.check_browser_initialized()
 
     if base_steps.is_disabled(link):
-        raise AssertionError("unable to click the link, as it is disabled")
+        raise RuntimeError("unable to click the link, as it is disabled")
 
     ctx.browser.click(link)
 

@@ -58,13 +58,13 @@ def do_nothing(_):
 
 @step("I fail")
 def i_fail(_):
-    raise AssertionError("step fails on purpose")
+    raise RuntimeError("step fails on purpose")
 
 
 @step("I wait to fail")
 def i_wait_to_fail(_):
     def fail():
-        raise AssertionError("step fails on purpose after a while")
+        raise RuntimeError("step fails on purpose after a while")
 
     retry(fail)()
 
@@ -72,7 +72,7 @@ def i_wait_to_fail(_):
 @step("I error after-scenario hook")
 def i_error_after_hook(_):
     def after_hook_fail(_):
-        raise AssertionError("after-hook errors on purpose")
+        raise RuntimeError("after-hook errors on purpose")
 
     register_after_this_scenario_hook(after_hook_fail)
 

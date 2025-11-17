@@ -31,7 +31,7 @@ def click_tab(ctx, tab):
     ctx.check_browser_initialized()
 
     if base_steps.is_disabled(tab):
-        raise AssertionError("unable to click the tab, as it is disabled")
+        raise RuntimeError("unable to click the tab, as it is disabled")
 
     ctx.browser.click(tab)
 

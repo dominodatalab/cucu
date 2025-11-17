@@ -141,7 +141,7 @@ def click_dropdown(ctx, dropdown):
     ctx.check_browser_initialized()
 
     if base_steps.is_disabled(dropdown):
-        raise AssertionError("unable to click the button, as it is disabled")
+        raise RuntimeError("unable to click the button, as it is disabled")
 
     logger.debug("clicking dropdown")
     try:
@@ -187,10 +187,10 @@ def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
 
     if dropdown_element is None:
         prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
-        raise AssertionError(f"unable to find the {prefix}dropdown {dropdown}")
+        raise RuntimeError(f"unable to find the {prefix}dropdown {dropdown}")
 
     if base_steps.is_disabled(dropdown_element):
-        raise AssertionError(
+        raise RuntimeError(
             "unable to select from the dropdown, as it is disabled"
         )
 
@@ -206,7 +206,7 @@ def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
         option_element = find_dropdown_option(ctx, option)
 
         if option_element is None:
-            raise AssertionError(
+            raise RuntimeError(
                 f'unable to find option "{option}" in dropdown "{dropdown}"'
             )
 
@@ -231,10 +231,10 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
 
     if dropdown_element is None:
         prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
-        raise AssertionError(f"unable to find the {prefix}dropdown {dropdown}")
+        raise RuntimeError(f"unable to find the {prefix}dropdown {dropdown}")
 
     if base_steps.is_disabled(dropdown_element):
-        raise AssertionError(
+        raise RuntimeError(
             "unable to select from the dropdown, as it is disabled"
         )
 
@@ -272,7 +272,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
                 option_element = None
 
     if option_element is None:
-        raise AssertionError(
+        raise RuntimeError(
             f'unable to find option "{option}" in dropdown "{dropdown}"'
         )
 
@@ -296,7 +296,7 @@ def assert_dropdown_option_selected(
 
     dropdown_element = find_dropdown(ctx, dropdown, index)
     if dropdown_element is None:
-        raise AssertionError(f'unable to find dropdown "{dropdown}"')
+        raise RuntimeError(f'unable to find dropdown "{dropdown}"')
 
     selected_option = None
     if dropdown_element.tag_name == "select":
@@ -304,7 +304,7 @@ def assert_dropdown_option_selected(
         selected_option = select_element.first_selected_option
 
         if selected_option is None:
-            raise AssertionError(
+            raise RuntimeError(
                 f"unable to find selected option in dropdown {dropdown}"
             )
 
@@ -315,10 +315,10 @@ def assert_dropdown_option_selected(
         #      and easier to find for automation by their name
         if is_selected:
             if selected_name.find(option) == -1:
-                raise AssertionError(f"{option} is not selected")
+                raise RuntimeError(f"{option} is not selected")
         else:
             if selected_name.find(option) != -1:
-                raise AssertionError(f"{option} is selected")
+                raise RuntimeError(f"{option} is selected")
 
     else:
         if dropdown_element.get_attribute("aria-expanded") != "true":
@@ -328,16 +328,16 @@ def assert_dropdown_option_selected(
         selected_option = find_dropdown_option(ctx, option)
 
         if selected_option is None:
-            raise AssertionError(
+            raise RuntimeError(
                 f'unable to find option "{option}" in dropdown "{dropdown}"'
             )
 
         if is_selected:
             if selected_option.get_attribute("aria-selected") != "true":
-                raise AssertionError(f"{option} is not selected")
+                raise RuntimeError(f"{option} is not selected")
         else:
             if selected_option.get_attribute("aria-selected") == "true":
-                raise AssertionError(f"{option} is selected")
+                raise RuntimeError(f"{option} is selected")
 
         # close the dropdown
         click_dropdown(ctx, dropdown_element)
