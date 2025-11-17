@@ -27,7 +27,7 @@ def find_input(ctx, name, index=0):
         the WebElement that matches the provided arguments.
 
     raises:
-        a RuntimeError if the input isn't found
+        a AssertionError if the input isn't found
     """
     ctx.check_browser_initialized()
 
@@ -48,7 +48,7 @@ def find_input(ctx, name, index=0):
     take_saw_element_screenshot(ctx, "input", name, index, element)
 
     if element is None:
-        raise RuntimeError(f'unable to find the {prefix}input "{name}"')
+        raise AssertionError(f'unable to find the {prefix}input "{name}"')
 
     return element
 
@@ -60,7 +60,7 @@ def click_input(ctx, input_):
     ctx.check_browser_initialized()
 
     if base_steps.is_disabled(input_):
-        raise RuntimeError("unable to click the input, as it is disabled")
+        raise AssertionError("unable to click the input, as it is disabled")
 
     ctx.browser.click(input_)
 
@@ -98,7 +98,7 @@ def find_n_write(ctx, name, value, index=0, clear_existing=True):
     input_ = find_input(ctx, name, index=index)
 
     if base_steps.is_disabled(input_):
-        raise RuntimeError("unable to write into the input, as it is disabled")
+        raise AssertionError("unable to write into the input, as it is disabled")
 
     if clear_existing:
         clear_input(input_)
@@ -140,7 +140,7 @@ def find_n_clear(ctx, name, index=0):
     input_ = find_input(ctx, name, index=index)
 
     if base_steps.is_disabled(input_):
-        raise RuntimeError("unable to clear the input, as it is disabled")
+        raise AssertionError("unable to clear the input, as it is disabled")
 
     clear_input(input_)
 
@@ -164,12 +164,12 @@ def assert_input_value(ctx, name, value, index=0):
 
     if value is None:
         if actual != "":
-            raise RuntimeError(
+            raise AssertionError(
                 f'the {prefix}input "{name}" has value "{actual}"'
             )
 
     elif actual != value:
-        raise RuntimeError(f'the {prefix}input "{name}" has value "{actual}"')
+        raise AssertionError(f'the {prefix}input "{name}" has value "{actual}"')
 
 
 helpers.define_should_see_thing_with_name_steps("input", find_input)

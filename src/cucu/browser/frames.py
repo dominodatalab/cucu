@@ -82,7 +82,7 @@ def try_in_frames_until_success(browser: Browser, function_to_run) -> None:
         function_to_run : a function that raises an exception if it fails
 
     Raises:
-        RuntimeError: when the function fails in all frames
+        AssertionError: when the function fails in all frames
     """
     browser.switch_to_default_frame()
     try:
@@ -100,7 +100,7 @@ def try_in_frames_until_success(browser: Browser, function_to_run) -> None:
                 if frames.index(frame) < len(frames) - 1:
                     continue
                 else:
-                    raise RuntimeError(
+                    raise AssertionError(
                         f"{function_to_run.__name__} failed in all frames"
                     )
             return
