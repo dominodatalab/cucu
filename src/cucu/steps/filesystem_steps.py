@@ -47,7 +47,7 @@ def append_to_file_the_following(ctx, filepath):
 
 def assert_file(ctx, filepath):
     if not (os.path.exists(filepath) and os.path.isfile(filepath)):
-        raise RuntimeError(f"unable to see file at {filepath}")
+        raise AssertionError(f"unable to see file at {filepath}")
 
 
 @step('I should see a file at "{filepath}"')
@@ -58,7 +58,7 @@ def should_see_file(ctx, filepath):
 @step('I should not see a file at "{filepath}"')
 def should_not_see_file(ctx, filepath):
     if os.path.exists(filepath) and os.path.isfile(filepath):
-        raise RuntimeError(f"able to see file at {filepath}")
+        raise AssertionError(f"able to see file at {filepath}")
 
 
 @step('I wait to see a file at "{filepath}"')
@@ -75,13 +75,13 @@ def wait_up_to_see_file(ctx, seconds, filepath):
 @step('I should see the directory at "{filepath}"')
 def should_see_directory(ctx, filepath):
     if not (os.path.exists(filepath) and os.path.isdir(filepath)):
-        raise RuntimeError(f"unable to see directory at {filepath}")
+        raise AssertionError(f"unable to see directory at {filepath}")
 
 
 @step('I should not see the directory at "{filepath}"')
 def should_not_see_directory(ctx, filepath):
     if os.path.exists(filepath) and os.path.isdir(filepath):
-        raise RuntimeError(f"able to see directory at {filepath}")
+        raise AssertionError(f"able to see directory at {filepath}")
 
 
 @step('I should see the file at "{filepath}" is equal to the following')
@@ -90,7 +90,7 @@ def should_see_file_is_equal_to_the_following(ctx, filepath):
         file_contents = input.read().decode("utf8")
 
         if file_contents != ctx.text:
-            raise RuntimeError(
+            raise AssertionError(
                 f"\n{file_contents}\nis not equal to\n{ctx.text}\n"
             )
 
@@ -101,7 +101,7 @@ def should_see_file_contains_the_following(ctx, filepath):
         file_contents = input.read().decode("utf8")
 
         if ctx.text not in file_contents:
-            raise RuntimeError(
+            raise AssertionError(
                 f"\n{file_contents}\ndoes not contain\n{ctx.text}\n"
             )
 
@@ -117,7 +117,7 @@ def should_see_file_contains_pattern(ctx, filepath):
         if not re.search(
             anchored_pattern, file_contents, re.MULTILINE | re.IGNORECASE
         ):
-            raise RuntimeError(
+            raise AssertionError(
                 f"\n{file_contents}\ndoes not match regex pattern:\n{pattern}\n"
             )
 
@@ -128,7 +128,7 @@ def should_see_file_matches_the_following(ctx, filepath):
         file_contents = input.read().decode("utf8")
 
         if not re.match(ctx.text, file_contents):
-            raise RuntimeError(
+            raise AssertionError(
                 f"\n{file_contents}\ndoes not match\n{ctx.text}\n"
             )
 
@@ -139,7 +139,7 @@ def should_see_file_is_not_equal_to_the_following(ctx, filepath):
         file_contents = input.read().decode("utf8")
 
         if file_contents != ctx.text:
-            raise RuntimeError(f"\n{file_contents}\nis equal to\n{ctx.text}\n")
+            raise AssertionError(f"\n{file_contents}\nis equal to\n{ctx.text}\n")
 
 
 @step('I should see the file at "{filepath}" does not contain the following')
@@ -148,7 +148,7 @@ def should_see_file_does_not_contain_the_following(ctx, filepath):
         file_contents = input.read().decode("utf8")
 
         if ctx.text in file_contents:
-            raise RuntimeError(f"\n{file_contents}\ncontains\n{ctx.text}\n")
+            raise AssertionError(f"\n{file_contents}\ncontains\n{ctx.text}\n")
 
 
 @step('I should see the file at "{filepath}" does not match the following')
@@ -157,4 +157,4 @@ def should_see_file_does_not_match_the_following(ctx, filepath):
         file_contents = input.read().decode("utf8")
 
         if re.match(ctx.text, file_contents):
-            raise RuntimeError(f"\n{file_contents}\nmatches\n{ctx.text}\n")
+            raise AssertionError(f"\n{file_contents}\nmatches\n{ctx.text}\n")

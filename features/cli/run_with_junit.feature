@@ -15,7 +15,7 @@ Feature: Run with JUnit
     Given I run the command "cucu run data/features/feature_with_failing_scenario_with_table.feature --results {CUCU_RESULTS_DIR}/tables_in_output_results" and save stdout to "STDOUT" and expect exit code "1"
      Then I should see the file at "{CUCU_RESULTS_DIR}/tables_in_output_results/Feature with failing to find a table.xml" contains the following:
       """
-      RuntimeError: unable to find desired table
+      AssertionError: unable to find desired table
       expected:
         | nope | this | is | not | it |
 
@@ -31,10 +31,10 @@ Feature: Run with JUnit
     Given I run the command "cucu run data/features/feature_with_failing_scenario.feature --results {CUCU_RESULTS_DIR}/junit_without_stacktraces_results" and expect exit code "1"
      Then I should see the file at "{CUCU_RESULTS_DIR}/junit_without_stacktraces_results/Feature with failing scenario.xml" does not contain the following:
       """
-      raise RuntimeError("step fails on purpose")
+      raise AssertionError("step fails on purpose")
       """
      When I run the command "cucu run data/features/feature_with_failing_scenario.feature --junit-with-stacktrace --results {CUCU_RESULTS_DIR}/junit_with_stacktraces_results" and expect exit code "1"
      Then I should see the file at "{CUCU_RESULTS_DIR}/junit_with_stacktraces_results/Feature with failing scenario.xml" contains the following:
       """
-      raise RuntimeError("step fails on purpose")
+      raise AssertionError("step fails on purpose")
       """

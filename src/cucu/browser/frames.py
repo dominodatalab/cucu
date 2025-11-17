@@ -100,7 +100,7 @@ def try_in_frames_until_success(browser: Browser, function_to_run) -> None:
                 if frames.index(frame) < len(frames) - 1:
                     continue
                 else:
-                    raise RuntimeError(
+                    raise AssertionError(
                         f"{function_to_run.__name__} failed in all frames"
                     )
             return

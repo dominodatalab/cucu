@@ -10,7 +10,7 @@ def search(regex, value):
     match = re.search(regex, value)
 
     if match is None:
-        raise RuntimeError(f'"{regex}" did not match anything in "{value}"')
+        raise AssertionError(f'"{regex}" did not match anything in "{value}"')
 
 
 def search_and_save(regex, value, name, variable):
@@ -21,7 +21,7 @@ def search_and_save(regex, value, name, variable):
     match = re.search(regex, value)
 
     if match is None:
-        raise RuntimeError(f'"{regex}" did not match anything in "{value}"')
+        raise AssertionError(f'"{regex}" did not match anything in "{value}"')
 
     groups = match.groupdict()
 
@@ -29,7 +29,7 @@ def search_and_save(regex, value, name, variable):
         config.CONFIG[variable] = groups[name]
 
     else:
-        raise RuntimeError(
+        raise AssertionError(
             f'group "{name}" not found when searching for regex "{regex}" in "{value}"'
         )
 
@@ -42,7 +42,7 @@ def match_and_save(regex, value, name, variable):
     match = re.match(regex, value)
 
     if match is None:
-        raise RuntimeError(f'"{regex}" did not match "{value}"')
+        raise AssertionError(f'"{regex}" did not match "{value}"')
 
     groups = match.groupdict()
 
@@ -50,6 +50,6 @@ def match_and_save(regex, value, name, variable):
         config.CONFIG[variable] = groups[name]
 
     else:
-        raise RuntimeError(
+        raise AssertionError(
             f'group "{name}" not found when matching regex "{regex}" to "{value}"'
         )
