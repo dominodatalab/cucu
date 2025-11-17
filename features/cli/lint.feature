@@ -163,7 +163,7 @@ Feature: Lint
       """
       from cucu.steps import *
 
-      raise RuntimeError("boom")
+      raise AssertionError("boom")
       """
       And I create a file at "{CUCU_RESULTS_DIR}/broken_step_lint/broken_step_feature.feature" with the following:
       """
@@ -172,7 +172,7 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/broken_step_lint/broken_step_feature.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDERR}" contains the following:
       """
-      RuntimeError: boom
+      AssertionError: boom
       """
 
   Scenario: User gets a lint error when there are duplicate feature names

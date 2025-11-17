@@ -12,5 +12,5 @@ Feature: debug
      Then I strip ansi codes from "{STDOUT}" and save to the variable "STDOUT"
       And I should see "{STDOUT}" contains the following
       """
-      -> raise RuntimeError("step fails on purpose")
+      -> raise AssertionError("step fails on purpose")
       """
