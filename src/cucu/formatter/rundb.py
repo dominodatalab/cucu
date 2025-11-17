@@ -194,7 +194,6 @@ class RundbFormatter(Formatter):
         # need to finish the last scenario
         self._finish_scenario()
         finish_feature_record(self.this_feature)
-        CONFIG.restore(with_pop=True)
 
     def close(self):
         """Called before the formatter is no longer used
