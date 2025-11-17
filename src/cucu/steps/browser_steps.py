@@ -157,7 +157,9 @@ def should_see_browser_title(ctx, title):
     current_title = ctx.browser.title()
 
     if current_title != title:
-        raise AssertionError(f'unexpected browser title, got "{current_title}"')
+        raise AssertionError(
+            f'unexpected browser title, got "{current_title}"'
+        )
 
 
 @step("I close the current browser")

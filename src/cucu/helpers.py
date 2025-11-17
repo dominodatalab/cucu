@@ -118,7 +118,9 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
         element = find_func(ctx, name, index=index)
 
         if element is None:
-            raise AssertionError(f'unable to find the {prefix}{thing} "{name}"')
+            raise AssertionError(
+                f'unable to find the {prefix}{thing} "{name}"'
+            )
         logger.debug(f'Success: saw {prefix}{thing} "{name}"')
 
     @step(f'I should immediately see the {thing} "{{name}}"')
@@ -432,7 +434,9 @@ def define_ensure_state_on_thing_with_name_steps(
         element = find_func(ctx, name, index=index)
 
         if element is None:
-            raise AssertionError(f'unable to find the {prefix}{thing} "{name}"')
+            raise AssertionError(
+                f'unable to find the {prefix}{thing} "{name}"'
+            )
 
         if not state_func(element):
             action_func(ctx, element)
@@ -545,7 +549,9 @@ def define_thing_with_name_in_state_steps(
         element = find_func(ctx, name, index=index)
 
         if element is None:
-            raise AssertionError(f'unable to find the {prefix}{thing} "{name}"')
+            raise AssertionError(
+                f'unable to find the {prefix}{thing} "{name}"'
+            )
 
         if not is_in_state_func(element):
             raise AssertionError(f'{thing} "{name}" is not {state}')

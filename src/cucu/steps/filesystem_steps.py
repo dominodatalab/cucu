@@ -139,7 +139,9 @@ def should_see_file_is_not_equal_to_the_following(ctx, filepath):
         file_contents = input.read().decode("utf8")
 
         if file_contents != ctx.text:
-            raise AssertionError(f"\n{file_contents}\nis equal to\n{ctx.text}\n")
+            raise AssertionError(
+                f"\n{file_contents}\nis equal to\n{ctx.text}\n"
+            )
 
 
 @step('I should see the file at "{filepath}" does not contain the following')

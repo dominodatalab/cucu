@@ -98,7 +98,9 @@ def find_n_write(ctx, name, value, index=0, clear_existing=True):
     input_ = find_input(ctx, name, index=index)
 
     if base_steps.is_disabled(input_):
-        raise AssertionError("unable to write into the input, as it is disabled")
+        raise AssertionError(
+            "unable to write into the input, as it is disabled"
+        )
 
     if clear_existing:
         clear_input(input_)
@@ -169,7 +171,9 @@ def assert_input_value(ctx, name, value, index=0):
             )
 
     elif actual != value:
-        raise AssertionError(f'the {prefix}input "{name}" has value "{actual}"')
+        raise AssertionError(
+            f'the {prefix}input "{name}" has value "{actual}"'
+        )
 
 
 helpers.define_should_see_thing_with_name_steps("input", find_input)
