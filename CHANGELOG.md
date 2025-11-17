@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.3.24
 - Chore - upgrade behave from 1.2.6 to 1.3.3
+- Change - from RuntimeError to AssertionError for step failure
 
 ## 1.3.23
 - Change - scroll before click for chrome and edge
