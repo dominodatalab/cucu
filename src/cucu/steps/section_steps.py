@@ -1,6 +1,6 @@
 import logging
 
-from behave import use_step_matcher
+from behave.api.step_matchers import use_step_matcher
 
 from cucu import step
 

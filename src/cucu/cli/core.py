@@ -14,8 +14,6 @@ from threading import Timer
 import click
 import coverage
 import psutil
-from behave.model_core import FileLocation
-from behave.runner_util import parse_features
 from click import ClickException
 from mpire import WorkerPool
 from tabulate import tabulate
@@ -871,6 +869,11 @@ def tags(filepath, logging_level):
     """
     print a table of tags and affected scenario counts
     """
+
+    # import here to preserve import to set behave parse BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON correctly
+    from behave.model_core import FileLocation
+    from behave.runner_util import parse_features
+
     init_global_hook_variables()
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())
