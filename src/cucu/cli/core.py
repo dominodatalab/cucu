@@ -339,7 +339,7 @@ def run(
             )
 
             if exit_code != 0:
-                raise ClickException("test run failed, see above for details")
+                raise RuntimeError("test run failed, see above for details")
 
         else:
             logger.debug(

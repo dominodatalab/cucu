@@ -76,6 +76,10 @@ def before_scenario(ctx, scenario):
     # values and not bleed values between scenario runs
     CONFIG.restore()
 
+    # save values from rundb.py formatter
+    CONFIG["FEATURE_RUN_ID"] = scenario.feature.feature_run_id
+    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id
+
     # we should load any cucurc.yml files in the path to the feature file
     # we are about to run so that the config values set for this feature are
     # correctly loaded.

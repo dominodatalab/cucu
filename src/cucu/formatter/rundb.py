@@ -132,19 +132,14 @@ class RundbFormatter(Formatter):
     def scenario(self, scenario):
         """Called before a scenario is executed (or ScenarioOutline scenarios)."""
         self._finish_scenario()
-        # Set after CONFIG.restore() in environment.before_scenario()
-        CONFIG["FEATURE_RUN_ID"] = scenario.feature.feature_run_id
 
         self.this_scenario = scenario
         self.this_steps = []
         self.next_start_at = get_iso_timestamp_with_ms()
-        scenario_run_id_seed = (
+        scenario.custom_data = {}
+        scenario.scenario_run_id = generate_short_id(
             f"{scenario.feature.feature_run_id}_{time.perf_counter()}"
         )
-        CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = (
-            generate_short_id(scenario_run_id_seed)
-        )
-        scenario.custom_data = {}
 
         # feature.scenarios is a mix of Scenario and ScenarioOutline objects with their own scenarios list
         for index, feature_scenario in enumerate(scenario.feature.scenarios):
@@ -199,6 +194,7 @@ class RundbFormatter(Formatter):
         # need to finish the last scenario
         self._finish_scenario()
         finish_feature_record(self.this_feature)
+        CONFIG.restore(with_pop=True)
 
     def close(self):
         """Called before the formatter is no longer used
