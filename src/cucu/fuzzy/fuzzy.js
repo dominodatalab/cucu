@@ -163,10 +163,6 @@
                 results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).parents(thing).toArray();
                 if (cucu.debug) { console.log(nameInNestedChildLabel, results); }
                 elements = elements.concat(results);
-                if (results.length > 0) {
-                   console.log('!*!*!* Found element labeled by nested child!');
-                   console.log(`!*!*!* elements: ${elements}`);
-                }
                 element_labels = element_labels.concat(results.map(x => nameInNestedChildLabel));
 
                 for(var aIndex=0; aIndex < attributes.length; aIndex++) {
