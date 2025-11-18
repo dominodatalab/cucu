@@ -5,6 +5,7 @@ from functools import partial
 from pathlib import Path
 
 import yaml
+from behave.model import Status
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
@@ -268,6 +269,13 @@ def before_step(ctx, step):
 
 
 def after_step(ctx, step):
+    # adjust status for AssertionError wrapped in Tenacity RetryError
+    if step.status == Status.error and isinstance(
+        step.exception.last_attempt._exception, AssertionError
+    ):
+        step.status = Status.failed
+        step.exception = step.exception.last_attempt._exception
+
     step.stdout = sys.stdout.captured()
     step.stderr = sys.stderr.captured()
 
