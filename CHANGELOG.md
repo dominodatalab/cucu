@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 1.3.25
-- Add - feature log to html report
+- Add - feature log to html report when available
 
 ## 1.3.24
 - Change - Remove logging useful only for development
