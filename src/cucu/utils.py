@@ -366,6 +366,10 @@ class TeeStream:
         """Clear the internal buffer."""
         self.string_buffer = []
 
+    @property
+    def encoding(self):
+        return self.file_stream.encoding
+
 
 def get_iso_timestamp_with_ms():
     """

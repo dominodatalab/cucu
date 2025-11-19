@@ -15,6 +15,7 @@ from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.db import create_database_file, record_cucu_run
 from cucu.page_checks import init_page_checks
+from cucu.utils import TeeStream
 
 
 def get_feature_name(file_path):
@@ -151,11 +152,12 @@ def behave(
 
     result = 0
     try:
-        if redirect_output:
-            feature_name = get_feature_name(filepath)
-            log_filename = f"{feature_name}.log"
-            log_filepath = results / log_filename
+        if filepath.is_dir():
+            log_filepath = results / "run.console.log"
+        else:
+            log_filepath = results / f"{get_feature_name(filepath)}.log"
 
+        if redirect_output:
             CONFIG["__CUCU_PARENT_STDOUT"] = sys.stdout
 
             def retry_progress(ctx):
@@ -174,10 +176,21 @@ def behave(
                         behave_tweaks.init_outputs(sys.stdout, sys.stderr)
                         result = behave_tweaks.behave_main(args)
         else:
-            # intercept the stdout/stderr so we can do things such
-            # as hiding secrets in logs
-            behave_tweaks.init_outputs(sys.stdout, sys.stderr)
-            result = behave_tweaks.behave_main(args)
+            stdout_tee = TeeStream(sys.stdout)
+            stderr_tee = TeeStream(sys.stderr)
+
+            with contextlib.redirect_stderr(stdout_tee):
+                with contextlib.redirect_stdout(stderr_tee):
+                    # intercept the stdout/stderr so we can do things such
+                    # as hiding secrets in logs
+                    behave_tweaks.init_outputs(sys.stdout, sys.stderr)
+                    result = behave_tweaks.behave_main(args)
+
+            with log_filepath.open("w", encoding="utf8") as output:
+                output.write("STDOUT:\n")
+                output.write(stdout_tee.read())
+                output.write("\n\nSTDERR:\n")
+                output.write(stderr_tee.read())
     except:
         result = -1
         raise

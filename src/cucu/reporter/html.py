@@ -6,6 +6,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape as escape_
 
 import jinja2
+import yaml
 from playhouse import shortcuts
 
 import cucu.db as db
@@ -175,19 +176,6 @@ def generate(results: Path, basepath: Path):
                         feature_path,
                         dirs_exist_ok=True,
                     )
-
-                    feature_log_path = feature_results_dir / f"{db_feature.name}.log"
-                    if feature_log_path.exists():
-                        dest_log_path = feature_path / "logs" / f"{db_feature.name}-{db_feature.worker_run_id}.log"
-                        dest_log_path.parent.mkdir(parents=True, exist_ok=True)
-                        shutil.copyfile(feature_log_path, dest_log_path)
-                        feature_dict["logs"] = feature_dict.get("logs", [])
-                        feature_dict["logs"].append(
-                            {
-                                "filepath": str(dest_log_path.relative_to(basepath)),
-                                "name": dest_log_path.name,
-                            }
-                        )
                 else:
                     logger.warning(
                         f"Feature directory not found, skipping copy: {src_feature_filepath}"
@@ -205,22 +193,18 @@ def generate(results: Path, basepath: Path):
                 feature_dict["scenarios"], key=lambda x: x["seq"]
             ):
                 CONFIG.restore()
-
-                scenario_dict["folder_name"] = ellipsize_filename(
-                    scenario_dict["name"]
-                )
+                scenario_dict["folder_name"] = ellipsize_filename(scenario_dict["name"])
                 scenario_filepath = feature_path / scenario_dict["folder_name"]
                 scenario_configpath = (
                     scenario_filepath / "logs/cucu.config.yaml.txt"
                 )
-                scenario_dict["total_steps"] = len(scenario_dict["steps"])
-                if scenario_dict["start_at"]:
-                    offset_seconds = (
-                        scenario_dict["start_at"] - feature_dict["start_at"]
-                    ).total_seconds()
-                    scenario_dict["time_offset"] = datetime.fromtimestamp(
-                        offset_seconds, timezone.utc
+                if not scenario_configpath.exists():
+                    scenario_configpath.parent.mkdir(
+                        parents=True, exist_ok=True
                     )
+                    config_json = scenario_dict["cucu_config"]
+                    config_yaml = yaml.safe_dump(config_json, sort_keys=False)
+                    scenario_configpath.write_text(config_yaml)
 
                 if not scenario_configpath.exists():
                     logger.info(f"No config to reload: {scenario_configpath}")
@@ -231,6 +215,15 @@ def generate(results: Path, basepath: Path):
                         logger.warning(
                             f"Could not reload config: {scenario_configpath}: {e}"
                         )
+
+                scenario_dict["total_steps"] = len(scenario_dict["steps"])
+                if scenario_dict["start_at"]:
+                    offset_seconds = (
+                        scenario_dict["start_at"] - feature_dict["start_at"]
+                    ).total_seconds()
+                    scenario_dict["time_offset"] = datetime.fromtimestamp(
+                        offset_seconds, timezone.utc
+                    )
 
                 process_tags(scenario_dict)
 
