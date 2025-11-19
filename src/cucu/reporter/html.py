@@ -6,16 +6,13 @@ from pathlib import Path
 from xml.sax.saxutils import escape as escape_
 
 import jinja2
-import yaml
 from playhouse import shortcuts
 
 import cucu.db as db
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
-from cucu.utils import (
-    ellipsize_filename, get_feature_name
-)
+from cucu.utils import ellipsize_filename, get_feature_name
 
 
 def escape(data):
@@ -193,18 +190,22 @@ def generate(results: Path, basepath: Path):
                 feature_dict["scenarios"], key=lambda x: x["seq"]
             ):
                 CONFIG.restore()
-                scenario_dict["folder_name"] = ellipsize_filename(scenario_dict["name"])
+
+                scenario_dict["folder_name"] = ellipsize_filename(
+                    scenario_dict["name"]
+                )
                 scenario_filepath = feature_path / scenario_dict["folder_name"]
                 scenario_configpath = (
                     scenario_filepath / "logs/cucu.config.yaml.txt"
                 )
-                if not scenario_configpath.exists():
-                    scenario_configpath.parent.mkdir(
-                        parents=True, exist_ok=True
+                scenario_dict["total_steps"] = len(scenario_dict["steps"])
+                if scenario_dict["start_at"]:
+                    offset_seconds = (
+                        scenario_dict["start_at"] - feature_dict["start_at"]
+                    ).total_seconds()
+                    scenario_dict["time_offset"] = datetime.fromtimestamp(
+                        offset_seconds, timezone.utc
                     )
-                    config_json = scenario_dict["cucu_config"]
-                    config_yaml = yaml.safe_dump(config_json, sort_keys=False)
-                    scenario_configpath.write_text(config_yaml)
 
                 if not scenario_configpath.exists():
                     logger.info(f"No config to reload: {scenario_configpath}")
@@ -215,15 +216,6 @@ def generate(results: Path, basepath: Path):
                         logger.warning(
                             f"Could not reload config: {scenario_configpath}: {e}"
                         )
-
-                scenario_dict["total_steps"] = len(scenario_dict["steps"])
-                if scenario_dict["start_at"]:
-                    offset_seconds = (
-                        scenario_dict["start_at"] - feature_dict["start_at"]
-                    ).total_seconds()
-                    scenario_dict["time_offset"] = datetime.fromtimestamp(
-                        offset_seconds, timezone.utc
-                    )
 
                 process_tags(scenario_dict)
 
@@ -280,7 +272,9 @@ def generate(results: Path, basepath: Path):
                 if filepath.is_dir():
                     cucu_log_path = results / "run.console.log"
                 else:
-                    cucu_log_path = results / f"{get_feature_name(filepath)}.console.log"                
+                    cucu_log_path = (
+                        results / f"{get_feature_name(filepath)}.console.log"
+                    )
 
                 if cucu_log_path.exists():
                     dest_log_path = logs_path / "run.console.log"

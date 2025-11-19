@@ -15,7 +15,7 @@ from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.db import create_database_file, record_cucu_run
 from cucu.page_checks import init_page_checks
-from cucu.utils import TeeStream, get_feature_name
+from cucu.utils import get_feature_name
 
 
 def behave_init(filepath="features"):
@@ -144,12 +144,14 @@ def behave(
 
     result = 0
     try:
-        if filepath.is_dir():
-            log_filepath = results / "run.console.log"
-        else:
-            log_filepath = results / f"{get_feature_name(filepath)}.console.log"
-
         if redirect_output:
+            if filepath.is_dir():
+                log_filepath = results / "run.console.log"
+            else:
+                log_filepath = (
+                    results / f"{get_feature_name(filepath)}.console.log"
+                )
+
             CONFIG["__CUCU_PARENT_STDOUT"] = sys.stdout
 
             def retry_progress(ctx):
@@ -168,22 +170,10 @@ def behave(
                         behave_tweaks.init_outputs(sys.stdout, sys.stderr)
                         result = behave_tweaks.behave_main(args)
         else:
-            stdout_tee = TeeStream(sys.stdout)
-            stderr_tee = TeeStream(sys.stderr)
-
-            try:
-                with contextlib.redirect_stderr(stdout_tee):
-                    with contextlib.redirect_stdout(stderr_tee):
-                        # intercept the stdout/stderr so we can do things such
-                        # as hiding secrets in logs
-                        behave_tweaks.init_outputs(sys.stdout, sys.stderr)
-                        result = behave_tweaks.behave_main(args)
-            finally:
-                with log_filepath.open("w", encoding="utf8") as output:
-                    output.write("STDOUT:\n")
-                    output.write(stdout_tee.read())
-                    output.write("\n\nSTDERR:\n")
-                    output.write(stderr_tee.read())
+            # intercept the stdout/stderr so we can do things such
+            # as hiding secrets in logs
+            behave_tweaks.init_outputs(sys.stdout, sys.stderr)
+            result = behave_tweaks.behave_main(args)
     except:
         result = -1
         raise

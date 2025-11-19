@@ -176,7 +176,7 @@ def record_feature(feature_obj):
         else str(feature_obj.description),
         tags=feature_obj.tags,
         start_at=parse_iso_timestamp(get_iso_timestamp_with_ms()),
-        behave_filepath=CONFIG['BEHAVE_FILEPATH'],
+        behave_filepath=CONFIG["BEHAVE_FILEPATH"],
     )
 
 
