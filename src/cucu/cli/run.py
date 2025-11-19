@@ -15,16 +15,7 @@ from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.db import create_database_file, record_cucu_run
 from cucu.page_checks import init_page_checks
-from cucu.utils import TeeStream
-
-
-def get_feature_name(file_path):
-    text = Path(file_path).read_text(encoding="utf8")
-    lines = text.split("\n")
-    for line in lines:
-        if "Feature:" in line:
-            feature_name = line.replace("Feature:", "").strip()
-            return feature_name
+from cucu.utils import TeeStream, get_feature_name
 
 
 def behave_init(filepath="features"):
@@ -149,13 +140,14 @@ def behave(
         args.append("--no-skipped")
 
     args.append(filepath)
+    os.environ["BEHAVE_FILEPATH"] = CONFIG["BEHAVE_FILEPATH"] = str(filepath)
 
     result = 0
     try:
         if filepath.is_dir():
             log_filepath = results / "run.console.log"
         else:
-            log_filepath = results / f"{get_feature_name(filepath)}.log"
+            log_filepath = results / f"{get_feature_name(filepath)}.console.log"
 
         if redirect_output:
             CONFIG["__CUCU_PARENT_STDOUT"] = sys.stdout
@@ -179,18 +171,19 @@ def behave(
             stdout_tee = TeeStream(sys.stdout)
             stderr_tee = TeeStream(sys.stderr)
 
-            with contextlib.redirect_stderr(stdout_tee):
-                with contextlib.redirect_stdout(stderr_tee):
-                    # intercept the stdout/stderr so we can do things such
-                    # as hiding secrets in logs
-                    behave_tweaks.init_outputs(sys.stdout, sys.stderr)
-                    result = behave_tweaks.behave_main(args)
-
-            with log_filepath.open("w", encoding="utf8") as output:
-                output.write("STDOUT:\n")
-                output.write(stdout_tee.read())
-                output.write("\n\nSTDERR:\n")
-                output.write(stderr_tee.read())
+            try:
+                with contextlib.redirect_stderr(stdout_tee):
+                    with contextlib.redirect_stdout(stderr_tee):
+                        # intercept the stdout/stderr so we can do things such
+                        # as hiding secrets in logs
+                        behave_tweaks.init_outputs(sys.stdout, sys.stderr)
+                        result = behave_tweaks.behave_main(args)
+            finally:
+                with log_filepath.open("w", encoding="utf8") as output:
+                    output.write("STDOUT:\n")
+                    output.write(stdout_tee.read())
+                    output.write("\n\nSTDERR:\n")
+                    output.write(stderr_tee.read())
     except:
         result = -1
         raise

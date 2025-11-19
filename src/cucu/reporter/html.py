@@ -14,7 +14,7 @@ from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
 from cucu.utils import (
-    ellipsize_filename,
+    ellipsize_filename, get_feature_name
 )
 
 
@@ -274,6 +274,18 @@ def generate(results: Path, basepath: Path):
                     step_dict["time_offset"] = time_offset
 
                 logs_path = scenario_filepath / "logs"
+
+                # copy run level console log
+                filepath = Path(db_feature.worker.cucu_run.filepath)
+                if filepath.is_dir():
+                    cucu_log_path = results / "run.console.log"
+                else:
+                    cucu_log_path = results / f"{get_feature_name(filepath)}.console.log"                
+
+                if cucu_log_path.exists():
+                    dest_log_path = logs_path / "run.console.log"
+                    dest_log_path.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(cucu_log_path, dest_log_path)
 
                 log_files = []
                 for log_file in logs_path.glob("*.*"):
