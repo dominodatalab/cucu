@@ -80,6 +80,7 @@ def sample_records_combined(temp_db):
         description="Test description",
         tags="tag1 tag2 tag3",
         start_at="2024-01-01T10:00:00",
+        behave_filepath="features/my_dir",
     )
 
     scenario_obj = db.scenario.create(
@@ -132,6 +133,7 @@ def sample_records_combined(temp_db):
         description="Test description",
         tags="consistency",
         start_at="2024-01-01T10:00:00",
+        behave_filepath="features/my_dir",
     )
 
     scenario_consistency = db.scenario.create(
