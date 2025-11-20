@@ -392,7 +392,7 @@ def parse_iso_timestamp(iso_timestamp: (str | None)) -> datetime | None:
 def get_feature_name(filename):
     filepath = Path(filename)
     if ":" in filepath.name:
-        filepath = filepath.parent / filepath.name.split(":")[0]  
+        filepath = filepath.parent / filepath.name.split(":")[0]
 
     text = filepath.read_text(encoding="utf8")
     lines = text.split("\n")
