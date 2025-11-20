@@ -12,7 +12,7 @@ import cucu.db as db
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
-from cucu.utils import ellipsize_filename, get_feature_name
+from cucu.utils import behave_filepath_to_cucu_logpath, ellipsize_filename
 
 
 def escape(data):
@@ -268,16 +268,11 @@ def generate(results: Path, basepath: Path):
                 logs_path = scenario_filepath / "logs"
 
                 # copy run level console log
-                filepath = Path(db_feature.worker.cucu_run.filepath)
-                if filepath.is_dir():
-                    cucu_log_path = results / "run.console.log"
-                else:
-                    cucu_log_path = (
-                        results / f"{get_feature_name(filepath)}.console.log"
-                    )
-
+                cucu_log_path = behave_filepath_to_cucu_logpath(
+                    Path(db_feature.behave_filepath), results
+                )
                 if cucu_log_path.exists():
-                    dest_log_path = logs_path / "run.console.log"
+                    dest_log_path = logs_path / cucu_log_path.name.lower()
                     dest_log_path.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copyfile(cucu_log_path, dest_log_path)
 

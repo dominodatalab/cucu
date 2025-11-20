@@ -15,7 +15,7 @@ from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.db import create_database_file, record_cucu_run
 from cucu.page_checks import init_page_checks
-from cucu.utils import get_feature_name
+from cucu.utils import behave_filepath_to_cucu_logpath, get_feature_name
 
 
 def behave_init(filepath="features"):
@@ -145,12 +145,7 @@ def behave(
     result = 0
     try:
         if redirect_output:
-            if filepath.is_dir():
-                log_filepath = results / "run.console.log"
-            else:
-                log_filepath = (
-                    results / f"{get_feature_name(filepath)}.console.log"
-                )
+            cucu_log_path = behave_filepath_to_cucu_logpath(filepath, results)
 
             CONFIG["__CUCU_PARENT_STDOUT"] = sys.stdout
 
@@ -162,7 +157,7 @@ def behave(
             # provide progress feedback on screen
             register_before_retry_hook(retry_progress)
 
-            with log_filepath.open("w", encoding="utf8") as output:
+            with cucu_log_path.open("w", encoding="utf8") as output:
                 with contextlib.redirect_stderr(output):
                     with contextlib.redirect_stdout(output):
                         # intercept the stdout/stderr so we can do things such

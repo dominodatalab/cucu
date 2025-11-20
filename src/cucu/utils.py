@@ -396,3 +396,12 @@ def get_feature_name(file_path):
         if "Feature:" in line:
             feature_name = line.replace("Feature:", "").strip()
             return feature_name
+
+
+def behave_filepath_to_cucu_logpath(filepath: Path, results: Path) -> Path:
+    if filepath.is_dir():
+        log_filepath = results / "run.console.log"
+    else:
+        log_filepath = results / f"{get_feature_name(filepath)}.console.log"
+
+    return log_filepath
