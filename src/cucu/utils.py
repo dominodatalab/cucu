@@ -399,6 +399,9 @@ def get_feature_name(file_path):
 
 
 def behave_filepath_to_cucu_logpath(filepath: Path, results: Path) -> Path:
+    if ":" in filepath.name:
+        filepath = filepath.parent / filepath.name.split(":")[0]
+
     if filepath.is_dir():
         log_filepath = results / "run.console.log"
     else:
