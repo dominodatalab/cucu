@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for src/cucu/utils.py: 94%</title>
+    <title>Coverage for src/cucu/utils.py: 92%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_8e611ae1.css" type="text/css">
     <script src="coverage_html_cb_6fb7b396.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>src/cucu/utils.py</b>:
-            <span class="pc_cov">94%</span>
+            <span class="pc_cov">92%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,11 +55,11 @@
             </div>
         </aside>
         <h2>
-            <span class="text">163 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">156<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">7<span class="text"> missing</span></button>
+            <span class="text">183 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">173<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">10<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
-            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">6<span class="text"> partial</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">9<span class="text"> partial</span></button>
         </h2>
         <p class="text">
             <a id="prevFileLink" class="nav" href="z_e53747c5a64a3337_webserver_steps_py.html">&#xab; prev</a> &nbsp; &nbsp;
@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.8.2">coverage.py v7.8.2</a>,
-            created at 2025-11-18 18:43 +0000
+            created at 2025-11-20 20:19 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -450,23 +450,52 @@
     <p class="pln"><span class="n"><a id="t366" href="#t366">366</a></span><span class="t">        <span class="str">"""Clear the internal buffer."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t367" href="#t367">367</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">string_buffer</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t368" href="#t368">368</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t369" href="#t369">369</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t370" href="#t370">370</a></span><span class="t"><span class="key">def</span> <span class="nam">get_iso_timestamp_with_ms</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t371" href="#t371">371</a></span><span class="t">    <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t372" href="#t372">372</a></span><span class="t"><span class="str">    Get the current time as an ISO 8601 formatted string with milliseconds precision.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t373" href="#t373">373</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t374" href="#t374">374</a></span><span class="t">    <span class="key">return</span> <span class="nam">datetime</span><span class="op">.</span><span class="nam">now</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">isoformat</span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="op">:</span><span class="op">-</span><span class="num">3</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t375" href="#t375">375</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t376" href="#t376">376</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t377" href="#t377">377</a></span><span class="t"><span class="key">def</span> <span class="nam">parse_iso_timestamp</span><span class="op">(</span><span class="nam">iso_timestamp</span><span class="op">:</span> <span class="op">(</span><span class="nam">str</span> <span class="op">|</span> <span class="key">None</span><span class="op">)</span><span class="op">)</span> <span class="op">-></span> <span class="nam">datetime</span> <span class="op">|</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t378" href="#t378">378</a></span><span class="t">    <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t379" href="#t379">379</a></span><span class="t"><span class="str">    Parse an ISO 8601 formatted string with milliseconds precision into a datetime object.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t380" href="#t380">380</a></span><span class="t"><span class="str">    Returns None if the input is None.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t381" href="#t381">381</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t382" href="#t382">382</a></span><span class="t">    <span class="key">if</span> <span class="nam">iso_timestamp</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t383" href="#t383">383</a></span><span class="t">        <span class="key">return</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t384" href="#t384">384</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t385" href="#t385">385</a></span><span class="t">    <span class="key">return</span> <span class="nam">datetime</span><span class="op">.</span><span class="nam">fromisoformat</span><span class="op">(</span><span class="nam">iso_timestamp</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t369" href="#t369">369</a></span><span class="t">    <span class="op">@</span><span class="nam">property</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t370" href="#t370">370</a></span><span class="t">    <span class="key">def</span> <span class="nam">encoding</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t371" href="#t371">371</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">file_stream</span><span class="op">.</span><span class="nam">encoding</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t372" href="#t372">372</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t373" href="#t373">373</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t374" href="#t374">374</a></span><span class="t"><span class="key">def</span> <span class="nam">get_iso_timestamp_with_ms</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t375" href="#t375">375</a></span><span class="t">    <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t376" href="#t376">376</a></span><span class="t"><span class="str">    Get the current time as an ISO 8601 formatted string with milliseconds precision.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t377" href="#t377">377</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t378" href="#t378">378</a></span><span class="t">    <span class="key">return</span> <span class="nam">datetime</span><span class="op">.</span><span class="nam">now</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">isoformat</span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="op">:</span><span class="op">-</span><span class="num">3</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t379" href="#t379">379</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t380" href="#t380">380</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t381" href="#t381">381</a></span><span class="t"><span class="key">def</span> <span class="nam">parse_iso_timestamp</span><span class="op">(</span><span class="nam">iso_timestamp</span><span class="op">:</span> <span class="op">(</span><span class="nam">str</span> <span class="op">|</span> <span class="key">None</span><span class="op">)</span><span class="op">)</span> <span class="op">-></span> <span class="nam">datetime</span> <span class="op">|</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t382" href="#t382">382</a></span><span class="t">    <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t383" href="#t383">383</a></span><span class="t"><span class="str">    Parse an ISO 8601 formatted string with milliseconds precision into a datetime object.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t384" href="#t384">384</a></span><span class="t"><span class="str">    Returns None if the input is None.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t385" href="#t385">385</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t386" href="#t386">386</a></span><span class="t">    <span class="key">if</span> <span class="nam">iso_timestamp</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t387" href="#t387">387</a></span><span class="t">        <span class="key">return</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t388" href="#t388">388</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t389" href="#t389">389</a></span><span class="t">    <span class="key">return</span> <span class="nam">datetime</span><span class="op">.</span><span class="nam">fromisoformat</span><span class="op">(</span><span class="nam">iso_timestamp</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t390" href="#t390">390</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t391" href="#t391">391</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t392" href="#t392">392</a></span><span class="t"><span class="key">def</span> <span class="nam">get_feature_name</span><span class="op">(</span><span class="nam">filename</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t393" href="#t393">393</a></span><span class="t">    <span class="nam">filepath</span> <span class="op">=</span> <span class="nam">Path</span><span class="op">(</span><span class="nam">filename</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="par run show_par"><span class="n"><a id="t394" href="#t394">394</a></span><span class="t">    <span class="key">if</span> <span class="str">":"</span> <span class="key">in</span> <span class="nam">filepath</span><span class="op">.</span><span class="nam">name</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">394&#x202F;&#x219B;&#x202F;395</span><span class="annotate long">line 394 didn't jump to line 395 because the condition on line 394 was never true</span></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t395" href="#t395">395</a></span><span class="t">        <span class="nam">filepath</span> <span class="op">=</span> <span class="nam">filepath</span><span class="op">.</span><span class="nam">parent</span> <span class="op">/</span> <span class="nam">filepath</span><span class="op">.</span><span class="nam">name</span><span class="op">.</span><span class="nam">split</span><span class="op">(</span><span class="str">":"</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t396" href="#t396">396</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t397" href="#t397">397</a></span><span class="t">    <span class="nam">text</span> <span class="op">=</span> <span class="nam">filepath</span><span class="op">.</span><span class="nam">read_text</span><span class="op">(</span><span class="nam">encoding</span><span class="op">=</span><span class="str">"utf8"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t398" href="#t398">398</a></span><span class="t">    <span class="nam">lines</span> <span class="op">=</span> <span class="nam">text</span><span class="op">.</span><span class="nam">split</span><span class="op">(</span><span class="str">"\n"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="par run show_par"><span class="n"><a id="t399" href="#t399">399</a></span><span class="t">    <span class="key">for</span> <span class="nam">line</span> <span class="key">in</span> <span class="nam">lines</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">399&#x202F;&#x219B;&#x202F;exit</span><span class="annotate long">line 399 didn't return from function 'get_feature_name' because the loop on line 399 didn't complete</span></span></p>
+    <p class="run"><span class="n"><a id="t400" href="#t400">400</a></span><span class="t">        <span class="key">if</span> <span class="str">"Feature:"</span> <span class="key">in</span> <span class="nam">line</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t401" href="#t401">401</a></span><span class="t">            <span class="nam">feature_name</span> <span class="op">=</span> <span class="nam">line</span><span class="op">.</span><span class="nam">replace</span><span class="op">(</span><span class="str">"Feature:"</span><span class="op">,</span> <span class="str">""</span><span class="op">)</span><span class="op">.</span><span class="nam">strip</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t402" href="#t402">402</a></span><span class="t">            <span class="key">return</span> <span class="nam">feature_name</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t403" href="#t403">403</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t404" href="#t404">404</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t405" href="#t405">405</a></span><span class="t"><span class="key">def</span> <span class="nam">behave_filepath_to_cucu_logpath</span><span class="op">(</span><span class="nam">filepath</span><span class="op">:</span> <span class="nam">Path</span><span class="op">,</span> <span class="nam">results</span><span class="op">:</span> <span class="nam">Path</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Path</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="par run show_par"><span class="n"><a id="t406" href="#t406">406</a></span><span class="t">    <span class="key">if</span> <span class="str">":"</span> <span class="key">in</span> <span class="nam">filepath</span><span class="op">.</span><span class="nam">name</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">406&#x202F;&#x219B;&#x202F;407</span><span class="annotate long">line 406 didn't jump to line 407 because the condition on line 406 was never true</span></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t407" href="#t407">407</a></span><span class="t">        <span class="nam">filepath</span> <span class="op">=</span> <span class="nam">filepath</span><span class="op">.</span><span class="nam">parent</span> <span class="op">/</span> <span class="nam">filepath</span><span class="op">.</span><span class="nam">name</span><span class="op">.</span><span class="nam">split</span><span class="op">(</span><span class="str">":"</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t408" href="#t408">408</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t409" href="#t409">409</a></span><span class="t">    <span class="key">if</span> <span class="nam">filepath</span><span class="op">.</span><span class="nam">is_dir</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t410" href="#t410">410</a></span><span class="t">        <span class="nam">log_filepath</span> <span class="op">=</span> <span class="nam">results</span> <span class="op">/</span> <span class="str">"run.console.log"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t411" href="#t411">411</a></span><span class="t">    <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t412" href="#t412">412</a></span><span class="t">        <span class="nam">log_filepath</span> <span class="op">=</span> <span class="nam">results</span> <span class="op">/</span> <span class="fst">f"</span><span class="op">{</span><span class="nam">get_feature_name</span><span class="op">(</span><span class="nam">filepath</span><span class="op">)</span><span class="op">}</span><span class="fst">.console.log</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t413" href="#t413">413</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t414" href="#t414">414</a></span><span class="t">    <span class="key">return</span> <span class="nam">log_filepath</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -476,7 +505,7 @@
             <a class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.8.2">coverage.py v7.8.2</a>,
-            created at 2025-11-18 18:43 +0000
+            created at 2025-11-20 20:19 +0000
         </p>
     </div>
 </footer>
