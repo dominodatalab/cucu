@@ -15,15 +15,7 @@ from cucu.browser import selenium
 from cucu.config import CONFIG
 from cucu.db import create_database_file, record_cucu_run
 from cucu.page_checks import init_page_checks
-
-
-def get_feature_name(file_path):
-    text = Path(file_path).read_text(encoding="utf8")
-    lines = text.split("\n")
-    for line in lines:
-        if "Feature:" in line:
-            feature_name = line.replace("Feature:", "").strip()
-            return feature_name
+from cucu.utils import behave_filepath_to_cucu_logpath, get_feature_name
 
 
 def behave_init(filepath="features"):
@@ -148,13 +140,12 @@ def behave(
         args.append("--no-skipped")
 
     args.append(filepath)
+    os.environ["BEHAVE_FILEPATH"] = CONFIG["BEHAVE_FILEPATH"] = str(filepath)
 
     result = 0
     try:
         if redirect_output:
-            feature_name = get_feature_name(filepath)
-            log_filename = f"{feature_name}.log"
-            log_filepath = results / log_filename
+            cucu_log_path = behave_filepath_to_cucu_logpath(filepath, results)
 
             CONFIG["__CUCU_PARENT_STDOUT"] = sys.stdout
 
@@ -166,7 +157,7 @@ def behave(
             # provide progress feedback on screen
             register_before_retry_hook(retry_progress)
 
-            with log_filepath.open("w", encoding="utf8") as output:
+            with cucu_log_path.open("w", encoding="utf8") as output:
                 with contextlib.redirect_stderr(output):
                     with contextlib.redirect_stdout(output):
                         # intercept the stdout/stderr so we can do things such
