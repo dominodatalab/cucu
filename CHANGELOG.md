@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.3.25
 - Add - feature log to html report when available
+- Add - behave_filepath to feature db
 
 ## 1.3.24
 - Change - Remove logging useful only for development
