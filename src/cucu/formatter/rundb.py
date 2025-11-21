@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 
 from behave.formatter.base import Formatter
-from behave.model import ScenarioOutline
+from behave.model import ScenarioOutline, Status
 
 from cucu import logger
 from cucu.config import CONFIG
@@ -184,8 +184,13 @@ class RundbFormatter(Formatter):
         previous_step_duration = getattr(
             self.this_scenario, "previous_step_duration", 0
         )
-        if step.status.name in ("untested", "undefined"):
+        if step.status in (Status.untested, Status.undefined):
             step.seq = self.this_steps.index(step) + 1
+
+        # consider undefined as test author's failure, not a framework issue.
+        if step.status == Status.undefined:
+            step.status = Status.failed
+            step.error_message = "Step is undefined"
 
         finish_step_record(step, previous_step_duration)
 

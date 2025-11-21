@@ -9,8 +9,9 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Chore - upgrade behave from 1.2.6 to 1.3.3
 - Change - reorder core.py imports for BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON
 - Change - from RuntimeError to AssertionError for step failure
-- Change - css .status-error
 - Change - some ordering between environment.py and rundb.py
+- Fix - behave renamed Status errored to error
+- Fix - consider undefined as failure of test
 
 ## 1.3.25
 - Add - feature log to html report when available

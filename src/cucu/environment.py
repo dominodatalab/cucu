@@ -270,6 +270,10 @@ def before_step(ctx, step):
 
 
 def after_step(ctx, step):
+    # consider undefined as test author's failure, not a framework issue.
+    if step.status == Status.undefined:
+        step.status = Status.failed
+
     # adjust status for StopRetryException wrapped in Tenacity RetryError
     if step.status == Status.error and isinstance(
         step.exception, StopRetryException
