@@ -30,7 +30,7 @@ Feature: Run with logging
       [\s\S]*
 
         Scenario: Logging at various levels
-      .* INFO hello
+      [\s\S]*.* INFO hello
           Given I log "hello" at level "info" \s*# .*
       .* DEBUG cruel
             And I log "cruel" at level "debug" \s*# .*
