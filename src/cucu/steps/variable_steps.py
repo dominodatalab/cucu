@@ -17,43 +17,43 @@ def set_variable_to_the_following(ctx, variable):
 @step('I should see "{this}" is empty')
 def should_see_is_empty(_, this):
     if this or len(this) != 0:
-        raise AssertionError(f"{this} is not empty")
+        raise AssertionError(f"\n{this}\n is not empty")
 
 
 @step('I should see "{this}" is equal to "{that}"')
 def should_see_is_equal(_, this, that):
     if this != that:
-        raise AssertionError(f"{this} is not equal to {that}")
+        raise AssertionError(f"\n{this}\n is not equal to:\n{that}")
 
 
 @step('I should see "{this}" is not equal to "{that}"')
 def should_see_is_not_equal(_, this, that):
     if this == that:
-        raise AssertionError(f"{this} is equal to {that}")
+        raise AssertionError(f"\n{this}\n is equal to:\n{that}")
 
 
 @step('I should see "{this}" contains "{that}"')
 def should_see_it_contains(_, this, that):
     if that not in this:
-        raise AssertionError(f"{this} does not contain {that}")
+        raise AssertionError(f"\n{this}\n does not contain:\n{that}")
 
 
 @step('I should see "{this}" contains the following')
 def should_see_it_contains_the_following(ctx, this):
     if ctx.text not in this:
-        raise AssertionError(f"{this} does not contain {ctx.text}")
+        raise AssertionError(f"\n{this}\n does not contain:\n{ctx.text}")
 
 
 @step('I should see "{this}" does not contain "{that}"')
 def should_see_it_doest_not_contain(_, this, that):
     if that in this:
-        raise AssertionError(f"{this} contains {that}")
+        raise AssertionError(f"\n{this}\n contains:\n{that}")
 
 
 @step('I should see "{this}" does not contain the following')
 def should_see_it_does_not_contain(ctx, this):
     if ctx.text in this:
-        raise AssertionError(f"{this} contain {ctx.text}")
+        raise AssertionError(f"\n{this}\n contain:\n{ctx.text}")
 
 
 @step('I should see "{this}" is equal to the following')
@@ -61,13 +61,13 @@ def should_see_is_equal_to_the_following(ctx, this):
     that = ctx.text
 
     if this != that:
-        raise AssertionError(f"{this} is not equal to {that}")
+        raise AssertionError(f"\n{this}\n is not equal to:\n{that}")
 
 
 @step('I should see "{this}" matches "{that}"')
 def should_see_matches(_, this, that):
     if re.match(that, this) is None:
-        raise AssertionError(f"{this} does not match {that}")
+        raise AssertionError(f"\n{this}\n does not match:\n{that}")
 
 
 @step('I should see "{this}" matches the following')
@@ -75,7 +75,7 @@ def should_see_matches_the_following(ctx, this):
     that = ctx.text
 
     if re.match(that, this) is None:
-        raise AssertionError(f"{this}\ndoes not match:\n{that}")
+        raise AssertionError(f"\n{this}\n\ndoes not match:\n{that}")
 
 
 @step('I should see "{this}" does not match the following')
@@ -83,7 +83,7 @@ def should_does_not_see_matches_the_following(ctx, this):
     that = ctx.text
 
     if re.match(that, this) is not None:
-        raise AssertionError(f"{this}\nmatches:\n{that}")
+        raise AssertionError(f"\n{this}\n\nmatches:\n{that}")
 
 
 @step(
