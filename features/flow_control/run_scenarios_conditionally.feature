@@ -9,6 +9,7 @@ Feature: Run scenarios conditionally
     Given I run the command "cucu run data/features/feature_skipping_scenarios_by_file_presence.feature --results {CUCU_RESULTS_DIR}/skip_scenarios_conditionally_results --no-color-output" and save stdout to "STDOUT" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
+      USING RUNNER: behave.runner:Runner
       Feature: Feature with skipping scenarios by file presence
 
         Scenario: That runs only when .\/skip_first_scenario.txt does not exist
@@ -36,6 +37,7 @@ Feature: Run scenarios conditionally
       And I run the command "cucu run data/features/feature_skipping_scenarios_by_file_presence.feature --results {CUCU_RESULTS_DIR}/skip_first_scenario_results --no-color-output" and save stdout to "STDOUT" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
+      USING RUNNER: behave.runner:Runner
       Feature: Feature with skipping scenarios by file presence
 
         Scenario: That runs only when ./skip_first_scenario.txt does not exist

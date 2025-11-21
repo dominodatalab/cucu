@@ -55,11 +55,11 @@ Feature: Run with hooks
       [\s\S]*
       .* DEBUG just logging some stuff from my before all hook
       Feature: Feature that simply echo's "Hello World"
+
+        Scenario: This is a scenario that simply echo's hello world
       [\s\S]*
       .* DEBUG just logging some stuff from my before scenario hook
       .* DEBUG HOOK before_scenario_log: passed ✅
-
-        Scenario: This is a scenario that simply echo's hello world
       .* DEBUG just logging some stuff from my before step hook
       Hello
 
@@ -125,6 +125,7 @@ Feature: Run with hooks
       [\s\S]*
 
         Scenario: This is a scenario that runs after this scenario hooks in LIFO order
+      [\s\S]*
           Given I run the following steps after the current scenario-1     # .*
             And I run the following steps after the current scenario-2     # .*
       .* DEBUG No browsers - skipping MHT webpage snapshot

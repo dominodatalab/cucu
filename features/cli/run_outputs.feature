@@ -71,6 +71,7 @@ Feature: Run outputs
     Given I run the command "cucu run data/features/feature_with_background_using_substeps.feature --results {CUCU_RESULTS_DIR}/background-with-substeps-results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       Feature: Feature with background using substeps
 
         Scenario: Scenario which now has a background using a step with substeps
@@ -102,6 +103,7 @@ Feature: Run outputs
     Given I run the command "cucu run data/features/feature_with_multilines_and_tables.feature --results {CUCU_RESULTS_DIR}/variable_values_expanded_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       Feature: Feature with multilines and tables
 
         Scenario: Scenario with a step that has a multiline argument
