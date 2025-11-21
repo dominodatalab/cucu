@@ -25,7 +25,7 @@ Feature: Run scenarios conditionally
 
       1 feature passed, 0 failed, 0 skipped
       2 scenarios passed, 0 failed, 0 skipped
-      4 steps passed, 0 failed, 0 skipped, 0 undefined
+      4 steps passed, 0 failed, 0 skipped
       [\s\S]*
       """
 
@@ -50,6 +50,6 @@ Feature: Run scenarios conditionally
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 1 skipped
-      2 steps passed, 0 failed, 2 skipped, 0 undefined
+      2 steps passed, 0 failed, 2 skipped
       [\s\S]*
       """

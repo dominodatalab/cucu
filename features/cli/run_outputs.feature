@@ -15,7 +15,7 @@ Feature: Run outputs
 
       0 features passed, 0 failed, 0 skipped, 1 untested
       0 scenarios passed, 0 failed, 0 skipped, 1 untested
-      0 steps passed, 0 failed, 0 skipped, 0 undefined, 1 untested
+      0 steps passed, 0 failed, 0 skipped, 1 untested
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
@@ -58,7 +58,7 @@ Feature: Run outputs
       [\s\S]*
       0 features passed, 1 failed, 0 skipped
       0 scenarios passed, 1 failed, 0 skipped
-      0 steps passed, 1 failed, 0 skipped, 0 undefined
+      0 steps passed, 1 failed, 0 skipped
       [\s\S]*
       """
       And I should see "{STDERR}" is equal to the following
@@ -93,7 +93,7 @@ Feature: Run outputs
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
-      3 steps passed, 0 failed, 0 skipped, 0 undefined
+      3 steps passed, 0 failed, 0 skipped
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
@@ -134,7 +134,7 @@ Feature: Run outputs
 
       1 feature passed, 0 failed, 0 skipped
       2 scenarios passed, 0 failed, 0 skipped
-      4 steps passed, 0 failed, 0 skipped, 0 undefined
+      4 steps passed, 0 failed, 0 skipped
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
@@ -219,7 +219,7 @@ Feature: Run outputs
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
-      6 steps passed, 0 failed, 0 skipped, 0 undefined
+      6 steps passed, 0 failed, 0 skipped
       [\s\S]*
       """
 
