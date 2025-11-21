@@ -91,7 +91,7 @@ def should_see_file_is_equal_to_the_following(ctx, filepath):
 
         if file_contents != ctx.text:
             raise AssertionError(
-                f"\n{file_contents}\nis not equal to\n{ctx.text}\n"
+                f"\n{file_contents}\n is not equal to:\n{ctx.text}\n"
             )
 
 

@@ -5,8 +5,9 @@ Feature: Run
     Given I run the command "cucu run data/features/inexistent.feature --results {CUCU_RESULTS_DIR}/inexistent-results" and save stdout to "STDOUT" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following
       """
+      ASSERT FAILED: USING RUNNER: behave.runner:Runner
       FileNotFoundError: data/features/inexistent.feature
-
+       is not equal to FileNotFoundError: data/features/inexistent.feature
       """
 
   Scenario: User can get the version of the currently running cucu command
