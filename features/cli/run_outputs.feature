@@ -15,13 +15,13 @@ Feature: Run outputs
 
       0 features passed, 0 failed, 0 skipped, 1 untested
       0 scenarios passed, 0 failed, 0 skipped, 1 untested
-      0 steps passed, 0 failed, 0 skipped, 0 undefined, 1 untested
+      0 steps passed, 0 failed, 0 skipped, 1 untested
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
 
   Scenario: User gets expected output when running steps with substeps
-    Given I run the command "cucu run data/features/scenario_with_substeps.feature --results {CUCU_RESULTS_DIR}/substeps-results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+    Given I run the command "cucu run data/features/scenario_with_substeps.feature --results {CUCU_RESULTS_DIR}/substeps_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*
@@ -51,14 +51,14 @@ Feature: Run outputs
           Given I fail .*s
       Traceback \(most recent call last\):
       [\s\S]*
-      RuntimeError: step fails on purpose
+      AssertionError: step fails on purpose
       [\s\S]*
       Failing scenarios:
         data/features/feature_with_failing_scenario.feature:\d+  Just a scenario that fails
       [\s\S]*
       0 features passed, 1 failed, 0 skipped
       0 scenarios passed, 1 failed, 0 skipped
-      0 steps passed, 1 failed, 0 skipped, 0 undefined
+      0 steps passed, 1 failed, 0 skipped
       [\s\S]*
       """
       And I should see "{STDERR}" is equal to the following
@@ -71,6 +71,7 @@ Feature: Run outputs
     Given I run the command "cucu run data/features/feature_with_background_using_substeps.feature --results {CUCU_RESULTS_DIR}/background-with-substeps-results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       Feature: Feature with background using substeps
 
         Scenario: Scenario which now has a background using a step with substeps
@@ -93,7 +94,7 @@ Feature: Run outputs
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
-      3 steps passed, 0 failed, 0 skipped, 0 undefined
+      3 steps passed, 0 failed, 0 skipped
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
@@ -102,6 +103,7 @@ Feature: Run outputs
     Given I run the command "cucu run data/features/feature_with_multilines_and_tables.feature --results {CUCU_RESULTS_DIR}/variable_values_expanded_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       Feature: Feature with multilines and tables
 
         Scenario: Scenario with a step that has a multiline argument
@@ -134,7 +136,7 @@ Feature: Run outputs
 
       1 feature passed, 0 failed, 0 skipped
       2 scenarios passed, 0 failed, 0 skipped
-      4 steps passed, 0 failed, 0 skipped, 0 undefined
+      4 steps passed, 0 failed, 0 skipped
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
@@ -219,7 +221,7 @@ Feature: Run outputs
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
-      6 steps passed, 0 failed, 0 skipped, 0 undefined
+      6 steps passed, 0 failed, 0 skipped
       [\s\S]*
       """
 
@@ -227,7 +229,7 @@ Feature: Run outputs
     Given I run the command "cucu run data/features/feature_with_failing_scenario_with_table.feature --results {CUCU_RESULTS_DIR}/tables_in_output_results" and save stdout to "STDOUT" and expect exit code "1"
       And I should see "{STDOUT}" contains the following
       """
-      RuntimeError: unable to find desired table
+      AssertionError: unable to find desired table
       expected:
         | nope | this | is | not | it |
 

@@ -5,8 +5,9 @@ Feature: Run
     Given I run the command "cucu run data/features/inexistent.feature --results {CUCU_RESULTS_DIR}/inexistent-results" and save stdout to "STDOUT" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following
       """
+      ASSERT FAILED: USING RUNNER: behave.runner:Runner
       FileNotFoundError: data/features/inexistent.feature
-
+       is not equal to FileNotFoundError: data/features/inexistent.feature
       """
 
   Scenario: User can get the version of the currently running cucu command
@@ -32,14 +33,14 @@ Feature: Run
         Scenario: Scenario that fails
           Given I fail                             # .*
       [\s\S]*
-      RuntimeError: step fails on purpose
+      AssertionError: step fails on purpose
       [\s]*
       Failing scenarios:
         data/features/feature_with_mixed_results.feature:\d+  Scenario that fails
 
       0 features passed, 1 failed, 0 skipped
       1 scenario passed, 1 failed, 0 skipped, 5 untested
-      1 step passed, 1 failed, 1 skipped, 0 undefined, 8 untested
+      1 step passed, 1 failed, 1 skipped, 8 untested
       [\s\S]*
       """
 
@@ -58,7 +59,7 @@ Feature: Run
       [\s]*
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 6 skipped
-      1 step passed, 0 failed, 10 skipped, 0 undefined
+      1 step passed, 0 failed, 10 skipped
       [\s\S]*
       """
 

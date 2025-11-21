@@ -14,7 +14,7 @@ def process_func_to_run_cucu(workers, runtime_timeout):
     with mock.patch("os.path.isdir", isdir_mock):
         config_mock = mock.MagicMock()
         config_mock.load_cucurc_files = mock.MagicMock(
-            side_effect=RuntimeError("something bad")
+            side_effect=AssertionError("something bad")
         )
         with mock.patch("cucu.cli.run.CONFIG", config_mock):
             runner = CliRunner()
