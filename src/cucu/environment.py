@@ -11,6 +11,7 @@ from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
 from cucu.utils import (
+    StopRetryException,
     TeeStream,
     ellipsize_filename,
     get_iso_timestamp_with_ms,
@@ -269,6 +270,12 @@ def before_step(ctx, step):
 
 
 def after_step(ctx, step):
+    # adjust status for StopRetryException wrapped in Tenacity RetryError
+    if step.status == Status.error and isinstance(
+        step.exception, StopRetryException
+    ):
+        step.status = Status.failed
+
     # adjust status for AssertionError wrapped in Tenacity RetryError
     if step.status == Status.error and isinstance(
         step.exception.last_attempt._exception, AssertionError

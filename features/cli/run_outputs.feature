@@ -21,7 +21,7 @@ Feature: Run outputs
       And I should see "{STDERR}" is empty
 
   Scenario: User gets expected output when running steps with substeps
-    Given I run the command "cucu run data/features/scenario_with_substeps.feature --results {CUCU_RESULTS_DIR}/substeps-results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+    Given I run the command "cucu run data/features/scenario_with_substeps.feature --results {CUCU_RESULTS_DIR}/substeps_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*
