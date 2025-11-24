@@ -7,6 +7,7 @@ Feature: Run
       """
       USING RUNNER: behave.runner:Runner
       FileNotFoundError: data/features/inexistent.feature
+
       """
 
   Scenario: User can get the version of the currently running cucu command
