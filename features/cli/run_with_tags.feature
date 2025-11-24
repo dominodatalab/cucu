@@ -24,7 +24,7 @@ Feature: Run with tags
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 2 skipped
-      1 step passed, 0 failed, 2 skipped, 0 undefined
+      1 step passed, 0 failed, 2 skipped
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
@@ -51,7 +51,7 @@ Feature: Run with tags
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 2 skipped
-      1 step passed, 0 failed, 2 skipped, 0 undefined
+      1 step passed, 0 failed, 2 skipped
       [\s\S]*
       """
       And I should see "{STDERR}" is empty

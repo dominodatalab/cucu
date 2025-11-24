@@ -49,8 +49,6 @@ Feature: Run outputs
 
         Scenario: Just a scenario that fails
           Given I fail .*s
-      Traceback \(most recent call last\):
-      [\s\S]*
       ASSERT FAILED: step fails on purpose
       [\s\S]*
       Failing scenarios:

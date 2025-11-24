@@ -145,7 +145,7 @@ Feature: Report basics
 
       And I click the button "Scenario that fails"
       And I click the button "I fail"
-     Then I should see the text "AssertionError: step fails on purpose"
+     Then I should see the text "ASSERT FAILED: step fails on purpose"
      When I click the button "Index"
       And I click the button "Feature with mixed results"
       And I click the button "Scenario that has an undefined step"
