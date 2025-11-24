@@ -93,6 +93,7 @@ Feature: Run
       """
       runtime timeout reached, aborting run
       """
+
   @runtime-timeout @workers
   Scenario: User can run with a runtime timeout and workers to avoid running over a certain amount of time
     Given I run the command "cucu run data/features/slow_features --workers 2 --runtime-timeout 10 --results {CUCU_RESULTS_DIR}/runtime_timeout_with_workers_timed_out_results" and save stdout to "STDOUT" and expect exit code "1"
@@ -102,6 +103,7 @@ Feature: Run
       """
       runtime timeout reached, aborting run
       """
+
   @feature-timeout @workers
   Scenario: When using workers, user can run with a feature timeout to avoid a feature running over a certain amount of time
     Given I run the command "cucu run data/features/slow_features --workers 2 --feature-timeout 3 --results {CUCU_RESULTS_DIR}/runtime_timeout_results" and save stdout to "STDOUT" and expect exit code "1"
