@@ -6,6 +6,7 @@ Feature: Run with tags
     Given I run the command "cucu run data/features/feature_with_tagging.feature --tags '@second' --show-skips --results {CUCU_RESULTS_DIR}/scenario_with_tag_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       @all
       Feature: Feature with tagging
 
@@ -32,6 +33,7 @@ Feature: Run with tags
     Given I run the command "cucu run data/features/feature_with_tagging.feature --tags '~@second' --show-skips --results {CUCU_RESULTS_DIR}/scenario_without_tag_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       @all
       Feature: Feature with tagging
 

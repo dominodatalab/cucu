@@ -51,7 +51,7 @@ Feature: Run outputs
           Given I fail .*s
       Traceback \(most recent call last\):
       [\s\S]*
-      AssertionError: step fails on purpose
+      ASSERT FAILED: step fails on purpose
       [\s\S]*
       Failing scenarios:
         data/features/feature_with_failing_scenario.feature:\d+  Just a scenario that fails
@@ -181,6 +181,7 @@ Feature: Run outputs
       # up with 4 backlslashes
       And I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       Feature: Echo
 
         Scenario: Echo an environment variable
@@ -229,7 +230,7 @@ Feature: Run outputs
     Given I run the command "cucu run data/features/feature_with_failing_scenario_with_table.feature --results {CUCU_RESULTS_DIR}/tables_in_output_results" and save stdout to "STDOUT" and expect exit code "1"
       And I should see "{STDOUT}" contains the following
       """
-      AssertionError: unable to find desired table
+      ASSERT FAILED: unable to find desired table
       expected:
         | nope | this | is | not | it |
 

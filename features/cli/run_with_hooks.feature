@@ -123,7 +123,6 @@ Feature: Run with hooks
       [\s\S]*
       Feature: Feature that runs after this scenario hooks in LIFO order.
       [\s\S]*
-
         Scenario: This is a scenario that runs after this scenario hooks in LIFO order
       [\s\S]*
           Given I run the following steps after the current scenario-1     # .*

@@ -28,7 +28,6 @@ Feature: Run with logging
       [\s\S]*
       Feature: Feature with logging
       [\s\S]*
-
         Scenario: Logging at various levels
       [\s\S]*.* INFO hello
           Given I log "hello" at level "info" \s*# .*

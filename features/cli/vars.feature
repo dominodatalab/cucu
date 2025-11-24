@@ -96,6 +96,7 @@ Feature: Vars
       # can see a built in variable
      Then I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       Feature: Feature with custom variables
 
         Scenario: That simply prints a custom variable

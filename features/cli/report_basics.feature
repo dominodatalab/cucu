@@ -144,6 +144,7 @@ Feature: Report basics
         | .*     | Scenario with after-hook error      | 2     | passed  | .*       |
 
       And I click the button "Scenario that fails"
+      And I click the button "I fail"
      Then I should see the text "AssertionError: step fails on purpose"
      When I click the button "Index"
       And I click the button "Feature with mixed results"
