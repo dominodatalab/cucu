@@ -134,7 +134,7 @@ class Selenium(Browser):
             # TODO: re-enable once Firefox supports this
             # options.set_capability("loggingPrefs", {"browser": "ALL"})
 
-            if headless:
+            if selenium_remote_url is None and headless:
                 options.add_argument("--headless")
 
             if selenium_remote_url is not None:
@@ -328,9 +328,11 @@ class Selenium(Browser):
         # if Firefox just do normal click
         if config.CONFIG["CUCU_BROWSER"] == "firefox":
             element.click()
+            logger.debug(f'Successfully clicked {element.tag_name}')
         else:
             actions = ActionChains(self.driver)
             actions.move_to_element(element).click().perform()
+            logger.debug(f'Successfully clicked {element.tag_name}')
 
         # let cucu's own wait for page to load checks run
         self.wait_for_page_to_load()
