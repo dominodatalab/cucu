@@ -116,7 +116,8 @@ Feature: Report basics
         | .*     | Scenario that passes                | 1     | passed  | .*       |
         | .*     | Scenario with after-hook error      | 2     | passed  | .*       |
       And I click the button "Scenario that fails"
-     Then I should see the text "RuntimeError: step fails on purpose"
+      And I click the button "I fail"
+     Then I should see the text "ASSERT FAILED: step fails on purpose"
      When I click the button "Index"
       And I click the button "Feature with mixed results"
       And I click the button "Scenario that has an undefined step"
@@ -143,7 +144,8 @@ Feature: Report basics
         | .*     | Scenario with after-hook error      | 2     | passed  | .*       |
 
       And I click the button "Scenario that fails"
-     Then I should see the text "RuntimeError: step fails on purpose"
+      And I click the button "I fail"
+     Then I should see the text "ASSERT FAILED: step fails on purpose"
      When I click the button "Index"
       And I click the button "Feature with mixed results"
       And I click the button "Scenario that has an undefined step"
@@ -275,7 +277,8 @@ Feature: Report basics
         | .*     | Scenario that passes                | 1     | passed  | .*       |
         | .*     | Scenario with after-hook error      | 2     | passed  | .*       |
       And I click the button "Scenario that fails"
-     Then I should see the text "RuntimeError: step fails on purpose"
+      And I click the button "I fail"
+     Then I should see the text "ASSERT FAILED: step fails on purpose"
      When I click the button "Index"
       And I click the button "Feature with mixed results"
       And I click the button "Scenario that has an undefined step"

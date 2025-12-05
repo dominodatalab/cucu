@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 
 from behave.formatter.base import Formatter
-from behave.model import ScenarioOutline
+from behave.model import ScenarioOutline, Status
 
 from cucu import logger
 from cucu.config import CONFIG
@@ -132,19 +132,14 @@ class RundbFormatter(Formatter):
     def scenario(self, scenario):
         """Called before a scenario is executed (or ScenarioOutline scenarios)."""
         self._finish_scenario()
-        # Set after CONFIG.restore() in environment.before_scenario()
-        CONFIG["FEATURE_RUN_ID"] = scenario.feature.feature_run_id
 
         self.this_scenario = scenario
         self.this_steps = []
         self.next_start_at = get_iso_timestamp_with_ms()
-        scenario_run_id_seed = (
+        scenario.custom_data = {}
+        scenario.scenario_run_id = generate_short_id(
             f"{scenario.feature.feature_run_id}_{time.perf_counter()}"
         )
-        CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id = (
-            generate_short_id(scenario_run_id_seed)
-        )
-        scenario.custom_data = {}
 
         # feature.scenarios is a mix of Scenario and ScenarioOutline objects with their own scenarios list
         for index, feature_scenario in enumerate(scenario.feature.scenarios):
@@ -189,8 +184,13 @@ class RundbFormatter(Formatter):
         previous_step_duration = getattr(
             self.this_scenario, "previous_step_duration", 0
         )
-        if step.status.name in ("untested", "undefined"):
+        if step.status in (Status.untested, Status.undefined):
             step.seq = self.this_steps.index(step) + 1
+
+        # consider undefined as test author's failure, not a framework issue.
+        if step.status == Status.undefined:
+            step.status = Status.failed
+            step.error_message = "Step is undefined"
 
         finish_step_record(step, previous_step_duration)
 

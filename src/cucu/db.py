@@ -189,7 +189,6 @@ def record_scenario(scenario_obj):
         line_number=scenario_obj.line,
         seq=scenario_obj.seq,
         tags=scenario_obj.tags,
-        start_at=parse_iso_timestamp(getattr(scenario_obj, "start_at", None)),
     )
 
 
@@ -301,6 +300,7 @@ def finish_scenario_record(scenario_obj):
     scenario.update(
         status=status,
         duration=duration,
+        start_at=parse_iso_timestamp(getattr(scenario_obj, "start_at", None)),
         end_at=end_at,
         log_files=log_files_json,
         cucu_config=getattr(scenario_obj, "cucu_config_json", dict()),
@@ -359,7 +359,7 @@ def create_database_file(db_filepath):
                 SUM(CASE WHEN s.status = 'passed' THEN 1 ELSE 0 END) AS passed,
                 SUM(CASE WHEN s.status = 'failed' THEN 1 ELSE 0 END) AS failed,
                 SUM(CASE WHEN s.status = 'skipped' THEN 1 ELSE 0 END) AS skipped,
-                SUM(CASE WHEN s.status = 'errored' THEN 1 ELSE 0 END) AS errored,
+                SUM(CASE WHEN s.status = 'error' THEN 1 ELSE 0 END) AS errored,
                 SUM(s.duration) AS duration,
                 SUM(s.steps) AS steps
             FROM scenario_with_steps s
@@ -375,7 +375,7 @@ def create_database_file(db_filepath):
                     SUM(CASE WHEN s.status = 'passed' THEN 1 ELSE 0 END) AS passed,
                     SUM(CASE WHEN s.status = 'failed' THEN 1 ELSE 0 END) AS failed,
                     SUM(CASE WHEN s.status = 'skipped' THEN 1 ELSE 0 END) AS skipped,
-                    SUM(CASE WHEN s.status = 'errored' THEN 1 ELSE 0 END) AS errored,
+                    SUM(CASE WHEN s.status = 'error' THEN 1 ELSE 0 END) AS errored,
                     SUM(s.duration) AS duration
                 FROM cucu_run r
                 JOIN worker w ON r.cucu_run_id = w.cucu_run_id

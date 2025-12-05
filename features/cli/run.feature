@@ -5,6 +5,7 @@ Feature: Run
     Given I run the command "cucu run data/features/inexistent.feature --results {CUCU_RESULTS_DIR}/inexistent-results" and save stdout to "STDOUT" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following
       """
+      USING RUNNER: behave.runner:Runner
       FileNotFoundError: data/features/inexistent.feature
 
       """
@@ -31,15 +32,14 @@ Feature: Run
 
         Scenario: Scenario that fails
           Given I fail                             # .*
-      [\s\S]*
-      RuntimeError: step fails on purpose
+      ASSERT FAILED: step fails on purpose
       [\s]*
       Failing scenarios:
         data/features/feature_with_mixed_results.feature:\d+  Scenario that fails
 
       0 features passed, 1 failed, 0 skipped
       1 scenario passed, 1 failed, 0 skipped, 5 untested
-      1 step passed, 1 failed, 1 skipped, 0 undefined, 8 untested
+      1 step passed, 1 failed, 1 skipped, 8 untested
       [\s\S]*
       """
 
@@ -58,7 +58,7 @@ Feature: Run
       [\s]*
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 6 skipped
-      1 step passed, 0 failed, 10 skipped, 0 undefined
+      1 step passed, 0 failed, 10 skipped
       [\s\S]*
       """
 
@@ -92,6 +92,7 @@ Feature: Run
       """
       runtime timeout reached, aborting run
       """
+
   @runtime-timeout @workers
   Scenario: User can run with a runtime timeout and workers to avoid running over a certain amount of time
     Given I run the command "cucu run data/features/slow_features --workers 2 --runtime-timeout 10 --results {CUCU_RESULTS_DIR}/runtime_timeout_with_workers_timed_out_results" and save stdout to "STDOUT" and expect exit code "1"
@@ -101,6 +102,7 @@ Feature: Run
       """
       runtime timeout reached, aborting run
       """
+
   @feature-timeout @workers
   Scenario: When using workers, user can run with a feature timeout to avoid a feature running over a certain amount of time
     Given I run the command "cucu run data/features/slow_features --workers 2 --feature-timeout 3 --results {CUCU_RESULTS_DIR}/runtime_timeout_results" and save stdout to "STDOUT" and expect exit code "1"
