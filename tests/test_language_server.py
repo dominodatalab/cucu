@@ -15,7 +15,7 @@ def test_find_completions_returns_something_when_prefix_does_not_match():
 
     for step_name, _ in matches:
         if step_name.find("click") == -1 and step_name.find("button") == -1:
-            raise RuntimeError(
+            raise AssertionError(
                 f"found step with neither click nor button in it: {step_name}"
             )
 
