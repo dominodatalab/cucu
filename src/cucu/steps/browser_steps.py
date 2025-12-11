@@ -68,6 +68,7 @@ def execute_javascript_and_save(ctx, variable):
 def assert_url_is(ctx, value):
     ctx.check_browser_initialized()
     url = ctx.browser.get_current_url()
+    logger.debug(f"current url is: {url}")
     if value != url:
         raise RuntimeError(f"current url is {url}, not {value}")
 
@@ -85,6 +86,7 @@ def wait_to_see_the_current_url_is(ctx, value):
 def assert_url_matches(ctx, regex):
     ctx.check_browser_initialized()
     url = ctx.browser.get_current_url()
+    logger.debug(f"current url is: {url}")
     if not re.search(regex, url):
         raise RuntimeError(f"current url {url} does not match {regex}")
 
@@ -102,7 +104,9 @@ def wait_to_see_the_current_url_matches(ctx, regex):
 @step('I save the current url to the variable "{variable}"')
 def save_current_url_to_variable(ctx, variable):
     ctx.check_browser_initialized()
-    config.CONFIG[variable] = ctx.browser.get_current_url()
+    current_url = ctx.browser.get_current_url()
+    config.CONFIG[variable] = current_url
+    logger.debug(f"saved current url {current_url} to variable {variable}")
 
 
 @step("I refresh the browser")
@@ -155,6 +159,7 @@ def save_clipboard_value_to_variable(ctx, variable):
 def should_see_browser_title(ctx, title):
     ctx.check_browser_initialized()
     current_title = ctx.browser.title()
+    logger.debug(f"current title is: {current_title}")
 
     if current_title != title:
         raise RuntimeError(f'unexpected browser title, got "{current_title}"')
@@ -194,7 +199,6 @@ def save_current_browser_url_to_variable(ctx, variable):
 @step("I switch to the previous browser")
 def switch_to_previous_browser(ctx):
     browser_index = ctx.browsers.index(ctx.browser)
-
     if browser_index > 0:
         ctx.browser = ctx.browsers[browser_index - 1]
     else:
@@ -204,7 +208,6 @@ def switch_to_previous_browser(ctx):
 @step("I switch to the next browser")
 def switch_to_next_browser(ctx):
     browser_index = ctx.browsers.index(ctx.browser)
-
     if browser_index < len(ctx.browsers) - 1:
         ctx.browser = ctx.browsers[browser_index + 1]
     else:
@@ -286,6 +289,9 @@ def save_browser_tabs_info_to_variable(ctx, variable):
         for index, tab in enumerate(tabs_info)
     ]
     config.CONFIG[variable] = lst_tab_info
+    logger.debug(
+        f"saved current tabs info {lst_tab_info} to variable {variable}"
+    )
 
 
 @step("I list the current browser tab info")
@@ -389,24 +395,28 @@ def download_mht_archive(ctx, file_path):
 
 @step('I run the following steps if the current browser is "{name}"')
 def run_if_browser(ctx, name):
+    logger.debug(f"current browser is {config.CONFIG['CUCU_BROWSER'].lower()}")
     if config.CONFIG["CUCU_BROWSER"].lower() == name.lower():
         run_steps(ctx, ctx.text)
 
 
 @step('I do not run the following steps if the current browser is "{name}"')
 def run_if_not_browser(ctx, name):
+    logger.debug(f"current browser is {config.CONFIG['CUCU_BROWSER'].lower()}")
     if config.CONFIG["CUCU_BROWSER"].lower() != name.lower():
         run_steps(ctx, ctx.text)
 
 
 @step('I skip this scenario if the current browser is "{name}"')
 def skip_if_browser(ctx, name):
+    logger.debug(f"current browser is {config.CONFIG['CUCU_BROWSER'].lower()}")
     if config.CONFIG["CUCU_BROWSER"].lower() == name.lower():
         ctx.scenario.skip(reason=f"skipping scenario since we're on {name}")
 
 
 @step('I skip this scenario if the current browser is not "{name}"')
 def skip_if_not_browser(ctx, name):
+    logger.debug(f"current browser is {config.CONFIG['CUCU_BROWSER'].lower()}")
     if config.CONFIG["CUCU_BROWSER"].lower() != name.lower():
         ctx.scenario.skip(
             reason=f"skipping scenario since we're not on {name}"
@@ -416,9 +426,9 @@ def skip_if_not_browser(ctx, name):
 @step('I save the browser cookie "{cookie_name}" to the variable "{variable}"')
 def save_browser_cookie(ctx, cookie_name, variable):
     ctx.check_browser_initialized()
-    config.CONFIG[variable] = ctx.browser.driver.get_cookie(cookie_name)[
-        "value"
-    ]
+    cookie_value = ctx.browser.driver.get_cookie(cookie_name)["value"]
+    config.CONFIG[variable] = cookie_value
+    logger.debug(f"saved browser cookie {cookie_value} to variable {variable}")
 
 
 @step('I set the browser cookie "{name}" a value of "{value}"')
@@ -433,3 +443,6 @@ def get_browser_window_size(ctx, variable):
     ctx.check_browser_initialized()
     size = ctx.browser.driver.get_window_size()
     config.CONFIG[variable] = f"{size['width']}x{size['height']}"
+    logger.debug(
+        f"saved browser window size {size['width']}x{size['height']} to variable {variable}"
+    )
