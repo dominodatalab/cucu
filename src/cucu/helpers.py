@@ -292,9 +292,9 @@ def define_action_on_thing_with_name_steps(
                 )
         else:
             action_func(ctx, element)
-            # logger.debug(
-            #     f'Successfully executed {action} {prefix}{thing} "{name}"'
-            # )
+            logger.debug(
+                f'Successfully executed {action} {prefix}{thing} "{name}"'
+            )
 
     @step(f'I immediately {action} the {thing} "{{name}}"')
     def immediately_action_the(ctx, name):
