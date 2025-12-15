@@ -65,10 +65,15 @@ def execute_javascript_and_save(ctx, variable):
     config.CONFIG[variable] = result
 
 
-def assert_url_is(ctx, value):
+def get_current_url(ctx):
     ctx.check_browser_initialized()
     url = ctx.browser.get_current_url()
     logger.debug(f"current url is: {url}")
+    return url
+
+
+def assert_url_is(ctx, value):
+    url = get_current_url(ctx)
     if value != url:
         raise RuntimeError(f"current url is {url}, not {value}")
 
@@ -84,9 +89,7 @@ def wait_to_see_the_current_url_is(ctx, value):
 
 
 def assert_url_matches(ctx, regex):
-    ctx.check_browser_initialized()
-    url = ctx.browser.get_current_url()
-    logger.debug(f"current url is: {url}")
+    url = get_current_url(ctx)
     if not re.search(regex, url):
         raise RuntimeError(f"current url {url} does not match {regex}")
 
@@ -103,8 +106,7 @@ def wait_to_see_the_current_url_matches(ctx, regex):
 
 @step('I save the current url to the variable "{variable}"')
 def save_current_url_to_variable(ctx, variable):
-    ctx.check_browser_initialized()
-    current_url = ctx.browser.get_current_url()
+    current_url = get_current_url(ctx)
     config.CONFIG[variable] = current_url
     logger.debug(f"saved current url {current_url} to variable {variable}")
 
@@ -188,8 +190,7 @@ def navigate_to_the_url(ctx, url):
 
 @step('I save the current browser url to the variable "{variable}"')
 def save_current_browser_url_to_variable(ctx, variable):
-    ctx.check_browser_initialized()
-    current_url = ctx.browser.get_current_url()
+    current_url = get_current_url(ctx)
     config.CONFIG[variable] = current_url
     logger.debug(
         f"saved current browser url {current_url} to variable {variable}"
@@ -393,31 +394,37 @@ def download_mht_archive(ctx, file_path):
     ctx.browser.download_mht(file_path)
 
 
+def get_current_browser_name(ctx):
+    browser_name = config.CONFIG["CUCU_BROWSER"].lower()
+    logger.debug(f"current browser is {browser_name}")
+    return browser_name
+
+
 @step('I run the following steps if the current browser is "{name}"')
 def run_if_browser(ctx, name):
-    logger.debug(f"current browser is {config.CONFIG['CUCU_BROWSER'].lower()}")
-    if config.CONFIG["CUCU_BROWSER"].lower() == name.lower():
+    browser_name = get_current_browser_name(ctx)
+    if browser_name == name.lower():
         run_steps(ctx, ctx.text)
 
 
 @step('I do not run the following steps if the current browser is "{name}"')
 def run_if_not_browser(ctx, name):
-    logger.debug(f"current browser is {config.CONFIG['CUCU_BROWSER'].lower()}")
-    if config.CONFIG["CUCU_BROWSER"].lower() != name.lower():
+    browser_name = get_current_browser_name(ctx)
+    if browser_name != name.lower():
         run_steps(ctx, ctx.text)
 
 
 @step('I skip this scenario if the current browser is "{name}"')
 def skip_if_browser(ctx, name):
-    logger.debug(f"current browser is {config.CONFIG['CUCU_BROWSER'].lower()}")
-    if config.CONFIG["CUCU_BROWSER"].lower() == name.lower():
+    browser_name = get_current_browser_name(ctx)
+    if browser_name == name.lower():
         ctx.scenario.skip(reason=f"skipping scenario since we're on {name}")
 
 
 @step('I skip this scenario if the current browser is not "{name}"')
 def skip_if_not_browser(ctx, name):
-    logger.debug(f"current browser is {config.CONFIG['CUCU_BROWSER'].lower()}")
-    if config.CONFIG["CUCU_BROWSER"].lower() != name.lower():
+    browser_name = get_current_browser_name(ctx)
+    if browser_name != name.lower():
         ctx.scenario.skip(
             reason=f"skipping scenario since we're not on {name}"
         )
