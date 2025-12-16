@@ -366,6 +366,10 @@ class TeeStream:
         """Clear the internal buffer."""
         self.string_buffer = []
 
+    @property
+    def encoding(self):
+        return self.file_stream.encoding
+
 
 def get_iso_timestamp_with_ms():
     """
@@ -383,3 +387,28 @@ def parse_iso_timestamp(iso_timestamp: (str | None)) -> datetime | None:
         return None
 
     return datetime.fromisoformat(iso_timestamp)
+
+
+def get_feature_name(filename):
+    filepath = Path(filename)
+    if ":" in filepath.name:
+        filepath = filepath.parent / filepath.name.split(":")[0]
+
+    text = filepath.read_text(encoding="utf8")
+    lines = text.split("\n")
+    for line in lines:
+        if "Feature:" in line:
+            feature_name = line.replace("Feature:", "").strip()
+            return feature_name
+
+
+def behave_filepath_to_cucu_logpath(filepath: Path, results: Path) -> Path:
+    if ":" in filepath.name:
+        filepath = filepath.parent / filepath.name.split(":")[0]
+
+    if filepath.is_dir():
+        log_filepath = results / "run.console.log"
+    else:
+        log_filepath = results / f"{get_feature_name(filepath)}.console.log"
+
+    return log_filepath
