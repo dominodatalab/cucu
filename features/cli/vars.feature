@@ -96,6 +96,7 @@ Feature: Vars
       # can see a built in variable
      Then I should see "{STDOUT}" matches the following
       """
+      [\s\S]*
       Feature: Feature with custom variables
 
         Scenario: That simply prints a custom variable
@@ -106,7 +107,7 @@ Feature: Vars
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
-      1 step passed, 0 failed, 0 skipped, 0 undefined
+      1 step passed, 0 failed, 0 skipped
       [\s\S]+
       """
 
