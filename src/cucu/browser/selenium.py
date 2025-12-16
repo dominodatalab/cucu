@@ -134,7 +134,7 @@ class Selenium(Browser):
             # TODO: re-enable once Firefox supports this
             # options.set_capability("loggingPrefs", {"browser": "ALL"})
 
-            if selenium_remote_url is None and headless:
+            if headless:
                 options.add_argument("--headless")
 
             if selenium_remote_url is not None:
