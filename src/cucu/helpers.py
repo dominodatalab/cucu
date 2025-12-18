@@ -283,7 +283,9 @@ def define_action_on_thing_with_name_steps(
     # undecorated def for reference below
     def base_action_the(ctx, thing, name, index=0, must_exist=True):
         prefix = nth_to_ordinal(index)
+        print(f"base_action_the: looking for {prefix}{thing} '{name}'")
         element = find_func(ctx, name, index=index)
+        print(f"element : {element.get_attribute('outerHTML')}")
 
         if element is None:
             if must_exist:
@@ -302,6 +304,7 @@ def define_action_on_thing_with_name_steps(
 
     @step(f'I {action} the {thing} "{{name}}"')
     def action_the(ctx, name):
+        print(f"DEBUG: action_the called for {thing} '{name}'")
         retry(
             base_action_the,
             retry_after_s=float(CONFIG["CUCU_SHORT_UI_RETRY_AFTER_S"]),
