@@ -339,7 +339,6 @@ class Selenium(Browser):
             )
             actions.move_to_element(element).click().perform()
 
-
         # let cucu's own wait for page to load checks run
         self.wait_for_page_to_load()
 
