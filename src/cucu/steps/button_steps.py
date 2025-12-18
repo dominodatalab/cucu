@@ -58,6 +58,7 @@ def find_button(ctx, name, index=0):
     )
 
     take_saw_element_screenshot(ctx, "button", name, index, element)
+
     return element
 
 
@@ -73,6 +74,7 @@ def click_button(ctx, button):
     if is_element_size_zero(button):
         find_n_click_input_parent_label(ctx, button)
         return
+
     ctx.browser.click(button)
 
 
