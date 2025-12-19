@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for src/cucu/helpers.py: 83%</title>
+    <title>Coverage for src/cucu/helpers.py: 84%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_8e611ae1.css" type="text/css">
     <script src="coverage_html_cb_6fb7b396.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>src/cucu/helpers.py</b>:
-            <span class="pc_cov">83%</span>
+            <span class="pc_cov">84%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -56,8 +56,8 @@
         </aside>
         <h2>
             <span class="text">271 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">222<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">49<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">224<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">47<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
             <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">3<span class="text"> partial</span></button>
         </h2>
@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_eddc69dae52e8172_hooks_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.8.2">coverage.py v7.8.2</a>,
-            created at 2025-12-19 17:37 +0000
+            created at 2025-12-19 18:11 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -670,7 +670,7 @@
     <p class="pln"><span class="n"><a id="t586" href="#t586">586</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t587" href="#t587">587</a></span><span class="t">        <span class="op">@</span><span class="nam">step</span><span class="op">(</span><span class="fst">f'</span><span class="fst">I should see the "{</span> <span class="fst">nth:nth}</span> <span class="fst">" </span><span class="op">{</span><span class="nam">thing</span><span class="op">}</span><span class="fst"> "{</span> <span class="fst">name}</span> <span class="fst">" is </span><span class="op">{</span><span class="nam">state</span><span class="op">}</span><span class="fst">'</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t588" href="#t588">588</a></span><span class="t">        <span class="key">def</span> <span class="nam">should_see_the_nth_in_state</span><span class="op">(</span><span class="nam">ctx</span><span class="op">,</span> <span class="nam">nth</span><span class="op">,</span> <span class="nam">name</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t589" href="#t589">589</a></span><span class="t">            <span class="nam">retry</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t589" href="#t589">589</a></span><span class="t">            <span class="nam">retry</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t590" href="#t590">590</a></span><span class="t">                <span class="nam">base_should_see_the_in_state</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t591" href="#t591">591</a></span><span class="t">                <span class="nam">retry_after_s</span><span class="op">=</span><span class="nam">float</span><span class="op">(</span><span class="nam">CONFIG</span><span class="op">[</span><span class="str">"CUCU_SHORT_UI_RETRY_AFTER_S"</span><span class="op">]</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t592" href="#t592">592</a></span><span class="t">                <span class="nam">wait_up_to_s</span><span class="op">=</span><span class="nam">float</span><span class="op">(</span><span class="nam">CONFIG</span><span class="op">[</span><span class="str">"CUCU_SHORT_UI_WAIT_TIMEOUT_S"</span><span class="op">]</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -678,7 +678,7 @@
     <p class="pln"><span class="n"><a id="t594" href="#t594">594</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t595" href="#t595">595</a></span><span class="t">        <span class="op">@</span><span class="nam">step</span><span class="op">(</span><span class="fst">f'</span><span class="fst">I wait to see the "{</span> <span class="fst">nth:nth}</span> <span class="fst">" </span><span class="op">{</span><span class="nam">thing</span><span class="op">}</span><span class="fst"> "{</span> <span class="fst">name}</span> <span class="fst">" is </span><span class="op">{</span><span class="nam">state</span><span class="op">}</span><span class="fst">'</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t596" href="#t596">596</a></span><span class="t">        <span class="key">def</span> <span class="nam">wait_to_see_the_nth_in_state</span><span class="op">(</span><span class="nam">ctx</span><span class="op">,</span> <span class="nam">nth</span><span class="op">,</span> <span class="nam">name</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t597" href="#t597">597</a></span><span class="t">            <span class="nam">retry</span><span class="op">(</span><span class="nam">base_should_see_the_in_state</span><span class="op">)</span><span class="op">(</span><span class="nam">ctx</span><span class="op">,</span> <span class="nam">thing</span><span class="op">,</span> <span class="nam">name</span><span class="op">,</span> <span class="nam">index</span><span class="op">=</span><span class="nam">nth</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t597" href="#t597">597</a></span><span class="t">            <span class="nam">retry</span><span class="op">(</span><span class="nam">base_should_see_the_in_state</span><span class="op">)</span><span class="op">(</span><span class="nam">ctx</span><span class="op">,</span> <span class="nam">thing</span><span class="op">,</span> <span class="nam">name</span><span class="op">,</span> <span class="nam">index</span><span class="op">=</span><span class="nam">nth</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t598" href="#t598">598</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t599" href="#t599">599</a></span><span class="t">        <span class="op">@</span><span class="nam">step</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t600" href="#t600">600</a></span><span class="t">            <span class="fst">f'</span><span class="fst">I wait up to "{</span> <span class="fst">seconds}</span> <span class="fst">" seconds to see the "{</span> <span class="fst">nth:nth}</span> <span class="fst">" </span><span class="op">{</span><span class="nam">thing</span><span class="op">}</span><span class="fst"> "{</span> <span class="fst">name}</span> <span class="fst">" is </span><span class="op">{</span><span class="nam">state</span><span class="op">}</span><span class="fst">'</span>&nbsp;</span><span class="r"></span></p>
@@ -966,7 +966,7 @@
             <a class="nav" href="z_eddc69dae52e8172_hooks_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.8.2">coverage.py v7.8.2</a>,
-            created at 2025-12-19 17:37 +0000
+            created at 2025-12-19 18:11 +0000
         </p>
     </div>
 </footer>
