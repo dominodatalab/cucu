@@ -345,10 +345,18 @@ def assert_dropdown_option_selected(
 
 helpers.define_should_see_thing_with_name_steps("dropdown", find_dropdown)
 helpers.define_thing_with_name_in_state_steps(
-    "dropdown", "disabled", find_dropdown, base_steps.is_disabled
+    "dropdown",
+    "disabled",
+    find_dropdown,
+    base_steps.is_disabled,
+    with_nth=True,
 )
 helpers.define_thing_with_name_in_state_steps(
-    "dropdown", "not disabled", find_dropdown, base_steps.is_not_disabled
+    "dropdown",
+    "not disabled",
+    find_dropdown,
+    base_steps.is_not_disabled,
+    with_nth=True,
 )
 helpers.define_run_steps_if_I_can_see_element_with_name_steps(
     "dropdown", find_dropdown
