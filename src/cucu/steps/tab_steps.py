@@ -4,18 +4,6 @@ from cucu.utils import take_saw_element_screenshot
 from . import base_steps
 
 
-def open_new_tab(ctx):
-    """
-    open a new tab in the current browser
-
-    parameters:
-      ctx(object): behave context object used to share data between steps
-    """
-    ctx.check_browser_initialized()
-
-    ctx.browser.switch_to.new_window("tab")
-
-
 def find_tab(ctx, name, index=0):
     """
     find a tab containing the text provide.
