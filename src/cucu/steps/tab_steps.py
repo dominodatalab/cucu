@@ -13,7 +13,7 @@ def open_new_tab(ctx):
     """
     ctx.check_browser_initialized()
 
-    ctx.browser.switch_to.new_window('tab')
+    ctx.browser.switch_to.new_window("tab")
 
 
 def find_tab(ctx, name, index=0):
