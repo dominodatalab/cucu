@@ -327,9 +327,16 @@ class Selenium(Browser):
     def click(self, element):
         # if Firefox just do normal click
         if config.CONFIG["CUCU_BROWSER"] == "firefox":
+            logger.debug(
+                f'Executing action click on "{element.text or element.get_attribute("id") or element.tag_name}"'
+            )
             element.click()
+
         else:
             actions = ActionChains(self.driver)
+            logger.debug(
+                f'Executing action click on "{element.text or element.get_attribute("id") or element.tag_name}"'
+            )
             actions.move_to_element(element).click().perform()
 
         # let cucu's own wait for page to load checks run
