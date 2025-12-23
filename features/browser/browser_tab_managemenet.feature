@@ -84,4 +84,6 @@ Feature: Browser tab management
      Then I should see the browser title is "Links!"
      When I open a new browser tab
       And I navigate to the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
-      And I should see the browser title is "Buttons!"
+     Then I should see the browser title is "Buttons!"
+      And I switch to the previous browser tab
+     Then I should see the browser title is "Links!"
