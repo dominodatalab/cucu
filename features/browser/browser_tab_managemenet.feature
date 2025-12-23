@@ -77,3 +77,11 @@ Feature: Browser tab management
       And I click the button "buttons! in a new tab"
       And I save the browser tabs info to the variable "TABS_INFO"
       And I should see "{TABS_INFO}" contains "tab(2): Buttons!"
+
+  Scenario: User can open a a new browser tab
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+     When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/links.html"
+     Then I should see the browser title is "Links!"
+     When I open a new browser tab
+      And I navigate to the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
+      And I should see the browser title is "Buttons!"
