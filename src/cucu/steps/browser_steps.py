@@ -220,7 +220,7 @@ def close_browser_tab(ctx):
 @step("I open a new browser tab")
 def open_a_new_browser_tab(ctx):
     ctx.check_browser_initialized()
-    ctx.browser.switch_to.new_window("tab")
+    ctx.browser.switch_to_new_tab()
 
 
 def switch_to_next_tab(ctx):
