@@ -22,7 +22,15 @@ Feature: Dropdowns
 
   Scenario: User can not select from a disabled dropdown
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/dropdowns.html"
-     Then I should see the dropdown "Pick a pet"
+     Then I should see the dropdown "Pick a pet" is disabled
+      And I should see the "1st" dropdown "Pick a pet" is disabled
+      And I should see the "2nd" dropdown "Pick a color" is not disabled
+      And I wait to see the "1st" dropdown "Pick a pet" is disabled
+      And I wait to see the "2nd" dropdown "Pick a color" is not disabled
+      And I expect the following step to fail with "unable to select from the dropdown, as it is disabled"
+      """
+      Then I select the option "CheeseBall" from the dropdown "Pick a pet"
+      """
       And I expect the following step to fail with "unable to select from the dropdown, as it is disabled"
       """
       Then I select the option "CheeseBall" from the dropdown "Pick a pet"
