@@ -59,9 +59,10 @@ Feature: Run outputs
       0 steps passed, 1 failed, 0 skipped
       [\s\S]*
       """
-      And I should see "{STDERR}" is equal to the following
+      And I should see "{STDERR}" matches the following
       """
-      Error: test run failed, see above for details
+      [\s\S]*
+      RuntimeError: test run failed, see above for details
 
       """
 
