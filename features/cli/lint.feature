@@ -106,24 +106,8 @@ Feature: Lint
       And I should see "{STDERR}" is empty
 
   Scenario: User can find and fix unnecessary whitespace
-    Given I create a file at "{CUCU_RESULTS_DIR}/whitespace_lint/environment.py" with the following:
-      """
-      from cucu.environment import *
-      """
-      And I create a file at "{CUCU_RESULTS_DIR}/whitespace_lint/steps/__init__.py" with the following:
-      """
-      from cucu.steps import *
-      """
-      And I create a file at "{CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" with the following:
-      """
-      Feature: Feature with extraneous whitespace 
-
-
-        Scenario: Scenario with extraneous whitespace  
-          Given I echo "foo" 
-
-      """
-     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+    Given I run the command "cp -r data/whitespace_lint {CUCU_RESULTS_DIR}/whitespace_lint" and expect exit code "0"
+     When I run the command "cucu lint {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
       USING RUNNER: behave.runner:Runner
