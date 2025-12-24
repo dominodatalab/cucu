@@ -11,7 +11,7 @@ Feature: Run with workers
      Then I should see the previous step took less than "25" seconds
 
   Scenario: User gets a report even when running with workers
-    Given I run the command "cucu run data/features/slow_features --workers 4 --generate-report --report {CUCU_RESULTS_DIR}/generate_report_with_workers_report --results {CUCU_RESULTS_DIR}/generate_report_with_workers_results" and expect exit code "0"
+    Given I run the command "cucu run data/features/slow_features --no-color-output --workers 4 --generate-report --report {CUCU_RESULTS_DIR}/generate_report_with_workers_report --results {CUCU_RESULTS_DIR}/generate_report_with_workers_results" and expect exit code "0"
      Then I should see a file at "{CUCU_RESULTS_DIR}/generate_report_with_workers_report/index.html"
 
   Scenario: User gets scheduling info and dots in the output when running with workers
