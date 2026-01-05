@@ -275,8 +275,10 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
         raise RuntimeError(
             f'unable to find option "{option}" in dropdown "{dropdown}"'
         )
-    
-    take_saw_element_screenshot(ctx, "dropdown option", option, index, option_element)
+
+    take_saw_element_screenshot(
+        ctx, "dropdown option", option, index, option_element
+    )
 
     logger.debug("clicking dropdown option")
     click_dynamic_dropdown_option(ctx, option_element)
