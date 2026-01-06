@@ -62,7 +62,6 @@ class Config(dict):
 
     def __setitem__(self, key, val):
         dict.__setitem__(self, key, val)
-        logging.debug(f"CONFIG {key} updated with value: {val}")
 
     def get(self, key, default=None):
         try:
