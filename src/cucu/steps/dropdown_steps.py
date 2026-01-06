@@ -119,14 +119,12 @@ def find_dropdown_option(ctx, name, index=0):
         direction=fuzzy.Direction.LEFT_TO_RIGHT,
         name_within_thing=True,
     )
-
-    take_saw_element_screenshot(ctx, "option", option, index, option)
-
     if option:
         outer_html = option.get_attribute("outerHTML")
         logger.debug(
             f'looked for dropdown option "{name}", and found "{outer_html}"'
         )
+        take_saw_element_screenshot(ctx, "option", option, index, option)
     else:
         logger.debug(f'looked for dropdown option "{name}" but found none')
 
@@ -242,10 +240,10 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
         )
 
     if dropdown_element.get_attribute("aria-expanded") != "true":
-        # open the dropdown
+        logger.debug("open the dropdown")
         click_dropdown(ctx, dropdown_element)
 
-    option_element = find_dropdown_option(ctx, option, index)
+    option_element = find_dropdown_option(ctx, option)
 
     # Use the search feature to make the option visible so cucu can pick it up
     if option_element is None:
@@ -268,7 +266,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
                 logger.debug(f'sending key "{key}"')
                 dropdown_input.send_keys(key)
                 ctx.browser.wait_for_page_to_load()
-                option_element = find_dropdown_option(ctx, option, index)
+                option_element = find_dropdown_option(ctx, option)
                 if option_element:
                     break
             except Exception:
