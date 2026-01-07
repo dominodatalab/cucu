@@ -7,8 +7,11 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 ## 1.3.28
 - Fix - option from nth dynamic dropdown
-- Fix - report correct nth number
+- Fix - report correct nth number in screenshots
 - Fix - dedup fuzzy find
+- Fix - step for blank nth input
+- Add - screenshot when saw option for dropdown 
+- Test - Add - test for nth dynamic dropdown
 
 ## 1.3.27
 - Add - step to open a new tab
