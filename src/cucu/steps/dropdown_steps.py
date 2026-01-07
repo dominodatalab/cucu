@@ -187,7 +187,7 @@ def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
     dropdown_element = find_dropdown(ctx, dropdown, index)
 
     if dropdown_element is None:
-        prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+        prefix = "" if index == 0 else f"{humanize.ordinal(index + 1)} "
         raise RuntimeError(f"unable to find the {prefix}dropdown {dropdown}")
 
     if base_steps.is_disabled(dropdown_element):
@@ -231,7 +231,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
     dropdown_element = find_dropdown(ctx, dropdown, index)
 
     if dropdown_element is None:
-        prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+        prefix = "" if index == 0 else f"{humanize.ordinal(index + 1)} "
         raise RuntimeError(f"unable to find the {prefix}dropdown {dropdown}")
 
     if base_steps.is_disabled(dropdown_element):

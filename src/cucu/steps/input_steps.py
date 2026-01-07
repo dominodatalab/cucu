@@ -43,7 +43,7 @@ def find_input(ctx, name, index=0):
         index=index,
     )
 
-    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+    prefix = "" if index == 0 else f"{humanize.ordinal(index + 1)} "
 
     take_saw_element_screenshot(ctx, "input", name, index, element)
 
@@ -160,7 +160,7 @@ def assert_input_value(ctx, name, value, index=0):
     """
     input_ = find_input(ctx, name, index=index)
     actual = input_.get_attribute("value")
-    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+    prefix = "" if index == 0 else f"{humanize.ordinal(index + 1)} "
 
     if value is None:
         if actual != "":
