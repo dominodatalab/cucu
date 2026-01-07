@@ -296,6 +296,6 @@ def wait_to_see_the_nth_input_with_value(ctx, value, nth, name):
     retry(assert_input_value)(ctx, name, value, index=nth)
 
 
-@step('I should see no value in the "{nth:nth}: input "{name}"')
+@step('I should see no value in the "{nth:nth}" input "{name}"')
 def should_see_the_nth_input_with_no_value(ctx, nth, name):
     assert_input_value(ctx, name, None, index=nth)
