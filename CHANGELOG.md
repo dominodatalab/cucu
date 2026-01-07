@@ -10,7 +10,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Fix - report correct nth number in screenshots
 - Fix - dedup fuzzy find
 - Fix - step for blank nth input
-- Add - screenshot when saw option for dropdown 
+- Add - screenshot when saw option for dropdown
 - Test - Add - test for nth dynamic dropdown
 
 ## 1.3.27
