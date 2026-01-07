@@ -261,6 +261,18 @@
             }
         }
 
+        // deduplicate elements and element_labels keeping order
+        var deduped_elements = [];
+        var deduped_element_labels = [];
+        for (var i = 0; i < elements.length; i++) {
+            if (deduped_elements.indexOf(elements[i]) === -1) {
+            deduped_elements.push(elements[i]);
+            deduped_element_labels.push(element_labels[i]);
+            }
+        }
+        elements = deduped_elements;
+        element_labels = deduped_element_labels;
+
         if (cucu.debug) {
             console.log(elements);
             console.log(element_labels);
