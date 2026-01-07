@@ -54,5 +54,7 @@ Feature: Dropdowns
 
   Scenario: User can select from a dynamic dropdown
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/dynamic_dropdown.html"
-     Then I should see the dropdown "Dynamic Dropdown"
-      And I wait to select the option "abbc" from the dynamic dropdown "Dynamic Dropdown"
+     When I should see the dropdown "Dynamic Dropdown"
+      And I wait to select the option "abbc" from the "2nd" dynamic dropdown "Dynamic Dropdown"
+     Then I should see the option "abbc" is not selected on the "1st" dropdown "Dynamic Dropdown"
+      And I should see the option "abbc" is selected on the "2nd" dropdown "Dynamic Dropdown"
