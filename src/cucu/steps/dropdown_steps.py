@@ -4,8 +4,6 @@ import humanize
 from selenium.common.exceptions import (
     ElementClickInterceptedException,
     ElementNotInteractableException,
-    NoSuchElementException,
-    StaleElementReferenceException,
 )
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -264,14 +262,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
         # we send keys one by one here and try to find the option after each key.
         for key in option:
             try:
-                try:
-                    dropdown_input.is_enabled()
-                except (
-                    StaleElementReferenceException,
-                    NoSuchElementException,
-                ):
-                    dropdown_input = find_input(ctx, dropdown, index)
-
+                dropdown_input = find_input(ctx, dropdown, index)
                 logger.debug(f'sending key "{key}"')
                 dropdown_input.send_keys(key)
                 ctx.browser.wait_for_page_to_load()
