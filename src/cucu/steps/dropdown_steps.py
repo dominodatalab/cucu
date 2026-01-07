@@ -124,7 +124,7 @@ def find_dropdown_option(ctx, name, index=0):
         logger.debug(
             f'looked for dropdown option "{name}", and found "{outer_html}"'
         )
-        take_saw_element_screenshot(ctx, "option", option, index, option)
+        take_saw_element_screenshot(ctx, "option", name, index, option)
     else:
         logger.debug(f'looked for dropdown option "{name}" but found none')
 
