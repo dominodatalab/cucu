@@ -173,6 +173,7 @@ def find_table(ctx, assert_func, nth=None):
     else:
         for table in found_tables:
             if assert_func(table, expected):
+                print(table)
                 return table
 
     report_unable_to_find_table(expected, found_tables)
@@ -415,11 +416,15 @@ def wait_click_table_cell_matching_text(ctx, column, match_text, table):
     retry(click_table_cell_matching_text)(ctx, column, match_text, table)
 
 
-def count_rows_in_table_element(ctx, table_element):
+def count_rows_in_table_element(table_element):
     """
-    Count the amount of rows it has.
+    Count the amount of rows the provided table element has.
 
     Rows are defined as tr elements.
+    Note that this is not a behave table nor an array of rows, unlike the result of func:`find_table`.
+    
+    parameters:
+        table(WebElement): the table to convert find trs from
     """
     table_rows = table_element.find_elements(By.CSS_SELECTOR, "tr")
     return len(table_rows)
@@ -464,8 +469,9 @@ for thing, check_func in {
 
         def find_table_row_count_validate():
             table_element = find_table_element(ctx, table)
+            # table_element is a WebElement when search is done using find_table_element
             table_rows = count_rows_in_table_element(ctx, table_element)
-            if check_func(int(row_count), table_rows):
+            if check_func(table_rows, int(row_count)):
                 return
             else:
                 raise RuntimeError(
@@ -480,12 +486,16 @@ for thing, check_func in {
     def should_see_the_table_containing_rows_with_row_count(
         ctx, row_count, thing=thing, check_func=check_func
     ):
+        """
+        Add 1 to the row count number if the table has a header row.
+        """
         def find_table_row_count_validate():
             table_element = find_table(
                 ctx, check_table_contains_matching_rows_in_table
             )
-            table_rows = count_rows_in_table_element(ctx, table_element)
-            if check_func(int(row_count), table_rows):
+            # table_element is an array of rows when search is done using find_table
+            table_rows = len(table_element)
+            if check_func(table_rows, int(row_count)):
                 return
             else:
                 raise RuntimeError(
