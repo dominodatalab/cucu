@@ -24,7 +24,7 @@ def find_file_input(ctx, name, index=0):
         ctx.browser, name, ['input[type="file"]'], index=index
     )
 
-    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+    prefix = "" if index == 0 else f"{humanize.ordinal(index + 1)} "
 
     take_saw_element_screenshot(ctx, "file input", name, index, element)
 

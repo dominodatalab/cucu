@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.3.28
+- Fix - option from nth dynamic dropdown
+- Fix - report correct nth number in screenshots
+- Fix - dedup fuzzy find
+- Fix - step for blank nth input
+- Add - screenshot when saw option for dropdown
+- Test - Add - test for nth dynamic dropdown
+
 ## 1.3.27
 - Add - step to open a new tab
 
