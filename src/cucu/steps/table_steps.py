@@ -421,7 +421,6 @@ def count_rows_in_table_element(ctx, table_element):
 
     Rows are defined as tr elements.
     """
-    table_element = find_table_element(ctx, table)
     table_rows = table_element.find_elements(By.CSS_SELECTOR, "tr")
     return len(table_rows)
 
