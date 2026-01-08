@@ -456,7 +456,7 @@ for thing, check_func in {
         f'I wait to see there are {thing} "{{row_count}}" rows in the "{{table:nth}}" table'
     )
     def should_see_the_table_with_row_count(
-        ctx, row_count, table, check_func=check_func
+        ctx, row_count, table, thing=thing, check_func=check_func
     ):
         """
         Add 1 to the row number if the table has a header row.
@@ -478,7 +478,7 @@ for thing, check_func in {
         f'I wait to see that the table containing these rows has {thing} "{{row_count}}" rows'
     )
     def should_see_the_table_containing_rows_with_row_count(
-        ctx, row_count, check_func=check_func
+        ctx, row_count, thing=thing, check_func=check_func
     ):
         def find_table_row_count_validate():
             table_element = find_table(
