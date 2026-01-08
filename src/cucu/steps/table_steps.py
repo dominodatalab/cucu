@@ -425,6 +425,7 @@ def count_rows_in_table_element(ctx, table_element):
     table_rows = table_element.find_elements(By.CSS_SELECTOR, "tr")
     return len(table_rows)
 
+
 @step('I wait to see there are "{row_count}" rows in the "{table:nth}" table')
 def wait_table_row_count(ctx, row_count, table):
     """
@@ -444,6 +445,7 @@ def wait_table_row_count(ctx, row_count, table):
 
     retry(find_table_row_count)(ctx, row_count, table)
 
+
 for thing, check_func in {
     "at least": operator.ge,
     "less than": operator.lt,
@@ -451,7 +453,9 @@ for thing, check_func in {
     "more than": operator.gt,
 }.items():
 
-    @step(f'I wait to see there are {thing} "{{row_count}}" rows in the "{{table:nth}}" table')
+    @step(
+        f'I wait to see there are {thing} "{{row_count}}" rows in the "{{table:nth}}" table'
+    )
     def should_see_the_table_with_row_count(ctx, check_func=check_func):
         """
         Add 1 to the row number if the table has a header row.
@@ -469,11 +473,16 @@ for thing, check_func in {
 
         retry(find_table_row_count_validate)(ctx, row_count, table)
 
-    @step(f'I wait to see that the table containing these rows has {thing} "{{row_count}}" rows')
-    def should_see_the_table_containing_rows_with_row_count(ctx, check_func=check_func):
-
+    @step(
+        f'I wait to see that the table containing these rows has {thing} "{{row_count}}" rows'
+    )
+    def should_see_the_table_containing_rows_with_row_count(
+        ctx, check_func=check_func
+    ):
         def find_table_row_count_validate(ctx, row_count, table):
-            table_element = find_table(ctx, check_table_contains_matching_rows_in_table)
+            table_element = find_table(
+                ctx, check_table_contains_matching_rows_in_table
+            )
             table_rows = count_rows_in_table_element(ctx, table_element)
             if check_func(int(row_count), table_rows):
                 return
@@ -483,4 +492,3 @@ for thing, check_func in {
                 )
 
         retry(find_table_row_count_validate)(ctx, row_count, table)
-
