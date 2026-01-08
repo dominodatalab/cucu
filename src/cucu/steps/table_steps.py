@@ -415,9 +415,9 @@ def wait_click_table_cell_matching_text(ctx, column, match_text, table):
     retry(click_table_cell_matching_text)(ctx, column, match_text, table)
 
 
-def find_table_count_rows(ctx, table):
+def count_rows_in_table_element(ctx, table_element):
     """
-    Find a table element given its selector, and count the amount of rows it has.
+    Count the amount of rows it has.
 
     Rows are defined as tr elements.
     """
@@ -432,7 +432,8 @@ def wait_table_row_count(ctx, row_count, table):
     """
 
     def find_table_row_count(ctx, row_count, table):
-        table_rows = find_table_count_rows(ctx, table)
+        table_element = find_table_element(ctx, table)
+        table_rows = count_rows_in_table_element(ctx, table_element)
 
         if int(row_count) == table_rows:
             return
@@ -450,14 +451,15 @@ for thing, check_func in {
     "more than": operator.gt,
 }.items():
 
-    @step(f"I wait to see there are {thing} "{row_count}" rows in the "{table:nth}" table")
+    @step(f'I wait to see there are {thing} "{{row_count}}" rows in the "{{table:nth}}" table')
     def should_see_the_table_with_row_count(ctx, check_func=check_func):
         """
         Add 1 to the row number if the table has a header row.
         """
 
         def find_table_row_count_validate(ctx, row_count, table):
-            table_rows = find_table_count_rows(ctx, table)
+            table_element = find_table_element(ctx, table)
+            table_rows = count_rows_in_table_element(ctx, table_element)
             if check_func(int(row_count), table_rows):
                 return
             else:
@@ -465,5 +467,5 @@ for thing, check_func in {
                     f"Expected {thing} {row_count} rows in table {table + 1}, but found {table_rows} instead. Please check your table data."
                 )
 
-        retry(find_table_row_count)(ctx, row_count, table)
+        retry(find_table_row_count_validate)(ctx, row_count, table)
 
