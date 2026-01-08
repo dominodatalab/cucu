@@ -456,12 +456,14 @@ for thing, check_func in {
     @step(
         f'I wait to see there are {thing} "{{row_count}}" rows in the "{{table:nth}}" table'
     )
-    def should_see_the_table_with_row_count(ctx, check_func=check_func):
+    def should_see_the_table_with_row_count(
+        ctx, row_count, table, check_func=check_func
+    ):
         """
         Add 1 to the row number if the table has a header row.
         """
 
-        def find_table_row_count_validate(ctx, row_count, table):
+        def find_table_row_count_validate():
             table_element = find_table_element(ctx, table)
             table_rows = count_rows_in_table_element(ctx, table_element)
             if check_func(int(row_count), table_rows):
@@ -471,15 +473,15 @@ for thing, check_func in {
                     f"Expected {thing} {row_count} rows in table {table + 1}, but found {table_rows} instead. Please check your table data."
                 )
 
-        retry(find_table_row_count_validate)(ctx, row_count, table)
+        retry(find_table_row_count_validate)()
 
     @step(
         f'I wait to see that the table containing these rows has {thing} "{{row_count}}" rows'
     )
     def should_see_the_table_containing_rows_with_row_count(
-        ctx, check_func=check_func
+        ctx, row_count, check_func=check_func
     ):
-        def find_table_row_count_validate(ctx, row_count, table):
+        def find_table_row_count_validate():
             table_element = find_table(
                 ctx, check_table_contains_matching_rows_in_table
             )
@@ -491,4 +493,4 @@ for thing, check_func in {
                     f"Expected {thing} {row_count} rows in the table contaning matching entries, but found {table_rows} instead. Please check your table data."
                 )
 
-        retry(find_table_row_count_validate)(ctx, row_count, table)
+        retry(find_table_row_count_validate)()
