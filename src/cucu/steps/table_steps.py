@@ -168,12 +168,12 @@ def find_table(ctx, assert_func, nth=None):
 
     if nth is not None:
         if assert_func(found_tables[nth], expected):
-            return
+            return found_tables[nth]
 
     else:
         for table in found_tables:
             if assert_func(table, expected):
-                return
+                return table
 
     report_unable_to_find_table(expected, found_tables)
 
@@ -465,6 +465,21 @@ for thing, check_func in {
             else:
                 raise RuntimeError(
                     f"Expected {thing} {row_count} rows in table {table + 1}, but found {table_rows} instead. Please check your table data."
+                )
+
+        retry(find_table_row_count_validate)(ctx, row_count, table)
+
+    @step(f'I wait to see that the table containing these rows has {thing} "{{row_count}}" rows')
+    def should_see_the_table_containing_rows_with_row_count(ctx, check_func=check_func):
+
+        def find_table_row_count_validate(ctx, row_count, table):
+            table_element = find_table(ctx, check_table_contains_matching_rows_in_table)
+            table_rows = count_rows_in_table_element(ctx, table_element)
+            if check_func(int(row_count), table_rows):
+                return
+            else:
+                raise RuntimeError(
+                    f"Expected {thing} {row_count} rows in the table contaning matching entries, but found {table_rows} instead. Please check your table data."
                 )
 
         retry(find_table_row_count_validate)(ctx, row_count, table)
