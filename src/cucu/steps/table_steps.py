@@ -1,3 +1,4 @@
+import operator
 import pkgutil
 import re
 from io import StringIO
@@ -414,6 +415,16 @@ def wait_click_table_cell_matching_text(ctx, column, match_text, table):
     retry(click_table_cell_matching_text)(ctx, column, match_text, table)
 
 
+def find_table_count_rows(ctx, table):
+    """
+    Find a table element given its selector, and count the amount of rows it has.
+
+    Rows are defined as tr elements.
+    """
+    table_element = find_table_element(ctx, table)
+    table_rows = table_element.find_elements(By.CSS_SELECTOR, "tr")
+    return len(table_rows)
+
 @step('I wait to see there are "{row_count}" rows in the "{table:nth}" table')
 def wait_table_row_count(ctx, row_count, table):
     """
@@ -421,8 +432,7 @@ def wait_table_row_count(ctx, row_count, table):
     """
 
     def find_table_row_count(ctx, row_count, table):
-        table_element = find_table_element(ctx, table)
-        table_rows = len(table_element.find_elements(By.CSS_SELECTOR, "tr"))
+        table_rows = find_table_count_rows(ctx, table)
 
         if int(row_count) == table_rows:
             return
@@ -432,3 +442,28 @@ def wait_table_row_count(ctx, row_count, table):
             )
 
     retry(find_table_row_count)(ctx, row_count, table)
+
+for thing, check_func in {
+    "at least": operator.ge,
+    "less than": operator.lt,
+    "at most": operator.le,
+    "more than": operator.gt,
+}.items():
+
+    @step(f"I wait to see there are {thing} "{row_count}" rows in the "{table:nth}" table")
+    def should_see_the_table_with_row_count(ctx, check_func=check_func):
+        """
+        Add 1 to the row number if the table has a header row.
+        """
+
+        def find_table_row_count_validate(ctx, row_count, table):
+            table_rows = find_table_count_rows(ctx, table)
+            if check_func(int(row_count), table_rows):
+                return
+            else:
+                raise RuntimeError(
+                    f"Expected {thing} {row_count} rows in table {table + 1}, but found {table_rows} instead. Please check your table data."
+                )
+
+        retry(find_table_row_count)(ctx, row_count, table)
+
