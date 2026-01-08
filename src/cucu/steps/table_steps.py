@@ -422,7 +422,7 @@ def count_rows_in_table_element(table_element):
 
     Rows are defined as tr elements.
     Note that this is not a behave table nor an array of rows, unlike the result of func:`find_table`.
-    
+
     parameters:
         table(WebElement): the table to convert find trs from
     """
@@ -491,6 +491,7 @@ for thing, check_func in {
         """
         Add 1 to the row count number if the table has a header row.
         """
+
         def find_table_row_count_validate():
             table_element = find_table(
                 ctx, check_table_contains_matching_rows_in_table
