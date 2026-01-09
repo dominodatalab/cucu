@@ -471,9 +471,7 @@ def find_table_matching_rows_and_validate_row_count(ctx, table_element, thing, c
     )
     # table_element is an array of rows when search is done using find_table
     table_rows = len(table_element)
-    if check_func(table_rows, int(row_count)):
-        return
-    else:
+    if not check_func(table_rows, int(row_count)):
         raise RuntimeError(
             f"Expected {thing} {row_count} rows in the table contaning matching entries, but found {table_rows} instead. Please check your table data."
         )
@@ -489,9 +487,7 @@ def wait_table_row_count(ctx, row_count, table):
         table_element = find_table_element(ctx, table)
         table_rows = count_rows_in_table_element(table_element)
 
-        if int(row_count) == table_rows:
-            return
-        else:
+        if not int(row_count) == table_rows:
             raise RuntimeError(
                 f"Unable to find {row_count} rows in table {table + 1}. Please check your table data."
             )
