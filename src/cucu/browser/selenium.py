@@ -232,6 +232,9 @@ class Selenium(Browser):
         self.driver.get(url)
         self.wait_for_page_to_load()
 
+    def switch_to_new_tab(self):
+        self.driver.switch_to.new_window("tab")
+
     def switch_to_next_tab(self):
         window_handles = self.driver.window_handles
         window_handle = self.driver.current_window_handle
