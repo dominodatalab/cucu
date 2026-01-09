@@ -189,7 +189,7 @@ Feature: Lint
       Error: linting errors found, but not fixed, see above for details
 
       """
-      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_more_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_more_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
       results/keyword_space_lint/keyword_more_space.feature:1: W Feature keyword must be followed by a single space
@@ -201,15 +201,15 @@ Feature: Lint
       Error: linting errors found, but not fixed, see above for details
 
       """
-      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_no_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_no_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is equal to the following:
       """
       results/keyword_space_lint/keyword_no_space.feature:1: W Feature keyword must be followed by a single space ✓
       results/keyword_space_lint/keyword_no_space.feature:3: W Scenario keyword must be followed by a single space ✓
-      
+
       linting errors found and fixed, see above for details
 
-      """ 
+      """
       And I should see the file at "{CUCU_RESULTS_DIR}/keyword_space_lint/keyword_no_space.feature" is equal to the following:
       """
       Feature: Feature with no space after keyword
@@ -217,7 +217,7 @@ Feature: Lint
         Scenario: Scenario with no space after keyword
           Given I echo "foo"
       """
-      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_more_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_more_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is equal to the following:
       """
       results/keyword_space_lint/keyword_more_space.feature:1: W Feature keyword must be followed by a single space ✓
@@ -232,7 +232,7 @@ Feature: Lint
 
         Scenario: Scenario with two spaces after keyword
           Given I echo "foo"
-      """ 
+      """
 
   Scenario: User gets error when cucu lint has an issue in the underlying step code
     Given I create a file at "{CUCU_RESULTS_DIR}/broken_step_lint/environment.py" with the following:
