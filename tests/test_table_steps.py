@@ -86,14 +86,14 @@ def test_find_table_matching_rows_and_validate_row_count(thing, check_func, expe
         if should_raise:
             with pytest.raises(RuntimeError) as context:
                 find_table_matching_rows_and_validate_row_count(
-                    dummy_ctx, None, expected_rows, thing, check_func
+                    dummy_ctx, None, thing, check_func, expected_rows
                 )
             assert f"Expected {thing} {expected_rows} rows" in str(context.value)
             assert f"but found {actual_rows} instead" in str(context.value)
         else:
             # Should not raise any exception
             result = find_table_matching_rows_and_validate_row_count(
-                dummy_ctx, None, expected_rows, thing, check_func
+                dummy_ctx, None, thing, check_func, expected_rows
             )
             assert result is None
 
