@@ -173,7 +173,6 @@ def find_table(ctx, assert_func, nth=None):
     else:
         for table in found_tables:
             if assert_func(table, expected):
-                print(table)
                 return table
 
     report_unable_to_find_table(expected, found_tables)
