@@ -457,14 +457,13 @@ def find_nth_table_and_validate_row_count(
 
 
 def find_table_matching_rows_and_validate_row_count(
-    ctx, table_element, thing, check_func, row_count
+    ctx, thing, check_func, row_count
 ):
     """
     Find a table containing matching rows and validate its row count using the provided check function
 
     parameters:
         ctx(object): behave context object used to share data between steps
-        table_element: unused parameter (table is found dynamically based on matching rows)
         thing(str): description of the comparison operator (e.g., "more than", "equals")
         check_func(function): operator function to perform the comparison (e.g., operator.gt, operator.eq)
         row_count(str): expected row count as a string
