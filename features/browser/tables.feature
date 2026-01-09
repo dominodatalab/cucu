@@ -178,7 +178,7 @@ Feature: Tables
         I wait to see there are "3" rows in the "7th" table
       """
       And I wait to see there are more than "1" rows in the "7th" table
-      And I wait to see there are at most "1" rows in the "7th" table
+      And I wait to see there are at most "2" rows in the "7th" table
       And I wait to see there are at least "1" rows in the "7th" table
       And I wait to see that the table containing these rows has more than "1" rows
         | Row Number |
