@@ -16,5 +16,6 @@ This contains a list of present and past contributors. If you are interested in 
 | Urian Chang     | urianchang                    |
 | Med Mahmoud     | ddl-mmahmoud                  |
 | Andrew Wroblicky| ddl-awroblicky                |
+| Martin Currao   | ddl-martin-currao             |
 
 \* original author and creator

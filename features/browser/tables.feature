@@ -177,6 +177,14 @@ Feature: Tables
       """
         I wait to see there are "3" rows in the "7th" table
       """
+      And I wait to see there are more than "1" rows in the "7th" table
+      And I wait to see there are at most "2" rows in the "7th" table
+      And I wait to see there are at least "1" rows in the "7th" table
+      And I wait to see that the table containing these rows has more than "1" rows
+        | Row Number |
+      And I wait to see there are less than "3" rows in the "7th" table
+      And I wait to see that the table containing these rows has less than "3" rows
+        | Row Number |
      When I wait to click the button "Add row after 20 seconds"
      Then I wait to see there are "3" rows in the "7th" table
       And I should see the previous step took more than "15" seconds
@@ -184,3 +192,15 @@ Feature: Tables
         | Row Number |
         |      2     |
         |      3     |
+      And I wait to see there are more than "2" rows in the "7th" table
+      And I wait to see there are at most "3" rows in the "7th" table
+      And I wait to see there are at least "2" rows in the "7th" table
+      And I wait to see that the table containing these rows has more than "2" rows
+        | Row Number |
+      And I wait to see there are less than "4" rows in the "7th" table
+      And I wait to see that the table containing these rows has less than "4" rows
+        | Row Number |
+      And I wait to see the following steps fail
+      """
+          I wait to see there are more than "3" rows in the "7th" table
+      """
