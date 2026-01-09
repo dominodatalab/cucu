@@ -52,7 +52,7 @@ scenario_keyword_requires_space:
     match: '^\s*Scenario:(\s{0}|\s{2,})(\S)'
   fix:
     match: 'Scenario:\s*(\S)'
-    replace: 'Scenario: \1'    
+    replace: 'Scenario: \1'
 
 scenario_tags_with_appropriate_indentation:
   message: scenario tags should be indented with 2 spaces
