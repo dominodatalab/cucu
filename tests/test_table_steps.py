@@ -63,18 +63,22 @@ class TestDoNotFindTable(TestCase):
 @pytest.mark.parametrize(
     "thing,check_func,expected_rows,actual_rows,should_raise",
     [
-        ("more than", operator.gt, 2, 3, False),
+        ("more than", operator.gt, 2, 1, True),
         ("more than", operator.gt, 2, 2, True),
-        ("equals", operator.eq, 2, 2, False),
+        ("more than", operator.gt, 2, 3, False),
         ("equals", operator.eq, 2, 1, True),
-        ("at least", operator.ge, 2, 2, False),
+        ("equals", operator.eq, 2, 2, False),
         ("at least", operator.ge, 2, 1, True),
+        ("at least", operator.ge, 2, 2, False),
+        ("at least", operator.ge, 2, 3, False),
+        ("at most", operator.le, 2, 1, False),
         ("at most", operator.le, 2, 2, False),
         ("at most", operator.le, 2, 3, True),
         ("less than", operator.lt, 2, 1, False),
         ("less than", operator.lt, 2, 2, True),
-        ("not equal to", operator.ne, 2, 3, False),
+        ("less than", operator.lt, 2, 3, True),
         ("not equal to", operator.ne, 2, 2, True),
+        ("not equal to", operator.ne, 2, 3, False),
     ],
 )
 def test_find_table_matching_rows_and_validate_row_count(
@@ -105,18 +109,22 @@ def test_find_table_matching_rows_and_validate_row_count(
 @pytest.mark.parametrize(
     "thing,check_func,expected_rows,actual_rows,should_raise",
     [
-        ("more than", operator.gt, 2, 3, False),
+        ("more than", operator.gt, 2, 1, True),
         ("more than", operator.gt, 2, 2, True),
-        ("equals", operator.eq, 2, 2, False),
+        ("more than", operator.gt, 2, 3, False),
         ("equals", operator.eq, 2, 1, True),
-        ("at least", operator.ge, 2, 2, False),
+        ("equals", operator.eq, 2, 2, False),
         ("at least", operator.ge, 2, 1, True),
+        ("at least", operator.ge, 2, 2, False),
+        ("at least", operator.ge, 2, 3, False),
+        ("at most", operator.le, 2, 1, False),
         ("at most", operator.le, 2, 2, False),
         ("at most", operator.le, 2, 3, True),
         ("less than", operator.lt, 2, 1, False),
         ("less than", operator.lt, 2, 2, True),
-        ("not equal to", operator.ne, 2, 3, False),
+        ("less than", operator.lt, 2, 3, True),
         ("not equal to", operator.ne, 2, 2, True),
+        ("not equal to", operator.ne, 2, 3, False),
     ],
 )
 def test_find_nth_table_and_validate_row_count(
