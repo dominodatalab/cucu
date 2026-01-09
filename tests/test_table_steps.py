@@ -75,21 +75,24 @@ class TestDoNotFindTable(TestCase):
         ("less than", operator.lt, 2, 2, True),
         ("not equal to", operator.ne, 2, 3, False),
         ("not equal to", operator.ne, 2, 2, True),
-    ]
+    ],
 )
-def test_find_table_matching_rows_and_validate_row_count(thing, check_func, expected_rows, actual_rows, should_raise):
+def test_find_table_matching_rows_and_validate_row_count(
+    thing, check_func, expected_rows, actual_rows, should_raise
+):
     with mock.patch(
-        "cucu.steps.table_steps.find_table",
-        return_value=[[1]] * actual_rows
+        "cucu.steps.table_steps.find_table", return_value=[[1]] * actual_rows
     ):
         dummy_ctx = mock.MagicMock()
-        
+
         if should_raise:
             with pytest.raises(RuntimeError) as context:
                 find_table_matching_rows_and_validate_row_count(
                     dummy_ctx, None, thing, check_func, expected_rows
                 )
-            assert f"Expected {thing} {expected_rows} rows" in str(context.value)
+            assert f"Expected {thing} {expected_rows} rows" in str(
+                context.value
+            )
             assert f"but found {actual_rows} instead" in str(context.value)
         else:
             # Should not raise any exception
@@ -114,27 +117,35 @@ def test_find_table_matching_rows_and_validate_row_count(thing, check_func, expe
         ("less than", operator.lt, 2, 2, True),
         ("not equal to", operator.ne, 2, 3, False),
         ("not equal to", operator.ne, 2, 2, True),
-    ]
+    ],
 )
-def test_find_nth_table_and_validate_row_count(thing, check_func, expected_rows, actual_rows, should_raise):
+def test_find_nth_table_and_validate_row_count(
+    thing, check_func, expected_rows, actual_rows, should_raise
+):
     mock_table_element = mock.MagicMock()
-    
-    with mock.patch(
-        "cucu.steps.table_steps.find_table_element",
-        return_value=mock_table_element
-    ), mock.patch(
-        "cucu.steps.table_steps.count_rows_in_table_element",
-        return_value=actual_rows
+
+    with (
+        mock.patch(
+            "cucu.steps.table_steps.find_table_element",
+            return_value=mock_table_element,
+        ),
+        mock.patch(
+            "cucu.steps.table_steps.count_rows_in_table_element",
+            return_value=actual_rows,
+        ),
     ):
         dummy_ctx = mock.MagicMock()
         table_index = 0
-        
+
         if should_raise:
             with pytest.raises(RuntimeError) as context:
                 find_nth_table_and_validate_row_count(
                     dummy_ctx, table_index, thing, check_func, expected_rows
                 )
-            assert f"Expected {thing} {expected_rows} rows in table {table_index + 1}" in str(context.value)
+            assert (
+                f"Expected {thing} {expected_rows} rows in table {table_index + 1}"
+                in str(context.value)
+            )
             assert f"but found {actual_rows} instead" in str(context.value)
         else:
             # Should not raise any exception

@@ -428,7 +428,10 @@ def count_rows_in_table_element(table_element):
     table_rows = table_element.find_elements(By.CSS_SELECTOR, "tr")
     return len(table_rows)
 
-def find_nth_table_and_validate_row_count(ctx, table, thing, check_func, row_count):
+
+def find_nth_table_and_validate_row_count(
+    ctx, table, thing, check_func, row_count
+):
     """
     Find the nth table by index and validate its row count using the provided check function
 
@@ -452,7 +455,10 @@ def find_nth_table_and_validate_row_count(ctx, table, thing, check_func, row_cou
             f"Expected {thing} {row_count} rows in table {table + 1}, but found {table_rows} instead."
         )
 
-def find_table_matching_rows_and_validate_row_count(ctx, table_element, thing, check_func, row_count):
+
+def find_table_matching_rows_and_validate_row_count(
+    ctx, table_element, thing, check_func, row_count
+):
     """
     Find a table containing matching rows and validate its row count using the provided check function
 
@@ -494,10 +500,11 @@ def wait_table_row_count(ctx, row_count, table):
 
     retry(find_table_row_count)(ctx, row_count, table)
 
+
 for thing, check_func in {
     "more than": operator.gt,
     "at least": operator.ge,
-    "equals":  operator.eq,
+    "equals": operator.eq,
     "at most": operator.le,
     "less than": operator.lt,
     "not equal to": operator.ne,
@@ -512,7 +519,9 @@ for thing, check_func in {
         """
         Add 1 to the row number if the table has a header row.
         """
-        retry(find_nth_table_and_validate_row_count)(ctx, table, thing, check_func, row_count)
+        retry(find_nth_table_and_validate_row_count)(
+            ctx, table, thing, check_func, row_count
+        )
 
     @step(
         f'I wait to see that the table containing these rows has {thing} "{{row_count}}" rows'
@@ -523,4 +532,6 @@ for thing, check_func in {
         """
         Add 1 to the row count number if the table has a header row.
         """
-        retry(find_table_matching_rows_and_validate_row_count)(ctx, thing, check_func, row_count)
+        retry(find_table_matching_rows_and_validate_row_count)(
+            ctx, thing, check_func, row_count
+        )
