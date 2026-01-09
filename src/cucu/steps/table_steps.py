@@ -449,7 +449,7 @@ def find_nth_table_and_validate_row_count(ctx, table, thing, check_func, row_cou
         return
     else:
         raise RuntimeError(
-            f"Expected {thing} {row_count} rows in table {table + 1}, but found {table_rows} instead. Please check your table data."
+            f"Expected {thing} {row_count} rows in table {table + 1}, but found {table_rows} instead."
         )
 
 def find_table_matching_rows_and_validate_row_count(ctx, table_element, thing, check_func, row_count):
@@ -473,7 +473,7 @@ def find_table_matching_rows_and_validate_row_count(ctx, table_element, thing, c
     table_rows = len(table_element)
     if not check_func(table_rows, int(row_count)):
         raise RuntimeError(
-            f"Expected {thing} {row_count} rows in the table contaning matching entries, but found {table_rows} instead. Please check your table data."
+            f"Expected {thing} {row_count} rows in the table contaning matching entries, but found {table_rows} instead."
         )
 
 
