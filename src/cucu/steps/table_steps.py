@@ -429,6 +429,30 @@ def count_rows_in_table_element(table_element):
     table_rows = table_element.find_elements(By.CSS_SELECTOR, "tr")
     return len(table_rows)
 
+def find_nth_table_and_validate_row_count(ctx, table, thing, check_func, row_count): 
+    table_element = find_table_element(ctx, table)
+    # table_element is a WebElement when search is done using find_table_element
+    table_rows = count_rows_in_table_element(table_element)
+    if check_func(table_rows, int(row_count)):
+        return
+    else:
+        raise RuntimeError(
+            f"Expected {thing} {row_count} rows in table {table + 1}, but found {table_rows} instead. Please check your table data."
+        )
+
+def find_table_matching_rows_and_validate_row_count(ctx, table_element, row_count, thing, check_func):
+    table_element = find_table(
+        ctx, check_table_contains_matching_rows_in_table
+    )
+    # table_element is an array of rows when search is done using find_table
+    table_rows = len(table_element)
+    if check_func(table_rows, int(row_count)):
+        return
+    else:
+        raise RuntimeError(
+            f"Expected {thing} {row_count} rows in the table contaning matching entries, but found {table_rows} instead. Please check your table data."
+        )
+
 
 @step('I wait to see there are "{row_count}" rows in the "{table:nth}" table')
 def wait_table_row_count(ctx, row_count, table):
@@ -438,7 +462,7 @@ def wait_table_row_count(ctx, row_count, table):
 
     def find_table_row_count(ctx, row_count, table):
         table_element = find_table_element(ctx, table)
-        table_rows = count_rows_in_table_element(ctx, table_element)
+        table_rows = count_rows_in_table_element(table_element)
 
         if int(row_count) == table_rows:
             return
@@ -448,7 +472,6 @@ def wait_table_row_count(ctx, row_count, table):
             )
 
     retry(find_table_row_count)(ctx, row_count, table)
-
 
 for thing, check_func in {
     "more than": operator.gt,
@@ -468,19 +491,7 @@ for thing, check_func in {
         """
         Add 1 to the row number if the table has a header row.
         """
-
-        def find_table_row_count_validate():
-            table_element = find_table_element(ctx, table)
-            # table_element is a WebElement when search is done using find_table_element
-            table_rows = count_rows_in_table_element(ctx, table_element)
-            if check_func(table_rows, int(row_count)):
-                return
-            else:
-                raise RuntimeError(
-                    f"Expected {thing} {row_count} rows in table {table + 1}, but found {table_rows} instead. Please check your table data."
-                )
-
-        retry(find_table_row_count_validate)()
+        retry(find_nth_table_and_validate_row_count)(ctx, table, thing, check_func, row_count)
 
     @step(
         f'I wait to see that the table containing these rows has {thing} "{{row_count}}" rows'
@@ -491,18 +502,4 @@ for thing, check_func in {
         """
         Add 1 to the row count number if the table has a header row.
         """
-
-        def find_table_row_count_validate():
-            table_element = find_table(
-                ctx, check_table_contains_matching_rows_in_table
-            )
-            # table_element is an array of rows when search is done using find_table
-            table_rows = len(table_element)
-            if check_func(table_rows, int(row_count)):
-                return
-            else:
-                raise RuntimeError(
-                    f"Expected {thing} {row_count} rows in the table contaning matching entries, but found {table_rows} instead. Please check your table data."
-                )
-
-        retry(find_table_row_count_validate)()
+        retry(find_table_matching_rows_and_validate_row_count)(ctx, thing, check_func, row_count)
