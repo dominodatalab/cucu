@@ -36,6 +36,24 @@ feature_name_on_first_line:
     match: '^\s*'
     replace: ''
 
+feature_keyword_requires_space:
+  message: "Feature keyword must be followed by a single space"
+  type: warning
+  current_line:
+    match: '^\s*Feature:(\s{0}|\s{2,})(\S)'
+  fix:
+    match: 'Feature:\s*(\S)'
+    replace: 'Feature: \1'
+
+scenario_keyword_requires_space:
+  message: "Scenario keyword must be followed by a single space"
+  type: warning
+  current_line:
+    match: '^\s*Scenario:(\s{0}|\s{2,})(\S)'
+  fix:
+    match: 'Scenario:\s*(\S)'
+    replace: 'Scenario: \1'    
+
 scenario_tags_with_appropriate_indentation:
   message: scenario tags should be indented with 2 spaces
   type: warning
