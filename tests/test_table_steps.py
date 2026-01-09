@@ -1,12 +1,13 @@
-from unittest import TestCase, mock
 import operator
+from unittest import TestCase, mock
+
 import pytest
 
 from cucu.steps.table_steps import (
     check_table_contains_matching_rows_in_table,
     do_not_find_table,
-    find_table_matching_rows_and_validate_row_count,
     find_nth_table_and_validate_row_count,
+    find_table_matching_rows_and_validate_row_count,
 )
 
 
