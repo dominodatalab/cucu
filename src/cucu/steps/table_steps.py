@@ -154,11 +154,14 @@ def find_table(ctx, assert_func, nth=None):
     matches anyone of the tables on the current web page. If `nth` is set to
     something then we only check against the nth table of the available tables.
 
-    paramters:
+    parameters:
         ctx(object): behave context object
         assert_func(function): function used to assert two tables "match"
         nth(int): when set to an int specifies the exact table within the list
                   of available tables to match against.
+
+    returns:
+        array of arrays representing the matching HTML table
 
     raises:
         RuntimeError when the desired table was not found
