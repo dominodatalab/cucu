@@ -451,9 +451,7 @@ def find_nth_table_and_validate_row_count(
     table_element = find_table_element(ctx, table)
     # table_element is a WebElement when search is done using find_table_element
     table_rows = count_rows_in_table_element(table_element)
-    if check_func(table_rows, int(row_count)):
-        return
-    else:
+    if not check_func(table_rows, int(row_count)):
         raise RuntimeError(
             f"Expected {thing} {row_count} rows in table {table + 1}, but found {table_rows} instead."
         )
