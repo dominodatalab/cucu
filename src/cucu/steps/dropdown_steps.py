@@ -124,6 +124,7 @@ def find_dropdown_option(ctx, name, index=0):
         logger.debug(
             f'looked for dropdown option "{name}", and found "{outer_html}"'
         )
+        take_saw_element_screenshot(ctx, "option", name, index, option)
     else:
         logger.debug(f'looked for dropdown option "{name}" but found none')
 
@@ -186,7 +187,7 @@ def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
     dropdown_element = find_dropdown(ctx, dropdown, index)
 
     if dropdown_element is None:
-        prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+        prefix = "" if index == 0 else f"{humanize.ordinal(index + 1)} "
         raise RuntimeError(f"unable to find the {prefix}dropdown {dropdown}")
 
     if base_steps.is_disabled(dropdown_element):
@@ -230,7 +231,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
     dropdown_element = find_dropdown(ctx, dropdown, index)
 
     if dropdown_element is None:
-        prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+        prefix = "" if index == 0 else f"{humanize.ordinal(index + 1)} "
         raise RuntimeError(f"unable to find the {prefix}dropdown {dropdown}")
 
     if base_steps.is_disabled(dropdown_element):
@@ -239,7 +240,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
         )
 
     if dropdown_element.get_attribute("aria-expanded") != "true":
-        # open the dropdown
+        logger.debug("open the dropdown")
         click_dropdown(ctx, dropdown_element)
 
     option_element = find_dropdown_option(ctx, option)
