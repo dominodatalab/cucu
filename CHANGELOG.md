@@ -13,7 +13,6 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Add - screenshot when saw option for dropdown
 - Test - Add - test for nth dynamic dropdown
 
-
 ## 1.3.28
 - Add - lint rule to enforce single space after Feature and Scenario keywords
 
