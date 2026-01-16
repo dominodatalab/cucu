@@ -274,12 +274,12 @@
         element_labels = deduped_element_labels;
 
         if (elements.length > 1 && index > 0 ){
-            console.debug(`fuzzy_find: multiple (${elements.length}) matches, returning index ${index}.`);
-            // output each element text and location x,y
+            let msg = `fuzzy_find: multiple (${elements.length}) matches, returning index ${index}.\n`;
             for (var i = 0; i < elements.length; i++) {
                 const rect = elements[i].getBoundingClientRect();
-                console.debug(`  [${i}]: `, elements[i], `"${(elements[i].textContent || elements[i].innerText || jqCucu(elements[i]).text() || '').trim()}" at (${rect.x}, ${rect.y})`);
+                msg += `  [${i}]: ${(elements[i].textContent || elements[i].innerText || jqCucu(elements[i]).text() || '').trim()} at (${rect.x}, ${rect.y})\n`;
             }
+            console.debug(msg);
         }
 
         if (cucu.debug) {
