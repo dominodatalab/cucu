@@ -282,7 +282,7 @@
             console.debug(msg);
         } else if (elements.length > 0) {
             let rect = elements[0].getBoundingClientRect();
-            console.debug(`fuzzy_find: selected ${(elements[0].textContent || elements[0].innerText || jqCucu(elements[0]).text() || '').trim()} at (${rect.x}, ${rect.y})`);
+            console.debug(`fuzzy_find: selected first element: ${(elements[0].textContent || elements[0].innerText || jqCucu(elements[0]).text() || '').trim()} at (${rect.x}, ${rect.y})`);
         }
 
         if (cucu.debug) {
