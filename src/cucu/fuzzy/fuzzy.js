@@ -276,10 +276,13 @@
         if (elements.length > 1 && index > 0 ){
             let msg = `fuzzy_find: multiple (${elements.length}) matches, returning index ${index}.\n`;
             for (var i = 0; i < elements.length; i++) {
-                const rect = elements[i].getBoundingClientRect();
-                msg += `  [${i}]: ${(elements[i].textContent || elements[i].innerText || jqCucu(elements[i]).text() || '').trim()} at (${rect.x}, ${rect.y})\n`;
+            const rect = elements[i].getBoundingClientRect();
+            msg += `  [${i}]: ${(elements[i].textContent || elements[i].innerText || jqCucu(elements[i]).text() || '').trim()} at (${rect.x}, ${rect.y})\n`;
             }
             console.debug(msg);
+        } else if (elements.length > 0) {
+            let rect = elements[0].getBoundingClientRect();
+            console.debug(`fuzzy_find: selected ${(elements[0].textContent || elements[0].innerText || jqCucu(elements[0]).text() || '').trim()} at (${rect.x}, ${rect.y})`);
         }
 
         if (cucu.debug) {
