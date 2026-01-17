@@ -66,6 +66,8 @@ class Selenium(Browser):
         ignore_ssl_certificate_errors = config.CONFIG[
             "CUCU_IGNORE_SSL_CERTIFICATE_ERRORS"
         ]
+        proxy_host = config.CONFIG.get("CUCU_PROXY_HOST")
+        proxy_port = config.CONFIG.get("CUCU_PROXY_PORT")
 
         if browser.startswith("chrome"):
             options = ChromeOptions()
@@ -82,6 +84,12 @@ class Selenium(Browser):
             options.add_experimental_option(
                 "excludeSwitches", ["enable-automation"]
             )  # new way
+
+            if proxy_host and proxy_port:
+                logger.debug(f"Using proxy: {proxy_host}:{proxy_port}")
+                options.add_argument(f"--proxy-server={proxy_host}:{proxy_port}")
+            else:
+                logger.debug("Not using a proxy")
 
             if headless:
                 options.add_argument("--headless")
