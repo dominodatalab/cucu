@@ -161,9 +161,10 @@ class Config(dict):
         return references
 
     def hide_secrets(self, text: str | bytes):
-        secret_keys = [x for x in self.get("CUCU_SECRETS", "").split(",") if x]
-        secret_values = [self.get(x) for x in secret_keys if self.get(x)]
-        secret_values = [x for x in secret_values if isinstance(x, str)]
+        secret_keys = [x.strip() for x in self.get("CUCU_SECRETS", "").split(",") if x.strip()]
+        raw_secret_values = [self.get(x) for x in secret_keys if isinstance(self.get(x), str)]
+        allowlist = {x.strip() for x in self.get("CUCU_SECRET_REDACTION_ALLOWLIST", "").split(",") if x.strip()}
+        secret_values = [x for x in raw_secret_values if x not in allowlist]
 
         is_bytes = isinstance(text, bytes)
         if is_bytes:
@@ -371,6 +372,12 @@ CONFIG.define(
     "CUCU_SECRETS",
     "a comma separated list of VARIABLE names that we want to hide "
     "their values in the various outputs of cucu by replacing with asterisks",
+    default="",
+)
+CONFIG.define(
+    "CUCU_SECRET_REDACTION_ALLOWLIST",
+    "a comma separated list of VALUES that we do not want to redact "
+    "from various output reports even if they exist in CUCU_SECRETS ",
     default="",
 )
 CONFIG.define(
