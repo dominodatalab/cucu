@@ -93,15 +93,10 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     """
     check that table contains the matching rows in expected_table
     """
-    # we need all expected rows to find a match
     for expected_row in expected_table:
-
-        # check all the rows to find our expected match
         for row in table:
-            # ensure the number of columns are equal
             found_row = len(expected_row) == len(row)
 
-            # check each corresponding column
             for expected_value, value in zip(expected_row, row):
                 if not re.match(expected_value, value):
                     found_row = False
