@@ -180,7 +180,7 @@ Feature: Secrets
      When I run the command "cucu run {CUCU_RESULTS_DIR}/substeps_with_variable_passthru --secrets MY_SECRET --results={CUCU_RESULTS_DIR}/substeps_with_variable_passthru_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see a file at "{CUCU_RESULTS_DIR}/substeps_with_variable_passthru_results/Feature that spills the beans/This scenario prints some secrets to the logs/0003 - I echo MY_SECRET/0000 - After I echo MY_SECRET.png"
 
-Scenario: User can override cucu_secrets redaction using a cucurc.yml allowlist
+  Scenario: User can override cucu_secrets redaction using a cucurc.yml allowlist
     Given I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets_and_allowlist/environment.py" with the following:
       """
       from cucu.environment import *
@@ -202,7 +202,7 @@ Scenario: User can override cucu_secrets redaction using a cucurc.yml allowlist
       And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets_and_allowlist/cucurc.yml" with the following:
       """
       CUCU_SECRETS: MY_SECRET,ANOTHER_ONE,TEST_SECRET,ADMIN_SECRET
-      CUCU_SECRET_REDACTION_ALLOWLIST: "test_secret,admin_secret"
+      CUCU_SECRETS_REDACTION_OVERRIDE: "test_secret,admin_secret"
       MY_SECRET: 'super secret'
       ANOTHER_ONE: 'another secret'
       TEST_SECRET: 'test_secret'
@@ -239,4 +239,4 @@ Scenario: User can override cucu_secrets redaction using a cucurc.yml allowlist
       And I should see the file at "{CUCU_RESULTS_DIR}/features_with_secrets_and_allowlist_report/Feature that spills the beans/This scenario prints some secrets to the logs/logs/cucu.debug.console.log.html" contains the following:
       """
       admin_secret
-      """     
+      """
