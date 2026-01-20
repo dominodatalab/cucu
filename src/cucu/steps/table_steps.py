@@ -112,6 +112,13 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     return True
 
 
+def report_found_table(expected_table, found_table):
+    logger.debug(
+        f"found desired table\nexpected:\n{format_gherkin_table(expected_table, [], '  ')}\n\n"
+        f"found:\n{format_gherkin_table(found_table, [], '  ')}\n"
+    )
+
+
 def report_unable_to_find_table(expected_table, found_tables):
     stream = StringIO()
     stream.write("\n")
@@ -169,11 +176,13 @@ def find_table(ctx, assert_func, nth=None):
 
     if nth is not None:
         if assert_func(found_tables[nth], expected):
+            report_found_table(expected, found_tables[nth])
             return found_tables[nth]
 
     else:
         for table in found_tables:
             if assert_func(table, expected):
+                report_found_table(expected, table)
                 return table
 
     report_unable_to_find_table(expected, found_tables)
