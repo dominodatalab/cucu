@@ -94,14 +94,16 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     check that table contains the matching rows in expected_table
     """
     for expected_row in expected_table:
+        found_row = False
         for row in table:
-            found_row = len(expected_row) == len(row)
+            good_cols = len(expected_row) == len(row)
 
             for expected_value, value in zip(expected_row, row):
                 if not re.match(expected_value, value):
-                    found_row = False
+                    good_cols = False
 
-            if found_row:
+            if good_cols:
+                found_row = True
                 break
 
         if not found_row:
