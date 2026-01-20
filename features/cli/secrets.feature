@@ -202,7 +202,7 @@ Feature: Secrets
       And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets_and_allowlist/cucurc.yml" with the following:
       """
       CUCU_SECRETS: MY_SECRET,ANOTHER_ONE,TEST_SECRET,ADMIN_SECRET
-      CUCU_SECRETS_REDACTION_OVERRIDE: "test_secret,admin_secret"
+      CUCU_SECRETS_REDACTION_OVERRIDE: "TEST_SECRET,ADMIN_SECRET"
       MY_SECRET: 'super secret'
       ANOTHER_ONE: 'another secret'
       TEST_SECRET: 'test_secret'
