@@ -58,6 +58,15 @@ Feature: Tables
         | Name | City          | Country       |
         | Foo  | .*            | .*            |
 
+  Scenario: User verify there is not a table that contains some matching rows for incomplete columns
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables_not.html"
+     Then I wait to see the following steps fail
+     """
+     Then I should see a table that contains rows matching the following:
+        | Name | City          | Country       |
+        | Foo  | .*            | .*            |
+     """
+
   Scenario: User can wait to verify an exact table
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html?delay_page_load_ms=5000"
      Then I wait to see a table that is the following:
