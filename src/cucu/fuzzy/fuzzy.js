@@ -259,10 +259,10 @@
         elements = deduped_elements;
 
         if ((elements.length > 1 && index > 0) || cucu.debug) {
-            console.debug(`fuzzy_find: multiple (${elements.length}) matches, returning index ${index}.\n`);
+            console.debug(`fuzzy_find: multiple (${elements.length}) matches, returning index ${index}.`);
             for (var i = 0; i < elements.length; i++) {
                 const rect = elements[i].element.getBoundingClientRect();
-                console.debug(`  [${i}]: ${(elements[i].element.textContent || elements[i].element.innerText || jqCucu(elements[i].element).text() || '').trim()} at (${rect.x}, ${rect.y})\n`);
+                console.debug(`  [${i}]: ${(elements[i].element.textContent || elements[i].element.innerText || jqCucu(elements[i].element).text() || '').trim()} at (${rect.x}, ${rect.y})`);
             }
         } else if (elements.length > 0) {
             let rect = elements[0].element.getBoundingClientRect();
