@@ -247,7 +247,7 @@
             }
         }
 
-        // deduplicate elements by element, keeping order
+        // deduplicate elements by element identity, keeping order
         var deduped_elements = [];
         var seen_elements = [];
         for (var i = 0; i < elements.length; i++) {

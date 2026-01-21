@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.3.33
 - Add - enhance fuzzy debug logging
+- Chore - refactor fuzzy.js in prep for enhanced filtering
 
 # 1.3.32
 - Fix - ensure table row matches have same number of cols
