@@ -4,7 +4,7 @@ import re
 
 from selenium.webdriver.common.keys import Keys
 
-from cucu import config, logger, retry, run_steps, step
+from cucu import config, logger, retry, run_steps, step, register_after_this_scenario_hook
 from cucu.browser.selenium import Selenium
 
 
@@ -19,6 +19,36 @@ def open_browser(ctx):
         browser_name,
         headless=headless,
         selenium_remote_url=selenium_remote_url,
+    )
+
+    return browser
+
+
+def open_browser_with_performance_logs(ctx):
+    browser_name = config.CONFIG["CUCU_BROWSER"]
+    headless = config.CONFIG["CUCU_BROWSER_HEADLESS"]
+    selenium_remote_url = config.CONFIG["CUCU_SELENIUM_REMOTE_URL"]
+
+    browser = Selenium()
+    logger.debug(
+        f"opening browser {browser_name} with performance logging enabled"
+    )
+    browser.open(
+        browser_name,
+        headless=headless,
+        selenium_remote_url=selenium_remote_url,
+        capture_performance_logs=True,
+    )
+    browser.driver.execute_cdp_cmd(
+        "Tracing.start",
+        {
+            "categories": [
+                "devtools.timeline",
+                "v8.execute",
+                "blink.user_timing",
+            ],
+            "transferMode": "ReturnAsStream",
+        },
     )
 
     return browser
@@ -45,6 +75,31 @@ def open_a_browser(ctx, url):
 @step('I open a new browser at the url "{url}"')
 def open_a_new_browser(ctx, url):
     ctx.browser = retry(open_browser)(ctx)
+    ctx.browsers.append(ctx.browser)
+    logger.debug(f"navigating to url: {url}")
+    ctx.browser.navigate(url)
+
+
+@step('I open a new browser with performance logging at the url "{url}"')
+def open_a_new_browser_perf_logging(ctx, url):
+    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
+    browser = retry(open_browser_with_performance_logs)(ctx)
+    ctx.browser = browser
+
+    def stop_browser_emit_logs(_):
+        browser.download_performance_logs(os.path.join(cucu_downloads_dir, str(ctx.browser)))
+        browser_index = ctx.browsers.index(browser)
+
+        if browser_index > 0:
+            ctx.browser = ctx.browsers[browser_index - 1]
+        else:
+            ctx.browser = None
+
+        ctx.browsers[browser_index].quit()
+        del ctx.browsers[browser_index]
+
+    register_after_this_scenario_hook(stop_browser_emit_logs)
+
     ctx.browsers.append(ctx.browser)
     logger.debug(f"navigating to url: {url}")
     ctx.browser.navigate(url)

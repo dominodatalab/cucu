@@ -52,7 +52,12 @@ class Selenium(Browser):
         self.driver = None
 
     def open(
-        self, browser, headless=False, selenium_remote_url=None, detach=False
+        self,
+        browser,
+        headless=False,
+        selenium_remote_url=None,
+        detach=False,
+        capture_performance_logs=False,
     ):
         if selenium_remote_url is None:
             init()
@@ -88,7 +93,11 @@ class Selenium(Browser):
 
             if ignore_ssl_certificate_errors:
                 options.add_argument("ignore-certificate-errors")
-            options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
+
+            if capture_performance_logs:
+                options.set_capability("goog:loggingPrefs", {"browser": "ALL", "performance": "ALL"})
+            else:
+                options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
 
             if selenium_remote_url is not None:
                 logger.debug(f"webdriver.Remote init: {selenium_remote_url}")
@@ -405,6 +414,53 @@ class Selenium(Browser):
 
         with open(target_filepath, "w") as mht_file:
             mht_file.write(mht_data)
+
+    def download_performance_logs(self, target_filepath):
+        if self.driver is None:
+            logger.warning(
+                "No active browser; will not attempt to download profiling "
+                "data."
+            )
+            return
+
+        browser_name = self.driver.name.lower()
+        if "chrome" not in browser_name:
+            logger.warning(
+                "The web driver is not using Chrome as a web browser"
+                f", but {browser_name}. This browser does not support"
+                "dowloading profiling data; will not attempt to download one."
+            )
+            return
+
+        perf_data = None
+        # TODO: What if the performance logging capability was never enabled?
+        if self.driver._is_remote:
+            cdp_url = f"{self.driver.command_executor._client_config.remote_server_addr}/session/{self.driver.session_id}/chromium/send_command_and_get_result"
+            cdp_request_body = '{"cmd": "Traacing.end", "params": {}}'
+            cdp_response = self.driver.command_executor._request(
+                "POST", cdp_url, cdp_request_body
+            )
+            # Flaky: Adding try catch block to handle the situation where we do not get a dictionary object.
+            # Could not reproduce this in local. So far we have seen this issue only when running on a remote web driver.
+            try:
+                perf_data = cdp_response.get("value").get("data")
+            except Exception as e:
+                logger.error(f'object "{cdp_response.get("value")}" : {e}')
+        else:
+            cdp_response = self.driver.execute_cdp_cmd(
+                "Performance.getMetrics", {}
+            )
+            perf_data = cdp_response.get("data")
+
+        if perf_data is None:
+            logger.warning(
+                "Something unexpected has happened: fetched the performance "
+                "data, but it was empty. Not writing performance log."
+            )
+            return
+
+        with open(target_filepath, "w") as out_file:
+            out_file.write(perf_data)
 
     def quit(self):
         self.driver.quit()
