@@ -258,16 +258,12 @@
         }
         elements = deduped_elements;
 
-        if ((elements.length > 1 && index > 0) || cucu.debug) {
-            console.debug(`fuzzy_find: multiple (${elements.length}) matches, returning index ${index}.`);
-            for (var i = 0; i < elements.length; i++) {
-                const rect = elements[i].element.getBoundingClientRect();
-                console.debug(`  [${i}]: ${(elements[i].element.textContent || elements[i].element.innerText || jqCucu(elements[i].element).text() || '').trim()} at (${rect.x}, ${rect.y})`);
-            }
-        } else if (elements.length > 0) {
-            let rect = elements[0].element.getBoundingClientRect();
-            console.debug(`fuzzy_find: selected first element: ${(elements[0].element.textContent || elements[0].element.innerText || jqCucu(elements[0].element).text() || '').trim()} at (${rect.x}, ${rect.y})`);
+        let debugMsg = `fuzzy_find: multiple (${elements.length}) matches, returning index ${index}.`;
+        for (var i = 0; i < elements.length; i++) {
+            const rect = elements[i].element.getBoundingClientRect();
+            debugMsg += "\n  [" + i + "]: " + ((elements[i].element.textContent || elements[i].element.innerText || jqCucu(elements[i].element).text() || '').trim()) + " at (" + rect.x + ", " + rect.y + ")";
         }
+        console.debug(debugMsg);
 
         if (elements.length > 0 && insert_label) {
             return [elements[index].element, elements[index].label];
