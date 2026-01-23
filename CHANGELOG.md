@@ -8,7 +8,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.1
 - Change - always all report step logs sections
-- Change - allow newlines in browser log entries
+- Change - add more logging to fuzzy find
+- Change - preserve newlines in browser log report
 
 # 1.4.0
 - Add - proxy options exposed to end user
