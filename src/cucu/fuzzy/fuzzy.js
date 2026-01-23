@@ -80,7 +80,7 @@
                 var nameInTagContentJq = `${thing}:vis:${matcher}("${name}")`;
                 results = jqCucu(nameInTagContentJq, document.body).toArray();
                 if (cucu.debug) { console.log(nameInTagContentLabel, results); }
-                elements = elements.concat(results.map(x => ({element: x, label: nameInTagContentLabel})));
+                elements = elements.concat(results.map(x => ({element: x, label: nameInTagContentLabel, label_name: 'nameInTagContent'})));
 
                 for(var aIndex=0; aIndex < attributes.length; aIndex++) {
                     var attribute_name = attributes[aIndex];
@@ -94,7 +94,7 @@
                         results = jqCucu(nameInAttributeJq, document.body).toArray();
                         if (cucu.debug) { console.log(nameIsAttributeLabel, results); }
                     }
-                    elements = elements.concat(results.map(x => ({element: x, label: nameIsAttributeLabel})));
+                    elements = elements.concat(results.map(x => ({element: x, label: nameIsAttributeLabel, label_name: 'nameIsAttribute'})));
                 }
             }
 
@@ -124,7 +124,7 @@
                     }).toArray();
                     if (cucu.debug) { console.log(nameInValueLabel, results); }
                 }
-                elements = elements.concat(results.map(x => ({element: x, label: nameInValueLabel})));
+                elements = elements.concat(results.map(x => ({element: x, label: nameInValueLabel, label_name: 'nameInValue'})));
             }
 
             /*
@@ -144,7 +144,7 @@
                     results = jqCucu(idMatchesForLabelJq, document.body).toArray();
 
                     if (cucu.debug) { console.log(labelForNameLabel, results); }
-                    elements = elements.concat(results.map(x => ({element: x, label: labelForNameLabel})));
+                    elements = elements.concat(results.map(x => ({element: x, label: labelForNameLabel, label_name: 'labelForName'})));
                 }
             }
 
@@ -157,14 +157,14 @@
                 var nameInNestedChildLabel = `<${thing}><*>...${name}...</*></${thing}>`;
                 results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).parents(thing).toArray();
                 if (cucu.debug) { console.log(nameInNestedChildLabel, results); }
-                elements = elements.concat(results.map(x => ({element: x, label: nameInNestedChildLabel})));
+                elements = elements.concat(results.map(x => ({element: x, label: nameInNestedChildLabel, label_name: 'nameInNestedChild'})));
 
                 for(var aIndex=0; aIndex < attributes.length; aIndex++) {
                     var attribute_name = attributes[aIndex];
                     var innerNestedElementsLabel = `<${thing}><* ${attribute_name}="${name}"></*></${thing}>`;
                     results = jqCucu(`*:vis[${attribute_name}="${name}"]`, document.body).parents(thing).toArray();
                     if (cucu.debug) { console.log(innerNestedElementsLabel, results); }
-                    elements = elements.concat(results.map(x => ({element: x, label: innerNestedElementsLabel})));
+                    elements = elements.concat(results.map(x => ({element: x, label: innerNestedElementsLabel, label_name: 'innerNestedElements'})));
                 }
             }
 
@@ -181,7 +181,7 @@
                     var nameIsPreviousSiblingLabel = `<*>${name}</*><${thing}/>`;
                     results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).next(thing + ':vis').toArray();
                     if (cucu.debug) { console.log(nameIsPreviousSiblingLabel, results); }
-                    elements = elements.concat(results.map(x => ({element: x, label: nameIsPreviousSiblingLabel})));
+                    elements = elements.concat(results.map(x => ({element: x, label: nameIsPreviousSiblingLabel, label_name: 'nameIsPreviousSibling'})));
                 }
             }
 
@@ -193,7 +193,7 @@
                     var nameIsNextSiblingLabel = `<${thing}/><*>${name}</*>`;
                     results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).prev(thing).toArray();
                     if (cucu.debug) { console.log(nameIsNextSiblingLabel, results); }
-                    elements = elements.concat(results.map(x => ({element: x, label: nameIsNextSiblingLabel})));
+                    elements = elements.concat(results.map(x => ({element: x, label: nameIsNextSiblingLabel, label_name: 'nameIsNextSibling'})));
                 }
             }
 
@@ -206,7 +206,7 @@
                 var nameIsTextSiblingLabel = `<*><${thing}></${thing}>${name}</*>`;
                 results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).children(thing + ':vis').toArray();
                 if (cucu.debug) { console.log(nameIsTextSiblingLabel, results); }
-                elements = elements.concat(results.map(x => ({element: x, label: nameIsTextSiblingLabel})));
+                elements = elements.concat(results.map(x => ({element: x, label: nameIsTextSiblingLabel, label_name: 'nameIsTextSibling'})));
             }
 
             // element labeled with any previous sibling
@@ -217,14 +217,14 @@
                     var leftToRightLabel = `<*>${name}</*>...<${thing}>...`;
                     results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).nextAll(thing + ':vis').toArray();
                     if (cucu.debug) { console.log(leftToRightLabel, results); }
-                    elements = elements.concat(results.map(x => ({element: x, label: leftToRightLabel})));
+                    elements = elements.concat(results.map(x => ({element: x, label: leftToRightLabel, label_name: 'leftToRight'})));
 
                     var leftToRightGrandpaLabel = `<...><*>${name}</*></...>...<...><${thing}></...>`;
                     // XXX: this rule is horribly complicated and I'd rather see it gone
                     //      basically: common great grandpranet
                     results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).nextAll().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log(leftToRightGrandpaLabel, results); }
-                    elements = elements.concat(results.map(x => ({element: x, label: leftToRightGrandpaLabel})));
+                    elements = elements.concat(results.map(x => ({element: x, label: leftToRightGrandpaLabel, label_name: 'leftToRightGrandpa'})));
                 }
             }
 
@@ -236,13 +236,13 @@
                     var rightToLeftLabel = `<${thing}>...<*>${name}</*>...`;
                     results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).prevAll(thing).toArray();
                     if (cucu.debug) { console.log(rightToLeftLabel, results); }
-                    elements = elements.concat(results.map(x => ({element: x, label: rightToLeftLabel})));
+                    elements = elements.concat(results.map(x => ({element: x, label: rightToLeftLabel, label_name: 'rightToLeft'})));
 
                     var rightToLeftGrandpaLabel = `<...><${thing}></...>...<...><*>${name}</*></...>`;
                     // XXX: this rule is horribly complicated and I'd rather see it gone
                     results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).prevAll().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log(rightToLeftGrandpaLabel, results); }
-                    elements = elements.concat(results.map(x => ({element: x, label: rightToLeftGrandpaLabel})));
+                    elements = elements.concat(results.map(x => ({element: x, label: rightToLeftGrandpaLabel, label_name: 'rightToLeftGrandpa'})));
                 }
             }
         }
@@ -253,21 +253,19 @@
         for (var i = 0; i < elements.length; i++) {
             if (seen_elements.indexOf(elements[i].element) === -1) {
                 seen_elements.push(elements[i].element);
+                elements[i].org_index = i;
                 deduped_elements.push(elements[i]);
             }
         }
         elements = deduped_elements;
 
-        if ((elements.length > 1 && index > 0) || cucu.debug) {
-            console.debug(`fuzzy_find: multiple (${elements.length}) matches, returning index ${index}.`);
-            for (var i = 0; i < elements.length; i++) {
-                const rect = elements[i].element.getBoundingClientRect();
-                console.debug(`  [${i}]: ${(elements[i].element.textContent || elements[i].element.innerText || jqCucu(elements[i].element).text() || '').trim()} at (${rect.x}, ${rect.y})`);
-            }
-        } else if (elements.length > 0) {
-            let rect = elements[0].element.getBoundingClientRect();
-            console.debug(`fuzzy_find: selected first element: ${(elements[0].element.textContent || elements[0].element.innerText || jqCucu(elements[0].element).text() || '').trim()} at (${rect.x}, ${rect.y})`);
+        let debugMsg = `fuzzy_find: found (${elements.length}) matches, returning index ${index}.`;
+        for (var i = 0; i < elements.length; i++) {
+            const rect = elements[i].element.getBoundingClientRect();
+            const content = (elements[i].element.textContent || elements[i].element.innerText || jqCucu(elements[i].element).text() || '').replace(/\n/g, '').trim();
+            debugMsg += `\n  [${i}]: text '${content}' at (${Math.round(rect.x)}, ${Math.round(rect.y)}) pass [${elements[i].org_index}] for ${elements[i].label_name} using ${elements[i].label}`;
         }
+        console.debug(debugMsg);
 
         if (elements.length > 0 && insert_label) {
             return [elements[index].element, elements[index].label];

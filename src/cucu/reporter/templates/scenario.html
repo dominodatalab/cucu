@@ -133,20 +133,15 @@
             {% if step is defined %}
                 <tr class="row"><td style="min-width: 0;" class="col-12 collapse multi-collapse" id="collapsable-row-{{ loop.index }}" colspan="2">
 
-                {% if step['stdout'] %}
-                <details open>
+                <details {% if step['stdout']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">stdout ({{ step['stdout']|length }} lines)</summary>
                     <pre style="color: darkgray;">{{ escape("\n".join(step['stdout'])) }}</pre>
                 </details>
-                {% endif %}
-                {% if step['stderr'] %}
-                <details open>
+                <details {% if step['stderr']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">stderr ({{ step['stderr']|length }} lines)</summary>
                     <pre style="color: darkgray;">{{ escape("\n".join(step['stderr'])) }}</pre>
                 </details>
-                {% endif %}
-                {% if step['screenshots'] %}
-                <details open>
+                <details {% if step['screenshots']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">images ({{ step['screenshots']|length }} images)</summary>
                     <div style="margin: 10px 0 0 0;">
                         {% for image in step['screenshots'] %}
@@ -157,25 +152,20 @@
                         {% endfor %}
                     </div>
                 </details>
-                {% endif %}
-                {% if step['error_message'] %}
-                <details open>
+                <details {% if step['error_message']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">error message ({{ step['error_message']|length }} lines)</summary>
                     <pre style="color: darkgray;">{% for entry in step['error_message'] %}{{ entry }}<br/>{% endfor %}</pre>
                 </details>
-                {% endif %}
-                {% if step['browser_logs'] %}
-                <details open>
+                <details {% if step['browser_logs']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">browser logs ({{ step['browser_logs']|length }} entries)</summary>
-                    <pre style="color: darkgray;">{% for entry in step['browser_logs'] %}{{ browser_timestamp_to_datetime(entry['timestamp']) }} {{ entry['level'] }} {{ entry['source']}}: {{ entry['message'] }}<br/>{% endfor %}</pre>
+                    {% for entry in step['browser_logs'] %}
+                    <pre style="color: darkgray;">{{ browser_timestamp_to_datetime(entry['timestamp']) }} {{ entry['level'] }} {{ entry['message'].replace('\\n', '\n')}}</pre>
+                    {% endfor %}
                 </details>
-                {% endif %}
-                {% if step['debug_output'] %}
-                <details open>
+                <details {% if step['debug_output']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">debug output ({{ step['debug_output']|length }} lines)</summary>
                     <pre style="color: darkgray;">{{ escape("\n".join(step['debug_output'])) }}</pre>
                 </details>
-                {% endif %}
 
                 </td></tr>
             {% endif %}
