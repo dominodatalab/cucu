@@ -426,4 +426,3 @@ def ansi_to_html(text: str) -> str:
     if not text:
         return ""
     return _converter.convert(text, full=False)
-
