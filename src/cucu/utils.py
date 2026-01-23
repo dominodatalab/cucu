@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 
 import humanize
+from ansi2html.converter import Ansi2HTMLConverter
 from selenium.webdriver.common.by import By
 from tabulate import DataRow, TableFormat, tabulate
 from tenacity import (
@@ -412,3 +413,17 @@ def behave_filepath_to_cucu_logpath(filepath: Path, results: Path) -> Path:
         log_filepath = results / f"{get_feature_name(filepath)}.console.log"
 
     return log_filepath
+
+
+
+_converter = Ansi2HTMLConverter(inline=True, scheme="xterm")
+
+def ansi_to_html(text: str) -> str:
+    """
+    Convert ANSI-colored text to HTML.
+    Returns safe HTML (no <html><body> wrapper).
+    """
+    if not text:
+        return ""
+    return _converter.convert(text, full=False)
+
