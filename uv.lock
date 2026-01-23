@@ -263,7 +263,7 @@ toml = [
 
 [[package]]
 name = "cucu"
-version = "1.3.31"
+version = "1.4.1"
 source = { editable = "." }
 dependencies = [
     { name = "ansi2html" },

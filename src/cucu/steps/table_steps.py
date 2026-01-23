@@ -93,25 +93,30 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     """
     check that table contains the matching rows in expected_table
     """
-    table_matched = True
-
     for expected_row in expected_table:
+        found_row = False
         for row in table:
-            found_row = True
+            good_cols = len(expected_row) == len(row)
+
             for expected_value, value in zip(expected_row, row):
                 if not re.match(expected_value, value):
-                    found_row = False
-            if found_row:
+                    good_cols = False
+
+            if good_cols:
+                found_row = True
                 break
 
         if not found_row:
-            table_matched = False
-            break
+            return False
 
-    if table_matched:
-        return True
+    return True
 
-    return False
+
+def report_found_table(expected_table, found_table):
+    logger.debug(
+        f"found desired table\nexpected:\n{format_gherkin_table(expected_table, [], '  ')}\n\n"
+        f"found:\n{format_gherkin_table(found_table, [], '  ')}\n"
+    )
 
 
 def report_unable_to_find_table(expected_table, found_tables):
@@ -171,11 +176,13 @@ def find_table(ctx, assert_func, nth=None):
 
     if nth is not None:
         if assert_func(found_tables[nth], expected):
+            report_found_table(expected, found_tables[nth])
             return found_tables[nth]
 
     else:
         for table in found_tables:
             if assert_func(table, expected):
+                report_found_table(expected, table)
                 return table
 
     report_unable_to_find_table(expected, found_tables)

@@ -5,8 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 1.3.31
+# 1.4.1
 - Fix - colorize debug output in html report
+
+# 1.4.0
+- Add - proxy options exposed to end user
+
+# 1.3.33
+- Add - enhance fuzzy debug logging
+- Chore - refactor fuzzy.js in prep for enhanced filtering
+
+# 1.3.32
+- Fix - ensure table row matches have same number of cols
+- Add - logging to successful find table
+
+# 1.3.31
+- Add - override cucu_secrets redaction using a config option
 
 # 1.3.30
 - Add - steps to validate tables' row count against an operator
