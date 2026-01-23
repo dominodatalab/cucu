@@ -7,6 +7,16 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.0
 - Add - proxy options exposed to end user
+CUCU_PROXY_HOST and CUCU_PROXY_PORT are added as environment varibales that will
+direct the underlying browser to attach to a proxy service. This allows for
+monitoring of traffic between the client and the server during tests.
+
+For example:
+Create HAR files based on captured network traffic.
+Profile network activity from the website under test.
+Compare requested endpoints across .feature files to forecast network traffic.
+Use the exposed variables like so:
+CUCU_PROXY_HOST=localhost CUCU_PROXY_PORT=9009 cucu run features/proxy_test.feature
 
 # 1.3.33
 - Add - enhance fuzzy debug logging
