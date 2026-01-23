@@ -258,10 +258,11 @@
         }
         elements = deduped_elements;
 
-        let debugMsg = `fuzzy_find: multiple (${elements.length}) matches, returning index ${index}.`;
+        let debugMsg = `fuzzy_find: found (${elements.length}) matches, returning index ${index}.`;
         for (var i = 0; i < elements.length; i++) {
             const rect = elements[i].element.getBoundingClientRect();
-            debugMsg += "\n  [" + i + "]: " + ((elements[i].element.textContent || elements[i].element.innerText || jqCucu(elements[i].element).text() || '').trim()) + " at (" + rect.x + ", " + rect.y + ")";
+            const content = (elements[i].element.textContent || elements[i].element.innerText || jqCucu(elements[i].element).text() || '').replace(/\n/g, '').trim();
+            debugMsg += `\n  [${i}]: ${content} at (${rect.x}, ${rect.y})`;
         }
         console.debug(debugMsg);
 
