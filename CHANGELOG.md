@@ -6,9 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-# 1.3.34
+# 1.4.1
 - Change - always all report step logs sections
 - Change - allow newlines in browser log entries
+
+# 1.4.0
+- Add - proxy options exposed to end user
 
 # 1.3.33
 - Add - enhance fuzzy debug logging
