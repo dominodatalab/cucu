@@ -239,6 +239,24 @@ looking for. We currently use [swizzle](https://github.com/jquery/sizzle) as
 the underlying element query language as its highly portable and has a bit
 useful features than basic CSS gives us.
 
+### Relevance Scoring (Ordering)
+When fuzzy matching yields multiple candidates, cucu orders results by a case-sensitive relevance score, then by discovery order as a tiebreaker. The `index` you pass to steps (e.g., the "2nd" button) refers to the Nth best-ranked element after sorting.
+
+- Priority by area (highest → lowest):
+   - Immediate text: direct TEXT_NODE children of the element.
+   - Attributes: selected attributes with sub-weights — `aria-label` > `id` > `class` (others like `title`, `placeholder`, `value` have no extra sub-weight).
+   - Full text: full element text including children.
+- Match strength within each area:
+   - Exact match outranks substring match.
+- Empty text fallback:
+   - If no area matches and the element has empty full text, a small default score is applied.
+- Tiebreaker:
+   - Earlier discovery pass (first found) wins ties with identical scores.
+
+Notes:
+- All matching is case-sensitive to mirror how selectors like `:contains` and custom `:has_text` behave.
+- The scoring is applied after deduplication by element identity.
+
 ## Custom steps
 It's easy to create custom steps, for example:
 1. create a new python file in your repo `features/steps/ui/weird_button_steps.py`
