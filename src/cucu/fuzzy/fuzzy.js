@@ -56,6 +56,93 @@
                                direction=LEFT_TO_RIGHT,
                                name_within_thing=false,
                                insert_label=false) {
+        function getImmediateText(el) {
+            var parts = [];
+            var nodes = el.childNodes || [];
+            for (var i = 0; i < nodes.length; i++) {
+                var n = nodes[i];
+                if (n.nodeType === 3) { // TEXT_NODE
+                    parts.push((n.nodeValue || '').trim());
+                }
+            }
+            return parts.join(' ').trim();
+        }
+
+        function getFullText(el) {
+            return ((el.textContent || el.innerText || jqCucu(el).text() || '') + '').trim();
+        }
+
+        function getAttr(el, name) {
+            if (name === 'class') {
+                return (el.className || '').toString();
+            }
+            return (el.getAttribute && el.getAttribute(name)) || '';
+        }
+
+        const AREA_WEIGHTS = {
+            immediate: 300,
+            attribute: 200,
+            fulltext: 100
+        };
+        const MATCH_WEIGHTS = {
+            exact: 50,
+            substring: 25
+        };
+        const ATTRIBUTE_SUBWEIGHTS = {
+            'aria-label': 30,
+            'id': 20,
+            'class': 10
+        };
+        const EMPTY_TEXT_SCORE = 10;
+
+        function includes(hay, needle) {
+            if (!hay) return false;
+            return hay.indexOf(needle) !== -1;
+        }
+
+        function equals(hay, needle) {
+            if (!hay) return false;
+            return hay.trim() === needle.trim();
+        }
+
+        function calculateRelevanceScore(el, query) {
+            var best = 0;
+
+            var imm = getImmediateText(el);
+            if (equals(imm, query)) {
+                best = Math.max(best, AREA_WEIGHTS.immediate + MATCH_WEIGHTS.exact);
+            } else if (includes(imm, query)) {
+                best = Math.max(best, AREA_WEIGHTS.immediate + MATCH_WEIGHTS.substring);
+            }
+
+            // attributes: check common attributes including sub-weights
+            var attrNames = ['aria-label', 'id', 'class', 'title', 'placeholder', 'value'];
+            for (var a = 0; a < attrNames.length; a++) {
+                var an = attrNames[a];
+                var av = getAttr(el, an) || '';
+                if (!av) continue;
+                var sub = ATTRIBUTE_SUBWEIGHTS[an] || 0;
+                if (equals(av, query)) {
+                    best = Math.max(best, AREA_WEIGHTS.attribute + MATCH_WEIGHTS.exact + sub);
+                } else if (includes(av, query)) {
+                    best = Math.max(best, AREA_WEIGHTS.attribute + MATCH_WEIGHTS.substring + sub);
+                }
+            }
+
+            var ft = getFullText(el);
+            if (equals(ft, query)) {
+                best = Math.max(best, AREA_WEIGHTS.fulltext + MATCH_WEIGHTS.exact);
+            } else if (includes(ft, query)) {
+                best = Math.max(best, AREA_WEIGHTS.fulltext + MATCH_WEIGHTS.substring);
+            }
+
+            if (best === 0 && ft.length === 0) {
+                best = EMPTY_TEXT_SCORE;
+            }
+
+            return best;
+        }
+
         var elements = [];
         var results = null;
         var attributes = ['aria-label', 'title', 'placeholder', 'value'];
@@ -259,11 +346,20 @@
         }
         elements = deduped_elements;
 
+        // score and sort by relevance (desc), then earlier pass (asc)
+        for (var i2 = 0; i2 < elements.length; i2++) {
+            elements[i2].score = calculateRelevanceScore(elements[i2].element, name);
+        }
+        elements.sort(function(a, b){
+            if (b.score !== a.score) return b.score - a.score;
+            return a.pass - b.pass;
+        });
+
         let debugMsg = `fuzzy_find: found (${elements.length}) matches, returning index ${index}.`;
         for (var i = 0; i < elements.length; i++) {
             const rect = elements[i].element.getBoundingClientRect();
             const content = (elements[i].element.textContent || elements[i].element.innerText || jqCucu(elements[i].element).text() || '').replace(/\n/g, '').trim();
-            debugMsg += `\n  [${i}]: text '${content}' at (${Math.round(rect.x)}, ${Math.round(rect.y)}) pass [${elements[i].pass}] for ${elements[i].label_name} using ${elements[i].label}`;
+            debugMsg += `\n  [${i}]: text '${content}' at (${Math.round(rect.x)}, ${Math.round(rect.y)}) score [${elements[i].score}] pass [${elements[i].pass}] for ${elements[i].label_name} using ${elements[i].label}`;
         }
         console.debug(debugMsg);
 

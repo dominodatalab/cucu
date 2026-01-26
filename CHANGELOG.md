@@ -7,7 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 
 # 1.4.2
-- Change - fuzzy find matching behavior
+- Change - fuzzy find matching with relevance score
 - Fix - recombine browser log report
 
 # 1.4.1
