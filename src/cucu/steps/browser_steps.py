@@ -1,4 +1,5 @@
 import base64
+import datetime
 import os
 import re
 
@@ -39,17 +40,6 @@ def open_browser_with_performance_logs(ctx):
         selenium_remote_url=selenium_remote_url,
         capture_performance_logs=True,
     )
-    browser.driver.execute_cdp_cmd(
-        "Tracing.start",
-        {
-            "categories": [
-                "devtools.timeline",
-                "v8.execute",
-                "blink.user_timing",
-            ],
-            "transferMode": "ReturnAsStream",
-        },
-    )
 
     return browser
 
@@ -86,19 +76,16 @@ def open_a_new_browser_perf_logging(ctx, url):
     browser = retry(open_browser_with_performance_logs)(ctx)
     ctx.browser = browser
 
-    def stop_browser_emit_logs(_):
-        browser.download_performance_logs(os.path.join(cucu_downloads_dir, str(ctx.browser)))
-        browser_index = ctx.browsers.index(browser)
+    def stop_tracing_emit_logs(_):
+        browser.bidi_collector.end_and_wait(timeout=60)
+        timestr = datetime.datetime.now(datetime.UTC).isoformat()
+        out_path = os.path.join(cucu_downloads_dir, f"{timestr}.json")
+        if not os.path.exists(cucu_downloads_dir):
+            os.makedirs(cucu_downloads_dir, exist_ok=True)
+        browser.bidi_collector.save(out_path)
 
-        if browser_index > 0:
-            ctx.browser = ctx.browsers[browser_index - 1]
-        else:
-            ctx.browser = None
-
-        ctx.browsers[browser_index].quit()
-        del ctx.browsers[browser_index]
-
-    register_after_this_scenario_hook(stop_browser_emit_logs)
+    register_after_this_scenario_hook(stop_tracing_emit_logs)
+    ctx.browser.bidi_collector.begin()
 
     ctx.browsers.append(ctx.browser)
     logger.debug(f"navigating to url: {url}")
