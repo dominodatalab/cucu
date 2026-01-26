@@ -267,6 +267,18 @@
         }
         console.debug(debugMsg);
 
+        /*
+        Explaination of debug output format:
+        Here's the breatkdown of the debug output for this single matched element:
+        `[0]: text 'blue          green          red' at (93, 8) pass [0] for labelForName using \u003C* for=...>Pick a color\u003C/*>...\u003Cselect id=...>\u003C/select>`
+
+        1. text `blue` is the text content of the found element (includes child text)
+        2. at `(93, 8)` the (x, y) coordinates of the top left of the element
+        3. pass `[0]` (mostly for internal purposes) is the original index number in which fuzzy found and recorded the element before deduplication
+        4. for `labelForName` is the kind of search fuzzy did to find the element
+        5. using `\u003C* for=...>Pick a color\u003C/*>...\u003Cselect id=...>\u003C/select>` was the search expression used
+        */
+
         if (elements.length > 0 && insert_label) {
             return [elements[index].element, elements[index].label];
         }
