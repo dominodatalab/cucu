@@ -249,10 +249,10 @@
 
         // deduplicate elements by element identity, keeping order
         var deduped_elements = [];
-        var seen_elements = [];
+        var seen_elements = new Set();
         for (var i = 0; i < elements.length; i++) {
-            if (seen_elements.indexOf(elements[i].element) === -1) {
-                seen_elements.push(elements[i].element);
+            if (!seen_elements.has(elements[i].element)) {
+                seen_elements.add(elements[i].element);
                 elements[i].pass = i;
                 deduped_elements.push(elements[i]);
             }
