@@ -29,6 +29,115 @@
     const LEFT_TO_RIGHT = 1;
     const RIGHT_TO_LEFT = 2;
 
+    // Helpers and relevance scoring promoted to cucu.relevance
+    function getImmediateText(el) {
+        var parts = [];
+        var nodes = el.childNodes || [];
+        for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            if (n.nodeType === 3) {
+                parts.push((n.nodeValue || '').trim());
+            }
+        }
+        return parts.join(' ').trim();
+    }
+
+    function getFullText(el) {
+        return ((el.textContent || el.innerText || jqCucu(el).text() || '') + '').trim();
+    }
+
+    function getAttr(el, name) {
+        if (name === 'class') {
+            return (el.className || '').toString();
+        }
+        return (el.getAttribute && el.getAttribute(name)) || '';
+    }
+
+    const WEIGHTS = {
+        area: {
+            immediate: 300,
+            attribute: 200,
+            fulltext: 100
+        },
+        match: {
+            exact: 50,
+            substring: 25
+        },
+        attrSub: {
+            'aria-label': 30,
+            'id': 20,
+            'class': 10
+        },
+        emptyText: 10
+    };
+
+
+    /*
+     * Relevance scoring (ordering)
+     *
+     * Case-sensitive matching. Higher scores rank first. After scoring, we
+     * deduplicate and sort by score desc, then by original discovery order
+     * (`pass`) asc as a tiebreaker. The `index` returned by fuzzy_find is
+     * the Nth best-ranked element after this sort.
+     *
+     * Area priority (highest → lowest):
+     *   1) Immediate text content (direct TEXT_NODE children only)
+     *   2) Attribute content with sub-weights (aria-label > id > class; others default)
+     *   3) Full text content (includes children)
+     *
+     * Within each area, exact match outranks substring match.
+     *
+     * Empty text fallback: if nothing matches and the element has empty
+     * full text, a small default score is applied so empty-but-possibly
+     * relevant nodes are not entirely discarded.
+     */
+    cucu.relevance = function(el, query) {
+        function includes(hay, needle) {
+            if (!hay) return false;
+            return hay.indexOf(needle) !== -1;
+        }
+
+        function equals(hay, needle) {
+            if (!hay) return false;
+            return hay.trim() === needle.trim();
+        }
+
+        var best = 0;
+
+        var imm = getImmediateText(el);
+        if (equals(imm, query)) {
+            best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.exact);
+        } else if (includes(imm, query)) {
+            best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.substring);
+        }
+
+        var attrNames = ['aria-label', 'id', 'class', 'title', 'placeholder', 'value'];
+        for (var a = 0; a < attrNames.length; a++) {
+            var an = attrNames[a];
+            var av = getAttr(el, an) || '';
+            if (!av) continue;
+            var sub = WEIGHTS.attrSub[an] || 0;
+            if (equals(av, query)) {
+                best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.exact + sub);
+            } else if (includes(av, query)) {
+                best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.substring + sub);
+            }
+        }
+
+        var ft = getFullText(el);
+        if (equals(ft, query)) {
+            best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.exact);
+        } else if (includes(ft, query)) {
+            best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.substring);
+        }
+
+        if (best === 0 && ft.length === 0) {
+            best = WEIGHTS.emptyText;
+        }
+
+        return best;
+    };
+
     /*
      * find an element by applying the fuzzy finding rules when given the name
      * that identifies the element on screen and a list of possible `things` that
@@ -56,111 +165,7 @@
                                direction=LEFT_TO_RIGHT,
                                name_within_thing=false,
                                insert_label=false) {
-        function getImmediateText(el) {
-            var parts = [];
-            var nodes = el.childNodes || [];
-            for (var i = 0; i < nodes.length; i++) {
-                var n = nodes[i];
-                if (n.nodeType === 3) { // TEXT_NODE
-                    parts.push((n.nodeValue || '').trim());
-                }
-            }
-            return parts.join(' ').trim();
-        }
-
-        function getFullText(el) {
-            return ((el.textContent || el.innerText || jqCucu(el).text() || '') + '').trim();
-        }
-
-        function getAttr(el, name) {
-            if (name === 'class') {
-                return (el.className || '').toString();
-            }
-            return (el.getAttribute && el.getAttribute(name)) || '';
-        }
-
-        const AREA_WEIGHTS = {
-            immediate: 300,
-            attribute: 200,
-            fulltext: 100
-        };
-        const MATCH_WEIGHTS = {
-            exact: 50,
-            substring: 25
-        };
-        const ATTRIBUTE_SUBWEIGHTS = {
-            'aria-label': 30,
-            'id': 20,
-            'class': 10
-        };
-        const EMPTY_TEXT_SCORE = 10;
-
-        function includes(hay, needle) {
-            if (!hay) return false;
-            return hay.indexOf(needle) !== -1;
-        }
-
-        function equals(hay, needle) {
-            if (!hay) return false;
-            return hay.trim() === needle.trim();
-        }
-
-        /*
-         * Relevance scoring (ordering)
-         *
-         * Case-sensitive matching. Higher scores rank first. After scoring, we
-         * deduplicate and sort by score desc, then by original discovery order
-         * (`pass`) asc as a tiebreaker. The `index` returned by fuzzy_find is
-         * the Nth best-ranked element after this sort.
-         *
-         * Area priority (highest → lowest):
-         *   1) Immediate text content (direct TEXT_NODE children only)
-         *   2) Attribute content with sub-weights (aria-label > id > class; others default)
-         *   3) Full text content (includes children)
-         *
-         * Within each area, exact match outranks substring match.
-         *
-         * Empty text fallback: if nothing matches and the element has empty
-         * full text, a small default score is applied so empty-but-possibly
-         * relevant nodes are not entirely discarded.
-         */
-        function calculateRelevanceScore(el, query) {
-            var best = 0;
-
-            var imm = getImmediateText(el);
-            if (equals(imm, query)) {
-                best = Math.max(best, AREA_WEIGHTS.immediate + MATCH_WEIGHTS.exact);
-            } else if (includes(imm, query)) {
-                best = Math.max(best, AREA_WEIGHTS.immediate + MATCH_WEIGHTS.substring);
-            }
-
-            // attributes: check common attributes including sub-weights
-            var attrNames = ['aria-label', 'id', 'class', 'title', 'placeholder', 'value'];
-            for (var a = 0; a < attrNames.length; a++) {
-                var an = attrNames[a];
-                var av = getAttr(el, an) || '';
-                if (!av) continue;
-                var sub = ATTRIBUTE_SUBWEIGHTS[an] || 0;
-                if (equals(av, query)) {
-                    best = Math.max(best, AREA_WEIGHTS.attribute + MATCH_WEIGHTS.exact + sub);
-                } else if (includes(av, query)) {
-                    best = Math.max(best, AREA_WEIGHTS.attribute + MATCH_WEIGHTS.substring + sub);
-                }
-            }
-
-            var ft = getFullText(el);
-            if (equals(ft, query)) {
-                best = Math.max(best, AREA_WEIGHTS.fulltext + MATCH_WEIGHTS.exact);
-            } else if (includes(ft, query)) {
-                best = Math.max(best, AREA_WEIGHTS.fulltext + MATCH_WEIGHTS.substring);
-            }
-
-            if (best === 0 && ft.length === 0) {
-                best = EMPTY_TEXT_SCORE;
-            }
-
-            return best;
-        }
+        
 
         var elements = [];
         var results = null;
@@ -367,7 +372,7 @@
 
         // score and sort by relevance (desc), then earlier pass (asc)
         for (var i2 = 0; i2 < elements.length; i2++) {
-            elements[i2].score = calculateRelevanceScore(elements[i2].element, name);
+            elements[i2].score = cucu.relevance(elements[i2].element, name);
         }
         elements.sort(function(a, b){
             if (b.score !== a.score) return b.score - a.score;
