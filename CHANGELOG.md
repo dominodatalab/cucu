@@ -10,6 +10,24 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - fuzzy find matching with relevance score
 - Fix - recombine browser log report
 
+##  Relevance scoring (ordering)
+
+Case-sensitive matching. Higher scores rank first. After scoring, we
+deduplicate and sort by score desc, then by original discovery order
+(`pass`) asc as a tiebreaker. The `index` returned by fuzzy_find is
+the Nth best-ranked element after this sort.
+
+Area priority (highest → lowest):
+  1) Immediate text content (direct TEXT_NODE children only)
+  2) Attribute content with sub-weights (aria-label > id > class; others default)
+  3) Full text content (includes children)
+
+Within each area, exact match outranks substring match.
+
+Empty text fallback: if nothing matches and the element has empty
+full text, a small default score is applied so empty-but-possibly
+relevant nodes are not entirely discarded.
+
 # 1.4.1
 - Change - always all report step logs sections
 - Change - add more logging to fuzzy find
