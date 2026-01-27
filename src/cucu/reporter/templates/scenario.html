@@ -158,9 +158,8 @@
                 </details>
                 <details {% if step['browser_logs']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">browser logs ({{ step['browser_logs']|length }} entries)</summary>
-                    {% for entry in step['browser_logs'] %}
-                    <pre style="color: darkgray;">{{ browser_timestamp_to_datetime(entry['timestamp']) }} {{ entry['level'] }} {{ entry['message'].replace('\\n', '\n')}}</pre>
-                    {% endfor %}
+                    <pre style="color: darkgray;">{% for entry in step['browser_logs'] %}
+{{ browser_timestamp_to_datetime(entry['timestamp']) }} {{ entry['level'] }} {{ entry['message'].replace('\\n', '\n')}}{% endfor %}</pre>
                 </details>
                 <details {% if step['debug_output']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">debug output ({{ step['debug_output']|length }} lines)</summary>
