@@ -60,8 +60,8 @@
             fulltext: 100
         },
         match: {
-            exact: 50,
-            substring: 25
+            exact: 200,
+            substring: 50
         },
         attrSub: {
             'aria-label': 30,
