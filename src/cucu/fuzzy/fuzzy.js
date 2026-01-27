@@ -43,7 +43,7 @@
     }
 
     function getFullText(el) {
-        return ((el.textContent || el.innerText || jqCucu(el).text() || '') + '').trim();
+        return (el.textContent || el.innerText || jqCucu(el).text() || '').replace(/\n/g, ' ').trim();
     }
 
     function getAttr(el, name) {
