@@ -249,11 +249,11 @@
 
         // deduplicate elements by element identity, keeping order
         var deduped_elements = [];
-        var seen_elements = [];
+        var seen_elements = new Set();
         for (var i = 0; i < elements.length; i++) {
-            if (seen_elements.indexOf(elements[i].element) === -1) {
-                seen_elements.push(elements[i].element);
-                elements[i].org_index = i;
+            if (!seen_elements.has(elements[i].element)) {
+                seen_elements.add(elements[i].element);
+                elements[i].pass = i;
                 deduped_elements.push(elements[i]);
             }
         }
@@ -263,7 +263,7 @@
         for (var i = 0; i < elements.length; i++) {
             const rect = elements[i].element.getBoundingClientRect();
             const content = (elements[i].element.textContent || elements[i].element.innerText || jqCucu(elements[i].element).text() || '').replace(/\n/g, '').trim();
-            debugMsg += `\n  [${i}]: text '${content}' at (${Math.round(rect.x)}, ${Math.round(rect.y)}) pass [${elements[i].org_index}] for ${elements[i].label_name} using ${elements[i].label}`;
+            debugMsg += `\n  [${i}]: text '${content}' at (${Math.round(rect.x)}, ${Math.round(rect.y)}) pass [${elements[i].pass}] for ${elements[i].label_name} using ${elements[i].label}`;
         }
         console.debug(debugMsg);
 
