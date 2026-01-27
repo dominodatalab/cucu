@@ -91,7 +91,7 @@
      * full text, a small default score is applied so empty-but-possibly
      * relevant nodes are not entirely discarded.
      */
-    cucu.relevance = function(el, query) {
+    cucu.relevance = function(el, query, immediateOverride) {
         function includes(hay, needle) {
             if (!hay) return false;
             return hay.indexOf(needle) !== -1;
@@ -104,7 +104,7 @@
 
         var best = 0;
 
-        var imm = getImmediateText(el);
+        var imm = immediateOverride || getImmediateText(el);
         if (equals(imm, query)) {
             best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.exact);
         } else if (includes(imm, query)) {
@@ -255,7 +255,8 @@
                     results = jqCucu(idMatchesForLabelJq, document.body).toArray();
 
                     if (cucu.debug) { console.log(labelForNameLabel, results); }
-                    elements = elements.concat(results.map(x => ({element: x, label: labelForNameLabel, label_name: 'labelForName'})));
+                    var labelImmediateText = getImmediateText(label);
+                    elements = elements.concat(results.map(x => ({element: x, label: labelForNameLabel, label_name: 'labelForName', immediate_override: labelImmediateText})));
                 }
             }
 
@@ -372,7 +373,7 @@
 
         // score and sort by relevance (desc), then earlier pass (asc)
         for (var i2 = 0; i2 < elements.length; i2++) {
-            elements[i2].score = cucu.relevance(elements[i2].element, name);
+            elements[i2].score = cucu.relevance(elements[i2].element, name, elements[i2].immediate_override);
         }
         elements.sort(function(a, b){
             if (b.score !== a.score) return b.score - a.score;
