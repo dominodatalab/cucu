@@ -165,8 +165,6 @@
                                direction=LEFT_TO_RIGHT,
                                name_within_thing=false,
                                insert_label=false) {
-
-
         var elements = [];
         var results = null;
         var attributes = ['aria-label', 'title', 'placeholder', 'value'];
