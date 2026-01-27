@@ -61,6 +61,8 @@ class BidiCollector:
                     "includedCategories": [
                         "devtools.timeline",
                         "disabled-by-default-devtools.timeline.frame",
+                        "disabled-by-default-devtools.timeline.stack",
+                        "devtools.net",
                     ],
                 }
 
