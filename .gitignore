@@ -189,3 +189,6 @@ terraform.rc
 
 # generated during test run
 skip_first_scenario.txt
+
+# Vim
+*.sw[lmnop]
