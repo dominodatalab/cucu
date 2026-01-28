@@ -10,8 +10,8 @@ import pkgutil
 import re
 import shutil
 import time
-from html import escape
 from datetime import datetime
+from html import escape
 from pathlib import Path
 
 import humanize
@@ -417,10 +417,9 @@ def behave_filepath_to_cucu_logpath(filepath: Path, results: Path) -> Path:
 
 
 def ansi_to_html(line: str) -> str:
-
     ANSI_STYLES = {
-        "0":  "",                      # reset
-        "1":  "font-weight: bold",
+        "0": "",  # reset
+        "1": "font-weight: bold",
         "30": "color: black",
         "31": "color: red",
         "32": "color: green",
@@ -442,7 +441,7 @@ def ansi_to_html(line: str) -> str:
 
     pos = 0
     for match in ANSI_SGR_RE.finditer(line):
-        chunk = line[pos:match.start()]
+        chunk = line[pos : match.start()]
         if chunk:
             result.append(escape(chunk))
 
@@ -503,5 +502,3 @@ def build_debug_output(raw: str) -> list[str]:
         lines.append(html + "<br>")
 
     return lines
-
-
