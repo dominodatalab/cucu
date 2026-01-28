@@ -170,11 +170,11 @@
                     <pre style="color: darkgray;">{% for entry in step['browser_logs'] %}{{ browser_timestamp_to_datetime(entry['timestamp']) }} {{ entry['level'] }} {{ entry['source']}}: {{ entry['message'] }}<br/>{% endfor %}</pre>
                 </details>
                 {% endif %}
-                {% if step['debug_output'] %}
-                {% set line_count = step.debug_output.count('\n') %}
+                {% if step.debug_output %}
+                {% set line_count = step.debug_output | length %}
                 <details open>
-                    <summary style="color: dimgray;"> debug output ({{ line_count}} lines)</summary>
-                    <pre style="color: #777;background-color: transparent;font-family: monospace;">{{ step.debug_output | safe }}</pre>
+                <summary style="color: dimgray;">debug output ({{ line_count }} lines)</summary>
+                <pre style="color:#777;background:transparent;font-family:monospace;">{{ step.debug_output | join('') | safe }}</pre>
                 </details>
                 {% endif %}
                 </td></tr>

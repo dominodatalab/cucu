@@ -11,7 +11,7 @@ from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
 from cucu.utils import (
     TeeStream,
-    ansi_to_html,
+    build_debug_output,
     ellipsize_filename,
     get_iso_timestamp_with_ms,
     parse_iso_timestamp,
@@ -270,9 +270,8 @@ def after_step(ctx, step):
 
     # Capture debug output from the TeeStream for this step
     if hasattr(ctx, "scenario_debug_log_tee"):
-        raw_lines = ctx.scenario_debug_log_tee.getvalue().splitlines()
-        # Convert ANSI to HTML once
-        step.debug_output= ansi_to_html("\n".join(raw_lines))
+        raw_lines = ctx.scenario_debug_log_tee.getvalue()
+        step.debug_output = build_debug_output(raw_lines)
     else:
         step.debug_output = []
 
