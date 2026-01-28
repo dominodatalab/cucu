@@ -5,11 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 1.4.1
+# 1.4.3
 - Fix - colorize debug output in html report
+
+# 1.4.2
+- Fix - browser logs report
+
+# 1.4.1
+- Change - always all report step logs sections
+- Change - add more logging to fuzzy find
+- Change - preserve newlines in browser log report
 
 # 1.4.0
 - Add - proxy options exposed to end user
+CUCU_PROXY_HOST and CUCU_PROXY_PORT are added as environment varibales that will
+direct the underlying browser to attach to a proxy service. This allows for
+monitoring of traffic between the client and the server during tests.
+
+For example:
+Create HAR files based on captured network traffic.
+Profile network activity from the website under test.
+Compare requested endpoints across .feature files to forecast network traffic.
+Use the exposed variables like so:
+CUCU_PROXY_HOST=localhost CUCU_PROXY_PORT=9009 cucu run features/proxy_test.feature
 
 # 1.3.33
 - Add - enhance fuzzy debug logging

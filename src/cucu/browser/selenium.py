@@ -87,7 +87,9 @@ class Selenium(Browser):
 
             if proxy_host and proxy_port:
                 logger.debug(f"Using proxy: {proxy_host}:{proxy_port}")
-                options.add_argument(f"--proxy-server={proxy_host}:{proxy_port}")
+                options.add_argument(
+                    f"--proxy-server={proxy_host}:{proxy_port}"
+                )
             else:
                 logger.debug("Not using a proxy")
 
