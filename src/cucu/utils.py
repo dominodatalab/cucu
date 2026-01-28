@@ -480,20 +480,20 @@ def ansi_to_html(line: str) -> str:
 
 
 def build_debug_output(raw: str) -> list[str]:
-    ANSI_CURSOR_RE = re.compile(r'\x1b\[[0-9;]*[ABCD]')
-    MULTI_NL_RE = re.compile(r'\n{3,}')
+    ANSI_CURSOR_RE = re.compile(r"\x1b\[[0-9;]*[ABCD]")
+    MULTI_NL_RE = re.compile(r"\n{3,}")
 
     # normalize newlines
-    text = raw.replace('\r\n', '\n').replace('\r', '\n')
+    text = raw.replace("\r\n", "\n").replace("\r", "\n")
 
     # remove cursor movement junk
-    text = ANSI_CURSOR_RE.sub('', text)
+    text = ANSI_CURSOR_RE.sub("", text)
 
     # collapse insane blank lines
-    text = MULTI_NL_RE.sub('\n\n', text)
+    text = MULTI_NL_RE.sub("\n\n", text)
 
     lines = []
-    for line in text.split('\n'):
+    for line in text.split("\n"):
         # keep empty lines (spacing matters)
         if not line:
             lines.append("<br>")
