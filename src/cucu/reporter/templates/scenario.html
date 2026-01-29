@@ -163,9 +163,8 @@
                 </details>
                 <details {% if step['debug_output']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">debug output ({{ step['debug_output']|length }} lines)</summary>
-                    <pre style="color: darkgray;">{{ escape("\n".join(step['debug_output'])) }}</pre>
+                    <pre style="color: darkgray; background: transparent; font-family: monospace;">{{ step['debug_output'] | join('') | safe }}</pre>
                 </details>
-
                 </td></tr>
             {% endif %}
 
