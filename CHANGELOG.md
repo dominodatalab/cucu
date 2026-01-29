@@ -8,6 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.5
 - Change - fuzzy find matching with relevance score
+- Change - lazy load images in report
 
 # 1.4.4
 - Fix - colorize debug output in html report
