@@ -8,6 +8,9 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 # 1.4.3
 - Fix - colorize debug output in html report
 
+# 1.4.3
+- Change table row count equality from 'equals' to 'exactly'
+
 # 1.4.2
 - Fix - browser logs report
 

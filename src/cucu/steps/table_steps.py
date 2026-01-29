@@ -511,7 +511,7 @@ def wait_table_row_count(ctx, row_count, table):
 for thing, check_func in {
     "more than": operator.gt,
     "at least": operator.ge,
-    "equals": operator.eq,
+    "exactly": operator.eq,
     "at most": operator.le,
     "less than": operator.lt,
     "not equal to": operator.ne,
