@@ -103,12 +103,15 @@
         }
 
         var best = 0;
+        var higherPriorityMatchFound = false;
 
         var imm = immediateOverride || getImmediateText(el);
         if (equals(imm, query)) {
             best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.exact);
+            higherPriorityMatchFound = true;
         } else if (includes(imm, query)) {
             best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.substring);
+            higherPriorityMatchFound = true;
         }
 
         var attrNames = ['aria-label', 'id', 'class', 'title', 'placeholder', 'value'];
@@ -119,15 +122,20 @@
             var sub = WEIGHTS.attrSub[an] || 0;
             if (equals(av, query)) {
                 best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.exact + sub);
+                higherPriorityMatchFound = true;
             } else if (includes(av, query)) {
                 best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.substring + sub);
+                higherPriorityMatchFound = true;
             }
         }
 
         var ft = getFullText(el);
         if (equals(ft, query)) {
-            best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.exact);
+            // Only promote exact full text matches to immediate weight when no higher priority matches found
+            var fullTextWeight = (!higherPriorityMatchFound) ? WEIGHTS.area.immediate : WEIGHTS.area.fulltext;
+            best = Math.max(best, fullTextWeight + WEIGHTS.match.exact);
         } else if (includes(ft, query)) {
+            // Substring matches never get promoted
             best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.substring);
         }
 
