@@ -11,7 +11,6 @@ import re
 import shutil
 import time
 from datetime import datetime
-from html import escape
 from pathlib import Path
 
 import humanize
@@ -28,6 +27,7 @@ from tenacity import (
 from tenacity import retry as retrying
 
 from cucu import logger
+from cucu.ansi_parser import ansi_to_html
 from cucu.browser.core import Browser
 from cucu.config import CONFIG
 
@@ -414,68 +414,6 @@ def behave_filepath_to_cucu_logpath(filepath: Path, results: Path) -> Path:
         log_filepath = results / f"{get_feature_name(filepath)}.console.log"
 
     return log_filepath
-
-
-def ansi_to_html(line: str) -> str:
-    ANSI_STYLES = {
-        "0": "",  # reset
-        "1": "font-weight: bold",
-        "30": "color: black",
-        "31": "color: red",
-        "32": "color: green",
-        "33": "color: yellow",
-        "34": "color: blue",
-        "35": "color: magenta",
-        "36": "color: cyan",
-        "37": "color: white",
-        "90": "color: gray",
-    }
-
-    ANSI_SGR_RE = re.compile(r"\x1b\[([0-9;]+)m")
-
-    """
-    Convert ANSI SGR codes to <span style="..."> HTML.
-    """
-    result = []
-    open_styles = []
-
-    pos = 0
-    for match in ANSI_SGR_RE.finditer(line):
-        chunk = line[pos : match.start()]
-        if chunk:
-            result.append(escape(chunk))
-
-        codes = match.group(1).split(";")
-
-        # reset
-        if "0" in codes:
-            while open_styles:
-                result.append("</span>")
-                open_styles.pop()
-
-        else:
-            styles = [
-                ANSI_STYLES[c]
-                for c in codes
-                if c in ANSI_STYLES and ANSI_STYLES[c]
-            ]
-            if styles:
-                style_attr = "; ".join(styles)
-                result.append(f'<span style="{style_attr}">')
-                open_styles.append("</span>")
-
-        pos = match.end()
-
-    # remainder
-    remainder = line[pos:]
-    if remainder:
-        result.append(escape(remainder))
-
-    # close any open spans
-    while open_styles:
-        result.append(open_styles.pop())
-
-    return "".join(result)
 
 
 def build_debug_output(raw: str) -> list[str]:

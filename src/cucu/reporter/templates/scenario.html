@@ -58,6 +58,24 @@
       display: inline;
       visibility: visible;
     }
+
+    .debug-output {
+    color: darkgray;
+    background: transparent;
+    font-family: monospace;
+    white-space: pre;
+    }
+
+    .debug-output .ansi-bold {font-weight: bold;}
+    .debug-output .ansi-black   { color: black; }
+    .debug-output .ansi-red     { color: red; }
+    .debug-output .ansi-green   { color: green; }
+    .debug-output .ansi-yellow  { color: goldenrod; }
+    .debug-output .ansi-blue    { color: #1f6feb; }
+    .debug-output .ansi-magenta { color: magenta; }
+    .debug-output .ansi-cyan    { color: cyan; }
+    .debug-output .ansi-white   { color: white; }
+    .debug-output .ansi-gray    { color: gray; }
     </style>
     <table class="table table-borderless container row">
 
@@ -163,7 +181,7 @@
                 </details>
                 <details {% if step['debug_output']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">debug output ({{ step['debug_output']|length }} lines)</summary>
-                    <pre style="color: darkgray; background: transparent; font-family: monospace;">{{ step['debug_output'] | join('') | safe }}</pre>
+                    <pre class="debug-output">{{ step['debug_output'] | join('') | safe }}</pre>
                 </details>
                 </td></tr>
             {% endif %}
