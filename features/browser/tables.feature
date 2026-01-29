@@ -191,6 +191,8 @@ Feature: Tables
       And I wait to see there are at least "1" rows in the "7th" table
       And I wait to see that the table containing these rows has more than "1" rows
         | Row Number |
+      And I wait to see that the table containing these rows has exactly "2" rows
+        | Row Number |
       And I wait to see there are less than "3" rows in the "7th" table
       And I wait to see that the table containing these rows has less than "3" rows
         | Row Number |

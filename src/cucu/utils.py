@@ -7,6 +7,7 @@ import hashlib
 import logging
 import os
 import pkgutil
+import re
 import shutil
 import time
 from datetime import datetime
@@ -26,6 +27,7 @@ from tenacity import (
 from tenacity import retry as retrying
 
 from cucu import logger
+from cucu.ansi_parser import ansi_to_html
 from cucu.browser.core import Browser
 from cucu.config import CONFIG
 
@@ -412,3 +414,29 @@ def behave_filepath_to_cucu_logpath(filepath: Path, results: Path) -> Path:
         log_filepath = results / f"{get_feature_name(filepath)}.console.log"
 
     return log_filepath
+
+
+def build_debug_output(raw: str) -> list[str]:
+    ANSI_CURSOR_RE = re.compile(r"\x1b\[[0-9;]*[ABCD]")
+    MULTI_NL_RE = re.compile(r"\n{3,}")
+
+    # normalize newlines
+    text = raw.replace("\r\n", "\n").replace("\r", "\n")
+
+    # remove cursor movement junk
+    text = ANSI_CURSOR_RE.sub("", text)
+
+    # collapse insane blank lines
+    text = MULTI_NL_RE.sub("\n\n", text)
+
+    lines = []
+    for line in text.split("\n"):
+        # keep empty lines (spacing matters)
+        if not line:
+            lines.append("<br>")
+            continue
+
+        html = ansi_to_html(line)
+        lines.append(html + "<br>")
+
+    return lines
