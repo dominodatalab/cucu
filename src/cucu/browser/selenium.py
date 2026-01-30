@@ -16,6 +16,7 @@ from selenium.webdriver.remote.command import Command
 from cucu import config, edgedriver_autoinstaller, logger
 from cucu.browser.core import Browser
 from cucu.browser.frames import search_in_all_frames
+from cucu.browser.bidi_collector import BidiCollector
 
 
 class DisableLogger:
@@ -52,7 +53,12 @@ class Selenium(Browser):
         self.driver = None
 
     def open(
-        self, browser, headless=False, selenium_remote_url=None, detach=False
+        self,
+        browser,
+        headless=False,
+        selenium_remote_url=None,
+        detach=False,
+        capture_performance_logs=False,
     ):
         if selenium_remote_url is None:
             init()
@@ -68,6 +74,13 @@ class Selenium(Browser):
         ]
         proxy_host = config.CONFIG.get("CUCU_PROXY_HOST")
         proxy_port = config.CONFIG.get("CUCU_PROXY_PORT")
+
+        if capture_performance_logs and not browser.startswith("chrome"):
+            logger.warning(
+                "The web driver is not using Chrome as a web browser"
+                f", but {browser_name}. This browser does not support"
+                "downloading performance traces so will not do so."
+            )
 
         if browser.startswith("chrome"):
             options = ChromeOptions()
@@ -98,7 +111,6 @@ class Selenium(Browser):
 
             if ignore_ssl_certificate_errors:
                 options.add_argument("ignore-certificate-errors")
-            options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
 
             if selenium_remote_url is not None:
                 logger.debug(f"webdriver.Remote init: {selenium_remote_url}")
@@ -121,6 +133,11 @@ class Selenium(Browser):
                 self.driver = webdriver.Chrome(
                     options=options,
                 )
+
+            if capture_performance_logs:
+                logger.info("Starting performance trace listener")
+                self.bidi_collector = BidiCollector(self.driver)
+                self.bidi_collector.start_background()
 
         elif browser.startswith("firefox"):
             options = FirefoxOptions()
