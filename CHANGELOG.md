@@ -11,6 +11,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - lazy load images in report
 - Change - rename CUCU_BROKEN_IMAGES_PAGE_CHECK to CUCU_SKIP_BROKEN_IMAGES_CHECK
 - Change - rename CUCU_READY_STATE_PAGE_CHECK to CUCU_SKIP_PAGE_READY_CHECK
+- Chore - skip image check for default tests
 
 # 1.4.4
 - Fix - colorize debug output in html report
