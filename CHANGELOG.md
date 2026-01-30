@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+# 1.4.5
+- Change - fuzzy find matching with relevance score
+- Change - lazy load images in report
+- Change - rename CUCU_BROKEN_IMAGES_PAGE_CHECK to CUCU_SKIP_BROKEN_IMAGES_CHECK
+- Change - rename CUCU_READY_STATE_PAGE_CHECK to CUCU_SKIP_PAGE_READY_CHECK
+- Chore - skip image check for default tests
+
 # 1.4.4
 - Fix - colorize debug output in html report
 
@@ -13,6 +21,24 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.2
 - Fix - browser logs report
+
+##  Relevance scoring (ordering)
+
+Case-sensitive matching. Higher scores rank first. After scoring, we
+deduplicate and sort by score desc, then by original discovery order
+(`pass`) asc as a tiebreaker. The `index` returned by fuzzy_find is
+the Nth best-ranked element after this sort.
+
+Area priority (highest → lowest):
+  1) Immediate text content (direct TEXT_NODE children only)
+  2) Attribute content with sub-weights (aria-label > id > class; others default)
+  3) Full text content (includes children)
+
+Within each area, exact match outranks substring match.
+
+Empty text fallback: if nothing matches and the element has empty
+full text, a small default score is applied so empty-but-possibly
+relevant nodes are not entirely discarded.
 
 # 1.4.1
 - Change - always all report step logs sections

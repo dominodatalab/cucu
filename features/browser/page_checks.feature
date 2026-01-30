@@ -60,7 +60,7 @@ Feature: Page checks
 
   Scenario: User can disable the broken image checker at runtime
     Given I start a webserver at directory "data/www/" and save the port to the variable "PORT"
-      And I set the variable "CUCU_BROKEN_IMAGES_PAGE_CHECK" to "disabled"
+      And I set the variable "CUCU_SKIP_BROKEN_IMAGES_CHECK" to "true"
      Then I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/broken_images.html"
 
   Scenario: User gets expected order on page checks due to order of insertion

@@ -30,7 +30,7 @@ Feature: Report with custom subheader
       And I run the command "cucu run {CUCU_RESULTS_DIR}/report_with_custom_subheader_handling --results {CUCU_RESULTS_DIR}/custom_subheader_handling_results --generate-report --report {CUCU_RESULTS_DIR}/custom_subheader_handling_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
 
      When I start a webserver at directory "{CUCU_RESULTS_DIR}/custom_subheader_handling_report" and save the port to the variable "PORT"
-      And I set the variable "CUCU_BROKEN_IMAGES_PAGE_CHECK" to "disabled"
+      And I set the variable "CUCU_SKIP_BROKEN_IMAGES_CHECK" to "true"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
       And I wait to click the link "Feature with custom subheader handling"
       And I click the link "Scenario with a custom subheader handler"
@@ -65,7 +65,7 @@ Feature: Report with custom subheader
       And I run the command "cucu report {CUCU_RESULTS_DIR}/custom_subheader_handling_cmd_results --output {CUCU_RESULTS_DIR}/custom_subheader_handling_cmd_report" and expect exit code "0"
 
      When I start a webserver at directory "{CUCU_RESULTS_DIR}/custom_subheader_handling_cmd_report" and save the port to the variable "PORT"
-      And I set the variable "CUCU_BROKEN_IMAGES_PAGE_CHECK" to "disabled"
+      And I set the variable "CUCU_SKIP_BROKEN_IMAGES_CHECK" to "true"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
       And I wait to click the link "Feature with custom subheader handling"
       And I click the link "Scenario with a custom subheader handler"

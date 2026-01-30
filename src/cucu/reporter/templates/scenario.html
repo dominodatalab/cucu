@@ -163,7 +163,7 @@
                     <summary style="color: dimgray;">images ({{ step['screenshots']|length }} images)</summary>
                     <div style="margin: 10px 0 0 0;">
                         {% for image in step['screenshots'] %}
-                            <img class="mx-auto d-block img-fluid shadow bg-white rounded" id="{{ image['html_id'] }}" style="margin-bottom:15px" alt="{{ escape(image['label']) }}" title="{{ escape(image['label']) }}" src="{{ image['html_src'] }}"></img>
+                            <img loading="lazy" class="mx-auto d-block img-fluid shadow bg-white rounded" id="{{ image['html_id'] }}" style="margin-bottom:15px" alt="{{ escape(image['label']) }}" title="{{ escape(image['label']) }}" src="{{ image['html_src'] }}"></img>
                             {% if image['highlight'] %}
                             <div class="step-image-highlight" id="{{ image['html_id']}}-highlight" height-ratio="{{ image['highlight']['height_ratio'] }}" width-ratio="{{ image['highlight']['width_ratio'] }}" top-ratio="{{ image['highlight']['top_ratio'] }}" left-ratio="{{ image['highlight']['left_ratio'] }}"></div>
                             {% endif %}
