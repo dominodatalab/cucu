@@ -9,6 +9,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 # 1.4.5
 - Change - fuzzy find matching with relevance score
 - Change - lazy load images in report
+- Change - rename CUCU_BROKEN_IMAGES_PAGE_CHECK to CUCU_SKIP_BROKEN_IMAGES_CHECK
+- Change - rename CUCU_READY_STATE_PAGE_CHECK to CUCU_SKIP_PAGE_READY_CHECK
 
 # 1.4.4
 - Fix - colorize debug output in html report

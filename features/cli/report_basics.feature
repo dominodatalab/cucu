@@ -15,7 +15,7 @@ Feature: Report basics
      Then I should see the text "I echo \"current shell is '\{SHELL\}'\""
 
   Scenario: User can run a basic browser test and create a report
-    Given I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "0"
+    Given I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_SKIP_BROKEN_IMAGES_CHECK=true" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
@@ -31,7 +31,7 @@ Feature: Report basics
       """
 
   Scenario: User can run a browser test and see tab information in html report
-    Given I run the command "cucu run data/features/scenario_with_browser_tabs.feature --results {CUCU_RESULTS_DIR}/browser-tab-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "0"
+    Given I run the command "cucu run data/features/scenario_with_browser_tabs.feature --results {CUCU_RESULTS_DIR}/browser-tab-results --env CUCU_SKIP_BROKEN_IMAGES_CHECK=true" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-tab-results --output {CUCU_RESULTS_DIR}/browser-tab-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-tab-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
@@ -49,7 +49,7 @@ Feature: Report basics
      Then I wait to see the text "tab(1 of 2): Links!"
 
   Scenario: User can run a test and see extended output
-    Given I run the command "cucu run data/features/with_secret/scenario_with_sections.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "1"
+    Given I run the command "cucu run data/features/with_secret/scenario_with_sections.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_SKIP_BROKEN_IMAGES_CHECK=true" and expect exit code "1"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
@@ -76,7 +76,7 @@ Feature: Report basics
 
   @QE-6852
   Scenario: User can run a multi scenario test with web steps and generate report with a shareable url
-    Given I run the command "cucu run data/features/multiple_scenarios_with_browser_steps.feature --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled --results {CUCU_RESULTS_DIR}/multi-scenario-browser-results" and expect exit code "0"
+    Given I run the command "cucu run data/features/multiple_scenarios_with_browser_steps.feature --env CUCU_SKIP_BROKEN_IMAGES_CHECK=true --results {CUCU_RESULTS_DIR}/multi-scenario-browser-results" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/multi-scenario-browser-results --output {CUCU_RESULTS_DIR}/multi-scenario-browser-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/multi-scenario-browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
@@ -364,7 +364,7 @@ Feature: Report basics
   @db
   Scenario: User can combine results from multiple runs into a single report
     Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/combined_results/run_1" and expect exit code "0"
-      And I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --results {CUCU_RESULTS_DIR}/combined_results/run_2 --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "0"
+      And I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --results {CUCU_RESULTS_DIR}/combined_results/run_2 --env CUCU_SKIP_BROKEN_IMAGES_CHECK=true" and expect exit code "0"
      When I run the command "cucu report --combine {CUCU_RESULTS_DIR}/combined_results --output {CUCU_RESULTS_DIR}/combined_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
