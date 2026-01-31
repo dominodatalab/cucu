@@ -48,11 +48,11 @@ Feature: Page checks
       .* executed page check "broken image checker" in .*
       [\s\S]*
       """
-     When I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --env CUCU_READY_STATE_PAGE_CHECK=false --logging-level debug --results {CUCU_RESULTS_DIR}/disabling_page_checks_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     When I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --env CUCU_SKIP_PAGE_READY_CHECK=true --logging-level debug --results {CUCU_RESULTS_DIR}/disabling_page_checks_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*
-      .* document.readyState check disabled
+      .* skipped document.readyState check
       [\s\S]*
       .* executed page check "broken image checker" in .*
       [\s\S]*
