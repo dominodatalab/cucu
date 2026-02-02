@@ -387,20 +387,38 @@
         });
 
         // trim low-score elements
+        var originalLength = elements.length;
+        var trimmedElements = [];
+        
         if (elements.length > 0) {
-            var originalLength = elements.length;
-
             var highestScore = elements[0].score;
-            // if highest score is greater than substring, trim lower than substring match
+            var threshold, useInclusive;
+            
+            // determine threshold and comparison type
             if (highestScore > WEIGHTS.match.substring) {
-                elements = elements.filter(x => x.score >= WEIGHTS.match.substring);
-                console.debug(`fuzzy_find: trimmed low-score elements from ${originalLength} to ${elements.length} (highest score: ${highestScore})`);
+                threshold = WEIGHTS.match.substring;
+                useInclusive = true; // score >= threshold
+            } else if (highestScore > 0) {
+                threshold = 0;
+                useInclusive = false; // score > threshold
+            } else {
+                // no trimming needed - all elements have score 0 or less
+                threshold = null;
             }
-            // else if highest score is greater than zero, trim zero or lower
-            else if (highestScore > 0) {
-                elements = elements.filter(x => x.score > 0);
-                // log number of elements length before and after trimming
-                console.debug(`fuzzy_find: trimmed low-score elements from ${originalLength} to ${elements.length} (highest score: ${highestScore})`);
+            
+            if (threshold !== null) {
+                // single pass separation: kept vs trimmed
+                var keptElements = [];
+                for (var i = 0; i < elements.length; i++) {
+                    var element = elements[i];
+                    var keep = useInclusive ? (element.score >= threshold) : (element.score > threshold);
+                    if (keep) {
+                        keptElements.push(element);
+                    } else {
+                        trimmedElements.push(element);
+                    }
+                }
+                elements = keptElements;
             }
         }
 
@@ -411,6 +429,18 @@
             debugMsg += `\n  [${i}]: score [${elements[i].score}] text '${content}' at (${Math.round(rect.x)}, ${Math.round(rect.y)}) pass [${elements[i].pass}] for ${elements[i].label_name} using ${elements[i].label}`;
         }
         console.debug(debugMsg);
+        
+        if (trimmedElements.length > 0) {
+            console.debug(`fuzzy_find: trimmed low-score elements from ${originalLength} to ${elements.length} (highest score: ${elements.length > 0 ? elements[0].score : 0})`);
+            
+            let trimmedDebugMsg = `fuzzy_find: trimmed elements (${trimmedElements.length}):`;
+            for (var i = 0; i < trimmedElements.length; i++) {
+                const rect = trimmedElements[i].element.getBoundingClientRect();
+                const content = (trimmedElements[i].element.textContent || trimmedElements[i].element.innerText || jqCucu(trimmedElements[i].element).text() || '').replace(/\n/g, '').trim();
+                trimmedDebugMsg += `\n  [${i}]: score [${trimmedElements[i].score}] text '${content}' at (${Math.round(rect.x)}, ${Math.round(rect.y)}) pass [${trimmedElements[i].pass}] for ${trimmedElements[i].label_name} using ${trimmedElements[i].label}`;
+            }
+            console.debug(trimmedDebugMsg);
+        }
 
         /*
         Explaination of debug output format:
