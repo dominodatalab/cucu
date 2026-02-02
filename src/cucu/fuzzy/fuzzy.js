@@ -389,11 +389,11 @@
         // trim low-score elements
         var originalLength = elements.length;
         var trimmedElements = [];
-        
+
         if (elements.length > 0) {
             var highestScore = elements[0].score;
             var threshold, useInclusive;
-            
+
             // determine threshold and comparison type
             if (highestScore > WEIGHTS.match.substring) {
                 threshold = WEIGHTS.match.substring;
@@ -405,7 +405,7 @@
                 // no trimming needed - all elements have score 0 or less
                 threshold = null;
             }
-            
+
             if (threshold !== null) {
                 // single pass separation: kept vs trimmed
                 var keptElements = [];
@@ -429,10 +429,10 @@
             debugMsg += `\n  [${i}]: score [${elements[i].score}] text '${content}' at (${Math.round(rect.x)}, ${Math.round(rect.y)}) pass [${elements[i].pass}] for ${elements[i].label_name} using ${elements[i].label}`;
         }
         console.debug(debugMsg);
-        
+
         if (trimmedElements.length > 0) {
             console.debug(`fuzzy_find: trimmed low-score elements from ${originalLength} to ${elements.length} (highest score: ${elements.length > 0 ? elements[0].score : 0})`);
-            
+
             let trimmedDebugMsg = `fuzzy_find: trimmed elements (${trimmedElements.length}):`;
             for (var i = 0; i < trimmedElements.length; i++) {
                 const rect = trimmedElements[i].element.getBoundingClientRect();
