@@ -387,7 +387,6 @@
         });
 
         // trim low-score elements
-        var originalLength = elements.length;
         var trimmedElements = [];
 
         if (elements.length > 0) {
