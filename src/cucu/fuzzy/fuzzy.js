@@ -431,9 +431,7 @@
         console.debug(debugMsg);
 
         if (trimmedElements.length > 0) {
-            console.debug(`fuzzy_find: trimmed low-score elements from ${originalLength} to ${elements.length} (highest score: ${elements.length > 0 ? elements[0].score : 0})`);
-
-            let trimmedDebugMsg = `fuzzy_find: trimmed elements (${trimmedElements.length}):`;
+            let trimmedDebugMsg = `fuzzy_find: trimmed ${trimmedElements.length} elements below score: ${threshold}`;
             for (var i = 0; i < trimmedElements.length; i++) {
                 const rect = trimmedElements[i].element.getBoundingClientRect();
                 const content = (trimmedElements[i].element.textContent || trimmedElements[i].element.innerText || jqCucu(trimmedElements[i].element).text() || '').replace(/\n/g, '').trim();
