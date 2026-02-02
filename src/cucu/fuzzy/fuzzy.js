@@ -386,6 +386,24 @@
             return a.pass - b.pass;
         });
 
+        // trim low-score elements
+        if (elements.length > 0) {
+            var originalLength = elements.length;
+
+            var highestScore = elements[0].score;
+            // if highest score is greater than substring, trim lower than substring match
+            if (highestScore > WEIGHTS.match.substring) {
+                elements = elements.filter(x => x.score >= WEIGHTS.match.substring);
+                console.debug(`fuzzy_find: trimmed low-score elements from ${originalLength} to ${elements.length} (highest score: ${highestScore})`);
+            }
+            // else if highest score is greater than zero, trim zero or lower
+            else if (highestScore > 0) {
+                elements = elements.filter(x => x.score > 0);
+                // log number of elements length before and after trimming
+                console.debug(`fuzzy_find: trimmed low-score elements from ${originalLength} to ${elements.length} (highest score: ${highestScore})`);
+            }
+        }
+
         let debugMsg = `fuzzy_find: found (${elements.length}) matches, returning index ${index}.`;
         for (var i = 0; i < elements.length; i++) {
             const rect = elements[i].element.getBoundingClientRect();
