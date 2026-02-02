@@ -4,28 +4,13 @@ Feature: Page checks
 
   @wip
   Scenario: User will get an error from the readyState page checker if the page never finishes loading
-    Given I create a file at "{CUCU_RESULTS_DIR}/loading_forever/environment.py" with the following:
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"
+     Then I expect the following step to fail with "document.readyState is in "loading""
       """
-      from cucu.environment import *
+      When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/page_that_loads_forever.html"
       """
-      And I create a file at "{CUCU_RESULTS_DIR}/loading_forever/steps/__init__.py" with the following:
-      """
-      from cucu.steps import *
-      """
-      And I create a file at "{CUCU_RESULTS_DIR}/loading_forever/loading_forever.feature" with the following:
-      """
-      Feature: Feature loads page with broken images
-
-        Scenario: That loads a page with broken images
-          Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
-            And I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"
-           Then I open a browser at the url "http://\{HOST_ADDRESS\}:\{PORT\}/page_that_loads_forever.html"
-      """
-     Then I run the command "cucu run {CUCU_RESULTS_DIR}/loading_forever/loading_forever.feature --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled --results {CUCU_RESULTS_DIR}/loading_forever_checker_results --logging-level=debug" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
-      And I should see "{STDOUT}" contains the following:
-      """
-      WebDriverException()
-      """
+      And I should see the previous step took more than "5" seconds
 
   Scenario: User will get an error from the broken image page checker if there are broken images
     Given I create a file at "{CUCU_RESULTS_DIR}/broken_image_checker/environment.py" with the following:
