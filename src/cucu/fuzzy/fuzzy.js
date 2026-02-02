@@ -64,11 +64,11 @@
             substring: 50
         },
         attrSub: {
-            'aria-label': 30,
-            'id': 20,
-            'class': 10
+            'aria-label': 34,
+            'id': 23,
+            'class': 12
         },
-        emptyText: 10
+        emptyText: 11
     };
 
 
