@@ -1,2 +1,2 @@
 # only run check in targeted tests
-CUCU_SKIP_BROKEN_IMAGES_CHECK: true
+CUCU_BROKEN_IMAGES_PAGE_CHECK: true

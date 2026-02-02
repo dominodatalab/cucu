@@ -21,7 +21,7 @@ Feature: Page checks
             And I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "5"
            Then I open a browser at the url "http://\{HOST_ADDRESS\}:\{PORT\}/page_that_loads_forever.html"
       """
-     Then I run the command "cucu run {CUCU_RESULTS_DIR}/loading_forever/loading_forever.feature --env CUCU_SKIP_BROKEN_IMAGES_CHECK=False --results {CUCU_RESULTS_DIR}/loading_forever_checker_results --logging-level=debug" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     Then I run the command "cucu run {CUCU_RESULTS_DIR}/loading_forever/loading_forever.feature --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled --results {CUCU_RESULTS_DIR}/loading_forever_checker_results --logging-level=debug" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" contains the following:
       """
       WebDriverException()
@@ -63,7 +63,7 @@ Feature: Page checks
       .* executed page check "broken image checker" in .*
       [\s\S]*
       """
-     When I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --env CUCU_SKIP_PAGE_READY_CHECK=true --logging-level debug --results {CUCU_RESULTS_DIR}/disabling_page_checks_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     When I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --env CUCU_READY_STATE_PAGE_CHECK=false --logging-level debug --results {CUCU_RESULTS_DIR}/disabling_page_checks_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*
@@ -75,7 +75,7 @@ Feature: Page checks
 
   Scenario: User can disable the broken image checker at runtime
     Given I start a webserver at directory "data/www/" and save the port to the variable "PORT"
-      And I set the variable "CUCU_SKIP_BROKEN_IMAGES_CHECK" to "true"
+      And I set the variable "CUCU_BROKEN_IMAGES_PAGE_CHECK" to "disabled"
      Then I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/broken_images.html"
 
   Scenario: User gets expected order on page checks due to order of insertion

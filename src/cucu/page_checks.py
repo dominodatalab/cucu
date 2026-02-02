@@ -15,13 +15,13 @@ def init_page_checks():
         wait=wait_fixed(float(config.CONFIG["CUCU_STEP_RETRY_AFTER_S"])),
     )
     def wait_for_document_to_be_ready(browser):
-        if config.CONFIG["CUCU_SKIP_PAGE_READY_CHECK"] != "false":
+        if config.CONFIG["CUCU_READY_STATE_PAGE_CHECK"] == "enabled":
             state = browser.execute("return document.readyState;")
 
             if state != "complete":
                 raise RuntimeError(f'document.readyState is in "{state}"')
         else:
-            logger.debug("skipped document.readyState check")
+            logger.debug("document.readyState check disabled")
 
     register_page_check_hook(
         "wait for document.readyState", wait_for_document_to_be_ready
@@ -34,7 +34,7 @@ def init_page_checks():
         wait=wait_fixed(float(config.CONFIG["CUCU_STEP_RETRY_AFTER_S"])),
     )
     def wait_for_all_images_to_be_loaded(browser):
-        if config.CONFIG["CUCU_SKIP_BROKEN_IMAGES_CHECK"] == "false":
+        if config.CONFIG["CUCU_BROKEN_IMAGES_PAGE_CHECK"] == "enabled":
             broken_images = browser.execute(
                 """
             return (function() {

@@ -4,14 +4,14 @@ from collections import OrderedDict
 from cucu.config import CONFIG
 
 CONFIG.define(
-    "CUCU_SKIP_BROKEN_IMAGES_CHECK",
+    "CUCU_BROKEN_IMAGES_PAGE_CHECK",
     "enable/disable the broken image page checker",
-    default="false",
+    default="enabled",
 )
 CONFIG.define(
-    "CUCU_SKIP_PAGE_READY_CHECK",
-    "Skip the page ready check",
-    default="false",
+    "CUCU_READY_STATE_PAGE_CHECK",
+    "enable/disable the ready state page checker",
+    default="enabled",
 )
 
 
