@@ -177,8 +177,7 @@
                 <details {% if step['browser_logs']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">browser logs ({{ step['browser_logs']|length }} entries)</summary>
                     <pre style="color: darkgray;">{% for entry in step['browser_logs'] %}
-{{ browser_timestamp_to_datetime(entry['timestamp']) }} {{ entry['level'] }} {% for line in entry['message'].replace("\\n", "\n").splitlines() %} {{ line.replace("\\\\", "").replace('\\"', '"').replace('\\u003C', '&lt;') }}
-{% endfor %}{% endfor %}</pre>
+{{ browser_timestamp_to_datetime(entry['timestamp']) }} {{ entry['level'] }} {{ entry['message'].replace("\\n", "\n").replace("\\\\", "").replace('\\"', '"').replace('\\u003C', '&lt;')}}{% endfor %}</pre>
                 </details>
                 <details {% if step['debug_output']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">debug output ({{ step['debug_output']|length }} lines)</summary>
