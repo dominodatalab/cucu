@@ -375,4 +375,4 @@ Feature: Report basics
      Then I should see a table that matches the following:
         | Start at | Features.*                             | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
         | .*       | Echo                                   | 1           | 1        | 0        | 0         | 0         | passed | .*         |
-        | .*         | Feature with passing scenario with web | 1           | 1        | 0        | 0         | 0         | passed | .*         |
+        | .*       | Feature with passing scenario with web | 1           | 1        | 0        | 0         | 0         | passed | .*         |
