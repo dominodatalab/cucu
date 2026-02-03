@@ -421,39 +421,46 @@
             }
         }
 
+        function getDebugContent(foundElement) {
+            const el = foundElement.element;
+            const rect = el.getBoundingClientRect();
+            const content = (el.textContent || el.innerText || jqCucu(el).text() || '').replace(/\n/g, '').trim();
+            return `\n  [${i}]: score(${foundElement.score}) pass(${foundElement.pass}) by(${foundElement.label_name}) at (${Math.round(rect.x)}, ${Math.round(rect.y)}) text '${content}'`;
+        }
+
+        let debugMsg = '\n';
         // scroll to selected index if possible and before logging coords
         if (index < elements.length) {
             elements[index].element.scrollIntoView({block:'center', inline:'center'});
+            const htmlEncoded = elements[index].element.outerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            debugMsg += `fuzzy_find: found (${elements.length}) matches, returning index ${index}, element is: \n ${htmlEncoded}\n`;
         }
 
-        let debugMsg = `fuzzy_find: found (${elements.length}) matches, returning index ${index}.`;
         for (var i = 0; i < elements.length; i++) {
-            const rect = elements[i].element.getBoundingClientRect();
-            const content = (elements[i].element.textContent || elements[i].element.innerText || jqCucu(elements[i].element).text() || '').replace(/\n/g, '').trim();
-            debugMsg += `\n  [${i}]: score [${elements[i].score}] text '${content}' at (${Math.round(rect.x)}, ${Math.round(rect.y)}) pass [${elements[i].pass}] for ${elements[i].label_name} using ${elements[i].label}`;
+            debugMsg += getDebugContent(elements[i]);
+        }
+        if (trimmedElements.length > 0) {
+            debugMsg += `\nfuzzy_find: trimmed ${trimmedElements.length} elements below score: ${threshold}`;
+            for (var i = 0; i < trimmedElements.length; i++) {
+                debugMsg += getDebugContent(trimmedElements[i]);
+            }
         }
         console.debug(debugMsg);
 
-        if (trimmedElements.length > 0) {
-            let trimmedDebugMsg = `fuzzy_find: trimmed ${trimmedElements.length} elements below score: ${threshold}`;
-            for (var i = 0; i < trimmedElements.length; i++) {
-                const rect = trimmedElements[i].element.getBoundingClientRect();
-                const content = (trimmedElements[i].element.textContent || trimmedElements[i].element.innerText || jqCucu(trimmedElements[i].element).text() || '').replace(/\n/g, '').trim();
-                trimmedDebugMsg += `\n  [${i}]: score [${trimmedElements[i].score}] text '${content}' at (${Math.round(rect.x)}, ${Math.round(rect.y)}) pass [${trimmedElements[i].pass}] for ${trimmedElements[i].label_name} using ${trimmedElements[i].label}`;
-            }
-            console.debug(trimmedDebugMsg);
-        }
-
         /*
-        Explaination of debug output format:
-        Here's the breatkdown of the debug output for this single matched element:
-        `[0]: text 'blue          green          red' at (93, 8) pass [0] for labelForName using \u003C* for=...>Pick a color\u003C/*>...\u003Cselect id=...>\u003C/select>`
+        example debug output for `cucu run -g features/browser/dropdowns.feature:6`:
+        2026-02-03 14:34:20,923 DEBUG console-api 451:16 "
+        fuzzy_find: found (2) matches, returning index 0, element is: 
+        <select name="color-names" id="color-names">
+                <option value="Blue">blue</option>
+                <option value="Green">green</option>
+                <option value="Red" selected="">red</option>
+            </select>
 
-        1. text `blue` is the text content of the found element (includes child text)
-        2. at `(93, 8)` the (x, y) coordinates of the top left of the element
-        3. pass `[0]` (mostly for internal purposes) is the original index number in which fuzzy found and recorded the element before deduplication
-        4. for `labelForName` is the kind of search fuzzy did to find the element
-        5. using `\u003C* for=...>Pick a color\u003C/*>...\u003Cselect id=...>\u003C/select>` was the search expression used
+        [0]: score(350) pass(0) by(labelForName) at (93, 8) text 'blue          green          red'
+        [1]: score(350) pass(1) by(labelForName) at (405, 8) text 'navy          forest          ruby'
+        fuzzy_find: trimmed 1 elements below score: 50
+        [0]: score(0) pass(7) by(leftToRight) at (225, 8) text 'CheeseBall          Nugget          Tater'"
         */
 
         if (elements.length > 0 && insert_label) {
