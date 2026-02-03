@@ -56,7 +56,7 @@ def init_page_checks():
 
                 raise RuntimeError("broken images were found on the page")
         else:
-            logger.debug("skipped broken image check")
+            logger.debug("broken image check disabled")
 
     register_page_check_hook(
         "broken image checker", wait_for_all_images_to_be_loaded

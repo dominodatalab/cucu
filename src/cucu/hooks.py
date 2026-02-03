@@ -5,12 +5,12 @@ from cucu.config import CONFIG
 
 CONFIG.define(
     "CUCU_BROKEN_IMAGES_PAGE_CHECK",
-    "enable/disable the broken image page checker",
+    "enabled/disabled the broken image page checker",
     default="enabled",
 )
 CONFIG.define(
     "CUCU_READY_STATE_PAGE_CHECK",
-    "enable/disable the ready state page checker",
+    "enabled/disabled the ready state page checker",
     default="enabled",
 )
 
