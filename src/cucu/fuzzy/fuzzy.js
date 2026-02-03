@@ -423,7 +423,8 @@
 
         // scroll to selected index if possible and before logging coords
         if (index < elements.length) {
-            elements[index].element.scrollIntoView({block: "center", inline: "center", behavior: "smooth"});
+            elements[index].element.scrollIntoView({block:'center', inline:'center'});
+        }
 
         let debugMsg = `fuzzy_find: found (${elements.length}) matches, returning index ${index}.`;
         for (var i = 0; i < elements.length; i++) {
