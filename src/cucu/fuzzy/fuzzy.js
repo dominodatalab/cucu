@@ -428,29 +428,29 @@
             return `\n  [${i}]: score(${foundElement.score}) pass(${foundElement.pass}) by(${foundElement.label_name}) at (${Math.round(rect.x)}, ${Math.round(rect.y)}) text '${content}'`;
         }
 
-        let debugMsg = '\n';
+        let debugMsg = '';
         // scroll to selected index if possible and before logging coords
         if (index < elements.length) {
             elements[index].element.scrollIntoView({block:'center', inline:'center'});
             const htmlEncoded = elements[index].element.outerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            debugMsg += `fuzzy_find: found (${elements.length}) matches, returning index ${index}, element is: \n ${htmlEncoded}\n`;
+            debugMsg += `\nfuzzy_find: found element: \n ${htmlEncoded}\n`;
+            debugMsg += `\nfuzzy_find: found (${elements.length}) matches, returning index ${index}`;
         }
-
+        else {
+            debugMsg += `\nfuzzy_find: no elements found matching '${name}'`;
+        }
         for (var i = 0; i < elements.length; i++) {
             debugMsg += getDebugContent(elements[i]);
         }
         if (trimmedElements.length > 0) {
             debugMsg += `\nfuzzy_find: trimmed ${trimmedElements.length} elements below score: ${threshold}`;
-            for (var i = 0; i < trimmedElements.length; i++) {
-                debugMsg += getDebugContent(trimmedElements[i]);
-            }
         }
         console.debug(debugMsg);
 
         /*
         example debug output for `cucu run -g features/browser/dropdowns.feature:6`:
         2026-02-03 14:34:20,923 DEBUG console-api 451:16 "
-        fuzzy_find: found (2) matches, returning index 0, element is: 
+        fuzzy_find: found (2) matches, returning index 0, element is:
         <select name="color-names" id="color-names">
                 <option value="Blue">blue</option>
                 <option value="Green">green</option>
