@@ -88,7 +88,6 @@ class BidiCollector:
 
     def end_and_wait(self, timeout=30):
         """Stop tracing and wait for Tracing.tracingComplete."""
-        self.start_background()
         self._cmd_q.put({"op": "end"})
 
         if not self._trace_done.wait(timeout=timeout):
