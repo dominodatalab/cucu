@@ -1,10 +1,14 @@
+import datetime
 import json
+import os
 import sys
 import traceback
 from functools import partial
 from pathlib import Path
 
 import yaml
+
+from behave import use_fixture
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
@@ -16,6 +20,7 @@ from cucu.utils import (
     parse_iso_timestamp,
     take_screenshot,
 )
+from cucu.browser.bidi_collector import BidiCollectorManager
 
 CONFIG.define(
     "SCENARIO_RESULTS_DIR",
@@ -345,3 +350,21 @@ def after_step(ctx, step):
         }
 
     step.browser_info = browser_info
+
+
+def before_tag(ctx, tag):
+    if tag == "fixture.browser.tracing_enabled":
+        use_fixture(tracing_enabled, ctx, timeout=30)
+
+
+def tracing_enabled(ctx, timeout=30, **kwargs):
+    ctx.bidi_collector = BidiCollectorManager()
+    yield
+    timestr = datetime.datetime.now(datetime.UTC).isoformat()
+    out_path = os.path.join(ctx.scenario_logs_dir, f"{timestr}.json")
+    if not os.path.exists(ctx.scenario_logs_dir):
+        os.makedirs(ctx.scenario_logs_dir, exist_ok=True)
+    ctx.bidi_collector.stop_and_save(out_path, timeout=90)
+    # Unset the collector
+    ctx.bidi_collector = None
+

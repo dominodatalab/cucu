@@ -58,7 +58,6 @@ class Selenium(Browser):
         headless=False,
         selenium_remote_url=None,
         detach=False,
-        capture_performance_logs=False,
     ):
         if selenium_remote_url is None:
             init()
@@ -72,13 +71,6 @@ class Selenium(Browser):
         ignore_ssl_certificate_errors = config.CONFIG[
             "CUCU_IGNORE_SSL_CERTIFICATE_ERRORS"
         ]
-
-        if capture_performance_logs and not browser.startswith("chrome"):
-            logger.warning(
-                "The web driver is not using Chrome as a web browser"
-                f", but {browser_name}. This browser does not support"
-                "downloading performance traces so will not do so."
-            )
 
         if browser.startswith("chrome"):
             options = ChromeOptions()
@@ -123,11 +115,6 @@ class Selenium(Browser):
                 self.driver = webdriver.Chrome(
                     options=options,
                 )
-
-            if capture_performance_logs:
-                logger.info("Starting performance trace listener")
-                self.bidi_collector = BidiCollector(self.driver)
-                self.bidi_collector.start_background()
 
         elif browser.startswith("firefox"):
             options = FirefoxOptions()

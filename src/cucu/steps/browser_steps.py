@@ -22,24 +22,15 @@ def open_browser(ctx):
         selenium_remote_url=selenium_remote_url,
     )
 
-    return browser
-
-
-def open_browser_with_performance_logs(ctx):
-    browser_name = config.CONFIG["CUCU_BROWSER"]
-    headless = config.CONFIG["CUCU_BROWSER_HEADLESS"]
-    selenium_remote_url = config.CONFIG["CUCU_SELENIUM_REMOTE_URL"]
-
-    browser = Selenium()
-    logger.debug(
-        f"opening browser {browser_name} with performance logging enabled"
-    )
-    browser.open(
-        browser_name,
-        headless=headless,
-        selenium_remote_url=selenium_remote_url,
-        capture_performance_logs=True,
-    )
+    if hasattr(ctx, "bidi_collector"):
+        logger.debug(
+            f"BiDi collector found, attaching it to this new browser session."
+        )
+        ctx.bidi_collector.initialize(browser.driver)
+        logger.info(
+            f"BiDi collector aggregating traces from {browser_name} for this "
+            f"scenario."
+        )
 
     return browser
 
@@ -65,28 +56,6 @@ def open_a_browser(ctx, url):
 @step('I open a new browser at the url "{url}"')
 def open_a_new_browser(ctx, url):
     ctx.browser = retry(open_browser)(ctx)
-    ctx.browsers.append(ctx.browser)
-    logger.debug(f"navigating to url: {url}")
-    ctx.browser.navigate(url)
-
-
-@step('I open a new browser with performance logging at the url "{url}"')
-def open_a_new_browser_perf_logging(ctx, url):
-    cucu_downloads_dir = config.CONFIG["CUCU_BROWSER_DOWNLOADS_DIR"]
-    browser = retry(open_browser_with_performance_logs)(ctx)
-    ctx.browser = browser
-
-    def stop_tracing_emit_logs(_):
-        browser.bidi_collector.end_and_wait(timeout=60)
-        timestr = datetime.datetime.now(datetime.UTC).isoformat()
-        out_path = os.path.join(cucu_downloads_dir, f"{timestr}.json")
-        if not os.path.exists(cucu_downloads_dir):
-            os.makedirs(cucu_downloads_dir, exist_ok=True)
-        browser.bidi_collector.save(out_path)
-
-    register_after_this_scenario_hook(stop_tracing_emit_logs)
-    ctx.browser.bidi_collector.begin()
-
     ctx.browsers.append(ctx.browser)
     logger.debug(f"navigating to url: {url}")
     ctx.browser.navigate(url)

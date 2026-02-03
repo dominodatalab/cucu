@@ -4,6 +4,21 @@ import threading
 import trio
 
 
+class BidiCollectorManager:
+
+    def __init__(self):
+        self.collector = None
+
+    def initialize(self, driver):
+        if self.collector is None:
+            self.collector = BidiCollector(driver)
+        self.collector.start_background()
+
+    def stop_and_save(self, path, timeout=60):
+        self.collector.end_and_wait(timeout=timeout)
+        self.collector.save(path)
+
+
 class BidiCollector:
     """
     Runs Selenium BiDi (Trio) in a background thread, collects
@@ -129,6 +144,7 @@ class BidiCollector:
         try:
             async for evt in data_listener:
                 with self._lock:
+                    print("ex...")
                     self._trace_events.extend(evt.value)
         except Exception as e:
             self._last_error = e
@@ -158,6 +174,7 @@ class BidiCollector:
                     )
 
                 elif op == "end":
+                    print("devtools.tracing.end")
                     await session.execute(devtools.tracing.end())
 
                 elif op == "quit":
