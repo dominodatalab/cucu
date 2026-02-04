@@ -397,9 +397,6 @@
             if (highestScore > WEIGHTS.match.substring) {
                 threshold = WEIGHTS.match.substring;
                 useInclusive = true; // score >= threshold
-            } else if (highestScore > 0) {
-                threshold = 0;
-                useInclusive = false; // score > threshold
             } else {
                 // no trimming needed - all elements have score 0 or less
                 threshold = null;
@@ -425,7 +422,7 @@
             const el = foundElement.element;
             const rect = el.getBoundingClientRect();
             const content = (el.textContent || el.innerText || jqCucu(el).text() || '').replace(/\n/g, '').trim();
-            return `\n  [${i}]: score(${foundElement.score}) pass(${foundElement.pass}) by(${foundElement.label_name}) at (${Math.round(rect.x)}, ${Math.round(rect.y)}) text '${content}'`;
+            return `\n  [${i}]: score(${foundElement.score}) pass(${foundElement.pass}) by(${foundElement.label_name}) at(${Math.round(rect.x)},${Math.round(rect.y)}) text '${content}'`;
         }
 
         let debugMsg = '';
@@ -433,11 +430,11 @@
         if (index < elements.length) {
             elements[index].element.scrollIntoView({block:'center', inline:'center'});
             const htmlEncoded = elements[index].element.outerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            debugMsg += `\nfuzzy_find: found element: \n ${htmlEncoded}\n`;
+            debugMsg += `\nfuzzy_find: found element for '${name}' at index ${index}\n ${htmlEncoded}\n`;
             debugMsg += `\nfuzzy_find: found (${elements.length}) matches, returning index ${index}`;
         }
         else {
-            debugMsg += `\nfuzzy_find: no elements found matching '${name}'`;
+            debugMsg += `\nfuzzy_find: no elements found matching '${name}' at index ${index}`;
         }
         for (var i = 0; i < elements.length; i++) {
             debugMsg += getDebugContent(elements[i]);
@@ -462,6 +459,10 @@
         fuzzy_find: trimmed 1 elements below score: 50
         [0]: score(0) pass(7) by(leftToRight) at (225, 8) text 'CheeseBall          Nugget          Tater'"
         */
+
+        if (index >= elements.length) {
+            return null;
+        }
 
         if (elements.length > 0 && insert_label) {
             return [elements[index].element, elements[index].label];
