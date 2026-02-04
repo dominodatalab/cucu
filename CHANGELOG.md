@@ -11,15 +11,6 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - lazy load images in report
 - Chore - skip image check for default tests
 
-# 1.4.4
-- Fix - colorize debug output in html report
-
-# 1.4.3
-- Change table row count equality from 'equals' to 'exactly'
-
-# 1.4.2
-- Fix - browser logs report
-
 ##  Relevance scoring (ordering)
 
 Case-sensitive matching. Higher scores rank first. After scoring, we
@@ -37,6 +28,15 @@ Within each area, exact match outranks substring match.
 Empty text fallback: if nothing matches and the element has empty
 full text, a small default score is applied so empty-but-possibly
 relevant nodes are not entirely discarded.
+
+# 1.4.4
+- Fix - colorize debug output in html report
+
+# 1.4.3
+- Change table row count equality from 'equals' to 'exactly'
+
+# 1.4.2
+- Fix - browser logs report
 
 # 1.4.1
 - Change - always all report step logs sections
