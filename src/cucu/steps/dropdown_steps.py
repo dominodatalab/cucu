@@ -208,7 +208,7 @@ def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
 
         if option_element is None:
             raise RuntimeError(
-                f'unable to find option "{option}" in dropdown "{dropdown}"'
+                f'unable to find option "{option}" in dropdown "{dropdown}" for selection'
             )
 
         logger.debug("clicking dropdown option")
@@ -260,10 +260,10 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
             dropdown_input.send_keys(Keys.BACKSPACE * len(dropdown_value))
         # After each key stroke there is a request and an update of the option list. To prevent stale element,
         # we send keys one by one here and try to find the option after each key.
-        for key in option:
+        for attempt, key in enumerate(option):
             try:
                 dropdown_input = find_input(ctx, dropdown, index)
-                logger.debug(f'sending key "{key}"')
+                logger.debug(f'sending key "{key}" in attempt {attempt + 1}')
                 dropdown_input.send_keys(key)
                 ctx.browser.wait_for_page_to_load()
                 option_element = find_dropdown_option(ctx, option)
@@ -274,7 +274,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
 
     if option_element is None:
         raise RuntimeError(
-            f'unable to find option "{option}" in dropdown "{dropdown}"'
+            f'unable to find option "{option}" in dropdown "{dropdown}" for dynamic selection'
         )
 
     logger.debug("clicking dropdown option")
@@ -330,7 +330,7 @@ def assert_dropdown_option_selected(
 
         if selected_option is None:
             raise RuntimeError(
-                f'unable to find option "{option}" in dropdown "{dropdown}"'
+                f'unable to find option "{option}" in dropdown "{dropdown}" for assertion'
             )
 
         if is_selected:
