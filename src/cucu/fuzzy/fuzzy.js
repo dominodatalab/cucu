@@ -398,17 +398,16 @@
                 threshold = WEIGHTS.match.substring;
                 useInclusive = true; // score >= threshold
             } else {
-                // no trimming needed - all elements have score 0 or less
                 threshold = null;
             }
 
             if (threshold !== null) {
-                // single pass separation: kept vs trimmed
                 var keptElements = [];
                 for (var i = 0; i < elements.length; i++) {
                     var element = elements[i];
                     var keep = useInclusive ? (element.score >= threshold) : (element.score > threshold);
-                    if (keep) {
+                    // always keep up to the requested index
+                    if (i <= index || keep) {
                         keptElements.push(element);
                     } else {
                         trimmedElements.push(element);
