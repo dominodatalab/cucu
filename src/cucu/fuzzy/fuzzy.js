@@ -427,7 +427,7 @@
         let debugMsg = '';
         // scroll to selected index if possible and before logging coords
         if (index < elements.length) {
-            elements[index].element.scrollIntoView({block:'center', inline:'center'});
+            // elements[index].element.scrollIntoView({block:'center', inline:'center'});
             const htmlEncoded = elements[index].element.outerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;');
             debugMsg += `\nfuzzy_find: found element for '${name}' at index ${index}\n ${htmlEncoded}\n`;
             debugMsg += `\nfuzzy_find: found (${elements.length}) matches, returning index ${index}`;
