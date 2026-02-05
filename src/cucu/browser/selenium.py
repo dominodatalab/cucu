@@ -68,6 +68,7 @@ class Selenium(Browser):
         ]
         proxy_host = config.CONFIG.get("CUCU_PROXY_HOST")
         proxy_port = config.CONFIG.get("CUCU_PROXY_PORT")
+        pac_file_url = config.CONFIG.get("CUCU_PAC_FILE_URL")
 
         if browser.startswith("chrome"):
             options = ChromeOptions()
@@ -85,13 +86,17 @@ class Selenium(Browser):
                 "excludeSwitches", ["enable-automation"]
             )  # new way
 
-            if proxy_host and proxy_port:
+            if pac_file_url:
+                logger.debug(f"Configuring browser to use PAC file url: {pac_file_url}")
+                logger.debug("This will take precedence over any other proxy configuration.")
+                options.add_argument("--proxy-pac-url={pac_file_url}")
+            elif proxy_host and proxy_port:
                 logger.debug(f"Using proxy: {proxy_host}:{proxy_port}")
                 options.add_argument(
                     f"--proxy-server={proxy_host}:{proxy_port}"
                 )
             else:
-                logger.debug("Not using a proxy")
+                logger.debug("Not using a proxy.")
 
             if headless:
                 options.add_argument("--headless")
