@@ -9,6 +9,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - lazy load report images
 - Chore - skip image check for default tests
 - Chore - improve some logging
+- Chore - improve some tests
 
 # 1.4.4
 - Fix - colorize debug output in html report
