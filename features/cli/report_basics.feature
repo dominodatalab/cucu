@@ -52,6 +52,7 @@ Feature: Report basics
     Given I run the command "cucu run data/features/with_secret/scenario_with_sections.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "1"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
+      And I set the variable "CUCU_READY_STATE_PAGE_CHECK" to "enabled"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
       And I wait to click the link "Scenario with sections"
 
