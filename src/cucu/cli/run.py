@@ -9,7 +9,6 @@ from pathlib import Path
 from cucu import (
     behave_tweaks,
     init_global_hook_variables,
-    logger,
     register_before_retry_hook,
 )
 from cucu.browser import selenium
@@ -52,13 +51,6 @@ def behave(
 ):
     # load all them configs
     CONFIG.load_cucurc_files(filepath)
-
-    logger.debug(
-        f"CUCU_BROKEN_IMAGES_PAGE_CHECK={CONFIG['CUCU_BROKEN_IMAGES_PAGE_CHECK']}"
-    )
-    logger.debug(
-        f"CUCU_READY_STATE_PAGE_CHECK={CONFIG.get('CUCU_READY_STATE_PAGE_CHECK')}"
-    )
 
     if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
         selenium.init()
