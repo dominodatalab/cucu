@@ -6,10 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-# 1.4.5
+# 1.4.6
 - Change - fuzzy find matching with relevance score
-- Change - lazy load images in report
-- Chore - skip image check for default tests
 
 ##  Relevance scoring (ordering)
 
@@ -28,6 +26,12 @@ Within each area, exact match outranks substring match.
 Empty text fallback: if nothing matches and the element has empty
 full text, a small default score is applied so empty-but-possibly
 relevant nodes are not entirely discarded.
+
+# 1.4.5
+- Change - lazy load report images (except Firefox)
+- Chore - skip image check for default tests
+- Chore - improve some logging
+- Chore - improve some tests
 
 # 1.4.4
 - Fix - colorize debug output in html report
