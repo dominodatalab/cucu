@@ -205,6 +205,11 @@
             $(expandables[index]).addClass('show')
         }
 
+        // For Firefox, force eager loading of images
+        if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+            document.querySelectorAll('img[loading="lazy"]').forEach(img => img.setAttribute('loading', 'eager'));
+        }
+
         // necessary to make sure we jump to the anchored step as the page loads
         // and then we take the URL parameter and figure out which rows to
         // expand and only then would it make sense to adjust for any anchors
