@@ -426,11 +426,19 @@
                 : `<${el.tagName.toLowerCase()}>`;
         }
 
-        function getDebugContent(foundElement) {
-            const el = foundElement.element;
-            const rect = el.getBoundingClientRect();
-            const content = (el.textContent || el.innerText || jqCucu(el).text() || '').replace(/\n/g, '').trim();
-            return `\n  [${i}]: score(${foundElement.score}) pass(${foundElement.pass}) by(${foundElement.label_name}) at(${Math.round(rect.x)},${Math.round(rect.y)}) text(${content}) node(${getNodeDescription(el)})`;
+        function getDebugContent(foundElements) {
+            if (!foundElements || foundElements.length === 0) return '';
+            const headers = ['#', 'score', 'pass', 'by', 'x', 'y', 'text', 'node'];
+            const numericCols = [0, 1, 2, 4, 5];
+            const rows = foundElements.map((e, i) => {
+                const el = e.element, r = el.getBoundingClientRect();
+                return [i, e.score, e.pass, e.label_name, Math.round(r.x), Math.round(r.y), (el.textContent || el.innerText || jqCucu(el).text() || '').replace(/\n/g, '').trim(), getNodeDescription(el)].map(String);
+            });
+            const maxColWidths = headers.map((h, j) => Math.min(Math.max(h.length, ...rows.map(r => r[j].length)), 80));
+            const pad = (s, l, right) => s.length >= l ? s.slice(0, l) : right ? s + ' '.repeat(l - s.length) : ' '.repeat(l - s.length) + s;
+            const fmtRow = row => '| ' + row.map((c, j) => pad(c, maxColWidths[j], !numericCols.includes(j))).join(' | ') + ' |';
+            const sep = '|-' + maxColWidths.map(w => '-'.repeat(w)).join('-|-') + '-|';
+            return ['\n' + fmtRow(headers), sep, ...rows.map(fmtRow)].join('\n');
         }
 
         let debugMsg = '';
@@ -438,14 +446,12 @@
         if (index < elements.length) {
             elements[index].element.scrollIntoView({block:'center', inline:'center'});
             node = getNodeDescription(elements[index].element);
-            debugMsg += `\nfuzzy_find: found element for '${name}' at index ${index} node(${node})`;
-            debugMsg += `\nfuzzy_find: found (${elements.length}) matches, returning index ${index}`;
-        }
-        else {
+            debugMsg += `\nfuzzy_find: found (${elements.length}) matches for '${name}', returning index ${index}`;
+        } else {
             debugMsg += `\nfuzzy_find: no elements found matching '${name}' at index ${index}`;
         }
-        for (var i = 0; i < elements.length; i++) {
-            debugMsg += getDebugContent(elements[i]);
+        if (elements.length > 0) {
+            debugMsg += getDebugContent(elements);
         }
         if (trimmedElements.length > 0) {
             debugMsg += `\nfuzzy_find: trimmed ${trimmedElements.length} elements below score: ${threshold}`;
