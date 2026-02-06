@@ -163,7 +163,7 @@
                     <summary style="color: dimgray;">images ({{ step['screenshots']|length }} images)</summary>
                     <div style="margin: 10px 0 0 0;">
                         {% for image in step['screenshots'] %}
-                            <img class="mx-auto d-block img-fluid shadow bg-white rounded" id="{{ image['html_id'] }}" style="margin-bottom:15px" alt="{{ escape(image['label']) }}" title="{{ escape(image['label']) }}" src="{{ image['html_src'] }}"></img>
+                            <img loading="lazy" class="mx-auto d-block img-fluid shadow bg-white rounded" id="{{ image['html_id'] }}" style="margin-bottom:15px" alt="{{ escape(image['label']) }}" title="{{ escape(image['label']) }}" src="{{ image['html_src'] }}"></img>
                             {% if image['highlight'] %}
                             <div class="step-image-highlight" id="{{ image['html_id']}}-highlight" height-ratio="{{ image['highlight']['height_ratio'] }}" width-ratio="{{ image['highlight']['width_ratio'] }}" top-ratio="{{ image['highlight']['top_ratio'] }}" left-ratio="{{ image['highlight']['left_ratio'] }}"></div>
                             {% endif %}
@@ -177,7 +177,7 @@
                 <details {% if step['browser_logs']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">browser logs ({{ step['browser_logs']|length }} entries)</summary>
                     <pre style="color: darkgray;">{% for entry in step['browser_logs'] %}
-{{ browser_timestamp_to_datetime(entry['timestamp']) }} {{ entry['level'] }} {{ entry['message'].replace('\\n', '\n')}}{% endfor %}</pre>
+{{ browser_timestamp_to_datetime(entry['timestamp']) }} {{ entry['level'] }} {{ entry['message'].replace("\\n", "\n").replace("\\\\", "").replace('\\"', '"').replace('\\u003C', '&lt;')}}{% endfor %}</pre>
                 </details>
                 <details {% if step['debug_output']|length != 0 %}open{% endif %}>
                     <summary style="color: dimgray;">debug output ({{ step['debug_output']|length }} lines)</summary>
@@ -203,6 +203,11 @@
         for (var index=0; index < expandables.length; index++) {
             $(expandables[index]).removeClass('hide')
             $(expandables[index]).addClass('show')
+        }
+
+        // For Firefox, force eager loading of images
+        if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+            document.querySelectorAll('img[loading="lazy"]').forEach(img => img.setAttribute('loading', 'eager'));
         }
 
         // necessary to make sure we jump to the anchored step as the page loads

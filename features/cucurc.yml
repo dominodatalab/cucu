@@ -1,0 +1,2 @@
+# only run check in targeted tests
+CUCU_BROKEN_IMAGES_PAGE_CHECK: disabled
