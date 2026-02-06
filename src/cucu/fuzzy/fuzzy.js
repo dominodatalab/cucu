@@ -417,19 +417,28 @@
             }
         }
 
+        function getNodeDescription(el) {
+            const attrs = Array.from(el.attributes)
+                .map(attr => `${attr.name}="${attr.value}"`)
+                .join(' ');
+            return attrs.length > 0
+                ? `<${el.tagName.toLowerCase()} ${attrs}>`
+                : `<${el.tagName.toLowerCase()}>`;
+        }
+
         function getDebugContent(foundElement) {
             const el = foundElement.element;
             const rect = el.getBoundingClientRect();
             const content = (el.textContent || el.innerText || jqCucu(el).text() || '').replace(/\n/g, '').trim();
-            return `\n  [${i}]: score(${foundElement.score}) pass(${foundElement.pass}) by(${foundElement.label_name}) at(${Math.round(rect.x)},${Math.round(rect.y)}) text '${content}'`;
+            return `\n  [${i}]: score(${foundElement.score}) pass(${foundElement.pass}) by(${foundElement.label_name}) at(${Math.round(rect.x)},${Math.round(rect.y)}) text(${content}) node(${getNodeDescription(el)})`;
         }
 
         let debugMsg = '';
         // scroll to selected index if possible and before logging coords
         if (index < elements.length) {
-            // elements[index].element.scrollIntoView({block:'center', inline:'center'});
-            const htmlEncoded = elements[index].element.outerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            debugMsg += `\nfuzzy_find: found element for '${name}' at index ${index}\n ${htmlEncoded}\n`;
+            elements[index].element.scrollIntoView({block:'center', inline:'center'});
+            node = getNodeDescription(elements[index].element);
+            debugMsg += `\nfuzzy_find: found element for '${name}' at index ${index} node(${node})`;
             debugMsg += `\nfuzzy_find: found (${elements.length}) matches, returning index ${index}`;
         }
         else {
