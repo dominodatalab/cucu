@@ -444,7 +444,7 @@
         let debugMsg = '';
         // scroll to selected index if possible and before logging coords
         if (index < elements.length) {
-            elements[index].element.scrollIntoView({block:'center', inline:'center'});
+            // elements[index].element.scrollIntoView({block:'center', inline:'center'});
             node = getNodeDescription(elements[index].element);
             debugMsg += `\nfuzzy_find: found (${elements.length}) matches for '${name}', returning index ${index}`;
         } else {
