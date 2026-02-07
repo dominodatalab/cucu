@@ -461,6 +461,11 @@ CONFIG.define(
     "when set to 'True' skips adding a border to highlight found element in screenshots",
     default=True,
 )
+CONFIG.define(
+    "CUCU_SKIP_FUZZY_RELEVANCE",
+    "when set to 'True' skips calculating relevance scores for fuzzy find and doesn't sort by relevance",
+    default=False,
+)
 
 
 # define re_map here instead of in utils.py to avoid circular import

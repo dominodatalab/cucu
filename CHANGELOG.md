@@ -8,6 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.6
 - Change - fuzzy find matching with relevance score
+- Add - config to disable feature CUCU_SKIP_FUZZY_RELEVANCE: true
 
 ##  Relevance scoring (ordering)
 

@@ -172,7 +172,8 @@
                                index=0,
                                direction=LEFT_TO_RIGHT,
                                name_within_thing=false,
-                               insert_label=false) {
+                               insert_label=false,
+                               skip_fuzzy_relevance=false) {
         var elements = [];
         var results = null;
         var attributes = ['aria-label', 'title', 'placeholder', 'value'];
@@ -381,15 +382,18 @@
         for (var i2 = 0; i2 < elements.length; i2++) {
             elements[i2].score = cucu.relevance(elements[i2].element, name, elements[i2].immediate_override);
         }
-        elements.sort(function(a, b){
-            if (b.score !== a.score) return b.score - a.score;
-            return a.pass - b.pass;
-        });
+
+        if (!skip_fuzzy_relevance) {
+            elements.sort(function(a, b){
+                if (b.score !== a.score) return b.score - a.score;
+                return a.pass - b.pass;
+            });
+        }
 
         // trim low-score elements
         var trimmedElements = [];
 
-        if (elements.length > 0) {
+        if (elements.length > 0 && !skip_fuzzy_relevance) {
             var highestScore = elements[0].score;
             var threshold, useInclusive;
 
