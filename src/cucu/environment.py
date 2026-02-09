@@ -1,6 +1,5 @@
 import json
 import sys
-import time
 import traceback
 from functools import partial
 from pathlib import Path
@@ -163,7 +162,6 @@ def run_after_scenario_hook(ctx, scenario, hook):
 
 
 def after_scenario(ctx, scenario):
-
     # Start Selenium keep-alive to prevent browser timeout during long after-scenario hooks
     run_after_scenario_hook(ctx, scenario, start_selenium_keep_alive)
 
@@ -357,6 +355,7 @@ def after_step(ctx, step):
 
     step.browser_info = browser_info
 
+
 def start_selenium_keep_alive(ctx):
     """
     Start the Selenium keep-alive mechanism before scenario execution.
@@ -366,11 +365,11 @@ def start_selenium_keep_alive(ctx):
     # Only start keep-alive if we have a browser
     if not CONFIG["CUCU_SELENIUM_KEEPALIVE_ENABLED"]:
         return
-    
-    if not (len(ctx.browsers) > 0 and hasattr(ctx, 'browser') and ctx.browser):
+
+    if not (len(ctx.browsers) > 0 and hasattr(ctx, "browser") and ctx.browser):
         logger.debug("No browser found, skipping keep-alive")
         return
-    
+
     interval = int(CONFIG["CUCU_SELENIUM_KEEPALIVE_INTERVAL_S"])
     # Create and start the keep-alive
     ctx.selenium_keep_alive = SeleniumKeepAlive(ctx.browser, interval=interval)
