@@ -2,22 +2,21 @@
   <head>
     <title>Duplicate Inputs!</title>
     <script>
-    function update(value) { document.querySelector("#input").value = value; }
+    function update(value) { document.querySelector("#modified-input").value = value; }
     </script>
   </head>
   <body>
-    <label>modified input:</label><input id="input" type="text"></input>
+    <label>modified input:</label><input id="modified-input" type="text"></input>
+    <label>input</label>
+    <input onkeypress="update('input1')" type="text" aria-label="my-input"></input><br/>
 
     <label>input</label>
-    <input onkeypress="update('input1')" type="text"></input><br/>
+    <input onkeypress="update('input2')" type="text" aria-label="my-input"></input><br/>
 
     <label>input</label>
-    <input onkeypress="update('input2')" type="text"></input><br/>
+    <input onkeypress="update('input3')" type="text" aria-label="my-input"></input><br/>
 
     <label>input</label>
-    <input onkeypress="update('input3')" type="text"></input><br/>
-
-    <label>input</label>
-    <input onkeypress="update('input4')" type="text"></input><br/>
+    <input onkeypress="update('input4')" type="text" aria-label="my-input"></input><br/>
   </body>
 </html>
