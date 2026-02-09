@@ -468,7 +468,7 @@ CONFIG.define(
 )
 CONFIG.define(
     "CUCU_SELENIUM_KEEPALIVE_INTERVAL_S",
-    "keep-alive ping interval in seconds (default: 30)",
+    "keep-alive ping interval in seconds (default: 30 seconds)",
     default=30,
 )
 CONFIG.define(
