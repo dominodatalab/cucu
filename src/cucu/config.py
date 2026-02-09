@@ -461,7 +461,21 @@ CONFIG.define(
     "when set to 'True' skips adding a border to highlight found element in screenshots",
     default=True,
 )
-
+CONFIG.define(
+    "CUCU_SELENIUM_KEEPALIVE_ENABLED",
+    "when set to 'True' enables sending keep-alive pings to the selenium server to prevent timeouts during long running scenarios",
+    default=True,
+)
+CONFIG.define(
+    "CUCU_SELENIUM_KEEPALIVE_INTERVAL_S",
+    "keep-alive ping interval in seconds (default: 30)",
+    default=30,
+)
+CONFIG.define(
+    "CUCU_SELENIUM_KEEP_ALIVE_MAX_DURATION_S",
+    "keep-alive total max duration in seconds to prevent infinite keep-alive pings (default: 30 minutes)",
+    default=1800,
+)
 
 # define re_map here instead of in utils.py to avoid circular import
 def leaf_map(data, value_func, parent=None, key=None):
