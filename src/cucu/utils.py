@@ -512,7 +512,7 @@ class SeleniumKeepAlive:
         """
         Background thread that periodically pings Selenium to keep the session alive.
 
-        This runs a lightweight command (getting current URL) to prevent timeouts.
+        This runs a lightweight command to prevent timeouts.
         The thread will automatically stop if the session is closed or an error occurs.
         """
 

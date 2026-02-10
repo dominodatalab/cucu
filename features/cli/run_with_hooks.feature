@@ -1,3 +1,4 @@
+
 Feature: Run with hooks
   As a developer I want the user to be able to register various hooks and see
   them run at the expected times
@@ -70,10 +71,13 @@ Feature: Run with hooks
 
       .* DEBUG just logging some stuff from my after step hook
             And I echo "World" \s*# .*
+      .* DEBUG No browser found, skipping keep-alive
+      .* DEBUG HOOK start_selenium_keep_alive: passed ✅
       .* DEBUG No browsers - skipping MHT webpage snapshot
       .* DEBUG HOOK download_mht_data: passed ✅
       .* DEBUG just logging some stuff from my after scenario hook
       .* DEBUG HOOK after_scenario_log: passed ✅
+      .* DEBUG HOOK stop_selenium_keep_alive: passed ✅
 
       .* DEBUG just logging some stuff from my after all hook
       [\s\S]*
@@ -127,12 +131,15 @@ Feature: Run with hooks
         Scenario: This is a scenario that runs after this scenario hooks in LIFO order
           Given I run the following steps after the current scenario-1     # .*
             And I run the following steps after the current scenario-2     # .*
+      .* DEBUG No browser found, skipping keep-alive
+      .* DEBUG HOOK start_selenium_keep_alive: passed ✅
       .* DEBUG No browsers - skipping MHT webpage snapshot
       .* DEBUG HOOK download_mht_data: passed ✅
       .* DEBUG just logging some stuff from second_after_this_scenario_hook_2
       .* DEBUG HOOK after_this_scenario_2: passed ✅
       .* DEBUG just logging some stuff from first_after_this_scenario_hook_1
       .* DEBUG HOOK after_this_scenario_1: passed ✅
+      .* DEBUG HOOK stop_selenium_keep_alive: passed ✅
 
       [\s\S]*
       1 feature passed, 0 failed, 0 skipped
