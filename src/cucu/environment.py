@@ -10,6 +10,7 @@ from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
 from cucu.utils import (
+    SeleniumKeepAlive,
     TeeStream,
     build_debug_output,
     ellipsize_filename,
@@ -161,6 +162,9 @@ def run_after_scenario_hook(ctx, scenario, hook):
 
 
 def after_scenario(ctx, scenario):
+    # Start Selenium keep-alive to prevent browser timeout during long after-scenario hooks
+    run_after_scenario_hook(ctx, scenario, start_selenium_keep_alive)
+
     for timer_name in ctx.step_timers:
         logger.warning(f'timer "{timer_name}" was never stopped/recorded')
 
@@ -192,6 +196,9 @@ def after_scenario(ctx, scenario):
         run_after_scenario_hook(ctx, scenario, hook)
 
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
+
+    # Stop keep-alive before cleaning up browsers
+    run_after_scenario_hook(ctx, scenario, stop_selenium_keep_alive)
 
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
@@ -347,3 +354,36 @@ def after_step(ctx, step):
         }
 
     step.browser_info = browser_info
+
+
+def start_selenium_keep_alive(ctx):
+    """
+    Start the Selenium keep-alive mechanism before scenario execution.
+    This should run AFTER the browser is initialized by cucu.
+    """
+
+    # Only start keep-alive if we have a browser
+    if not CONFIG["CUCU_SELENIUM_KEEPALIVE_ENABLED"]:
+        return
+
+    if not (len(ctx.browsers) > 0 and hasattr(ctx, "browser") and ctx.browser):
+        logger.debug("No browser found, skipping keep-alive")
+        return
+
+    interval = int(CONFIG["CUCU_SELENIUM_KEEPALIVE_INTERVAL_S"])
+    # Create and start the keep-alive
+    ctx.selenium_keep_alive = SeleniumKeepAlive(ctx.browser, interval=interval)
+    ctx.selenium_keep_alive.start()
+    logger.info("Selenium keep-alive enabled for this scenario")
+
+
+def stop_selenium_keep_alive(ctx):
+    """
+    Stop the Selenium keep-alive mechanism.
+    This should run at the very end, after all hooks complete.
+    """
+
+    keep_alive = getattr(ctx, "selenium_keep_alive", None)
+    if keep_alive:
+        keep_alive.stop()
+        ctx.selenium_keep_alive = None
