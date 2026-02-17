@@ -7,7 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.7
 - Fix - convert html tables with rowspan and colspan to uniform rectangular logical tables
-        for realiable comparison in table steps
+        for reliable comparison in table steps
 
 # 1.4.6
 - Add - keep selenium session alive to prevent browser timeout during long after-scenario hooks
