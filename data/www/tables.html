@@ -87,6 +87,7 @@
       </tr>
     </table>
 
+
     <!-- table with clickable rows --->
     <label>Clicked:</label><input id="input" type="text"></input>
     <table>
@@ -143,6 +144,37 @@
       <tr>
         <th>Row Number</th>
       </tr>
+    </table>
+
+    <!-- table with column headers spanning multiple rows and columns -->
+    <table>
+      <thead>
+        <tr>
+          <th rowspan="2">Employee Name</th>
+          <th colspan="2">Years of Service</th>
+        </tr>
+        <tr>
+          <th>Years</th>
+          <th>Months</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>John</td>
+          <td>10</td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <td>Sarah</td>
+          <td>5</td>
+          <td>8</td>
+        </tr>
+        <tr>
+          <td>Kate</td>
+          <td>16</td>
+          <td>2</td>
+        </tr>
+      </tbody>
     </table>
 
     <!-- utility used to delay page loading -->
