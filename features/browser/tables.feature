@@ -52,6 +52,14 @@ Feature: Tables
         | .*     | .*            | .*            |
         | Maria  | Cancun        | Mexico        |
 
+  Scenario: User verify there is a table that contains matching header spread across multiple rows
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
+     Then I should see a table that contains rows matching the following:
+        | Employee Name | Years of Service |.*     |
+        | .*            | Years            |Months |
+        | John          | 10               | 0 |
+        | Kate          | 16               | 2 |
+
   Scenario: User verify there is not a table that contains some matching rows
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
      Then I should not see a table that contains rows matching the following:
