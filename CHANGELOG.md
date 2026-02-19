@@ -5,8 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
-# 1.4.6
+# 1.4.7
 - Change - fuzzy find matching with relevance score
 - Add - config to disable feature CUCU_SKIP_FUZZY_RELEVANCE: true
 
@@ -27,6 +26,9 @@ Within each area, exact match outranks substring match.
 Empty text fallback: if nothing matches and the element has empty
 full text, a small default score is applied so empty-but-possibly
 relevant nodes are not entirely discarded.
+
+# 1.4.6
+- Add - keep selenium session alive to prevent browser timeout during long after-scenario hooks
 
 # 1.4.5
 - Change - lazy load report images (except Firefox)

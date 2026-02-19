@@ -9,11 +9,13 @@ import os
 import pkgutil
 import re
 import shutil
+import threading
 import time
 from datetime import datetime
 from pathlib import Path
 
 import humanize
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from tabulate import DataRow, TableFormat, tabulate
 from tenacity import (
@@ -440,3 +442,100 @@ def build_debug_output(raw: str) -> list[str]:
         lines.append(html + "<br>")
 
     return lines
+
+
+class SeleniumKeepAlive:
+    """
+    Manages keep-alive for Selenium sessions during long-running hooks.
+
+    This prevents the Selenium session from timing out while API calls
+    are being made in after_scenario hooks by periodically pinging the
+    browser with lightweight commands.
+
+    Example usage:
+        # Start keep-alive
+        keep_alive = SeleniumKeepAlive(browser, interval=30)
+        keep_alive.start()
+
+        # Do long-running operations...
+
+        # Stop keep-alive
+        keep_alive.stop()
+    """
+
+    def __init__(self, browser, interval):
+        """
+        Initialize the keep-alive manager.
+
+        Args:
+            browser: The selenium browser/driver instance
+            interval: How often to ping the session (in seconds). Default is 30.
+        """
+        self.browser = browser
+        self.interval = interval
+        self.active = False
+        self.thread = None
+
+    def start(self):
+        """
+        Start the keep-alive background thread.
+        This creates and starts a daemon thread that will periodically
+        ping the Selenium session to prevent timeouts.
+        """
+
+        if not self.active and self.browser:
+            self.active = True
+            self.start_time = time.time()
+            self.max_duration = int(
+                CONFIG["CUCU_SELENIUM_KEEP_ALIVE_MAX_DURATION_S"]
+            )
+            self.thread = threading.Thread(
+                target=self._keep_alive_loop, daemon=True
+            )
+            self.thread.start()
+            logger.debug(
+                f"Selenium keep-alive started (ping interval: {self.interval}s)"
+            )
+
+    def stop(self):
+        """
+        Stop the keep-alive background thread.
+        This signals the thread to stop and waits up to 5 seconds for it to terminate.
+        """
+        if self.active:
+            self.active = False
+            if self.thread:
+                self.thread.join(timeout=5)
+            logger.debug("Selenium keep-alive stopped")
+
+    def _keep_alive_loop(self):
+        """
+        Background thread that periodically pings Selenium to keep the session alive.
+
+        This runs a lightweight command to prevent timeouts.
+        The thread will automatically stop if the session is closed or an error occurs.
+        """
+
+        while self.active:
+            if time.time() - self.start_time > self.max_duration:
+                logger.warning("Keep-alive max duration reached, stopping")
+                self.active = False
+                break
+            try:
+                if self.browser:
+                    # Execute a lightweight command to keep session alive
+                    _ = self.browser.execute("return 1")
+                    logger.debug("Keep-alive ping sent to Selenium session")
+            except WebDriverException as e:
+                # Session is already closed, stop the thread
+                logger.warning(
+                    f"Selenium session closed, stopping keep-alive: {e}"
+                )
+                self.active = False
+                break
+            except Exception as e:
+                # Log but continue - don't let errors stop the keep-alive
+                logger.warning(f"Keep-alive ping failed (continuing): {e}")
+
+            # Wait before next ping
+            time.sleep(self.interval)

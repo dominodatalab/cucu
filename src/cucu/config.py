@@ -462,6 +462,21 @@ CONFIG.define(
     default=True,
 )
 CONFIG.define(
+    "CUCU_SELENIUM_KEEPALIVE_ENABLED",
+    "when set to 'True' enables sending keep-alive pings to the selenium server to prevent timeouts during long running scenarios",
+    default=True,
+)
+CONFIG.define(
+    "CUCU_SELENIUM_KEEPALIVE_INTERVAL_S",
+    "keep-alive ping interval in seconds (default: 30 seconds)",
+    default=30,
+)
+CONFIG.define(
+    "CUCU_SELENIUM_KEEP_ALIVE_MAX_DURATION_S",
+    "keep-alive total max duration in seconds to prevent infinite keep-alive pings (default: 30 minutes)",
+    default=1800,
+)
+CONFIG.define(
     "CUCU_SKIP_FUZZY_RELEVANCE",
     "when set to 'True' skips calculating relevance scores for fuzzy find and doesn't sort by relevance",
     default=False,
