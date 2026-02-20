@@ -60,8 +60,10 @@
             fulltext: 100
         },
         match: {
-            exact: 200,
-            substring: 50
+            exact: 205,
+            caselessexact: 200,
+            substring: 55,
+            caselesssubstring: 50
         },
         attrSub: {
             'aria-label': 34,
@@ -123,8 +125,14 @@
             if (equals(av, query)) {
                 best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.exact + sub);
                 higherPriorityMatchFound = true;
+            } else if (av.toLowerCase() === query.toLowerCase()) {
+                best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.caselessexact + sub);
+                higherPriorityMatchFound = true;
             } else if (includes(av, query)) {
                 best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.substring + sub);
+                higherPriorityMatchFound = true;
+            } else if (av.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
+                best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.caselesssubstring + sub);
                 higherPriorityMatchFound = true;
             }
         }
