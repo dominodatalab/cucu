@@ -37,6 +37,9 @@ from cucu.db import (
 from cucu.lint import linter
 from cucu.utils import generate_short_id
 
+# set env var BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON=yes before importing behave
+os.environ["BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON"] = "yes"
+
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
 
@@ -299,7 +302,7 @@ def run(
     create_run(results, filepath)
 
     try:
-        if workers is None or workers == 1:
+        if workers is None: # or workers == 1:
             logger.debug(
                 f"Starting cucu_run {CONFIG['CUCU_RUN_ID']} with single worker"
             )
