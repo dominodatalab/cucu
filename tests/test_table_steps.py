@@ -19,7 +19,7 @@ class TestDoNotFindTable(TestCase):
         ]
 
     def test_do_not_find_table_error(self):
-        # Assert that if ANY table matches the undesired table pattern, a RuntimeError is raised
+        # Assert that if ANY table matches the undesired table pattern, a AssertionError is raised
         undesired_table = [
             ["", "NAME", "SIZE", "MODIFIED", ""],
             ["", "3GB_file\\.txt", ".*", ".*", ""],
@@ -31,7 +31,7 @@ class TestDoNotFindTable(TestCase):
             seen_mock = mock.MagicMock(return_value=self.seen_tables)
             with mock.patch("cucu.steps.table_steps.find_tables", seen_mock):
                 dummy = mock.MagicMock()
-                with self.assertRaises(RuntimeError):
+                with self.assertRaises(AssertionError):
                     do_not_find_table(
                         dummy, check_table_contains_matching_rows_in_table
                     )

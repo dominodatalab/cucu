@@ -14,8 +14,6 @@ from threading import Timer
 import click
 import coverage
 import psutil
-from behave.model_core import FileLocation
-from behave.runner_util import parse_features
 from click import ClickException
 from mpire import WorkerPool
 from tabulate import tabulate
@@ -38,6 +36,9 @@ from cucu.db import (
 )
 from cucu.lint import linter
 from cucu.utils import generate_short_id
+
+# set env var BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON=yes before importing behave
+os.environ["BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON"] = "yes"
 
 # will start coverage tracking once COVERAGE_PROCESS_START is set
 coverage.process_startup()
@@ -301,7 +302,7 @@ def run(
     create_run(results, filepath)
 
     try:
-        if workers is None or workers == 1:
+        if workers is None:  # or workers == 1:
             logger.debug(
                 f"Starting cucu_run {CONFIG['CUCU_RUN_ID']} with single worker"
             )
@@ -341,7 +342,7 @@ def run(
             )
 
             if exit_code != 0:
-                raise ClickException("test run failed, see above for details")
+                raise RuntimeError("test run failed, see above for details")
 
         else:
             logger.debug(
@@ -871,6 +872,11 @@ def tags(filepath, logging_level):
     """
     print a table of tags and affected scenario counts
     """
+
+    # import here to preserve import to set behave parse BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON correctly
+    from behave.model_core import FileLocation
+    from behave.runner_util import parse_features
+
     init_global_hook_variables()
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())

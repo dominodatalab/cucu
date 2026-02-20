@@ -75,7 +75,7 @@ def get_current_url(ctx):
 def assert_url_is(ctx, value):
     url = get_current_url(ctx)
     if value != url:
-        raise RuntimeError(f"current url is {url}, not {value}")
+        raise AssertionError(f"current url is {url}, not {value}")
 
 
 @step('I should see the current url is "{value}"')
@@ -91,7 +91,7 @@ def wait_to_see_the_current_url_is(ctx, value):
 def assert_url_matches(ctx, regex):
     url = get_current_url(ctx)
     if not re.search(regex, url):
-        raise RuntimeError(f"current url {url} does not match {regex}")
+        raise AssertionError(f"current url {url} does not match {regex}")
 
 
 @step('I should see the current url matches "{regex}"')
@@ -164,7 +164,9 @@ def should_see_browser_title(ctx, title):
     logger.debug(f"current title is: {current_title}")
 
     if current_title != title:
-        raise RuntimeError(f'unexpected browser title, got "{current_title}"')
+        raise AssertionError(
+            f'unexpected browser title, got "{current_title}"'
+        )
 
 
 @step("I close the current browser")
@@ -203,7 +205,7 @@ def switch_to_previous_browser(ctx):
     if browser_index > 0:
         ctx.browser = ctx.browsers[browser_index - 1]
     else:
-        raise RuntimeError("no previous browser window available")
+        raise AssertionError("no previous browser window available")
 
 
 @step("I switch to the next browser")
@@ -212,7 +214,7 @@ def switch_to_next_browser(ctx):
     if browser_index < len(ctx.browsers) - 1:
         ctx.browser = ctx.browsers[browser_index + 1]
     else:
-        raise RuntimeError("no next browser window available")
+        raise AssertionError("no next browser window available")
 
 
 @step("I close the current browser tab")
@@ -362,7 +364,7 @@ def save_downloaded_file(ctx, filename):
             ctx.browser.execute("return window.__cucu_downloaded_file;")
             is None
         ):
-            raise RuntimeError(f"waiting on file {filename}")
+            raise AssertionError(f"waiting on file {filename}")
 
     retry(wait_for_file)()
 
