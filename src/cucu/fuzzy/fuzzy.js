@@ -444,7 +444,7 @@
             const numericCols = [0, 1, 2, 4, 5];
             const rows = foundElements.map((e, i) => {
                 const el = e.element, r = el.getBoundingClientRect();
-                return [i, e.score, e.pass, e.label_name, Math.round(r.x), Math.round(r.y), (el.textContent || el.innerText || jqCucu(el).text() || '').replace(/\n/g, '').trim(), getNodeDescription(el)].map(String);
+                return [i, e.score, e.pass, e.label_name, Math.round(r.x), Math.round(r.y), (el.textContent || el.innerText || jqCucu(el).text() || '').replace(/\n/g, ' ').trim(), getNodeDescription(el)].map(String);
             });
             const maxColWidths = headers.map((h, j) => Math.min(Math.max(h.length, ...rows.map(r => r[j].length)), 80));
             const pad = (s, l, right) => s.length >= l ? s.slice(0, l) : right ? s + ' '.repeat(l - s.length) : ' '.repeat(l - s.length) + s;
