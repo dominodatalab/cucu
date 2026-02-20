@@ -302,7 +302,7 @@ def run(
     create_run(results, filepath)
 
     try:
-        if workers is None: # or workers == 1:
+        if workers is None:  # or workers == 1:
             logger.debug(
                 f"Starting cucu_run {CONFIG['CUCU_RUN_ID']} with single worker"
             )

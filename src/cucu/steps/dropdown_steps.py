@@ -124,6 +124,7 @@ def find_dropdown_option(ctx, name, index=0):
         logger.debug(
             f'looked for dropdown option "{name}", and found "{outer_html}"'
         )
+        take_saw_element_screenshot(ctx, "option", name, index, option)
     else:
         logger.debug(f'looked for dropdown option "{name}" but found none')
 
@@ -186,7 +187,7 @@ def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
     dropdown_element = find_dropdown(ctx, dropdown, index)
 
     if dropdown_element is None:
-        prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+        prefix = "" if index == 0 else f"{humanize.ordinal(index + 1)} "
         raise AssertionError(f"unable to find the {prefix}dropdown {dropdown}")
 
     if base_steps.is_disabled(dropdown_element):
@@ -207,7 +208,7 @@ def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
 
         if option_element is None:
             raise AssertionError(
-                f'unable to find option "{option}" in dropdown "{dropdown}"'
+                f'unable to find option "{option}" in dropdown "{dropdown}" for selection'
             )
 
         logger.debug("clicking dropdown option")
@@ -230,7 +231,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
     dropdown_element = find_dropdown(ctx, dropdown, index)
 
     if dropdown_element is None:
-        prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+        prefix = "" if index == 0 else f"{humanize.ordinal(index + 1)} "
         raise AssertionError(f"unable to find the {prefix}dropdown {dropdown}")
 
     if base_steps.is_disabled(dropdown_element):
@@ -239,7 +240,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
         )
 
     if dropdown_element.get_attribute("aria-expanded") != "true":
-        # open the dropdown
+        logger.debug("open the dropdown")
         click_dropdown(ctx, dropdown_element)
 
     option_element = find_dropdown_option(ctx, option)
@@ -259,10 +260,10 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
             dropdown_input.send_keys(Keys.BACKSPACE * len(dropdown_value))
         # After each key stroke there is a request and an update of the option list. To prevent stale element,
         # we send keys one by one here and try to find the option after each key.
-        for key in option:
+        for attempt, key in enumerate(option):
             try:
                 dropdown_input = find_input(ctx, dropdown, index)
-                logger.debug(f'sending key "{key}"')
+                logger.debug(f'sending key "{key}" in attempt {attempt + 1}')
                 dropdown_input.send_keys(key)
                 ctx.browser.wait_for_page_to_load()
                 option_element = find_dropdown_option(ctx, option)
@@ -273,7 +274,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
 
     if option_element is None:
         raise AssertionError(
-            f'unable to find option "{option}" in dropdown "{dropdown}"'
+            f'unable to find option "{option}" in dropdown "{dropdown}" for dynamic selection'
         )
 
     logger.debug("clicking dropdown option")
@@ -329,7 +330,7 @@ def assert_dropdown_option_selected(
 
         if selected_option is None:
             raise AssertionError(
-                f'unable to find option "{option}" in dropdown "{dropdown}"'
+                f'unable to find option "{option}" in dropdown "{dropdown}" for assertion'
             )
 
         if is_selected:
@@ -345,10 +346,18 @@ def assert_dropdown_option_selected(
 
 helpers.define_should_see_thing_with_name_steps("dropdown", find_dropdown)
 helpers.define_thing_with_name_in_state_steps(
-    "dropdown", "disabled", find_dropdown, base_steps.is_disabled
+    "dropdown",
+    "disabled",
+    find_dropdown,
+    base_steps.is_disabled,
+    with_nth=True,
 )
 helpers.define_thing_with_name_in_state_steps(
-    "dropdown", "not disabled", find_dropdown, base_steps.is_not_disabled
+    "dropdown",
+    "not disabled",
+    find_dropdown,
+    base_steps.is_not_disabled,
+    with_nth=True,
 )
 helpers.define_run_steps_if_I_can_see_element_with_name_steps(
     "dropdown", find_dropdown

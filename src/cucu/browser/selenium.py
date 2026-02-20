@@ -66,6 +66,8 @@ class Selenium(Browser):
         ignore_ssl_certificate_errors = config.CONFIG[
             "CUCU_IGNORE_SSL_CERTIFICATE_ERRORS"
         ]
+        proxy_host = config.CONFIG.get("CUCU_PROXY_HOST")
+        proxy_port = config.CONFIG.get("CUCU_PROXY_PORT")
 
         if browser.startswith("chrome"):
             options = ChromeOptions()
@@ -82,6 +84,14 @@ class Selenium(Browser):
             options.add_experimental_option(
                 "excludeSwitches", ["enable-automation"]
             )  # new way
+
+            if proxy_host and proxy_port:
+                logger.debug(f"Using proxy: {proxy_host}:{proxy_port}")
+                options.add_argument(
+                    f"--proxy-server={proxy_host}:{proxy_port}"
+                )
+            else:
+                logger.debug("Not using a proxy")
 
             if headless:
                 options.add_argument("--headless")
@@ -232,6 +242,9 @@ class Selenium(Browser):
         self.driver.get(url)
         self.wait_for_page_to_load()
 
+    def switch_to_new_tab(self):
+        self.driver.switch_to.new_window("tab")
+
     def switch_to_next_tab(self):
         window_handles = self.driver.window_handles
         window_handle = self.driver.current_window_handle
@@ -327,9 +340,16 @@ class Selenium(Browser):
     def click(self, element):
         # if Firefox just do normal click
         if config.CONFIG["CUCU_BROWSER"] == "firefox":
+            logger.debug(
+                f'Executing action click on "{element.text or element.get_attribute("id") or element.tag_name}"'
+            )
             element.click()
+
         else:
             actions = ActionChains(self.driver)
+            logger.debug(
+                f'Executing action click on "{element.text or element.get_attribute("id") or element.tag_name}"'
+            )
             actions.move_to_element(element).click().perform()
 
         # let cucu's own wait for page to load checks run

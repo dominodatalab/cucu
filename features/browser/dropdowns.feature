@@ -22,7 +22,15 @@ Feature: Dropdowns
 
   Scenario: User can not select from a disabled dropdown
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/dropdowns.html"
-     Then I should see the dropdown "Pick a pet"
+     Then I should see the dropdown "Pick a pet" is disabled
+      And I should see the "1st" dropdown "Pick a pet" is disabled
+      And I should see the "2nd" dropdown "Pick a color" is not disabled
+      And I wait to see the "1st" dropdown "Pick a pet" is disabled
+      And I wait to see the "2nd" dropdown "Pick a color" is not disabled
+      And I expect the following step to fail with "unable to select from the dropdown, as it is disabled"
+      """
+      Then I select the option "CheeseBall" from the dropdown "Pick a pet"
+      """
       And I expect the following step to fail with "unable to select from the dropdown, as it is disabled"
       """
       Then I select the option "CheeseBall" from the dropdown "Pick a pet"
@@ -46,5 +54,8 @@ Feature: Dropdowns
 
   Scenario: User can select from a dynamic dropdown
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/dynamic_dropdown.html"
-     Then I should see the dropdown "Dynamic Dropdown"
-      And I wait to select the option "abbc" from the dynamic dropdown "Dynamic Dropdown"
+     When I should see the dropdown "Dynamic Dropdown"
+      And I wait to select the option "abbc" from the "2nd" dynamic dropdown "Dynamic Dropdown"
+     Then I should see "abbc" in the "2nd" input "Dynamic Dropdown"
+      And I should see the option "abbc" is selected on the "2nd" dropdown "Dynamic Dropdown"
+      And I should see no value in the "1st" input "Dynamic Dropdown"

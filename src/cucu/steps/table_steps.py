@@ -1,3 +1,4 @@
+import operator
 import pkgutil
 import re
 from io import StringIO
@@ -92,25 +93,30 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     """
     check that table contains the matching rows in expected_table
     """
-    table_matched = True
-
     for expected_row in expected_table:
+        found_row = False
         for row in table:
-            found_row = True
+            good_cols = len(expected_row) == len(row)
+
             for expected_value, value in zip(expected_row, row):
                 if not re.match(expected_value, value):
-                    found_row = False
-            if found_row:
+                    good_cols = False
+
+            if good_cols:
+                found_row = True
                 break
 
         if not found_row:
-            table_matched = False
-            break
+            return False
 
-    if table_matched:
-        return True
+    return True
 
-    return False
+
+def report_found_table(expected_table, found_table):
+    logger.debug(
+        f"found desired table\nexpected:\n{format_gherkin_table(expected_table, [], '  ')}\n\n"
+        f"found:\n{format_gherkin_table(found_table, [], '  ')}\n"
+    )
 
 
 def report_unable_to_find_table(expected_table, found_tables):
@@ -153,11 +159,14 @@ def find_table(ctx, assert_func, nth=None):
     matches anyone of the tables on the current web page. If `nth` is set to
     something then we only check against the nth table of the available tables.
 
-    paramters:
+    parameters:
         ctx(object): behave context object
         assert_func(function): function used to assert two tables "match"
         nth(int): when set to an int specifies the exact table within the list
                   of available tables to match against.
+
+    returns:
+        array of arrays representing the matching HTML table
 
     raises:
         AssertionError when the desired table was not found
@@ -167,12 +176,14 @@ def find_table(ctx, assert_func, nth=None):
 
     if nth is not None:
         if assert_func(found_tables[nth], expected):
-            return
+            report_found_table(expected, found_tables[nth])
+            return found_tables[nth]
 
     else:
         for table in found_tables:
             if assert_func(table, expected):
-                return
+                report_found_table(expected, table)
+                return table
 
     report_unable_to_find_table(expected, found_tables)
 
@@ -414,6 +425,71 @@ def wait_click_table_cell_matching_text(ctx, column, match_text, table):
     retry(click_table_cell_matching_text)(ctx, column, match_text, table)
 
 
+def count_rows_in_table_element(table_element):
+    """
+    Count the amount of rows the provided table element has.
+
+    Rows are defined as tr elements.
+    Note that this is not a behave table nor an array of rows, unlike the result of func:`find_table`.
+
+    parameters:
+        table(WebElement): the table to convert find trs from
+    """
+    table_rows = table_element.find_elements(By.CSS_SELECTOR, "tr")
+    return len(table_rows)
+
+
+def find_nth_table_and_validate_row_count(
+    ctx, table, thing, check_func, row_count
+):
+    """
+    Find the nth table by index and validate its row count using the provided check function
+
+    parameters:
+        ctx(object): behave context object used to share data between steps
+        table(int): the index of the table to check (0-based)
+        thing(str): description of the comparison operator (e.g., "more than", "equals")
+        check_func(function): operator function to perform the comparison (e.g., operator.gt, operator.eq)
+        row_count(str): expected row count as a string
+
+    raises:
+        RuntimeError: when the table row count does not meet the specified criteria
+    """
+    table_element = find_table_element(ctx, table)
+    # table_element is a WebElement when search is done using find_table_element
+    table_rows = count_rows_in_table_element(table_element)
+    if not check_func(table_rows, int(row_count)):
+        raise RuntimeError(
+            f"Expected {thing} {row_count} rows in table {table + 1}, but found {table_rows} instead."
+        )
+
+
+def find_table_matching_rows_and_validate_row_count(
+    ctx, thing, check_func, row_count
+):
+    """
+    Find a table containing matching rows and validate its row count using the provided check function
+
+    parameters:
+        ctx(object): behave context object used to share data between steps
+        thing(str): description of the comparison operator (e.g., "more than", "equals")
+        check_func(function): operator function to perform the comparison (e.g., operator.gt, operator.eq)
+        row_count(str): expected row count as a string
+
+    raises:
+        RuntimeError: when the table row count does not meet the specified criteria
+    """
+    table_element = find_table(
+        ctx, check_table_contains_matching_rows_in_table
+    )
+    # table_element is an array of rows when search is done using find_table
+    table_rows = len(table_element)
+    if not check_func(table_rows, int(row_count)):
+        raise RuntimeError(
+            f"Expected {thing} {row_count} rows in the table contaning matching entries, but found {table_rows} instead."
+        )
+
+
 @step('I wait to see there are "{row_count}" rows in the "{table:nth}" table')
 def wait_table_row_count(ctx, row_count, table):
     """
@@ -422,13 +498,47 @@ def wait_table_row_count(ctx, row_count, table):
 
     def find_table_row_count(ctx, row_count, table):
         table_element = find_table_element(ctx, table)
-        table_rows = len(table_element.find_elements(By.CSS_SELECTOR, "tr"))
+        table_rows = count_rows_in_table_element(table_element)
 
-        if int(row_count) == table_rows:
-            return
-        else:
+        if not int(row_count) == table_rows:
             raise AssertionError(
                 f"Unable to find {row_count} rows in table {table + 1}. Please check your table data."
             )
 
     retry(find_table_row_count)(ctx, row_count, table)
+
+
+for thing, check_func in {
+    "more than": operator.gt,
+    "at least": operator.ge,
+    "exactly": operator.eq,
+    "at most": operator.le,
+    "less than": operator.lt,
+    "not equal to": operator.ne,
+}.items():
+
+    @step(
+        f'I wait to see there are {thing} "{{row_count}}" rows in the "{{table:nth}}" table'
+    )
+    def should_see_the_table_with_row_count(
+        ctx, row_count, table, thing=thing, check_func=check_func
+    ):
+        """
+        Add 1 to the row number if the table has a header row.
+        """
+        retry(find_nth_table_and_validate_row_count)(
+            ctx, table, thing, check_func, row_count
+        )
+
+    @step(
+        f'I wait to see that the table containing these rows has {thing} "{{row_count}}" rows'
+    )
+    def should_see_the_table_containing_rows_with_row_count(
+        ctx, row_count, thing=thing, check_func=check_func
+    ):
+        """
+        Add 1 to the row count number if the table has a header row.
+        """
+        retry(find_table_matching_rows_and_validate_row_count)(
+            ctx, thing, check_func, row_count
+        )

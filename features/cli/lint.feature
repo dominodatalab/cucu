@@ -150,6 +150,86 @@ Feature: Lint
       """
       And I should see "{STDERR}" is empty
 
+  Scenario: Keywords must be followed by single space
+    Given I create a file at "{CUCU_RESULTS_DIR}/keyword_space_lint/environment.py" with the following:
+      """
+      from cucu.environment import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/keyword_space_lint/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/keyword_space_lint/keyword_no_space.feature" with the following:
+      """
+      Feature:Feature with no space after keyword
+
+        Scenario:Scenario with no space after keyword
+          Given I echo "foo"
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/keyword_space_lint/keyword_more_space.feature" with the following:
+      """
+      Feature:  Feature with two spaces after keyword
+
+        Scenario:  Scenario with two spaces after keyword
+          Given I echo "foo"
+      """
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_no_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      results/keyword_space_lint/keyword_no_space.feature:1: W 'Feature: ' keyword must be followed by a single space
+      results/keyword_space_lint/keyword_no_space.feature:3: W 'Scenario: ' keyword must be followed by a single space
+
+      """
+      And I should see "{STDERR}" is equal to the following:
+      """
+      Error: linting errors found, but not fixed, see above for details
+
+      """
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_more_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      results/keyword_space_lint/keyword_more_space.feature:1: W 'Feature: ' keyword must be followed by a single space
+      results/keyword_space_lint/keyword_more_space.feature:3: W 'Scenario: ' keyword must be followed by a single space
+
+      """
+      And I should see "{STDERR}" is equal to the following:
+      """
+      Error: linting errors found, but not fixed, see above for details
+
+      """
+     Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_no_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      results/keyword_space_lint/keyword_no_space.feature:1: W 'Feature: ' keyword must be followed by a single space ✓
+      results/keyword_space_lint/keyword_no_space.feature:3: W 'Scenario: ' keyword must be followed by a single space ✓
+
+      linting errors found and fixed, see above for details
+
+      """
+      And I should see the file at "{CUCU_RESULTS_DIR}/keyword_space_lint/keyword_no_space.feature" is equal to the following:
+      """
+      Feature: Feature with no space after keyword
+
+        Scenario: Scenario with no space after keyword
+          Given I echo "foo"
+      """
+     Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_more_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      results/keyword_space_lint/keyword_more_space.feature:1: W 'Feature: ' keyword must be followed by a single space ✓
+      results/keyword_space_lint/keyword_more_space.feature:3: W 'Scenario: ' keyword must be followed by a single space ✓
+
+      linting errors found and fixed, see above for details
+
+      """
+      And I should see the file at "{CUCU_RESULTS_DIR}/keyword_space_lint/keyword_more_space.feature" is equal to the following:
+      """
+      Feature: Feature with two spaces after keyword
+
+        Scenario: Scenario with two spaces after keyword
+          Given I echo "foo"
+      """
+
   Scenario: User gets error when cucu lint has an issue in the underlying step code
     Given I create a file at "{CUCU_RESULTS_DIR}/broken_step_lint/environment.py" with the following:
       """

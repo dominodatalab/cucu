@@ -43,7 +43,7 @@ def find_input(ctx, name, index=0):
         index=index,
     )
 
-    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+    prefix = "" if index == 0 else f"{humanize.ordinal(index + 1)} "
 
     take_saw_element_screenshot(ctx, "input", name, index, element)
 
@@ -162,7 +162,7 @@ def assert_input_value(ctx, name, value, index=0):
     """
     input_ = find_input(ctx, name, index=index)
     actual = input_.get_attribute("value")
-    prefix = "" if index == 0 else f"{humanize.ordinal(index)} "
+    prefix = "" if index == 0 else f"{humanize.ordinal(index + 1)} "
 
     if value is None:
         if actual != "":
@@ -300,6 +300,6 @@ def wait_to_see_the_nth_input_with_value(ctx, value, nth, name):
     retry(assert_input_value)(ctx, name, value, index=nth)
 
 
-@step('I should see no value in the "{nth:nth}: input "{name}"')
+@step('I should see no value in the "{nth:nth}" input "{name}"')
 def should_see_the_nth_input_with_no_value(ctx, nth, name):
     assert_input_value(ctx, name, None, index=nth)

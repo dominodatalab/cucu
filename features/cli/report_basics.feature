@@ -52,6 +52,7 @@ Feature: Report basics
     Given I run the command "cucu run data/features/with_secret/scenario_with_sections.feature --results {CUCU_RESULTS_DIR}/browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "1"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
+      And I set the variable "CUCU_READY_STATE_PAGE_CHECK" to "enabled"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
       And I wait to click the link "Scenario with sections"
 
@@ -224,13 +225,13 @@ Feature: Report basics
      When I start a webserver at directory "{CUCU_RESULTS_DIR}/cucu_debug_report" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
       And I click the link "Feature with passing scenario with web"
-     Then I should not see the text "DEBUG executing page check \"wait for document.readyState\""
-      And I should not see the text "DEBUG executing page check \"broken image checker\""
+     Then I should not see the text "DEBUG executed page check \"wait for document.readyState\""
+      And I should not see the text "DEBUG executed page check \"broken image checker\""
       And I click the button "Just a scenario that opens a web page"
      When I click the button "Logs"
       And I click the button "cucu.debug.console.log"
-     Then I wait to see the text "DEBUG executing page check \"wait for document.readyState\""
-      And I wait to see the text "DEBUG executing page check \"broken image checker\""
+     Then I wait to see the text "DEBUG executed page check \"wait for document.readyState\""
+      And I wait to see the text "DEBUG executed page check \"broken image checker\""
 
   Scenario: User can run a scenario with tags and see them in the test report
     Given I run the command "cucu run data/features/feature_with_tagging.feature --results {CUCU_RESULTS_DIR}/report_with_tags_results --generate-report --report {CUCU_RESULTS_DIR}/report_with_tags_report" and save stdout to "STDOUT" and expect exit code "0"
@@ -378,4 +379,4 @@ Feature: Report basics
      Then I should see a table that matches the following:
         | Start at | Features.*                             | Scenarios.* | Passed.* | Failed.* | Skipped.* | Errored.* | Status | Duration.* |
         | .*       | Echo                                   | 1           | 1        | 0        | 0         | 0         | passed | .*         |
-        | .*         | Feature with passing scenario with web | 1           | 1        | 0        | 0         | 0         | passed | .*         |
+        | .*       | Feature with passing scenario with web | 1           | 1        | 0        | 0         | 0         | passed | .*         |

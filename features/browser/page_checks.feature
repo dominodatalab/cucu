@@ -44,19 +44,17 @@ Feature: Page checks
      Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*
-      .* executing page check "wait for document.readyState"
-      [\s\S]*
-      .* executing page check "broken image checker"
+      .* executed page check "wait for document.readyState" in .*
+      .* executed page check "broken image checker" in .*
       [\s\S]*
       """
-     When I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --env CUCU_READY_STATE_PAGE_CHECK=false --logging-level debug --results {CUCU_RESULTS_DIR}/disabling_page_checks_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     When I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --env CUCU_READY_STATE_PAGE_CHECK=disabled --logging-level debug --results {CUCU_RESULTS_DIR}/disabling_page_checks_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*
-      .* executing page check "wait for document.readyState"
       .* document.readyState check disabled
       [\s\S]*
-      .* executing page check "broken image checker"
+      .* executed page check "broken image checker" in .*
       [\s\S]*
       """
 
@@ -92,11 +90,8 @@ Feature: Page checks
       And I should see "{STDOUT}" matches the following:
       """
       [\s\S]*
-      .* DEBUG executing page check "wait for document.readyState"
       .* DEBUG executed page check "wait for document.readyState" in .*
-      .* DEBUG executing page check "broken image checker"
       .* DEBUG executed page check "broken image checker" in .*
-      .* DEBUG executing page check "my own page check"
       .* DEBUG executed page check "my own page check" in .*
       [\s\S]*
       """

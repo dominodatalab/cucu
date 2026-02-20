@@ -161,9 +161,20 @@ class Config(dict):
         return references
 
     def hide_secrets(self, text: str | bytes):
-        secret_keys = [x for x in self.get("CUCU_SECRETS", "").split(",") if x]
-        secret_values = [self.get(x) for x in secret_keys if self.get(x)]
-        secret_values = [x for x in secret_values if isinstance(x, str)]
+        secret_keys = {
+            x.strip()
+            for x in self.get("CUCU_SECRETS", "").split(",")
+            if x.strip()
+        }
+        allowlist_keys = {
+            x.strip()
+            for x in self.get("CUCU_SECRETS_REDACTION_OVERRIDE", "").split(",")
+            if x.strip()
+        }
+        keys_to_redact = secret_keys - allowlist_keys
+        secret_values = [
+            self.get(x) for x in keys_to_redact if isinstance(self.get(x), str)
+        ]
 
         is_bytes = isinstance(text, bytes)
         if is_bytes:
@@ -374,6 +385,12 @@ CONFIG.define(
     default="",
 )
 CONFIG.define(
+    "CUCU_SECRETS_REDACTION_OVERRIDE",
+    "a comma separated list of VARIABLE names whose values we do not want to redact "
+    "from various output reports even if they exist in CUCU_SECRETS ",
+    default="",
+)
+CONFIG.define(
     "CUCU_SHORT_UI_RETRY_AFTER_S",
     "the amount of time to wait between retries in seconds for non-wait ui steps",
     default=0.25,
@@ -443,6 +460,21 @@ CONFIG.define(
     "CUCU_SKIP_HIGHLIGHT_BORDER",
     "when set to 'True' skips adding a border to highlight found element in screenshots",
     default=True,
+)
+CONFIG.define(
+    "CUCU_SELENIUM_KEEPALIVE_ENABLED",
+    "when set to 'True' enables sending keep-alive pings to the selenium server to prevent timeouts during long running scenarios",
+    default=True,
+)
+CONFIG.define(
+    "CUCU_SELENIUM_KEEPALIVE_INTERVAL_S",
+    "keep-alive ping interval in seconds (default: 30 seconds)",
+    default=30,
+)
+CONFIG.define(
+    "CUCU_SELENIUM_KEEP_ALIVE_MAX_DURATION_S",
+    "keep-alive total max duration in seconds to prevent infinite keep-alive pings (default: 30 minutes)",
+    default=1800,
 )
 
 

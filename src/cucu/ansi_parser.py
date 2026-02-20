@@ -1,5 +1,6 @@
 import html
 import re
+from html import escape
 
 from behave.formatter.ansi_escapes import colors, escapes
 
@@ -57,3 +58,64 @@ def parse_log_to_html(input: str) -> str:
         )  # use print instead of logger to avoid circular import
 
     return result
+
+
+ANSI_CLASSES = {
+    "0": [],  # reset
+    "1": ["ansi-bold"],
+    "30": ["ansi-black"],
+    "31": ["ansi-red"],
+    "32": ["ansi-green"],
+    "33": ["ansi-yellow"],
+    "34": ["ansi-blue"],
+    "35": ["ansi-magenta"],
+    "36": ["ansi-cyan"],
+    "37": ["ansi-white"],
+    "90": ["ansi-gray"],
+}
+
+ANSI_SGR_RE = re.compile(r"\x1b\[([0-9;]+)m")
+
+
+def ansi_to_html(line: str) -> str:
+    """
+    Convert ANSI SGR codes to <span class="..."> HTML.
+    """
+    result = []
+    open_spans = []
+
+    pos = 0
+    for match in ANSI_SGR_RE.finditer(line):
+        chunk = line[pos : match.start()]
+        if chunk:
+            result.append(escape(chunk))
+
+        codes = match.group(1).split(";")
+
+        # reset
+        if "0" in codes:
+            while open_spans:
+                result.append("</span>")
+                open_spans.pop()
+        else:
+            classes = []
+            for c in codes:
+                classes.extend(ANSI_CLASSES.get(c, []))
+
+            if classes:
+                class_attr = " ".join(classes)
+                result.append(f'<span class="{class_attr}">')
+                open_spans.append("</span>")
+
+        pos = match.end()
+
+    # remainder
+    remainder = line[pos:]
+    if remainder:
+        result.append(escape(remainder))
+
+    # close any open spans
+    while open_spans:
+        result.append(open_spans.pop())
+
+    return "".join(result)

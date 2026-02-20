@@ -35,8 +35,11 @@ Feature: Run with logging
             And I log "cruel" at level "debug" \s*# .*
       .* WARNING world
             And I log "world" at level "warning" \s*# .*
+      .* DEBUG No browser found, skipping keep-alive
+      .* DEBUG HOOK start_selenium_keep_alive: passed ✅
       .* DEBUG No browsers - skipping MHT webpage snapshot
       .* DEBUG HOOK download_mht_data: passed ✅
+      .* DEBUG HOOK stop_selenium_keep_alive: passed ✅
 
       [\s\S]*
       1 feature passed, 0 failed, 0 skipped
