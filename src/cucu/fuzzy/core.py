@@ -3,6 +3,7 @@ from enum import Enum
 
 from cucu import logger
 from cucu.browser.frames import search_in_all_frames
+from cucu.config import CONFIG
 
 
 def load_jquery_lib():
@@ -98,6 +99,7 @@ def find(
         str(direction.value),
         name_within_thing,
         "true",
+        str(CONFIG["CUCU_SKIP_FUZZY_RELEVANCE"]).lower(),
     ]
 
     def execute_fuzzy_find():
