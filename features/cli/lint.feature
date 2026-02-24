@@ -176,6 +176,7 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_no_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/keyword_space_lint/keyword_no_space.feature:1: W 'Feature: ' keyword must be followed by a single space
       results/keyword_space_lint/keyword_no_space.feature:3: W 'Scenario: ' keyword must be followed by a single space
 
@@ -188,6 +189,7 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_more_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/keyword_space_lint/keyword_more_space.feature:1: W 'Feature: ' keyword must be followed by a single space
       results/keyword_space_lint/keyword_more_space.feature:3: W 'Scenario: ' keyword must be followed by a single space
 
@@ -200,6 +202,7 @@ Feature: Lint
      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_no_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/keyword_space_lint/keyword_no_space.feature:1: W 'Feature: ' keyword must be followed by a single space ✓
       results/keyword_space_lint/keyword_no_space.feature:3: W 'Scenario: ' keyword must be followed by a single space ✓
 
@@ -216,6 +219,7 @@ Feature: Lint
      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_more_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/keyword_space_lint/keyword_more_space.feature:1: W 'Feature: ' keyword must be followed by a single space ✓
       results/keyword_space_lint/keyword_more_space.feature:3: W 'Scenario: ' keyword must be followed by a single space ✓
 
