@@ -528,10 +528,12 @@ def _generate_report(
 
     if junit_folder:
         for junit_file in junit_folder.rglob("*.xml"):
-            try:           
+            try:
                 junit = ET.parse(junit_file)
             except ET.ParseError:
-                logger.error(f"failed to parse junit file {junit_file}, skipping")
+                logger.error(
+                    f"failed to parse junit file {junit_file}, skipping"
+                )
                 continue
 
             test_suite = junit.getroot()
