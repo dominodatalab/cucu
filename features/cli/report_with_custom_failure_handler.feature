@@ -23,7 +23,9 @@ Feature: Report with custom JUnit failure handler
       Feature: Feature with a failure
 
         Scenario: Scenario that definitely fails
-          Given I click the button "not there"
+          Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+            And I open a browser at the url "http://\{HOST_ADDRESS\}:\{PORT\}/nothing_to_see_here.html"
+            And I click the button "not there"
       """
      Then I run the command "cucu run {CUCU_RESULTS_DIR}/report_with_custom_failure_handling --results {CUCU_RESULTS_DIR}/custom_failure_handler_results --generate-report --report {CUCU_RESULTS_DIR}/custom_failure_handler_report" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see the file at "{CUCU_RESULTS_DIR}/custom_failure_handler_results/Feature with a failure.xml" matches the following:
