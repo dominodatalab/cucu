@@ -129,7 +129,7 @@ def report_unable_to_find_table(expected_table, found_tables):
         )
 
     stream.seek(0)
-    raise RuntimeError(
+    raise AssertionError(
         f"unable to find desired table\nexpected:\n{format_gherkin_table(expected_table, [], '  ')}\n\nfound:{stream.read()}"
     )
 
@@ -150,7 +150,7 @@ def report_found_undesired_table(unexpected_tables, found_tables):
             f"found undesired table\n\nundesired table:\n{format_gherkin_table(table, [], '  ')}\n\n"
             f"all tables found:{stream.read()}\n"
         )
-    raise RuntimeError(error_message)
+    raise AssertionError(error_message)
 
 
 def find_table(ctx, assert_func, nth=None):
@@ -169,7 +169,7 @@ def find_table(ctx, assert_func, nth=None):
         array of arrays representing the matching HTML table
 
     raises:
-        RuntimeError when the desired table was not found
+        AssertionError when the desired table was not found
     """
     expected = behave_table_to_array(ctx.table)
     found_tables = find_tables(ctx)
@@ -201,7 +201,7 @@ def do_not_find_table(ctx, assert_func, nth=None):
                   of available tables to match against.
 
     raises:
-        RuntimeError when the desired table was not found
+        AssertionError when the desired table was not found
     """
     expected = behave_table_to_array(ctx.table)
     tables = find_tables(ctx)
@@ -313,7 +313,7 @@ def get_table_cell_value(ctx, table, row, column, variable_name):
     try:
         cell_value = tables[table][row][column]
     except IndexError:
-        raise RuntimeError(
+        raise AssertionError(
             f"Cannot find table:{table + 1},row:{row + 1},column:{column + 1}. Please check your table data."
         )
     config.CONFIG[variable_name] = cell_value
@@ -350,7 +350,7 @@ def find_table_element(ctx, nth=1):
     try:
         return ctx.browser.css_find_elements("table")[nth]
     except IndexError:
-        raise RuntimeError(
+        raise AssertionError(
             f"Cannot find table:{nth + 1}. Please check your table data."
         )
 
@@ -371,7 +371,7 @@ def click_table_cell(ctx, row, column, table):
         row = table_element.find_elements(By.CSS_SELECTOR, "tbody tr")[row]
         cell = row.find_elements(By.CSS_SELECTOR, "td")[column]
     except IndexError:
-        raise RuntimeError(
+        raise AssertionError(
             f"Cannot find table:{table + 1},row:{row + 1},column:{column + 1}. Please check your table data."
         )
     ctx.browser.click(cell)
@@ -416,7 +416,7 @@ def wait_click_table_cell_matching_text(ctx, column, match_text, table):
                 )
             cell = row[0].find_elements(By.CSS_SELECTOR, "td")[column]
         except IndexError:
-            raise RuntimeError(
+            raise AssertionError(
                 f"Cannot find table:{table + 1},column:{column + 1},text:{match_text}. Please check your table data."
             )
 
@@ -501,7 +501,7 @@ def wait_table_row_count(ctx, row_count, table):
         table_rows = count_rows_in_table_element(table_element)
 
         if not int(row_count) == table_rows:
-            raise RuntimeError(
+            raise AssertionError(
                 f"Unable to find {row_count} rows in table {table + 1}. Please check your table data."
             )
 

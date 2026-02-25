@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.4.8
+- Chore - upgrade behave from 1.2.6 to 1.3.3
+- Change - reorder core.py imports for BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON
+- Change - from RuntimeError to AssertionError for step failure
+- Change - some ordering between environment.py and rundb.py
+- Fix - behave renamed "AssertionError" to "ASSERT FAILED"
+- Fix - behave renamed Status errored to error
+- Fix - consider undefined as failure of test
+
 # 1.4.7
 - Change - fuzzy find matching with relevance score
 - Add - config to disable feature CUCU_SKIP_FUZZY_RELEVANCE: true

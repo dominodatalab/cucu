@@ -5,12 +5,14 @@ from functools import partial
 from pathlib import Path
 
 import yaml
+from behave.model import Status
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
 from cucu.page_checks import init_page_checks
 from cucu.utils import (
     SeleniumKeepAlive,
+    StopRetryException,
     TeeStream,
     build_debug_output,
     ellipsize_filename,
@@ -77,6 +79,10 @@ def before_scenario(ctx, scenario):
     # we want every scenario to start with the exact same reinitialized config
     # values and not bleed values between scenario runs
     CONFIG.restore()
+
+    # save values from rundb.py formatter
+    CONFIG["FEATURE_RUN_ID"] = scenario.feature.feature_run_id
+    CONFIG["SCENARIO_RUN_ID"] = scenario.scenario_run_id
 
     # we should load any cucurc.yml files in the path to the feature file
     # we are about to run so that the config values set for this feature are
@@ -272,6 +278,23 @@ def before_step(ctx, step):
 
 
 def after_step(ctx, step):
+    # consider undefined as test author's failure, not a framework issue.
+    if step.status == Status.undefined:
+        step.status = Status.failed
+
+    # adjust status for StopRetryException wrapped in Tenacity RetryError
+    if step.status == Status.error and isinstance(
+        step.exception, StopRetryException
+    ):
+        step.status = Status.failed
+
+    # adjust status for AssertionError wrapped in Tenacity RetryError
+    if step.status == Status.error and isinstance(
+        step.exception.last_attempt._exception, AssertionError
+    ):
+        step.status = Status.failed
+        step.exception = step.exception.last_attempt._exception
+
     step.stdout = sys.stdout.captured()
     step.stderr = sys.stderr.captured()
 

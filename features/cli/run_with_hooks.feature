@@ -56,11 +56,11 @@ Feature: Run with hooks
       [\s\S]*
       .* DEBUG just logging some stuff from my before all hook
       Feature: Feature that simply echo's "Hello World"
+
+        Scenario: This is a scenario that simply echo's hello world
       [\s\S]*
       .* DEBUG just logging some stuff from my before scenario hook
       .* DEBUG HOOK before_scenario_log: passed ✅
-
-        Scenario: This is a scenario that simply echo's hello world
       .* DEBUG just logging some stuff from my before step hook
       Hello
 
@@ -83,7 +83,7 @@ Feature: Run with hooks
       [\s\S]*
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
-      2 steps passed, 0 failed, 0 skipped, 0 undefined
+      2 steps passed, 0 failed, 0 skipped
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
@@ -127,8 +127,8 @@ Feature: Run with hooks
       [\s\S]*
       Feature: Feature that runs after this scenario hooks in LIFO order.
       [\s\S]*
-
         Scenario: This is a scenario that runs after this scenario hooks in LIFO order
+      [\s\S]*
           Given I run the following steps after the current scenario-1     # .*
             And I run the following steps after the current scenario-2     # .*
       .* DEBUG No browser found, skipping keep-alive
@@ -144,7 +144,7 @@ Feature: Run with hooks
       [\s\S]*
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
-      2 steps passed, 0 failed, 0 skipped, 0 undefined
+      2 steps passed, 0 failed, 0 skipped
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
@@ -156,7 +156,7 @@ Feature: Run with hooks
       from cucu import register_after_scenario_hook
 
       def after_scenario_fail(ctx):
-        raise RuntimeError("boom")
+        raise AssertionError("boom")
 
       register_after_scenario_hook(after_scenario_fail)
 
@@ -175,11 +175,11 @@ Feature: Run with hooks
      When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/failing_custom_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/failing_custom_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" contains the following
       """
-      HOOK-ERROR in after_scenario_fail: RuntimeError: boom
+      HOOK-ERROR in after_scenario_fail: AssertionError: boom
       """
       And I should see "{STDOUT}" contains the following
       """
-      raise RuntimeError("boom")
+      raise AssertionError("boom")
       """
      When I start a webserver at directory "{CUCU_RESULTS_DIR}/failing_custom_hooks_report" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
@@ -194,7 +194,7 @@ Feature: Run with hooks
       from cucu import register_before_scenario_hook
 
       def before_scenario_fail(ctx):
-        raise RuntimeError("boom")
+        raise AssertionError("boom")
 
       register_before_scenario_hook(before_scenario_fail)
 
@@ -213,11 +213,11 @@ Feature: Run with hooks
      When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_before_hooks/echo.feature --results {CUCU_RESULTS_DIR}/failing_before_hooks_results/ --generate-report --report {CUCU_RESULTS_DIR}/failing_before_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      Then I should see "{STDOUT}" contains the following
       """
-      HOOK-ERROR in before_scenario_fail: RuntimeError: boom
+      HOOK-ERROR in before_scenario_fail: AssertionError: boom
       """
       And I should see "{STDOUT}" contains the following
       """
-      raise RuntimeError("boom")
+      raise AssertionError("boom")
       """
 
   Scenario: User gets expected output when running a scenario with multiple after hooks failing and passing in order
@@ -232,7 +232,7 @@ Feature: Run with hooks
       register_after_scenario_hook(after_scenario_pass)
 
       def after_scenario_fail(ctx):
-        raise RuntimeError("boom")
+        raise AssertionError("boom")
 
       register_after_scenario_hook(after_scenario_fail)
 
@@ -251,11 +251,11 @@ Feature: Run with hooks
      When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" contains the following
       """
-      HOOK-ERROR in after_scenario_fail: RuntimeError: boom
+      HOOK-ERROR in after_scenario_fail: AssertionError: boom
       """
       And I should see "{STDOUT}" contains the following
       """
-      raise RuntimeError("boom")
+      raise AssertionError("boom")
       """
       And I should see "{STDOUT}" contains the following
       """
@@ -274,7 +274,7 @@ Feature: Run with hooks
       from cucu import logger, register_after_scenario_hook
 
       def after_scenario_fail(ctx):
-        raise RuntimeError("boom")
+        raise AssertionError("boom")
 
       register_after_scenario_hook(after_scenario_fail)
 
@@ -298,11 +298,11 @@ Feature: Run with hooks
      When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" contains the following
       """
-      HOOK-ERROR in after_scenario_fail: RuntimeError: boom
+      HOOK-ERROR in after_scenario_fail: AssertionError: boom
       """
       And I should see "{STDOUT}" contains the following
       """
-      raise RuntimeError("boom")
+      raise AssertionError("boom")
       """
       And I should see "{STDOUT}" contains the following
       """
@@ -322,7 +322,7 @@ Feature: Run with hooks
       from cucu import register_before_scenario_hook
 
       def before_scenario_error(ctx):
-          raise RuntimeError("This error should be logged and reported.")
+          raise AssertionError("This error should be logged and reported.")
 
       register_before_scenario_hook(before_scenario_error)
       """

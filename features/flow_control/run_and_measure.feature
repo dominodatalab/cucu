@@ -25,6 +25,7 @@ Feature: Run and measure
      When I run the command "cucu run {CUCU_RESULTS_DIR}/measuring_following_steps/measuring_feature.feature --results {CUCU_RESULTS_DIR}/measuring_following_steps_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following:
       """
+      [\s\S]*
       Feature: Feature that measures a set of steps
 
         Scenario: Scenario that measures a block of following steps
@@ -40,7 +41,7 @@ Feature: Run and measure
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
-      1 step passed, 0 failed, 0 skipped, 0 undefined
+      1 step passed, 0 failed, 0 skipped
       [\s\S]*
       """
       And I should see "{STDERR}" is empty
@@ -67,6 +68,7 @@ Feature: Run and measure
      When I run the command "cucu run {CUCU_RESULTS_DIR}/measuring_between_steps/measuring_feature.feature --results {CUCU_RESULTS_DIR}/measuring_between_steps_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" matches the following:
       """
+      [\s\S]*
       Feature: Feature that measures a set of steps
 
         Scenario: Scenario that measures a block of steps between two steps
@@ -80,7 +82,7 @@ Feature: Run and measure
 
       1 feature passed, 0 failed, 0 skipped
       1 scenario passed, 0 failed, 0 skipped
-      4 steps passed, 0 failed, 0 skipped, 0 undefined
+      4 steps passed, 0 failed, 0 skipped
       [\s\S]*
       """
       And I should see "{STDERR}" is empty

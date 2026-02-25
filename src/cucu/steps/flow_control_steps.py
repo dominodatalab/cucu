@@ -22,18 +22,18 @@ def expect_the_following_step_to_fail(ctx, message):
         run_steps(ctx, ctx.text)
     except Exception as exception:
         if str(exception).find(message) == -1:
-            raise RuntimeError(
+            raise AssertionError(
                 f'expected failure message was "{str(exception)}" not "{message}"'
             )
         return
 
-    raise RuntimeError("previous steps did not fail!")
+    raise AssertionError("previous steps did not fail!")
 
 
 @step('I should see the previous step took less than "{seconds}" seconds')
 def should_see_previous_step_took_less_than(ctx, seconds):
     if ctx.scenario.previous_step_duration > float(seconds):
-        raise RuntimeError(
+        raise AssertionError(
             f"previous step took {ctx.scenario.previous_step_duration}, which is more than {seconds}"
         )
 
@@ -41,7 +41,7 @@ def should_see_previous_step_took_less_than(ctx, seconds):
 @step('I should see the previous step took more than "{seconds}" seconds')
 def should_see_previous_step_took_more_than(ctx, seconds):
     if ctx.scenario.previous_step_duration < float(seconds):
-        raise RuntimeError(
+        raise AssertionError(
             f"previous step took {ctx.scenario.previous_step_duration}, which is less than {seconds}"
         )
 
@@ -63,7 +63,7 @@ def wait_for_steps_to_fail(ctx, steps, timeout=None):
         except:  # noqa: E722
             return
 
-        raise RuntimeError("underlying steps did not fail")
+        raise AssertionError("underlying steps did not fail")
 
     retry(steps_should_fail, wait_up_to_s=timeout)()
 
@@ -126,7 +126,7 @@ def start_the_timer(ctx, name):
 @step('I stop the timer "{name}"')
 def stop_the_timer(ctx, name):
     if name not in ctx.step_timers:
-        raise RuntimeError(f'no previously started timer with name "{name}"')
+        raise AssertionError(f'no previously started timer with name "{name}"')
     start = ctx.step_timers[name]
     del ctx.step_timers[name]
 
@@ -140,7 +140,7 @@ def run_feature(ctx, filepath, results):
 
     return_code = process.returncode
     if return_code != 0:
-        raise RuntimeError(
+        raise AssertionError(
             f'"{command}" exited with {return_code}, see above for details'
         )
 

@@ -54,6 +54,7 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/indent_lint/bad_feature_indentation.feature:1: W feature name should not have any indentation
       results/indent_lint/bad_feature_indentation.feature:3: W scenario tags should be indented with 2 spaces
       results/indent_lint/bad_feature_indentation.feature:4: W scenario name should be indented with 2 spaces
@@ -71,6 +72,7 @@ Feature: Lint
      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/indent_lint/bad_feature_indentation.feature:1: W feature name should not have any indentation ✓
       results/indent_lint/bad_feature_indentation.feature:3: W scenario tags should be indented with 2 spaces ✓
       results/indent_lint/bad_feature_indentation.feature:4: W scenario name should be indented with 2 spaces ✓
@@ -96,30 +98,19 @@ Feature: Lint
       """
       # nothing to fix at this point
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/indent_lint/bad_feature_indentation.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
-      And I should see "{STDOUT}" is empty
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      USING RUNNER: behave.runner:Runner
+
+      """
       And I should see "{STDERR}" is empty
 
   Scenario: User can find and fix unnecessary whitespace
-    Given I create a file at "{CUCU_RESULTS_DIR}/whitespace_lint/environment.py" with the following:
-      """
-      from cucu.environment import *
-      """
-      And I create a file at "{CUCU_RESULTS_DIR}/whitespace_lint/steps/__init__.py" with the following:
-      """
-      from cucu.steps import *
-      """
-      And I create a file at "{CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" with the following:
-      """
-      Feature: Feature with extraneous whitespace 
-
-
-        Scenario: Scenario with extraneous whitespace  
-          Given I echo "foo" 
-
-      """
-     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+    Given I run the command "cp -r data/whitespace_lint {CUCU_RESULTS_DIR}/whitespace_lint" and expect exit code "0"
+     When I run the command "cucu lint {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/whitespace_lint/extraneous_whitespace.feature:1: W line has extraneous whitespace at the end
       results/whitespace_lint/extraneous_whitespace.feature:3: W too many blank lines
       results/whitespace_lint/extraneous_whitespace.feature:4: W line has extraneous whitespace at the end
@@ -134,6 +125,7 @@ Feature: Lint
      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/whitespace_lint/extraneous_whitespace.feature:1: W line has extraneous whitespace at the end ✓
       results/whitespace_lint/extraneous_whitespace.feature:3: W too many blank lines ✓
       results/whitespace_lint/extraneous_whitespace.feature:4: W line has extraneous whitespace at the end ✓
@@ -151,7 +143,11 @@ Feature: Lint
 
       """
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/whitespace_lint/extraneous_whitespace.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
-      And I should see "{STDOUT}" is empty
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      USING RUNNER: behave.runner:Runner
+
+      """
       And I should see "{STDERR}" is empty
 
   Scenario: Keywords must be followed by single space
@@ -180,6 +176,7 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_no_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/keyword_space_lint/keyword_no_space.feature:1: W 'Feature: ' keyword must be followed by a single space
       results/keyword_space_lint/keyword_no_space.feature:3: W 'Scenario: ' keyword must be followed by a single space
 
@@ -192,6 +189,7 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_more_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/keyword_space_lint/keyword_more_space.feature:1: W 'Feature: ' keyword must be followed by a single space
       results/keyword_space_lint/keyword_more_space.feature:3: W 'Scenario: ' keyword must be followed by a single space
 
@@ -204,6 +202,7 @@ Feature: Lint
      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_no_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/keyword_space_lint/keyword_no_space.feature:1: W 'Feature: ' keyword must be followed by a single space ✓
       results/keyword_space_lint/keyword_no_space.feature:3: W 'Scenario: ' keyword must be followed by a single space ✓
 
@@ -220,6 +219,7 @@ Feature: Lint
      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/keyword_space_lint/keyword_more_space.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/keyword_space_lint/keyword_more_space.feature:1: W 'Feature: ' keyword must be followed by a single space ✓
       results/keyword_space_lint/keyword_more_space.feature:3: W 'Scenario: ' keyword must be followed by a single space ✓
 
@@ -243,7 +243,7 @@ Feature: Lint
       """
       from cucu.steps import *
 
-      raise RuntimeError("boom")
+      raise AssertionError("boom")
       """
       And I create a file at "{CUCU_RESULTS_DIR}/broken_step_lint/broken_step_feature.feature" with the following:
       """
@@ -252,7 +252,7 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/broken_step_lint/broken_step_feature.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDERR}" contains the following:
       """
-      RuntimeError: boom
+      AssertionError: boom
       """
 
   Scenario: User gets a lint error when there are duplicate feature names
@@ -281,6 +281,7 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/unique_feature_lint" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       {CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature:1: E feature name must be unique, "Feature with non unique name" also used in "{CUCU_RESULTS_DIR}/unique_feature_lint/first_feature.feature"
 
       """
@@ -292,6 +293,7 @@ Feature: Lint
      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/unique_feature_lint" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       {CUCU_RESULTS_DIR}/unique_feature_lint/second_feature.feature:1: E feature name must be unique, "Feature with non unique name" also used in "{CUCU_RESULTS_DIR}/unique_feature_lint/first_feature.feature" ✗ (must be fixed manually)
 
       """
@@ -327,6 +329,7 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/unique_scenario_lint" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       {CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature:3: E scenario name must be unique, "Scenario with non unique name" also used in "{CUCU_RESULTS_DIR}/unique_scenario_lint/first_feature.feature:2" Scenario: "Scenario with non unique name"
 
       """
@@ -338,6 +341,7 @@ Feature: Lint
      Then I run the command "cucu lint --fix {CUCU_RESULTS_DIR}/unique_scenario_lint" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       {CUCU_RESULTS_DIR}/unique_scenario_lint/second_feature.feature:3: E scenario name must be unique, "Scenario with non unique name" also used in "{CUCU_RESULTS_DIR}/unique_scenario_lint/first_feature.feature:2" Scenario: "Scenario with non unique name" ✗ (must be fixed manually)
 
       """
@@ -469,7 +473,11 @@ Feature: Lint
           replace: 'I wait to \1'
       """
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/custom_linting_with_exclusions/custom_linting_feature.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
-      And I should see "{STDOUT}" is empty
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      USING RUNNER: behave.runner:Runner
+
+      """
       And I should see "{STDERR}" is empty
 
   Scenario: User gets appropriate exit code when cucu can not parse the file
@@ -510,6 +518,7 @@ Feature: Lint
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/invalid_names_lint/bad_name_usage.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
       And I should see "{STDOUT}" is equal to the following:
       """
+      USING RUNNER: behave.runner:Runner
       results/invalid_names_lint/bad_name_usage.feature:1: E feature name must not contain the characters '/\:?'
       results/invalid_names_lint/bad_name_usage.feature:3: E scenario name must not contain the characters '/\:?'
 
