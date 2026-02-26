@@ -10,9 +10,12 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - reorder core.py imports for BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON
 - Change - from RuntimeError to AssertionError for step failure
 - Change - some ordering between environment.py and rundb.py
+- Change - expect first output `USING RUNNER: behave.runner:Runner`
+- Change - don't expect `, # undefined` steps when 0
 - Fix - behave renamed "AssertionError" to "ASSERT FAILED"
-- Fix - behave renamed Status errored to error
+- Fix - behave renamed Status `errored` to `error`
 - Fix - consider undefined as failure of test
+
 
 # 1.4.7
 - Change - fuzzy find matching with relevance score
