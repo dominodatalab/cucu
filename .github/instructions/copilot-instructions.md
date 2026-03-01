@@ -6,21 +6,19 @@ applyTo: '**'
 
 **cucu** is a Python BDD/Gherkin web testing framework built on Behave + Selenium. Published to PyPI.
 
-## Commands
+## Build & Validation
 
 ```bash
 make setup      # uv sync --dev
 make fix        # ruff format + ruff check --fix + pre-commit + cucu lint --fix  ← use this, not make lint
-make test       # pytest + cucu feature tests
 
 uv run pytest tests/test_config.py                 # unit test
 uv run cucu run features/browser/links.feature     # feature test
 uv run cucu run features/browser/links.feature:10  # specific scenario by line
-uv run cucu run -g features/                       # all feature tests + HTML report
 uv run cucu steps                                  # list all step definitions
 ```
 
-Docker must be running for `cucu run` (Selenium).
+Never run `make test` — it runs the full suite and takes too long. Always run individual test files or scenarios. Docker must be running for `cucu run` (Selenium).
 
 ## Source Layout
 
