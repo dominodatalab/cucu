@@ -112,7 +112,7 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     return True
 
 
-def _find_header_row_index(table, expected_headers, max_scan_rows=2):
+def find_header_row_index(table, expected_headers, max_scan_rows=2):
     """
     Find first header row (within first 2 rows) where each expected header regex
     matches at least one actual header cell.
@@ -135,7 +135,7 @@ def _find_header_row_index(table, expected_headers, max_scan_rows=2):
     return None
 
 
-def _build_expected_header_to_indices(header_row, expected_headers):
+def build_expected_header_to_indices(header_row, expected_headers):
     """
     For each expected header regex, return all matching column indices
     from the actual header row (supports duplicate headers / colspan).
@@ -157,7 +157,7 @@ def _build_expected_header_to_indices(header_row, expected_headers):
     return expected_to_indices
 
 
-def _contains_rows_by_named_columns(table, expected_table, match_value):
+def contains_rows_by_named_columns(table, expected_table, match_value):
     """
     expected_table format (from behave_table_to_array(ctx.table)):
       expected_table[0] = expected header regexes (only columns you care about)
@@ -172,13 +172,13 @@ def _contains_rows_by_named_columns(table, expected_table, match_value):
     expected_headers = expected_table[0]
     expected_rows = expected_table[1:]
 
-    header_row_idx = _find_header_row_index(
+    header_row_idx = find_header_row_index(
         table, expected_headers, max_scan_rows=2
     )
     if header_row_idx is None:
         return False
 
-    expected_to_indices = _build_expected_header_to_indices(
+    expected_to_indices = build_expected_header_to_indices(
         table[header_row_idx], expected_headers
     )
     if expected_to_indices is None:
@@ -224,7 +224,7 @@ def check_table_contains_rows_matching_only_these_columns(
     table, expected_table
 ):
     """Header and cell values matched via regex."""
-    return _contains_rows_by_named_columns(
+    return contains_rows_by_named_columns(
         table,
         expected_table,
         lambda expected, actual: re.match(expected, actual),
@@ -233,7 +233,7 @@ def check_table_contains_rows_matching_only_these_columns(
 
 def check_table_contains_rows_with_only_these_columns(table, expected_table):
     """Header matched via regex; cell values matched by exact equality."""
-    return _contains_rows_by_named_columns(
+    return contains_rows_by_named_columns(
         table, expected_table, lambda expected, actual: expected == actual
     )
 
