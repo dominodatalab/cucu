@@ -90,10 +90,11 @@ class Config(dict):
         """
         loads configuration values from a YAML file at the filepath provided
         """
-        config = yaml.safe_load(open(filepath, "rb"))
+        with open(filepath, "rb") as f:
+            config = yaml.safe_load(f)
 
         if config:
-            for key in config.keys():
+            for key in config:
                 if key == "CUCU_SECRETS":  # security: only add restrictions
                     vals = self.get(key, "").split(",")
                     vals = vals + config[key].split(",")

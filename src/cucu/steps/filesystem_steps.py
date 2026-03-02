@@ -35,7 +35,7 @@ def delete_file_at_if_it_exists(ctx, filepath):
     'I read the contents of the file at "{filepath}" and save to the variable "{variable}"'
 )
 def read_file_contents(ctx, filepath, variable):
-    with open(filepath, "r") as _input:
+    with open(filepath) as _input:
         CONFIG[variable] = CONFIG.escape(_input.read())
 
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
 
 import traceback
 
@@ -22,7 +20,7 @@ class CucuFormatter(Formatter):
     SUBSTEP_PREFIX = "  ⤷"
 
     def __init__(self, stream_opener, config, **kwargs):
-        super(CucuFormatter, self).__init__(stream_opener, config)
+        super().__init__(stream_opener, config)
         self.current_scenario = None
         self.steps = []
         self.match_step_index = 0
@@ -86,11 +84,7 @@ class CucuFormatter(Formatter):
         self.current_scenario = scenario
 
         indent = make_indentation(self.indent_size)
-        text = "\n%s%s: %s\n" % (
-            indent,
-            self.colorize(scenario.keyword, "magenta"),
-            scenario.name,
-        )
+        text = f"\n{indent}{self.colorize(scenario.keyword, 'magenta')}: {scenario.name}\n"
         self.write_tags(scenario.tags, indent)
         self.stream.write(text)
         self.steps = []
@@ -163,11 +157,7 @@ class CucuFormatter(Formatter):
             text = self.colorize(
                 f"{indent}{prefix}{keyword} {step.name}", "yellow"
             )
-        elif step.status == Status.skipped:
-            text = self.colorize(
-                f"{indent}{prefix}{keyword} {step.name}\n", "cyan"
-            )
-        elif step.status == Status.untested:
+        elif step.status == Status.skipped or step.status == Status.untested:
             text = self.colorize(
                 f"{indent}{prefix}{keyword} {step.name}\n", "cyan"
             )
@@ -247,15 +237,14 @@ class CucuFormatter(Formatter):
     def eof(self):
         self.stream.write("\n")
 
-        if self.current_scenario:
-            if self.current_scenario.status.name == "failed":
-                # we need to record the error_message and exc_traceback in the
-                # last executed step and mark it as failed so the reporting can
-                # show the result correctly
-                error_message = traceback.format_tb(
-                    self.current_scenario.exc_traceback
-                )
-                self.stream.write("\n".join(error_message))
+        if self.current_scenario and self.current_scenario.status.name == "failed":
+            # we need to record the error_message and exc_traceback in the
+            # last executed step and mark it as failed so the reporting can
+            # show the result correctly
+            error_message = traceback.format_tb(
+                self.current_scenario.exc_traceback
+            )
+            self.stream.write("\n".join(error_message))
 
     # -- MORE: Formatter helpers
     def doc_string(self, doc_string):

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
 
 import os
 import time
@@ -64,7 +62,7 @@ class RundbFormatter(Formatter):
     description = "records the results of the run to the run.db database"
 
     def __init__(self, stream_opener, config):
-        super(RundbFormatter, self).__init__(stream_opener, config)
+        super().__init__(stream_opener, config)
         # We don't actually use the stream provided by Behave, so don't open it.
         # self.stream = self.open()
         self.config = config

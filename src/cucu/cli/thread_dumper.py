@@ -10,7 +10,7 @@ class ThreadDumper(threading.Thread):
     """
 
     def __init__(self, interval_min, stdout, *args, **kwargs):
-        super(ThreadDumper, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.interval_min = interval_min
         self.stdout = stdout
         self.running = False

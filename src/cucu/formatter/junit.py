@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import os
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 from xml.sax.saxutils import escape
 
 import bs4
@@ -20,7 +19,7 @@ class CucuJUnitFormatter(Formatter):
     description = "JUnit Formater"
 
     def __init__(self, stream_opener, config):
-        super(CucuJUnitFormatter, self).__init__(stream_opener, config)
+        super().__init__(stream_opener, config)
         self.xml_root = None
         self.current_feature = None
         self.current_scenario = None
@@ -37,7 +36,7 @@ class CucuJUnitFormatter(Formatter):
 
     def feature(self, feature):
         self.current_feature = feature
-        date_now = datetime.now()
+        date_now = datetime.now(tz=timezone.utc)
         self.feature_results = {
             "name": escape(feature.name),
             "foldername": escape(ellipsize_filename(feature.name)),
@@ -73,12 +72,10 @@ class CucuJUnitFormatter(Formatter):
             if status == "failed" and self.current_scenario_traceback:
                 failure_handlers = CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"]
 
-                for failure_handler in failure_handlers:
-                    failures.append(
-                        failure_handler(
-                            self.current_feature, self.current_scenario
-                        )
-                    )
+                failures.extend(
+                    failure_handler(self.current_feature, self.current_scenario)
+                    for failure_handler in failure_handlers
+                )
 
                 failures += [
                     f"{self.current_step.keyword} {self.current_step.name} (after {round(self.current_step.duration, 3)}s)"
@@ -229,13 +226,11 @@ class CucuJUnitFormatter(Formatter):
         scenarios = results["scenarios"]
 
         if CONFIG["CUCU_SHOW_SKIPS"] != "true":
-            filtered_scenarios = {}
-
-            for name, scenario in scenarios.items():
-                if scenario["status"] != "skipped":
-                    filtered_scenarios[name] = scenario
-
-            scenarios = filtered_scenarios
+            scenarios = {
+                name: scenario
+                for name, scenario in scenarios.items()
+                if scenario["status"] != "skipped"
+            }
 
             if len(scenarios) == 0:
                 # we had a suite of just skipped results

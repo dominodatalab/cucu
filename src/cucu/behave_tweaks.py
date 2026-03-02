@@ -70,14 +70,10 @@ def init_step_hooks(stdout, stderr):
                             rows=ctx.table.rows,
                             line=ctx.table.line,
                         )
-                        new_rows = []
-                        for row in ctx.table.rows:
-                            new_row = []
-
-                            for value in row:
-                                new_row.append(CONFIG.resolve(value))
-
-                            new_rows.append(new_row)
+                        new_rows = [
+                            [CONFIG.resolve(value) for value in row]
+                            for row in ctx.table.rows
+                        ]
 
                         ctx.table.rows = new_rows
 
@@ -111,7 +107,7 @@ def init_step_hooks(stdout, stderr):
             #            at the `src/cucu/helpers.py` location.
             #
             def wrapper(func):
-                @decorator(step_text)
+                @decorator(step_text)  # noqa: B023
                 @wraps(func)
                 def inner_step(*args, **kwargs):
                     inner_step_func(

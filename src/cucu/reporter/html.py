@@ -68,7 +68,7 @@ def browser_timestamp_to_datetime(value):
     """Convert a browser timestamp (in milliseconds since epoch) to a datetime object"""
     try:
         timestamp_sec = int(value) / 1000.0
-        return datetime.fromtimestamp(timestamp_sec).strftime(
+        return datetime.fromtimestamp(timestamp_sec, tz=timezone.utc).strftime(
             "%Y-%m-%d %H:%M:%S,%f"
         )[:-3]
     except (ValueError, TypeError):
@@ -99,7 +99,7 @@ def step_table_to_html(table_data):
 def generate(results: Path, basepath: Path):
     ## Jinja2 templates setup
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
-    templates = jinja2.Environment(loader=package_loader)  # nosec
+    templates = jinja2.Environment(loader=package_loader)  # nosec  # noqa: S701
     templates.globals.update(
         escape=escape,
         urlencode=urlencode,
@@ -227,7 +227,7 @@ def generate(results: Path, basepath: Path):
                         sub_header = handler(scenario_dict, feature_dict)
                         if sub_header:
                             sub_headers.append(sub_header)
-                    except Exception:
+                    except Exception:  # noqa: PERF203
                         logger.warning(
                             f'Exception while trying to run sub_headers hook for scenario: "{scenario_dict["name"]}"\n{traceback.format_exc()}'
                         )
@@ -350,12 +350,12 @@ def generate(results: Path, basepath: Path):
         feature_stats_db = db.db.execute_sql("SELECT * FROM flat_feature")
         keys = tuple([x[0] for x in feature_stats_db.description])
         feature_stats = [
-            dict(zip(keys, x)) for x in feature_stats_db.fetchall()
+            dict(zip(keys, x, strict=False)) for x in feature_stats_db.fetchall()
         ]
 
         grand_totals_db = db.db.execute_sql("SELECT * FROM flat_all")
         keys = tuple([x[0] for x in grand_totals_db.description])
-        grand_totals = dict(zip(keys, grand_totals_db.fetchone()))
+        grand_totals = dict(zip(keys, grand_totals_db.fetchone(), strict=False))
 
         ## Generate index.html and flat.html
 

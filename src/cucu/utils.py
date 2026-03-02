@@ -11,7 +11,7 @@ import re
 import shutil
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import humanize
@@ -59,7 +59,9 @@ def generate_short_id(seed=None, length=7):
     return hashlib.sha256(str(seed).encode("utf-8")).hexdigest()[:length]
 
 
-def format_gherkin_table(table, headings=[], prefix=""):
+def format_gherkin_table(table, headings=None, prefix=""):
+    if headings is None:
+        headings = []
     formatted = tabulate(table, headings, tablefmt=GHERKIN_TABLEFORMAT)
     if prefix == "":
         return formatted
@@ -379,7 +381,7 @@ def get_iso_timestamp_with_ms():
     """
     Get the current time as an ISO 8601 formatted string with milliseconds precision.
     """
-    return datetime.now().isoformat()[:-3]
+    return datetime.now(tz=timezone.utc).isoformat()[:-3]
 
 
 def parse_iso_timestamp(iso_timestamp: (str | None)) -> datetime | None:

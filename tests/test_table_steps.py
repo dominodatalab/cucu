@@ -1,5 +1,7 @@
 from unittest import TestCase, mock
 
+import pytest
+
 from cucu.steps.table_steps import (
     check_table_contains_matching_rows_in_table,
     do_not_find_table,
@@ -31,7 +33,7 @@ class TestDoNotFindTable(TestCase):
             seen_mock = mock.MagicMock(return_value=self.seen_tables)
             with mock.patch("cucu.steps.table_steps.find_tables", seen_mock):
                 dummy = mock.MagicMock()
-                with self.assertRaises(RuntimeError):
+                with pytest.raises(RuntimeError):
                     do_not_find_table(
                         dummy, check_table_contains_matching_rows_in_table
                     )
@@ -52,4 +54,4 @@ class TestDoNotFindTable(TestCase):
                 result = do_not_find_table(
                     dummy, check_table_contains_matching_rows_in_table
                 )
-                self.assertIsNone(result)
+                assert result is None

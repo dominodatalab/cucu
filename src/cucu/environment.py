@@ -109,7 +109,7 @@ def before_scenario(ctx, scenario):
         ctx.scenario_logs_dir.mkdir(parents=True, exist_ok=True)
 
         cucu_debug_log_path = ctx.scenario_logs_dir / "cucu.debug.console.log"
-        ctx.scenario_debug_log_file = open(
+        ctx.scenario_debug_log_file = open(  # noqa: SIM115
             cucu_debug_log_path, "w", encoding=sys.stdout.encoding
         )
         ctx.scenario_debug_log_tee = TeeStream(ctx.scenario_debug_log_file)
@@ -123,7 +123,7 @@ def before_scenario(ctx, scenario):
         logger.init_debug_logger(ctx.scenario_debug_log_tee)
 
         # capture browser logs using TeeStream since each call clears the log
-        ctx.browser_log_file = open(
+        ctx.browser_log_file = open(  # noqa: SIM115
             ctx.scenario_logs_dir / "browser_console.log.txt",
             "w",
             encoding="utf-8",
@@ -135,7 +135,7 @@ def before_scenario(ctx, scenario):
         try:
             hook(ctx)
             logger.debug(f"HOOK {hook.__name__}: passed ✅")
-        except Exception as e:
+        except Exception as e:  # noqa: PERF203
             error_message = (
                 f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}\n"
             )

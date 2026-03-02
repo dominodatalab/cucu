@@ -83,8 +83,30 @@ dev = [
 ]
 
 [tool.ruff]
-lint.select = ["E", "F", "I", "Q0"]  # default options + isort
-lint.ignore = ["E501", "F403"]  # line_length, import *
+lint.select = [
+    "E", "F", "I", "Q0",  # defaults + isort
+    "UP",    # pyupgrade
+    "C4",    # flake8-comprehensions
+    "RUF",   # ruff-specific
+    "DTZ",   # flake8-datetimez
+    "TID",   # flake8-tidy-imports
+    "SIM",   # flake8-simplify
+    "PT",    # flake8-pytest-style
+    "B",     # flake8-bugbear
+    "PERF",  # perflint
+    "FURB",  # refurb
+    "S",     # flake8-bandit
+]
+lint.ignore = [
+    "E501",  # line too long
+    "F403",  # import *
+]
+lint.per-file-ignores."tests/**" = ["S101"]  # assert in pytest is expected
+lint.per-file-ignores."src/cucu/edgedriver_autoinstaller/**" = ["S"]  # vendored driver installer
+lint.per-file-ignores."src/cucu/steps/command_steps.py" = ["S103", "S602", "S603"]  # intentional shell execution
+lint.per-file-ignores."src/cucu/steps/flow_control_steps.py" = ["S602"]  # intentional shell execution
+lint.per-file-ignores."src/cucu/language_server/core.py" = ["S104"]  # intentional bind-all for dev tool
+lint.per-file-ignores."src/cucu/config.py" = ["S108"]  # known temp dir path constant
 exclude = [".env", ".venv", "venv", "__init__.py"]
 line-length = 79
 

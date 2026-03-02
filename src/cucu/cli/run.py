@@ -3,7 +3,7 @@ import json
 import os
 import socket
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from cucu import (
@@ -157,9 +157,11 @@ def behave(
             # provide progress feedback on screen
             register_before_retry_hook(retry_progress)
 
-            with cucu_log_path.open("w", encoding="utf8") as output:
-                with contextlib.redirect_stderr(output):
-                    with contextlib.redirect_stdout(output):
+            with (
+                cucu_log_path.open("w", encoding="utf8") as output,
+                contextlib.redirect_stderr(output),
+                contextlib.redirect_stdout(output),
+            ):
                         # intercept the stdout/stderr so we can do things such
                         # as hiding secrets in logs
                         behave_tweaks.init_outputs(sys.stdout, sys.stderr)
@@ -193,7 +195,7 @@ def create_run(results_path: Path, filepath: Path):
         "filepath": str(filepath),
         "full_arguments": sys.argv,
         "env": env_values,
-        "date": datetime.now().isoformat(),
+        "date": datetime.now(tz=timezone.utc).isoformat(),
     }
 
     run_json_filepath.write_text(

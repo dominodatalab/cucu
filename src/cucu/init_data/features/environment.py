@@ -8,7 +8,7 @@ from cucu import (
     register_custom_tags_in_report_handling,
 )
 from cucu.config import CONFIG
-from cucu.environment import *  # noqa
+from cucu.environment import *
 
 # point the `cucu lint` command to our own custom linting rules
 CONFIG["CUCU_LINT_RULES_PATH"] = "features/lint_rules"
