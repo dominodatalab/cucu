@@ -112,6 +112,132 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
     return True
 
 
+def _find_header_row_index(table, expected_headers, max_scan_rows=2):
+    """
+    Find first header row (within first 2 rows) where each expected header regex
+    matches at least one actual header cell.
+    """
+    expected_patterns = [(h or "").strip(" ") for h in expected_headers]
+    scan_rows = min(len(table), max_scan_rows)
+
+    for idx in range(scan_rows):
+        actual_headers = [(v or "").strip(" ") for v in table[idx]]
+
+        all_headers_present = True
+        for pattern in expected_patterns:
+            if not any(re.match(pattern, actual) for actual in actual_headers):
+                all_headers_present = False
+                break
+
+        if all_headers_present:
+            return idx
+
+    return None
+
+
+def _build_expected_header_to_indices(header_row, expected_headers):
+    """
+    For each expected header regex, return all matching column indices
+    from the actual header row (supports duplicate headers / colspan).
+    """
+    actual_headers = [(h or "").strip(" ") for h in header_row]
+    expected_patterns = [(h or "").strip(" ") for h in expected_headers]
+
+    expected_to_indices = []
+    for pattern in expected_patterns:
+        indices = [
+            idx
+            for idx, actual in enumerate(actual_headers)
+            if re.match(pattern, actual)
+        ]
+        if not indices:
+            return None
+        expected_to_indices.append(indices)
+
+    return expected_to_indices
+
+
+def _contains_rows_by_named_columns(table, expected_table, match_value):
+    """
+    expected_table format (from behave_table_to_array(ctx.table)):
+      expected_table[0] = expected header regexes (only columns you care about)
+      expected_table[1:] = expected cell values/patterns for those headers
+
+    For each expected row, find at least one actual data row that matches all
+    specified columns. Extra columns and column order in the UI are ignored.
+    """
+    if not expected_table or len(expected_table) < 2:
+        return False
+
+    expected_headers = expected_table[0]
+    expected_rows = expected_table[1:]
+
+    header_row_idx = _find_header_row_index(
+        table, expected_headers, max_scan_rows=2
+    )
+    if header_row_idx is None:
+        return False
+
+    expected_to_indices = _build_expected_header_to_indices(
+        table[header_row_idx], expected_headers
+    )
+    if expected_to_indices is None:
+        return False
+
+    actual_data_rows = table[header_row_idx + 1 :]
+
+    for expected_row in expected_rows:
+        if len(expected_row) != len(expected_headers):
+            return False
+
+        matched_any_actual_row = False
+
+        for actual_row in actual_data_rows:
+            row_ok = True
+
+            for expected_col_idx, expected_value in enumerate(expected_row):
+                candidate_indices = expected_to_indices[expected_col_idx]
+
+                matched_this_expected_column = False
+                for col_idx in candidate_indices:
+                    if col_idx < len(actual_row) and match_value(
+                        expected_value, actual_row[col_idx]
+                    ):
+                        matched_this_expected_column = True
+                        break
+
+                if not matched_this_expected_column:
+                    row_ok = False
+                    break
+
+            if row_ok:
+                matched_any_actual_row = True
+                break
+
+        if not matched_any_actual_row:
+            return False
+
+    return True
+
+
+def check_table_contains_rows_matching_only_these_columns(
+    table, expected_table
+):
+    """Header and cell values matched via regex."""
+    return _contains_rows_by_named_columns(
+        table,
+        expected_table,
+        lambda expected, actual: re.match(expected, actual),
+    )
+
+
+def check_table_contains_rows_with_only_these_columns(table, expected_table):
+    """Header matched via regex; cell values matched by exact equality."""
+    return _contains_rows_by_named_columns(
+        table, expected_table, lambda expected, actual: expected == actual
+    )
+
+
 def report_found_table(expected_table, found_table):
     logger.debug(
         f"found desired table\nexpected:\n{format_gherkin_table(expected_table, [], '  ')}\n\n"
@@ -280,6 +406,56 @@ for thing, check_func in {
     ):
         seconds = float(seconds)
         retry(find_table, wait_up_to_s=seconds)(ctx, check_func, nth=nth)
+
+
+@step("I should see a table that contains rows matching only these columns")
+def should_see_table_rows_matching_only_these_columns(ctx):
+    find_table(ctx, check_table_contains_rows_matching_only_these_columns)
+
+
+@step(
+    "I should not see a table that contains rows matching only these columns"
+)
+def should_not_see_table_rows_matching_only_these_columns(ctx):
+    do_not_find_table(
+        ctx, check_table_contains_rows_matching_only_these_columns
+    )
+
+
+@step("I wait to see a table that contains rows matching only these columns")
+def wait_to_see_table_rows_matching_only_these_columns(ctx):
+    retry(find_table)(
+        ctx, check_table_contains_rows_matching_only_these_columns
+    )
+
+
+@step(
+    'I wait up to "{seconds}" seconds to see a table that contains rows matching only these columns'
+)
+def wait_up_to_seconds_to_see_table_rows_matching_only_these_columns(
+    ctx, seconds
+):
+    retry(find_table, wait_up_to_s=float(seconds))(
+        ctx, check_table_contains_rows_matching_only_these_columns
+    )
+
+
+@step(
+    'I should see the "{nth}" table containing rows matching only these columns'
+)
+def should_see_nth_table_rows_matching_only_these_columns(ctx, nth):
+    find_table(
+        ctx, check_table_contains_rows_matching_only_these_columns, nth=nth
+    )
+
+
+@step(
+    'I wait to see the "{nth}" table containing rows matching only these columns'
+)
+def wait_to_see_nth_table_rows_matching_only_these_columns(ctx, nth):
+    retry(find_table)(
+        ctx, check_table_contains_rows_matching_only_these_columns, nth=nth
+    )
 
 
 def find_table_header(ctx, name, index=0):
