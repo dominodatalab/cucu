@@ -25,7 +25,8 @@ Never run `make test` — it runs the full suite and takes too long. Always run 
 `src/cucu/`:
 - `cli/core.py` — all CLI commands; add new ones here only
 - `steps/` — Gherkin step definitions; explicitly imported in `steps/__init__.py`
-- `browser/core.py` — Selenium wrapper; `browser/fuzzy/core.py` — JS-based DOM matching
+- `browser/core.py` — Selenium wrapper
+- `fuzzy/core.py` — JS-based DOM element matching
 - `environment.py` — Behave lifecycle hooks; do not modify directly
 - `hooks.py` — hook registration API
 - `config.py` — `CONFIG` global state; hierarchical config via `cucurc.yml` + env vars
@@ -57,8 +58,7 @@ New steps go in `src/cucu/steps/` and must be explicitly imported in `src/cucu/s
 Split into `find_*` + `action_*` helpers (importable by other step modules) and a `@step` wrapper:
 
 ```python
-from cucu import step
-from cucu.browser import fuzzy
+from cucu import step, fuzzy
 
 def find_button(ctx, name, index=0):
     return fuzzy.find(ctx.browser, name, ["button", 'input[type="button"]', '*[role="button"]'], index=index)
@@ -71,7 +71,7 @@ def step_impl(ctx, name):
     click_button(ctx, find_button(ctx, name))
 ```
 
-Use `fuzzy.find(ctx.browser, name, [css_selectors], index=index)` for all DOM matching — not XPath or direct CSS. Pass multiple selector alternatives; the JS library matches by visible text. Source: `src/cucu/browser/fuzzy/core.py`.
+Use `fuzzy.find(ctx.browser, name, [css_selectors], index=index)` for all DOM matching — not XPath or direct CSS. Pass multiple selector alternatives; the JS library matches by visible text. Source: `src/cucu/fuzzy/core.py`.
 
 For waiting variants, wrap with `retry()` instead of writing polling loops:
 
