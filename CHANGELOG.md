@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 # 1.4.9
+- Add - Match table rows with columns of interest instead of complete table match in table steps
 - Chore - add agent directives
 
 # 1.4.8

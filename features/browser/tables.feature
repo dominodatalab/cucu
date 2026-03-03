@@ -75,6 +75,41 @@ Feature: Tables
         | Foo  | .*            | .*            |
      """
 
+  Scenario: User can verify a table by matching only the columns they care about
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
+     Then I should see a table with rows matching these columns and values:
+        | Name   | Country       |
+        | Alfred | Germany       |
+        | Maria  | Mexico        |
+
+  Scenario: User can verify a table with only these columns in any order
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
+     Then I should see a table with rows matching these columns and values:
+        | Country      | Name   |
+        | Germany      | Alfred |
+        | Mexico       | Maria  |
+
+  Scenario: User can match table using header regex and cell regex
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
+     Then I should see a table with rows matching these columns and values:
+        | .*me   | Coun.*  |
+        | .*fred | Ger.*   |
+        | Maria  | Mexico  |
+
+  Scenario: User can match table when same header appears in multiple columns
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
+     Then I should see a table with rows matching these columns and values:
+        | Employee Name | Years of Service |
+        | John          | 10               |
+        | Kate          | 16               |
+
+  Scenario: User can match table when expected headers are in the second header row
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html"
+     Then I should see a table with rows matching these columns and values:
+        | Years | Months |
+        | 10    | 0      |
+        | 16    | 2      |
+
   Scenario: User can wait to verify an exact table
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/tables.html?delay_page_load_ms=5000"
      Then I wait to see a table that is the following:
