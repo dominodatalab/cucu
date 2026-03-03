@@ -1,0 +1,4 @@
+# Cursor Rules
+
+- Please refer to `.github/.copilot-instructions.md` for all project-specific coding guidelines, style preferences, and instructions.
+- Any new instructions for Cursor should be placed into `.github/.copilot-instructions.md` instead
