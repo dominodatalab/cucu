@@ -408,13 +408,13 @@ for thing, check_func in {
         retry(find_table, wait_up_to_s=seconds)(ctx, check_func, nth=nth)
 
 
-@step("I should see a table that contains rows matching only these columns")
+@step("I should see a table with rows matching these columns and values")
 def should_see_table_rows_matching_only_these_columns(ctx):
     find_table(ctx, check_table_contains_rows_matching_only_these_columns)
 
 
 @step(
-    "I should not see a table that contains rows matching only these columns"
+    "I should not see a table that contains rows matching these columns and values"
 )
 def should_not_see_table_rows_matching_only_these_columns(ctx):
     do_not_find_table(
@@ -422,7 +422,9 @@ def should_not_see_table_rows_matching_only_these_columns(ctx):
     )
 
 
-@step("I wait to see a table that contains rows matching only these columns")
+@step(
+    "I wait to see a table that contains rows matching these columns and values"
+)
 def wait_to_see_table_rows_matching_only_these_columns(ctx):
     retry(find_table)(
         ctx, check_table_contains_rows_matching_only_these_columns
@@ -430,7 +432,7 @@ def wait_to_see_table_rows_matching_only_these_columns(ctx):
 
 
 @step(
-    'I wait up to "{seconds}" seconds to see a table that contains rows matching only these columns'
+    'I wait up to "{seconds}" seconds to see a table that contains rows matching these columns and values'
 )
 def wait_up_to_seconds_to_see_table_rows_matching_only_these_columns(
     ctx, seconds
@@ -441,7 +443,7 @@ def wait_up_to_seconds_to_see_table_rows_matching_only_these_columns(
 
 
 @step(
-    'I should see the "{nth}" table containing rows matching only these columns'
+    'I should see the "{nth}" table containing rows matching these columns and values'
 )
 def should_see_nth_table_rows_matching_only_these_columns(ctx, nth):
     find_table(
@@ -450,7 +452,7 @@ def should_see_nth_table_rows_matching_only_these_columns(ctx, nth):
 
 
 @step(
-    'I wait to see the "{nth}" table containing rows matching only these columns'
+    'I wait to see the "{nth}" table containing rows matching these columns and values'
 )
 def wait_to_see_nth_table_rows_matching_only_these_columns(ctx, nth):
     retry(find_table)(
