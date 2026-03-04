@@ -5,7 +5,6 @@ import re
 import chromedriver_autoinstaller
 import geckodriver_autoinstaller
 import urllib3
-from requests.adapters import HTTPAdapter
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.common.action_chains import ActionChains
@@ -17,6 +16,9 @@ from selenium.webdriver.remote.command import Command
 from cucu import config, edgedriver_autoinstaller, logger
 from cucu.browser.core import Browser
 from cucu.browser.frames import search_in_all_frames
+
+# suppress warning caused by selenium_keep_alive taking an extra http connection
+logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
 
 
 class DisableLogger:
@@ -51,13 +53,6 @@ def init():
 class Selenium(Browser):
     def __init__(self, max_pool_size=2):
         self.driver = None
-
-        # Add another connection for selenium_keep_alive
-        adapter = HTTPAdapter(
-            pool_connections=max_pool_size, pool_maxsize=max_pool_size
-        )
-        self.mount("http://", adapter)
-        self.mount("https://", adapter)
 
     def open(
         self, browser, headless=False, selenium_remote_url=None, detach=False
