@@ -49,13 +49,7 @@ def behave_table_to_array(table):
         array of rows representing the behave table provided.
     """
     result = [table.headings]
-
-    for row in table.rows:
-        values = []
-        for value in row:
-            values.append(value)
-        result.append(values)
-
+    result.extend(list(row) for row in table.rows)
     return result
 
 
@@ -73,8 +67,8 @@ def check_table_matches_table(table, expected_table):
 
     table_matched = bool(len(table) == len(expected_table))
     if table_matched:
-        for expected_row, row in zip(expected_table, table):
-            for expected_value, value in zip(expected_row, row):
+        for expected_row, row in zip(expected_table, table, strict=False):
+            for expected_value, value in zip(expected_row, row, strict=False):
                 if not re.match(expected_value, value):
                     table_matched = False
                     break
@@ -98,7 +92,7 @@ def check_table_contains_matching_rows_in_table(table, expected_table):
         for row in table:
             good_cols = len(expected_row) == len(row)
 
-            for expected_value, value in zip(expected_row, row):
+            for expected_value, value in zip(expected_row, row, strict=False):
                 if not re.match(expected_value, value):
                     good_cols = False
 
@@ -338,9 +332,9 @@ def do_not_find_table(ctx, assert_func, nth=None):
             matching_tables.append(tables[nth])
 
     else:
-        for table in tables:
-            if assert_func(table, expected):
-                matching_tables.append(table)
+        matching_tables.extend(
+            table for table in tables if assert_func(table, expected)
+        )
 
     # If none of the tables match the pattern, then return
     if len(matching_tables) == 0:
@@ -490,10 +484,10 @@ def get_table_cell_value(ctx, table, row, column, variable_name):
 
     try:
         cell_value = tables[table][row][column]
-    except IndexError:
+    except IndexError as e:
         raise RuntimeError(
             f"Cannot find table:{table + 1},row:{row + 1},column:{column + 1}. Please check your table data."
-        )
+        ) from e
     config.CONFIG[variable_name] = cell_value
 
 
@@ -527,10 +521,10 @@ def find_table_element(ctx, nth=1):
 
     try:
         return ctx.browser.css_find_elements("table")[nth]
-    except IndexError:
+    except IndexError as e:
         raise RuntimeError(
             f"Cannot find table:{nth + 1}. Please check your table data."
-        )
+        ) from e
 
 
 def click_table_cell(ctx, row, column, table):
@@ -548,10 +542,10 @@ def click_table_cell(ctx, row, column, table):
     try:
         row = table_element.find_elements(By.CSS_SELECTOR, "tbody tr")[row]
         cell = row.find_elements(By.CSS_SELECTOR, "td")[column]
-    except IndexError:
+    except IndexError as e:
         raise RuntimeError(
             f"Cannot find table:{table + 1},row:{row + 1},column:{column + 1}. Please check your table data."
-        )
+        ) from e
     ctx.browser.click(cell)
 
 
@@ -593,10 +587,10 @@ def wait_click_table_cell_matching_text(ctx, column, match_text, table):
                     f'Found {len(row)} rows with matching text "{match_text}", using the first row.'
                 )
             cell = row[0].find_elements(By.CSS_SELECTOR, "td")[column]
-        except IndexError:
+        except IndexError as e:
             raise RuntimeError(
                 f"Cannot find table:{table + 1},column:{column + 1},text:{match_text}. Please check your table data."
-            )
+            ) from e
 
         ctx.browser.click(cell)
 

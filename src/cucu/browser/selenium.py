@@ -114,7 +114,7 @@ class Selenium(Browser):
                         " you may need to restart it"
                     )
                     print("*" * 80)
-                    print("")
+                    print()
                     raise
             else:
                 logger.debug("webdriver.Chrome init")
@@ -161,7 +161,7 @@ class Selenium(Browser):
                         " you may need to restart it"
                     )
                     print("*" * 80)
-                    print("")
+                    print()
                     raise
             else:
                 logger.debug("webdriver.Firefox init")
@@ -197,7 +197,7 @@ class Selenium(Browser):
                         " you may need to restart it"
                     )
                     print("*" * 80)
-                    print("")
+                    print()
                     raise
             else:
                 logger.debug("webdriver.Edge init")

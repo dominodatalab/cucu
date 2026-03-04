@@ -14,12 +14,7 @@ def test_any_subclass_of_browser_gets_appropriate_error_from_unimplemented_class
         if method_name in ignore_methods:
             continue
 
+        method = browser.__getattribute__(method_name)
+        args = ["fake argument" for _ in range(0, method.__code__.co_argcount - 1)]
         with pytest.raises(RuntimeError, match="implement me"):
-            method = browser.__getattribute__(method_name)
-            print(method.__code__.co_argcount)
-            args = [
-                "fake argument"
-                for _ in range(0, method.__code__.co_argcount - 1)
-            ]
-            # XXX: eventually need to pass keyword arguments
             method(*args)

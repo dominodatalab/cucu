@@ -102,5 +102,5 @@ def try_in_frames_until_success(browser: Browser, function_to_run) -> None:
                 else:
                     raise RuntimeError(
                         f"{function_to_run.__name__} failed in all frames"
-                    )
+                    ) from None
             return

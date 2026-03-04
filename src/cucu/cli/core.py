@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import shutil
 import signal
@@ -240,12 +239,8 @@ def run(
     init_global_hook_variables()
     dumper = None
 
-    if os.environ.get("CUCU") == "true":
-        # when cucu is already running it means that we're running inside
-        # another cucu process and therefore we should make sure the results
-        # directory isn't the default one and throw an exception otherwise
-        if results == Path("results"):
-            raise Exception(
+    if os.environ.get("CUCU") == "true" and results == Path("results"):
+        raise Exception(
                 "running within cucu but --results was not used, "
                 "this would lead to some very difficult to debug "
                 "failures as this process would clobber the "
@@ -259,9 +254,8 @@ def run(
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())
 
-    if not preserve_results:
-        if results.exists():
-            shutil.rmtree(results)
+    if not preserve_results and results.exists():
+        shutil.rmtree(results)
 
     results.mkdir(parents=True, exist_ok=True)
 
@@ -392,7 +386,7 @@ def run(
                                 child.kill()
 
                             worker_proc.kill()
-                        except psutil.NoSuchProcess:
+                        except psutil.NoSuchProcess:  # noqa: PERF203
                             pass
 
                 def handle_kill_signal(signum, frame):
@@ -485,7 +479,7 @@ def run(
                 task_failed.update(async_results)
 
                 if task_failed:
-                    failing_features = [str(x) for x in task_failed.keys()]
+                    failing_features = [str(x) for x in task_failed]
                     logger.error(
                         f"Failing Features:\n{'\n'.join(failing_features)}"
                     )
@@ -527,7 +521,7 @@ def _generate_report(
 
     if junit_folder:
         for junit_file in junit_folder.rglob("*.xml"):
-            junit = ET.parse(junit_file)
+            junit = ET.parse(junit_file)  # noqa: S314
             test_suite = junit.getroot()
             ts_folder = test_suite.get("foldername")
             for test_case in test_suite.iter("testcase"):
@@ -694,7 +688,7 @@ def lint(filepath, fix, logging_level):
                         print(
                             "failure loading some steps, see above for details"
                         )
-                        print("")
+                        print()
                         continue
 
                     location = violation["location"]

@@ -68,7 +68,7 @@ def i_echo_the_following(ctx):
     elif ctx.table is not None:
         printer = ModelPrinter(sys.stdout)
         printer.print_table(ctx.table)
-        print("")
+        print()
 
 
 @step('I log "{message}" at level "{level}"')

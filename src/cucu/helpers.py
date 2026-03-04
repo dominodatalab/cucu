@@ -6,7 +6,7 @@ from cucu import logger, retry, run_steps
 from cucu.config import CONFIG
 
 
-class step(object):
+class step:
     """
     Only to be used in this file as we're redefining the @step decorator in
     order to fix the code location of the @step() usage.

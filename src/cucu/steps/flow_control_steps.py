@@ -23,8 +23,8 @@ def expect_the_following_step_to_fail(ctx, message):
     except Exception as exception:
         if str(exception).find(message) == -1:
             raise RuntimeError(
-                f'expected failure message was "{str(exception)}" not "{message}"'
-            )
+                f'expected failure message was "{exception!s}" not "{message}"'
+            ) from exception
         return
 
     raise RuntimeError("previous steps did not fail!")

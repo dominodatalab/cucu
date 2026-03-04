@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 #
 # adapted from:
 #   https://github.com/behave/behave/blob/master/behave/formatter/json.py
 #
-from __future__ import absolute_import
 
 import json
 import traceback
 import uuid
+from typing import ClassVar
 
 import six
 from behave.formatter.base import Formatter
@@ -23,15 +22,15 @@ from cucu.config import CONFIG
 class CucuJSONFormatter(Formatter):
     name = "cucu-json"
     description = "JSON dump of test run"
-    dumps_kwargs = {"indent": 2, "sort_keys": True}
+    dumps_kwargs: ClassVar = {"indent": 2, "sort_keys": True}
 
     split_text_into_lines = True  # EXPERIMENT for better readability.
 
-    json_number_types = six.integer_types + (float,)
-    json_scalar_types = json_number_types + (six.text_type, bool, type(None))
+    json_number_types = (*six.integer_types, float)
+    json_scalar_types = (*json_number_types, six.text_type, bool, type(None))
 
     def __init__(self, stream_opener, config):
-        super(CucuJSONFormatter, self).__init__(stream_opener, config)
+        super().__init__(stream_opener, config)
         # -- ENSURE: Output stream is open.
         self.stream = self.open()
         self.feature_count = 0
@@ -244,7 +243,7 @@ class CucuJSONFormatter(Formatter):
 
     # -- JSON-DATA COLLECTION:
     def add_feature_element(self, element):
-        assert self.current_feature_data is not None
+        assert self.current_feature_data is not None  # noqa: S101
         if "elements" not in self.current_feature_data:
             self.current_feature_data["elements"] = []
         self.current_feature_data["elements"].append(element)
@@ -252,12 +251,12 @@ class CucuJSONFormatter(Formatter):
 
     @property
     def current_feature_element(self):
-        assert self.current_feature_data is not None
+        assert self.current_feature_data is not None  # noqa: S101
         return self.current_feature_data["elements"][-1]
 
     def update_status_data(self):
-        assert self.current_feature
-        assert self.current_feature_data
+        assert self.current_feature  # noqa: S101
+        assert self.current_feature_data  # noqa: S101
         self.current_feature_data["status"] = self.current_feature.status.name
 
     def finish_current_scenario(self):

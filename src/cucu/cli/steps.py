@@ -40,9 +40,8 @@ def load_cucu_steps(filepath=None):
     stdout = io.StringIO()
     stderr = io.StringIO()
 
-    with contextlib.redirect_stderr(stderr):
-        with contextlib.redirect_stdout(stdout):
-            error = behave_tweaks.behave_main(args)
+    with contextlib.redirect_stderr(stderr), contextlib.redirect_stdout(stdout):
+        error = behave_tweaks.behave_main(args)
 
     stdout = stdout.getvalue()
     stderr = stderr.getvalue()

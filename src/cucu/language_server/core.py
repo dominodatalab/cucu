@@ -36,7 +36,7 @@ def find_completions(step_fragment, steps_cache=None):
         steps_cache, _ = load_cucu_steps()
 
     # first pass try to find steps that start with fragment provided
-    for step in steps_cache.keys():
+    for step in steps_cache:
         if step.startswith(step_fragment):
             step_details = steps_cache[step]
             location = step_details["location"]
@@ -46,7 +46,7 @@ def find_completions(step_fragment, steps_cache=None):
     # if there were 0 steps found then lets at least find some that are close
     # based on some string distance heuristic
     if len(items) == 0:
-        for step in steps_cache.keys():
+        for step in steps_cache:
             if jellyfish.jaro_similarity(step_fragment, step) > 0.6:
                 step_details = steps_cache[step]
                 location = step_details["location"]

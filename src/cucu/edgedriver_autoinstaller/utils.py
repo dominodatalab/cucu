@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Helper functions for filename and URL generation.
 """
@@ -215,7 +214,7 @@ def download_edgedriver(cwd=False):
             if response.status_code != 200:
                 raise Exception("URL Not Found")
         except Exception:
-            raise RuntimeError(f"Failed to download edgedriver archive: {url}")
+            raise RuntimeError(f"Failed to download edgedriver archive: {url}") from None
         archive = BytesIO(response.content)
         with zipfile.ZipFile(archive) as zip_file:
             zip_file.extract(edgedriver_filename, edgedriver_dir)

@@ -112,6 +112,6 @@ def find(
         logger.debug("Fuzzy found no element.")
         return None
     logger.debug(
-        "Fuzzy found element by search term {}".format(fuzzy_return[1])
+        f"Fuzzy found element by search term {fuzzy_return[1]}"
     )
     return fuzzy_return[0]

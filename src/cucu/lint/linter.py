@@ -29,7 +29,7 @@ def load_lint_rules(rules, filepath):
     for lint_rule_filepath in lint_rule_filepaths:
         logger.debug(f"loading lint rules from {lint_rule_filepath}")
 
-        with open(lint_rule_filepath, "r", encoding="utf8") as _input:
+        with open(lint_rule_filepath, encoding="utf8") as _input:
             rules_loaded = yaml.safe_load(_input.read())
 
         for rule_name, rule in rules_loaded.items():
@@ -149,11 +149,7 @@ def parse_matcher(name, rule_name, rule, line, state):
 
 def lint_line(state, rules, steps, line_number, lines, filepath):
     """ """
-    if line_number >= 1:
-        previous_line = lines[line_number - 1]
-
-    else:
-        previous_line = None
+    previous_line = lines[line_number - 1] if line_number >= 1 else None
 
     current_line = lines[line_number]
 
@@ -165,7 +161,7 @@ def lint_line(state, rules, steps, line_number, lines, filepath):
     logger.debug(f'linting line "{current_line}"')
 
     violations = []
-    for rule_name in rules.keys():
+    for rule_name in rules:
         logger.debug(f' * checking against rule "{rule_name}"')
         rule = rules[rule_name]
 
@@ -203,10 +199,7 @@ def lint_line(state, rules, steps, line_number, lines, filepath):
             type = rule["type"][0].upper()
             message = rule["message"]
 
-            if "fix" in rule:
-                fix = rule["fix"]
-            else:
-                fix = None
+            fix = rule.get("fix")
 
             violations.append(
                 {
@@ -251,7 +244,8 @@ def fix(violations):
 
     deletions = []
     filepath = violations[0]["location"]["filepath"]
-    lines = open(filepath, "r").read().split("\n")
+    with open(filepath) as f:
+        lines = f.read().split("\n")
 
     for violation in violations:
         if violation["fix"] is None:
@@ -355,7 +349,8 @@ def lint(filepath):
     for feature_filepath in feature_filepaths:
         state["current_feature_filepath"] = feature_filepath
 
-        lines = open(feature_filepath).read().split("\n")
+        with open(feature_filepath) as f:
+            lines = f.read().split("\n")
         line_number = 0
 
         violations = []
@@ -364,7 +359,7 @@ def lint(filepath):
             "'''": False,
         }
 
-        for line in lines:
+        for line_number, line in enumerate(lines):
             state["current_line_number"] = line_number
 
             feature_match = re.match(".*Feature: (.*)", line)
@@ -387,11 +382,8 @@ def lint(filepath):
                 in_docstring["'''"] = not in_docstring["'''"]
 
             if not (in_docstring['"""'] or in_docstring["'''"]):
-                for violation in lint_line(
-                    state, rules, steps, line_number, lines, feature_filepath
-                ):
-                    violations.append(violation)
-
-            line_number += 1
+                violations.extend(
+                    lint_line(state, rules, steps, line_number, lines, feature_filepath)
+                )
 
         yield violations

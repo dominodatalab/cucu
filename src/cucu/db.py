@@ -303,9 +303,9 @@ def finish_scenario_record(scenario_obj):
         duration=duration,
         end_at=end_at,
         log_files=log_files_json,
-        cucu_config=getattr(scenario_obj, "cucu_config_json", dict()),
-        browser_info=getattr(scenario_obj, "browser_info", dict()),
-        custom_data=getattr(scenario_obj, "custom_data", dict()),
+        cucu_config=getattr(scenario_obj, "cucu_config_json", {}),
+        browser_info=getattr(scenario_obj, "browser_info", {}),
+        custom_data=getattr(scenario_obj, "custom_data", {}),
     ).where(scenario.scenario_run_id == scenario_obj.scenario_run_id).execute()
 
 
@@ -491,7 +491,7 @@ def consolidate_database_files(results_dir, combine=False):
             with sqlite3.connect(db_file) as source_conn:
                 source_cursor = source_conn.cursor()
                 for table_name in tables_to_copy:
-                    source_cursor.execute(f"SELECT * FROM {table_name}")
+                    source_cursor.execute(f"SELECT * FROM {table_name}")  # noqa: S608
                     rows = source_cursor.fetchall()
                     source_cursor.execute(f"PRAGMA table_info({table_name})")
                     columns = [col[1] for col in source_cursor.fetchall()]
@@ -509,7 +509,7 @@ def consolidate_database_files(results_dir, combine=False):
 
                     placeholders = ",".join(["?" for _ in columns])
                     target_cursor.executemany(
-                        f"INSERT OR REPLACE INTO {table_name} VALUES ({placeholders})",
+                        f"INSERT OR REPLACE INTO {table_name} VALUES ({placeholders})",  # noqa: S608
                         rows,
                     )
                     target_conn.commit()
