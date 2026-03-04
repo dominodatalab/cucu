@@ -397,7 +397,7 @@ def start_selenium_keep_alive(ctx):
     # Create and start the keep-alive
     ctx.selenium_keep_alive = SeleniumKeepAlive(ctx.browser, interval=interval)
     ctx.selenium_keep_alive.start()
-    logger.info("Selenium keep-alive enabled for this scenario")
+    logger.debug("Selenium keep-alive enabled for this scenario")
 
 
 def stop_selenium_keep_alive(ctx):

@@ -5,6 +5,7 @@ import re
 import chromedriver_autoinstaller
 import geckodriver_autoinstaller
 import urllib3
+from requests.adapters import HTTPAdapter
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.common.action_chains import ActionChains
@@ -48,8 +49,15 @@ def init():
 
 
 class Selenium(Browser):
-    def __init__(self):
+    def __init__(self, max_pool_size=2):
         self.driver = None
+
+        # Add another connection for selenium_keep_alive
+        adapter = HTTPAdapter(
+            pool_connections=max_pool_size, pool_maxsize=max_pool_size
+        )
+        self.mount("http://", adapter)
+        self.mount("https://", adapter)
 
     def open(
         self, browser, headless=False, selenium_remote_url=None, detach=False
