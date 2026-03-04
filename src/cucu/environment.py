@@ -289,7 +289,7 @@ def after_step(ctx, step):
         step.status = Status.failed
 
     # adjust status for AssertionError wrapped in Tenacity RetryError
-    if step.status == Status.error and isinstance(
+    if step.status == Status.error and hasattr(step.exception, 'last_attempt') and isinstance(
         step.exception.last_attempt._exception, AssertionError
     ):
         step.status = Status.failed
