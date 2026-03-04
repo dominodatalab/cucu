@@ -27,7 +27,7 @@ def find_input(ctx, name, index=0):
         the WebElement that matches the provided arguments.
 
     raises:
-        a AssertionError if the input isn't found
+        an AssertionError if the input isn't found
     """
     ctx.check_browser_initialized()
 

@@ -142,7 +142,7 @@ def click_dropdown(ctx, dropdown):
     ctx.check_browser_initialized()
 
     if base_steps.is_disabled(dropdown):
-        raise AssertionError("unable to click the button, as it is disabled")
+        raise AssertionError("unable to click the dropdown, as it is disabled")
 
     logger.debug("clicking dropdown")
     try:

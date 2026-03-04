@@ -51,7 +51,7 @@ def init():
 
 
 class Selenium(Browser):
-    def __init__(self, max_pool_size=2):
+    def __init__(self):
         self.driver = None
 
     def open(

@@ -53,7 +53,7 @@ def should_see_it_doest_not_contain(_, this, that):
 @step('I should see "{this}" does not contain the following')
 def should_see_it_does_not_contain(ctx, this):
     if ctx.text in this:
-        raise AssertionError(f"\n{this}\n contain:\n{ctx.text}")
+        raise AssertionError(f"\n{this}\n contains:\n{ctx.text}")
 
 
 @step('I should see "{this}" is equal to the following')
