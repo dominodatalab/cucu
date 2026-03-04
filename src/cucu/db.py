@@ -300,7 +300,7 @@ def finish_scenario_record(scenario_obj):
     scenario.update(
         status=status,
         duration=duration,
-        start_at=parse_iso_timestamp(getattr(scenario_obj, "start_at", None)),
+        start_at=start_at,
         end_at=end_at,
         log_files=log_files_json,
         cucu_config=getattr(scenario_obj, "cucu_config_json", dict()),
