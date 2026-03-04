@@ -1,31 +1,12 @@
 import operator
-import re
 import sys
 import time
 
-import parse
-from behave import register_type
 from behave.model_describe import ModelPrinter
 
 from cucu import logger, step
 from cucu.ansi_parser import remove_ansi
 from cucu.config import CONFIG
-
-NTH_REGEX = r"(\d+)(nd|th|rd|st)"
-
-
-@parse.with_pattern(NTH_REGEX)
-def parse_nth(nth):
-    matcher = re.match(NTH_REGEX, nth)
-
-    if matcher is None:
-        raise Exception(f"nth expression {nth} is invalid")
-
-    number, _ = matcher.groups()
-    return int(number) - 1
-
-
-register_type(nth=parse_nth)
 
 
 def is_disabled(element):
