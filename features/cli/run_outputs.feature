@@ -61,8 +61,7 @@ Feature: Run outputs
       """
       And I should see "{STDERR}" matches the following
       """
-      [\s\S]*
-      RuntimeError: test run failed, see above for details
+      Error: test run failed, see above for details
 
       """
 
