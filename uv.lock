@@ -258,7 +258,7 @@ toml = [
 
 [[package]]
 name = "cucu"
-version = "1.4.8"
+version = "1.4.10"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
