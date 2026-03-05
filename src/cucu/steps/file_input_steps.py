@@ -29,7 +29,7 @@ def find_file_input(ctx, name, index=0):
     take_saw_element_screenshot(ctx, "file input", name, index, element)
 
     if element is None:
-        raise RuntimeError(f'unable to find the {prefix}file input "{name}"')
+        raise AssertionError(f'unable to find the {prefix}file input "{name}"')
 
     return element
 

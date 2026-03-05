@@ -5,19 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.10
+- Chore - upgrade behave from 1.2.6 to 1.3.3
+  - reorder core.py imports for BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON
+  - from RuntimeError to AssertionError for step failure
+  - some ordering between environment.py and rundb.py
+  - expect first output `USING RUNNER: behave.runner:Runner`
+  - don't expect `, # undefined` steps when 0
+  - behave renamed "AssertionError" to "ASSERT FAILED"
+  - behave renamed Status `errored` to `error`
+  - consider undefined as failure of test
+
+## Upgrade behave from 1.2.6 to 1.3.3
+There was a long gap between 1.2.6 and 1.3.0 (was 1.2.7) which introduced a few major changes under the hood.
+The most significant change for cucu is how behave imports python modules when cucu is running with multiple workers. This caused an out-of-order loading where cucu's custom parse `nth` wasn't being loaded before the steps.
+
 # 1.4.9
 - Add - Match table rows with columns of interest instead of complete table match in table steps
 - Chore - add agent directives
 
 # 1.4.8
 - Fix - convert html tables with rowspan and colspan to uniform rectangular logical tables
-        for realiable comparison in table steps
+        for reliable comparison in table steps
 
 # 1.4.7
 - Change - fuzzy find matching with relevance score
 - Add - config to disable feature CUCU_SKIP_FUZZY_RELEVANCE: true
 
-##  Relevance scoring (ordering)
+### Relevance scoring (ordering)
 
 Case-sensitive matching. Higher scores rank first. After scoring, we
 deduplicate and sort by score desc, then by original discovery order
