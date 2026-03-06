@@ -1,10 +1,11 @@
 import tempfile
+from unittest.mock import MagicMock, patch
 
 import pytest
 import pytest_check as check
 
 import cucu
-from cucu.config import CONFIG, Config, leaf_map
+from cucu.config import CONFIG, Config, _get_local_address, leaf_map
 
 
 def test_config_lookup_for_inexistent_is_none():
@@ -263,3 +264,24 @@ def test_config_empty_snapshots_list():
     # restore and pop should handle empty snapshots gracefully
     config.restore()  # should not raise
     config.restore(with_pop=True)  # should not raise
+
+
+def test_get_local_address_uses_env_var(monkeypatch):
+    monkeypatch.setenv("HOST_ADDRESS", "192.0.2.1")
+    assert _get_local_address() == "192.0.2.1"
+
+
+def test_get_local_address_uses_socket_when_env_var_not_set(monkeypatch):
+    monkeypatch.delenv("HOST_ADDRESS", raising=False)
+    mock_socket = MagicMock()
+    mock_socket.getsockname.return_value = ("10.0.0.5", 0)
+    with patch("cucu.config.socket.socket", return_value=mock_socket):
+        assert _get_local_address() == "10.0.0.5"
+
+
+def test_get_local_address_falls_back_to_loopback_on_oserror(monkeypatch):
+    monkeypatch.delenv("HOST_ADDRESS", raising=False)
+    mock_socket = MagicMock()
+    mock_socket.connect.side_effect = OSError("Operation not permitted")
+    with patch("cucu.config.socket.socket", return_value=mock_socket):
+        assert _get_local_address() == "127.0.0.1"

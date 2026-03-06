@@ -363,9 +363,17 @@ def _get_local_address():
     """
     internal method to get the current host address
     """
-    google_dns_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    google_dns_socket.connect(("8.8.8.8", 80))
-    return google_dns_socket.getsockname()[0]
+    # Respect an explicitly configured value so callers in restricted
+    # environments (e.g. sandbox / CI lint steps) can skip the socket call.
+    if host := os.environ.get("HOST_ADDRESS"):
+        return host
+
+    try:
+        google_dns_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        google_dns_socket.connect(("8.8.8.8", 80))
+        return google_dns_socket.getsockname()[0]
+    except OSError:
+        return "127.0.0.1"
 
 
 CONFIG.define(
