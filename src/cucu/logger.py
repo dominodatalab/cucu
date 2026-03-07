@@ -22,6 +22,8 @@ def init_logging(logging_level):
 
     logging.debug("logger initialized")
 
+    logging.getLogger("boto3").setLevel(logging.WARNING)
+    logging.getLogger("botocore").setLevel(logging.WARNING)
     logging.getLogger("parse").setLevel(logging.WARNING)
     logging.getLogger("selenium").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)

@@ -3,6 +3,7 @@
 #      writing while not interfering with the way behave does its own log
 #      capturing
 #
+import logging
 import os
 import sys
 import warnings
@@ -11,11 +12,20 @@ from functools import wraps
 # set env var BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON=yes before importing behave
 os.environ["BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON"] = "yes"
 
-import behave
-from behave.__main__ import main as original_behave_main
-from behave.model import Table
+# behave has unfixed invalid escape sequences in its vendored code; suppress
+# them before importing so they don't pollute cucu's output
+warnings.filterwarnings("ignore", category=SyntaxWarning, module="behave")
 
-from cucu.config import CONFIG
+# boto3/botocore emit INFO-level credential discovery messages whenever a
+# boto3 session is created; raise their threshold so they don't appear in output
+logging.getLogger("boto3").setLevel(logging.WARNING)
+logging.getLogger("botocore").setLevel(logging.WARNING)
+
+import behave  # noqa: E402
+from behave.__main__ import main as original_behave_main  # noqa: E402
+from behave.model import Table  # noqa: E402
+
+from cucu.config import CONFIG  # noqa: E402
 
 
 def behave_main(args):
