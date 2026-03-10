@@ -49,7 +49,12 @@ def parse_log_to_html(input: str) -> str:
     head = '<head>\n<meta http-equiv="Content-Type" content="text/html; charset=utf-8">\n</head>\n'
     body_start = '<body style="color: white; background-color: #100c08;">'  # use dark bg since colors are from behave
     body_end = "</body>\n"
-    result = f"{html_start}{head}{body_start}<pre>\n{RE_TO_HTML.sub(lambda match: TRANSLATION[match.group(0)], html.escape(input, quote=False))}\n</pre>{body_end}{html_end}"
+    result = f"{html_start}{head}{body_start}<pre>\n{
+        RE_TO_HTML.sub(
+            lambda match: TRANSLATION[match.group(0)],
+            html.escape(input, quote=False),
+        )
+    }\n</pre>{body_end}{html_end}"
     if ESC_SEQ in result:
         lines = "\n".join([x for x in result.split("\n") if ESC_SEQ in x])
 
