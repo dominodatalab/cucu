@@ -51,6 +51,21 @@ Tests:
 - Always check exit codes + stdout/stderr when running shell commands
 - Use default `results/` folder; never pass `--results` in examples or tests
 
+### Commit messages
+- Changelog-style: `type: subject` (types: feat, fix, chore, docs, refactor, test, build, ci). Subject and body bullets in simple present only (add/fix/update, never added/fixed/updated). Optional body with `-` bullets. No period on subject.
+
+### PR commit messages
+- When asked to create a PR message: use the diff from main (or the current branch) to draft title and body. Put the JIRA ticket first in the title: `{JIRA-TICKET} {Title description}`. Body in simple present with `-` bullets; keep it concise.
+
+### Branch splitting (theme-based PRs)
+
+When the user asks to **split** changes into separate branches:
+
+1. **Define themes** — One named slice per branch. Do not mix themes on a branch.
+2. **Per theme:** Create a **new branch from main** (not from the feature branch unless the user says otherwise). Apply only that theme’s files: `git checkout <source-branch> -- path/to/file1 path/to/file2`, then `git add` and a single commit (see Commit messages). Verify with a diff of those paths against the source. Do **not** cherry-pick unless the user explicitly asks.
+3. **Report** — Branch name(s), what each contains, and the suggested commit message for each.
+
+
 ## Step Definitions
 
 New steps go in `src/cucu/steps/` and must be explicitly imported in `src/cucu/steps/__init__.py`.
