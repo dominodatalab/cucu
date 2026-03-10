@@ -1,6 +1,6 @@
 [project]
 name = "cucu"
-version = "1.4.5"
+version = "1.4.9"
 description = "Easy BDD web testing"
 readme = "README.md"
 license = "BSD-3-Clause-Clear"
@@ -54,7 +54,7 @@ dependencies = [
     "pyyaml~=6.0.1",
     "requests>=2.31.0,<3.0.0",
     "selenium>=4.38",
-    "tabulate~=0.9.0",
+    "tabulate~=0.10.0",
     "tenacity>=9.0",
 ]
 

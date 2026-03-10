@@ -476,6 +476,11 @@ CONFIG.define(
     "keep-alive total max duration in seconds to prevent infinite keep-alive pings (default: 30 minutes)",
     default=1800,
 )
+CONFIG.define(
+    "CUCU_SKIP_FUZZY_RELEVANCE",
+    "when set to 'True' skips calculating relevance scores for fuzzy find and doesn't sort by relevance",
+    default=False,
+)
 
 
 # define re_map here instead of in utils.py to avoid circular import
