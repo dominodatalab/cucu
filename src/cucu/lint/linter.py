@@ -383,7 +383,14 @@ def lint(filepath):
 
             if not (in_docstring['"""'] or in_docstring["'''"]):
                 violations.extend(
-                    lint_line(state, rules, steps, line_number, lines, feature_filepath)
+                    lint_line(
+                        state,
+                        rules,
+                        steps,
+                        line_number,
+                        lines,
+                        feature_filepath,
+                    )
                 )
 
         yield violations

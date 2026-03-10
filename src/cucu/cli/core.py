@@ -241,11 +241,11 @@ def run(
 
     if os.environ.get("CUCU") == "true" and results == Path("results"):
         raise Exception(
-                "running within cucu but --results was not used, "
-                "this would lead to some very difficult to debug "
-                "failures as this process would clobber the "
-                "parent results directory"
-            )
+            "running within cucu but --results was not used, "
+            "this would lead to some very difficult to debug "
+            "failures as this process would clobber the "
+            "parent results directory"
+        )
 
     # set for testing cucu itself but basically allows you to know when cucu
     # is running itself as part of internal testing
@@ -386,7 +386,7 @@ def run(
                                 child.kill()
 
                             worker_proc.kill()
-                        except psutil.NoSuchProcess:  # noqa: PERF203
+                        except psutil.NoSuchProcess:
                             pass
 
                 def handle_kill_signal(signum, frame):

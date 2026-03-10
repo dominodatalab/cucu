@@ -135,7 +135,7 @@ def before_scenario(ctx, scenario):
         try:
             hook(ctx)
             logger.debug(f"HOOK {hook.__name__}: passed ✅")
-        except Exception as e:  # noqa: PERF203
+        except Exception as e:
             error_message = (
                 f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}\n"
             )

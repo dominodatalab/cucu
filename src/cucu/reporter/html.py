@@ -1,7 +1,7 @@
 import shutil
 import sys
 import traceback
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from xml.sax.saxutils import escape as escape_
 
@@ -68,7 +68,7 @@ def browser_timestamp_to_datetime(value):
     """Convert a browser timestamp (in milliseconds since epoch) to a datetime object"""
     try:
         timestamp_sec = int(value) / 1000.0
-        return datetime.fromtimestamp(timestamp_sec, tz=timezone.utc).strftime(
+        return datetime.fromtimestamp(timestamp_sec, tz=UTC).strftime(
             "%Y-%m-%d %H:%M:%S,%f"
         )[:-3]
     except (ValueError, TypeError):
@@ -204,7 +204,7 @@ def generate(results: Path, basepath: Path):
                         scenario_dict["start_at"] - feature_dict["start_at"]
                     ).total_seconds()
                     scenario_dict["time_offset"] = datetime.fromtimestamp(
-                        offset_seconds, timezone.utc
+                        offset_seconds, UTC
                     )
 
                 if not scenario_configpath.exists():
@@ -227,7 +227,7 @@ def generate(results: Path, basepath: Path):
                         sub_header = handler(scenario_dict, feature_dict)
                         if sub_header:
                             sub_headers.append(sub_header)
-                    except Exception:  # noqa: PERF203
+                    except Exception:
                         logger.warning(
                             f'Exception while trying to run sub_headers hook for scenario: "{scenario_dict["name"]}"\n{traceback.format_exc()}'
                         )
@@ -261,7 +261,7 @@ def generate(results: Path, basepath: Path):
                         (
                             timestamp - scenario_dict["start_at"]
                         ).total_seconds(),
-                        timezone.utc,
+                        UTC,
                     )
                     step_dict["time_offset"] = time_offset
 
@@ -350,12 +350,15 @@ def generate(results: Path, basepath: Path):
         feature_stats_db = db.db.execute_sql("SELECT * FROM flat_feature")
         keys = tuple([x[0] for x in feature_stats_db.description])
         feature_stats = [
-            dict(zip(keys, x, strict=False)) for x in feature_stats_db.fetchall()
+            dict(zip(keys, x, strict=False))
+            for x in feature_stats_db.fetchall()
         ]
 
         grand_totals_db = db.db.execute_sql("SELECT * FROM flat_all")
         keys = tuple([x[0] for x in grand_totals_db.description])
-        grand_totals = dict(zip(keys, grand_totals_db.fetchone(), strict=False))
+        grand_totals = dict(
+            zip(keys, grand_totals_db.fetchone(), strict=False)
+        )
 
         ## Generate index.html and flat.html
 

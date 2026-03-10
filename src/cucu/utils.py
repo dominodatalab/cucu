@@ -11,7 +11,7 @@ import re
 import shutil
 import threading
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import humanize
@@ -381,7 +381,7 @@ def get_iso_timestamp_with_ms():
     """
     Get the current time as an ISO 8601 formatted string with milliseconds precision.
     """
-    return datetime.now(tz=timezone.utc).isoformat()[:-3]
+    return datetime.now(tz=UTC).isoformat()[:-3]
 
 
 def parse_iso_timestamp(iso_timestamp: (str | None)) -> datetime | None:

@@ -1,4 +1,3 @@
-
 import traceback
 
 from behave.formatter.ansi_escapes import colors, escapes, up
@@ -237,7 +236,10 @@ class CucuFormatter(Formatter):
     def eof(self):
         self.stream.write("\n")
 
-        if self.current_scenario and self.current_scenario.status.name == "failed":
+        if (
+            self.current_scenario
+            and self.current_scenario.status.name == "failed"
+        ):
             # we need to record the error_message and exc_traceback in the
             # last executed step and mark it as failed so the reporting can
             # show the result correctly

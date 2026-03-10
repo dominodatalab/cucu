@@ -1,6 +1,6 @@
 import os
 import traceback
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from xml.sax.saxutils import escape
 
 import bs4
@@ -36,7 +36,7 @@ class CucuJUnitFormatter(Formatter):
 
     def feature(self, feature):
         self.current_feature = feature
-        date_now = datetime.now(tz=timezone.utc)
+        date_now = datetime.now(tz=UTC)
         self.feature_results = {
             "name": escape(feature.name),
             "foldername": escape(ellipsize_filename(feature.name)),
@@ -73,7 +73,9 @@ class CucuJUnitFormatter(Formatter):
                 failure_handlers = CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"]
 
                 failures.extend(
-                    failure_handler(self.current_feature, self.current_scenario)
+                    failure_handler(
+                        self.current_feature, self.current_scenario
+                    )
                     for failure_handler in failure_handlers
                 )
 

@@ -40,7 +40,10 @@ def load_cucu_steps(filepath=None):
     stdout = io.StringIO()
     stderr = io.StringIO()
 
-    with contextlib.redirect_stderr(stderr), contextlib.redirect_stdout(stdout):
+    with (
+        contextlib.redirect_stderr(stderr),
+        contextlib.redirect_stdout(stdout),
+    ):
         error = behave_tweaks.behave_main(args)
 
     stdout = stdout.getvalue()
@@ -121,7 +124,7 @@ def print_json_steps(filepath=None):
     """
     pretty print the steps in a JSON fart
     """
-    steps, steps_error = load_cucu_steps(filepath=filepath)
+    steps, _steps_error = load_cucu_steps(filepath=filepath)
     print(json.dumps(steps, indent=2, sort_keys=True))
 
 

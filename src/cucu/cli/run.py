@@ -3,7 +3,7 @@ import json
 import os
 import socket
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from cucu import (
@@ -162,10 +162,10 @@ def behave(
                 contextlib.redirect_stderr(output),
                 contextlib.redirect_stdout(output),
             ):
-                        # intercept the stdout/stderr so we can do things such
-                        # as hiding secrets in logs
-                        behave_tweaks.init_outputs(sys.stdout, sys.stderr)
-                        result = behave_tweaks.behave_main(args)
+                # intercept the stdout/stderr so we can do things such
+                # as hiding secrets in logs
+                behave_tweaks.init_outputs(sys.stdout, sys.stderr)
+                result = behave_tweaks.behave_main(args)
         else:
             # intercept the stdout/stderr so we can do things such
             # as hiding secrets in logs
@@ -195,7 +195,7 @@ def create_run(results_path: Path, filepath: Path):
         "filepath": str(filepath),
         "full_arguments": sys.argv,
         "env": env_values,
-        "date": datetime.now(tz=timezone.utc).isoformat(),
+        "date": datetime.now(tz=UTC).isoformat(),
     }
 
     run_json_filepath.write_text(
