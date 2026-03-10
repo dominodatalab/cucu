@@ -51,6 +51,12 @@ Tests:
 - Always check exit codes + stdout/stderr when running shell commands
 - Use default `results/` folder; never pass `--results` in examples or tests
 
+### Commit messages
+- Changelog-style: `type: subject` (types: feat, fix, chore, docs, refactor, test, build, ci). Subject and body bullets in simple present only (add/fix/update, never added/fixed/updated). Optional body with `-` bullets. No period on subject.
+
+### PR commit messages
+- When asked to create a PR message: use the diff from main (or the current branch) to draft title and body. Put the JIRA ticket first in the title: `{JIRA-TICKET} {Title description}`. Body in simple present with `-` bullets; keep it concise.
+
 ## Step Definitions
 
 New steps go in `src/cucu/steps/` and must be explicitly imported in `src/cucu/steps/__init__.py`.
