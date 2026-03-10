@@ -3,21 +3,21 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Coverage for src/cucu/behave_tweaks.py: 90%</title>
-    <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
-    <link rel="stylesheet" href="style_cb_8e611ae1.css" type="text/css">
-    <script src="coverage_html_cb_6fb7b396.js" defer></script>
+    <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
+    <link rel="stylesheet" href="style_cb_9ff733b0.css" type="text/css">
+    <script src="coverage_html_cb_dd2e7eb5.js" defer></script>
 </head>
 <body class="pyfile">
 <header>
     <div class="content">
         <h1>
-            <span class="text">Coverage for </span><b>src/cucu/behave_tweaks.py</b>:
+            <span class="text">Coverage for </span><b>src&#8201;/&#8201;cucu&#8201;/&#8201;behave_tweaks.py</b>:
             <span class="pc_cov">90%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
             <label for="help_panel_state">
-                <img id="keyboard_icon" src="keybd_closed_cb_ce680311.png" alt="Show/hide keyboard shortcuts">
+                <img id="keyboard_icon" src="keybd_closed_cb_900cfef5.png" alt="Show/hide keyboard shortcuts">
             </label>
             <div id="help_panel">
                 <p class="legend">Shortcuts on this page</p>
@@ -66,8 +66,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_51433d0636feaf37___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.8.2">coverage.py v7.8.2</a>,
-            created at 2026-03-10 17:23 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.13.4">coverage.py v7.13.4</a>,
+            created at 2026-03-10 17:46 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -133,8 +133,8 @@
     <p class="run"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">            <span class="key">if</span> <span class="key">not</span> <span class="nam">variable_passthru</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">                <span class="nam">args</span> <span class="op">=</span> <span class="op">[</span><span class="nam">CONFIG</span><span class="op">.</span><span class="nam">resolve</span><span class="op">(</span><span class="nam">value</span><span class="op">)</span> <span class="key">for</span> <span class="nam">value</span> <span class="key">in</span> <span class="nam">args</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">                <span class="nam">kwargs</span> <span class="op">=</span> <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">                    <span class="nam">key</span><span class="op">:</span> <span class="nam">CONFIG</span><span class="op">.</span><span class="nam">resolve</span><span class="op">(</span><span class="nam">val</span><span class="op">)</span> <span class="key">for</span> <span class="op">(</span><span class="nam">key</span><span class="op">,</span> <span class="nam">val</span><span class="op">)</span> <span class="key">in</span> <span class="nam">kwargs</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">                <span class="op">}</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">                    <span class="nam">key</span><span class="op">:</span> <span class="nam">CONFIG</span><span class="op">.</span><span class="nam">resolve</span><span class="op">(</span><span class="nam">val</span><span class="op">)</span> <span class="key">for</span> <span class="op">(</span><span class="nam">key</span><span class="op">,</span> <span class="nam">val</span><span class="op">)</span> <span class="key">in</span> <span class="nam">kwargs</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">                <span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">                <span class="com"># resolve variables in text and table data</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t56" href="#t56">56</a></span><span class="t">                <span class="nam">ctx</span> <span class="op">=</span> <span class="nam">args</span><span class="op">[</span><span class="num">0</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
@@ -150,10 +150,10 @@
     <p class="pln"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t">                    <span class="com"># resolve variables in the table values</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t">                    <span class="key">if</span> <span class="nam">ctx</span><span class="op">.</span><span class="nam">table</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t">                        <span class="nam">ctx</span><span class="op">.</span><span class="nam">table</span><span class="op">.</span><span class="nam">original</span> <span class="op">=</span> <span class="nam">Table</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t">                            <span class="nam">ctx</span><span class="op">.</span><span class="nam">table</span><span class="op">.</span><span class="nam">headings</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t">                            <span class="nam">rows</span><span class="op">=</span><span class="nam">ctx</span><span class="op">.</span><span class="nam">table</span><span class="op">.</span><span class="nam">rows</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t71" href="#t71">71</a></span><span class="t">                            <span class="nam">line</span><span class="op">=</span><span class="nam">ctx</span><span class="op">.</span><span class="nam">table</span><span class="op">.</span><span class="nam">line</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t">                        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t">                            <span class="nam">ctx</span><span class="op">.</span><span class="nam">table</span><span class="op">.</span><span class="nam">headings</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t">                            <span class="nam">rows</span><span class="op">=</span><span class="nam">ctx</span><span class="op">.</span><span class="nam">table</span><span class="op">.</span><span class="nam">rows</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t71" href="#t71">71</a></span><span class="t">                            <span class="nam">line</span><span class="op">=</span><span class="nam">ctx</span><span class="op">.</span><span class="nam">table</span><span class="op">.</span><span class="nam">line</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t">                        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t">                        <span class="nam">new_rows</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t">                        <span class="key">for</span> <span class="nam">row</span> <span class="key">in</span> <span class="nam">ctx</span><span class="op">.</span><span class="nam">table</span><span class="op">.</span><span class="nam">rows</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t">                            <span class="nam">new_row</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
@@ -168,8 +168,8 @@
     <p class="run"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">            <span class="nam">func</span><span class="op">(</span><span class="op">*</span><span class="nam">args</span><span class="op">,</span> <span class="op">**</span><span class="nam">kwargs</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">        <span class="key">def</span> <span class="nam">new_decorator</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">            <span class="nam">step_text</span><span class="op">,</span> <span class="nam">fix_inner_step</span><span class="op">=</span><span class="key">lambda</span> <span class="nam">x</span><span class="op">:</span> <span class="nam">x</span><span class="op">,</span> <span class="nam">variable_passthru</span><span class="op">=</span><span class="key">False</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">        <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">            <span class="nam">step_text</span><span class="op">,</span> <span class="nam">fix_inner_step</span><span class="op">=</span><span class="key">lambda</span> <span class="nam">x</span><span class="op">:</span> <span class="nam">x</span><span class="op">,</span> <span class="nam">variable_passthru</span><span class="op">=</span><span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">        <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">            <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t"><span class="str">            the new @step decorator</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -199,19 +199,19 @@
     <p class="run"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t">                <span class="op">@</span><span class="nam">wraps</span><span class="op">(</span><span class="nam">func</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t116" href="#t116">116</a></span><span class="t">                <span class="key">def</span> <span class="nam">inner_step</span><span class="op">(</span><span class="op">*</span><span class="nam">args</span><span class="op">,</span> <span class="op">**</span><span class="nam">kwargs</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t117" href="#t117">117</a></span><span class="t">                    <span class="nam">inner_step_func</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t118" href="#t118">118</a></span><span class="t">                        <span class="nam">func</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t119" href="#t119">119</a></span><span class="t">                        <span class="op">*</span><span class="nam">args</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">                        <span class="nam">variable_passthru</span><span class="op">=</span><span class="nam">variable_passthru</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t121" href="#t121">121</a></span><span class="t">                        <span class="op">**</span><span class="nam">kwargs</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">                    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t118" href="#t118">118</a></span><span class="t">                        <span class="nam">func</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t119" href="#t119">119</a></span><span class="t">                        <span class="op">*</span><span class="nam">args</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">                        <span class="nam">variable_passthru</span><span class="op">=</span><span class="nam">variable_passthru</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t121" href="#t121">121</a></span><span class="t">                        <span class="op">**</span><span class="nam">kwargs</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">                    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t124" href="#t124">124</a></span><span class="t">                <span class="nam">fix_inner_step</span><span class="op">(</span><span class="nam">inner_step</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">            <span class="key">return</span> <span class="nam">wrapper</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t127" href="#t127">127</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t">        <span class="nam">behave</span><span class="op">.</span><span class="nam">__dict__</span><span class="op">[</span><span class="nam">decorator_name</span><span class="op">.</span><span class="nam">title</span><span class="op">(</span><span class="op">)</span><span class="op">]</span> <span class="op">=</span> <span class="nam">behave</span><span class="op">.</span><span class="nam">__dict__</span><span class="op">[</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">            <span class="nam">decorator_name</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">        <span class="op">]</span> <span class="op">=</span> <span class="nam">new_decorator</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">            <span class="nam">decorator_name</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">        <span class="op">]</span> <span class="op">=</span> <span class="nam">new_decorator</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t"><span class="nam">_stdout</span> <span class="op">=</span> <span class="nam">sys</span><span class="op">.</span><span class="nam">stdout</span>&nbsp;</span><span class="r"></span></p>
@@ -294,8 +294,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_51433d0636feaf37___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.8.2">coverage.py v7.8.2</a>,
-            created at 2026-03-10 17:23 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.13.4">coverage.py v7.13.4</a>,
+            created at 2026-03-10 17:46 +0000
         </p>
     </div>
 </footer>

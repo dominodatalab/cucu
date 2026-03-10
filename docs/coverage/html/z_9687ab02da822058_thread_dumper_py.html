@@ -3,21 +3,21 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Coverage for src/cucu/cli/thread_dumper.py: 64%</title>
-    <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
-    <link rel="stylesheet" href="style_cb_8e611ae1.css" type="text/css">
-    <script src="coverage_html_cb_6fb7b396.js" defer></script>
+    <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
+    <link rel="stylesheet" href="style_cb_9ff733b0.css" type="text/css">
+    <script src="coverage_html_cb_dd2e7eb5.js" defer></script>
 </head>
 <body class="pyfile">
 <header>
     <div class="content">
         <h1>
-            <span class="text">Coverage for </span><b>src/cucu/cli/thread_dumper.py</b>:
+            <span class="text">Coverage for </span><b>src&#8201;/&#8201;cucu&#8201;/&#8201;cli&#8201;/&#8201;thread_dumper.py</b>:
             <span class="pc_cov">64%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
             <label for="help_panel_state">
-                <img id="keyboard_icon" src="keybd_closed_cb_ce680311.png" alt="Show/hide keyboard shortcuts">
+                <img id="keyboard_icon" src="keybd_closed_cb_900cfef5.png" alt="Show/hide keyboard shortcuts">
             </label>
             <div id="help_panel">
                 <p class="legend">Shortcuts on this page</p>
@@ -66,8 +66,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_eddc69dae52e8172_config_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.8.2">coverage.py v7.8.2</a>,
-            created at 2026-03-10 17:23 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.13.4">coverage.py v7.13.4</a>,
+            created at 2026-03-10 17:46 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -114,8 +114,8 @@
     <p class="mis show_mis"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">            <span class="key">for</span> <span class="nam">thread</span> <span class="key">in</span> <span class="nam">threading</span><span class="op">.</span><span class="nam">enumerate</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">stdout</span><span class="op">.</span><span class="nam">write</span><span class="op">(</span><span class="fst">f"</span><span class="op">{</span><span class="nam">thread</span><span class="op">}</span><span class="fst">\n</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">                <span class="nam">traceback</span><span class="op">.</span><span class="nam">print_stack</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">                    <span class="nam">sys</span><span class="op">.</span><span class="nam">_current_frames</span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="nam">thread</span><span class="op">.</span><span class="nam">ident</span><span class="op">]</span><span class="op">,</span> <span class="nam">file</span><span class="op">=</span><span class="nam">self</span><span class="op">.</span><span class="nam">stdout</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">                    <span class="nam">sys</span><span class="op">.</span><span class="nam">_current_frames</span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="nam">thread</span><span class="op">.</span><span class="nam">ident</span><span class="op">]</span><span class="op">,</span> <span class="nam">file</span><span class="op">=</span><span class="nam">self</span><span class="op">.</span><span class="nam">stdout</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">stdout</span><span class="op">.</span><span class="nam">write</span><span class="op">(</span><span class="str">"\n"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">stdout</span><span class="op">.</span><span class="nam">write</span><span class="op">(</span><span class="fst">f"</span><span class="op">{</span><span class="str">'*'</span> <span class="op">*</span> <span class="num">80</span><span class="op">}</span><span class="fst">\n</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">event</span><span class="op">.</span><span class="nam">wait</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">interval_min</span> <span class="op">*</span> <span class="num">60</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -145,8 +145,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_eddc69dae52e8172_config_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.8.2">coverage.py v7.8.2</a>,
-            created at 2026-03-10 17:23 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.13.4">coverage.py v7.13.4</a>,
+            created at 2026-03-10 17:46 +0000
         </p>
     </div>
 </footer>
