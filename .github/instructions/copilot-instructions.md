@@ -65,6 +65,8 @@ When the user asks to **split** changes into separate branches:
 2. **Per theme:** Create a **new branch from main** (not from the feature branch unless the user says otherwise). Apply only that theme’s files: `git checkout <source-branch> -- path/to/file1 path/to/file2`, then `git add` and a single commit (see Commit messages). Verify with a diff of those paths against the source. Do **not** cherry-pick unless the user explicitly asks.
 3. **Report** — Branch name(s), what each contains, and the suggested commit message for each.
 
+### Syncing branch with base (get latest)
+When the user asks to **update** the current branch with the latest from its base (e.g. "get latest", "sync with main"): fetch the base (e.g. `origin/main`), **merge** (do not rebase) into the current branch, and **resolve all merge conflicts** before finishing.
 
 ## Step Definitions
 
