@@ -57,7 +57,7 @@ Tests:
 - No period on subject.
 
 ### PR commit messages
-- When asked to create a PR message: use the diff from main (or the current branch) to draft title and body. Put the JIRA ticket first in the title: `{JIRA-TICKET} {Title description}`. Body in simple present with `-` bullets; keep it concise.
+- Base all PR commit messages on the **diff from the base branch to the current branch** (e.g. `git diff main...HEAD` or the branch the PR targets). Use that diff to draft title and body. Put the JIRA ticket first in the title: `{JIRA-TICKET} {Title description}`. Body in simple present with `-` bullets; keep it concise.
 
 ### Branch splitting (theme-based PRs)
 When the user asks to **split** changes into separate branches:
