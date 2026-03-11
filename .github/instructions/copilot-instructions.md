@@ -1,12 +1,11 @@
----
-applyTo: '**'
----
+# Project agent rules
 
-# cucu Project Instructions
+This file is the canonical project rules for Cursor and Claude. Apply these rules when working in this repo. Python changes: follow testing and CI rules; when suggesting commits, use the commit message format below.
 
-**cucu** is a Python BDD/Gherkin web testing framework built on Behave + Selenium. Published to PyPI.
+**After making changes:** run **`make fix`** and `uv run pytest tests` before finishing.
 
-## Build & Validation
+
+## Commands
 
 ```bash
 make setup      # uv sync --dev
@@ -50,6 +49,22 @@ Tests:
 - No docstrings or comments for obvious code; don't extract unnecessary helpers
 - Always check exit codes + stdout/stderr when running shell commands
 - Use default `results/` folder; never pass `--results` in examples or tests
+
+### Commit messages
+- **Changelog-style:** `type: subject` (types: feat, fix, chore, docs, refactor, test, build, ci).
+- **Subject and body** in simple present only (add/fix/update, never added/fixed/updated).
+- Optional body with `-` bullets.
+- No period on subject.
+
+### PR commit messages
+- Base all PR commit messages on the **diff from the base branch to the current branch** (e.g. `git diff main...HEAD` or the branch the PR targets). Use that diff to draft title and body. Put the JIRA ticket first in the title: `{JIRA-TICKET} {Title description}`. Body in simple present with `-` bullets; keep it concise.
+
+### Branch splitting (theme-based PRs)
+When the user asks to **split** changes into separate branches:
+1. **Define themes** — One named slice per branch. Do not mix themes on a branch.
+2. **Per theme:** Create a **new branch from main** (not from the feature branch unless the user says otherwise). Apply only that theme’s files: `git checkout <source-branch> -- path/to/file1 path/to/file2`, then `git add` and a single commit (see Commit messages). Verify with a diff of those paths against the source. Do **not** cherry-pick unless the user explicitly asks.
+3. **Report** — Branch name(s), what each contains, and the suggested commit message for each.
+
 
 ## Step Definitions
 
