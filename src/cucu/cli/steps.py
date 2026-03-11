@@ -47,10 +47,6 @@ def load_cucu_steps(filepath=None):
     stdout = stdout.getvalue()
     stderr = stderr.getvalue()
 
-    if stdout.startswith("USING RUNNER:"):
-        # remove the first line of the output so that linter won't error out trying to parse it as a step
-        stdout = "\n".join(stdout.split("\n")[1:])
-
     if stdout.startswith("ParserError"):
         print(stdout)
         raise RuntimeError(
