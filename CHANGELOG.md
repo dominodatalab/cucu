@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.10
 - Refactor - use consistent error classes (AssertionError for test failures)
+- Chore - bump peewee and use new SqliteDatabase class
 
 # 1.4.9
 - Add - Match table rows with columns of interest instead of complete table match in table steps
