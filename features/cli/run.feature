@@ -31,8 +31,7 @@ Feature: Run
 
         Scenario: Scenario that fails
           Given I fail                             # .*
-      [\s\S]*
-      AssertionError: step fails on purpose
+      Assertion Failed: step fails on purpose
       [\s]*
       Failing scenarios:
         data/features/feature_with_mixed_results.feature:\d+  Scenario that fails
