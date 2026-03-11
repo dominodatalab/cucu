@@ -14,64 +14,64 @@ class Browser:
         pass
 
     def open(self, *args, **kwargs):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def navigate(self, url):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def switch_to_next_tab(self):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def switch_to_previous_tab(self):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def back(self):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def refresh(self):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def get_current_url(self):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def title(self):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def execute(self, javascript, *args, **kwargs):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def click(self, element):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def switch_to_default_frame(self):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def switch_to_frame(self, frame):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def screenshot(self, filepath):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def close_window(self):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def get_tab_info(self):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def get_all_tabs_info(self):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def switch_to_nth_tab(self, tab_index):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def switch_to_tab_that_matches_regex(self, text):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def get_session_id(self):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     def quit(self):
-        raise AssertionError("implement me")
+        raise RuntimeError("implement me")
 
     # built in methods to be used by all browser implementations
     def wait_for_page_to_load(self):
