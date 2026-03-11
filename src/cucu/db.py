@@ -16,7 +16,7 @@ from peewee import (
     Model,
     TextField,
 )
-from playhouse.sqlite_ext import JSONField, SqliteExtDatabase
+from playhouse.sqlite_ext import JSONField, SqliteDatabase
 from tenacity import RetryError
 
 from cucu import logger as cucu_logger
@@ -24,7 +24,7 @@ from cucu.config import CONFIG
 from cucu.utils import get_iso_timestamp_with_ms, parse_iso_timestamp
 
 db_filepath = CONFIG["RUN_DB_PATH"]
-db = SqliteExtDatabase(db_filepath)
+db = SqliteDatabase(db_filepath)
 
 logger = logging.getLogger("peewee")
 logger.setLevel(logging.WARNING)  # Only show warnings and errors
