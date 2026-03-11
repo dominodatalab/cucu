@@ -34,7 +34,7 @@ def load_lint_rules(rules, filepath):
 
         for rule_name, rule in rules_loaded.items():
             if rule_name in rules:
-                raise RuntimeError(
+                raise AssertionError(
                     f"found duplicate rule names {rule_name}, please correct one of the locations."
                 )
 
@@ -144,7 +144,7 @@ def parse_matcher(name, rule_name, rule, line, state):
 
         return (True, "")
 
-    raise RuntimeError(f"unsupported matcher for {name}")
+    raise AssertionError(f"unsupported matcher for {name}")
 
 
 def lint_line(state, rules, steps, line_number, lines, filepath):
@@ -273,7 +273,7 @@ def fix(violations):
                 violation["fixed"] = True
 
             else:
-                raise RuntimeError(f"unknown fix type in {violation}")
+                raise AssertionError(f"unknown fix type in {violation}")
 
     # sort the deletions from bottom to the top of the file and then perform
     # the deletions

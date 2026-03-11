@@ -41,7 +41,7 @@ def check_browser_initialized(ctx):
     """
 
     if ctx.browser is None:
-        raise RuntimeError("browser not currently open")
+        raise AssertionError("browser not currently open")
 
 
 def before_all(ctx):

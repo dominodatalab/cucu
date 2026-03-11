@@ -58,10 +58,10 @@ def find_n_assert_radio_button(ctx, name, index=0, is_visible=True):
 
     if is_visible:
         if radio is None:
-            raise Exception(f'unable to find radio button "{name}"')
+            raise AssertionError(f'unable to find radio button "{name}"')
     else:
         if radio is not None:
-            raise Exception(f'able to find radio button "{name}"')
+            raise AssertionError(f'able to find radio button "{name}"')
 
     return radio
 
@@ -82,7 +82,7 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
     radio = find_n_assert_radio_button(ctx, name, index=index)
 
     if base_steps.is_disabled(radio):
-        raise RuntimeError(
+        raise AssertionError(
             "unable to select the radio button, as it is disabled"
         )
 
@@ -92,7 +92,7 @@ def find_n_select_radio_button(ctx, name, index=0, ignore_if_selected=False):
         if ignore_if_selected:
             return
 
-        raise Exception(f'radio button "{name}" already selected')
+        raise AssertionError(f'radio button "{name}" already selected')
 
     if is_element_size_zero(radio):
         find_n_click_input_parent_label(ctx, radio)
@@ -122,14 +122,14 @@ def select_radio_button(ctx, radiobox):
     ctx.check_browser_initialized()
 
     if base_steps.is_disabled(radiobox):
-        raise RuntimeError(
+        raise AssertionError(
             "unable to select the radio button, as it is disabled"
         )
 
     selected = bool(radiobox.get_attribute("checked"))
 
     if selected:
-        raise Exception("radiobox already selected")
+        raise AssertionError("radiobox already selected")
 
     if is_element_size_zero(radiobox):
         find_n_click_input_parent_label(ctx, radiobox)

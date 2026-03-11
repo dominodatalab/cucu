@@ -69,7 +69,7 @@ def click_button(ctx, button):
     ctx.check_browser_initialized()
 
     if base_steps.is_disabled(button):
-        raise RuntimeError("unable to click the button, as it is disabled")
+        raise AssertionError("unable to click the button, as it is disabled")
 
     if is_element_size_zero(button):
         find_n_click_input_parent_label(ctx, button)

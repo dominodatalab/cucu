@@ -338,7 +338,7 @@ And here's an example:
              elements = browser.css_find_elements("[aria-label='loading'")
              if elements:
                    print_elements(elements)
-                   raise RuntimeError("aria-label='loading', see above for details")
+                   raise AssertionError("aria-label='loading', see above for details")
 
        retry(should_not_see_aria_label_equals_loading)()
 
@@ -347,7 +347,7 @@ And here's an example:
           elements = browser.css_find_elements("[my-attr*='loading'")
           if elements:
              print_elements(elements)
-             raise RuntimeError("my-attr*='loading', see above for details")
+             raise AssertionError("my-attr*='loading', see above for details")
 
        retry(should_not_see_data_test_contains_loading)()
 
@@ -356,7 +356,7 @@ And here's an example:
           elements = browser.css_find_elements("[class*='my-spinner'")
           if elements:
              print_elements(elements)
-             raise RuntimeError("class*='my-spinner', see above for details")
+             raise AssertionError("class*='my-spinner', see above for details")
 
        retry(should_not_see_class_contains_my_spinner)()
 

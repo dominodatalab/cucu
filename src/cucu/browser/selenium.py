@@ -210,7 +210,7 @@ class Selenium(Browser):
                 )
 
         else:
-            raise Exception(f"unknown browser {browser}")
+            raise RuntimeError(f"unknown browser {browser}")
 
         self.driver.set_window_size(width, height)
         session_id = self.get_session_id()
@@ -251,7 +251,7 @@ class Selenium(Browser):
         window_handle_index = window_handles.index(window_handle)
 
         if window_handle_index == len(window_handles) - 1:
-            raise RuntimeError("no next browser tab available")
+            raise AssertionError("no next browser tab available")
         self.driver.switch_to.window(window_handles[window_handle_index + 1])
 
     def switch_to_previous_tab(self):
@@ -260,7 +260,7 @@ class Selenium(Browser):
         window_handle_index = window_handles.index(window_handle)
 
         if window_handle_index == 0:
-            raise RuntimeError("no previous browser tab available")
+            raise AssertionError("no previous browser tab available")
         self.driver.switch_to.window(window_handles[window_handle_index - 1])
 
     def switch_to_nth_tab(self, tab_number):
@@ -268,7 +268,7 @@ class Selenium(Browser):
         window_handles = self.driver.window_handles
         total_tabs = len(window_handles)
         if tab_number > total_tabs:
-            raise RuntimeError(f"no {tab_number} browser tab available")
+            raise AssertionError(f"no {tab_number} browser tab available")
         self.driver.switch_to.window(window_handles[tab_number])
 
     def switch_to_tab_that_matches_regex(self, title_pattern):
@@ -279,7 +279,7 @@ class Selenium(Browser):
             if re.search(title_pattern, self.driver.title):
                 return
 
-        raise Exception(f"No tab title matches pattern: {title_pattern}")
+        raise RuntimeError(f"No tab title matches pattern: {title_pattern}")
 
     def get_tab_info(self):
         window_handles = self.driver.window_handles

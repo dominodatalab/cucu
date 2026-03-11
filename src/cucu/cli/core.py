@@ -245,7 +245,7 @@ def run(
         # another cucu process and therefore we should make sure the results
         # directory isn't the default one and throw an exception otherwise
         if results == Path("results"):
-            raise Exception(
+            raise RuntimeError(
                 "running within cucu but --results was not used, "
                 "this would lead to some very difficult to debug "
                 "failures as this process would clobber the "
@@ -489,7 +489,7 @@ def run(
                     logger.error(
                         f"Failing Features:\n{'\n'.join(failing_features)}"
                     )
-                    raise RuntimeError(
+                    raise AssertionError(
                         "there are failures, see above for details"
                     )
     finally:
@@ -643,7 +643,7 @@ def steps(filepath, format):
         print_json_steps(filepath=filepath)
 
     else:
-        raise RuntimeError(f'unsupported format "{format}"')
+        raise AssertionError(f'unsupported format "{format}"')
 
 
 @main.command()

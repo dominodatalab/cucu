@@ -49,7 +49,7 @@ def load_cucu_steps(filepath=None):
 
     if stdout.startswith("ParserError"):
         print(stdout)
-        raise RuntimeError(
+        raise AssertionError(
             "unable to parse feature files, see above for details"
         )
 
@@ -134,4 +134,6 @@ def print_human_readable_steps(filepath=None):
 
     if steps_error is not None:
         print(steps_error)
-        raise RuntimeError("Failure loading some steps, see above for details")
+        raise AssertionError(
+            "Failure loading some steps, see above for details"
+        )

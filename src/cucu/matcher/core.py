@@ -27,4 +27,4 @@ class ElementMatcher:
             return the Element found
 
         """
-        raise RuntimeError("implement me")
+        raise AssertionError("implement me")

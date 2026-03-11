@@ -19,7 +19,7 @@ def parse_nth(nth):
     matcher = re.match(NTH_REGEX, nth)
 
     if matcher is None:
-        raise Exception(f"nth expression {nth} is invalid")
+        raise RuntimeError(f"nth expression {nth} is invalid")
 
     number, _ = matcher.groups()
     return int(number) - 1
@@ -47,7 +47,7 @@ def is_not_disabled(element):
 
 @step("I run a step that fails")
 def this_step_fails(_):
-    raise Exception("failing on purpose")
+    raise RuntimeError("failing on purpose")
 
 
 @step('I sleep for "{value}" seconds')

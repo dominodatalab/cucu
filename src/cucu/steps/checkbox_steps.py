@@ -65,10 +65,10 @@ def check_checkbox(ctx, checkbox):
     ctx.check_browser_initialized()
 
     if is_checked(checkbox):
-        raise Exception("checkbox already checked")
+        raise AssertionError("checkbox already checked")
 
     if base_steps.is_disabled(checkbox):
-        raise RuntimeError("unable to check the checkbox, as it is disabled")
+        raise AssertionError("unable to check the checkbox, as it is disabled")
 
     if is_element_size_zero(checkbox):
         find_n_click_input_parent_label(ctx, checkbox)
@@ -84,7 +84,7 @@ def uncheck_checkbox(ctx, checkbox):
     ctx.check_browser_initialized()
 
     if is_not_checked(checkbox):
-        raise Exception("checkbox already unchecked")
+        raise AssertionError("checkbox already unchecked")
 
     if is_element_size_zero(checkbox):
         find_n_click_input_parent_label(ctx, checkbox)

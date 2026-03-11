@@ -48,7 +48,7 @@ def get_platform_architecture():
         platform = "win"
         architecture = "32"
     else:
-        raise RuntimeError(
+        raise AssertionError(
             "Could not determine edgedriver download URL for this platform."
         )
     return platform, architecture
@@ -213,9 +213,11 @@ def download_edgedriver(cwd=False):
         try:
             response = requests.get(url)
             if response.status_code != 200:
-                raise Exception("URL Not Found")
+                raise RuntimeError("URL Not Found")
         except Exception:
-            raise RuntimeError(f"Failed to download edgedriver archive: {url}")
+            raise AssertionError(
+                f"Failed to download edgedriver archive: {url}"
+            )
         archive = BytesIO(response.content)
         with zipfile.ZipFile(archive) as zip_file:
             zip_file.extract(edgedriver_filename, edgedriver_dir)

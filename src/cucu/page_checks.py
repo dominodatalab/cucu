@@ -19,7 +19,7 @@ def init_page_checks():
             state = browser.execute("return document.readyState;")
 
             if state != "complete":
-                raise RuntimeError(f'document.readyState is in "{state}"')
+                raise AssertionError(f'document.readyState is in "{state}"')
         else:
             logger.debug("document.readyState check disabled")
 
@@ -54,7 +54,7 @@ def init_page_checks():
                     html = broken_image.get_attribute("outerHTML")
                     logger.warning(f"broken image found: {html}")
 
-                raise RuntimeError("broken images were found on the page")
+                raise AssertionError("broken images were found on the page")
         else:
             logger.debug("broken image check disabled")
 
