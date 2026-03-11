@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.10
+- Fix - Reraise exceptions for cucu retry (QE-18975)
+- Chore - Add direnv configuration and update copilot rules
+- Chore - Fix whitespace-lint test setup  
+- Chore - Update dependency tabulate to ~=0.10.0
+- Chore - Update astral-sh/setup-uv and other dependency maintenance
+
 # 1.4.9
 - Add - Match table rows with columns of interest instead of complete table match in table steps
 - Chore - add agent directives
