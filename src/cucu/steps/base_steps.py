@@ -28,7 +28,7 @@ def is_not_disabled(element):
 
 @step("I run a step that fails")
 def this_step_fails(_):
-    raise Exception("failing on purpose")
+    raise RuntimeError("failing on purpose")
 
 
 @step('I sleep for "{value}" seconds')

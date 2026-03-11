@@ -213,7 +213,7 @@ class Selenium(Browser):
                 )
 
         else:
-            raise Exception(f"unknown browser {browser}")
+            raise RuntimeError(f"unknown browser {browser}")
 
         self.driver.set_window_size(width, height)
         session_id = self.get_session_id()
@@ -282,7 +282,7 @@ class Selenium(Browser):
             if re.search(title_pattern, self.driver.title):
                 return
 
-        raise Exception(f"No tab title matches pattern: {title_pattern}")
+        raise RuntimeError(f"No tab title matches pattern: {title_pattern}")
 
     def get_tab_info(self):
         window_handles = self.driver.window_handles

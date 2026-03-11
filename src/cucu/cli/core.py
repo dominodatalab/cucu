@@ -246,7 +246,7 @@ def run(
         # another cucu process and therefore we should make sure the results
         # directory isn't the default one and throw an exception otherwise
         if results == Path("results"):
-            raise Exception(
+            raise RuntimeError(
                 "running within cucu but --results was not used, "
                 "this would lead to some very difficult to debug "
                 "failures as this process would clobber the "

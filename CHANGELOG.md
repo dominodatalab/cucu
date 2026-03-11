@@ -15,6 +15,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
   - behave renamed "AssertionError" to "ASSERT FAILED"
   - behave renamed Status `errored` to `error`
   - consider undefined as failure of test
+- Refactor - use consistent error classes (AssertionError for test failures)
+- Chore - bump peewee and use new SqliteDatabase class
 
 ## Upgrade behave from 1.2.6 to 1.3.3
 There was a long gap between 1.2.6 and 1.3.0 (was 1.2.7) which introduced a few major changes under the hood.

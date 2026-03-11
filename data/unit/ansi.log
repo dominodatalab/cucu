@@ -1,70 +1,125 @@
 
   [35mScenario[0m: Just a scenario that opens a web page
 [90m    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
-[0m[1A    [32mGiven[0m I start a webserver at directory "data/www" and save the port to the variable "PORT"[33m     # started at 2023-09-11T10:38:27.776 took 0.206s[0m
+[0m2026-03-11 10:55:07,340 DEBUG Webserver is running at port=49699
+[1A    [32mGiven[0m I start a webserver at directory "data/www" and save the port to the variable "PORT"[33m     # started at 2026-03-11T10:55:07.336 took 0.004s[0m
 [90m      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"
-[0m2023-09-11 10:38:27,983 DEBUG opening browser chrome
-2023-09-11 10:38:28,384 DEBUG webdriver.Chrome init
-2023-09-11 10:38:29,919 DEBUG executing page check "wait for document.readyState"
-2023-09-11 10:38:29,923 DEBUG executed page check "wait for document.readyState" in 0.004s
-2023-09-11 10:38:29,923 DEBUG executing page check "broken image checker"
-2023-09-11 10:38:29,928 DEBUG executed page check "broken image checker" in 0.005s
-2023-09-11 10:38:29,929 DEBUG navigating to url #http://10.0.0.55:56368/buttons.html
-2023-09-11 10:38:30,034 DEBUG executing page check "wait for document.readyState"
-2023-09-11 10:38:30,038 DEBUG executed page check "wait for document.readyState" in 0.004s
-2023-09-11 10:38:30,039 DEBUG executing page check "broken image checker"
-2023-09-11 10:38:30,042 DEBUG executed page check "broken image checker" in 0.003s
-[1A    [32m  And[0m I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"[33m                  # started at 2023-09-11T10:38:27.983 took 2.100s[0m
-[34m      # HOST_ADDRESS="10.0.0.55" PORT="56368"
+[0m2026-03-11 10:55:07,344 DEBUG Starting call to 'cucu.utils.retry.<locals>.new_decorator', this is the 1st time calling it.
+2026-03-11 10:55:07,344 DEBUG opening browser chrome
+2026-03-11 10:55:07,442 DEBUG Not using a proxy
+2026-03-11 10:55:07,442 DEBUG webdriver.Chrome init
+2026-03-11 10:55:08,651 DEBUG cucu started Selenium session with ID: 3f7b00a70325c309a094a435e04a9152
+2026-03-11 10:55:08,651 DEBUG navigating to url: http://localhost:49699/buttons.html
+2026-03-11 10:55:08,688 DEBUG executed page check "wait for document.readyState" in 0.005s
+2026-03-11 10:55:08,692 DEBUG executed page check "broken image checker" in 0.003s
+2026-03-11 10:55:09,020 DEBUG 
+tab(1 of 1): Buttons!
+url: http://localhost:49699/buttons.html
+
+[1A    [32m  And[0m I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html"[33m                  # started at 2026-03-11T10:55:07.344 took 1.349s[0m
+[34m      # HOST_ADDRESS="localhost" PORT="49699"
 [0m[90m      And I should see the text "inexistent"
-[0m2023-09-11 10:38:30,450 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
-2023-09-11 10:38:30,763 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
-2023-09-11 10:38:31,075 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
-2023-09-11 10:38:31,394 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
-2023-09-11 10:38:31,705 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
-2023-09-11 10:38:32,011 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
-2023-09-11 10:38:32,328 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised RuntimeError: unable to find the text "inexistent".
-[1A[31m      And I should see the text "inexistent"[0m[33m                                                       # started at 2023-09-11T10:38:30.372 took 2.281s[0m
+[0m2026-03-11 10:55:09,027 DEBUG Starting call to 'cucu.utils.retry.<locals>.new_decorator', this is the 1st time calling it.
+2026-03-11 10:55:09,029 DEBUG inject cucu fuzzy find library to the browser
+2026-03-11 10:55:09,085 DEBUG Fuzzy found no element.
+2026-03-11 10:55:09,114 DEBUG Finished call to 'cucu.utils.retry.<locals>.new_decorator' after 0.0877(s), this was the 1st time calling it.
+2026-03-11 10:55:09,114 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised AssertionError: unable to find the text "inexistent".
+2026-03-11 10:55:09,368 DEBUG Starting call to 'cucu.utils.retry.<locals>.new_decorator', this is the 2nd time calling it.
+2026-03-11 10:55:09,394 DEBUG Fuzzy found no element.
+2026-03-11 10:55:09,417 DEBUG Finished call to 'cucu.utils.retry.<locals>.new_decorator' after 0.39(s), this was the 2nd time calling it.
+2026-03-11 10:55:09,417 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised AssertionError: unable to find the text "inexistent".
+2026-03-11 10:55:09,672 DEBUG Starting call to 'cucu.utils.retry.<locals>.new_decorator', this is the 3rd time calling it.
+2026-03-11 10:55:09,691 DEBUG Fuzzy found no element.
+2026-03-11 10:55:09,717 DEBUG Finished call to 'cucu.utils.retry.<locals>.new_decorator' after 0.69(s), this was the 3rd time calling it.
+2026-03-11 10:55:09,717 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised AssertionError: unable to find the text "inexistent".
+2026-03-11 10:55:09,972 DEBUG Starting call to 'cucu.utils.retry.<locals>.new_decorator', this is the 4th time calling it.
+2026-03-11 10:55:10,005 DEBUG Fuzzy found no element.
+2026-03-11 10:55:10,035 DEBUG Finished call to 'cucu.utils.retry.<locals>.new_decorator' after 1.01(s), this was the 4th time calling it.
+2026-03-11 10:55:10,035 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised AssertionError: unable to find the text "inexistent".
+2026-03-11 10:55:10,291 DEBUG Starting call to 'cucu.utils.retry.<locals>.new_decorator', this is the 5th time calling it.
+2026-03-11 10:55:10,320 DEBUG Fuzzy found no element.
+2026-03-11 10:55:10,353 DEBUG Finished call to 'cucu.utils.retry.<locals>.new_decorator' after 1.33(s), this was the 5th time calling it.
+2026-03-11 10:55:10,353 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised AssertionError: unable to find the text "inexistent".
+2026-03-11 10:55:10,604 DEBUG Starting call to 'cucu.utils.retry.<locals>.new_decorator', this is the 6th time calling it.
+2026-03-11 10:55:10,634 DEBUG Fuzzy found no element.
+2026-03-11 10:55:10,671 DEBUG Finished call to 'cucu.utils.retry.<locals>.new_decorator' after 1.64(s), this was the 6th time calling it.
+2026-03-11 10:55:10,671 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised AssertionError: unable to find the text "inexistent".
+2026-03-11 10:55:10,926 DEBUG Starting call to 'cucu.utils.retry.<locals>.new_decorator', this is the 7th time calling it.
+2026-03-11 10:55:10,955 DEBUG Fuzzy found no element.
+2026-03-11 10:55:10,983 DEBUG Finished call to 'cucu.utils.retry.<locals>.new_decorator' after 1.96(s), this was the 7th time calling it.
+2026-03-11 10:55:10,983 DEBUG Retrying cucu.utils.retry.<locals>.new_decorator in 0.25 seconds as it raised AssertionError: unable to find the text "inexistent".
+2026-03-11 10:55:11,239 DEBUG Starting call to 'cucu.utils.retry.<locals>.new_decorator', this is the 8th time calling it.
+2026-03-11 10:55:11,263 DEBUG Fuzzy found no element.
+2026-03-11 10:55:11,302 DEBUG Finished call to 'cucu.utils.retry.<locals>.new_decorator' after 2.28(s), this was the 8th time calling it.
+2026-03-11 10:55:11,336 DEBUG 
+tab(1 of 1): Buttons!
+url: http://localhost:49699/buttons.html
+
+[1A[31m      And I should see the text "inexistent"[0m[33m                                                       # started at 2026-03-11T10:55:09.026 took 2.278s[0m
 Traceback (most recent call last):
-  File "/Users/xindong/Library/Caches/pypoetry/virtualenvs/cucu-M6jSuFdm-py3.11/lib/python3.11/site-packages/tenacity/__init__.py", line 382, in __call__
+  File "/Users/cedric.young/code/cursor/cucu/.venv/lib/python3.13/site-packages/tenacity/__init__.py", line 473, in __call__
     result = fn(*args, **kwargs)
-             ^^^^^^^^^^^^^^^^^^^
-  File "/Users/xindong/Work/cucu/src/cucu/utils.py", line 126, in new_decorator
+  File "/Users/cedric.young/code/cursor/cucu/src/cucu/utils.py", line 153, in new_decorator
     return func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/xindong/Work/cucu/src/cucu/helpers.py", line 121, in base_should_see_the
-    raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
-RuntimeError: unable to find the text "inexistent"
+  File "/Users/cedric.young/code/cursor/cucu/src/cucu/helpers.py", line 121, in base_should_see_the
+    raise AssertionError(
+        f'unable to find the {prefix}{thing} "{name}"'
+    )
+AssertionError: unable to find the text "inexistent"
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "/Users/xindong/Library/Caches/pypoetry/virtualenvs/cucu-M6jSuFdm-py3.11/lib/python3.11/site-packages/behave/model.py", line 1329, in run
+  File "/Users/cedric.young/code/cursor/cucu/.venv/lib/python3.13/site-packages/behave/model.py", line 1329, in run
     match.run(runner.context)
-  File "/Users/xindong/Library/Caches/pypoetry/virtualenvs/cucu-M6jSuFdm-py3.11/lib/python3.11/site-packages/behave/matchers.py", line 98, in run
+    ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Users/cedric.young/code/cursor/cucu/.venv/lib/python3.13/site-packages/behave/matchers.py", line 98, in run
     self.func(context, *args, **kwargs)
-  File "/Users/xindong/Work/cucu/src/cucu/steps/text_steps.py", line 30, in <module>
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cedric.young/code/cursor/cucu/src/cucu/steps/text_steps.py", line 34, in <module>
     helpers.define_should_see_thing_with_name_steps("text", find_text)
                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/xindong/Work/cucu/src/cucu/behave_tweaks.py", line 78, in inner_step_func
+    ...<4 lines>...
+    
+    
+  File "/Users/cedric.young/code/cursor/cucu/src/cucu/behave_tweaks.py", line 84, in inner_step_func
     func(*args, **kwargs)
-  File "/Users/xindong/Work/cucu/src/cucu/helpers.py", line 62, in wrapper
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/cedric.young/code/cursor/cucu/src/cucu/helpers.py", line 62, in wrapper
     func(*args, **kwargs)
-  File "/Users/xindong/Work/cucu/src/cucu/helpers.py", line 130, in should_see_the
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/cedric.young/code/cursor/cucu/src/cucu/helpers.py", line 132, in should_see_the
     retry(
-  File "/Users/xindong/Library/Caches/pypoetry/virtualenvs/cucu-M6jSuFdm-py3.11/lib/python3.11/site-packages/tenacity/__init__.py", line 289, in wrapped_f
-    return self(f, *args, **kw)
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/Users/xindong/Library/Caches/pypoetry/virtualenvs/cucu-M6jSuFdm-py3.11/lib/python3.11/site-packages/tenacity/__init__.py", line 379, in __call__
+    ~~~~~~
+    ...<2 lines>...
+        wait_up_to_s=float(CONFIG["CUCU_SHORT_UI_WAIT_TIMEOUT_S"]),
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    )(ctx, thing, name)
+    ~^^^^^^^^^^^^^^^^^^
+  File "/Users/cedric.young/code/cursor/cucu/.venv/lib/python3.13/site-packages/tenacity/__init__.py", line 331, in wrapped_f
+    return copy(f, *args, **kw)
+  File "/Users/cedric.young/code/cursor/cucu/.venv/lib/python3.13/site-packages/tenacity/__init__.py", line 470, in __call__
     do = self.iter(retry_state=retry_state)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/xindong/Library/Caches/pypoetry/virtualenvs/cucu-M6jSuFdm-py3.11/lib/python3.11/site-packages/tenacity/__init__.py", line 326, in iter
+  File "/Users/cedric.young/code/cursor/cucu/.venv/lib/python3.13/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "/Users/cedric.young/code/cursor/cucu/.venv/lib/python3.13/site-packages/tenacity/__init__.py", line 414, in exc_check
     raise retry_exc from fut.exception()
-tenacity.RetryError: RetryError[<Future at 0x10bedf490 state=finished raised RuntimeError>]
+tenacity.RetryError: RetryError[<Future at 0x10aee96d0 state=finished raised AssertionError>]
 
-2023-09-11 10:38:32,947 DEBUG Saving MHT webpage snapshot: browser_snapshot.mht
-2023-09-11 10:38:33,006 DEBUG quitting browser between sessions
+2026-03-11 10:55:11,342 DEBUG Selenium keep-alive started (ping interval: 30s)
+2026-03-11 10:55:11,342 INFO Selenium keep-alive enabled for this scenario
+2026-03-11 10:55:11,342 DEBUG HOOK start_selenium_keep_alive: passed ✅
+2026-03-11 10:55:11,344 DEBUG Keep-alive ping sent to Selenium session
+2026-03-11 10:55:11,344 WARNING Connection pool is full, discarding connection: localhost. Connection pool size: 1
+2026-03-11 10:55:11,350 DEBUG Saving MHT webpage snapshot: browser_snapshot.mht
+2026-03-11 10:55:11,355 DEBUG HOOK download_mht_data: passed ✅
+2026-03-11 10:55:11,691 DEBUG HOOK shutdown_webserver: passed ✅
+2026-03-11 10:55:16,696 DEBUG Selenium keep-alive stopped
+2026-03-11 10:55:16,697 DEBUG HOOK stop_selenium_keep_alive: passed ✅
+2026-03-11 10:55:16,697 DEBUG quitting browser between sessions
+2026-03-11 10:55:16,793 DEBUG HOOK cleanup_browsers: passed ✅
 
+2026-03-11 10:55:16,799 DEBUG CONFIG: popped and restored snapshot 'before_all' (stack depth: 0)
 
 Failing scenarios:
   data/features/feature_with_failing_scenario_with_web.feature:4  Just a scenario that opens a web page
@@ -72,5 +127,10 @@ Failing scenarios:
 0 features passed, 1 failed, 0 skipped
 0 scenarios passed, 1 failed, 0 skipped
 2 steps passed, 1 failed, 0 skipped, 0 undefined
-Took 0m4.586s
-Error: test run failed, see above for details
+Took 0m3.631s
+2026-03-11 10:55:16,801 DEBUG Found existing database at results/run.db
+2026-03-11 10:55:16,802 DEBUG No database files found to consolidate.
+2026-03-11 10:55:16,806 DEBUG Found existing database at results/run.db
+2026-03-11 10:55:16,806 DEBUG No database files found to consolidate.
+2026-03-11 10:55:16,828 DEBUG CONFIG: snapshot taken 'snapshot_0' (stack depth: 1)
+2026-03-11 10:55:16,829 INFO Starting to process 1 features, 1 scenarios, and 3 steps for report

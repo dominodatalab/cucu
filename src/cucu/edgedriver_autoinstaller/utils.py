@@ -213,8 +213,8 @@ def download_edgedriver(cwd=False):
         try:
             response = requests.get(url)
             if response.status_code != 200:
-                raise Exception("URL Not Found")
-        except Exception:
+                raise RuntimeError("URL Not Found")
+        except RuntimeError:
             raise RuntimeError(f"Failed to download edgedriver archive: {url}")
         archive = BytesIO(response.content)
         with zipfile.ZipFile(archive) as zip_file:

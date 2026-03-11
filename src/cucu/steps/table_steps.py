@@ -631,13 +631,13 @@ def find_nth_table_and_validate_row_count(
         row_count(str): expected row count as a string
 
     raises:
-        RuntimeError: when the table row count does not meet the specified criteria
+        AssertionError: when the table row count does not meet the specified criteria
     """
     table_element = find_table_element(ctx, table)
     # table_element is a WebElement when search is done using find_table_element
     table_rows = count_rows_in_table_element(table_element)
     if not check_func(table_rows, int(row_count)):
-        raise RuntimeError(
+        raise AssertionError(
             f"Expected {thing} {row_count} rows in table {table + 1}, but found {table_rows} instead."
         )
 
@@ -655,7 +655,7 @@ def find_table_matching_rows_and_validate_row_count(
         row_count(str): expected row count as a string
 
     raises:
-        RuntimeError: when the table row count does not meet the specified criteria
+        AssertionError: when the table row count does not meet the specified criteria
     """
     table_element = find_table(
         ctx, check_table_contains_matching_rows_in_table
@@ -663,7 +663,7 @@ def find_table_matching_rows_and_validate_row_count(
     # table_element is an array of rows when search is done using find_table
     table_rows = len(table_element)
     if not check_func(table_rows, int(row_count)):
-        raise RuntimeError(
+        raise AssertionError(
             f"Expected {thing} {row_count} rows in the table contaning matching entries, but found {table_rows} instead."
         )
 

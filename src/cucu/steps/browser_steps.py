@@ -370,7 +370,7 @@ def save_downloaded_file(ctx, filename):
 
     result = ctx.browser.execute("return window.__cucu_downloaded_file;")
     if not result.startswith("data:"):
-        raise Exception("Failed to get file content: %s" % result)
+        raise RuntimeError("Failed to get file content: %s" % result)
 
     filedata = base64.b64decode(result[result.find("base64,") + 7 :])
     scenario_downloads_dir = config.CONFIG["SCENARIO_DOWNLOADS_DIR"]
