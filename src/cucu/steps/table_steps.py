@@ -526,7 +526,7 @@ def find_table_element(ctx, nth=1):
     ctx.check_browser_initialized()
 
     try:
-        return ctx.browser.css_find_elements("table")[nth]
+        return ctx.browser.css_find_elements("table", skip_assert=True)[nth]
     except IndexError:
         raise AssertionError(
             f"Cannot find table:{nth + 1}. Please check your table data."
