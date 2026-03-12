@@ -26,6 +26,7 @@ Feature: Run with workers
      \.\.\.\.\.
      """
 
+  # @todo
   # This scneario doesn't work in CI, for some reason the workers aren't spawning or recording to the db
   # @db
   # Scenario: Database records all the workers
