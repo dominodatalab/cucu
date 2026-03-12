@@ -326,7 +326,7 @@ class Selenium(Browser):
     def title(self):
         return self.driver.title
 
-    def css_find_elements(self, selector):
+    def css_find_elements(self, selector, skip_assert=False):
         def find_elements_in_frame():
             elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
 
@@ -335,7 +335,13 @@ class Selenium(Browser):
 
             return list(filter(visible, elements))
 
-        return search_in_all_frames(self, find_elements_in_frame)
+        elements = search_in_all_frames(self, find_elements_in_frame)
+        if not len(elements) > 0:
+            raise AssertionError(
+                f"No elements found for selector '{selector}'"
+            )
+
+        return elements
 
     def execute(self, javascript, *args):
         return self.driver.execute_script(javascript, *args)
