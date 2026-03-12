@@ -293,7 +293,7 @@ def finish_scenario_record(scenario_obj):
         log_files_json = sorted(log_files)
 
     if scenario_obj.hook_failed:
-        status = "errored"
+        status = "error"
     else:
         status = scenario_obj.status.name
 
