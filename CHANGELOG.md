@@ -16,7 +16,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
   - behave renamed Status `errored` to `error`
   - consider undefined as failure of test
   - fix load order so custom nth parser is registered before steps when running with multiple workers
-- Change - Selenium css_find_elements raises AssertionError when no elements found (optional skip_assert param)
+- Change - Selenium css_find_elements raises AssertionError when no elements found (optional missing_ok param)
 - Refactor - use consistent error classes (AssertionError for test failures)
 - Chore - bump peewee and use new SqliteDatabase class
 

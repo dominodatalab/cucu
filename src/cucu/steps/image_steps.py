@@ -21,7 +21,7 @@ def find_image(ctx, name, index=0):
 
     name = name.replace('"', '\\"')
     images = ctx.browser.css_find_elements(
-        f'img[alt="{name}"', skip_assert=True
+        f'img[alt="{name}"', missing_ok=True
     )
 
     if index >= len(images):
