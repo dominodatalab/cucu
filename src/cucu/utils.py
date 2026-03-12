@@ -143,6 +143,7 @@ def retry(func, wait_up_to_s=None, retry_after_s=None):
         before=before_log(logger, logging.DEBUG),
         after=after_log(logger, logging.DEBUG),
         before_sleep=before_sleep_log(logger, logging.DEBUG),
+        reraise=True,
     )
     def new_decorator(*args, **kwargs):
         ctx = CONFIG["__CUCU_CTX"]
