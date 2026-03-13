@@ -19,6 +19,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Change - Selenium css_find_elements raises AssertionError when no elements found (optional missing_ok param)
 - Refactor - use consistent error classes (AssertionError for test failures)
 - Chore - bump peewee and use new SqliteDatabase class
+- Chore - make fix now runs unit tests (pytest) after lint/fix steps
 
 ## Upgrade behave from 1.2.6 to 1.3.3
 There was a long gap between 1.2.6 and 1.3.0 (was 1.2.7) which introduced a few major changes under the hood.
