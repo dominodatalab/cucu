@@ -20,6 +20,8 @@ fix:
 	uv run ruff check . --fix
 	SKIP=makefile uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
 	uv run cucu lint --fix features
+	# run unit tests too
+	uv run pytest tests
 
 lint:
 	# make lint
