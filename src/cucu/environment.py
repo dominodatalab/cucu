@@ -149,7 +149,7 @@ def before_scenario(ctx, scenario):
             logger.error(error_message)
             ctx.scenario.mark_skipped()
             # Set 'hook_failed' status to 'True' so that the test gets marked
-            # as 'errored', even though no steps ran
+            # as 'error', even though no steps ran
             ctx.scenario.hook_failed = True
 
 
