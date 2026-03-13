@@ -65,6 +65,11 @@ When the user asks to **split** changes into separate branches:
 2. **Per theme:** Create a **new branch from main** (not from the feature branch unless the user says otherwise). Apply only that theme’s files: `git checkout <source-branch> -- path/to/file1 path/to/file2`, then `git add` and a single commit (see Commit messages). Verify with a diff of those paths against the source. Do **not** cherry-pick unless the user explicitly asks.
 3. **Report** — Branch name(s), what each contains, and the suggested commit message for each.
 
+### Syncing branch with base (get latest)
+When the user asks to **update** the current branch with the latest from its base (e.g. "get latest", "sync with main"): fetch the base (e.g. `origin/main`), **merge** (do not rebase) into the current branch, and **resolve all merge conflicts** before finishing.
+
+### Bump version
+Run `uv version --bump patch`, then add a `# X.Y.Z` section at the top of `CHANGELOG.md` with `- Type - subject` bullets from the PR/commit message (Fix, Add, Change, Chore, etc.).
 
 ## Step Definitions
 
@@ -116,9 +121,3 @@ Available: `register_before_all_hook`, `register_after_all_hook`, `register_befo
 ## Configuration
 
 Config loads in order, each overriding the previous: `~/.cucurc.yml` → cwd → feature file directory → env vars (always wins). Add per-directory `cucurc.yml` files; don't use a single root `.env`. See `src/cucu/config.py` for all `CONFIG.define()` variables.
-
-## Release
-
-1. Bump version in `pyproject.toml` + add `CHANGELOG.md` entry + run `uv lock`
-2. PR → merge to main → GitHub Actions publishes to test.pypi.org automatically
-3. Manually trigger `publish-production.yml` to publish to pypi.org

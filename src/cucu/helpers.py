@@ -118,7 +118,9 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
         element = find_func(ctx, name, index=index)
 
         if element is None:
-            raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
+            raise AssertionError(
+                f'unable to find the {prefix}{thing} "{name}"'
+            )
         logger.debug(f'Success: saw {prefix}{thing} "{name}"')
 
     @step(f'I should immediately see the {thing} "{{name}}"')
@@ -176,7 +178,7 @@ def define_should_see_thing_with_name_steps(thing, find_func, with_nth=False):
         element = find_func(ctx, name, index=index)
 
         if element is not None:
-            raise RuntimeError(f'able to find the {prefix}{thing} "{name}"')
+            raise AssertionError(f'able to find the {prefix}{thing} "{name}"')
         logger.debug(f'Success: did not see {prefix}{thing} "{name}"')
 
     @step(f'I should immediately not see the {thing} "{{name}}"')
@@ -287,7 +289,7 @@ def define_action_on_thing_with_name_steps(
 
         if element is None:
             if must_exist:
-                raise RuntimeError(
+                raise AssertionError(
                     f'unable to find the {prefix}{thing} "{name}"'
                 )
         else:
@@ -432,7 +434,9 @@ def define_ensure_state_on_thing_with_name_steps(
         element = find_func(ctx, name, index=index)
 
         if element is None:
-            raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
+            raise AssertionError(
+                f'unable to find the {prefix}{thing} "{name}"'
+            )
 
         if not state_func(element):
             action_func(ctx, element)
@@ -545,10 +549,12 @@ def define_thing_with_name_in_state_steps(
         element = find_func(ctx, name, index=index)
 
         if element is None:
-            raise RuntimeError(f'unable to find the {prefix}{thing} "{name}"')
+            raise AssertionError(
+                f'unable to find the {prefix}{thing} "{name}"'
+            )
 
         if not is_in_state_func(element):
-            raise RuntimeError(f'{thing} "{name}" is not {state}')
+            raise AssertionError(f'{thing} "{name}" is not {state}')
         logger.debug(f'{thing} {name} was in desired state "{state}"')
 
     @step(f'I should immediately see the {thing} "{{name}}" is {state}')
@@ -768,7 +774,7 @@ def define_two_thing_interaction_steps(
                     f'Unable to find the {prefix_2}{thing_2} "{name_2}"'
                 )
 
-            raise RuntimeError(", ".join(error_message))
+            raise AssertionError(", ".join(error_message))
 
         else:
             action_func(ctx, element_1, element_2)

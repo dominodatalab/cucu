@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 import pytest_check as check
-from playhouse.sqlite_ext import SqliteExtDatabase
+from playhouse.sqlite_ext import SqliteDatabase
 
 from cucu import db
 
@@ -16,7 +16,7 @@ from cucu import db
 def temp_db():
     """Create a temporary database for testing."""
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
-        test_db = SqliteExtDatabase(tmp.name)
+        test_db = SqliteDatabase(tmp.name)
         original_db = db.db
 
         # Switch to test database

@@ -4,9 +4,12 @@
 #      capturing
 #
 import os
+import re
 import sys
 import warnings
 from functools import wraps
+
+import parse
 
 # set env var BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON=yes before importing behave
 os.environ["BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON"] = "yes"
@@ -26,6 +29,20 @@ def init_outputs(stdout, stderr):
     # capturing stdout and stderr output to record in reporting
     sys.stdout = CucuOutputStream(sys.stdout)
     sys.stderr = CucuOutputStream(sys.stderr)
+
+
+NTH_REGEX = r"(\d+)(nd|th|rd|st)"
+
+
+@parse.with_pattern(NTH_REGEX)
+def parse_nth(nth):
+    matcher = re.match(NTH_REGEX, nth)
+
+    if matcher is None:
+        raise Exception(f"nth expression {nth} is invalid")
+
+    number, _ = matcher.groups()
+    return int(number) - 1
 
 
 def init_step_hooks(stdout, stderr):
@@ -101,6 +118,13 @@ def init_step_hooks(stdout, stderr):
                                        be handled further down in `run_steps`
                                        for example.
             """
+
+            # ensure register nth type after Runner reset when used with multiple workers
+            parse_matcher = behave.matchers._the_step_matcher_factory.step_matcher_class_mapping[
+                "parse"
+            ]
+            if not parse_matcher.has_registered_type(name="nth"):
+                parse_matcher.register_type(nth=parse_nth)
 
             #
             # IMPORTANT: if you add any additional line from the `wrapper`

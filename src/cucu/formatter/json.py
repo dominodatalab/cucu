@@ -264,13 +264,13 @@ class CucuJSONFormatter(Formatter):
         if self.current_scenario:
             hook_failed = self.current_scenario.hook_failed
             if hook_failed:
-                status_name = "errored"
+                status_name = "error"
             else:
                 status_name = self.current_scenario.status.name
 
             self.current_feature_element["status"] = status_name
 
-            if status_name in ["failed", "errored"]:
+            if status_name in ["failed", "error"]:
                 # we need to record the error_message and exc_traceback in the
                 # last executed step and mark it as failed so the reporting can
                 # show the result correctly

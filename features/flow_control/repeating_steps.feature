@@ -20,7 +20,7 @@ Feature: Repeating steps
       And I wait to see the value "3" in the input "count at"
 
   Scenario: User can stop retry when they want
-    Given I run the command "cucu run data/features/scenario_stop_retry_early.feature --results {CUCU_RESULTS_DIR}/substeps-results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+    Given I run the command "cucu run data/features/scenario_stop_retry_early.feature --results {CUCU_RESULTS_DIR}/stop_retry_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      Then I should see "{STDOUT}" matches the following
       """
       [\s\S]*
