@@ -17,6 +17,7 @@ os.environ["BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON"] = "yes"
 import behave
 from behave.__main__ import main as original_behave_main
 from behave.model import Table
+from tenacity import RetryError
 
 from cucu import logger
 from cucu.config import CONFIG
@@ -120,17 +121,20 @@ def init_step_hooks(stdout, stderr):
             )
             try:
                 func(*args, **kwargs)
-            except AssertionError:
-                raise
-            except CucuPassThroughError as e:
-                raise e.__cause__ if e.__cause__ else e
             except Exception as e:
+                if isinstance(e, RetryError) and e.last_attempt is not None:
+                    inner = e.last_attempt.exception()
+                    if inner is not None:
+                        e = inner
+                        logger.debug(f"unpacked RetryError: {inner}")
+                if isinstance(e, AssertionError):
+                    raise
+                if isinstance(e, CucuPassThroughError):
+                    raise e.__cause__ if e.__cause__ else e
                 if isinstance(e, allowed):
                     raise
                 logger.debug(
-                    "step raised %s, re-raising as AssertionError: %s",
-                    type(e).__name__,
-                    e,
+                    f"step raised {type(e).__name__}, re-raising as AssertionError: {e}",
                 )
                 raise AssertionError(str(e) or repr(e)) from e
 
