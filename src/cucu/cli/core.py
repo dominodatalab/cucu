@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import re
 import shutil
 import signal
 import sqlite3
@@ -29,6 +30,7 @@ from cucu import (
 from cucu.cli import thread_dumper
 from cucu.cli.run import behave, behave_init, create_run
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
+from cucu.cli.tags import collect_cucu_tags
 from cucu.config import CONFIG
 from cucu.db import (
     consolidate_database_files,
@@ -917,6 +919,42 @@ def tags(filepath, logging_level):
     ]
 
     print(tabulate(table_data, headers="firstrow", tablefmt="fancy_grid"))
+
+
+@main.command("collect-tags")
+@click.option(
+    "--filter",
+    default=None,
+    help="output only tags that match the given regular expression",
+)
+@click.argument(
+    "filepath", default="features", type=click.Path(path_type=Path)
+)
+@click.option(
+    "--tags",
+    default=None,
+    type=str,
+    help="tags to apply to test collection",
+    multiple=True,
+)
+def collect_tags(filepath, tags, filter=None):
+    """
+    Perform test collection and print all tags associated with the tests
+    so collected that would run.
+    """
+    filter_regex = None
+    if filter:
+        try:
+            filter_regex = re.compile(filter)
+        except re.PatternError as e:
+            print(f"Invalid filter expression provided to --collect-tags: {e}")
+            print("Aborting tag collection.")
+            exit(5)
+    collected_tags = collect_cucu_tags(filepath, tags)
+
+    if filter_regex:
+        collected_tags = [t for t in collected_tags if filter_regex.match(t)]
+    print("\n".join(collected_tags))
 
 
 if __name__ == "__main__":
