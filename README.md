@@ -48,7 +48,9 @@ to drive various underlying tools/frameworks to create real world testing scenar
   - [Run specific browser version with docker](#run-specific-browser-version-with-docker)
 - [Extending Cucu](#extending-cucu)
   - [Fuzzy matching](#fuzzy-matching)
+    - [Relevance Scoring (Ordering)](#relevance-scoring-ordering)
   - [Custom steps](#custom-steps)
+    - [Passing exceptions through](#passing-exceptions-through)
   - [Before / After hooks](#before--after-hooks)
   - [Custom lint rules](#custom-lint-rules)
 - [More Ways To Install Cucu](#more-ways-to-install-cucu)
@@ -293,6 +295,41 @@ It's easy to create custom steps, for example:
     import steps.ui.weird_button_steps
     ```
 3. profit!
+
+### Passing exceptions through
+
+By default, any exception raised in a step (other than `AssertionError`) is
+converted to an `AssertionError` so failures are reported consistently. To let
+specific exceptions pass through unchanged, use either of these:
+
+1. **Raise `CucuPassThroughError`** – In the step, raise
+   `CucuPassThroughError` to pass it through as-is, or
+   `raise CucuPassThroughError() from real_error` to unwrap so the real
+   exception type and traceback propagate:
+
+   ```python
+   from cucu import step, CucuPassThroughError
+
+   @step("I run something that may raise")
+   def step_impl(ctx):
+       try:
+           some_library()
+       except ValueError as e:
+           raise CucuPassThroughError() from e
+   ```
+
+2. **Use the `pass_through` decorator parameter** – Declare which exception
+   type(s) this step may raise and should pass through (single class or tuple):
+
+   ```python
+   @step("I parse a number", pass_through=ValueError)
+   def step_impl(ctx):
+       int("not a number")  # ValueError passes through
+
+   @step("I do I/O", pass_through=(OSError, RuntimeError))
+   def step_impl(ctx):
+       ...
+   ```
 
 ## Before / After hooks
 

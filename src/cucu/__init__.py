@@ -33,6 +33,7 @@ from cucu.utils import (
     retry,
     StopRetryException,
 )
+from cucu.behave_tweaks import CucuPassThroughError
 
 from cucu import helpers
 from behave import step

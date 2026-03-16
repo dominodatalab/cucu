@@ -22,6 +22,13 @@ from cucu import logger
 from cucu.config import CONFIG
 
 
+class CucuPassThroughError(Exception):
+    """
+    Exception that steps can use so the error passes through without being
+    converted to AssertionError.
+    """
+
+
 def behave_main(args):
     return original_behave_main(args)
 
@@ -49,14 +56,19 @@ def parse_nth(nth):
 def init_step_hooks(stdout, stderr):
     init_outputs(stdout, stderr)
     #
-    # wrap the given, when, then, step decorators from behave so we can intercept
-    # the step arguments and do things such as replacing variable references that
-    # are wrapped with curly braces {...}.
+    # Wrap the given, when, then, step decorators from behave so we can intercept
+    # step arguments and (1) replace variable references wrapped with {...}, and
+    # (2) control exception pass-through: AssertionError and CucuPassThroughError
+    # (or types listed in the step's pass_through=) are re-raised as-is; other
+    # exceptions are converted to AssertionError. See CucuPassThroughError and
+    # the pass_through decorator parameter docstrings.
     #
     for decorator_name in ["given", "when", "then", "step"]:
         decorator = behave.__dict__[decorator_name]
 
-        def inner_step_func(func, *args, variable_passthru=False, **kwargs):
+        def inner_step_func(
+            func, *args, variable_passthru=False, pass_through=None, **kwargs
+        ):
             #
             # replace the variable references in the args and kwargs passed to the
             # step
@@ -99,11 +111,22 @@ def init_step_hooks(stdout, stderr):
 
                         ctx.table.rows = new_rows
 
+            allowed = (
+                ()
+                if pass_through is None
+                else (pass_through,)
+                if isinstance(pass_through, type)
+                else tuple(pass_through)
+            )
             try:
                 func(*args, **kwargs)
             except AssertionError:
                 raise
+            except CucuPassThroughError as e:
+                raise e.__cause__ if e.__cause__ else e
             except Exception as e:
+                if isinstance(e, allowed):
+                    raise
                 logger.debug(
                     "step raised %s, re-raising as AssertionError: %s",
                     type(e).__name__,
@@ -112,7 +135,10 @@ def init_step_hooks(stdout, stderr):
                 raise AssertionError(str(e) or repr(e)) from e
 
         def new_decorator(
-            step_text, fix_inner_step=lambda x: x, variable_passthru=False
+            step_text,
+            fix_inner_step=lambda x: x,
+            variable_passthru=False,
+            pass_through=None,
         ):
             """
             the new @step decorator
@@ -128,6 +154,9 @@ def init_step_hooks(stdout, stderr):
                                        {FOO} are passed as such so they can
                                        be handled further down in `run_steps`
                                        for example.
+              pass_through: optional single exception class or tuple of
+                            exception classes to pass through without
+                            converting to AssertionError.
             """
 
             # ensure register nth type after Runner reset when used with multiple workers
@@ -153,6 +182,7 @@ def init_step_hooks(stdout, stderr):
                         func,
                         *args,
                         variable_passthru=variable_passthru,
+                        pass_through=pass_through,
                         **kwargs,
                     )
 

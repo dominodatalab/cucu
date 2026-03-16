@@ -55,6 +55,7 @@ Tests:
 - **Subject and body** in simple present only (add/fix/update, never added/fixed/updated).
 - Optional body with `-` bullets.
 - No period on subject.
+- Do not mention README, docs, or changelog updates in commit messages or changelog bullets; assume they are updated as part of the work.
 
 ### PR commit messages
 - Base all PR commit messages on the **diff from the base branch to the current branch** (e.g. `git diff main...HEAD` or the branch the PR targets). Use that diff to draft title and body. Put the JIRA ticket first in the title: `{JIRA-TICKET} {Title description}`. Body in simple present with `-` bullets; keep it concise.
