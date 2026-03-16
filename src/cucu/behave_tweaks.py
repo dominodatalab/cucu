@@ -112,16 +112,17 @@ def init_step_hooks(stdout, stderr):
 
                         ctx.table.rows = new_rows
 
-            allowed = (
-                ()
-                if pass_through is None
-                else (pass_through,)
-                if isinstance(pass_through, type)
-                else tuple(pass_through)
-            )
             try:
                 func(*args, **kwargs)
             except Exception as e:
+                allowed = (
+                    ()
+                    if pass_through is None
+                    else (pass_through,)
+                    if isinstance(pass_through, type)
+                    else tuple(pass_through)
+                )
+
                 if isinstance(e, RetryError) and e.last_attempt is not None:
                     inner = e.last_attempt.exception()
                     if inner is not None:
