@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.12
+- Feat - step exceptions auto-converted to AssertionError with debug log on change
+- Chore - bump version and agent rules for bump version (patch only, in copilot-instructions)
+
 # 1.4.11
 - Chore - upgrade behave from 1.2.6 to 1.3.3
   - reorder core.py imports for BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON
