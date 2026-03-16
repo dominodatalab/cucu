@@ -6,12 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 # 1.4.12
-- Feat - exception pass-through for steps
-  - non-AssertionError step exceptions auto-converted to AssertionError (debug log on change)
-  - CucuPassThroughError and @step(..., pass_through=Err) to pass through or unwrap
-  - run_steps re-raises step.exception when set; step to assert exception class from previous step output
-  - cucu tests via sub-cucu (data/features/pass_through_*.feature), pass-through cases expect "1 error"
-- Chore - bump version and agent rules for bump version (patch only, in copilot-instructions)
+- Feat - keep exceptions as fails for behave 1.3.x with auto-conversion
+  - auto-convert exceptions to AssertionError by default, and log it
+  - add workarounds with CucuPassThroughError and @step(..., pass_through=Err)
+  - for RetryError auto-unwrap source exception
+- Chore - update agent rules to `bump version`
 
 # 1.4.11
 - Chore - upgrade behave from 1.2.6 to 1.3.3
