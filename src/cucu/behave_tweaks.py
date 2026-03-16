@@ -18,6 +18,7 @@ import behave
 from behave.__main__ import main as original_behave_main
 from behave.model import Table
 
+from cucu import logger
 from cucu.config import CONFIG
 
 
@@ -98,7 +99,17 @@ def init_step_hooks(stdout, stderr):
 
                         ctx.table.rows = new_rows
 
-            func(*args, **kwargs)
+            try:
+                func(*args, **kwargs)
+            except AssertionError:
+                raise
+            except Exception as e:
+                logger.debug(
+                    "step raised %s, re-raising as AssertionError: %s",
+                    type(e).__name__,
+                    e,
+                )
+                raise AssertionError(str(e) or repr(e)) from e
 
         def new_decorator(
             step_text, fix_inner_step=lambda x: x, variable_passthru=False
