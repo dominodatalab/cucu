@@ -69,7 +69,7 @@ When the user asks to **split** changes into separate branches:
 When the user asks to **update** the current branch with the latest from its base (e.g. "get latest", "sync with main"): fetch the base (e.g. `origin/main`), **merge** (do not rebase) into the current branch, and **resolve all merge conflicts** before finishing.
 
 ### Bump version
-Run `uv version --bump patch`, then add a `# X.Y.Z` section at the top of `CHANGELOG.md` with `- Type - subject` bullets from the PR/commit message (Fix, Add, Change, Chore, etc.).
+Run `uv version --bump patch`. Sync `__version__` in `src/cucu/__init__.py` to the new version. Add a `# X.Y.Z` section at the top of `CHANGELOG.md` with `- Type - subject` bullets from the PR/commit message (Fix, Add, Change, Chore, etc.). On release, run `uv lock`.
 
 ## Step Definitions
 
