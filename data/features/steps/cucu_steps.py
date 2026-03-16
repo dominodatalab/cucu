@@ -1,4 +1,5 @@
 from cucu import (
+    CucuPassThroughError,
     StopRetryException,
     register_after_this_scenario_hook,
     retry,
@@ -86,6 +87,34 @@ def stop_retry(ctx):
     raise StopRetryException("Just cause I wanted to stop early")
 
 
-@step("I use retry but stop immediately")
+@step("I use retry but stop immediately", pass_through=StopRetryException)
 def use_retry_but_stop_immediately(ctx):
     retry(stop_retry)(ctx)
+
+
+@step('I raise AssertionError with message "{msg}"')
+def raise_assertion_error(_, msg):
+    raise AssertionError(msg)
+
+
+@step('I raise CucuPassThroughError with message "{msg}"')
+def raise_cucu_passthrough_error(_, msg):
+    raise CucuPassThroughError(msg)
+
+
+@step('I raise CucuPassThroughError wrapping ValueError "{msg}"')
+def raise_cucu_passthrough_wrapping_value_error(_, msg):
+    raise CucuPassThroughError() from ValueError(msg)
+
+
+@step('I raise ValueError with message "{msg}"')
+def raise_value_error(_, msg):
+    raise ValueError(msg)
+
+
+@step(
+    'I raise ValueError with pass_through with message "{msg}"',
+    pass_through=ValueError,
+)
+def raise_value_error_passthrough(_, msg):
+    raise ValueError(msg)
