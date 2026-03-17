@@ -205,6 +205,12 @@ def main():
     default=None,
     help="the HTTP url for a selenium hub setup to run the browser tests on",
 )
+@click.option(
+    "--chrome-profile-dir",
+    default=None,
+    type=click.Path(path_type=Path, exists=True),
+    help="Chrome profile path: use the whole Profile Path from chrome://version (e.g. /Users/my.user/Library/Application Support/Google/Chrome/Profile 1). When set, Chrome is launched with that profile.",
+)
 def run(
     filepath,
     browser,
@@ -232,6 +238,7 @@ def run(
     selenium_remote_url,
     workers,
     verbose,
+    chrome_profile_dir,
 ):
     """
     run a set of feature files
@@ -268,6 +275,9 @@ def run(
 
     if selenium_remote_url is not None:
         os.environ["CUCU_SELENIUM_REMOTE_URL"] = selenium_remote_url
+
+    if chrome_profile_dir is not None:
+        os.environ["CUCU_CHROME_PROFILE_DIR"] = str(chrome_profile_dir)
 
     if periodic_thread_dumper is not None:
         interval_min = float(periodic_thread_dumper)
@@ -338,6 +348,7 @@ def run(
                 show_skips,
                 tags,
                 verbose,
+                chrome_profile_dir=chrome_profile_dir,
                 skip_init_global_hook_variables=True,
             )
 
@@ -434,6 +445,7 @@ def run(
                             verbose,
                         ],
                         {
+                            "chrome_profile_dir": chrome_profile_dir,
                             "redirect_output": True,
                         },
                         task_timeout=float(feature_timeout),
