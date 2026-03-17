@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 # 1.4.12
-- Feat - keep exceptions as fails for behave 1.3.x with auto-conversion
+- Change - step decorator to preserve all errors as test fails for behave 1.3.x
   - auto-convert exceptions to AssertionError by default, and log it
   - add workarounds with CucuPassThroughError and @step(..., pass_through=Err)
   - for RetryError auto-unwrap source exception
