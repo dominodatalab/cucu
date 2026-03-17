@@ -481,11 +481,6 @@ CONFIG.define(
     "when set to 'True' skips calculating relevance scores for fuzzy find and doesn't sort by relevance",
     default=False,
 )
-CONFIG.define(
-    "CUCU_CHROME_PROFILE_DIR",
-    "Chrome profile path (use the whole Profile Path from chrome://version); when set, Chrome is launched with --user-data-dir (parent) and --profile-directory (basename) derived from this path",
-    default=None,
-)
 
 
 # define re_map here instead of in utils.py to avoid circular import

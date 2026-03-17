@@ -1,7 +1,6 @@
 import logging
 import os
 import re
-from pathlib import Path
 
 import chromedriver_autoinstaller
 import geckodriver_autoinstaller
@@ -99,12 +98,6 @@ class Selenium(Browser):
 
             if headless:
                 options.add_argument("--headless")
-
-            chrome_profile_dir = config.CONFIG.get("CUCU_CHROME_PROFILE_DIR")
-            if chrome_profile_dir:
-                path = Path(chrome_profile_dir).resolve()
-                options.add_argument(f"--user-data-dir={path}")
-                options.add_argument("--profile-directory=e2e-tests")
 
             if ignore_ssl_certificate_errors:
                 options.add_argument("ignore-certificate-errors")
