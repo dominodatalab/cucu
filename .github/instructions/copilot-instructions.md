@@ -6,7 +6,7 @@ This file is the canonical project rules for Cursor and Claude. Apply these rule
 
 ## do jira X
 
-When the user says **do jira \<ticket\>** (e.g. do jira QE-18980), implement that ticket using mcp to access it. Use the **Implementation plan** section in the ticket description as the spec (no local plan or shortened checklist). Get the plan: MCP `getJiraIssue(cloudId, issueIdOrKey, responseContentFormat="markdown")` → use "Implementation plan" in `fields.description`; else the user opens the ticket URL. Follow every part of the plan; run verification the plan or project specifies. If the ticket has no Implementation plan, ask the user for a spec. The plan is authoritative—do not substitute a shorter or local version unless asked.
+When the user says **do jira \<ticket\>** (e.g. do jira QE-18980), implement that ticket. Use the **Implementation plan** section in the ticket description as the spec (no local plan or shortened checklist). Get the plan: MCP `getJiraIssue(cloudId, issueIdOrKey, responseContentFormat="markdown")` → use "Implementation plan" in `fields.description`; else the user opens the ticket URL. Follow every part of the plan; run verification the plan or project specifies. If the ticket has no Implementation plan, ask the user for a spec. The plan is authoritative—do not substitute a shorter or local version unless asked.
 
 ## Commands
 

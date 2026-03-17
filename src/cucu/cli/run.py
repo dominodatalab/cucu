@@ -48,13 +48,9 @@ def behave(
     verbose,
     redirect_output=False,
     skip_init_global_hook_variables=False,
-    chrome_profile_dir=None,
 ):
     # load all them configs
     CONFIG.load_cucurc_files(filepath)
-
-    if chrome_profile_dir is not None:
-        os.environ["CUCU_CHROME_PROFILE_DIR"] = str(chrome_profile_dir)
 
     if CONFIG["CUCU_SELENIUM_REMOTE_URL"] is None:
         selenium.init()
