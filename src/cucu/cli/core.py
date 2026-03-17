@@ -939,8 +939,7 @@ def tags(filepath, logging_level):
 )
 def collect_tags(filepath, tags, filter=None):
     """
-    Perform test collection and print all tags associated with the tests
-    so collected that would run.
+    Perform test collection and print all associated tags
     """
     filter_regex = None
     if filter:

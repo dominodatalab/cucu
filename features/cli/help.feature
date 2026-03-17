@@ -14,15 +14,16 @@ Feature: Help
         --help     Show this message and exit.
 
       Commands:
-        debug   debug cucu library
-        init    initialize cucu in the current directory
-        lint    lint feature files
-        lsp     start the cucu language server
-        report  generate a test report from a results directory
-        run     run a set of feature files
-        steps   print available cucu steps
-        tags    print a table of tags and affected scenario counts
-        vars    print built-in cucu variables
+        collect-tags  Perform test collection and print all associated tags
+        debug         debug cucu library
+        init          initialize cucu in the current directory
+        lint          lint feature files
+        lsp           start the cucu language server
+        report        generate a test report from a results directory
+        run           run a set of feature files
+        steps         print available cucu steps
+        tags          print a table of tags and affected scenario counts
+        vars          print built-in cucu variables
 
       """
       And I should see "{STDERR}" is empty
