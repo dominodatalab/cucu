@@ -10,6 +10,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
   - auto-convert exceptions to AssertionError by default, and log it
   - add workarounds with CucuPassThroughError and @step(..., pass_through=Err)
   - for RetryError auto-unwrap source exception
+  - replaces missing_ok
 - Chore - update agent rules to `bump version`
 
 # 1.4.11

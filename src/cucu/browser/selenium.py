@@ -336,10 +336,6 @@ class Selenium(Browser):
             return list(filter(visible, elements))
 
         elements = search_in_all_frames(self, find_elements_in_frame)
-        if not missing_ok and not len(elements) > 0:
-            raise AssertionError(
-                f"No elements found for selector '{selector}'"
-            )
 
         return elements
 
