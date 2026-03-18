@@ -11,7 +11,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
   - add workarounds with CucuPassThroughError and @step(..., pass_through=Err)
   - for RetryError auto-unwrap source exception
   - replaces missing_ok
-- Chore - update agent rules to `bump version`
+- Chore - update agent rules to (merge-from-latest, bump version)
 
 # 1.4.13
 - Chore - revert accidental push of 1.4.12 to main
