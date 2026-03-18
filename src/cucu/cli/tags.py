@@ -32,7 +32,9 @@ def collect_cucu_tags(filepath=None, tags=tuple()):
         with contextlib.redirect_stdout(stdout):
             behave_tweaks.behave_main(args)
 
-    stdout = [tag for tag in stdout.getvalue().split("\n") if len(tag.strip()) > 0]
+    stdout = [
+        tag for tag in stdout.getvalue().split("\n") if len(tag.strip()) > 0
+    ]
 
     if len(stdout) > 0 and stdout[0].startswith("USING RUNNER:"):
         # remove the first line of the output so that linter won't error out trying to parse it as a step

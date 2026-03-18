@@ -7,7 +7,6 @@ import sqlite3
 import sys
 import time
 import xml.etree.ElementTree as ET
-from collections import Counter
 from importlib.metadata import version
 from pathlib import Path
 from threading import Timer
@@ -867,61 +866,7 @@ def debug(browser, url, detach, logging_level):
             time.sleep(5)
 
 
-@main.command()
-@click.option(
-    "-l",
-    "--logging-level",
-    default="INFO",
-    help="set logging level to one of debug, warn or info (default)",
-)
-@click.argument(
-    "filepath", default="features", type=click.Path(path_type=Path)
-)
-def tags(filepath, logging_level):
-    """
-    print a table of tags and affected scenario counts
-    """
-
-    # import here to preserve import to set behave parse BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON correctly
-    from behave.model_core import FileLocation
-    from behave.runner_util import parse_features
-
-    init_global_hook_variables()
-    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
-    logger.init_logging(logging_level.upper())
-
-    if filepath.is_file():
-        feature_files = [filepath]
-    else:
-        feature_files = list(filepath.rglob("*.feature"))
-
-    if not filepath.exists() or not feature_files:
-        raise ClickException("No feature files found.")
-
-    file_locations = [FileLocation(f.absolute()) for f in feature_files]
-    features = parse_features(file_locations)
-    tag_scenarios = Counter()
-
-    for feature in features:
-        for scenario in feature.scenarios:
-            affecting_tags = set(feature.tags + scenario.tags)
-            tag_scenarios.update(affecting_tags)
-
-    if not tag_scenarios:
-        print("No tags found in feature files.")
-        return
-
-    table_data = [["Tag", "Scenarios Affected"]] + [
-        [tag_name, str(count)]
-        for tag_name, count in sorted(
-            tag_scenarios.items(), key=lambda x: x[0].lower()
-        )
-    ]
-
-    print(tabulate(table_data, headers="firstrow", tablefmt="fancy_grid"))
-
-
-@main.command("collect-tags")
+@main.command("tags")
 @click.option(
     "--filter",
     default=None,
