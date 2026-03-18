@@ -5,13 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 1.4.12
+# 1.4.14
 - Change - step decorator to preserve all errors as test fails for behave 1.3.x
   - auto-convert exceptions to AssertionError by default, and log it
   - add workarounds with CucuPassThroughError and @step(..., pass_through=Err)
   - for RetryError auto-unwrap source exception
   - replaces missing_ok
 - Chore - update agent rules to `bump version`
+
+# 1.4.13
+- Chore - revert accidental push of 1.4.12 to main
+
+# 1.4.12
+Add --chrome-profile-dir for Chrome profile
+- Add CLI option --chrome-profile-dir and CUCU_CHROME_PROFILE_DIR config/env
+- Set Chrome --user-data-dir from path and --profile-directory e2e-tests in selenium
+- Document option in README and help with example path
+- Bump version to 1.4.12
 
 # 1.4.11
 - Chore - upgrade behave from 1.2.6 to 1.3.3
