@@ -85,16 +85,14 @@ Feature: Tags
       CUCU_SECRETS: SECRET_NUMBER
       SECRET_NUMBER: '123'
       """
-      And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/features/feature_that_spills_the_beans.feature" with the following:
+      And I create a file at "{CUCU_RESULTS_DIR}/features_with_secrets/features/feature_that_tags_the_beans.feature" with the following:
       """
       Feature: Feature with a tag that would be redacted
 
         @tag-555123555
         Scenario: This scenario prints some secrets to the logs
-         Given I echo "the current user is \{USER\}"
-           And I echo "\{MY_SECRET\}"
-           And I echo "your home directory is at \{HOME\}"
-          Then I use a step with substeps that has secrets
+         Given I echo "This is not secret"
+          Then I echo "Only the tag is secret"
       """
      When I run the command "cucu tags {CUCU_RESULTS_DIR}/features_with_secrets" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
      Then I should see "{STDOUT}" contains "tag-555123555"
