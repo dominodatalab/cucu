@@ -21,7 +21,7 @@ Feature: Help
         report  generate a test report from a results directory
         run     run a set of feature files
         steps   print available cucu steps
-        tags    print a table of tags and affected scenario counts
+        tags    Perform test collection and print all associated tags
         vars    print built-in cucu variables
 
       """

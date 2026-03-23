@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
+import re
 import shutil
 import signal
 import sqlite3
 import sys
 import time
 import xml.etree.ElementTree as ET
-from collections import Counter
 from importlib.metadata import version
 from pathlib import Path
 from threading import Timer
@@ -29,6 +29,7 @@ from cucu import (
 from cucu.cli import thread_dumper
 from cucu.cli.run import behave, behave_init, create_run
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
+from cucu.cli.tags import collect_cucu_tags
 from cucu.config import CONFIG
 from cucu.db import (
     consolidate_database_files,
@@ -865,58 +866,39 @@ def debug(browser, url, detach, logging_level):
             time.sleep(5)
 
 
-@main.command()
+@main.command("tags")
 @click.option(
-    "-l",
-    "--logging-level",
-    default="INFO",
-    help="set logging level to one of debug, warn or info (default)",
+    "--filter",
+    default=None,
+    help="output only tags that match the given regular expression",
 )
 @click.argument(
     "filepath", default="features", type=click.Path(path_type=Path)
 )
-def tags(filepath, logging_level):
+@click.option(
+    "--tags",
+    default=None,
+    type=str,
+    help="tags to apply to test collection",
+    multiple=True,
+)
+def collect_tags(filepath, tags, filter=None):
     """
-    print a table of tags and affected scenario counts
+    Perform test collection and print all associated tags
     """
+    filter_regex = None
+    if filter:
+        try:
+            filter_regex = re.compile(filter)
+        except re.PatternError as e:
+            print(f"Invalid filter expression provided to --collect-tags: {e}")
+            print("Aborting tag collection.")
+            exit(5)
+    collected_tags = collect_cucu_tags(filepath, tags)
 
-    # import here to preserve import to set behave parse BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON correctly
-    from behave.model_core import FileLocation
-    from behave.runner_util import parse_features
-
-    init_global_hook_variables()
-    os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
-    logger.init_logging(logging_level.upper())
-
-    if filepath.is_file():
-        feature_files = [filepath]
-    else:
-        feature_files = list(filepath.rglob("*.feature"))
-
-    if not filepath.exists() or not feature_files:
-        raise ClickException("No feature files found.")
-
-    file_locations = [FileLocation(f.absolute()) for f in feature_files]
-    features = parse_features(file_locations)
-    tag_scenarios = Counter()
-
-    for feature in features:
-        for scenario in feature.scenarios:
-            affecting_tags = set(feature.tags + scenario.tags)
-            tag_scenarios.update(affecting_tags)
-
-    if not tag_scenarios:
-        print("No tags found in feature files.")
-        return
-
-    table_data = [["Tag", "Scenarios Affected"]] + [
-        [tag_name, str(count)]
-        for tag_name, count in sorted(
-            tag_scenarios.items(), key=lambda x: x[0].lower()
-        )
-    ]
-
-    print(tabulate(table_data, headers="firstrow", tablefmt="fancy_grid"))
+    if filter_regex:
+        collected_tags = [t for t in collected_tags if filter_regex.match(t)]
+    print("\n".join(collected_tags))
 
 
 if __name__ == "__main__":
