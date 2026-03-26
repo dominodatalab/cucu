@@ -37,11 +37,11 @@ def collect_cucu_tags(filepath=None, tags=tuple()):
     ]
 
     if len(stdout) > 0 and stdout[0].startswith("USING RUNNER:"):
-            # remove the first line of the output so that linter won't error out trying to parse it as a step
-            stdout = stdout[1:]
+        # remove the first line of the output so that linter won't error out trying to parse it as a step
+        stdout = stdout[1:]
 
-    if len(stdout) > 0 and  stdout[0].startswith("ParserError"):
+    if len(stdout) > 0 and stdout[0].startswith("ParserError"):
         raise RuntimeError(
             "Unable to parse feature files. Please double-check the syntax of your feature files."
-            )
+        )
     return stdout

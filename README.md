@@ -147,6 +147,13 @@ By default we'll simply use the `Google Chrome` you have installed and there's
 a python package that'll handle downloading chromedriver that matches your
 specific local Google Chrome version.
 
+To run Chrome with a specific profile (e.g. one that has extensions or login state), use `--chrome-profile-dir` with the **whole** Profile Path from `chrome://version` in Chrome (e.g. `/Users/my.user/Library/Application Support/Google/Chrome/Profile 1`). You can also set the env var `CUCU_CHROME_PROFILE_DIR`.
+
+Example:
+```bash
+cucu run features --chrome-profile-dir="/Users/my.user/Library/Application Support/Google/Chrome/Profile 1" --no-headless
+```
+
 ## Run specific browser version with docker
 
 [docker hub](https://hub.docker.com/) has easy to use docker containers for
