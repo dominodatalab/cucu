@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.14
 - Add - cucu run `--chrome-profile-dir` arg to specify local chrome profile
+- Add - Replace current tags command with new logic
 
 # 1.4.13
 - Chore - revert accidental push of 1.4.12 to main
