@@ -87,7 +87,9 @@ def stop_retry(ctx):
     raise StopRetryException("Just cause I wanted to stop early")
 
 
-@step("I use retry but stop immediately", pass_through=StopRetryException)
+@step(
+    "I use retry but stop immediately", exception_passthru=StopRetryException
+)
 def use_retry_but_stop_immediately(ctx):
     retry(stop_retry)(ctx)
 
@@ -113,8 +115,8 @@ def raise_value_error(_, msg):
 
 
 @step(
-    'I raise ValueError with pass_through with message "{msg}"',
-    pass_through=ValueError,
+    'I raise ValueError with exception_passthru with message "{msg}"',
+    exception_passthru=ValueError,
 )
 def raise_value_error_passthrough(_, msg):
     raise ValueError(msg)

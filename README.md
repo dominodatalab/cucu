@@ -318,15 +318,15 @@ specific exceptions pass through unchanged, use either of these:
            raise CucuPassThroughError() from e
    ```
 
-2. **Use the `pass_through` decorator parameter** – Declare which exception
+2. **Use the `exception_passthru` decorator parameter** – Declare which exception
    type(s) this step may raise and should pass through (single class or tuple):
 
    ```python
-   @step("I parse a number", pass_through=ValueError)
+   @step("I parse a number", exception_passthru=ValueError)
    def step_impl(ctx):
        int("not a number")  # ValueError passes through
 
-   @step("I do I/O", pass_through=(OSError, RuntimeError))
+   @step("I do I/O", exception_passthru=(OSError, RuntimeError))
    def step_impl(ctx):
        ...
    ```

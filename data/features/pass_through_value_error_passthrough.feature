@@ -1,3 +1,3 @@
-Feature: Pass-through case - ValueError with pass_through
-  Scenario: ValueError with pass_through decorator passes through
-    Then I raise ValueError with pass_through with message "value error with passthrough"
+Feature: Pass-through case - ValueError with exception_passthru
+  Scenario: ValueError with exception_passthru passes through
+    Then I raise ValueError with exception_passthru with message "value error with passthrough"

@@ -60,15 +60,19 @@ def init_step_hooks(stdout, stderr):
     # Wrap the given, when, then, step decorators from behave so we can intercept
     # step arguments and (1) replace variable references wrapped with {...}, and
     # (2) control exception pass-through: AssertionError and CucuPassThroughError
-    # (or types listed in the step's pass_through=) are re-raised as-is; other
+    # (or types listed in the step's exception_passthru=) are re-raised as-is; other
     # exceptions are converted to AssertionError. See CucuPassThroughError and
-    # the pass_through decorator parameter docstrings.
+    # the exception_passthru decorator parameter docstrings.
     #
     for decorator_name in ["given", "when", "then", "step"]:
         decorator = behave.__dict__[decorator_name]
 
         def inner_step_func(
-            func, *args, variable_passthru=False, pass_through=None, **kwargs
+            func,
+            *args,
+            variable_passthru=False,
+            exception_passthru=None,
+            **kwargs,
         ):
             #
             # replace the variable references in the args and kwargs passed to the
@@ -117,10 +121,10 @@ def init_step_hooks(stdout, stderr):
             except Exception as e:
                 allowed = (
                     ()
-                    if pass_through is None
-                    else (pass_through,)
-                    if isinstance(pass_through, type)
-                    else tuple(pass_through)
+                    if exception_passthru is None
+                    else (exception_passthru,)
+                    if isinstance(exception_passthru, type)
+                    else tuple(exception_passthru)
                 )
 
                 if isinstance(e, RetryError) and e.last_attempt is not None:
@@ -143,7 +147,7 @@ def init_step_hooks(stdout, stderr):
             step_text,
             fix_inner_step=lambda x: x,
             variable_passthru=False,
-            pass_through=None,
+            exception_passthru=None,
         ):
             """
             the new @step decorator
@@ -159,7 +163,7 @@ def init_step_hooks(stdout, stderr):
                                        {FOO} are passed as such so they can
                                        be handled further down in `run_steps`
                                        for example.
-              pass_through: optional single exception class or tuple of
+              exception_passthru: optional single exception class or tuple of
                             exception classes to pass through without
                             converting to AssertionError.
             """
@@ -187,7 +191,7 @@ def init_step_hooks(stdout, stderr):
                         func,
                         *args,
                         variable_passthru=variable_passthru,
-                        pass_through=pass_through,
+                        exception_passthru=exception_passthru,
                         **kwargs,
                     )
 
