@@ -120,7 +120,7 @@ def init_step_hooks(stdout, stderr):
 
             try:
                 func(*args, **kwargs)
-            except Exception as e:
+            except Exception as ex:
                 # ensure exception_passthru is a tuple for isinstance check
                 if exception_passthru is None:
                     allowed = ()
@@ -129,21 +129,23 @@ def init_step_hooks(stdout, stderr):
                 else:
                     allowed = tuple(exception_passthru)
 
-                if isinstance(e, RetryError) and e.last_attempt is not None:
-                    inner = e.last_attempt.exception()
+                if isinstance(ex, RetryError) and ex.last_attempt is not None:
+                    inner = ex.last_attempt.exception()
                     if inner is not None:
-                        e = inner
+                        ex = inner
                         logger.debug(f"unpacked RetryError: {inner}")
-                if isinstance(e, AssertionError):
-                    raise
-                if isinstance(e, CucuPassThroughError):
-                    raise e.__cause__ if e.__cause__ else e
-                if isinstance(e, allowed):
-                    raise
+
+                # in the case of unpacked RetryError raise the changed `ex`
+                if isinstance(ex, AssertionError):
+                    raise ex
+                if isinstance(ex, CucuPassThroughError):
+                    raise ex.__cause__ if ex.__cause__ else ex
+                if isinstance(ex, allowed):
+                    raise ex
                 logger.debug(
-                    f"step raised {type(e).__name__}, re-raising as AssertionError: {e}",
+                    f"step raised {type(ex).__name__}, re-raising as AssertionError: {ex}",
                 )
-                raise AssertionError(str(e) or repr(e)) from e
+                raise AssertionError(str(ex) or repr(ex)) from ex
 
         def new_decorator(
             step_text,
