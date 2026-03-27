@@ -24,3 +24,16 @@ Feature: Pass-through exceptions
     Given I run the command "cucu run data/features/pass_through_value_error_converted.feature --no-color-output --results {CUCU_RESULTS_DIR}/pass_through_value_converted" and save stdout to "STDOUT" and expect exit code "1"
      Then I should see "{STDOUT}" contains "ASSERT FAILED: value error converted"
       And I should see "{STDOUT}" contains "0 scenarios passed, 1 failed, 0 skipped"
+
+  Scenario: ValueError with exception_passthru tuple passes through
+    Given I run the command "cucu run data/features/pass_through_tuple_value.feature --no-color-output --results {CUCU_RESULTS_DIR}/pass_through_tuple_value" and save stdout to "STDOUT" and expect exit code "1"
+     Then I should see "{STDOUT}" contains "0 scenarios passed, 0 failed, 1 error, 0 skipped"
+
+  Scenario: TypeError with exception_passthru tuple passes through
+    Given I run the command "cucu run data/features/pass_through_tuple_type.feature --no-color-output --results {CUCU_RESULTS_DIR}/pass_through_tuple_type" and save stdout to "STDOUT" and expect exit code "1"
+     Then I should see "{STDOUT}" contains "0 scenarios passed, 0 failed, 1 error, 0 skipped"
+
+  Scenario: RuntimeError not in exception_passthru tuple is converted to AssertionError
+    Given I run the command "cucu run data/features/pass_through_tuple_runtime_converted.feature --no-color-output --results {CUCU_RESULTS_DIR}/pass_through_tuple_runtime" and save stdout to "STDOUT" and expect exit code "1"
+     Then I should see "{STDOUT}" contains "ASSERT FAILED: runtime not in passthrough tuple"
+      And I should see "{STDOUT}" contains "0 scenarios passed, 1 failed, 0 skipped"

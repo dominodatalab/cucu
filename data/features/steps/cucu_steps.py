@@ -120,3 +120,27 @@ def raise_value_error(_, msg):
 )
 def raise_value_error_passthrough(_, msg):
     raise ValueError(msg)
+
+
+@step(
+    'I raise ValueError with exception_passthru tuple with message "{msg}"',
+    exception_passthru=(ValueError, TypeError),
+)
+def raise_value_error_passthrough_tuple(_, msg):
+    raise ValueError(msg)
+
+
+@step(
+    'I raise TypeError with exception_passthru tuple with message "{msg}"',
+    exception_passthru=(ValueError, TypeError),
+)
+def raise_type_error_passthrough_tuple(_, msg):
+    raise TypeError(msg)
+
+
+@step(
+    'I raise RuntimeError with exception_passthru tuple with message "{msg}"',
+    exception_passthru=(ValueError, TypeError),
+)
+def raise_runtime_error_with_tuple_passthrough(_, msg):
+    raise RuntimeError(msg)
