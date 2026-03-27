@@ -3,6 +3,8 @@
 #      writing while not interfering with the way behave does its own log
 #      capturing
 #
+
+
 import os
 import re
 import sys
@@ -17,8 +19,17 @@ os.environ["BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON"] = "yes"
 import behave
 from behave.__main__ import main as original_behave_main
 from behave.model import Table
+from tenacity import RetryError
 
+from cucu import logger
 from cucu.config import CONFIG
+
+
+class CucuPassThroughError(Exception):
+    """
+    Exception that steps can use so the error passes through without being
+    converted to AssertionError.
+    """
 
 
 def behave_main(args):
@@ -48,14 +59,23 @@ def parse_nth(nth):
 def init_step_hooks(stdout, stderr):
     init_outputs(stdout, stderr)
     #
-    # wrap the given, when, then, step decorators from behave so we can intercept
-    # the step arguments and do things such as replacing variable references that
-    # are wrapped with curly braces {...}.
+    # Wrap the given, when, then, step decorators from behave so we can intercept
+    # step arguments and (1) replace variable references wrapped with {...}, and
+    # (2) control exception pass-through: AssertionError and CucuPassThroughError
+    # (or types listed in the step's exception_passthru=) are re-raised as-is; other
+    # exceptions are converted to AssertionError. See CucuPassThroughError and
+    # the exception_passthru decorator parameter docstrings.
     #
     for decorator_name in ["given", "when", "then", "step"]:
         decorator = behave.__dict__[decorator_name]
 
-        def inner_step_func(func, *args, variable_passthru=False, **kwargs):
+        def inner_step_func(
+            func,
+            *args,
+            variable_passthru=False,
+            exception_passthru=None,
+            **kwargs,
+        ):
             #
             # replace the variable references in the args and kwargs passed to the
             # step
@@ -98,10 +118,40 @@ def init_step_hooks(stdout, stderr):
 
                         ctx.table.rows = new_rows
 
-            func(*args, **kwargs)
+            try:
+                func(*args, **kwargs)
+            except Exception as ex:
+                # ensure exception_passthru is a tuple for isinstance check
+                if exception_passthru is None:
+                    allowed = ()
+                elif isinstance(exception_passthru, type):
+                    allowed = (exception_passthru,)
+                else:
+                    allowed = tuple(exception_passthru)
+
+                if isinstance(ex, RetryError) and ex.last_attempt is not None:
+                    inner = ex.last_attempt.exception()
+                    if inner is not None:
+                        ex = inner
+                        logger.debug(f"unpacked RetryError: {inner}")
+
+                # in the case of unpacked RetryError raise the changed `ex`
+                if isinstance(ex, AssertionError):
+                    raise ex
+                if isinstance(ex, CucuPassThroughError):
+                    raise ex.__cause__ if ex.__cause__ else ex
+                if isinstance(ex, allowed):
+                    raise ex
+                logger.debug(
+                    f"step raised {type(ex).__name__}, re-raising as AssertionError: {ex}",
+                )
+                raise AssertionError(str(ex) or repr(ex)) from ex
 
         def new_decorator(
-            step_text, fix_inner_step=lambda x: x, variable_passthru=False
+            step_text,
+            fix_inner_step=lambda x: x,
+            variable_passthru=False,
+            exception_passthru=None,
         ):
             """
             the new @step decorator
@@ -117,6 +167,9 @@ def init_step_hooks(stdout, stderr):
                                        {FOO} are passed as such so they can
                                        be handled further down in `run_steps`
                                        for example.
+              exception_passthru: optional single exception class or tuple of
+                            exception classes to pass through without
+                            converting to AssertionError.
             """
 
             # ensure register nth type after Runner reset when used with multiple workers
@@ -142,6 +195,7 @@ def init_step_hooks(stdout, stderr):
                         func,
                         *args,
                         variable_passthru=variable_passthru,
+                        exception_passthru=exception_passthru,
                         **kwargs,
                     )
 

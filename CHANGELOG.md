@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.16
+- Change - step decorator to preserve all errors as test fails for behave 1.3.x
+  - auto-convert exceptions to AssertionError by default, and log it
+  - add workarounds with CucuPassThroughError and @step(..., exception_passthru=Err)
+  - for RetryError auto-unwrap source exception
+  - replaces missing_ok
+- Chore - update agent rules to (merge-from-latest, bump version)
+
 # 1.4.15
 - Add - cucu run `--chrome-profile-dir` arg to specify local chrome profile
 

@@ -333,7 +333,7 @@ class Selenium(Browser):
     def title(self):
         return self.driver.title
 
-    def css_find_elements(self, selector, missing_ok=False):
+    def css_find_elements(self, selector):
         def find_elements_in_frame():
             elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
 
@@ -343,10 +343,6 @@ class Selenium(Browser):
             return list(filter(visible, elements))
 
         elements = search_in_all_frames(self, find_elements_in_frame)
-        if not missing_ok and not len(elements) > 0:
-            raise AssertionError(
-                f"No elements found for selector '{selector}'"
-            )
 
         return elements
 

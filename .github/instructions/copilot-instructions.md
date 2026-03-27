@@ -55,6 +55,7 @@ Tests:
 - **Subject and body** in simple present only (add/fix/update, never added/fixed/updated).
 - Optional body with `-` bullets.
 - No period on subject.
+- Do not mention README, docs, or changelog updates in commit messages or changelog bullets; assume they are updated as part of the work.
 
 ### PR commit messages
 - Base all PR commit messages on the **diff from the base branch to the current branch** (e.g. `git diff main...HEAD` or the branch the PR targets). Use that diff to draft title and body. Put the JIRA ticket first in the title: `{JIRA-TICKET} {Title description}`. Body in simple present with `-` bullets; keep it concise.
@@ -65,11 +66,11 @@ When the user asks to **split** changes into separate branches:
 2. **Per theme:** Create a **new branch from main** (not from the feature branch unless the user says otherwise). Apply only that theme’s files: `git checkout <source-branch> -- path/to/file1 path/to/file2`, then `git add` and a single commit (see Commit messages). Verify with a diff of those paths against the source. Do **not** cherry-pick unless the user explicitly asks.
 3. **Report** — Branch name(s), what each contains, and the suggested commit message for each.
 
-### Syncing branch with base (get latest)
-When the user asks to **update** the current branch with the latest from its base (e.g. "get latest", "sync with main"): fetch the base (e.g. `origin/main`), **merge** (do not rebase) into the current branch, and **resolve all merge conflicts** before finishing.
+### Syncing branch with base (merge from latest)
+When the user asks to **update** the current branch with the latest from its base (e.g. "get latest", "merge from latest", "sync with main"): fetch the base (default `origin/main` or `origin/HEAD`), **merge** (do not rebase) into the current branch. If no conflicts, commit and finish. **If conflicts in `pyproject.toml`, `uv.lock`, or `CHANGELOG.md`:** take **theirs** for `pyproject.toml` and `uv.lock`, then bump version once (see **Bump version**) and run `uv lock`; in `CHANGELOG.md`, put a new `# X.Y.Z` at the top with **our** changelog items only, then base's sections in order, and remove conflict markers. Stage resolved files and commit (e.g. "Merge origin/<base> into <branch>"). Resolve any other conflicted files manually.
 
 ### Bump version
-Run `uv version --bump patch`, then add a `# X.Y.Z` section at the top of `CHANGELOG.md` with `- Type - subject` bullets from the PR/commit message (Fix, Add, Change, Chore, etc.).
+Run `uv version --bump patch`, then add a `# X.Y.Z` section at the top of `CHANGELOG.md` with `- Type - subject` bullets from the PR/commit message (Fix, Add, Change, Chore, etc.). On release, run `uv lock`.
 
 ## Step Definitions
 
