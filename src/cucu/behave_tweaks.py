@@ -3,6 +3,8 @@
 #      writing while not interfering with the way behave does its own log
 #      capturing
 #
+
+
 import os
 import re
 import sys
@@ -119,13 +121,13 @@ def init_step_hooks(stdout, stderr):
             try:
                 func(*args, **kwargs)
             except Exception as e:
-                allowed = (
-                    ()
-                    if exception_passthru is None
-                    else (exception_passthru,)
-                    if isinstance(exception_passthru, type)
-                    else tuple(exception_passthru)
-                )
+                # ensure exception_passthru is a tuple for isinstance check
+                if exception_passthru is None:
+                    allowed = ()
+                elif isinstance(exception_passthru, type):
+                    allowed = (exception_passthru,)
+                else:
+                    allowed = tuple(exception_passthru)
 
                 if isinstance(e, RetryError) and e.last_attempt is not None:
                     inner = e.last_attempt.exception()
