@@ -167,9 +167,7 @@ class RundbFormatter(Formatter):
         """cucu specific step insertion method used to add steps here and dynamically"""
         next_index = index if index != -1 else len(self.this_steps)
         step_run_id_seed = f"{self.this_scenario.scenario_run_id}_{next_index}_{time.perf_counter()}"
-        step.step_run_id = generate_short_id(
-            step_run_id_seed, length=10
-        )  # up to 10 characters to give two orders of magnitude less chance of collision
+        step.step_run_id = generate_short_id(step_run_id_seed)
         self.this_steps.insert(next_index, step)
         start_step_record(step, self.this_scenario.scenario_run_id)
 

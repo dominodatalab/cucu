@@ -49,7 +49,7 @@ class StopRetryException(Exception):
     pass
 
 
-def generate_short_id(seed=None, length=7):
+def generate_short_id(seed=None, length=12):
     """
     Generate a short character ID based on seed (defaults to current performance counter).
     """
