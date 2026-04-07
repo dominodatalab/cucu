@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.17
 - Change - more id uniquness to use 12 digits
+- Change - remove lazy load report images
 
 # 1.4.16
 - Change - step decorator to preserve all errors as test fails for behave 1.3.x
