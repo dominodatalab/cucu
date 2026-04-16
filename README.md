@@ -49,6 +49,7 @@ to drive various underlying tools/frameworks to create real world testing scenar
 - [Extending Cucu](#extending-cucu)
   - [Fuzzy matching](#fuzzy-matching)
     - [Relevance Scoring (Ordering)](#relevance-scoring-ordering)
+  - [Nested iframes and open shadow DOM](#nested-iframes-and-open-shadow-dom)
   - [Custom steps](#custom-steps)
     - [Passing exceptions through](#passing-exceptions-through)
   - [Before / After hooks](#before--after-hooks)
@@ -265,6 +266,23 @@ When fuzzy matching yields multiple candidates, cucu orders results by a case-se
 Notes:
 - All matching is case-sensitive to mirror how selectors like `:contains` and custom `:has_text` behave.
 - The scoring is applied after deduplication by element identity.
+
+## Nested iframes and open shadow DOM
+
+Built-in fuzzy matching and `css_find_elements` only walk the top document plus
+**one** level of child `iframe` contexts. For deeper iframe trees, use
+`cucu.browser.frames.search_in_all_frames_nested` (breadth-first by iframe index
+path from default content, with a `max_depth` guard). Helpers
+`switch_to_frame_path` and `search_in_all_frames_nested_and_deep` live in the
+same module. Like `search_in_all_frames`, nested search **leaves the session in
+the last frame that was searched** when a match is found.
+
+Selenium’s normal CSS queries do not enter **open** `shadowRoot` trees. For
+that, use `cucu.browser.shadow.deep_query_selector_first` /
+`deep_query_selector_all` with the current `WebDriver`, or opt into
+`Selenium.css_find_elements_deep` / `css_find_elements_nested` on the cucu
+browser object. Closed shadow roots and cross-origin nested documents are still
+out of reach from the parent page.
 
 ## Custom steps
 It's easy to create custom steps, for example:
