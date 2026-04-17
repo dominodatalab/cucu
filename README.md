@@ -269,13 +269,15 @@ Notes:
 
 ## Nested iframes and open shadow DOM
 
-Built-in fuzzy matching and `css_find_elements` only walk the top document plus
-**one** level of child `iframe` contexts. For deeper iframe trees, use
-`cucu.browser.frames.search_in_all_frames_nested` (breadth-first by iframe index
-path from default content, with a `max_depth` guard). Helpers
-`switch_to_frame_path` and `search_in_all_frames_nested_and_deep` live in the
-same module. Like `search_in_all_frames`, nested search **leaves the session in
-the last frame that was searched** when a match is found.
+`cucu.browser.frames.search_in_all_frames` walks the current context, then
+default content, then **nested** `iframe` trees breadth-first by index path
+from default content (with a `max_depth` guard). Pass
+`include_nested_frames=False` to restore the previous behavior of only the
+default document plus **top-level** iframes. Helpers `switch_to_frame_path` and
+`search_in_all_frames_nested_and_deep` live in the same module; the legacy name
+`search_in_all_frames_nested` is an alias for nested mode. Like all frame search
+helpers here, search **leaves the session in the last frame that was searched**
+when a match is found.
 
 Selenium’s normal CSS queries do not enter **open** `shadowRoot` trees. For
 that, use `cucu.browser.shadow.deep_query_selector_first` /

@@ -16,10 +16,7 @@ from selenium.webdriver.remote.command import Command
 
 from cucu import config, edgedriver_autoinstaller, logger
 from cucu.browser.core import Browser
-from cucu.browser.frames import (
-    search_in_all_frames,
-    search_in_all_frames_nested,
-)
+from cucu.browser.frames import search_in_all_frames
 from cucu.browser.shadow import deep_query_selector_all
 
 # suppress warning caused by selenium_keep_alive taking an extra http connection
@@ -359,8 +356,11 @@ class Selenium(Browser):
 
             return list(filter(visible, elements))
 
-        return search_in_all_frames_nested(
-            self, find_elements_in_frame, max_depth=max_depth
+        return search_in_all_frames(
+            self,
+            find_elements_in_frame,
+            include_nested_frames=True,
+            max_depth=max_depth,
         )
 
     def css_find_elements_deep(self, selector, *, max_depth: int = 15):
@@ -372,8 +372,11 @@ class Selenium(Browser):
 
             return list(filter(visible, elements))
 
-        return search_in_all_frames_nested(
-            self, find_in_frame, max_depth=max_depth
+        return search_in_all_frames(
+            self,
+            find_in_frame,
+            include_nested_frames=True,
+            max_depth=max_depth,
         )
 
     def execute(self, javascript, *args):

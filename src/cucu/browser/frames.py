@@ -3,7 +3,13 @@ from collections import deque
 from cucu.browser.core import Browser
 
 
-def search_in_all_frames(browser, search_function):
+def search_in_all_frames(
+    browser,
+    search_function,
+    *,
+    include_nested_frames: bool = True,
+    max_depth: int = 15,
+):
     """
     search all frames on the page for an element
 
@@ -11,32 +17,59 @@ def search_in_all_frames(browser, search_function):
     users of this method are in that frame.
 
     parameters:
-      browser           - the cucu.browser.Browser object
-      search_function   - function to search for the element (within a frame)
+      browser               - the cucu.browser.Browser object
+      search_function       - function to search for the element (within a frame)
+      include_nested_frames - when True (default), breadth-first search into nested
+                              iframes by index path up to max_depth; when False,
+                              only the default document and top-level iframes
+      max_depth             - maximum iframe path length when include_nested_frames
+                              is True (ignored otherwise)
     returns:
         the WebElement that matches (if found)
     """
-    # check whatever frame we're currently in
     result = search_function()
 
     if not result:
-        # we might have not been in the default frame so check again
         browser.switch_to_default_frame()
 
         result = search_function()
         if result:
             return result
 
-        frames = browser.execute('return document.querySelectorAll("iframe");')
-        for frame in frames:
-            # need to be in the default frame in order to switch to a child
-            # frame w/o getting a stale element exception
-            browser.switch_to_default_frame()
-            browser.switch_to_frame(frame)
-            result = search_function()
+        if include_nested_frames:
+            queue = deque()
+            frames = browser.execute(
+                'return document.querySelectorAll("iframe");'
+            )
+            for i in range(len(frames)):
+                if len((i,)) <= max_depth:
+                    queue.append((i,))
 
-            if result:
-                return result
+            while queue:
+                path = queue.popleft()
+                switch_to_frame_path(browser, path)
+                result = search_function()
+                if result:
+                    return result
+
+                inner = browser.execute(
+                    'return document.querySelectorAll("iframe");'
+                )
+                for j in range(len(inner)):
+                    next_path = path + (j,)
+                    if len(next_path) <= max_depth:
+                        queue.append(next_path)
+        else:
+            frames = browser.execute(
+                'return document.querySelectorAll("iframe");'
+            )
+            for frame in frames:
+                browser.switch_to_default_frame()
+                browser.switch_to_frame(frame)
+                result = search_function()
+
+                if result:
+                    return result
 
     return result
 
@@ -129,57 +162,23 @@ def search_in_all_frames_nested(
     browser, search_function, *, max_depth: int = 15
 ):
     """
-    Like search_in_all_frames, but descends into nested iframes breadth-first
-    by index path from default content (up to max_depth levels).
-
-    Warning: This leaves the browser in whatever frame was last searched so
-    callers remain in that frame.
-
-    parameters:
-      browser         - the cucu.browser.Browser object
-      search_function - function to run in each candidate frame (no arguments)
-      max_depth       - maximum iframe depth (number of indices in a path)
-
-    returns:
-      The first truthy value returned by search_function, or the last falsy
-      result if nothing matched (same convention as search_in_all_frames).
+    Equivalent to ``search_in_all_frames(..., include_nested_frames=True,
+    max_depth=max_depth)``.
     """
-    result = search_function()
-    if result:
-        return result
-
-    browser.switch_to_default_frame()
-    result = search_function()
-    if result:
-        return result
-
-    queue = deque()
-    frames = browser.execute('return document.querySelectorAll("iframe");')
-    for i in range(len(frames)):
-        if len((i,)) <= max_depth:
-            queue.append((i,))
-
-    while queue:
-        path = queue.popleft()
-        switch_to_frame_path(browser, path)
-        result = search_function()
-        if result:
-            return result
-
-        inner = browser.execute('return document.querySelectorAll("iframe");')
-        for j in range(len(inner)):
-            next_path = path + (j,)
-            if len(next_path) <= max_depth:
-                queue.append(next_path)
-
-    return result
+    return search_in_all_frames(
+        browser,
+        search_function,
+        include_nested_frames=True,
+        max_depth=max_depth,
+    )
 
 
 def search_in_all_frames_nested_and_deep(
     browser, selector: str, *, max_depth: int = 15
 ):
     """
-    For each nested frame (BFS, same ordering as search_in_all_frames_nested),
+    For each nested frame (BFS, same ordering as search_in_all_frames with
+    nested iframes enabled),
     run deep_query_selector_first in that frame's document.
 
     Requires a Selenium-backed browser with a ``driver`` attribute.

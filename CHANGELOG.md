@@ -8,6 +8,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 # 1.4.18
 - Add - nested iframe search (`switch_to_frame_path`, `search_in_all_frames_nested`, `search_in_all_frames_nested_and_deep`)
 - Add - open shadow DOM CSS helpers (`deep_query_selector_first`, `deep_query_selector_all`) and opt-in `Selenium.css_find_elements_nested` / `css_find_elements_deep`
+- Change - `search_in_all_frames` defaults to nested iframe BFS; pass `include_nested_frames=False` for the previous top-level-only walk; `max_depth` applies when nested mode is on
+- Change - `search_in_all_frames_nested` is now a thin wrapper around `search_in_all_frames`
 
 # 1.4.17
 - Change - more id uniquness to use 12 digits
