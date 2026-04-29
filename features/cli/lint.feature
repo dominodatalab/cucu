@@ -555,7 +555,7 @@ Feature: Lint
       """
       And I should see "{STDOUT}" does not contain the following:
       """
-      results/exclude_tags_lint/scenario_tag.feature:6:
+      results/exclude_tags_lint/scenario_tag.feature:7:
       """
      Then I run the command "cucu lint {CUCU_RESULTS_DIR}/exclude_tags_lint/feature_tag.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
       And I should see "{STDOUT}" is equal to the following:
