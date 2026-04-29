@@ -175,10 +175,11 @@ def lint_line(state, rules, steps, line_number, lines, filepath):
 
         # skip rules whose exclude_tags match the active scenario/feature tags
         if "exclude_tags" in rule:
-            active_tags = state.get(
-                "current_scenario_tags", set()
-            ) | state.get("current_feature_tags", set())
-            if active_tags & set(rule["exclude_tags"]):
+            if any(
+                excl in state.get("current_scenario_tags", [])
+                or excl in state.get("current_feature_tags", [])
+                for excl in rule["exclude_tags"]
+            ):
                 continue
 
         (current_matcher, current_message) = parse_matcher(
