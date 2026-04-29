@@ -480,6 +480,96 @@ Feature: Lint
       """
       And I should see "{STDERR}" is empty
 
+  Scenario: User can exclude rules using exclude_tags
+    Given I create a file at "{CUCU_RESULTS_DIR}/exclude_tags_lint/environment.py" with the following:
+      """
+      from cucu.environment import *
+      from cucu.config import CONFIG
+
+      CONFIG["CUCU_LINT_RULES_PATH"] = "{CUCU_RESULTS_DIR}/exclude_tags_lint/lint_rules"
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/exclude_tags_lint/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/exclude_tags_lint/lint_rules/custom_rules.yaml" with the following:
+      """
+      # custom cucu lint rules
+      ---
+
+      click_step_must_be_followed_by_wait_to:
+        message: a click step must be followed by a `wait to` step
+        type: error
+        exclude_tags: ['@allow-clicks']
+        previous_line:
+          match: '.* I click the (.*)'
+        current_line:
+          # match if the next line does not contain `wait to` in it
+          match: '^((?!wait to).)*$'
+        fix:
+          match: 'I (.*)'
+          replace: 'I wait to \1'
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/exclude_tags_lint/scenario_tag.feature" with the following:
+      """
+      Feature: Tag exclusion mixed feature
+
+        @allow-clicks
+        Scenario: Scenario with tag should be excluded
+          Given I open a browser at the url "http://\{HOST_ADDRESS\}:\{PORT\}/buttons.html"
+            And I click the button "button"
+            And I click the button "button"
+            And I wait to see the button "done"
+
+        Scenario: Scenario without tag should be checked
+          Given I open a browser at the url "http://\{HOST_ADDRESS\}:\{PORT\}/buttons.html"
+            And I click the button "button"
+            And I click the button "button"
+            And I wait to see the button "done"
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/exclude_tags_lint/feature_tag.feature" with the following:
+      """
+      @allow-clicks
+      Feature: Feature with feature-level tag
+
+        Scenario: Scenario inside tagged feature
+          Given I open a browser at the url "http://\{HOST_ADDRESS\}:\{PORT\}/buttons.html"
+            And I click the button "button"
+            And I click the button "button"
+            And I wait to see the button "done"
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/exclude_tags_lint/no_tag.feature" with the following:
+      """
+      Feature: Feature without any exclude tag
+
+        Scenario: Scenario without exclude tag should violate
+          Given I open a browser at the url "http://\{HOST_ADDRESS\}:\{PORT\}/buttons.html"
+            And I click the button "button"
+            And I click the button "button"
+            And I wait to see the button "done"
+      """
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/exclude_tags_lint/scenario_tag.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+      And I should see "{STDOUT}" contains the following:
+      """
+      results/exclude_tags_lint/scenario_tag.feature:13: E a click step must be followed by a `wait to` step
+      """
+      And I should see "{STDOUT}" does not contain the following:
+      """
+      results/exclude_tags_lint/scenario_tag.feature:6:
+      """
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/exclude_tags_lint/feature_tag.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I should see "{STDOUT}" is equal to the following:
+      """
+      USING RUNNER: behave.runner:Runner
+
+      """
+      And I should see "{STDERR}" is empty
+     Then I run the command "cucu lint {CUCU_RESULTS_DIR}/exclude_tags_lint/no_tag.feature" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+      And I should see "{STDOUT}" contains the following:
+      """
+      results/exclude_tags_lint/no_tag.feature:6: E a click step must be followed by a `wait to` step
+      """
+
   Scenario: User gets appropriate exit code when cucu can not parse the file
     Given I create a file at "{CUCU_RESULTS_DIR}/broken_feature_file_lint/environment.py" with the following:
       """

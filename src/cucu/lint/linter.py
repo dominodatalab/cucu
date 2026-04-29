@@ -173,6 +173,14 @@ def lint_line(state, rules, steps, line_number, lines, filepath):
         if "exclude" in rule and re.match(rule["exclude"], filepath):
             continue
 
+        # skip rules whose exclude_tags match the active scenario/feature tags
+        if "exclude_tags" in rule:
+            active_tags = state.get(
+                "current_scenario_tags", set()
+            ) | state.get("current_feature_tags", set())
+            if active_tags & set(rule["exclude_tags"]):
+                continue
+
         (current_matcher, current_message) = parse_matcher(
             "current_line",
             rule_name,
@@ -364,12 +372,36 @@ def lint(filepath):
             "'''": False,
         }
 
+        tag_buffer = set()
+        state["current_feature_tags"] = set()
+        state["current_scenario_tags"] = set()
+
         for line in lines:
             state["current_line_number"] = line_number
 
             feature_match = re.match(".*Feature: (.*)", line)
+            scenario_keyword_match = re.match(
+                r"\s*Scenario(?: Outline)?:", line
+            )
+
             if feature_match is not None:
                 state["current_feature_name"] = feature_match.group(1)
+                state["current_feature_tags"] = tag_buffer
+                state["current_scenario_tags"] = set()
+                tag_buffer = set()
+            elif scenario_keyword_match is not None:
+                state["current_scenario_tags"] = tag_buffer
+                tag_buffer = set()
+            else:
+                stripped = line.strip()
+                if stripped.startswith("@"):
+                    tokens = stripped.split()
+                    if all(t.startswith("@") for t in tokens):
+                        tag_buffer.update(tokens)
+                    else:
+                        tag_buffer = set()
+                elif stripped != "":
+                    tag_buffer = set()
 
             scenario_match = re.match("  Scenario: (.*)", line)
 
