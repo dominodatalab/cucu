@@ -137,7 +137,17 @@ def before_scenario(ctx, scenario):
         ctx.browser_log_tee = TeeStream(ctx.browser_log_file)
 
     # run before all scenario hooks
+    scenario.before_hook_results = []
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
+        sys.stdout.captured()
+        sys.stderr.captured()
+        hook_result = {
+            "name": hook.__name__,
+            "status": "passed",
+            "stdout": [],
+            "stderr": [],
+            "error_message": [],
+        }
         try:
             hook(ctx)
             logger.debug(f"HOOK {hook.__name__}: passed ✅")
@@ -147,13 +157,28 @@ def before_scenario(ctx, scenario):
             )
             error_message += traceback.format_exc()
             logger.error(error_message)
+            hook_result["status"] = "error"
+            hook_result["error_message"] = error_message.splitlines()
             ctx.scenario.mark_skipped()
             # Set 'hook_failed' status to 'True' so that the test gets marked
             # as 'error', even though no steps ran
             ctx.scenario.hook_failed = True
+        finally:
+            hook_result["stdout"] = sys.stdout.captured()
+            hook_result["stderr"] = sys.stderr.captured()
+        scenario.before_hook_results.append(hook_result)
 
 
 def run_after_scenario_hook(ctx, scenario, hook):
+    sys.stdout.captured()
+    sys.stderr.captured()
+    hook_result = {
+        "name": hook.__name__,
+        "status": "passed",
+        "stdout": [],
+        "stderr": [],
+        "error_message": [],
+    }
     try:
         hook(ctx)
         logger.debug(f"HOOK {hook.__name__}: passed ✅")
@@ -165,11 +190,21 @@ def run_after_scenario_hook(ctx, scenario, hook):
         )
         error_message += traceback.format_exc()
         logger.error(error_message)
+        hook_result["status"] = "error"
+        hook_result["error_message"] = error_message.splitlines()
+    finally:
+        hook_result["stdout"] = sys.stdout.captured()
+        hook_result["stderr"] = sys.stderr.captured()
+    return hook_result
 
 
 def after_scenario(ctx, scenario):
+    scenario.after_hook_results = []
+
     # Start Selenium keep-alive to prevent browser timeout during long after-scenario hooks
-    run_after_scenario_hook(ctx, scenario, start_selenium_keep_alive)
+    scenario.after_hook_results.append(
+        run_after_scenario_hook(ctx, scenario, start_selenium_keep_alive)
+    )
 
     for timer_name in ctx.step_timers:
         logger.warning(f'timer "{timer_name}" was never stopped/recorded')
@@ -191,26 +226,36 @@ def after_scenario(ctx, scenario):
             logger.error(f"Error getting browser info: {e}")
     scenario.browser_info = browser_info
 
-    run_after_scenario_hook(ctx, scenario, download_mht_data)
+    scenario.after_hook_results.append(
+        run_after_scenario_hook(ctx, scenario, download_mht_data)
+    )
 
     # run after all scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"][::-1]:
-        run_after_scenario_hook(ctx, scenario, hook)
+        scenario.after_hook_results.append(
+            run_after_scenario_hook(ctx, scenario, hook)
+        )
 
     # run after this scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"][::-1]:
-        run_after_scenario_hook(ctx, scenario, hook)
+        scenario.after_hook_results.append(
+            run_after_scenario_hook(ctx, scenario, hook)
+        )
 
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 
     # Stop keep-alive before cleaning up browsers
-    run_after_scenario_hook(ctx, scenario, stop_selenium_keep_alive)
+    scenario.after_hook_results.append(
+        run_after_scenario_hook(ctx, scenario, stop_selenium_keep_alive)
+    )
 
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
     elif len(ctx.browsers) != 0:
         logger.debug("quitting browser between sessions")
-        run_after_scenario_hook(ctx, scenario, cleanup_browsers)
+        scenario.after_hook_results.append(
+            run_after_scenario_hook(ctx, scenario, cleanup_browsers)
+        )
 
     cucu_config_path = ctx.scenario_logs_dir / "cucu.config.yaml.txt"
     with open(cucu_config_path, "w") as config_file:
