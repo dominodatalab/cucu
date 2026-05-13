@@ -5,12 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 1.4.18
+# 1.4.19
 - Change - `search_in_all_frames` walks nested iframes by default (BFS by index path, `max_depth=15`); pass `include_nested_frames=False` to restore the previous top-level-only walk
 - Add - `switch_to_frame_path` for jumping to a nested iframe by index path (re-resolves at each hop to avoid stale element references)
 - Add - `search_in_all_frames_nested_and_deep` returning a `FrameMatch` dataclass; combines nested iframe BFS with open-shadow-DOM lookup per frame
 - Add - `cucu.browser.shadow.deep_query_selector_first` / `deep_query_selector_all` traverse open shadow roots in a single `execute_script`
 - Add - opt-in `Selenium.css_find_elements_deep` for combined nested-iframe + open-shadow-DOM search
+
+# 1.4.18
+- Add - cucu lint `exclude_tags` rule attribute to skip rules on tagged scenarios or features
 
 # 1.4.17
 - Change - more id uniquness to use 12 digits
