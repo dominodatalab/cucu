@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <title>Nested Iframes!</title>
+    <style>
+        iframe {
+            display: block;
+            width: 100%;
+            height: 600px;
+        }
+    </style>
+  </head>
+  <body>
+      <button id="button-on-default-frame"><label>button on default frame</label></button><br/>
+      <iframe name="outer" srcdoc="
+        <html>
+          <body>
+            <button id='button-on-outer-frame'><label>button on outer frame</label></button>
+            <iframe name='inner' src='buttons.html'></iframe>
+          </body>
+        </html>
+      "></iframe>
+  </body>
+</html>

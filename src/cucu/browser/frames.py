@@ -1,4 +1,6 @@
 from collections import deque
+from dataclasses import dataclass
+from typing import Optional
 
 from cucu.browser.core import Browser
 
@@ -23,55 +25,59 @@ def search_in_all_frames(
                               iframes by index path up to max_depth; when False,
                               only the default document and top-level iframes
       max_depth             - maximum iframe path length when include_nested_frames
-                              is True (ignored otherwise)
+                              is True (ignored otherwise). 0 means "default
+                              content only, no iframes."
     returns:
         the WebElement that matches (if found)
     """
     result = search_function()
+    if result:
+        return result
 
-    if not result:
-        browser.switch_to_default_frame()
+    browser.switch_to_default_frame()
+    result = search_function()
+    if result:
+        return result
 
+    if not include_nested_frames:
+        frames = browser.execute('return document.querySelectorAll("iframe");')
+        for frame in frames:
+            # need to be in the default frame in order to switch to a child
+            # frame w/o getting a stale element exception
+            browser.switch_to_default_frame()
+            browser.switch_to_frame(frame)
+            result = search_function()
+            if result:
+                return result
+        return None
+
+    # Nested BFS. Each queue entry is an iframe index path from default
+    # content; e.g. (0, 1, 2) means "first iframe, then its second child
+    # iframe, then its third grandchild iframe." Paths are re-resolved each
+    # hop via switch_to_frame_path to avoid stale element references.
+    queue = deque()
+    if max_depth > 0:
+        top_level_frames = browser.execute(
+            'return document.querySelectorAll("iframe");'
+        )
+        for i in range(len(top_level_frames)):
+            queue.append((i,))
+
+    while queue:
+        path = queue.popleft()
+        switch_to_frame_path(browser, path)
         result = search_function()
         if result:
             return result
 
-        if include_nested_frames:
-            queue = deque()
-            frames = browser.execute(
+        if len(path) < max_depth:
+            child_frames = browser.execute(
                 'return document.querySelectorAll("iframe");'
             )
-            for i in range(len(frames)):
-                if len((i,)) <= max_depth:
-                    queue.append((i,))
+            for child_index in range(len(child_frames)):
+                queue.append(path + (child_index,))
 
-            while queue:
-                path = queue.popleft()
-                switch_to_frame_path(browser, path)
-                result = search_function()
-                if result:
-                    return result
-
-                inner = browser.execute(
-                    'return document.querySelectorAll("iframe");'
-                )
-                for j in range(len(inner)):
-                    next_path = path + (j,)
-                    if len(next_path) <= max_depth:
-                        queue.append(next_path)
-        else:
-            frames = browser.execute(
-                'return document.querySelectorAll("iframe");'
-            )
-            for frame in frames:
-                browser.switch_to_default_frame()
-                browser.switch_to_frame(frame)
-                result = search_function()
-
-                if result:
-                    return result
-
-    return result
+    return None
 
 
 def run_in_all_frames(browser, search_function):
@@ -143,43 +149,46 @@ def try_in_frames_until_success(browser: Browser, function_to_run) -> None:
 
 def switch_to_frame_path(browser, path: tuple[int, ...]) -> None:
     """
-    Switch to default content, then for each index resolve
-    document.querySelectorAll("iframe") in the current document and
-    switch_to.frame(iframe[index]). Re-queries iframes from the top on each
-    call to reduce stale element issues.
+    Switch the browser to a nested iframe identified by a tuple of indices
+    measured from default content.
+
+    The path is interpreted level-by-level: ``(0, 1, 2)`` means "default
+    content -> first iframe -> its second child iframe -> its third
+    grandchild iframe." Iframes are re-queried at each hop, which avoids
+    stale element exceptions when the page has re-rendered between calls.
 
     parameters:
       browser - the cucu.browser.Browser object
-      path      - tuple of iframe indices from default content
+      path    - tuple of iframe indices from default content
     """
     browser.switch_to_default_frame()
-    for idx in path:
+    for child_index in path:
         frames = browser.execute('return document.querySelectorAll("iframe");')
-        browser.switch_to_frame(frames[idx])
+        browser.switch_to_frame(frames[child_index])
 
 
-def search_in_all_frames_nested(
-    browser, search_function, *, max_depth: int = 15
-):
+@dataclass
+class FrameMatch:
+    """Result of search_in_all_frames_nested_and_deep.
+
+    element: the matched WebElement, or None if nothing matched.
+    path:    tuple of iframe indices from default content where the match
+             lives. ``()`` means default content. ``None`` means the match
+             was found in the original browsing context before we switched
+             to default content (so the caller's frame focus is unchanged).
     """
-    Equivalent to ``search_in_all_frames(..., include_nested_frames=True,
-    max_depth=max_depth)``.
-    """
-    return search_in_all_frames(
-        browser,
-        search_function,
-        include_nested_frames=True,
-        max_depth=max_depth,
-    )
+
+    element: object
+    path: Optional[tuple]
 
 
 def search_in_all_frames_nested_and_deep(
     browser, selector: str, *, max_depth: int = 15
-):
+) -> FrameMatch:
     """
     For each nested frame (BFS, same ordering as search_in_all_frames with
-    nested iframes enabled),
-    run deep_query_selector_first in that frame's document.
+    nested iframes enabled), run deep_query_selector_first in that frame's
+    document.
 
     Requires a Selenium-backed browser with a ``driver`` attribute.
 
@@ -192,10 +201,7 @@ def search_in_all_frames_nested_and_deep(
       max_depth - passed through to the nested iframe walk
 
     returns:
-      On success: ``(element, path)`` where ``path`` is an iframe index tuple
-      from default content, ``()`` when the match is in default content after
-      switching to it, or ``None`` when the match is in the original browsing
-      context before that switch. On failure: ``(None, None)``.
+      A FrameMatch. On failure, ``FrameMatch(None, None)``.
     """
     from cucu.browser.shadow import deep_query_selector_first
 
@@ -209,17 +215,19 @@ def search_in_all_frames_nested_and_deep(
 
     element = deep_query_selector_first(driver, selector)
     if element:
-        return (element, None)
+        return FrameMatch(element, None)
 
     browser.switch_to_default_frame()
     element = deep_query_selector_first(driver, selector)
     if element:
-        return (element, ())
+        return FrameMatch(element, ())
 
     queue = deque()
-    frames = browser.execute('return document.querySelectorAll("iframe");')
-    for i in range(len(frames)):
-        if len((i,)) <= max_depth:
+    if max_depth > 0:
+        top_level_frames = browser.execute(
+            'return document.querySelectorAll("iframe");'
+        )
+        for i in range(len(top_level_frames)):
             queue.append((i,))
 
     while queue:
@@ -227,12 +235,13 @@ def search_in_all_frames_nested_and_deep(
         switch_to_frame_path(browser, path)
         element = deep_query_selector_first(driver, selector)
         if element:
-            return (element, path)
+            return FrameMatch(element, path)
 
-        inner = browser.execute('return document.querySelectorAll("iframe");')
-        for j in range(len(inner)):
-            next_path = path + (j,)
-            if len(next_path) <= max_depth:
-                queue.append(next_path)
+        if len(path) < max_depth:
+            child_frames = browser.execute(
+                'return document.querySelectorAll("iframe");'
+            )
+            for child_index in range(len(child_frames)):
+                queue.append(path + (child_index,))
 
-    return (None, None)
+    return FrameMatch(None, None)

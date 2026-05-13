@@ -347,22 +347,6 @@ class Selenium(Browser):
 
         return elements
 
-    def css_find_elements_nested(self, selector, *, max_depth: int = 15):
-        def find_elements_in_frame():
-            elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
-
-            def visible(element):
-                return element.is_displayed()
-
-            return list(filter(visible, elements))
-
-        return search_in_all_frames(
-            self,
-            find_elements_in_frame,
-            include_nested_frames=True,
-            max_depth=max_depth,
-        )
-
     def css_find_elements_deep(self, selector, *, max_depth: int = 15):
         def find_in_frame():
             elements = deep_query_selector_all(self.driver, selector)

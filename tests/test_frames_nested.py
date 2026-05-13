@@ -2,8 +2,8 @@ import pytest
 
 from cucu.browser.core import Browser
 from cucu.browser.frames import (
+    FrameMatch,
     search_in_all_frames,
-    search_in_all_frames_nested,
     search_in_all_frames_nested_and_deep,
     switch_to_frame_path,
 )
@@ -39,11 +39,11 @@ class MockBrowser:
         raise AssertionError(f"unexpected script {javascript!r}")
 
 
-def test_switch_to_frame_path_follows_indices():
+def _three_level_browser():
     f00 = FakeFrame((0, 0))
     f0 = FakeFrame((0,))
     f1 = FakeFrame((1,))
-    browser = MockBrowser(
+    return MockBrowser(
         {
             (): [f0, f1],
             (0,): [f00],
@@ -52,22 +52,15 @@ def test_switch_to_frame_path_follows_indices():
         }
     )
 
+
+def test_switch_to_frame_path_follows_indices():
+    browser = _three_level_browser()
     switch_to_frame_path(browser, (0, 0))
     assert browser.frame_path == (0, 0)
 
 
 def test_search_in_all_frames_nested_bfs_order():
-    f00 = FakeFrame((0, 0))
-    f0 = FakeFrame((0,))
-    f1 = FakeFrame((1,))
-    browser = MockBrowser(
-        {
-            (): [f0, f1],
-            (0,): [f00],
-            (1,): [],
-            (0, 0): [],
-        }
-    )
+    browser = _three_level_browser()
     visited: list[tuple[int, ...]] = []
 
     def search():
@@ -75,22 +68,15 @@ def test_search_in_all_frames_nested_bfs_order():
         return None
 
     search_in_all_frames(browser, search, include_nested_frames=True)
+    # First two calls are the initial-context and default-content searches;
+    # both happen at path ().
     assert visited[0] == ()
     assert visited[1] == ()
     assert visited[2:] == [(0,), (1,), (0, 0)]
 
 
 def test_search_in_all_frames_nested_respects_max_depth():
-    f00 = FakeFrame((0, 0))
-    f0 = FakeFrame((0,))
-    browser = MockBrowser(
-        {
-            (): [f0, FakeFrame((1,))],
-            (0,): [f00],
-            (1,): [],
-            (0, 0): [],
-        }
-    )
+    browser = _three_level_browser()
     visited: list[tuple[int, ...]] = []
 
     def search():
@@ -103,18 +89,23 @@ def test_search_in_all_frames_nested_respects_max_depth():
     assert (0, 0) not in visited
 
 
-def test_search_in_all_frames_nested_returns_first_hit():
-    f00 = FakeFrame((0, 0))
-    f0 = FakeFrame((0,))
-    f1 = FakeFrame((1,))
-    browser = MockBrowser(
-        {
-            (): [f0, f1],
-            (0,): [f00],
-            (1,): [],
-            (0, 0): [],
-        }
+def test_search_in_all_frames_max_depth_zero_skips_iframes():
+    browser = _three_level_browser()
+    visited: list[tuple[int, ...]] = []
+
+    def search():
+        visited.append(browser.frame_path)
+        return None
+
+    search_in_all_frames(
+        browser, search, include_nested_frames=True, max_depth=0
     )
+    # Only the two default-content searches; no iframe walks.
+    assert visited == [(), ()]
+
+
+def test_search_in_all_frames_nested_returns_first_hit():
+    browser = _three_level_browser()
 
     def search():
         if browser.frame_path == (1,):
@@ -128,16 +119,7 @@ def test_search_in_all_frames_nested_returns_first_hit():
 
 
 def test_search_in_all_frames_shallow_does_not_reach_nested_only_match():
-    f00 = FakeFrame((0, 0))
-    f0 = FakeFrame((0,))
-    browser = MockBrowser(
-        {
-            (): [f0, FakeFrame((1,))],
-            (0,): [f00],
-            (1,): [],
-            (0, 0): [],
-        }
-    )
+    browser = _three_level_browser()
 
     def search():
         if browser.frame_path == (0, 0):
@@ -148,34 +130,20 @@ def test_search_in_all_frames_shallow_does_not_reach_nested_only_match():
         search_in_all_frames(browser, search, include_nested_frames=False)
         is None
     )
+
+    browser = _three_level_browser()
     assert (
         search_in_all_frames(browser, search, include_nested_frames=True)
         == "deep"
     )
 
 
-def test_search_in_all_frames_nested_wrapper_delegates():
-    f00 = FakeFrame((0, 0))
-    f0 = FakeFrame((0,))
-    browser = MockBrowser(
-        {
-            (): [f0, FakeFrame((1,))],
-            (0,): [f00],
-            (1,): [],
-            (0, 0): [],
-        }
-    )
-    visited: list[tuple[int, ...]] = []
-
-    def search():
-        visited.append(browser.frame_path)
-        return None
-
-    search_in_all_frames_nested(browser, search, max_depth=15)
-    assert visited[2:] == [(0,), (1,), (0, 0)]
-
-
 def test_search_in_all_frames_nested_and_deep_requires_selenium_browser():
     browser = Browser()
     with pytest.raises(TypeError):
         search_in_all_frames_nested_and_deep(browser, "div")
+
+
+def test_frame_match_dataclass_failure_sentinel():
+    assert FrameMatch(None, None).element is None
+    assert FrameMatch(None, None).path is None
