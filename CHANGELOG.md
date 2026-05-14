@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.18
 - Add - cucu lint `exclude_tags` rule attribute to skip rules on tagged scenarios or features
+- Add - `cucu run` supports comma-separated feature paths (e.g. `cucu run a.feature,b.feature`)
 
 # 1.4.17
 - Change - more id uniquness to use 12 digits
