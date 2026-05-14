@@ -308,6 +308,28 @@ def run(
 
     filepaths = [Path(p.strip()) for p in filepath.split(",")]
 
+    if len(filepaths) > 1:
+        features_ancestors = set()
+        for fp in filepaths:
+            resolved = fp.resolve()
+            ancestor = next(
+                (
+                    a
+                    for a in [resolved, *resolved.parents]
+                    if a.name == "features"
+                ),
+                None,
+            )
+            if ancestor is None:
+                raise ClickException(
+                    f"comma-separated feature path {fp} has no 'features' ancestor directory"
+                )
+            features_ancestors.add(ancestor)
+        if len(features_ancestors) > 1:
+            raise ClickException(
+                "comma-separated feature paths must share a common 'features' ancestor directory"
+            )
+
     os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = filepath
 
     create_run(results, filepaths)

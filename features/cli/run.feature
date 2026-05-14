@@ -124,3 +124,10 @@ Feature: Run
       Feature: Feature with passing scenario
       [\s\S]*
       """
+
+  Scenario: User gets an error when comma-separated feature paths do not share a common features ancestor
+    Given I run the command "cucu run data/features/echo.feature,/tmp/other.feature --results {CUCU_RESULTS_DIR}/mismatched_ancestor_results --no-color-output" and save stderr to "STDERR" and expect exit code "1"
+     Then I should see "{STDERR}" matches the following
+      """
+      [\s\S]*comma-separated feature path.*has no 'features' ancestor directory[\s\S]*
+      """
