@@ -5,9 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.19
+- Add - `cucu run` supports comma-separated feature paths (e.g. `cucu run a.feature,b.feature`)
+
 # 1.4.18
 - Add - cucu lint `exclude_tags` rule attribute to skip rules on tagged scenarios or features
-- Add - `cucu run` supports comma-separated feature paths (e.g. `cucu run a.feature,b.feature`)
 
 # 1.4.17
 - Change - more id uniquness to use 12 digits
