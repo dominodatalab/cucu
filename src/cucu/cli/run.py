@@ -51,7 +51,14 @@ def behave(
     chrome_profile_dir=None,
 ):
     # load all them configs
-    CONFIG.load_cucurc_files(filepaths[0])
+    if len(filepaths) > 1:
+        resolved = filepaths[0].resolve()
+        cucurc_anchor = next(
+            a for a in [resolved, *resolved.parents] if a.name == "features"
+        )
+    else:
+        cucurc_anchor = filepaths[0]
+    CONFIG.load_cucurc_files(cucurc_anchor)
 
     if chrome_profile_dir is not None:
         os.environ["CUCU_CHROME_PROFILE_DIR"] = str(chrome_profile_dir)
