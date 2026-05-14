@@ -55,9 +55,7 @@ def main():
 
 
 @main.command()
-@click.argument(
-    "filepath", default="features", type=click.Path(path_type=Path)
-)
+@click.argument("filepath", default="features")
 @click.option(
     "-b",
     "--browser",
@@ -308,9 +306,11 @@ def run(
         generate_short_id(worker_id_seed)
     )
 
-    os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = str(filepath)
+    filepaths = [Path(p.strip()) for p in filepath.split(",")]
 
-    create_run(results, filepath)
+    os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = filepath
+
+    create_run(results, filepaths)
 
     try:
         if workers is None or workers == 1:
@@ -335,7 +335,7 @@ def run(
                 register_after_all_hook(cancel_timer)
 
             exit_code = behave(
-                filepath,
+                filepaths,
                 color_output,
                 dry_run,
                 env,
@@ -360,10 +360,12 @@ def run(
             logger.debug(
                 f"Starting cucu_run {CONFIG['CUCU_RUN_ID']} with multiple workers: {workers}"
             )
-            if filepath.is_dir():
-                feature_filepaths = list(filepath.rglob("*.feature"))
-            else:
-                feature_filepaths = [filepath]
+            feature_filepaths = []
+            for fp in filepaths:
+                if fp.is_dir():
+                    feature_filepaths.extend(fp.rglob("*.feature"))
+                else:
+                    feature_filepaths.append(fp)
 
             if sys.platform == "darwin":
                 logger.info(
@@ -430,7 +432,7 @@ def run(
                     async_results[feature_filepath] = pool.apply_async(
                         behave,
                         [
-                            feature_filepath,
+                            [feature_filepath],
                             color_output,
                             dry_run,
                             env,

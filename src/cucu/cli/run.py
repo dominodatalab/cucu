@@ -32,7 +32,7 @@ def behave_init(filepath="features"):
 
 
 def behave(
-    filepath,
+    filepaths,
     color_output,
     dry_run,
     env,
@@ -51,7 +51,7 @@ def behave(
     chrome_profile_dir=None,
 ):
     # load all them configs
-    CONFIG.load_cucurc_files(filepath)
+    CONFIG.load_cucurc_files(filepaths[0])
 
     if chrome_profile_dir is not None:
         os.environ["CUCU_CHROME_PROFILE_DIR"] = str(chrome_profile_dir)
@@ -100,7 +100,7 @@ def behave(
 
     run_json_filename = "run.json"
     if redirect_output:
-        feature_name = get_feature_name(filepath)
+        feature_name = get_feature_name(filepaths[0])
         run_json_filename = f"{feature_name}-run.json"
 
     if dry_run:
@@ -143,13 +143,17 @@ def behave(
     if not show_skips:
         args.append("--no-skipped")
 
-    args.append(filepath)
-    os.environ["BEHAVE_FILEPATH"] = CONFIG["BEHAVE_FILEPATH"] = str(filepath)
+    args.extend([str(p) for p in filepaths])
+    os.environ["BEHAVE_FILEPATH"] = CONFIG["BEHAVE_FILEPATH"] = str(
+        filepaths[0]
+    )
 
     result = 0
     try:
         if redirect_output:
-            cucu_log_path = behave_filepath_to_cucu_logpath(filepath, results)
+            cucu_log_path = behave_filepath_to_cucu_logpath(
+                filepaths[0], results
+            )
 
             CONFIG["__CUCU_PARENT_STDOUT"] = sys.stdout
 
@@ -180,7 +184,7 @@ def behave(
     return result
 
 
-def create_run(results_path: Path, filepath: Path):
+def create_run(results_path: Path, filepaths: list):
     run_json_filepath = results_path / "run_details.json"
 
     if run_json_filepath.exists():
@@ -194,7 +198,7 @@ def create_run(results_path: Path, filepath: Path):
 
     run_details = {
         "cucu_run_id": CONFIG["CUCU_RUN_ID"],
-        "filepath": str(filepath),
+        "filepath": ",".join(str(p) for p in filepaths),
         "full_arguments": sys.argv,
         "env": env_values,
         "date": datetime.now().isoformat(),
