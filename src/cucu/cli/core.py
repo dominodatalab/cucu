@@ -55,9 +55,7 @@ def main():
 
 
 @main.command()
-@click.argument(
-    "filepath", default="features", type=click.Path(path_type=Path)
-)
+@click.argument("filepath", nargs=-1, type=click.Path(path_type=Path))
 @click.option(
     "-b",
     "--browser",
@@ -244,6 +242,10 @@ def run(
     """
     run a set of feature files
 
+    FILEPATH may be omitted (defaults to the `features` directory), a single
+    file or directory, or multiple files/directories that share a common
+    'features' ancestor directory.
+
     Note: All the os.environ variables are set to be available in the child processes
     """
     init_global_hook_variables()
@@ -308,9 +310,34 @@ def run(
         generate_short_id(worker_id_seed)
     )
 
-    os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = str(filepath)
+    filepaths = list(filepath) or [Path("features")]
 
-    create_run(results, filepath)
+    if len(filepaths) > 1:
+        features_ancestors = set()
+        for fp in filepaths:
+            resolved = fp.resolve()
+            ancestor = next(
+                (
+                    a
+                    for a in [resolved, *resolved.parents]
+                    if a.name == "features"
+                ),
+                None,
+            )
+            if ancestor is None:
+                raise ClickException(
+                    f"feature path {fp} has no 'features' ancestor directory"
+                )
+            features_ancestors.add(ancestor)
+        if len(features_ancestors) > 1:
+            raise ClickException(
+                "multiple feature paths must share a common 'features' ancestor directory"
+            )
+
+    filepath_str = " ".join(str(p) for p in filepaths)
+    os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = filepath_str
+
+    create_run(results, filepaths)
 
     try:
         if workers is None or workers == 1:
@@ -335,7 +362,7 @@ def run(
                 register_after_all_hook(cancel_timer)
 
             exit_code = behave(
-                filepath,
+                filepaths,
                 color_output,
                 dry_run,
                 env,
@@ -360,10 +387,12 @@ def run(
             logger.debug(
                 f"Starting cucu_run {CONFIG['CUCU_RUN_ID']} with multiple workers: {workers}"
             )
-            if filepath.is_dir():
-                feature_filepaths = list(filepath.rglob("*.feature"))
-            else:
-                feature_filepaths = [filepath]
+            feature_filepaths = []
+            for fp in filepaths:
+                if fp.is_dir():
+                    feature_filepaths.extend(fp.rglob("*.feature"))
+                else:
+                    feature_filepaths.append(fp)
 
             if sys.platform == "darwin":
                 logger.info(
@@ -430,7 +459,7 @@ def run(
                     async_results[feature_filepath] = pool.apply_async(
                         behave,
                         [
-                            feature_filepath,
+                            [feature_filepath],
                             color_output,
                             dry_run,
                             env,

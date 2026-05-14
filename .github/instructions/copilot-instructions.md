@@ -41,7 +41,7 @@ Tests:
 ## Coding Standards
 
 - `make fix` to fix style — never run ruff or cucu lint directly
-- Update `CHANGELOG.md` per PR; bump `pyproject.toml` version + run `uv lock` on release
+- Update `CHANGELOG.md` per PR; bump `pyproject.toml` version + run `uv lock`
 - Minimal `__init__.py`; no relative imports; imports at top of file only
 - `CONFIG` for shared/multi-location values; `ctx` for scenario-scoped values
 - `pathlib` over `os.path`; guard clauses over nesting
@@ -70,7 +70,7 @@ When the user asks to **split** changes into separate branches:
 When the user asks to **update** the current branch with the latest from its base (e.g. "get latest", "merge from latest", "sync with main"): fetch the base (default `origin/main` or `origin/HEAD`), **merge** (do not rebase) into the current branch. If no conflicts, commit and finish. **If conflicts in `pyproject.toml`, `uv.lock`, or `CHANGELOG.md`:** take **theirs** for `pyproject.toml` and `uv.lock`, then bump version once (see **Bump version**) and run `uv lock`; in `CHANGELOG.md`, put a new `# X.Y.Z` at the top with **our** changelog items only, then base's sections in order, and remove conflict markers. Stage resolved files and commit (e.g. "Merge origin/<base> into <branch>"). Resolve any other conflicted files manually.
 
 ### Bump version
-Run `uv version --bump patch`, then add a `# X.Y.Z` section at the top of `CHANGELOG.md` with `- Type - subject` bullets from the PR/commit message (Fix, Add, Change, Chore, etc.). On release, run `uv lock`.
+Run `uv version --bump patch`, then run `uv lock`, then add a `# X.Y.Z` section at the top of `CHANGELOG.md` with `- Type - subject` bullets from the PR/commit message (Fix, Add, Change, Chore, etc.).
 
 ## Step Definitions
 

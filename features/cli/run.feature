@@ -112,3 +112,22 @@ Feature: Run
       .*task timed out.*timeout=3.0.*
       [\s\S]*
       """
+
+  Scenario: User can run multiple feature files specified as separate arguments
+    Given I run the command "cucu run data/features/echo.feature data/features/feature_with_passing_scenario.feature --results {CUCU_RESULTS_DIR}/multi_path_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see the directory at "{CUCU_RESULTS_DIR}/multi_path_results"
+      And I should see "{STDOUT}" matches the following
+      """
+      [\s\S]*
+      Feature: Echo
+      [\s\S]*
+      Feature: Feature with passing scenario
+      [\s\S]*
+      """
+
+  Scenario: User gets an error when multiple feature paths do not share a common features ancestor
+    Given I run the command "cucu run data/features/echo.feature /tmp/other.feature --results {CUCU_RESULTS_DIR}/mismatched_ancestor_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     Then I should see "{STDERR}" matches the following
+      """
+      [\s\S]*feature path.*has no 'features' ancestor directory[\s\S]*
+      """

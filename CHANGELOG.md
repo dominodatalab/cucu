@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.19
+- Add - `cucu run` accepts multiple feature paths as separate arguments (e.g. `cucu run a.feature b.feature`); multiple paths must share a common `features` ancestor directory
+
 # 1.4.18
 - Add - cucu lint `exclude_tags` rule attribute to skip rules on tagged scenarios or features
 
