@@ -55,7 +55,7 @@ def main():
 
 
 @main.command()
-@click.argument("filepath", default="features")
+@click.argument("filepath", nargs=-1, type=click.Path(path_type=Path))
 @click.option(
     "-b",
     "--browser",
@@ -242,6 +242,10 @@ def run(
     """
     run a set of feature files
 
+    FILEPATH may be omitted (defaults to the `features` directory), a single
+    file or directory, or multiple files/directories that share a common
+    'features' ancestor directory.
+
     Note: All the os.environ variables are set to be available in the child processes
     """
     init_global_hook_variables()
@@ -306,7 +310,7 @@ def run(
         generate_short_id(worker_id_seed)
     )
 
-    filepaths = [Path(p.strip()) for p in filepath.split(",")]
+    filepaths = list(filepath) or [Path("features")]
 
     if len(filepaths) > 1:
         features_ancestors = set()
@@ -322,15 +326,16 @@ def run(
             )
             if ancestor is None:
                 raise ClickException(
-                    f"comma-separated feature path {fp} has no 'features' ancestor directory"
+                    f"feature path {fp} has no 'features' ancestor directory"
                 )
             features_ancestors.add(ancestor)
         if len(features_ancestors) > 1:
             raise ClickException(
-                "comma-separated feature paths must share a common 'features' ancestor directory"
+                "multiple feature paths must share a common 'features' ancestor directory"
             )
 
-    os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = filepath
+    filepath_str = " ".join(str(p) for p in filepaths)
+    os.environ["CUCU_FILEPATH"] = CONFIG["CUCU_FILEPATH"] = filepath_str
 
     create_run(results, filepaths)
 

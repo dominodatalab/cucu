@@ -54,7 +54,8 @@ def behave(
     if len(filepaths) > 1:
         resolved = filepaths[0].resolve()
         cucurc_anchor = next(
-            a for a in [resolved, *resolved.parents] if a.name == "features"
+            (a for a in [resolved, *resolved.parents] if a.name == "features"),
+            filepaths[0],
         )
     else:
         cucurc_anchor = filepaths[0]
@@ -205,7 +206,7 @@ def create_run(results_path: Path, filepaths: list):
 
     run_details = {
         "cucu_run_id": CONFIG["CUCU_RUN_ID"],
-        "filepath": ",".join(str(p) for p in filepaths),
+        "filepath": " ".join(str(p) for p in filepaths),
         "full_arguments": sys.argv,
         "env": env_values,
         "date": datetime.now().isoformat(),
