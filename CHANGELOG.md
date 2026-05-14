@@ -7,10 +7,9 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.19
 - Change - `search_in_all_frames` walks nested iframes by default (BFS by index path, `max_depth=15`); pass `include_nested_frames=False` to restore the previous top-level-only walk
-- Add - `switch_to_frame_path` for jumping to a nested iframe by index path (re-resolves at each hop to avoid stale element references)
-- Add - `search_in_all_frames_nested_and_deep` returning a `FrameMatch` dataclass; combines nested iframe BFS with open-shadow-DOM lookup per frame
-- Add - `cucu.browser.shadow.deep_query_selector_first` / `deep_query_selector_all` traverse open shadow roots in a single `execute_script`
-- Add - opt-in `Selenium.css_find_elements_deep` for combined nested-iframe + open-shadow-DOM search
+- Add - `CUCU_SHADOW_DOM_SEARCH=enabled` opts `Selenium.css_find_elements` and `fuzzy.find` into open-shadow-DOM traversal
+- Fix - `Selenium.css_find_elements` returns `[]` instead of `None` when no element is found
+- Fix - close unbalanced `img[alt="..."` selector in image step
 
 # 1.4.18
 - Add - cucu lint `exclude_tags` rule attribute to skip rules on tagged scenarios or features

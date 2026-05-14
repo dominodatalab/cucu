@@ -273,19 +273,15 @@ Notes:
 default content, then **nested** `iframe` trees breadth-first by index path
 from default content (with a `max_depth` guard, default 15). Pass
 `include_nested_frames=False` to restore the previous behavior of only the
-default document plus **top-level** iframes. The companion
-`switch_to_frame_path` helper takes a tuple of iframe indices and re-resolves
-iframes at each hop to avoid stale element exceptions. Like all frame search
-helpers here, search **leaves the session in the last frame that was searched**
-when a match is found.
+default document plus **top-level** iframes. Like all frame search helpers
+here, search **leaves the session in the last frame that was searched** when a
+match is found.
 
-Selenium’s normal CSS queries do not enter **open** `shadowRoot` trees. For
-that, use `cucu.browser.shadow.deep_query_selector_first` /
-`deep_query_selector_all` with the current `WebDriver`, or opt into
-`Selenium.css_find_elements_deep` on the cucu browser object —
-`search_in_all_frames_nested_and_deep` combines the two and returns a
-`FrameMatch(element, path)` dataclass. Closed shadow roots and cross-origin
-nested documents are still out of reach from the parent page.
+Selenium’s normal CSS queries do not enter **open** `shadowRoot` trees. Set
+`CUCU_SHADOW_DOM_SEARCH=enabled` to opt `Selenium.css_find_elements` and
+`fuzzy.find` into a walker that descends through open shadow roots. Closed
+shadow roots and cross-origin nested documents are still out of reach from the
+parent page.
 
 ## Custom steps
 It's easy to create custom steps, for example:

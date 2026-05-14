@@ -1,12 +1,4 @@
-import pytest
-
-from cucu.browser.core import Browser
-from cucu.browser.frames import (
-    FrameMatch,
-    search_in_all_frames,
-    search_in_all_frames_nested_and_deep,
-    switch_to_frame_path,
-)
+from cucu.browser.frames import search_in_all_frames
 
 
 class FakeFrame:
@@ -51,12 +43,6 @@ def _three_level_browser():
             (0, 0): [],
         }
     )
-
-
-def test_switch_to_frame_path_follows_indices():
-    browser = _three_level_browser()
-    switch_to_frame_path(browser, (0, 0))
-    assert browser.frame_path == (0, 0)
 
 
 def test_search_in_all_frames_nested_bfs_order():
@@ -136,14 +122,3 @@ def test_search_in_all_frames_shallow_does_not_reach_nested_only_match():
         search_in_all_frames(browser, search, include_nested_frames=True)
         == "deep"
     )
-
-
-def test_search_in_all_frames_nested_and_deep_requires_selenium_browser():
-    browser = Browser()
-    with pytest.raises(TypeError):
-        search_in_all_frames_nested_and_deep(browser, "div")
-
-
-def test_frame_match_dataclass_failure_sentinel():
-    assert FrameMatch(None, None).element is None
-    assert FrameMatch(None, None).path is None

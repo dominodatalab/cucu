@@ -17,10 +17,36 @@ from selenium.webdriver.remote.command import Command
 from cucu import config, edgedriver_autoinstaller, logger
 from cucu.browser.core import Browser
 from cucu.browser.frames import search_in_all_frames
-from cucu.browser.shadow import deep_query_selector_all
 
 # suppress warning caused by selenium_keep_alive taking an extra http connection
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
+
+_DEEP_QUERY_ALL_JS = """
+var sel = arguments[0];
+var acc = [];
+function cucuWalkAll(n) {
+    if (!n) {
+        return;
+    }
+    if (n.nodeType === 1 && n.matches && n.matches(sel)) {
+        acc.push(n);
+    }
+    var ch = n.children;
+    if (ch) {
+        for (var i = 0; i < ch.length; i++) {
+            cucuWalkAll(ch[i]);
+        }
+    }
+    if (n.nodeType === 1 && n.shadowRoot) {
+        var sh = n.shadowRoot.children;
+        for (var j = 0; j < sh.length; j++) {
+            cucuWalkAll(sh[j]);
+        }
+    }
+}
+cucuWalkAll(document.documentElement);
+return acc;
+"""
 
 
 class DisableLogger:
@@ -335,33 +361,24 @@ class Selenium(Browser):
         return self.driver.title
 
     def css_find_elements(self, selector):
+        shadow_enabled = config.CONFIG["CUCU_SHADOW_DOM_SEARCH"] == "enabled"
+
         def find_elements_in_frame():
-            elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
+            if shadow_enabled:
+                elements = self.driver.execute_script(
+                    _DEEP_QUERY_ALL_JS, selector
+                )
+            else:
+                elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
 
             def visible(element):
                 return element.is_displayed()
 
-            return list(filter(visible, elements))
+            return list(filter(visible, elements or []))
 
         elements = search_in_all_frames(self, find_elements_in_frame)
 
         return elements or []
-
-    def css_find_elements_deep(self, selector, *, max_depth: int = 15):
-        def find_in_frame():
-            elements = deep_query_selector_all(self.driver, selector)
-
-            def visible(element):
-                return element.is_displayed()
-
-            return list(filter(visible, elements))
-
-        return search_in_all_frames(
-            self,
-            find_in_frame,
-            include_nested_frames=True,
-            max_depth=max_depth,
-        )
 
     def execute(self, javascript, *args):
         return self.driver.execute_script(javascript, *args)
