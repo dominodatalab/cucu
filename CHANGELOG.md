@@ -5,11 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 1.4.19
+# 1.4.20
 - Change - `search_in_all_frames` walks nested iframes by default (BFS by index path, `max_depth=15`); pass `include_nested_frames=False` to restore the previous top-level-only walk
 - Add - `CUCU_SHADOW_DOM_SEARCH=enabled` opts `Selenium.css_find_elements` and `fuzzy.find` into open-shadow-DOM traversal
 - Fix - `Selenium.css_find_elements` returns `[]` instead of `None` when no element is found
 - Fix - close unbalanced `img[alt="..."` selector in image step
+
+# 1.4.19
+- Add - `cucu run` accepts multiple feature paths as separate arguments (e.g. `cucu run a.feature b.feature`); multiple paths must share a common `features` ancestor directory
 
 # 1.4.18
 - Add - cucu lint `exclude_tags` rule attribute to skip rules on tagged scenarios or features
