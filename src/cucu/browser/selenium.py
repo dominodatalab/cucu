@@ -345,7 +345,7 @@ class Selenium(Browser):
 
         elements = search_in_all_frames(self, find_elements_in_frame)
 
-        return elements
+        return elements or []
 
     def css_find_elements_deep(self, selector, *, max_depth: int = 15):
         def find_in_frame():
