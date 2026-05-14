@@ -119,7 +119,7 @@ def find(
     """
     browser.switch_to_default_frame()
 
-    if CONFIG["CUCU_SHADOW_DOM_SEARCH"] == "enabled":
+    if CONFIG.true("CUCU_SHADOW_DOM_SEARCH"):
         element = browser.driver.execute_script(_DEEP_TEXT_FIND_JS, name)
         if element is None:
             logger.debug("Fuzzy found no element via shadow DOM search.")

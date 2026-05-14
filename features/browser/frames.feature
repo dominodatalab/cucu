@@ -57,4 +57,3 @@ Feature: Frames
       And I set the variable "CUCU_SHADOW_DOM_SEARCH" to "enabled"
      Then I should see the text "Shadow DOM Test Page"
       And I should see the text "leaf one"
-

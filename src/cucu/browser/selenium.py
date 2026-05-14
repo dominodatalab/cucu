@@ -361,7 +361,7 @@ class Selenium(Browser):
         return self.driver.title
 
     def css_find_elements(self, selector):
-        shadow_enabled = config.CONFIG["CUCU_SHADOW_DOM_SEARCH"] == "enabled"
+        shadow_enabled = config.CONFIG.true("CUCU_SHADOW_DOM_SEARCH")
 
         def find_elements_in_frame():
             if shadow_enabled:

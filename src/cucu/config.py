@@ -392,9 +392,9 @@ CONFIG.define(
 )
 CONFIG.define(
     "CUCU_SHADOW_DOM_SEARCH",
-    "when set to 'enabled', text-finding steps will traverse open shadow "
-    "roots after the default search fails to find an element",
-    default="disabled",
+    "when truthy, text-finding steps and css_find_elements will traverse "
+    "open shadow roots in addition to the light DOM",
+    default=False,
 )
 CONFIG.define(
     "CUCU_SHORT_UI_RETRY_AFTER_S",
