@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.19
+- Change - fuzzy find matching is now case-aware, not case-sensitive
+  - case-different text enters the candidate pool: query `"project"` now finds `Project`/`PrOjEcT`
+  - exact-case match still outranks caseless match for the same element area
+
 # 1.4.18
 - Add - cucu lint `exclude_tags` rule attribute to skip rules on tagged scenarios or features
 

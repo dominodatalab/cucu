@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <title>Fuzzy Case-Aware Rules</title>
+    <script>
+    function update(value) {
+      document.querySelector("#input").value = value;
+    }
+    </script>
+  </head>
+  <body>
+    <label>value:</label><input id="input" type="text"></input>
+    <hr/>
+    <!-- Ranking trio: same text in three cases. Each writes a distinctive
+         payload so the assertion proves which one was actually clicked. -->
+    <button onclick="update('exact case lowercase');">project</button>
+    <button onclick="update('title case Project');">Project</button>
+    <button onclick="update('crazy case PrOjEcT');">PrOjEcT</button>
+    <hr/>
+    <!-- Caseless-only: only one variant present, query with different case. -->
+    <button onclick="update('Settings clicked');">Settings</button>
+    <hr/>
+    <!-- Caseless attribute: aria-label carries the term, inner text doesn't. -->
+    <button onclick="update('Save via aria-label');" aria-label="Save">a button</button>
+    <hr/>
+    <!-- Tiebreak: two caseless variants with no exact-case lowercase variant
+         on the page. Both score the same (immediate + caselessexact = 500),
+         so DOM order (pass index) breaks the tie. A different word from the
+         ranking trio guarantees no lowercase 'dashboard' is present. Also
+         serves as filler for the no-match-query scenario. -->
+    <button onclick="update('Dashboard first in DOM');">Dashboard</button>
+    <button onclick="update('DaShBoArD second in DOM');">DaShBoArD</button>
+  </body>
+</html>
