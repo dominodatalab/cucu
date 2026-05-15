@@ -15,6 +15,11 @@
         <html>
           <body>
             <button id='button-on-outer-frame'><label>button on outer frame</label></button>
+            <div id='shadow-host-in-outer'></div>
+            <script>
+              document.getElementById('shadow-host-in-outer').attachShadow({mode:'open'}).innerHTML =
+                '<button>shadow button in outer frame</button>';
+            </script>
             <iframe name='inner' src='buttons.html'></iframe>
           </body>
         </html>

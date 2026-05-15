@@ -45,6 +45,10 @@ Feature: Frames
      When I click the button "button with child"
      Then I should see "button with child was clicked" in the input "value:"
 
+        * # User can find a shadow-rooted element inside a nested iframe
+      And I set the variable "CUCU_SHADOW_DOM_SEARCH" to "enabled"
+     Then I should see the button "shadow button in outer frame"
+
   Scenario: User can only see light DOM elements by default
     Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
      When I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/shadow_dom.html"
@@ -57,3 +61,5 @@ Feature: Frames
       And I set the variable "CUCU_SHADOW_DOM_SEARCH" to "enabled"
      Then I should see the text "Shadow DOM Test Page"
       And I should see the text "leaf one"
+      And I should see the button "shadow target"
+      And I should see the image with the alt text "shadow image"

@@ -7,6 +7,17 @@ from cucu.config import CONFIG
 
 _DEEP_TEXT_FIND_JS = """
 var text = arguments[0];
+var things = arguments[1] || ["*"];
+function cucuMatchesAny(el) {
+    for (var i = 0; i < things.length; i++) {
+        try {
+            if (el.matches && el.matches(things[i])) return true;
+        } catch (e) {
+            // jQuery-only fragments like [type!=button] throw on matches()
+        }
+    }
+    return false;
+}
 function cucuWalkText(n, acc) {
     if (!n || n.nodeType !== 1) {
         return;
@@ -31,9 +42,9 @@ var all = [];
 cucuWalkText(document.documentElement, all);
 for (var k = all.length - 1; k >= 0; k--) {
     var el = all[k];
-    if ((el.textContent || "").indexOf(text) !== -1) {
-        return el;
-    }
+    if ((el.textContent || "").indexOf(text) === -1) continue;
+    if (!cucuMatchesAny(el)) continue;
+    return el;
 }
 return null;
 """
@@ -120,7 +131,13 @@ def find(
     browser.switch_to_default_frame()
 
     if CONFIG.true("CUCU_SHADOW_DOM_SEARCH"):
-        element = browser.driver.execute_script(_DEEP_TEXT_FIND_JS, name)
+
+        def shadow_search():
+            return browser.driver.execute_script(
+                _DEEP_TEXT_FIND_JS, name, things
+            )
+
+        element = search_in_all_frames(browser, shadow_search)
         if element is None:
             logger.debug("Fuzzy found no element via shadow DOM search.")
             return None
