@@ -5,50 +5,6 @@ from cucu import logger
 from cucu.browser.frames import search_in_all_frames
 from cucu.config import CONFIG
 
-_DEEP_TEXT_FIND_JS = """
-var text = arguments[0];
-var things = arguments[1] || ["*"];
-function cucuMatchesAny(el) {
-    for (var i = 0; i < things.length; i++) {
-        try {
-            if (el.matches && el.matches(things[i])) return true;
-        } catch (e) {
-            // jQuery-only fragments like [type!=button] throw on matches()
-        }
-    }
-    return false;
-}
-function cucuWalkText(n, acc) {
-    if (!n || n.nodeType !== 1) {
-        return;
-    }
-    var tag = (n.tagName || "").toUpperCase();
-    if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT") {
-        return;
-    }
-    acc.push(n);
-    var ch = n.children;
-    for (var i = 0; i < ch.length; i++) {
-        cucuWalkText(ch[i], acc);
-    }
-    if (n.shadowRoot) {
-        var sh = n.shadowRoot.children;
-        for (var j = 0; j < sh.length; j++) {
-            cucuWalkText(sh[j], acc);
-        }
-    }
-}
-var all = [];
-cucuWalkText(document.documentElement, all);
-for (var k = all.length - 1; k >= 0; k--) {
-    var el = all[k];
-    if ((el.textContent || "").indexOf(text) === -1) continue;
-    if (!cucuMatchesAny(el)) continue;
-    return el;
-}
-return null;
-"""
-
 
 def load_jquery_lib():
     """
@@ -130,20 +86,6 @@ def find(
     """
     browser.switch_to_default_frame()
 
-    if CONFIG.true("CUCU_SHADOW_DOM_SEARCH"):
-
-        def shadow_search():
-            return browser.driver.execute_script(
-                _DEEP_TEXT_FIND_JS, name, things
-            )
-
-        element = search_in_all_frames(browser, shadow_search)
-        if element is None:
-            logger.debug("Fuzzy found no element via shadow DOM search.")
-            return None
-        logger.debug(f"Fuzzy found element via shadow DOM search for '{name}'")
-        return element
-
     # always need to protect names in which double quotes are used as below
     # we pass arguments to the fuzzy_find javascript function wrapped in double
     # quotes
@@ -158,6 +100,7 @@ def find(
         name_within_thing,
         "true",
         str(CONFIG["CUCU_SKIP_FUZZY_RELEVANCE"]).lower(),
+        str(CONFIG.true("CUCU_SHADOW_DOM_SEARCH")).lower(),
     ]
 
     def execute_fuzzy_find():
