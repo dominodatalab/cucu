@@ -27,7 +27,7 @@ Feature: Report replay view
 
         * # Step counter updates when navigating to the last step
      When I click the button "⏭"
-     Then I wait to see the text "good bye {{USER}}"
+     Then I wait to see the text "good bye \{USER\}"
       And I execute in the current browser the following javascript and save the result to the variable "STEP_COUNTER"
         """
         return document.getElementById('step-count').textContent.trim();
