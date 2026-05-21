@@ -6,9 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 # 1.4.20
-- Change - fuzzy find matching is now case-aware, not case-sensitive
-  - case-different text enters the candidate pool: query `"project"` now finds `Project`/`PrOjEcT`
-  - exact-case match still outranks caseless match for the same element area
+- Add - opt-in case-aware fuzzy matching via `CUCU_FUZZY_CASE_AWARE` (default: `False`)
+  - when enabled, case-different text enters the candidate pool: query `"project"` finds `Project`/`PrOjEcT`
+  - within the same area, exact-case match still outranks caseless match
+  - default `False` keeps fuzzy find case-sensitive as before; flip to `True` to opt in
 
 # 1.4.19
 - Add - `cucu run` accepts multiple feature paths as separate arguments (e.g. `cucu run a.feature b.feature`); multiple paths must share a common `features` ancestor directory
