@@ -11,7 +11,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
   - within the same area, exact-case match still outranks caseless match
   - default `False` keeps fuzzy find case-sensitive as before; flip to `True` to opt in
 
-# 1.4.20  
+# 1.4.20
 - Change - fuzzy find matching is now case-aware, not case-sensitive
   - case-different text enters the candidate pool: query `"project"` now finds `Project`/`PrOjEcT`
   - exact-case match still outranks caseless match for the same element area
