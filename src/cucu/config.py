@@ -482,6 +482,13 @@ CONFIG.define(
     default=False,
 )
 CONFIG.define(
+    "CUCU_FUZZY_CASE_AWARE",
+    "when set to 'True' fuzzy find matches across case (e.g. query 'project' finds 'Project'), "
+    "ranking exact-case ahead of caseless within the same area; when 'False' (default) fuzzy "
+    "matches case-sensitively as before",
+    default=False,
+)
+CONFIG.define(
     "CUCU_CHROME_PROFILE_DIR",
     "Chrome profile path (use the whole Profile Path from chrome://version); when set, Chrome is launched with --user-data-dir (parent) and --profile-directory (basename) derived from this path",
     default=None,
