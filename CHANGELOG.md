@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.22
+- Fix - dropdown steps wait for page load before locating the dropdown to avoid races on freshly-loaded pages
+
 # 1.4.21
 - Add - opt-in case-aware fuzzy matching via `CUCU_FUZZY_CASE_AWARE` (default: `False`)
   - when enabled, case-different text enters the candidate pool: query `"project"` finds `Project`/`PrOjEcT`
