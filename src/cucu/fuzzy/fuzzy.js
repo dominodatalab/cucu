@@ -217,11 +217,19 @@
                                name_within_thing=false,
                                insert_label=false,
                                skip_fuzzy_relevance=false,
-                               shadow=false) {
+                               shadow=false,
+                               case_aware=false) {
         var elements = [];
         var results = null;
         var attributes = ['aria-label', 'title', 'placeholder', 'value'];
-        var matchers = ['has_text', 'has_text_ci', 'contains', 'icontains'];
+        // When case_aware is false the caseless matchers are dropped from the
+        // pool so no case-different elements enter, restoring pre-1.4.20
+        // case-sensitive behavior end-to-end. The caseless tiers in
+        // cucu.relevance remain but never fire because no caseless candidates
+        // ever reach scoring.
+        var matchers = case_aware
+            ? ['has_text', 'has_text_ci', 'contains', 'icontains']
+            : ['has_text', 'contains'];
 
         name = name.replaceAll('"', '\\"');
 
