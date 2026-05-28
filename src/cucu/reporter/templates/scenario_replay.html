@@ -1,37 +1,9 @@
 {% extends "layout.html" %}
 
-{# Shared chrome for the cucu / browser / stdout / stderr / errors log panels.
-   The body is rendered by the {% call %} caller. #}
-{% macro log_panel(panel_id, title, follow_chk_id, content_id, resize_handle_id,
-                   timeline_track_id=None, timeline_cursor_id=None, timeline_hidden=true) %}
-<div id="{{ panel_id }}" class="vp-log-panel">
-  <div class="vp-log-header">
-    <span class="log-toggle-area" data-log-toggle="{{ panel_id }}">
-      <span class="log-collapse-chevron">▾</span>
-      <span class="log-title">{{ title }}</span>
-    </span>
-    {% if timeline_track_id %}
-    <div id="{{ timeline_track_id }}" class="panel-header-track"{% if timeline_hidden %} style="display:none"{% endif %}>
-      <div id="{{ timeline_cursor_id }}"></div>
-    </div>
-    {% endif %}
-    <label class="log-follow-label">
-      <input type="checkbox" id="{{ follow_chk_id }}" checked>
-      follow
-    </label>
-  </div>
-  <div class="vp-log-body">
-    <div id="{{ content_id }}" class="vp-log-content">
-      {{ caller() }}
-    </div>
-    <div class="vp-log-resize" id="{{ resize_handle_id }}"></div>
-  </div>
-</div>
-{% endmacro %}
-
 {% block nav %}
-{# Inline theme-init runs before any paint to prevent flash-of-wrong-theme. Mirrors the logic in
-   replay.js: dark when explicitly chosen, or auto + OS dark. #}
+{# Inline theme-init runs before paint to prevent flash-of-wrong-theme. CSS custom properties on
+   `:root` / `html.theme-dark` inherit into the component's shadow DOM, so the component's render
+   automatically picks up the right theme palette. #}
 <script>(function(){
   try {
     var t = localStorage.getItem('vp-theme') || 'auto';
@@ -39,262 +11,51 @@
     if (dark) document.documentElement.classList.add('theme-dark');
   } catch (e) {}
 })();</script>
-<link href="{{ dir_depth }}external/replay.css" rel="stylesheet">
-
-<nav id="vp-nav">
-  <a href="../../flat.html" title="Flat view">Flat</a>
-  <span class="vp-sep">|</span>
-  <a href="../../index.html" title="Index">Index</a>
-  <span class="vp-sep">|</span>
-  <a href="../../{{ urlencode(escape(feature['name'])) }}.html" title="Feature">Feature</a>
-  <span class="vp-sep">|</span>
-  <a href="index.html" title="Classic checklist view">☑ Classic</a>
-  {% if scenario['logs'] %}
-  <span class="vp-sep">|</span>
-  <div id="log-menu-wrap">
-    <a href="#" id="log-menu-trigger">Logs ▾</a>
-    <div id="log-dd">
-      {% for log_file in scenario['logs'] %}
-      <a href="{{ log_file['filepath'] }}">{{ log_file['name'] }}</a>
-      {% endfor %}
-    </div>
-  </div>
-  {% endif %}
-
-  <div class="vp-nav-right">
-    <button id="theme-toggle" type="button" title="Cycle theme: auto / light / dark">🖥</button>
-    <span class="vp-meta" id="vp-meta-time">▶ {{ scenario["start_at"] }} &nbsp;·&nbsp; 0.0 / {{ '{:.1f}'.format(scenario['duration'] | float) }}s</span>
-  </div>
-</nav>
+<style>
+  /* Theme palette — defined globally so values inherit into the shadow DOM. */
+  :root {
+    --vp-bg: #ffffff; --vp-surface: #f6f8fa; --vp-inset: #eaeef2; --vp-stage: #f0f2f5;
+    --vp-border: #d0d7de; --vp-text: #1f2328; --vp-text2: #656d76; --vp-text3: #9198a1;
+    --vp-link: #0969da; --vp-link-hover: #218bff; --vp-accent: #0969da; --vp-accent-hover: #218bff;
+    --vp-passed: #1a7f37; --vp-failed: #cf222e; --vp-skipped: #0550ae; --vp-untested: #9198a1;
+    --vp-heading: #9a6700; --vp-overlay: rgba(0,0,0,0.35); --vp-shadow: rgba(140,149,159,0.15);
+    --vp-stage-shadow: rgba(140,149,159,0.3);
+  }
+  html.theme-dark {
+    --vp-bg: #0d1117; --vp-surface: #161b22; --vp-inset: #21262d; --vp-stage: #010409;
+    --vp-border: #30363d; --vp-text: #e6edf3; --vp-text2: #8b949e; --vp-text3: #6e7681;
+    --vp-link: #58a6ff; --vp-link-hover: #79c0ff; --vp-accent: #1f6feb; --vp-accent-hover: #388bfd;
+    --vp-passed: #3fb950; --vp-failed: #f85149; --vp-skipped: #58a6ff; --vp-untested: #6e7681;
+    --vp-heading: #e3b341; --vp-overlay: rgba(0,0,0,0.5); --vp-shadow: rgba(0,0,0,0.3);
+    --vp-stage-shadow: rgba(0,0,0,0.65);
+  }
+  body { background: var(--vp-bg); color: var(--vp-text); margin: 0; transition: background 0.2s, color 0.2s; }
+  .container { max-width: 100% !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- SCENARIO HEADER -->
-<div id="vp-header">
-  <div class="vp-feature-row">
-    <div class="vp-feature-name">
-      <span class="vp-feature-label">Feature</span>
-      <a href="../../{{ urlencode(escape(feature['name'])) }}.html" title="Go to feature report">{{ escape(feature['name']) }}</a>
-    </div>
-    {% set _mht = namespace(files=[]) %}
-    {% for lf in scenario['logs'] %}{% if lf['name'].endswith('.mht') %}{% set _mht.files = _mht.files + [lf] %}{% endif %}{% endfor %}
-    {% if _mht.files %}
-    <div class="vp-mht-link">
-      {% for mf in _mht.files %}
-      <a href="{{ mf['filepath'] }}" title="Browser snapshot (MHT archive)">📄 {{ mf['name'] }}</a>{% if not loop.last %} &nbsp;{% endif %}
-      {% endfor %}
-    </div>
-    {% endif %}
-  </div>
-  <div class="vp-scenario-name"><span class="vp-feature-label">Scenario</span> {{ escape(scenario['name']) }}</div>
-  {% if feature['tags'] or scenario['tags'] %}
-  <div class="vp-tags">{{ feature['tags'] }} {{ scenario['tags'] }}</div>
-  {% endif %}
-  {% if scenario['sub_headers'] %}
-  <div class="vp-tags" style="margin-top:4px">{{ scenario['sub_headers'] }}</div>
-  {% endif %}
-</div>
-
-<!-- Secondary timeline tracks (pics / stdout / cucu / browser) live inside each panel header. -->
-{% set _has_browser = namespace(value=false) %}
-{% for step in steps %}{% if step['browser_logs'] %}{% set _has_browser.value = true %}{% endif %}{% endfor %}
-
-<!-- PICS PANEL -->
-<div id="vp-pics-panel" class="vp-log-panel">
-  <div class="vp-log-header">
-    <span class="log-toggle-area" data-log-toggle="vp-pics-panel">
-      <span class="log-collapse-chevron">▾</span>
-      <span class="log-title">Pics</span>
-    </span>
-    <div id="pics-timeline-track" class="panel-header-track" style="display:none">
-      <div id="pics-tl-cursor"></div>
-    </div>
-    <label class="log-follow-label" title="Toggle element highlights">
-      <input type="checkbox" id="btn-highlight" checked>
-      highlight
-    </label>
-  </div>
-  <div class="vp-log-body">
-
-<!-- STAGE: shows current step's screenshot or text -->
-<div id="vp-stage">
-  {% for step in steps %}
-  {% set si = loop.index0 %}
-  <div class="step-frame" id="frame-{{ si }}" style="display:none">
-    {% if step['screenshots'] %}
-    <div class="stage-screenshots">
-      {% for image in step['screenshots'] %}
-      <div class="screenshot-wrapper{% if loop.first %} active{% endif %}"
-           data-frame="{{ si }}" data-imgidx="{{ loop.index0 }}">
-        <img loading="lazy" class="stage-img"
-             src="{{ image['html_src'] }}"
-             alt="{{ escape(image['label']) }}"
-             title="{{ escape(image['label']) }}">
-        {% if image['highlight'] %}
-        <div class="highlight-overlay" style="top:{{ '%.3f'|format(image['highlight']['top_ratio']*100) }}%;left:{{ '%.3f'|format(image['highlight']['left_ratio']*100) }}%;width:{{ '%.3f'|format(image['highlight']['width_ratio']*100) }}%;height:{{ '%.3f'|format(image['highlight']['height_ratio']*100) }}%"></div>
-        {% endif %}
-      </div>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="no-screenshot-display">
-      {% set _status = step['status'] or 'untested' %}
-      {% if _status == 'skipped' %}<div class="step-skipped-label status-{{ _status }}">({{ _status | upper }})</div>{% endif %}
-      <div class="step-line">
-        {% if step['is_substep'] %}<span class="substep-prefix">↳</span> {% endif %}<span class="step-keyword-large status-{{ _status }}">{{ escape(step['keyword']) }}</span> <span class="step-name-large">{{ escape(step['name']) }}</span>
-      </div>
-      {% if step['text'] %}
-      <pre class="step-detail-pre">{{ escape(step_text_list_to_html(step['text'])) }}</pre>
-      {% endif %}
-      {% if step['table_data'] %}
-      <pre class="step-detail-pre">{{ escape(step_table_to_html(step['table_data'])) }}</pre>
-      {% endif %}
-    </div>
-    {% endif %}
-  </div>
-  {% endfor %}
-
-  <button class="stage-nav-btn" id="stage-btn-prev" type="button" title="Previous screenshot (← arrow)">&#8249;</button>
-  <button class="stage-nav-btn" id="stage-btn-next" type="button" title="Next screenshot (→ arrow)">&#8250;</button>
-</div>
-
-<div id="stage-resize-handle"></div>
-  </div><!-- /vp-log-body (pics) -->
-</div><!-- /vp-pics-panel -->
-
-<!-- STEP INFO BAR (controls embedded at start) -->
-<div id="vp-step-info">
-  <span id="pic-overall-pill" class="status-pill" title="Overall pic index across the scenario (each step counts as at least one frame)">– / –</span>
-  <button class="ctrl-btn" id="btn-start"      type="button" title="Start">⏮</button>
-  <button class="ctrl-btn" id="btn-play-pause" type="button" title="Play / Pause (Space)">▶</button>
-  <button class="ctrl-btn" id="btn-end"        type="button" title="End">⏭</button>
-  <span id="step-num-badge">
-    <span class="step-nav-label">Step</span>
-    <button class="step-nav-btn" id="step-nav-prev" type="button" title="Previous step">◀</button>
-    <span id="step-count"><span id="step-cur">1</span> / {{ steps | length }}</span>
-    <button class="step-nav-btn" id="step-nav-next" type="button" title="Next step">▶</button>
-  </span>
-  <span id="step-pic-nav" class="disabled">
-    <span class="step-pic-nav-label">Step Pic</span>
-    <button class="step-pic-nav-btn" type="button" data-delta="-1" title="Previous screenshot">◀</button>
-    <span id="pic-count">– / –</span>
-    <button class="step-pic-nav-btn" type="button" data-delta="1" title="Next screenshot">▶</button>
-  </span>
-  <span id="pic-caption"></span>
-  <span id="step-timing-text"></span>
-</div>
-
-<!-- STEPS PANEL -->
-<div id="vp-steps-panel" class="vp-log-panel">
-  <div class="vp-log-header">
-    <span class="log-toggle-area" data-log-toggle="vp-steps-panel">
-      <span class="log-collapse-chevron">▾</span>
-      <span class="log-title">Steps</span>
-    </span>
-    <div id="timeline-track" class="steps-header-track">
-      <div id="timeline-playhead"></div>
-      <!-- .step-bar elements injected by buildTimeline() -->
-    </div>
-    <label class="log-follow-label">
-      <input type="checkbox" id="steps-follow-chk" checked>
-      follow
-    </label>
-  </div>
-  <div class="vp-log-body">
-    <div id="steps-breadcrumb"></div>
-    <div id="vp-steps-content" class="vp-log-content">
-      <div class="log-step-group steps-row steps-heading" data-seek-time="0" title="Jump to scenario start">
-        <div class="log-line">
-          <span class="steps-name">Scenario: {{ escape(scenario['name']) }}</span>
-        </div>
-      </div>
-      {% for step in steps %}
-      <div class="log-step-group steps-row{% if step['is_substep'] %} steps-substep{% endif %}{% if step['heading_level'] %} steps-heading{% endif %}" data-step="{{ loop.index0 }}" data-seek-step="{{ loop.index0 }}">
-        <div class="log-line">
-          {% if step['heading_level'] %}
-          <span class="steps-name">{{ escape(step['keyword']) }} {{ escape(step['name']) }}</span>
-          {% else %}
-          <span class="steps-kw steps-{{ step['status'] or 'untested' }}">{{ escape(step['keyword']) }}</span><span class="steps-name">{{ escape(step['name']) }}</span>
-          {% endif %}
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-    <div class="vp-log-resize" id="steps-resize-handle"></div>
-  </div>
-</div>
-
-<!-- CUCU DEBUG LOG TRANSCRIPT (per-step debug_output, pre-escaped HTML produced by build_debug_output) -->
-{% if steps | selectattr('debug_output') | list %}
-{% call log_panel('vp-cucu-panel', 'Cucu', 'cucu-follow-chk', 'vp-cucu-content', 'cucu-resize-handle',
-                  timeline_track_id='cucu-timeline-track', timeline_cursor_id='cucu-tl-cursor') %}
-      {% for step in steps %}{% if step['debug_output'] %}
-      <div class="log-step-group" data-step="{{ loop.index0 }}">
-        <div class="log-line">{{ step['debug_output'] | join('') | safe }}</div>
-      </div>
-      {% endif %}{% endfor %}
-{% endcall %}
-{% endif %}
-
-<!-- BROWSER LOG TRANSCRIPT -->
-{% if _has_browser.value %}
-{% set _scen_ts = scenario['start_at'].timestamp() if scenario['start_at'] else none %}
-{% call log_panel('vp-browser-panel', 'Browser', 'browser-follow-chk', 'vp-browser-content', 'browser-resize-handle',
-                  timeline_track_id='browser-timeline-track', timeline_cursor_id='browser-tl-cursor', timeline_hidden=false) %}
-      {% for step in steps %}
-      {% for entry in step['browser_logs'] %}
-      {% set _bl_level = 'error' if entry['level'] in ('SEVERE', 'ERROR', 'CRITICAL') else ('warning' if entry['level'] == 'WARNING' else 'info') %}
-      {% if _scen_ts is not none %}
-      {% set _bl_offset = (entry['timestamp'] | float) / 1000.0 - _scen_ts %}
-      {% endif %}
-      <div class="log-line browser-log-line bl-{{ _bl_level }}"{% if _scen_ts is not none %} data-offset="{{ '%.3f' | format(_bl_offset) }}"{% endif %}>{{ browser_timestamp_to_datetime(entry['timestamp']) }} {{ escape(entry['level']) }} {{ escape(entry['message'].replace("\\n", " ").replace("\\\\", "\\").replace('\\"', '"')) }}</div>
-      {% endfor %}
-      {% endfor %}
-{% endcall %}
-{% endif %}
-
-<!-- STDOUT PANEL -->
-{% if steps | selectattr('stdout') | list %}
-{% call log_panel('vp-stdout-panel', 'Stdout', 'stdout-follow-chk', 'vp-stdout-content', 'stdout-resize-handle',
-                  timeline_track_id='stdout-timeline-track', timeline_cursor_id='stdout-tl-cursor') %}
-      {% for step in steps %}{% if step['stdout'] %}
-      <div class="log-step-group" data-step="{{ loop.index0 }}">
-        {% for line in step['stdout'] %}<div class="log-line">{{ escape(line) }}</div>{% endfor %}
-      </div>
-      {% endif %}{% endfor %}
-{% endcall %}
-{% endif %}
-
-<!-- STDERR PANEL -->
-{% if steps | selectattr('stderr') | list %}
-{% call log_panel('vp-stderr-panel', 'Stderr', 'stderr-follow-chk', 'vp-stderr-content', 'stderr-resize-handle') %}
-      {% for step in steps %}{% if step['stderr'] %}
-      <div class="log-step-group" data-step="{{ loop.index0 }}">
-        <div class="log-step-label">Step {{ loop.index }}: {{ escape(step['keyword']) }}{{ escape(step['name']) }}</div>
-        {% for line in step['stderr'] %}<div class="log-line stderr-line">{{ escape(line) }}</div>{% endfor %}
-      </div>
-      {% endif %}{% endfor %}
-{% endcall %}
-{% endif %}
-
-<!-- ERRORS PANEL -->
-{% if steps | selectattr('error_message') | list %}
-{% call log_panel('vp-errors-panel', 'Errors', 'errors-follow-chk', 'vp-errors-content', 'errors-resize-handle',
-                  timeline_track_id='errors-timeline-track', timeline_cursor_id='errors-tl-cursor') %}
-      {% for step in steps %}{% if step['error_message'] %}
-      <div class="log-step-group" data-step="{{ loop.index0 }}">
-        {% for entry in step['error_message'] %}<div class="log-line error-line">{{ escape(entry) }}</div>{% endfor %}
-      </div>
-      {% endif %}{% endfor %}
-{% endcall %}
-{% endif %}
-
-<!-- Per-scenario data consumed by replay.js -->
 <script id="replay-data" type="application/json">
+{% set _mht = namespace(files=[]) %}
+{% for lf in scenario['logs'] %}{% if lf['name'].endswith('.mht') %}{% set _mht.files = _mht.files + [lf] %}{% endif %}{% endfor %}
+{% set _scen_ts = scenario['start_at'].timestamp() if scenario['start_at'] else none %}
 {
   "scenarioName": {{ scenario['name']|tojson }},
   "scenarioDuration": {{ scenario['duration'] | float }},
   "scenarioStartMs": {% if scenario['start_at'] %}{{ scenario['start_at'].timestamp() * 1000 }}{% else %}null{% endif %},
+  "scenarioStartLabel": {{ (scenario['start_at']|string if scenario['start_at'] else '')|tojson }},
+  "featureName": {{ feature['name']|tojson }},
+  "featureTagsHtml": {{ (feature['tags'] or '')|tojson }},
+  "scenarioTagsHtml": {{ (scenario['tags'] or '')|tojson }},
+  "subHeadersHtml": {{ (scenario['sub_headers'] or '')|tojson }},
+  "links": {
+    "flat":    "../../flat.html",
+    "index":   "../../index.html",
+    "feature": {{ ('../../' ~ urlencode(escape(feature['name'])) ~ '.html')|tojson }},
+    "classic": "index.html"
+  },
+  "logs":     [{% for lf in scenario['logs']     %}{"name": {{ lf['name']|tojson }}, "url": {{ (lf['filepath']|string)|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}],
+  "mhtFiles": [{% for lf in _mht.files           %}{"name": {{ lf['name']|tojson }}, "url": {{ (lf['filepath']|string)|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}],
   "steps": [
     {% for step in steps %}
     {
@@ -308,17 +69,33 @@
       "isSubstep": {{ 'true' if step['is_substep'] else 'false' }},
       "startOffset": {% if step['time_offset'] %}{{ step['time_offset'].hour * 3600 + step['time_offset'].minute * 60 + step['time_offset'].second + step['time_offset'].microsecond / 1000000.0 }}{% else %}null{% endif %},
       "duration": {{ step['duration'] | default(0) | float }},
-      "screenshots": [{% for img in step['screenshots'] %}{"src": {{ img['html_src']|tojson }}, "label": {{ img['label']|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}],
       "timingLabel": {% if step['timestamp'] and step['duration'] %}"{{ step['timestamp'].strftime('%H:%M:%S') }} · {{ '{:.3f}s'.format(step['duration'] | float) }}"{% else %}""{% endif %},
-      "hasStdout": {{ 'true' if step['stdout'] else 'false' }},
-      "hasCucu": {{ 'true' if step['debug_output'] else 'false' }},
-      "hasBrowserLogs": {{ 'true' if step['browser_logs'] else 'false' }},
-      "hasScreenshots": {{ 'true' if step['screenshots'] else 'false' }},
-      "hasErrors": {{ 'true' if step['error_message'] else 'false' }}
+      "screenshots": [{% for img in step['screenshots'] %}{
+        "src": {{ img['html_src']|tojson }},
+        "label": {{ img['label']|tojson }}
+        {%- if img['highlight'] %},
+        "highlight": {"top": {{ '%.3f'|format(img['highlight']['top_ratio']*100) }}, "left": {{ '%.3f'|format(img['highlight']['left_ratio']*100) }}, "width": {{ '%.3f'|format(img['highlight']['width_ratio']*100) }}, "height": {{ '%.3f'|format(img['highlight']['height_ratio']*100) }}}
+        {%- endif %}
+      }{% if not loop.last %},{% endif %}{% endfor %}],
+      "textHtml":        {% if step['text']          %}{{ step_text_list_to_html(step['text'])|tojson }}{% else %}null{% endif %},
+      "tableHtml":       {% if step['table_data']    %}{{ step_table_to_html(step['table_data'])|tojson }}{% else %}null{% endif %},
+      "debugOutputHtml": {% if step['debug_output']  %}{{ (step['debug_output'] | join(''))|tojson }}{% else %}null{% endif %},
+      "stdout":       [{% for line in step['stdout']        %}{{ line|tojson }}{% if not loop.last %},{% endif %}{% endfor %}],
+      "stderr":       [{% for line in step['stderr']        %}{{ line|tojson }}{% if not loop.last %},{% endif %}{% endfor %}],
+      "errorMessage": [{% for line in step['error_message'] %}{{ line|tojson }}{% if not loop.last %},{% endif %}{% endfor %}],
+      "browserLogs": [{% for entry in step['browser_logs'] %}{
+        "ts":      "{{ browser_timestamp_to_datetime(entry['timestamp']) }}",
+        "level":   {{ entry['level']|tojson }},
+        "message": {{ entry['message'].replace("\\n", " ").replace("\\\\", "\\").replace('\\"', '"')|tojson }}
+        {%- if _scen_ts is not none %},
+        "offset":  {{ '%.3f' | format((entry['timestamp'] | float) / 1000.0 - _scen_ts) }}
+        {%- endif %}
+      }{% if not loop.last %},{% endif %}{% endfor %}]
     }{% if not loop.last %},{% endif %}
     {% endfor %}
   ]
 }
 </script>
-<script src="{{ dir_depth }}external/replay.js"></script>
+<cucu-replay-app></cucu-replay-app>
+<script type="module" src="{{ dir_depth }}external/replay.js"></script>
 {% endblock %}
