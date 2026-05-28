@@ -1,5 +1,6 @@
-// Cucu replay-view player. Companion CSS: replay.css. Per-scenario data is supplied via the
-// inline JSON island at #replay-data; everything else is wired up from the static DOM.
+// Cucu replay-view player. Companion CSS: replay.css. Per-scenario data — including all log
+// content — comes from the inline JSON island at #replay-data; the player is wired up
+// declaratively via Alpine.js (x-data="replayPlayer()").
 (function () {
   "use strict";
 
@@ -12,246 +13,23 @@
   var SCENARIO_START_MS = DATA.scenarioStartMs;
   var SCENARIO_NAME     = DATA.scenarioName;
   var STEPS             = DATA.steps;
+  var BROWSER_LOGS      = DATA.browserLogs || [];
   var TOTAL_STEPS       = STEPS.length;
 
-  // ===== THEME =====
-  // Theme-init is inline in <head> so it runs before paint. Here we just handle the toggle button.
-  var THEME_CYCLE  = ['auto', 'light', 'dark'];
-  var THEME_ICONS  = { auto: '🖥', light: '☀', dark: '🌙' };
-  var THEME_TITLES = { auto: 'Theme: auto (follows system)', light: 'Theme: light', dark: 'Theme: dark' };
-
-  function applyTheme(mode) {
-    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var dark = mode === 'dark' || (mode === 'auto' && prefersDark);
-    document.documentElement.classList.toggle('theme-dark', dark);
-    var btn = document.getElementById('theme-toggle');
-    if (btn) {
-      btn.textContent = THEME_ICONS[mode] || THEME_ICONS.auto;
-      btn.title       = THEME_TITLES[mode] || THEME_TITLES.auto;
-    }
-  }
-
-  function readTheme() {
-    try { return localStorage.getItem('vp-theme') || 'auto'; } catch (e) { return 'auto'; }
-  }
-
-  function cycleTheme() {
-    var cur  = readTheme();
-    var next = THEME_CYCLE[(THEME_CYCLE.indexOf(cur) + 1) % THEME_CYCLE.length];
-    try { localStorage.setItem('vp-theme', next); } catch (e) {}
-    applyTheme(next);
-  }
-
-  applyTheme(readTheme());
-  if (window.matchMedia) {
-    // Track OS dark-mode flips while the user is on auto.
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
-      if (readTheme() === 'auto') applyTheme('auto');
-    });
-  }
-
-  // ===== LOG PANEL: COLLAPSE & RESIZE =====
-  function toggleLogPanel(panelId) {
-    var panel = document.getElementById(panelId);
-    if (!panel) return;
-    var collapsed = panel.classList.toggle('collapsed');
-    try { localStorage.setItem('vp-' + panelId + '-collapsed', collapsed ? '1' : '0'); } catch (e) {}
-  }
-
-  function initLogPanel(panelId, contentId, resizeId) {
-    var panel   = document.getElementById(panelId);
-    var content = document.getElementById(contentId);
-    var handle  = resizeId ? document.getElementById(resizeId) : null;
-    if (!panel) return;
-
-    try {
-      if (localStorage.getItem('vp-' + panelId + '-collapsed') === '1') panel.classList.add('collapsed');
-    } catch (e) {}
-
-    if (!handle || !content) return;
-
-    try {
-      var h = parseInt(localStorage.getItem('vp-' + panelId + '-height'), 10);
-      if (h >= 60) content.style.height = h + 'px';
-    } catch (e) {}
-
-    handle.addEventListener('pointerdown', function (e) {
-      e.preventDefault();
-      handle.setPointerCapture(e.pointerId);
-      var startY = e.clientY;
-      var startH = content.offsetHeight;
-      var minH   = parseInt(window.getComputedStyle(content).minHeight, 10) || 60;
-      handle.classList.add('dragging');
-      document.body.style.cursor    = 'ns-resize';
-      document.body.style.userSelect = 'none';
-
-      function onMove(ev) {
-        content.style.height = Math.max(minH, startH + (ev.clientY - startY)) + 'px';
-      }
-      function onUp() {
-        handle.classList.remove('dragging');
-        document.body.style.cursor    = '';
-        document.body.style.userSelect = '';
-        try { localStorage.setItem('vp-' + panelId + '-height', content.offsetHeight); } catch (e2) {}
-        handle.removeEventListener('pointermove', onMove);
-        handle.removeEventListener('pointerup',   onUp);
-        handle.removeEventListener('pointercancel', onUp);
-      }
-      handle.addEventListener('pointermove', onMove);
-      handle.addEventListener('pointerup',   onUp);
-      handle.addEventListener('pointercancel', onUp);
-    });
-  }
-
-  initLogPanel('vp-pics-panel');  // collapse only — stage has its own resize handle
-  initLogPanel('vp-steps-panel',   'vp-steps-content',   'steps-resize-handle');
-  initLogPanel('vp-cucu-panel',    'vp-cucu-content',    'cucu-resize-handle');
-  initLogPanel('vp-browser-panel', 'vp-browser-content', 'browser-resize-handle');
-  initLogPanel('vp-stdout-panel',  'vp-stdout-content',  'stdout-resize-handle');
-  initLogPanel('vp-stderr-panel',  'vp-stderr-content',  'stderr-resize-handle');
-  initLogPanel('vp-errors-panel',  'vp-errors-content',  'errors-resize-handle');
-
-  // Stage resize
-  (function () {
-    var stage  = document.getElementById('vp-stage');
-    var handle = document.getElementById('stage-resize-handle');
-    if (!stage || !handle) return;
-    try {
-      var h = parseInt(localStorage.getItem('vp-stage-height'), 10);
-      if (h >= 120) stage.style.height = h + 'px';
-    } catch (e) {}
-    handle.addEventListener('pointerdown', function (e) {
-      e.preventDefault();
-      handle.setPointerCapture(e.pointerId);
-      var startY = e.clientY;
-      var startH = stage.offsetHeight;
-      handle.classList.add('dragging');
-      document.body.style.cursor    = 'ns-resize';
-      document.body.style.userSelect = 'none';
-      function onMove(ev) {
-        stage.style.height = Math.max(120, startH + (ev.clientY - startY)) + 'px';
-      }
-      function onUp() {
-        handle.classList.remove('dragging');
-        document.body.style.cursor    = '';
-        document.body.style.userSelect = '';
-        try { localStorage.setItem('vp-stage-height', stage.offsetHeight); } catch (e2) {}
-        handle.removeEventListener('pointermove', onMove);
-        handle.removeEventListener('pointerup',   onUp);
-        handle.removeEventListener('pointercancel', onUp);
-      }
-      handle.addEventListener('pointermove', onMove);
-      handle.addEventListener('pointerup',   onUp);
-      handle.addEventListener('pointercancel', onUp);
-    });
-  })();
-
-  // ===== STEP-BASED PANEL SCROLL (stdout / stderr / errors) =====
-  var stepPanelFollowing = {};
-  var stepScrollBusy     = {};   // true while a programmatic scroll is in flight
-
-  function setStepPanelFollowing(contentId, enabled) {
-    stepPanelFollowing[contentId] = enabled;
-    if (enabled) scrollStepPanelToStep(contentId, shownStepIdx >= 0 ? shownStepIdx : 0);
-  }
-
-  function scrollStepPanelToStep(contentId, stepIdx) {
-    if (stepPanelFollowing[contentId] === false) return;
-    var content = document.getElementById(contentId);
-    if (!content) return;
-    content.querySelectorAll('.log-step-group').forEach(function (g) {
-      g.classList.remove('step-current', 'step-previous');
-    });
-    // find the closest group at-or-before stepIdx (current) and the one just before it (previous)
-    var best = null;
-    var prev = null;
-    content.querySelectorAll('.log-step-group[data-step]').forEach(function (g) {
-      if (parseInt(g.dataset.step, 10) <= stepIdx) {
-        prev = best;
-        best = g;
-      }
-    });
-    if (best) {
-      best.classList.add('step-current');
-      // Steps panel only: also mark the previous step and scroll so both stay in view
-      if (contentId === 'vp-steps-content' && prev) prev.classList.add('step-previous');
-      stepScrollBusy[contentId] = true;
-      var anchor = (contentId === 'vp-steps-content' && prev) ? prev : best;
-      var top = anchor.offsetTop - content.offsetTop;
-      content.scrollTop = Math.max(0, top - 4);
-      requestAnimationFrame(function () { stepScrollBusy[contentId] = false; });
-    }
-  }
-
-  function scrollAllStepPanels(stepIdx) {
-    ['vp-steps-content', 'vp-cucu-content', 'vp-stdout-content', 'vp-stderr-content', 'vp-errors-content'].forEach(function (id) {
-      scrollStepPanelToStep(id, stepIdx);
-    });
-    updateStepsBreadcrumb(stepIdx);
-  }
-
-  // Show the current group header — the most recent heading at-or-before stepIdx (with its
-  // raw `#` prefixes preserved). If no heading has been encountered yet, fall back to the scenario
-  // name prefixed with "Scenario: ".
-  function updateStepsBreadcrumb(stepIdx) {
-    var bc = document.getElementById('steps-breadcrumb');
-    if (!bc) return;
-    var name = 'Scenario: ' + SCENARIO_NAME;
-    for (var i = 0; i <= stepIdx && i < STEPS.length; i++) {
-      if (STEPS[i].headingLevel) name = ((STEPS[i].keyword || '') + ' ' + STEPS[i].name).trim();
-    }
-    bc.innerHTML = '<div class="log-line"><span class="steps-name">' + escHtml(name) + '</span></div>';
-  }
-
-  function escHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
-  ['vp-steps-content', 'vp-cucu-content', 'vp-stdout-content', 'vp-stderr-content', 'vp-errors-content'].forEach(function (id) {
-    stepPanelFollowing[id] = true;
-  });
-
-  // ===== STEP TIMING / PIC INDEX =====
-  function padN(n, w) { var s = String(n); while (s.length < (w || 2)) s = '0' + s; return s; }
-  function formatPlayheadTime(epochMs) {
-    // Local time — matches the rest of the report (step timestamps, scenario start_at).
-    var d = new Date(epochMs);
-    return d.getFullYear() + '-' + padN(d.getMonth() + 1) + '-' + padN(d.getDate()) + ' ' +
-           padN(d.getHours()) + ':' + padN(d.getMinutes()) + ':' + padN(d.getSeconds()) + '.' +
-           padN(d.getMilliseconds(), 3) + '000';
-  }
-  function updateMetaTime() {
-    var el = document.getElementById('vp-meta-time');
-    if (!el) return;
-    var cur = currentTimeSec.toFixed(1);
-    var tot = SCENARIO_DURATION.toFixed(1);
-    if (SCENARIO_START_MS === null) {
-      el.textContent = '▶ ' + cur + ' / ' + tot + 's';
-    } else {
-      el.textContent = '▶ ' + formatPlayheadTime(SCENARIO_START_MS + currentTimeSec * 1000) + ' · ' + cur + ' / ' + tot + 's';
-    }
-  }
-
-  // Each step contributes max(1, screenshots.length) — steps without screenshots (and skipped
-  // steps) count as a single "frame" so they're navigable in the pic player.
   function stepFrameCount(s) { return Math.max(1, s.screenshots.length); }
-  var PIC_OFFSETS = (function () {
-    var offsets = []; var sum = 0;
-    STEPS.forEach(function (s) { offsets.push(sum); sum += stepFrameCount(s); });
-    return offsets;
-  })();
+
+  var PIC_OFFSETS = STEPS.reduce(function (acc, s) {
+    acc.push(acc.length ? acc[acc.length - 1] + stepFrameCount(STEPS[acc.length - 1]) : 0);
+    return acc;
+  }, []);
   var TOTAL_PICS = PIC_OFFSETS.length ? PIC_OFFSETS[PIC_OFFSETS.length - 1] + stepFrameCount(STEPS[STEPS.length - 1]) : 0;
 
-  // Whether we have enough real timing data to drive time-based playback
   var HAS_TIMING = SCENARIO_DURATION > 0 &&
     STEPS.some(function (s) { return s.startOffset !== null && s.duration > 0; });
 
   // Synthesise startOffset/duration for untimed (skipped/untested) steps so they integrate with
-  // timeToStepIdx, the timeline, and the pic player exactly like timed steps. Each untimed step
-  // gets a small inline slot right after the previous step ended.
-  (function assignVirtualOffsets() {
+  // timeToStepIdx, the timeline, and the pic player exactly like timed steps.
+  (function () {
     if (!HAS_TIMING) return;
     var untimedMarkerSec = SCENARIO_DURATION * 0.005;
     var lastEnd = 0;
@@ -266,135 +44,90 @@
     });
   })();
 
-  // Total playback range — actual end of the last step (no trailing slack against SCENARIO_DURATION).
-  var PLAY_END = (function () {
-    if (!HAS_TIMING) return Math.max(TOTAL_STEPS - 1, 0);
-    var last = 0;
-    STEPS.forEach(function (s) {
-      if (s.startOffset !== null) last = Math.max(last, s.startOffset + (s.duration || 0));
-    });
-    return last > 0 ? last : SCENARIO_DURATION;
-  })();
+  var PLAY_END = HAS_TIMING
+    ? STEPS.reduce(function (m, s) { return s.startOffset !== null ? Math.max(m, s.startOffset + (s.duration || 0)) : m; }, 0) || SCENARIO_DURATION
+    : Math.max(TOTAL_STEPS - 1, 0);
+  var TOTAL_DUR = PLAY_END > 0 ? PLAY_END : 1;
 
-  // ===== STATE =====
-  var currentTimeSec = 0;
-  var shownStepIdx   = -1;
-  var shownImgIdx    = -1;
-  var isPlaying      = false;
-  var playbackRate   = 1.0;
-  var lastRafTime    = null;
-  var rafId          = null;
+  // ----- Precomputed tick / bar arrays — bound via <template x-for> in markup. -----
+  var STEP_BARS = STEPS.map(function (step, i) {
+    var leftPct = HAS_TIMING ? step.startOffset / TOTAL_DUR * 100 : i / Math.max(TOTAL_STEPS - 1, 1) * 100;
+    var widthPct = HAS_TIMING ? Math.max(step.duration / TOTAL_DUR * 100, 0.25) : 100 / TOTAL_STEPS;
+    return {
+      index:    i,
+      leftPct:  leftPct,
+      widthPct: widthPct,
+      cls:      'status-' + (step.status || 'untested') + (step.isHeading ? ' heading' : ''),
+      title:    'Step ' + step.num + ': ' + step.keyword + ' ' + step.name.slice(0, 80),
+      seekTime: HAS_TIMING ? step.startOffset : i,
+    };
+  });
 
-  var browserFollowing   = true;
-  var browserScrollBusy  = { value: false };
-  var browserTimedLines  = null;
-
-  function getBrowserTimedLines() {
-    if (!browserTimedLines)
-      browserTimedLines = Array.from(document.querySelectorAll('#vp-browser-content .log-line[data-offset]'));
-    return browserTimedLines;
-  }
-
-  // ===== TIMELINE BUILDERS =====
-  function buildStepPresenceTrack(trackId, stepHasContent) {
-    var track = document.getElementById(trackId);
-    if (!track) return;
-    var totalDur = PLAY_END > 0 ? PLAY_END : 1;
-    var cursor = track.firstElementChild;
-    var hasAny = false;
-    STEPS.forEach(function (step, i) {
-      if (!stepHasContent(step)) return;
-      hasAny = true;
-      var bar = document.createElement('div');
-      bar.className = 'tl-step-bar';
-      if (HAS_TIMING && step.startOffset !== null && totalDur > 0) {
-        bar.style.left  = (step.startOffset / totalDur * 100) + '%';
-        bar.style.width = Math.max(0.5, step.duration / totalDur * 100) + '%';
-      } else {
-        bar.style.left  = (i / Math.max(TOTAL_STEPS, 1) * 100) + '%';
-        bar.style.width = (100 / TOTAL_STEPS) + '%';
-      }
-      if (cursor) track.insertBefore(bar, cursor); else track.appendChild(bar);
-    });
-    if (hasAny) track.style.display = '';
-  }
-
-  function buildPicsTimeline() {
-    // One tick per screenshot at its capture offset, plus a single tick for steps without screenshots
-    // (skipped/untested/no-pic). Each tick is coloured by its step's status.
-    var track = document.getElementById('pics-timeline-track');
-    if (!track) return;
-    var totalDur = PLAY_END > 0 ? PLAY_END : 1;
-    STEPS.forEach(function (step) {
-      if (step.startOffset === null) return;
-      var n = Math.max(1, step.screenshots.length);
-      var statusClass = 'pics-tick-' + (step.status || 'untested');
-      for (var i = 0; i < n; i++) {
-        var offset = step.startOffset + (i / n) * step.duration;
-        var tick = document.createElement('div');
-        tick.className = 'pics-tick ' + statusClass;
-        tick.style.left = Math.max(0, Math.min(100, offset / totalDur * 100)) + '%';
-        track.appendChild(tick);
-      }
-    });
-    track.style.display = '';
-  }
-
-  function buildBrowserTimeline() {
-    // One tick per browser log entry, coloured by severity (info / warning / error).
-    var track = document.getElementById('browser-timeline-track');
-    if (!track) return;
-    var totalDur = PLAY_END > 0 ? PLAY_END : 1;
-    var cursor = document.getElementById('browser-tl-cursor');
-    var lines = getBrowserTimedLines();
-    if (lines.length === 0) { track.style.display = 'none'; return; }
-    lines.forEach(function (line) {
-      var offset = parseFloat(line.dataset.offset);
-      if (isNaN(offset)) return;
-      var level = 'info';
-      if (line.classList.contains('bl-error'))   level = 'error';
-      else if (line.classList.contains('bl-warning')) level = 'warning';
-      var tick = document.createElement('div');
-      tick.className = 'tl-tick tl-' + level;
-      tick.style.left = Math.max(0, Math.min(100, offset / totalDur * 100)) + '%';
-      if (cursor) track.insertBefore(tick, cursor); else track.appendChild(tick);
-    });
-  }
-
-  function buildTimeline() {
-    var track = document.getElementById('timeline-track');
-    var totalDur = HAS_TIMING ? PLAY_END : Math.max(TOTAL_STEPS - 1, 1);
-
-    STEPS.forEach(function (step, i) {
-      var bar = document.createElement('div');
-      bar.id = 'bar-' + i;
-      bar.className = 'step-bar status-' + (step.status || 'untested') + (step.isHeading ? ' heading' : '');
-      bar.setAttribute('title', 'Step ' + step.num + ': ' + step.keyword + ' ' + step.name.slice(0, 80));
-      bar.dataset.step = i;
-
-      var leftPct, widthPct;
-      if (HAS_TIMING) {
-        // Every step has a (real or synthesised) startOffset+duration after assignVirtualOffsets
-        leftPct  = step.startOffset / totalDur * 100;
-        widthPct = Math.max(step.duration / totalDur * 100, 0.25);
-      } else {
-        leftPct  = (i / Math.max(TOTAL_STEPS - 1, 1)) * 100;
-        widthPct = 100 / TOTAL_STEPS;
-      }
-
-      bar.style.left  = leftPct  + '%';
-      bar.style.width = widthPct + '%';
-
-      bar.addEventListener('click', function (e) {
-        e.stopPropagation();
-        seekToTime(HAS_TIMING ? step.startOffset : stepIdxToTime(i));
+  var PIC_TICKS = STEPS.reduce(function (acc, step) {
+    if (step.startOffset === null) return acc;
+    var n = Math.max(1, step.screenshots.length);
+    for (var i = 0; i < n; i++) {
+      acc.push({
+        cls: 'pics-tick pics-tick-' + (step.status || 'untested'),
+        leftPct: Math.max(0, Math.min(100, (step.startOffset + (i / n) * step.duration) / TOTAL_DUR * 100)),
       });
-      track.appendChild(bar);
-    });
+    }
+    return acc;
+  }, []);
+
+  function buildPresenceBars(predicate) {
+    return STEPS.reduce(function (acc, step, i) {
+      if (!predicate(step)) return acc;
+      var leftPct  = HAS_TIMING ? step.startOffset / TOTAL_DUR * 100 : i / Math.max(TOTAL_STEPS, 1) * 100;
+      var widthPct = HAS_TIMING ? Math.max(0.5, step.duration / TOTAL_DUR * 100) : 100 / TOTAL_STEPS;
+      acc.push({ leftPct: leftPct, widthPct: widthPct });
+      return acc;
+    }, []);
+  }
+  var STDOUT_BARS = buildPresenceBars(function (s) { return s.stdout && s.stdout.length; });
+  var CUCU_BARS   = buildPresenceBars(function (s) { return !!s.debugOutput; });
+  var ERRORS_BARS = buildPresenceBars(function (s) { return s.errorMessage && s.errorMessage.length; });
+
+  var BROWSER_TICKS = BROWSER_LOGS.map(function (log) {
+    return { leftPct: Math.max(0, Math.min(100, log.offset / TOTAL_DUR * 100)), level: log.level };
+  });
+
+  var STEP_PANELS = [
+    { contentId: 'vp-steps-content',  followId: 'steps-follow-chk',  field: null },
+    { contentId: 'vp-cucu-content',   followId: 'cucu-follow-chk',   field: 'debugOutput' },
+    { contentId: 'vp-stdout-content', followId: 'stdout-follow-chk', field: 'stdout' },
+    { contentId: 'vp-stderr-content', followId: 'stderr-follow-chk', field: 'stderr' },
+    { contentId: 'vp-errors-content', followId: 'errors-follow-chk', field: 'errorMessage' },
+  ];
+  var FOLLOW_IDS = ['browser-follow-chk'].concat(STEP_PANELS.map(function (p) { return p.followId; }));
+
+  var PANEL_IDS = [
+    'vp-pics-panel', 'vp-steps-panel', 'vp-cucu-panel', 'vp-browser-panel',
+    'vp-stdout-panel', 'vp-stderr-panel', 'vp-errors-panel',
+  ];
+
+  var RESIZE_TARGETS = [
+    ['vp-stage',           120, 'vp-stage-height'],
+    ['vp-steps-content',    60, 'vp-vp-steps-panel-height'],
+    ['vp-cucu-content',     60, 'vp-vp-cucu-panel-height'],
+    ['vp-browser-content',  60, 'vp-vp-browser-panel-height'],
+    ['vp-stdout-content',   60, 'vp-vp-stdout-panel-height'],
+    ['vp-stderr-content',   60, 'vp-vp-stderr-panel-height'],
+    ['vp-errors-content',   60, 'vp-vp-errors-panel-height'],
+  ];
+
+  var THEME_CYCLE  = ['auto', 'light', 'dark'];
+  var THEME_ICONS  = { auto: '🖥', light: '☀', dark: '🌙' };
+  var THEME_TITLES = { auto: 'Theme: auto (follows system)', light: 'Theme: light', dark: 'Theme: dark' };
+
+  function padN(n, w) { var s = String(n); while (s.length < (w || 2)) s = '0' + s; return s; }
+  function formatPlayheadTime(epochMs) {
+    var d = new Date(epochMs);
+    return d.getFullYear() + '-' + padN(d.getMonth() + 1) + '-' + padN(d.getDate()) + ' ' +
+           padN(d.getHours()) + ':' + padN(d.getMinutes()) + ':' + padN(d.getSeconds()) + '.' +
+           padN(d.getMilliseconds(), 3) + '000';
   }
 
-  // Convert a step index to a player-time value. If this step has no startOffset, walk backwards
-  // to the nearest step that does.
   function stepIdxToTime(idx) {
     if (!HAS_TIMING) return idx;
     for (var i = idx; i >= 0; i--) {
@@ -402,432 +135,396 @@
     }
     return 0;
   }
-
-  // ===== TIME ↔ STEP RESOLUTION =====
   function timeToStepIdx(t) {
     if (!HAS_TIMING) return Math.min(Math.round(t), TOTAL_STEPS - 1);
     var best = 0;
     for (var i = 0; i < TOTAL_STEPS; i++) {
-      var s = STEPS[i];
-      if (s.startOffset !== null && s.startOffset <= t) best = i;
+      if (STEPS[i].startOffset !== null && STEPS[i].startOffset <= t) best = i;
     }
     return best;
   }
-
   function timeToImgIdx(stepIdx, t) {
     var step = STEPS[stepIdx];
     var n = step.screenshots.length;
     if (n <= 1 || step.duration <= 0 || step.startOffset === null) return 0;
-    var within = Math.max(0, t - step.startOffset);
-    return Math.min(Math.floor(within / step.duration * n), n - 1);
+    return Math.min(Math.floor(Math.max(0, t - step.startOffset) / step.duration * n), n - 1);
   }
 
-  // ===== SEEK & DISPLAY =====
-  function seekToTime(t) {
-    currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
-    reengageFollow();
-    updateDisplay(true);
+  function readTheme() {
+    try { return localStorage.getItem('vp-theme') || 'auto'; } catch (e) { return 'auto'; }
+  }
+  function applyThemeClass(mode) {
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.classList.toggle('theme-dark', mode === 'dark' || (mode === 'auto' && prefersDark));
   }
 
-  function reengageFollow() {
-    browserFollowing = true;
-    var bc = document.getElementById('browser-follow-chk'); if (bc) bc.checked = true;
-    ['vp-steps-content', 'vp-cucu-content', 'vp-stdout-content', 'vp-stderr-content', 'vp-errors-content'].forEach(function (id) {
-      stepPanelFollowing[id] = true;
-    });
-    var cc = document.getElementById('cucu-follow-chk'); if (cc) cc.checked = true;
+  function panelByFollowId(followId) {
+    for (var i = 0; i < STEP_PANELS.length; i++) if (STEP_PANELS[i].followId === followId) return STEP_PANELS[i];
+    return null;
+  }
+  function panelByContentId(contentId) {
+    for (var i = 0; i < STEP_PANELS.length; i++) if (STEP_PANELS[i].contentId === contentId) return STEP_PANELS[i];
+    return null;
   }
 
-  function seekToStepIdx(idx) {
-    seekToTime(stepIdxToTime(idx));
-  }
+  // ===== ALPINE COMPONENT =====
+  window.replayPlayer = function () {
+    return {
+      // ----- bound state -----
+      steps:           STEPS,
+      totalSteps:      TOTAL_STEPS,
+      totalPics:       TOTAL_PICS,
+      stepBars:        STEP_BARS,
+      picTicks:        PIC_TICKS,
+      stdoutBars:      STDOUT_BARS,
+      cucuBars:        CUCU_BARS,
+      errorsBars:      ERRORS_BARS,
+      browserTicks:    BROWSER_TICKS,
+      browserLogs:     BROWSER_LOGS,
+      cucuSteps:       STEPS.filter(function (s) { return !!s.debugOutput; }),
+      stdoutSteps:     STEPS.filter(function (s) { return s.stdout && s.stdout.length; }),
+      stderrSteps:     STEPS.filter(function (s) { return s.stderr && s.stderr.length; }),
+      errorSteps:      STEPS.filter(function (s) { return s.errorMessage && s.errorMessage.length; }),
+      currentTimeSec:  0,
+      shownStepIdx:    -1,
+      shownImgIdx:     -1,
+      isPlaying:       false,
+      playbackRate:    1.0,
+      theme:           'auto',
+      highlight:       true,
+      logsOpen:        false,
+      panelsCollapsed: {},
+      followFlags:     {},
+      themeIcons:      THEME_ICONS,
+      themeTitles:     THEME_TITLES,
 
-  function updateDisplay(force) {
-    var headPct = PLAY_END > 0 ? (currentTimeSec / PLAY_END) * 100 : 0;
-    document.getElementById('timeline-playhead').style.left = headPct + '%';
-    ['pics-tl-cursor', 'stdout-tl-cursor', 'cucu-tl-cursor', 'browser-tl-cursor'].forEach(function (id) {
-      var el = document.getElementById(id); if (el) el.style.left = headPct + '%';
-    });
+      // ----- unbound internals -----
+      _rafId:             null,
+      _lastRafTime:       null,
+      _browserLineEls:    null,
+      _stepScrollBusy:    {},
+      _browserScrollBusy: { value: false },
 
-    var stepIdx = timeToStepIdx(currentTimeSec);
-    var imgIdx  = timeToImgIdx(stepIdx, currentTimeSec);
+      // ----- derived (getters) -----
+      get headPct()       { return this.currentTimeSec / TOTAL_DUR * 100; },
+      get atEnd()         { return this.currentTimeSec >= PLAY_END; },
+      get curStep()       { return this.shownStepIdx >= 0 ? this.steps[this.shownStepIdx] : null; },
+      get hasMultiplePics() { return !!(this.curStep && this.curStep.screenshots.length > 1); },
+      get picCaption()    {
+        var s = this.curStep;
+        return s && s.screenshots[this.shownImgIdx] ? (s.screenshots[this.shownImgIdx].label || '') : '';
+      },
+      get picCountText()  {
+        var s = this.curStep;
+        return s && s.screenshots.length > 1 ? (this.shownImgIdx + 1) + ' / ' + s.screenshots.length : '– / –';
+      },
+      get picOverallText(){
+        if (TOTAL_PICS === 0 || !this.curStep) return '– / –';
+        var n = this.curStep.screenshots.length;
+        var clamped = n > 1 ? Math.min(this.shownImgIdx, n - 1) : 0;
+        return ((PIC_OFFSETS[this.shownStepIdx] || 0) + clamped + 1) + ' / ' + TOTAL_PICS;
+      },
+      get metaTimeText()  {
+        var cur = this.currentTimeSec.toFixed(1), tot = SCENARIO_DURATION.toFixed(1);
+        if (SCENARIO_START_MS === null) return '▶ ' + cur + ' / ' + tot + 's';
+        return '▶ ' + formatPlayheadTime(SCENARIO_START_MS + this.currentTimeSec * 1000) + ' · ' + cur + ' / ' + tot + 's';
+      },
+      get breadcrumbText() {
+        var name = 'Scenario: ' + SCENARIO_NAME;
+        for (var i = 0; i <= Math.max(0, this.shownStepIdx) && i < this.steps.length; i++) {
+          if (this.steps[i].headingLevel) name = ((this.steps[i].keyword || '') + ' ' + this.steps[i].name).trim();
+        }
+        return name;
+      },
+      get playPauseDisabled() { return this.atEnd && !this.isPlaying; },
+      get stepPrevDisabled()  { return this.shownStepIdx === 0 && this.currentTimeSec <= 0; },
+      get startDisabled()     { return this.currentTimeSec <= 0; },
 
-    var stepChanged = stepIdx !== shownStepIdx;
-    var imgChanged  = imgIdx  !== shownImgIdx;
+      // Used by .log-step-group :class bindings — returns the highest step index <= shownStepIdx
+      // whose given field is truthy. (e.g. 'debugOutput', 'stdout', 'stderr', 'errorMessage')
+      currentStepFor(field) {
+        for (var i = this.shownStepIdx; i >= 0; i--) {
+          if (this.steps[i][field]) return i;
+        }
+        return -1;
+      },
 
-    if (stepChanged || force) {
-      if (shownStepIdx >= 0) {
-        document.getElementById('frame-' + shownStepIdx).style.display = 'none';
-        var oldBar = document.getElementById('bar-' + shownStepIdx);
-        if (oldBar) oldBar.classList.remove('active');
-      }
-      shownStepIdx = stepIdx;
-      document.getElementById('frame-' + stepIdx).style.display = '';
-      var newBar = document.getElementById('bar-' + stepIdx);
-      if (newBar) newBar.classList.add('active');
+      // ===== INIT =====
+      init() {
+        var self = this;
 
-      var step = STEPS[stepIdx];
-      document.getElementById('step-cur').textContent = step.num;
-      document.getElementById('step-timing-text').textContent = step.timingLabel;
-      // Deliberate: replace (not push) so refresh / back-button lands on the right step.
-      history.replaceState(null, '', '#step_' + step.num);
-    }
+        this.theme = readTheme();
+        if (window.matchMedia) {
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+            if (self.theme === 'auto') applyThemeClass('auto');
+          });
+        }
 
-    var atEnd = currentTimeSec >= PLAY_END;
-    document.getElementById('btn-start').disabled       = (currentTimeSec <= 0);
-    document.getElementById('btn-end').disabled         = atEnd;
-    document.getElementById('step-nav-prev').disabled   = (stepIdx === 0 && currentTimeSec <= 0);
-    document.getElementById('step-nav-next').disabled   = atEnd;
-    // Play/Pause is only meaningful while the playhead can still advance — disable at PLAY_END
-    document.getElementById('btn-play-pause').disabled = atEnd && !isPlaying;
+        PANEL_IDS.forEach(function (pid) {
+          try { self.panelsCollapsed[pid] = localStorage.getItem('vp-' + pid + '-collapsed') === '1'; }
+          catch (e) {}
+        });
+        FOLLOW_IDS.forEach(function (fid) { self.followFlags[fid] = true; });
 
-    if (imgChanged || stepChanged) {
-      if (STEPS[stepIdx].screenshots.length > 1) {
-        setActiveScreenshot(stepIdx, imgIdx);
-      } else {
-        var picNav   = document.getElementById('step-pic-nav');
-        var picCount = document.getElementById('pic-count');
-        if (picNav)   picNav.classList.add('disabled');
-        if (picCount) picCount.textContent = '– / –';
-        setPicCaption(stepIdx, 0);
-      }
-      shownImgIdx = imgIdx;
-    }
+        RESIZE_TARGETS.forEach(function (t) {
+          var target = document.getElementById(t[0]);
+          if (!target) return;
+          try {
+            var h = parseInt(localStorage.getItem(t[2]), 10);
+            if (h >= t[1]) target.style.height = h + 'px';
+          } catch (e) {}
+        });
 
-    scrollBrowserToTime(currentTimeSec);
-    if (stepChanged) scrollAllStepPanels(stepIdx);
+        if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+          document.querySelectorAll('img[loading="lazy"]').forEach(function (img) {
+            img.setAttribute('loading', 'eager');
+          });
+        }
 
-    updateMetaTime();
-  }
+        var startTime = 0;
+        var hash = window.location.hash;
+        if (hash && hash.indexOf('#step_') === 0) {
+          var n = parseInt(hash.replace('#step_', ''), 10);
+          if (!isNaN(n) && n >= 1 && n <= TOTAL_STEPS) startTime = stepIdxToTime(n - 1);
+        } else {
+          var failIdx = STEPS.findIndex(function (s) { return s.status === 'failed' || s.status === 'errored'; });
+          if (failIdx >= 0) startTime = stepIdxToTime(failIdx);
+        }
+        this.seekToTime(startTime);
+      },
 
-  function setActiveScreenshot(frameIdx, imgIdx) {
-    var wrappers = document.querySelectorAll('.screenshot-wrapper[data-frame="' + frameIdx + '"]');
-    wrappers.forEach(function (w) { w.classList.remove('active'); });
-    if (wrappers[imgIdx]) wrappers[imgIdx].classList.add('active');
-    var picNav   = document.getElementById('step-pic-nav');
-    var picCount = document.getElementById('pic-count');
-    if (picNav && picCount) {
-      if (wrappers.length > 1) {
-        picCount.textContent = (imgIdx + 1) + ' / ' + wrappers.length;
-        picNav.classList.remove('disabled');
-      } else {
-        picCount.textContent = '– / –';
-        picNav.classList.add('disabled');
-      }
-    }
-    setPicCaption(frameIdx, imgIdx);
-  }
+      // ===== ACTIONS =====
+      cycleTheme() {
+        var next = THEME_CYCLE[(THEME_CYCLE.indexOf(this.theme) + 1) % THEME_CYCLE.length];
+        try { localStorage.setItem('vp-theme', next); } catch (e) {}
+        this.theme = next;
+        applyThemeClass(next);
+      },
 
-  function setPicCaption(frameIdx, imgIdx) {
-    var caption = document.getElementById('pic-caption');
-    if (caption) {
-      var shots = (STEPS[frameIdx] && STEPS[frameIdx].screenshots) || [];
-      var shot = shots[imgIdx];
-      caption.textContent = shot ? (shot.label || '') : '';
-    }
-    var pill = document.getElementById('pic-overall-pill');
-    if (pill) {
-      if (TOTAL_PICS === 0) {
-        pill.textContent = '– / –';
-        pill.classList.add('disabled');
-      } else {
-        var shotsLen = (STEPS[frameIdx] && STEPS[frameIdx].screenshots.length) || 0;
-        var clampedImgIdx = shotsLen > 1 ? Math.min(imgIdx, shotsLen - 1) : 0;
-        var overall = (PIC_OFFSETS[frameIdx] || 0) + clampedImgIdx + 1;
-        pill.textContent = overall + ' / ' + TOTAL_PICS;
-        pill.classList.remove('disabled');
-      }
-    }
-  }
+      togglePanel(panelId) {
+        var next = !this.panelsCollapsed[panelId];
+        this.panelsCollapsed[panelId] = next;
+        try { localStorage.setItem('vp-' + panelId + '-collapsed', next ? '1' : '0'); } catch (e) {}
+      },
 
-  // ===== STEP NAVIGATION =====
-  function navigateStep(delta) {
-    // Stepping forward off the last step parks the playhead at the very end of the scenario
-    if (delta > 0 && shownStepIdx >= TOTAL_STEPS - 1) { seekToTime(PLAY_END); return; }
-    var next = Math.max(0, Math.min(shownStepIdx + delta, TOTAL_STEPS - 1));
-    seekToStepIdx(next);
-  }
-  function goToEnd() { seekToTime(PLAY_END); }
+      onFollowChange(followId) {
+        if (!this.followFlags[followId]) return;
+        if (followId === 'browser-follow-chk') { this._scrollBrowserToTime(); return; }
+        var p = panelByFollowId(followId);
+        if (p) this._scrollStepPanel(p.contentId, p.followId);
+      },
 
-  // ===== PLAYBACK ENGINE (requestAnimationFrame for smooth time-based play) =====
-  function startPlay() {
-    if (isPlaying) return;
-    if (currentTimeSec >= PLAY_END) return;  // at end — user must manually rewind with ⏮
-    isPlaying = true;
-    lastRafTime = null;
-    reengageFollow();
-    document.getElementById('btn-play-pause').textContent = '⏸';
-    rafId = requestAnimationFrame(playFrame);
-  }
+      _reengageFollow() {
+        var self = this;
+        FOLLOW_IDS.forEach(function (fid) { self.followFlags[fid] = true; });
+      },
 
-  function stopPlay() {
-    isPlaying = false;
-    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-    document.getElementById('btn-play-pause').textContent = '▶';
-  }
+      seekToTime(t) {
+        this.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
+        this._reengageFollow();
+        this._updateDisplay(true);
+      },
+      seekToStepIdx(idx) { this.seekToTime(stepIdxToTime(idx)); },
+      navigateStep(delta) {
+        if (delta > 0 && this.shownStepIdx >= TOTAL_STEPS - 1) { this.seekToTime(PLAY_END); return; }
+        this.seekToStepIdx(Math.max(0, Math.min(this.shownStepIdx + delta, TOTAL_STEPS - 1)));
+      },
+      goToEnd() { this.seekToTime(PLAY_END); },
 
-  function togglePlay() { if (isPlaying) stopPlay(); else startPlay(); }
+      togglePlay() { if (this.isPlaying) this._stopPlay(); else this._startPlay(); },
+      _startPlay() {
+        if (this.isPlaying || this.currentTimeSec >= PLAY_END) return;
+        this.isPlaying = true;
+        this._lastRafTime = null;
+        this._reengageFollow();
+        var self = this;
+        this._rafId = requestAnimationFrame(function (t) { self._playFrame(t); });
+      },
+      _stopPlay() {
+        this.isPlaying = false;
+        if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
+      },
+      _playFrame(rafTime) {
+        if (!this.isPlaying) return;
+        if (this._lastRafTime !== null) {
+          this.currentTimeSec += (rafTime - this._lastRafTime) / 1000 * this.playbackRate;
+          if (this.currentTimeSec >= PLAY_END) {
+            this.currentTimeSec = PLAY_END;
+            this._updateDisplay(false);
+            this._stopPlay();
+            return;
+          }
+        }
+        this._lastRafTime = rafTime;
+        this._updateDisplay(false);
+        var self = this;
+        this._rafId = requestAnimationFrame(function (t) { self._playFrame(t); });
+      },
 
-  function playFrame(rafTime) {
-    if (!isPlaying) return;
-    if (lastRafTime !== null) {
-      currentTimeSec += (rafTime - lastRafTime) / 1000 * playbackRate;
-      if (currentTimeSec >= PLAY_END) {
-        currentTimeSec = PLAY_END;
-        updateDisplay(false);
-        stopPlay();
-        return;
-      }
-    }
-    lastRafTime = rafTime;
-    updateDisplay(false);
-    rafId = requestAnimationFrame(playFrame);
-  }
+      shiftScreenshot(delta) {
+        var frameIdx = this.shownStepIdx;
+        if (frameIdx < 0) return;
+        var step = this.steps[frameIdx];
+        var n = step.screenshots.length;
+        var next = (this.shownImgIdx < 0 ? 0 : this.shownImgIdx) + delta;
 
-  // ===== TIMELINE CLICK / DRAG =====
-  // The same handler is wired to every track (steps + pics + stdout + cucu + browser + errors),
-  // so resolve the rect against the track that actually received the event.
-  function seekFromPointer(track, clientX) {
-    var rect  = track.getBoundingClientRect();
-    var ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    seekToTime(ratio * PLAY_END);
-  }
-
-  function attachTimelineDrag(track) {
-    track.addEventListener('pointerdown', function (e) {
-      e.preventDefault();
-      track.setPointerCapture(e.pointerId);
-      seekFromPointer(track, e.clientX);
-      function onMove(ev) { seekFromPointer(track, ev.clientX); }
-      function onUp() {
-        track.removeEventListener('pointermove', onMove);
-        track.removeEventListener('pointerup',   onUp);
-        track.removeEventListener('pointercancel', onUp);
-      }
-      track.addEventListener('pointermove', onMove);
-      track.addEventListener('pointerup',   onUp);
-      track.addEventListener('pointercancel', onUp);
-    });
-  }
-
-  // ===== TRANSCRIPT SYNC =====
-  function scrollTranscriptToTime(containerId, timedLines, busyFlag, following) {
-    if (!following) return;
-    if (timedLines.length === 0) return;
-    var lo = 0, hi = timedLines.length - 1, best = 0;
-    while (lo <= hi) {
-      var mid = (lo + hi) >> 1;
-      if (parseFloat(timedLines[mid].dataset.offset) <= currentTimeSec) { best = mid; lo = mid + 1; }
-      else { hi = mid - 1; }
-    }
-    var target = timedLines[best];
-    var container = document.getElementById(containerId);
-    if (!container) return;
-    var prev = container.querySelector('.log-current');
-    if (prev === target) return;
-    if (prev) prev.classList.remove('log-current');
-    target.classList.add('log-current');
-    busyFlag.value = true;
-    var containerRect = container.getBoundingClientRect();
-    var lineRect      = target.getBoundingClientRect();
-    container.scrollTop += (lineRect.top - containerRect.top) - Math.floor(container.clientHeight * 0.33);
-    requestAnimationFrame(function () { busyFlag.value = false; });
-  }
-
-  function setBrowserFollowing(enabled) {
-    browserFollowing = enabled;
-    if (enabled) scrollBrowserToTime(currentTimeSec);
-  }
-  function scrollBrowserToTime() {
-    scrollTranscriptToTime('vp-browser-content', getBrowserTimedLines(), browserScrollBusy, browserFollowing);
-  }
-
-  // ===== MANUAL SCREENSHOT CAROUSEL =====
-  function shiftScreenshot(delta) {
-    var frameIdx = shownStepIdx;
-    var wrappers = Array.from(document.querySelectorAll('.screenshot-wrapper[data-frame="' + frameIdx + '"]'));
-    var n   = wrappers.length;
-    var cur = n > 0 ? wrappers.findIndex(function (w) { return w.classList.contains('active'); }) : -1;
-    if (cur < 0) cur = 0;
-
-    var next = cur + delta;
-
-    if (next >= 0 && next < n) {
-      // ── within the same step ──
-      var step = STEPS[frameIdx];
-      if (HAS_TIMING && step.startOffset !== null && step.duration > 0 && n > 1) {
-        // Use midpoint of the screenshot's time slot to avoid floating-point edge cases where
-        // (next/n)*n rounds down to next-1 inside timeToImgIdx.
-        seekToTime(step.startOffset + ((next + 0.5) / n) * step.duration);
-      } else {
-        setActiveScreenshot(frameIdx, next);
-        shownImgIdx = next;
-      }
-      return;
-    }
-
-    if (delta > 0) {
-      // ── forward: first screenshot of the next step that has any ──
-      for (var siF = frameIdx + 1; siF < TOTAL_STEPS; siF++) {
-        if (STEPS[siF].screenshots.length > 0) { seekToStepIdx(siF); return; }
-      }
-    } else {
-      // ── backward: last screenshot of the previous step that has any ──
-      for (var siB = frameIdx - 1; siB >= 0; siB--) {
-        var m = STEPS[siB].screenshots.length;
-        if (m > 0) {
-          var s = STEPS[siB];
-          if (HAS_TIMING && s.startOffset !== null && s.duration > 0 && m > 1) {
-            seekToTime(s.startOffset + ((m - 0.5) / m) * s.duration);
+        if (next >= 0 && next < n) {
+          if (HAS_TIMING && step.startOffset !== null && step.duration > 0 && n > 1) {
+            this.seekToTime(step.startOffset + ((next + 0.5) / n) * step.duration);
           } else {
-            seekToStepIdx(siB);
+            this.shownImgIdx = next;
           }
           return;
         }
-      }
-      seekToTime(0);  // before the first step with screenshots
-    }
-  }
 
-  // ===== HIGHLIGHT TOGGLE =====
-  function toggleHighlight() {
-    var chk = document.getElementById('btn-highlight');
-    document.body.classList.toggle('hide-highlights', !!(chk && !chk.checked));
-  }
+        var dir = delta > 0 ? 1 : -1;
+        for (var i = frameIdx + dir; i >= 0 && i < TOTAL_STEPS; i += dir) {
+          var m = this.steps[i].screenshots.length;
+          if (m === 0) continue;
+          var s = this.steps[i];
+          if (dir < 0 && HAS_TIMING && s.startOffset !== null && s.duration > 0 && m > 1) {
+            this.seekToTime(s.startOffset + ((m - 0.5) / m) * s.duration);
+          } else {
+            this.seekToStepIdx(i);
+          }
+          return;
+        }
+        if (dir < 0) this.seekToTime(0);
+      },
 
-  // ===== EVENT WIRING =====
-  function on(id, event, fn) {
-    var el = document.getElementById(id);
-    if (el) el.addEventListener(event, fn);
-  }
+      // ===== DISPLAY UPDATE =====
+      _updateDisplay(force) {
+        var stepIdx = timeToStepIdx(this.currentTimeSec);
+        var imgIdx  = timeToImgIdx(stepIdx, this.currentTimeSec);
+        var stepChanged = stepIdx !== this.shownStepIdx;
+        if (stepChanged || force) {
+          this.shownStepIdx = stepIdx;
+          history.replaceState(null, '', '#step_' + this.steps[stepIdx].num);
+        }
+        if (imgIdx !== this.shownImgIdx || stepChanged || force) {
+          this.shownImgIdx = this.steps[stepIdx].screenshots.length > 1 ? imgIdx : 0;
+        }
+        this._scrollBrowserToTime();
+        if (stepChanged || force) {
+          var self = this;
+          STEP_PANELS.forEach(function (p) { self._scrollStepPanel(p.contentId, p.followId); });
+        }
+      },
 
-  on('theme-toggle', 'click', cycleTheme);
+      // ===== STEP-PANEL SCROLL (class toggling is done declaratively via :class bindings) =====
+      _scrollStepPanel(contentId, followId) {
+        if (!this.followFlags[followId]) return;
+        var content = document.getElementById(contentId);
+        if (!content) return;
+        var anchorIdx;
+        if (contentId === 'vp-steps-content') {
+          anchorIdx = this.shownStepIdx > 0 ? this.shownStepIdx - 1 : this.shownStepIdx;
+        } else {
+          var p = panelByContentId(contentId);
+          anchorIdx = p && p.field ? this.currentStepFor(p.field) : this.shownStepIdx;
+        }
+        if (anchorIdx < 0) return;
+        var anchor = content.querySelector('.log-step-group[data-step="' + anchorIdx + '"]');
+        if (!anchor) return;
+        this._stepScrollBusy[contentId] = true;
+        content.scrollTop = Math.max(0, anchor.offsetTop - content.offsetTop - 4);
+        var self = this;
+        requestAnimationFrame(function () { self._stepScrollBusy[contentId] = false; });
+      },
 
-  on('btn-start',      'click', function () { seekToTime(0); });
-  on('btn-play-pause', 'click', togglePlay);
-  on('btn-end',        'click', goToEnd);
-  on('step-nav-prev',  'click', function () { navigateStep(-1); });
-  on('step-nav-next',  'click', function () { navigateStep(1); });
-  on('stage-btn-prev', 'click', function () { shiftScreenshot(-1); });
-  on('stage-btn-next', 'click', function () { shiftScreenshot(1); });
+      // ===== BROWSER TRANSCRIPT SYNC (binary search over BROWSER_LOGS) =====
+      _scrollBrowserToTime() {
+        if (!this.followFlags['browser-follow-chk']) return;
+        if (BROWSER_LOGS.length === 0) return;
+        var lo = 0, hi = BROWSER_LOGS.length - 1, best = 0;
+        while (lo <= hi) {
+          var mid = (lo + hi) >> 1;
+          if (BROWSER_LOGS[mid].offset <= this.currentTimeSec) { best = mid; lo = mid + 1; }
+          else { hi = mid - 1; }
+        }
+        var container = document.getElementById('vp-browser-content');
+        if (!container) return;
+        if (!this._browserLineEls) {
+          this._browserLineEls = container.querySelectorAll('.browser-log-line');
+        }
+        var target = this._browserLineEls[best];
+        if (!target) return;
+        var prev = container.querySelector('.log-current');
+        if (prev === target) return;
+        if (prev) prev.classList.remove('log-current');
+        target.classList.add('log-current');
+        this._browserScrollBusy.value = true;
+        container.scrollTop += (target.getBoundingClientRect().top - container.getBoundingClientRect().top) -
+                              Math.floor(container.clientHeight * 0.33);
+        var self = this;
+        requestAnimationFrame(function () { self._browserScrollBusy.value = false; });
+      },
 
-  document.querySelectorAll('.step-pic-nav-btn').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      shiftScreenshot(parseInt(btn.dataset.delta, 10) || 0);
-    });
-  });
+      // ===== EVENT HANDLERS (bound via Alpine @-directives in markup) =====
+      onTimelineDrag(e) {
+        var track = e.currentTarget, self = this;
+        e.preventDefault();
+        track.setPointerCapture(e.pointerId);
+        function seek(x) {
+          var r = track.getBoundingClientRect();
+          self.seekToTime(Math.max(0, Math.min(1, (x - r.left) / r.width)) * PLAY_END);
+        }
+        seek(e.clientX);
+        function onMove(ev) { seek(ev.clientX); }
+        function onUp() {
+          track.removeEventListener('pointermove', onMove);
+          track.removeEventListener('pointerup',   onUp);
+          track.removeEventListener('pointercancel', onUp);
+        }
+        track.addEventListener('pointermove', onMove);
+        track.addEventListener('pointerup',   onUp);
+        track.addEventListener('pointercancel', onUp);
+      },
 
-  on('btn-highlight', 'change', toggleHighlight);
-  on('browser-follow-chk', 'change', function (e) { setBrowserFollowing(e.target.checked); });
-  [
-    ['steps-follow-chk',  'vp-steps-content'],
-    ['cucu-follow-chk',   'vp-cucu-content'],
-    ['stdout-follow-chk', 'vp-stdout-content'],
-    ['stderr-follow-chk', 'vp-stderr-content'],
-    ['errors-follow-chk', 'vp-errors-content'],
-  ].forEach(function (pair) {
-    on(pair[0], 'change', function (e) { setStepPanelFollowing(pair[1], e.target.checked); });
-  });
+      onResizeDrag(e, targetId, minH, storageKey) {
+        var target = document.getElementById(targetId);
+        if (!target) return;
+        var handle = e.currentTarget;
+        e.preventDefault();
+        handle.setPointerCapture(e.pointerId);
+        var startY = e.clientY, startH = target.offsetHeight;
+        handle.classList.add('dragging');
+        document.body.style.cursor    = 'ns-resize';
+        document.body.style.userSelect = 'none';
+        function onMove(ev) {
+          target.style.height = Math.max(minH, startH + (ev.clientY - startY)) + 'px';
+        }
+        function onUp() {
+          handle.classList.remove('dragging');
+          document.body.style.cursor    = '';
+          document.body.style.userSelect = '';
+          try { localStorage.setItem(storageKey, target.offsetHeight); } catch (e2) {}
+          handle.removeEventListener('pointermove', onMove);
+          handle.removeEventListener('pointerup',   onUp);
+          handle.removeEventListener('pointercancel', onUp);
+        }
+        handle.addEventListener('pointermove', onMove);
+        handle.addEventListener('pointerup',   onUp);
+        handle.addEventListener('pointercancel', onUp);
+      },
 
-  // Log panel collapse toggles
-  document.querySelectorAll('[data-log-toggle]').forEach(function (el) {
-    el.addEventListener('click', function () { toggleLogPanel(el.dataset.logToggle); });
-  });
+      onLogScroll(contentId, followId) {
+        if (contentId === 'vp-browser-content') {
+          if (this._browserScrollBusy.value) return;
+        } else if (this._stepScrollBusy[contentId]) return;
+        this.followFlags[followId] = false;
+      },
 
-  // Steps list click-to-seek (scenario row, plus each step row)
-  document.querySelectorAll('[data-seek-step]').forEach(function (row) {
-    row.addEventListener('click', function () { seekToStepIdx(parseInt(row.dataset.seekStep, 10)); });
-  });
-  var scenarioRow = document.querySelector('[data-seek-time]');
-  if (scenarioRow) scenarioRow.addEventListener('click', function () { seekToTime(parseFloat(scenarioRow.dataset.seekTime) || 0); });
-
-  // Timeline tracks
-  ['timeline-track', 'pics-timeline-track', 'stdout-timeline-track', 'cucu-timeline-track', 'browser-timeline-track', 'errors-timeline-track'].forEach(function (id) {
-    var t = document.getElementById(id); if (t) attachTimelineDrag(t);
-  });
-
-  // Logs dropdown — clicking the trigger toggles, clicking outside closes
-  on('log-menu-trigger', 'click', function (e) {
-    e.preventDefault();
-    var dd = document.getElementById('log-dd');
-    if (dd) dd.classList.toggle('open');
-  });
-  document.addEventListener('click', function (e) {
-    var wrap = document.getElementById('log-menu-wrap');
-    var dd   = document.getElementById('log-dd');
-    if (dd && wrap && !wrap.contains(e.target)) dd.classList.remove('open');
-  });
-
-  // Transcript scroll → disable follow-mode on user scroll
-  (function attachTranscriptScrollListeners() {
-    var bc = document.getElementById('vp-browser-content');
-    if (bc) {
-      bc.addEventListener('scroll', function () {
-        if (browserScrollBusy.value) return;
-        setBrowserFollowing(false);
-        var chk = document.getElementById('browser-follow-chk');
-        if (chk) chk.checked = false;
-      }, { passive: true });
-    }
-
-    function makeStepListener(contentId, chkId) {
-      return function () {
-        if (stepScrollBusy[contentId]) return;
-        setStepPanelFollowing(contentId, false);
-        var chk = document.getElementById(chkId);
-        if (chk) chk.checked = false;
-      };
-    }
-
-    [
-      ['vp-steps-content',  'steps-follow-chk'],
-      ['vp-cucu-content',   'cucu-follow-chk'],
-      ['vp-stdout-content', 'stdout-follow-chk'],
-      ['vp-stderr-content', 'stderr-follow-chk'],
-      ['vp-errors-content', 'errors-follow-chk'],
-    ].forEach(function (pair) {
-      var el = document.getElementById(pair[0]);
-      if (el) el.addEventListener('scroll', makeStepListener(pair[0], pair[1]), { passive: true });
-    });
-  })();
-
-  // ===== KEYBOARD SHORTCUTS =====
-  document.addEventListener('keydown', function (e) {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    switch (e.key) {
-      case 'ArrowLeft':  e.preventDefault(); shiftScreenshot(-1);   break;
-      case 'ArrowRight': e.preventDefault(); shiftScreenshot(1);    break;
-      case ' ':          e.preventDefault(); togglePlay();          break;
-      case 'Home':       e.preventDefault(); seekToStepIdx(0);      break;
-      case 'End':        e.preventDefault(); goToEnd();             break;
-    }
-  });
-
-  // Firefox defers `loading="lazy"` images until they near the viewport, but in this report the
-  // hidden step frames never trigger that intersection check until shown — by then the user has
-  // already advanced past them. Force eager loading on Firefox so screenshots are ready when seeked.
-  if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
-    document.querySelectorAll('img[loading="lazy"]').forEach(function (img) { img.setAttribute('loading', 'eager'); });
-  }
-
-  // ===== INIT =====
-  buildTimeline();
-  buildPicsTimeline();
-  buildStepPresenceTrack('stdout-timeline-track', function (s) { return s.hasStdout; });
-  buildStepPresenceTrack('cucu-timeline-track',   function (s) { return s.hasCucu; });
-  buildStepPresenceTrack('errors-timeline-track', function (s) { return s.hasErrors; });
-  buildBrowserTimeline();
-
-  var startTime = 0;
-  var hash = window.location.hash;
-  if (hash && hash.indexOf('#step_') === 0) {
-    var n = parseInt(hash.replace('#step_', ''), 10);
-    if (!isNaN(n) && n >= 1 && n <= TOTAL_STEPS) {
-      startTime = stepIdxToTime(n - 1);
-    }
-  } else {
-    var failIdx = STEPS.findIndex(function (s) { return s.status === 'failed' || s.status === 'errored'; });
-    if (failIdx >= 0) startTime = stepIdxToTime(failIdx);
-  }
-  seekToTime(startTime);
+      onKey(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        switch (e.key) {
+          case 'ArrowLeft':  e.preventDefault(); this.shiftScreenshot(-1); break;
+          case 'ArrowRight': e.preventDefault(); this.shiftScreenshot(1);  break;
+          case ' ':          e.preventDefault(); this.togglePlay();        break;
+          case 'Home':       e.preventDefault(); this.seekToStepIdx(0);    break;
+          case 'End':        e.preventDefault(); this.goToEnd();           break;
+        }
+      },
+    };
+  };
 })();

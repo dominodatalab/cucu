@@ -139,37 +139,16 @@ def before_scenario(ctx, scenario):
     # run before all scenario hooks
     scenario.before_hook_results = []
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
-        sys.stdout.captured()
-        sys.stderr.captured()
-        hook_result = {
-            "name": hook.__name__,
-            "status": "passed",
-            "stdout": [],
-            "stderr": [],
-            "error_message": [],
-        }
-        try:
-            hook(ctx)
-            logger.debug(f"HOOK {hook.__name__}: passed ✅")
-        except Exception as e:
-            error_message = (
-                f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}\n"
-            )
-            error_message += traceback.format_exc()
-            logger.error(error_message)
-            hook_result["status"] = "error"
-            hook_result["error_message"] = error_message.splitlines()
+        hook_result = _run_hook(ctx, hook)
+        if hook_result["status"] == "error":
             ctx.scenario.mark_skipped()
             # Set 'hook_failed' status to 'True' so that the test gets marked
             # as 'error', even though no steps ran
             ctx.scenario.hook_failed = True
-        finally:
-            hook_result["stdout"] = sys.stdout.captured()
-            hook_result["stderr"] = sys.stderr.captured()
         scenario.before_hook_results.append(hook_result)
 
 
-def run_after_scenario_hook(ctx, scenario, hook):
+def _run_hook(ctx, hook):
     sys.stdout.captured()
     sys.stderr.captured()
     hook_result = {
@@ -183,8 +162,6 @@ def run_after_scenario_hook(ctx, scenario, hook):
         hook(ctx)
         logger.debug(f"HOOK {hook.__name__}: passed ✅")
     except Exception as e:
-        # For any after scenario hooks,'hook_failed' status will be 'False'
-        # but will attach the error message to scenario.
         error_message = (
             f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}\n"
         )
@@ -203,7 +180,7 @@ def after_scenario(ctx, scenario):
 
     # Start Selenium keep-alive to prevent browser timeout during long after-scenario hooks
     scenario.after_hook_results.append(
-        run_after_scenario_hook(ctx, scenario, start_selenium_keep_alive)
+        _run_hook(ctx, start_selenium_keep_alive)
     )
 
     for timer_name in ctx.step_timers:
@@ -226,36 +203,28 @@ def after_scenario(ctx, scenario):
             logger.error(f"Error getting browser info: {e}")
     scenario.browser_info = browser_info
 
-    scenario.after_hook_results.append(
-        run_after_scenario_hook(ctx, scenario, download_mht_data)
-    )
+    scenario.after_hook_results.append(_run_hook(ctx, download_mht_data))
 
     # run after all scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"][::-1]:
-        scenario.after_hook_results.append(
-            run_after_scenario_hook(ctx, scenario, hook)
-        )
+        scenario.after_hook_results.append(_run_hook(ctx, hook))
 
     # run after this scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"][::-1]:
-        scenario.after_hook_results.append(
-            run_after_scenario_hook(ctx, scenario, hook)
-        )
+        scenario.after_hook_results.append(_run_hook(ctx, hook))
 
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 
     # Stop keep-alive before cleaning up browsers
     scenario.after_hook_results.append(
-        run_after_scenario_hook(ctx, scenario, stop_selenium_keep_alive)
+        _run_hook(ctx, stop_selenium_keep_alive)
     )
 
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
     elif len(ctx.browsers) != 0:
         logger.debug("quitting browser between sessions")
-        scenario.after_hook_results.append(
-            run_after_scenario_hook(ctx, scenario, cleanup_browsers)
-        )
+        scenario.after_hook_results.append(_run_hook(ctx, cleanup_browsers))
 
     cucu_config_path = ctx.scenario_logs_dir / "cucu.config.yaml.txt"
     with open(cucu_config_path, "w") as config_file:

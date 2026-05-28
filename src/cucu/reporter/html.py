@@ -86,6 +86,12 @@ def step_text_list_to_html(text):
     )
 
 
+def browser_log_level(raw_level):
+    if raw_level in ("SEVERE", "ERROR", "CRITICAL"):
+        return "error"
+    return "warning" if raw_level == "WARNING" else "info"
+
+
 def step_table_to_html(table_data):
     """Convert a step table data structure to an indented HTML table format"""
     text_indent = " " * 8
@@ -104,6 +110,7 @@ def generate(results: Path, basepath: Path):
         escape=escape,
         urlencode=urlencode,
         browser_timestamp_to_datetime=browser_timestamp_to_datetime,
+        browser_log_level=browser_log_level,
         step_text_list_to_html=step_text_list_to_html,
         step_table_to_html=step_table_to_html,
     )
