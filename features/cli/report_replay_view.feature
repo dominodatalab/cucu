@@ -18,12 +18,12 @@ Feature: Report replay view
       And I should see the text "Echo"
 
         * # Stage shows step text for non-browser tests
-      And I should see the text "Step 1 of 6"
+      And I should see the text "1 / 6"
       And I should see the text "Given"
 
         * # Step counter updates when navigating to the last step
      When I click the button "⏭"
-     Then I wait to see the text "Step 6 of 6"
+     Then I wait to see the text "6 / 6"
 
         * # Return to the classic scenario view from the replay view
      When I click the link "☑ Classic"
@@ -37,7 +37,7 @@ Feature: Report replay view
      When I click the link "Feature with failing scenario"
       And I click the link "Just a scenario that fails"
       And I click the link "🔁 Replay"
-     Then I wait to see the text "Step 1 of 1"
+     Then I wait to see the text "1 / 1"
       And I should see the text "failed"
 
   Scenario: Replay view renders correctly for a scenario with substeps
@@ -48,7 +48,7 @@ Feature: Report replay view
      When I click the link "Feature with substeps"
       And I click the link "Scenario that uses a step with substeps"
       And I click the link "🔁 Replay"
-     Then I wait to see the text "Step 1 of"
+     Then I wait to see the text "1 /"
       And I should see the text "passed"
 
   Scenario: Replay view renders screenshots for a browser scenario
@@ -59,6 +59,6 @@ Feature: Report replay view
      When I wait to click the link "Feature with passing scenario with web"
       And I wait to click the link "Just a scenario that opens a web page"
       And I wait to click the link "🔁 Replay"
-     Then I wait to see the text "Step 1 of"
+     Then I wait to see the text "1 /"
       And I should see the link "Flat"
       And I should see the link "Index"
