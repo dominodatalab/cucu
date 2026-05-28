@@ -20,7 +20,7 @@ def find_image(ctx, name, index=0):
     ctx.check_browser_initialized()
 
     name = name.replace('"', '\\"')
-    images = ctx.browser.css_find_elements(f'img[alt="{name}"')
+    images = ctx.browser.css_find_elements(f'img[alt="{name}"]')
 
     if index >= len(images):
         element = None

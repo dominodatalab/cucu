@@ -100,6 +100,7 @@ def find(
         name_within_thing,
         "true",
         str(CONFIG["CUCU_SKIP_FUZZY_RELEVANCE"]).lower(),
+        str(CONFIG.true("CUCU_SHADOW_DOM_SEARCH")).lower(),
         str(CONFIG.bool("CUCU_FUZZY_CASE_AWARE")).lower(),
     ]
 
