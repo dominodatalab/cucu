@@ -60,7 +60,7 @@
 <script defer src="{{ dir_depth }}external/replay.js"></script>
 <script defer src="{{ dir_depth }}external/alpine.min.js"></script>
 
-<div x-data="replayPlayer()" :class="{ 'hide-highlights': !highlight }" @keydown.window="onKey($event)">
+<div x-data="replayPlayer()" @keydown.window="onKey($event)">
 
 <nav id="vp-nav">
   <a href="../../flat.html" title="Flat view">Flat</a>
@@ -135,7 +135,7 @@
       </template>
     </div>
     <label class="log-follow-label" title="Toggle element highlights">
-      <input type="checkbox" id="btn-highlight" checked x-model="highlight">
+      <input type="checkbox" id="btn-highlight" checked x-model="highlight" @change="applyHighlightClass()">
       highlight
     </label>
   </div>

@@ -260,6 +260,8 @@
           });
         }
 
+        this.applyHighlightClass();
+
         PANEL_IDS.forEach(function (pid) {
           try { self.panelsCollapsed[pid] = localStorage.getItem('vp-' + pid + '-collapsed') === '1'; }
           catch (e) {}
@@ -299,6 +301,10 @@
         try { localStorage.setItem('vp-theme', next); } catch (e) {}
         this.theme = next;
         applyThemeClass(next);
+      },
+
+      applyHighlightClass() {
+        document.body.classList.toggle('hide-highlights', !this.highlight);
       },
 
       togglePanel(panelId) {
@@ -373,6 +379,7 @@
             this.seekToTime(step.startOffset + ((next + 0.5) / n) * step.duration);
           } else {
             this.shownImgIdx = next;
+            this._updateDisplay(false);
           }
           return;
         }
@@ -380,10 +387,13 @@
         var dir = delta > 0 ? 1 : -1;
         for (var i = frameIdx + dir; i >= 0 && i < TOTAL_STEPS; i += dir) {
           var m = this.steps[i].screenshots.length;
-          if (m === 0) continue;
           var s = this.steps[i];
-          if (dir < 0 && HAS_TIMING && s.startOffset !== null && s.duration > 0 && m > 1) {
-            this.seekToTime(s.startOffset + ((m - 0.5) / m) * s.duration);
+          if (m > 0 && HAS_TIMING && s.startOffset !== null && s.duration > 0) {
+            if (dir < 0) {
+              this.seekToTime(s.startOffset + ((m - 0.5) / m) * s.duration);
+            } else {
+              this.seekToTime(s.startOffset);
+            }
           } else {
             this.seekToStepIdx(i);
           }
