@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <title>Shadow DOM!</title>
+  </head>
+  <body>
+    <h1>Shadow DOM Test Page</h1>
+    <div id="host-a"></div>
+    <div id="host-b"></div>
+    <div id="host-c"></div>
+    <div id="host-d"></div>
+    <script>
+      const a = document.getElementById("host-a");
+      a.attachShadow({ mode: "open" }).innerHTML =
+        '<span class="cucu-shadow-leaf">leaf one</span>';
+
+      const b = document.getElementById("host-b");
+      b.attachShadow({ mode: "open" }).innerHTML =
+        '<span class="cucu-shadow-leaf">leaf two</span>';
+
+      const c = document.getElementById("host-c");
+      c.attachShadow({ mode: "open" }).innerHTML =
+        '<div>shadow target</div><button>shadow target</button>';
+
+      const d = document.getElementById("host-d");
+      d.attachShadow({ mode: "open" }).innerHTML =
+        '<img alt="shadow image" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgAAIAAAUAAarVyFEAAAAASUVORK5CYII=" />';
+    </script>
+  </body>
+</html>

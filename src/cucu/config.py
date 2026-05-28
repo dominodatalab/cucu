@@ -391,6 +391,12 @@ CONFIG.define(
     default="",
 )
 CONFIG.define(
+    "CUCU_SHADOW_DOM_SEARCH",
+    "when truthy, text-finding steps and css_find_elements will traverse "
+    "open shadow roots in addition to the light DOM",
+    default=False,
+)
+CONFIG.define(
     "CUCU_SHORT_UI_RETRY_AFTER_S",
     "the amount of time to wait between retries in seconds for non-wait ui steps",
     default=0.25,
@@ -479,6 +485,13 @@ CONFIG.define(
 CONFIG.define(
     "CUCU_SKIP_FUZZY_RELEVANCE",
     "when set to 'True' skips calculating relevance scores for fuzzy find and doesn't sort by relevance",
+    default=False,
+)
+CONFIG.define(
+    "CUCU_FUZZY_CASE_AWARE",
+    "when set to 'True' fuzzy find matches across case (e.g. query 'project' finds 'Project'), "
+    "ranking exact-case ahead of caseless within the same area; when 'False' (default) fuzzy "
+    "matches case-sensitively as before",
     default=False,
 )
 CONFIG.define(

@@ -7,10 +7,14 @@
      * custom jquery matchers:
      *
      *
-     *  has_text - matches an element with the exact text provided.
+     *  has_text    - matches an element with the exact text provided.
      *
-     *  vis      - matches an element that is visible and has at least
-     *             one visible parent.
+     *  has_text_ci - case-insensitive variant of has_text.
+     *
+     *  icontains   - case-insensitive variant of jQuery's :contains.
+     *
+     *  vis         - matches an element that is visible and has at least
+     *                one visible parent.
      *
      */
     jqCucu.extend(
@@ -18,6 +22,12 @@
         {
             has_text: function(elem, index, match) {
                 return (elem.textContent || elem.innerText || jqCucu(elem).text() || '').trim() === match[3].trim();
+            },
+            has_text_ci: function(elem, index, match) {
+                return (elem.textContent || elem.innerText || jqCucu(elem).text() || '').trim().toLowerCase() === match[3].trim().toLowerCase();
+            },
+            icontains: function(elem, index, match) {
+                return (elem.textContent || elem.innerText || jqCucu(elem).text() || '').toLowerCase().indexOf(match[3].toLowerCase()) !== -1;
             },
             vis: function (elem) {
                 return !(jqCucu(elem).is(":hidden") || jqCucu(elem).css("width") == "0px" || jqCucu(elem).css("height") == "0px" || jqCucu(elem).parents(":hidden").length);
@@ -77,17 +87,20 @@
     /*
      * Relevance scoring (ordering)
      *
-     * Case-sensitive matching. Higher scores rank first. After scoring, we
-     * deduplicate and sort by score desc, then by original discovery order
-     * (`pass`) asc as a tiebreaker. The `index` returned by fuzzy_find is
-     * the Nth best-ranked element after this sort.
+     * Case-aware matching: candidates are accepted regardless of case, but
+     * within each area an exact-case match outranks a caseless match
+     * (exact > caselessexact > substring > caselesssubstring). Higher scores
+     * rank first. After scoring, we deduplicate and sort by score desc, then
+     * by original discovery order (`pass`) asc as a tiebreaker. The `index`
+     * returned by fuzzy_find is the Nth best-ranked element after this sort.
      *
      * Area priority (highest → lowest):
      *   1) Immediate text content (direct TEXT_NODE children only)
      *   2) Attribute content with sub-weights (aria-label > id > class; others default)
      *   3) Full text content (includes children)
      *
-     * Within each area, exact match outranks substring match.
+     * Within each area, exact match outranks substring match, and case-sensitive
+     * outranks case-insensitive within each of those.
      *
      * Empty text fallback: if nothing matches and the element has empty
      * full text, a small default score is applied so empty-but-possibly
@@ -104,6 +117,16 @@
             return hay.trim() === needle.trim();
         }
 
+        function includesCi(hay, needle) {
+            if (!hay) return false;
+            return hay.toLowerCase().indexOf(needle.toLowerCase()) !== -1;
+        }
+
+        function equalsCi(hay, needle) {
+            if (!hay) return false;
+            return hay.trim().toLowerCase() === needle.trim().toLowerCase();
+        }
+
         var best = 0;
         var higherPriorityMatchFound = false;
 
@@ -111,8 +134,14 @@
         if (equals(imm, query)) {
             best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.exact);
             higherPriorityMatchFound = true;
+        } else if (equalsCi(imm, query)) {
+            best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.caselessexact);
+            higherPriorityMatchFound = true;
         } else if (includes(imm, query)) {
             best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.substring);
+            higherPriorityMatchFound = true;
+        } else if (includesCi(imm, query)) {
+            best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.caselesssubstring);
             higherPriorityMatchFound = true;
         }
 
@@ -142,9 +171,15 @@
             // Only promote exact full text matches to immediate weight when no higher priority matches found
             var fullTextWeight = (!higherPriorityMatchFound) ? WEIGHTS.area.immediate : WEIGHTS.area.fulltext;
             best = Math.max(best, fullTextWeight + WEIGHTS.match.exact);
+        } else if (equalsCi(ft, query)) {
+            // Caseless-exact full text matches are promoted on the same rule as exact ones
+            var fullTextWeightCi = (!higherPriorityMatchFound) ? WEIGHTS.area.immediate : WEIGHTS.area.fulltext;
+            best = Math.max(best, fullTextWeightCi + WEIGHTS.match.caselessexact);
         } else if (includes(ft, query)) {
             // Substring matches never get promoted
             best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.substring);
+        } else if (includesCi(ft, query)) {
+            best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.caselesssubstring);
         }
 
         if (best === 0 && ft.length === 0) {
@@ -181,13 +216,45 @@
                                direction=LEFT_TO_RIGHT,
                                name_within_thing=false,
                                insert_label=false,
-                               skip_fuzzy_relevance=false) {
+                               skip_fuzzy_relevance=false,
+                               shadow=false,
+                               case_aware=false) {
         var elements = [];
         var results = null;
         var attributes = ['aria-label', 'title', 'placeholder', 'value'];
-        var matchers = ['has_text', 'contains'];
+        // When case_aware is false the caseless matchers are dropped from the
+        // pool so no case-different elements enter, restoring pre-1.4.20
+        // case-sensitive behavior end-to-end. The caseless tiers in
+        // cucu.relevance remain but never fire because no caseless candidates
+        // ever reach scoring.
+        var matchers = case_aware
+            ? ['has_text', 'has_text_ci', 'contains', 'icontains']
+            : ['has_text', 'contains'];
 
         name = name.replaceAll('"', '\\"');
+
+        var roots = [document.body];
+        if (shadow) {
+            function collectShadow(n) {
+                if (!n || n.nodeType !== 1) return;
+                if (n.shadowRoot) {
+                    roots.push(n.shadowRoot);
+                    var sh = n.shadowRoot.children;
+                    for (var i = 0; i < sh.length; i++) collectShadow(sh[i]);
+                }
+                var ch = n.children || [];
+                for (var j = 0; j < ch.length; j++) collectShadow(ch[j]);
+            }
+            collectShadow(document.documentElement);
+        }
+
+        function jqRoots(selector) {
+            var combined = jqCucu();
+            for (var i = 0; i < roots.length; i++) {
+                combined = combined.add(jqCucu(selector, roots[i]));
+            }
+            return combined;
+        }
 
         /*
          * try to match on exact text but ultimately fall back to matching on
@@ -204,7 +271,7 @@
 
                 var nameInTagContentLabel = `<${thing}>${name}</${thing}>`;
                 var nameInTagContentJq = `${thing}:vis:${matcher}("${name}")`;
-                results = jqCucu(nameInTagContentJq, document.body).toArray();
+                results = jqRoots(nameInTagContentJq).toArray();
                 if (cucu.debug) { console.log(nameInTagContentLabel, results); }
                 elements = elements.concat(results.map(x => ({element: x, label: nameInTagContentLabel, label_name: 'nameInTagContent'})));
 
@@ -213,11 +280,30 @@
                     var nameIsAttributeLabel = `<${thing} attribute="${attribute_name}"></${thing}>`;
                     if (matcher == 'has_text') {
                         var nameIsAttributeJq = `${thing}[${attribute_name}="${name}"]:vis`;
-                        results = jqCucu(nameIsAttributeJq, document.body).toArray();
+                        results = jqRoots(nameIsAttributeJq).toArray();
+                        if (cucu.debug) { console.log(nameIsAttributeLabel, results); }
+                    } else if (matcher == 'has_text_ci') {
+                        // Sizzle does not parse the CSS-L4 `[attr=val i]` flag,
+                        // so filter case-insensitively in JS.
+                        var nameLowerExactAttr = name.toLowerCase();
+                        var attrNameExactCi = attribute_name;
+                        results = jqCucu(`${thing}:vis`, document.body).filter(function(){
+                            var val = this.getAttribute(attrNameExactCi);
+                            return val !== null && val.toLowerCase() === nameLowerExactAttr;
+                        }).toArray();
                         if (cucu.debug) { console.log(nameIsAttributeLabel, results); }
                     } else if (matcher == 'contains') {
                         var nameInAttributeJq = `${thing}[${attribute_name}*="${name}"]:vis`;
-                        results = jqCucu(nameInAttributeJq, document.body).toArray();
+                        results = jqRoots(nameInAttributeJq).toArray();
+                        if (cucu.debug) { console.log(nameIsAttributeLabel, results); }
+                    } else if (matcher == 'icontains') {
+                        // See note above; Sizzle does not parse the `i` flag.
+                        var nameLowerSubAttr = name.toLowerCase();
+                        var attrNameSubCi = attribute_name;
+                        results = jqCucu(`${thing}:vis`, document.body).filter(function(){
+                            var val = this.getAttribute(attrNameSubCi);
+                            return val !== null && val.toLowerCase().indexOf(nameLowerSubAttr) !== -1;
+                        }).toArray();
                         if (cucu.debug) { console.log(nameIsAttributeLabel, results); }
                     }
                     elements = elements.concat(results.map(x => ({element: x, label: nameIsAttributeLabel, label_name: 'nameIsAttribute'})));
@@ -238,15 +324,31 @@
                 if (matcher == 'has_text') {
                     var nameIsValueLabel = `${thing} value="${name}"></${thing}>`;
                     var nameIsValueJq = `${thing}:vis`;
-                    results = jqCucu(nameInValueJq, document.body).filter(function(){
+                    results = jqRoots(nameInValueJq).filter(function(){
                         return this.value == name;
                     }).toArray();
                     if (cucu.debug) { console.log(nameIsValueLabel, results); }
+                } else if (matcher == 'has_text_ci') {
+                    var nameInValueLabel = `${thing} value="${name}" i></${thing}>`;
+                    var nameInValueJq = `${thing}:vis`;
+                    var nameLowerExact = name.toLowerCase();
+                    results = jqCucu(nameInValueJq, document.body).filter(function(){
+                        return this.value !== undefined && String(this.value).toLowerCase() === nameLowerExact;
+                    }).toArray();
+                    if (cucu.debug) { console.log(nameInValueLabel, results); }
                 } else if (matcher == 'contains') {
                     var nameInValueLabel = `${thing} value*="${name}"></${thing}>`;
                     var nameInValueJq = `${thing}:vis`;
-                    results = jqCucu(nameInValueJq, document.body).filter(function(){
+                    results = jqRoots(nameInValueJq).filter(function(){
                         return this.value !== undefined && String(this.value).indexOf(name) != -1;
+                    }).toArray();
+                    if (cucu.debug) { console.log(nameInValueLabel, results); }
+                } else if (matcher == 'icontains') {
+                    var nameInValueLabel = `${thing} value*="${name}" i></${thing}>`;
+                    var nameInValueJq = `${thing}:vis`;
+                    var nameLowerSub = name.toLowerCase();
+                    results = jqCucu(nameInValueJq, document.body).filter(function(){
+                        return this.value !== undefined && String(this.value).toLowerCase().indexOf(nameLowerSub) != -1;
                     }).toArray();
                     if (cucu.debug) { console.log(nameInValueLabel, results); }
                 }
@@ -257,7 +359,7 @@
              * element labeled by another using the for/id attributes
              */
             var labelForNameJq = `*[for]:vis:${matcher}("${name}")`
-            var labels = jqCucu(labelForNameJq, document.body).toArray();
+            var labels = jqRoots(labelForNameJq).toArray();
             for(var tIndex = 0; tIndex < things.length; tIndex++) {
                 var thing = things[tIndex];
                 results = [];
@@ -267,7 +369,7 @@
                     var label = labels[lIndex];
                     var id = label.getAttribute('for');
                     var idMatchesForLabelJq = `${thing}[id="${id}"]:vis`;
-                    results = jqCucu(idMatchesForLabelJq, document.body).toArray();
+                    results = jqRoots(idMatchesForLabelJq).toArray();
 
                     if (cucu.debug) { console.log(labelForNameLabel, results); }
                     var labelImmediateText = getImmediateText(label);
@@ -282,14 +384,25 @@
                 var thing = things[tIndex];
 
                 var nameInNestedChildLabel = `<${thing}><*>...${name}...</*></${thing}>`;
-                results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).parents(thing).toArray();
+                results = jqRoots('*:vis:' + matcher + '("' + name + '")').parents(thing).toArray();
                 if (cucu.debug) { console.log(nameInNestedChildLabel, results); }
                 elements = elements.concat(results.map(x => ({element: x, label: nameInNestedChildLabel, label_name: 'nameInNestedChild'})));
 
                 for(var aIndex=0; aIndex < attributes.length; aIndex++) {
                     var attribute_name = attributes[aIndex];
                     var innerNestedElementsLabel = `<${thing}><* ${attribute_name}="${name}"></*></${thing}>`;
-                    results = jqCucu(`*:vis[${attribute_name}="${name}"]`, document.body).parents(thing).toArray();
+                    var caseInsensitiveAttr = (matcher == 'has_text_ci' || matcher == 'icontains');
+                    if (caseInsensitiveAttr) {
+                        // Sizzle does not parse `[attr=val i]`; filter in JS.
+                        var nameLowerNested = name.toLowerCase();
+                        var attrNameNested = attribute_name;
+                        results = jqRoots(`*:vis`).filter(function(){
+                            var val = this.getAttribute(attrNameNested);
+                            return val !== null && val.toLowerCase() === nameLowerNested;
+                        }).parents(thing).toArray();
+                    } else {
+                        results = jqRoots(`*:vis[${attribute_name}="${name}"]`).parents(thing).toArray();
+                    }
                     if (cucu.debug) { console.log(innerNestedElementsLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: innerNestedElementsLabel, label_name: 'innerNestedElements'})));
                 }
@@ -306,7 +419,7 @@
                     var thing = things[tIndex];
 
                     var nameIsPreviousSiblingLabel = `<*>${name}</*><${thing}/>`;
-                    results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).next(thing + ':vis').toArray();
+                    results = jqRoots(`*:vis:${matcher}("${name}")`).next(thing + ':vis').toArray();
                     if (cucu.debug) { console.log(nameIsPreviousSiblingLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: nameIsPreviousSiblingLabel, label_name: 'nameIsPreviousSibling'})));
                 }
@@ -318,7 +431,7 @@
                     var thing = things[tIndex];
 
                     var nameIsNextSiblingLabel = `<${thing}/><*>${name}</*>`;
-                    results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).prev(thing).toArray();
+                    results = jqRoots(`*:vis:${matcher}("${name}")`).prev(thing).toArray();
                     if (cucu.debug) { console.log(nameIsNextSiblingLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: nameIsNextSiblingLabel, label_name: 'nameIsNextSibling'})));
                 }
@@ -331,7 +444,7 @@
                 var thing = things[tIndex];
 
                 var nameIsTextSiblingLabel = `<*><${thing}></${thing}>${name}</*>`;
-                results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).children(thing + ':vis').toArray();
+                results = jqRoots(`*:vis:${matcher}("${name}")`).children(thing + ':vis').toArray();
                 if (cucu.debug) { console.log(nameIsTextSiblingLabel, results); }
                 elements = elements.concat(results.map(x => ({element: x, label: nameIsTextSiblingLabel, label_name: 'nameIsTextSibling'})));
             }
@@ -342,14 +455,14 @@
                     var thing = things[tIndex];
 
                     var leftToRightLabel = `<*>${name}</*>...<${thing}>...`;
-                    results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).nextAll(thing + ':vis').toArray();
+                    results = jqRoots(`*:vis:${matcher}("${name}")`).nextAll(thing + ':vis').toArray();
                     if (cucu.debug) { console.log(leftToRightLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: leftToRightLabel, label_name: 'leftToRight'})));
 
                     var leftToRightGrandpaLabel = `<...><*>${name}</*></...>...<...><${thing}></...>`;
                     // XXX: this rule is horribly complicated and I'd rather see it gone
                     //      basically: common great grandpranet
-                    results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).nextAll().find(thing + ':vis').toArray();
+                    results = jqRoots(`*:vis:${matcher}("${name}")`).nextAll().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log(leftToRightGrandpaLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: leftToRightGrandpaLabel, label_name: 'leftToRightGrandpa'})));
                 }
@@ -361,13 +474,13 @@
                     var thing = things[tIndex];
 
                     var rightToLeftLabel = `<${thing}>...<*>${name}</*>...`;
-                    results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).prevAll(thing).toArray();
+                    results = jqRoots(`*:vis:${matcher}("${name}")`).prevAll(thing).toArray();
                     if (cucu.debug) { console.log(rightToLeftLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: rightToLeftLabel, label_name: 'rightToLeft'})));
 
                     var rightToLeftGrandpaLabel = `<...><${thing}></...>...<...><*>${name}</*></...>`;
                     // XXX: this rule is horribly complicated and I'd rather see it gone
-                    results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).prevAll().find(thing + ':vis').toArray();
+                    results = jqRoots(`*:vis:${matcher}("${name}")`).prevAll().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log(rightToLeftGrandpaLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: rightToLeftGrandpaLabel, label_name: 'rightToLeftGrandpa'})));
                 }

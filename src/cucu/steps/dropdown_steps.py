@@ -183,6 +183,7 @@ def find_n_select_dropdown_option(ctx, dropdown, option, index=0):
       index(str):  the index of the dropdown if there are duplicates
     """
     ctx.check_browser_initialized()
+    ctx.browser.wait_for_page_to_load()
 
     dropdown_element = find_dropdown(ctx, dropdown, index)
 
@@ -227,6 +228,7 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
       index(str):  the index of the dropdown if there are duplicates
     """
     ctx.check_browser_initialized()
+    ctx.browser.wait_for_page_to_load()
 
     dropdown_element = find_dropdown(ctx, dropdown, index)
 
@@ -294,6 +296,7 @@ def assert_dropdown_option_selected(
       index(str):  the index of the dropdown if there are duplicates
     """
     ctx.check_browser_initialized()
+    ctx.browser.wait_for_page_to_load()
 
     dropdown_element = find_dropdown(ctx, dropdown, index)
     if dropdown_element is None:
