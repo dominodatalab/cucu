@@ -5,9 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 1.4.21
+# 1.4.24
 - Add - replay timeline view for scenario reports with stage, step navigation, and synced log panels
 - Add - capture before/after scenario hook results (stdout, stderr, status, errors) and persist them on the scenario record
+
+# 1.4.23
+- Change - `search_in_all_frames` walks nested iframes by default (BFS by index path, `max_depth=15`); pass `include_nested_frames=False` to restore the previous top-level-only walk
+- Add - `CUCU_SHADOW_DOM_SEARCH=enabled` opts `Selenium.css_find_elements` and `fuzzy.find` into open-shadow-DOM traversal; `fuzzy.find` runs the full ranker (label-for/id, sibling, nested-child, attribute weights) across combined light + open-shadow-DOM candidates
+- Fix - `Selenium.css_find_elements` returns `[]` instead of `None` when no element is found
+- Fix - close unbalanced `img[alt="..."` selector in image step
+
+# 1.4.22
+- Fix - dropdown steps wait for page load before locating the dropdown to avoid races on freshly-loaded pages
+
+# 1.4.21
+- Add - opt-in case-aware fuzzy matching via `CUCU_FUZZY_CASE_AWARE` (default: `False`)
+  - when enabled, case-different text enters the candidate pool: query `"project"` finds `Project`/`PrOjEcT`
+  - within the same area, exact-case match still outranks caseless match
+  - default `False` keeps fuzzy find case-sensitive as before; flip to `True` to opt in
 
 # 1.4.20
 - Change - fuzzy find matching is now case-aware, not case-sensitive

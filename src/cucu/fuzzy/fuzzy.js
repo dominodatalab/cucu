@@ -216,13 +216,45 @@
                                direction=LEFT_TO_RIGHT,
                                name_within_thing=false,
                                insert_label=false,
-                               skip_fuzzy_relevance=false) {
+                               skip_fuzzy_relevance=false,
+                               shadow=false,
+                               case_aware=false) {
         var elements = [];
         var results = null;
         var attributes = ['aria-label', 'title', 'placeholder', 'value'];
-        var matchers = ['has_text', 'has_text_ci', 'contains', 'icontains'];
+        // When case_aware is false the caseless matchers are dropped from the
+        // pool so no case-different elements enter, restoring pre-1.4.20
+        // case-sensitive behavior end-to-end. The caseless tiers in
+        // cucu.relevance remain but never fire because no caseless candidates
+        // ever reach scoring.
+        var matchers = case_aware
+            ? ['has_text', 'has_text_ci', 'contains', 'icontains']
+            : ['has_text', 'contains'];
 
         name = name.replaceAll('"', '\\"');
+
+        var roots = [document.body];
+        if (shadow) {
+            function collectShadow(n) {
+                if (!n || n.nodeType !== 1) return;
+                if (n.shadowRoot) {
+                    roots.push(n.shadowRoot);
+                    var sh = n.shadowRoot.children;
+                    for (var i = 0; i < sh.length; i++) collectShadow(sh[i]);
+                }
+                var ch = n.children || [];
+                for (var j = 0; j < ch.length; j++) collectShadow(ch[j]);
+            }
+            collectShadow(document.documentElement);
+        }
+
+        function jqRoots(selector) {
+            var combined = jqCucu();
+            for (var i = 0; i < roots.length; i++) {
+                combined = combined.add(jqCucu(selector, roots[i]));
+            }
+            return combined;
+        }
 
         /*
          * try to match on exact text but ultimately fall back to matching on
@@ -239,7 +271,7 @@
 
                 var nameInTagContentLabel = `<${thing}>${name}</${thing}>`;
                 var nameInTagContentJq = `${thing}:vis:${matcher}("${name}")`;
-                results = jqCucu(nameInTagContentJq, document.body).toArray();
+                results = jqRoots(nameInTagContentJq).toArray();
                 if (cucu.debug) { console.log(nameInTagContentLabel, results); }
                 elements = elements.concat(results.map(x => ({element: x, label: nameInTagContentLabel, label_name: 'nameInTagContent'})));
 
@@ -248,7 +280,7 @@
                     var nameIsAttributeLabel = `<${thing} attribute="${attribute_name}"></${thing}>`;
                     if (matcher == 'has_text') {
                         var nameIsAttributeJq = `${thing}[${attribute_name}="${name}"]:vis`;
-                        results = jqCucu(nameIsAttributeJq, document.body).toArray();
+                        results = jqRoots(nameIsAttributeJq).toArray();
                         if (cucu.debug) { console.log(nameIsAttributeLabel, results); }
                     } else if (matcher == 'has_text_ci') {
                         // Sizzle does not parse the CSS-L4 `[attr=val i]` flag,
@@ -262,7 +294,7 @@
                         if (cucu.debug) { console.log(nameIsAttributeLabel, results); }
                     } else if (matcher == 'contains') {
                         var nameInAttributeJq = `${thing}[${attribute_name}*="${name}"]:vis`;
-                        results = jqCucu(nameInAttributeJq, document.body).toArray();
+                        results = jqRoots(nameInAttributeJq).toArray();
                         if (cucu.debug) { console.log(nameIsAttributeLabel, results); }
                     } else if (matcher == 'icontains') {
                         // See note above; Sizzle does not parse the `i` flag.
@@ -292,7 +324,7 @@
                 if (matcher == 'has_text') {
                     var nameIsValueLabel = `${thing} value="${name}"></${thing}>`;
                     var nameIsValueJq = `${thing}:vis`;
-                    results = jqCucu(nameInValueJq, document.body).filter(function(){
+                    results = jqRoots(nameInValueJq).filter(function(){
                         return this.value == name;
                     }).toArray();
                     if (cucu.debug) { console.log(nameIsValueLabel, results); }
@@ -307,7 +339,7 @@
                 } else if (matcher == 'contains') {
                     var nameInValueLabel = `${thing} value*="${name}"></${thing}>`;
                     var nameInValueJq = `${thing}:vis`;
-                    results = jqCucu(nameInValueJq, document.body).filter(function(){
+                    results = jqRoots(nameInValueJq).filter(function(){
                         return this.value !== undefined && String(this.value).indexOf(name) != -1;
                     }).toArray();
                     if (cucu.debug) { console.log(nameInValueLabel, results); }
@@ -327,7 +359,7 @@
              * element labeled by another using the for/id attributes
              */
             var labelForNameJq = `*[for]:vis:${matcher}("${name}")`
-            var labels = jqCucu(labelForNameJq, document.body).toArray();
+            var labels = jqRoots(labelForNameJq).toArray();
             for(var tIndex = 0; tIndex < things.length; tIndex++) {
                 var thing = things[tIndex];
                 results = [];
@@ -337,7 +369,7 @@
                     var label = labels[lIndex];
                     var id = label.getAttribute('for');
                     var idMatchesForLabelJq = `${thing}[id="${id}"]:vis`;
-                    results = jqCucu(idMatchesForLabelJq, document.body).toArray();
+                    results = jqRoots(idMatchesForLabelJq).toArray();
 
                     if (cucu.debug) { console.log(labelForNameLabel, results); }
                     var labelImmediateText = getImmediateText(label);
@@ -352,7 +384,7 @@
                 var thing = things[tIndex];
 
                 var nameInNestedChildLabel = `<${thing}><*>...${name}...</*></${thing}>`;
-                results = jqCucu('*:vis:' + matcher + '("' + name + '")', document.body).parents(thing).toArray();
+                results = jqRoots('*:vis:' + matcher + '("' + name + '")').parents(thing).toArray();
                 if (cucu.debug) { console.log(nameInNestedChildLabel, results); }
                 elements = elements.concat(results.map(x => ({element: x, label: nameInNestedChildLabel, label_name: 'nameInNestedChild'})));
 
@@ -364,12 +396,12 @@
                         // Sizzle does not parse `[attr=val i]`; filter in JS.
                         var nameLowerNested = name.toLowerCase();
                         var attrNameNested = attribute_name;
-                        results = jqCucu(`*:vis`, document.body).filter(function(){
+                        results = jqRoots(`*:vis`).filter(function(){
                             var val = this.getAttribute(attrNameNested);
                             return val !== null && val.toLowerCase() === nameLowerNested;
                         }).parents(thing).toArray();
                     } else {
-                        results = jqCucu(`*:vis[${attribute_name}="${name}"]`, document.body).parents(thing).toArray();
+                        results = jqRoots(`*:vis[${attribute_name}="${name}"]`).parents(thing).toArray();
                     }
                     if (cucu.debug) { console.log(innerNestedElementsLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: innerNestedElementsLabel, label_name: 'innerNestedElements'})));
@@ -387,7 +419,7 @@
                     var thing = things[tIndex];
 
                     var nameIsPreviousSiblingLabel = `<*>${name}</*><${thing}/>`;
-                    results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).next(thing + ':vis').toArray();
+                    results = jqRoots(`*:vis:${matcher}("${name}")`).next(thing + ':vis').toArray();
                     if (cucu.debug) { console.log(nameIsPreviousSiblingLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: nameIsPreviousSiblingLabel, label_name: 'nameIsPreviousSibling'})));
                 }
@@ -399,7 +431,7 @@
                     var thing = things[tIndex];
 
                     var nameIsNextSiblingLabel = `<${thing}/><*>${name}</*>`;
-                    results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).prev(thing).toArray();
+                    results = jqRoots(`*:vis:${matcher}("${name}")`).prev(thing).toArray();
                     if (cucu.debug) { console.log(nameIsNextSiblingLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: nameIsNextSiblingLabel, label_name: 'nameIsNextSibling'})));
                 }
@@ -412,7 +444,7 @@
                 var thing = things[tIndex];
 
                 var nameIsTextSiblingLabel = `<*><${thing}></${thing}>${name}</*>`;
-                results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).children(thing + ':vis').toArray();
+                results = jqRoots(`*:vis:${matcher}("${name}")`).children(thing + ':vis').toArray();
                 if (cucu.debug) { console.log(nameIsTextSiblingLabel, results); }
                 elements = elements.concat(results.map(x => ({element: x, label: nameIsTextSiblingLabel, label_name: 'nameIsTextSibling'})));
             }
@@ -423,14 +455,14 @@
                     var thing = things[tIndex];
 
                     var leftToRightLabel = `<*>${name}</*>...<${thing}>...`;
-                    results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).nextAll(thing + ':vis').toArray();
+                    results = jqRoots(`*:vis:${matcher}("${name}")`).nextAll(thing + ':vis').toArray();
                     if (cucu.debug) { console.log(leftToRightLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: leftToRightLabel, label_name: 'leftToRight'})));
 
                     var leftToRightGrandpaLabel = `<...><*>${name}</*></...>...<...><${thing}></...>`;
                     // XXX: this rule is horribly complicated and I'd rather see it gone
                     //      basically: common great grandpranet
-                    results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).nextAll().find(thing + ':vis').toArray();
+                    results = jqRoots(`*:vis:${matcher}("${name}")`).nextAll().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log(leftToRightGrandpaLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: leftToRightGrandpaLabel, label_name: 'leftToRightGrandpa'})));
                 }
@@ -442,13 +474,13 @@
                     var thing = things[tIndex];
 
                     var rightToLeftLabel = `<${thing}>...<*>${name}</*>...`;
-                    results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).prevAll(thing).toArray();
+                    results = jqRoots(`*:vis:${matcher}("${name}")`).prevAll(thing).toArray();
                     if (cucu.debug) { console.log(rightToLeftLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: rightToLeftLabel, label_name: 'rightToLeft'})));
 
                     var rightToLeftGrandpaLabel = `<...><${thing}></...>...<...><*>${name}</*></...>`;
                     // XXX: this rule is horribly complicated and I'd rather see it gone
-                    results = jqCucu(`*:vis:${matcher}("${name}")`, document.body).prevAll().find(thing + ':vis').toArray();
+                    results = jqRoots(`*:vis:${matcher}("${name}")`).prevAll().find(thing + ':vis').toArray();
                     if (cucu.debug) { console.log(rightToLeftGrandpaLabel, results); }
                     elements = elements.concat(results.map(x => ({element: x, label: rightToLeftGrandpaLabel, label_name: 'rightToLeftGrandpa'})));
                 }
