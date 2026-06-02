@@ -34,12 +34,23 @@
       ]
     },
     {
-      "description": "Ignore behave version updates due to compatibility issues",
+      "description": "Ignore behave and selenium version updates due to compatibility issues",
       "matchDatasources": [
         "pypi"
       ],
       "matchPackageNames": [
-        "behave"
+        "behave",
+        "selenium"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Ignore selenium Docker image updates",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackagePatterns": [
+        "^selenium/"
       ],
       "enabled": false
     },
