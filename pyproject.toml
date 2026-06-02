@@ -70,9 +70,6 @@ cucu = "cucu.cli:main"
 requires = ["uv_build>=0.11.1,<0.12.0"]
 build-backend = "uv_build"
 
-[tool.uv]
-exclude-newer = "2 weeks"
-
 [tool.uv.build-backend]
 source-include = ["CHANGELOG.md"]
 
