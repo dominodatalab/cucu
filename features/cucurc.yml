@@ -3,3 +3,4 @@ CUCU_BROKEN_IMAGES_PAGE_CHECK: disabled
 # enable case-aware fuzzy matching for cucu's own self-tests; the project-wide
 # default in config.py is False so external consumers opt in explicitly.
 CUCU_FUZZY_CASE_AWARE: true
+CUCU_SHADOW_DOM_SEARCH: enabled
