@@ -50,10 +50,10 @@
       "matchDatasources": [
         "docker"
       ],
-      "matchPackagePatterns": [
-        "^selenium/"
-      ],
-      "enabled": false
+      "enabled": false,
+      "matchPackageNames": [
+        "/^selenium//"
+      ]
     },
     {
       "description": "Ignore minor Python version updates",
