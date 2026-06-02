@@ -8,6 +8,9 @@
   "ignorePaths": [
     "**/.python-version"
   ],
+  "lockFileMaintenance": {
+    "enabled": false
+  },
   "packageRules": [
     {
       "matchCategories": [
@@ -16,7 +19,7 @@
       "enabled": true
     },
     {
-      "groupName": "glom all dependencies",
+      "groupName": "all dependencies",
       "matchFileNames": [
         "**"
       ],
@@ -25,7 +28,9 @@
       "matchUpdateTypes": [
         "major",
         "minor",
-        "patch"
+        "patch",
+        "digest",
+        "pin"
       ]
     },
     {
