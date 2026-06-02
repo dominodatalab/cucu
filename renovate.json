@@ -8,6 +8,7 @@
   "ignorePaths": [
     "**/.python-version"
   ],
+  "minimumReleaseAge": "14 days",
   "lockFileMaintenance": {
     "enabled": false
   },
