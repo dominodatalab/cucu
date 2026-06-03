@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.24
+- Chore - upgrade click to 8.4.0 for ParamType typing improvements and bug fixes (readline on non-Windows, Fish shell completion, CLI error messaging)
+- Chore - update GitHub Actions checkout and cimg/python:3.13 Docker image digests
+
 # 1.4.23
 - Change - `search_in_all_frames` walks nested iframes by default (BFS by index path, `max_depth=15`); pass `include_nested_frames=False` to restore the previous top-level-only walk
 - Add - `CUCU_SHADOW_DOM_SEARCH=enabled` opts `Selenium.css_find_elements` and `fuzzy.find` into open-shadow-DOM traversal; `fuzzy.find` runs the full ranker (label-for/id, sibling, nested-child, attribute weights) across combined light + open-shadow-DOM candidates
