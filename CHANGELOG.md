@@ -8,6 +8,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 # 1.4.24
 - Add - replay timeline view for scenario reports with stage, step navigation, and synced log panels
 - Add - capture before/after scenario hook results (stdout, stderr, status, errors) and persist them on the scenario record
+- Chore - upgrade click to 8.4.0 for ParamType typing improvements and bug fixes (readline on non-Windows, Fish shell completion, CLI error messaging)
+- Chore - update GitHub Actions checkout and cimg/python:3.13 Docker image digests
 
 # 1.4.23
 - Change - `search_in_all_frames` walks nested iframes by default (BFS by index path, `max_depth=15`); pass `include_nested_frames=False` to restore the previous top-level-only walk
