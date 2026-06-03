@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for src/cucu/steps/browser_steps.py: 86%</title>
+    <title>Coverage for src/cucu/steps/browser_steps.py: 87%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_9ff733b0.css" type="text/css">
     <script src="coverage_html_cb_dd2e7eb5.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>src&#8201;/&#8201;cucu&#8201;/&#8201;steps&#8201;/&#8201;browser_steps.py</b>:
-            <span class="pc_cov">86%</span>
+            <span class="pc_cov">87%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -56,10 +56,10 @@
         </aside>
         <h2>
             <span class="text">259 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">229<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">30<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">230<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">29<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
-            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">5<span class="text"> partial</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">4<span class="text"> partial</span></button>
         </h2>
         <p class="text">
             <a id="prevFileLink" class="nav" href="z_e53747c5a64a3337_base_steps_py.html">&#xab; prev</a> &nbsp; &nbsp;
@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_e53747c5a64a3337_button_steps_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-06-02 16:04 +0000
+            created at 2026-06-03 00:03 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -483,7 +483,7 @@
     <p class="pln"><span class="n"><a id="t399" href="#t399">399</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t400" href="#t400">400</a></span><span class="t"><span class="op">@</span><span class="nam">step</span><span class="op">(</span><span class="str">'I download an mht archive of the current page to "{file_path}"'</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t401" href="#t401">401</a></span><span class="t"><span class="key">def</span> <span class="nam">download_mht_archive</span><span class="op">(</span><span class="nam">ctx</span><span class="op">,</span> <span class="nam">file_path</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t402" href="#t402">402</a></span><span class="t">    <span class="nam">ctx</span><span class="op">.</span><span class="nam">browser</span><span class="op">.</span><span class="nam">download_mht</span><span class="op">(</span><span class="nam">file_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t402" href="#t402">402</a></span><span class="t">    <span class="nam">ctx</span><span class="op">.</span><span class="nam">browser</span><span class="op">.</span><span class="nam">download_mht</span><span class="op">(</span><span class="nam">file_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t403" href="#t403">403</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t404" href="#t404">404</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t405" href="#t405">405</a></span><span class="t"><span class="key">def</span> <span class="nam">get_current_browser_name</span><span class="op">(</span><span class="nam">ctx</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -516,7 +516,7 @@
     <p class="run"><span class="n"><a id="t432" href="#t432">432</a></span><span class="t"><span class="op">@</span><span class="nam">step</span><span class="op">(</span><span class="str">'I skip this scenario if the current browser is not "{name}"'</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t433" href="#t433">433</a></span><span class="t"><span class="key">def</span> <span class="nam">skip_if_not_browser</span><span class="op">(</span><span class="nam">ctx</span><span class="op">,</span> <span class="nam">name</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t434" href="#t434">434</a></span><span class="t">    <span class="nam">browser_name</span> <span class="op">=</span> <span class="nam">get_current_browser_name</span><span class="op">(</span><span class="nam">ctx</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="par run show_par"><span class="n"><a id="t435" href="#t435">435</a></span><span class="t">    <span class="key">if</span> <span class="nam">browser_name</span> <span class="op">!=</span> <span class="nam">name</span><span class="op">.</span><span class="nam">lower</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">435&#x202F;&#x219B;&#x202F;exit</span><span class="annotate long">line 435 didn't return from function 'skip_if_not_browser' because the condition on line 435 was always true</span></span></p>
+    <p class="run"><span class="n"><a id="t435" href="#t435">435</a></span><span class="t">    <span class="key">if</span> <span class="nam">browser_name</span> <span class="op">!=</span> <span class="nam">name</span><span class="op">.</span><span class="nam">lower</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t436" href="#t436">436</a></span><span class="t">        <span class="nam">ctx</span><span class="op">.</span><span class="nam">scenario</span><span class="op">.</span><span class="nam">skip</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t437" href="#t437">437</a></span><span class="t">            <span class="nam">reason</span><span class="op">=</span><span class="fst">f"</span><span class="fst">skipping scenario since we're not on </span><span class="op">{</span><span class="nam">name</span><span class="op">}</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t438" href="#t438">438</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -554,7 +554,7 @@
             <a class="nav" href="z_e53747c5a64a3337_button_steps_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-06-02 16:04 +0000
+            created at 2026-06-03 00:03 +0000
         </p>
     </div>
 </footer>
