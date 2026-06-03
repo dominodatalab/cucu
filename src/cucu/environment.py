@@ -139,15 +139,7 @@ def before_scenario(ctx, scenario):
     # run before all scenario hooks
     scenario.before_hook_results = []
     for hook in CONFIG["__CUCU_BEFORE_SCENARIO_HOOKS"]:
-        sys.stdout.captured()
-        sys.stderr.captured()
-        hook_result = {
-            "name": hook.__name__,
-            "status": "passed",
-            "stdout": [],
-            "stderr": [],
-            "error_message": [],
-        }
+        hook_result = _create_hook_result(hook)
         try:
             hook(ctx)
             logger.debug(f"HOOK {hook.__name__}: passed ✅")
@@ -160,8 +152,6 @@ def before_scenario(ctx, scenario):
             hook_result["status"] = "error"
             hook_result["error_message"] = error_message.splitlines()
             ctx.scenario.mark_skipped()
-            # Set 'hook_failed' status to 'True' so that the test gets marked
-            # as 'error', even though no steps ran
             ctx.scenario.hook_failed = True
         finally:
             hook_result["stdout"] = sys.stdout.captured()
@@ -169,22 +159,22 @@ def before_scenario(ctx, scenario):
         scenario.before_hook_results.append(hook_result)
 
 
-def run_after_scenario_hook(ctx, scenario, hook):
-    sys.stdout.captured()
-    sys.stderr.captured()
-    hook_result = {
+def _create_hook_result(hook):
+    return {
         "name": hook.__name__,
         "status": "passed",
         "stdout": [],
         "stderr": [],
         "error_message": [],
     }
+
+
+def run_after_scenario_hook(ctx, scenario, hook):
+    hook_result = _create_hook_result(hook)
     try:
         hook(ctx)
         logger.debug(f"HOOK {hook.__name__}: passed ✅")
     except Exception as e:
-        # For any after scenario hooks,'hook_failed' status will be 'False'
-        # but will attach the error message to scenario.
         error_message = (
             f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}\n"
         )
