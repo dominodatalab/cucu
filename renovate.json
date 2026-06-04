@@ -8,6 +8,10 @@
   "ignorePaths": [
     "**/.python-version"
   ],
+  "minimumReleaseAge": "14 days",
+  "lockFileMaintenance": {
+    "enabled": false
+  },
   "packageRules": [
     {
       "matchCategories": [
@@ -16,7 +20,7 @@
       "enabled": true
     },
     {
-      "groupName": "glom all dependencies",
+      "groupName": "all dependencies",
       "matchFileNames": [
         "**"
       ],
@@ -25,18 +29,31 @@
       "matchUpdateTypes": [
         "major",
         "minor",
-        "patch"
+        "patch",
+        "digest",
+        "pin"
       ]
     },
     {
-      "description": "Ignore behave version updates due to compatibility issues",
+      "description": "Ignore behave and selenium version updates due to compatibility issues",
       "matchDatasources": [
         "pypi"
       ],
       "matchPackageNames": [
-        "behave"
+        "behave",
+        "selenium"
       ],
       "enabled": false
+    },
+    {
+      "description": "Ignore selenium Docker image updates",
+      "matchDatasources": [
+        "docker"
+      ],
+      "enabled": false,
+      "matchPackageNames": [
+        "/^selenium//"
+      ]
     },
     {
       "description": "Ignore minor Python version updates",
