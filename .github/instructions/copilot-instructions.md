@@ -122,3 +122,25 @@ Available: `register_before_all_hook`, `register_after_all_hook`, `register_befo
 ## Configuration
 
 Config loads in order, each overriding the previous: `~/.cucurc.yml` → cwd → feature file directory → env vars (always wins). Add per-directory `cucurc.yml` files; don't use a single root `.env`. See `src/cucu/config.py` for all `CONFIG.define()` variables.
+
+## Replay View
+
+The replay view is a browser-based step-by-step timeline player rendered in scenario reports. Developers click "🔁 Replay" to view a scenario's steps in visual, sequential order with screenshots for browser tests.
+
+**Files:**
+- `src/cucu/reporter/external/replay.js` — timeline player, Alpine.js declarations, screenshot/timing logic
+- `src/cucu/reporter/templates/scenario_replay.html` — markup for replay view; #replay-data JSON island feeds the player
+- `src/cucu/reporter/templates/scenario.html` — classic scenario view; toggle between Classic ↔ Replay via links
+- `src/cucu/reporter/html.py` — template rendering, JSON data serialization for replay player
+- `features/cli/report_replay_view.feature` — integration tests for all replay view scenarios
+
+**Testing replay view changes:**
+- Run the integration test: `uv run cucu run features/cli/report_replay_view.feature`
+- To inspect a single scenario: `uv run cucu run features/cli/report_replay_view.feature:6` (replace 6 with the line number)
+- The test generates HTML reports and opens them in a browser via Selenium — no manual opening needed
+
+**Key behaviors:**
+- Non-browser scenarios show step text only; browser scenarios show screenshots from each step
+- Timeline uses `startOffset` and `duration` when available (timed steps) — falls back to step index when timing is missing
+- Failed scenarios auto-focus the first failing step in the replay view
+- Substeps are rendered flattened within the parent step's text (not as separate timeline entries)

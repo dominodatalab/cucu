@@ -1,0 +1,456 @@
+/* ===== CSS CUSTOM PROPERTIES ===== */
+
+/* Light mode — default */
+:root {
+  --vp-bg:           #ffffff;
+  --vp-surface:      #f6f8fa;
+  --vp-inset:        #eaeef2;
+  --vp-stage:        #f0f2f5;
+  --vp-border:       #d0d7de;
+  --vp-text:         #1f2328;
+  --vp-text2:        #656d76;
+  --vp-text3:        #9198a1;
+  --vp-link:         #0969da;
+  --vp-link-hover:   #218bff;
+  --vp-accent:       #0969da;
+  --vp-accent-hover: #218bff;
+  --vp-passed:       #1a7f37;
+  --vp-failed:       #cf222e;
+  --vp-skipped:      #0550ae;
+  --vp-untested:     #9198a1;
+  --vp-heading:      #9a6700;
+  --vp-overlay:      rgba(0,0,0,0.35);
+  --vp-shadow:       rgba(140,149,159,0.15);
+  --vp-stage-shadow: rgba(140,149,159,0.3);
+  /* status pills */
+  --pill-passed-txt: #1a7f37; --pill-passed-bg: rgba(26,127,55,0.1);   --pill-passed-bd: rgba(26,127,55,0.35);
+  --pill-failed-txt: #cf222e; --pill-failed-bg: rgba(207,34,46,0.1);   --pill-failed-bd: rgba(207,34,46,0.35);
+  --pill-skipped-txt:#0550ae; --pill-skipped-bg: rgba(5,80,174,0.1);   --pill-skipped-bd: rgba(5,80,174,0.35);
+  --pill-untested-txt:#9198a1;--pill-untested-bg:rgba(145,152,161,0.1);--pill-untested-bd:rgba(145,152,161,0.3);
+}
+
+/* Dark mode — applied via class set by the inline theme-init script.
+   The class is added when the user picked dark explicitly, OR when they're on auto and the OS is dark. */
+html.theme-dark {
+  --vp-bg:           #0d1117;
+  --vp-surface:      #161b22;
+  --vp-inset:        #21262d;
+  --vp-stage:        #010409;
+  --vp-border:       #30363d;
+  --vp-text:         #e6edf3;
+  --vp-text2:        #8b949e;
+  --vp-text3:        #6e7681;
+  --vp-link:         #58a6ff;
+  --vp-link-hover:   #79c0ff;
+  --vp-accent:       #1f6feb;
+  --vp-accent-hover: #388bfd;
+  --vp-passed:       #3fb950;
+  --vp-failed:       #f85149;
+  --vp-skipped:      #58a6ff;
+  --vp-untested:     #6e7681;
+  --vp-heading:      #e3b341;
+  --vp-overlay:      rgba(0,0,0,0.5);
+  --vp-shadow:       rgba(0,0,0,0.3);
+  --vp-stage-shadow: rgba(0,0,0,0.65);
+  --pill-passed-txt: #3fb950; --pill-passed-bg: rgba(63,185,80,0.15);  --pill-passed-bd: rgba(63,185,80,0.4);
+  --pill-failed-txt: #f85149; --pill-failed-bg: rgba(248,81,73,0.15);  --pill-failed-bd: rgba(248,81,73,0.4);
+  --pill-skipped-txt:#58a6ff; --pill-skipped-bg: rgba(88,166,255,0.15);--pill-skipped-bd: rgba(88,166,255,0.4);
+  --pill-untested-txt:#6e7681;--pill-untested-bg:rgba(110,118,129,0.1);--pill-untested-bd:rgba(110,118,129,0.3);
+}
+
+/* ===== COMPONENT STYLES ===== */
+body {
+  background: var(--vp-bg);
+  color: var(--vp-text);
+  margin: 0; padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  transition: background 0.2s, color 0.2s;
+}
+.container { max-width: 100% !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
+
+/* NAV */
+#vp-nav {
+  background: var(--vp-surface);
+  border-bottom: 1px solid var(--vp-border);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  flex-wrap: wrap;
+}
+#vp-nav a { color: var(--vp-link); text-decoration: none; font-size: 13px; }
+#vp-nav a:hover { color: var(--vp-link-hover); text-decoration: underline; }
+.vp-sep { color: var(--vp-border); user-select: none; }
+.vp-nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.vp-meta { color: var(--vp-text3); font-size: 12px; font-family: monospace; white-space: nowrap; }
+
+/* Logs dropdown */
+#log-menu-wrap { position: relative; display: inline-block; }
+#log-dd {
+  display: none; position: absolute; top: calc(100% + 6px); left: 0;
+  background: var(--vp-surface); border: 1px solid var(--vp-border); border-radius: 6px;
+  min-width: 200px; z-index: 200; padding: 4px 0;
+  box-shadow: 0 8px 24px var(--vp-shadow);
+}
+#log-dd.open { display: block; }
+#log-dd a { display: block; padding: 6px 14px; color: var(--vp-link); font-size: 12px; text-decoration: none; }
+#log-dd a:hover { background: var(--vp-inset); }
+
+/* Theme toggle */
+#theme-toggle {
+  background: transparent;
+  border: 1px solid var(--vp-border);
+  color: var(--vp-text2);
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.4;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+#theme-toggle:hover { color: var(--vp-text); border-color: var(--vp-link); }
+
+/* HEADER */
+#vp-header {
+  background: var(--vp-surface);
+  border-bottom: 1px solid var(--vp-border);
+  padding: 10px 20px;
+}
+.vp-feature-label { color: var(--vp-text3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+.vp-feature-row   { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.vp-feature-name  { color: var(--vp-text2); font-size: 13px; }
+.vp-feature-name a { color: var(--vp-link); text-decoration: none; }
+.vp-feature-name a:hover { text-decoration: underline; }
+.vp-mht-link { font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+.vp-mht-link a { color: var(--vp-text3); text-decoration: none; }
+.vp-mht-link a:hover { color: var(--vp-link); text-decoration: underline; }
+.vp-scenario-name { color: var(--vp-text);  font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+.vp-tags          { color: var(--vp-text3); font-size: 11px; font-family: monospace; }
+
+/* STAGE */
+#vp-stage {
+  background: var(--vp-stage);
+  height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s;
+}
+#stage-resize-handle {
+  height: 5px; background: transparent; cursor: ns-resize; flex-shrink: 0;
+  border-top: 1px solid var(--vp-border);
+}
+#stage-resize-handle:hover, #stage-resize-handle.dragging { background: var(--vp-accent); }
+.step-frame {
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px;         /* horizontal gutter only; no vertical padding */
+}
+.stage-screenshots { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center; }
+/* screenshot-wrapper shrinks to the exact rendered img size so the highlight overlay aligns */
+.screenshot-wrapper { display: none; position: relative; max-height: 100%; }
+.screenshot-wrapper.active { display: inline-flex; align-items: center; justify-content: center; max-height: 100%; }
+.stage-img { max-height: 100%; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 8px 32px var(--vp-stage-shadow); display: block; }
+/* highlight overlay — absolute % coords map 1-to-1 with screenshot viewport ratios */
+.highlight-overlay {
+  position: absolute; pointer-events: none;
+  border: 2px solid rgba(255, 80, 80, 0.9);
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px rgba(255,80,80,0.2), inset 0 0 0 1px rgba(255,80,80,0.15);
+}
+body.hide-highlights .highlight-overlay { display: none; }
+/* step-pic-nav badge — same pill style as step-num-badge */
+#step-pic-nav {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: var(--vp-inset); border: 1px solid var(--vp-border); border-radius: 6px;
+  padding: 4px 8px; font-size: 12px; color: var(--vp-text); white-space: nowrap; font-family: monospace;
+}
+#step-pic-nav.disabled { opacity: 0.35; pointer-events: none; }
+.step-pic-nav-label { color: var(--vp-text2); margin-right: 2px; }
+.step-pic-nav-btn { background: transparent; border: none; color: var(--vp-text); cursor: pointer; padding: 0 2px; font-size: 11px; line-height: 1; }
+.step-pic-nav-btn:hover { color: var(--vp-link); }
+.no-screenshot-display {
+  text-align: center; padding: 40px 20px; max-width: 700px;
+}
+/* Keyword + name share a row in the no-screenshot stage view; baselines align by virtue of
+   `.step-line` being a flex/baseline container. */
+.no-screenshot-display .step-line {
+  display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 0.4em;
+  line-height: 1.4;
+}
+.no-screenshot-display .step-keyword-large {
+  color: var(--vp-text2); font-size: 20px; font-weight: bold; font-family: monospace;
+}
+.no-screenshot-display .step-keyword-large.status-passed   { color: var(--vp-passed); }
+.no-screenshot-display .step-keyword-large.status-failed,
+.no-screenshot-display .step-keyword-large.status-error    { color: var(--vp-failed); }
+.no-screenshot-display .step-keyword-large.status-skipped,
+.no-screenshot-display .step-keyword-large.status-untested { color: var(--vp-untested); }
+.no-screenshot-display .step-name-large { color: var(--vp-text); font-size: 24px; }
+/* Standalone (SKIPPED) label above the keyword/name line */
+.no-screenshot-display .step-skipped-label {
+  font-size: 20px; font-weight: bold; font-family: monospace; margin-bottom: 6px;
+}
+.no-screenshot-display .step-skipped-label.status-skipped { color: var(--vp-untested); }
+.substep-prefix { color: var(--vp-text3); }
+.no-screenshot-display .step-detail-pre {
+  color: var(--vp-text2); font-family: monospace; font-size: 13px; margin-top: 20px; text-align: left;
+  background: var(--vp-surface); padding: 12px 16px; border-radius: 6px; white-space: pre-wrap;
+  border: 1px solid var(--vp-border); max-width: 600px;
+}
+
+/* Stage side-nav arrows */
+.stage-nav-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: var(--vp-overlay); border: 1px solid var(--vp-border);
+  color: var(--vp-text); font-size: 22px; padding: 16px 12px; border-radius: 6px;
+  cursor: pointer; opacity: 0; transition: opacity 0.2s, background 0.15s; z-index: 10;
+}
+#vp-stage:hover .stage-nav-btn { opacity: 1; }
+.stage-nav-btn:hover { background: var(--vp-overlay); filter: brightness(1.2); }
+#stage-btn-prev { left: 12px; }
+#stage-btn-next { right: 12px; }
+
+/* STEP INFO BAR */
+#vp-step-info {
+  background: var(--vp-surface);
+  border-top: 1px solid var(--vp-border);
+  border-bottom: 1px solid var(--vp-border);
+  padding: 10px 16px; display: flex; align-items: center; gap: 12px; min-height: 48px;
+}
+#step-num-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: var(--vp-inset); border: 1px solid var(--vp-border); border-radius: 6px;
+  padding: 4px 8px; font-size: 12px; color: var(--vp-text); white-space: nowrap; font-family: monospace;
+}
+.step-nav-label { color: var(--vp-text2); margin-right: 2px; }
+.step-nav-btn { background: transparent; border: none; color: var(--vp-text); cursor: pointer; padding: 0 2px; font-size: 11px; line-height: 1; }
+.step-nav-btn:hover:not(:disabled) { color: var(--vp-link); }
+.step-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+#step-timing-text { color: var(--vp-text3); font-size: 12px; white-space: nowrap; font-family: monospace; margin-left: auto; }
+#pic-caption { color: var(--vp-text2); font-size: 12px; font-style: italic; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status-pill {
+  padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  white-space: nowrap; display: inline-block; font-family: monospace;
+  background: var(--vp-inset); color: var(--vp-text); border: 1px solid var(--vp-border);
+}
+.status-pill.disabled { opacity: 0.4; }
+
+/* PLAYBACK CONTROLS (inline in step-info bar) */
+.ctrl-btn {
+  background: transparent; border: 1px solid var(--vp-border); color: var(--vp-text);
+  padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; line-height: 1;
+  transition: background 0.12s, border-color 0.12s; flex-shrink: 0;
+}
+.ctrl-btn:hover:not(:disabled) { background: var(--vp-inset); border-color: var(--vp-link); }
+.ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+#btn-play-pause {
+  background: var(--vp-accent); border-color: var(--vp-accent);
+  color: #fff; font-size: 15px; padding: 4px 14px; font-weight: bold;
+}
+#btn-play-pause:hover:not(:disabled) { background: var(--vp-accent-hover); border-color: var(--vp-accent-hover); }
+.ctrl-sep { color: var(--vp-border); margin: 0 2px; user-select: none; }
+
+/* TIMELINE */
+/* Screenshot / step bar track */
+#timeline-track {
+  flex: 1; position: relative; height: 14px; background: var(--vp-bg);
+  border: 1px solid var(--vp-border);
+  border-radius: 3px; cursor: pointer; overflow: visible; align-self: center;
+}
+/* Step bars — width and left set by JS from real timestamps */
+.step-bar {
+  position: absolute; top: 2px; height: calc(100% - 4px);
+  border-radius: 2px; cursor: pointer; min-width: 3px;
+  opacity: 0.72; z-index: 5; box-sizing: border-box;
+  transition: top 0.1s, height 0.1s, opacity 0.1s;
+}
+.step-bar:hover { opacity: 1; top: 1px; height: calc(100% - 2px); z-index: 15; }
+.step-bar.active {
+  opacity: 1; top: 0; height: 100%; border-radius: 3px; z-index: 20;
+  box-shadow: 0 0 0 2px var(--vp-bg), 0 0 0 3px currentColor;
+}
+/* Step bars are coloured by status; heading markers are dimmer regardless of status */
+.step-bar                  { background: var(--vp-link);     color: var(--vp-link); }
+.step-bar.status-passed    { background: var(--vp-passed);   color: var(--vp-passed); }
+.step-bar.status-failed,
+.step-bar.status-error     { background: var(--vp-failed);   color: var(--vp-failed); }
+.step-bar.status-skipped,
+.step-bar.status-untested  { background: var(--vp-untested); color: var(--vp-untested); }
+/* Group-header steps (`* # heading`) — neutral foreground, overrides status colouring */
+.step-bar.heading          { background: var(--vp-text);     color: var(--vp-text);  opacity: 1; }
+/* Shared playhead — thin vertical line tracking current time */
+#timeline-playhead {
+  position: absolute; top: -3px; bottom: -3px; width: 2px;
+  background: var(--vp-text); border-radius: 1px;
+  pointer-events: none; z-index: 30; left: 0%;
+  transform: translateX(-50%);
+}
+/* Pics / stdout / cucu / browser / errors secondary tracks — match steps track height for visual parity */
+#pics-timeline-track,
+#stdout-timeline-track,
+#cucu-timeline-track,
+#browser-timeline-track,
+#errors-timeline-track {
+  flex: 1; position: relative; height: 14px; background: var(--vp-bg);
+  border: 1px solid var(--vp-border);
+  border-radius: 3px; cursor: pointer; overflow: visible; align-self: center;
+}
+/* Per-step bars used by cucu / stdout panels (where the bar IS the data, not a background) */
+.tl-step-bar {
+  position: absolute; top: 0; height: 100%; border-radius: 1px;
+  pointer-events: none; min-width: 2px;
+  background: var(--vp-link); opacity: 0.55;
+}
+/* Foreground per-event markers — drawn on top of step bars to show panel-specific data */
+/* Screenshot ticks — coloured by step status */
+.pics-tick {
+  position: absolute; top: -1px; height: calc(100% + 2px); width: 2px;
+  background: var(--vp-link); opacity: 0.95; border-radius: 1px; pointer-events: none;
+}
+.pics-tick.pics-tick-passed    { background: var(--vp-passed); }
+.pics-tick.pics-tick-failed,
+.pics-tick.pics-tick-error     { background: var(--vp-failed); }
+.pics-tick.pics-tick-skipped,
+.pics-tick.pics-tick-untested  { background: var(--vp-untested); opacity: 0.7; }
+/* Browser log-level ticks */
+.tl-tick { position: absolute; top: -1px; height: calc(100% + 2px); border-radius: 1px; pointer-events: none; }
+.tl-tick.tl-info    { width: 1px; background: var(--vp-link);   opacity: 0.55; }
+.tl-tick.tl-warning { width: 2px; background: #e87d0d;          opacity: 0.85; }
+.tl-tick.tl-error   { width: 2px; background: var(--vp-failed); opacity: 0.95; }
+/* Cursor line on secondary tracks */
+#pics-tl-cursor, #stdout-tl-cursor, #cucu-tl-cursor, #browser-tl-cursor, #errors-tl-cursor {
+  position: absolute; top: -4px; bottom: -4px; width: 2px;
+  background: var(--vp-link); border-radius: 1px;
+  pointer-events: none; z-index: 30; left: 0%; transform: translateX(-50%);
+}
+
+/* LOG TRANSCRIPT PANELS (cucu + browser share the same base styles) */
+.vp-log-panel { border-top: 1px solid var(--vp-border); }
+.vp-log-header {
+  background: var(--vp-surface); border-bottom: 1px solid var(--vp-border);
+  padding: 7px 16px; display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--vp-text2); user-select: none;
+}
+/* Only the chevron + title region toggles collapse — extends into the header padding for a comfy hit area */
+.log-toggle-area {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  margin: -7px 0 -7px -16px; padding: 7px 8px 7px 16px;
+}
+.log-toggle-area:hover { background: var(--vp-inset); }
+/* Fixed title width so timelines line up vertically across all panel headers */
+.vp-log-header .log-title { font-weight: 500; color: var(--vp-text); width: 64px; flex-shrink: 0; }
+.vp-log-header .log-count { color: var(--vp-text3); font-size: 11px; font-family: monospace; }
+.log-collapse-chevron { font-size: 22px; color: var(--vp-text3); transition: transform 0.15s; flex-shrink: 0; width: 20px; text-align: center; line-height: 1; }
+.vp-log-panel.collapsed .log-collapse-chevron { transform: rotate(-90deg); }
+.vp-log-panel.collapsed .vp-log-body { display: none; }
+/* Fixed right-side slot — keeps timeline tracks ending at the same x position across panels */
+.log-follow-label, .log-follow-spacer {
+  display: flex; align-items: center; gap: 4px;
+  width: 80px; flex-shrink: 0; margin-left: auto; color: var(--vp-text2); font-size: 11px;
+}
+.log-follow-label { cursor: pointer; }
+.log-follow-label input { cursor: pointer; accent-color: var(--vp-accent); }
+/* resize handle — drag to change panel height */
+.vp-log-resize {
+  height: 5px; background: transparent; cursor: ns-resize;
+  border-bottom: 1px solid var(--vp-border);
+  transition: background 0.1s;
+}
+.vp-log-resize:hover, .vp-log-resize.dragging { background: var(--vp-accent); }
+.vp-log-content {
+  height: 200px; overflow-y: auto; background: var(--vp-bg);
+  font-family: monospace; font-size: 11.5px; line-height: 1.55;
+  padding: 2px 0;
+}
+.log-line {
+  padding: 0 16px; white-space: pre-wrap; word-break: break-all;
+  color: var(--vp-text3); border-left: 2px solid transparent;
+}
+.log-line.log-current {
+  background: var(--vp-inset); color: var(--vp-text);
+  border-left-color: var(--vp-accent);
+}
+/* Step group headers inside stdout/stderr/error panels */
+.log-step-group { border-top: 1px solid var(--vp-border); }
+.log-step-group:first-child { border-top: none; }
+.log-step-label {
+  padding: 3px 16px; font-size: 10.5px; color: var(--vp-text3);
+  background: var(--vp-surface); position: sticky; top: 0; z-index: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.log-step-group.step-current .log-step-label { color: var(--vp-accent); background: var(--vp-inset); }
+.log-step-group.step-current .log-line { color: var(--vp-text); }
+.stderr-line { color: #e87d0d; }
+.error-line  { color: var(--vp-failed); }
+/* Browser log level colouring */
+.browser-log-line.bl-warning { color: #e87d0d; }
+.browser-log-line.bl-error   { color: var(--vp-failed); }
+/* Steps panel — per-step rows */
+.steps-row { cursor: pointer; }
+.steps-row:hover .log-line { background: var(--vp-inset); }
+#vp-steps-content .log-step-group.step-current .log-line {
+  background: var(--vp-inset); border-left-color: var(--vp-accent);
+}
+/* Previous step — kept visible above the current step for context */
+#vp-steps-content .log-step-group.step-previous .log-line {
+  background: var(--vp-surface); border-left-color: var(--vp-text3); opacity: 0.85;
+}
+.steps-kw { font-weight: bold; font-family: monospace; flex-shrink: 0; min-width: 6.5ch; }
+.steps-passed   { color: var(--vp-passed); }
+.steps-failed   { color: var(--vp-failed); }
+.steps-error    { color: var(--vp-failed); }
+.steps-skipped  { color: var(--vp-untested); }
+.steps-untested { color: var(--vp-untested); }
+.steps-substep  { padding-left: 28px; }
+/* Group-header step rows — match the muted colour used by `.log-line` / `.log-step-label`
+   group headers in the other panels, and align flush with the row's left edge. */
+.steps-heading .steps-kw,
+.steps-heading .steps-name { color: var(--vp-text3); font-weight: bold; }
+/* Breadcrumb above the steps list — current group header (or scenario name), styled like a
+   regular steps row that's been scrolled into view at the top */
+#steps-breadcrumb {
+  background: var(--vp-surface); border-bottom: 1px solid var(--vp-border);
+  font-family: monospace; font-size: 11.5px; line-height: 1.55;
+  color: var(--vp-text); font-weight: bold;
+}
+#steps-breadcrumb:empty { display: none; }
+#steps-breadcrumb .log-line {
+  padding: 2px 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#vp-steps-content {
+  min-height: calc(11.5px * 1.35 + 2px);
+}
+#vp-steps-content .log-line {
+  display: flex;
+  align-items: baseline;
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 1px 8px;
+  line-height: 1.35;
+}
+#vp-steps-content .steps-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ANSI color classes for cucu log lines */
+.log-line .ansi-bold    { font-weight: bold; }
+.log-line .ansi-black   { color: var(--vp-text3); }
+.log-line .ansi-red     { color: var(--vp-failed); }
+.log-line .ansi-green   { color: var(--vp-passed); }
+.log-line .ansi-yellow  { color: var(--vp-heading); }
+.log-line .ansi-blue    { color: var(--vp-link); }
+.log-line .ansi-magenta { color: #bc8cff; }
+.log-line .ansi-cyan    { color: #39c5cf; }
+.log-line .ansi-white   { color: var(--vp-text); }
+.log-line .ansi-gray    { color: var(--vp-text2); }

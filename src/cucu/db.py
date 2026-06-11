@@ -102,6 +102,8 @@ class scenario(BaseModel):
     cucu_config = JSONField(null=True)
     line_number = IntegerField()
     log_files = JSONField(null=True)
+    before_hooks = JSONField(null=True)
+    after_hooks = JSONField(null=True)
 
 
 class step(BaseModel):
@@ -307,6 +309,8 @@ def finish_scenario_record(scenario_obj):
         cucu_config=getattr(scenario_obj, "cucu_config_json", dict()),
         browser_info=getattr(scenario_obj, "browser_info", dict()),
         custom_data=getattr(scenario_obj, "custom_data", dict()),
+        before_hooks=getattr(scenario_obj, "before_hook_results", []),
+        after_hooks=getattr(scenario_obj, "after_hook_results", []),
     ).where(scenario.scenario_run_id == scenario_obj.scenario_run_id).execute()
 
 
