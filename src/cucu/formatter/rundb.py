@@ -136,6 +136,7 @@ class RundbFormatter(Formatter):
         self.this_scenario = scenario
         self.this_steps = []
         self.next_start_at = get_iso_timestamp_with_ms()
+        scenario.start_at = self.next_start_at
         scenario.custom_data = {}
         scenario.scenario_run_id = generate_short_id(
             f"{scenario.feature.feature_run_id}_{time.perf_counter()}"

@@ -249,7 +249,10 @@ def generate(results: Path, basepath: Path):
                     if not step_dict["end_at"]:
                         continue
 
-                    if not step_dict["start_at"]:
+                    if (
+                        not step_dict["start_at"]
+                        or not scenario_dict["start_at"]
+                    ):
                         step_dict["timestamp"] = ""
                         step_dict["time_offset"] = ""
                         continue

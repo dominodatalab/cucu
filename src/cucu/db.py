@@ -189,6 +189,7 @@ def record_scenario(scenario_obj):
         line_number=scenario_obj.line,
         seq=scenario_obj.seq,
         tags=scenario_obj.tags,
+        start_at=parse_iso_timestamp(getattr(scenario_obj, "start_at", None)),
     )
 
 
