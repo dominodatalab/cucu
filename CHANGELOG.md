@@ -30,6 +30,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
   - exact-case match still outranks caseless match for the same element area
 
 # 1.4.19
+- Add - replay timeline view for scenario reports with stage, step navigation, and synced log panels
+- Add - capture before/after scenario hook results (stdout, stderr, status, errors) and persist them on the scenario record
 - Add - `cucu run` accepts multiple feature paths as separate arguments (e.g. `cucu run a.feature b.feature`); multiple paths must share a common `features` ancestor directory
 
 # 1.4.18

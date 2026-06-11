@@ -86,6 +86,12 @@ def step_text_list_to_html(text):
     )
 
 
+def browser_log_level(raw_level):
+    if raw_level in ("SEVERE", "ERROR", "CRITICAL"):
+        return "error"
+    return "warning" if raw_level == "WARNING" else "info"
+
+
 def step_table_to_html(table_data):
     """Convert a step table data structure to an indented HTML table format"""
     text_indent = " " * 8
@@ -104,11 +110,13 @@ def generate(results: Path, basepath: Path):
         escape=escape,
         urlencode=urlencode,
         browser_timestamp_to_datetime=browser_timestamp_to_datetime,
+        browser_log_level=browser_log_level,
         step_text_list_to_html=step_text_list_to_html,
         step_table_to_html=step_table_to_html,
     )
     feature_template = templates.get_template("feature.html")
     scenario_template = templates.get_template("scenario.html")
+    scenario_replay_template = templates.get_template("scenario_replay.html")
 
     ## prepare report directory
     cucu_dir = Path(sys.modules["cucu"].__file__).parent
@@ -257,11 +265,17 @@ def generate(results: Path, basepath: Path):
                     timestamp = step_dict["start_at"]
                     step_dict["timestamp"] = timestamp
 
-                    time_offset = datetime.fromtimestamp(
+                    # Clamp to >= 0: the first step can start a hair before scenario.start_at
+                    # due to timing, but a negative epoch in datetime.fromtimestamp wraps to
+                    # 23:59:59.999 which would push the step bar off the timeline.
+                    offset_seconds = max(
+                        0.0,
                         (
                             timestamp - scenario_dict["start_at"]
                         ).total_seconds(),
-                        timezone.utc,
+                    )
+                    time_offset = datetime.fromtimestamp(
+                        offset_seconds, timezone.utc
                     )
                     step_dict["time_offset"] = time_offset
 
@@ -322,6 +336,19 @@ def generate(results: Path, basepath: Path):
                 )
                 scenario_output_filepath = scenario_basepath / "index.html"
                 scenario_output_filepath.write_text(rendered_scenario_html)
+
+                # render replay-style scenario view
+                rendered_replay_html = scenario_replay_template.render(
+                    basepath=results,
+                    feature=feature_dict,
+                    path_exists=lambda path: Path(path).exists(),
+                    scenario=scenario_dict,
+                    steps=scenario_dict["steps"],
+                    title=scenario_dict["name"],
+                    dir_depth="../../",
+                )
+                scenario_replay_filepath = scenario_basepath / "replay.html"
+                scenario_replay_filepath.write_text(rendered_replay_html)
 
             # render feature html
             rendered_feature_html = feature_template.render(
