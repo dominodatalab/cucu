@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.25
+- Add - replay timeline view for scenario reports with stage, step navigation, and synced log panels
+- Add - capture before/after scenario hook results (stdout, stderr, status, errors) and persist them on the scenario record
+
 # 1.4.24
 - Chore - upgrade click to 8.4.0 for ParamType typing improvements and bug fixes (readline on non-Windows, Fish shell completion, CLI error messaging)
 - Chore - update GitHub Actions checkout and cimg/python:3.13 Docker image digests
