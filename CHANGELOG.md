@@ -6,12 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 # 1.4.25
-- Add - replay timeline view (`replay.html`) alongside classic scenario view; displays current step screenshot/text, step timeline, and synchronized log panels (step, cucu, browser, stdout, stderr, errors)
-- Add - replay view as declarative Alpine.js component with state management in template bindings
-- Add - capture before/after scenario hook results (stdout, stderr, status, error message) persisted on scenario db record via two new JSON columns
-- Chore - deduplicate hook execution in `environment.py` into shared `_run_hook` function
-- Chore - extract `browser_log_level` helper to `html.py`
-- Fix - clamp step time offsets to >= 0 to prevent negative-epoch wrapping in `datetime.fromtimestamp`
+- Add - replay timeline view for scenario reports with stage, step navigation, and synced log panels
+- Add - capture before/after scenario hook results (stdout, stderr, status, errors) and persist them on the scenario record
 
 # 1.4.24
 - Chore - upgrade click to 8.4.0 for ParamType typing improvements and bug fixes (readline on non-Windows, Fish shell completion, CLI error messaging)
