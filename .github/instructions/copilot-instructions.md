@@ -67,10 +67,18 @@ When the user asks to **split** changes into separate branches:
 3. **Report** — Branch name(s), what each contains, and the suggested commit message for each.
 
 ### Syncing branch with base (merge from latest)
-When the user asks to **update** the current branch with the latest from its base (e.g. "get latest", "merge from latest", "sync with main"): fetch the base (default `origin/main` or `origin/HEAD`), **merge** (do not rebase) into the current branch. If no conflicts, commit and finish. **If conflicts in `pyproject.toml`, `uv.lock`, or `CHANGELOG.md`:** take **theirs** for `pyproject.toml` and `uv.lock`, then bump version once (see **Bump version**) and run `uv lock`; in `CHANGELOG.md`, put a new `# X.Y.Z` at the top with **our** changelog items only, then base's sections in order, and remove conflict markers. Stage resolved files and commit (e.g. "Merge origin/<base> into <branch>"). Resolve any other conflicted files manually.
+When the user asks to **update** the current branch with the latest from its base (e.g. "get latest", "merge from latest", "sync with main"): fetch the base (default `origin/main` or `origin/HEAD`), **merge** (do not rebase) into the current branch. If no conflicts, commit and finish.
+
+**If there are conflicts in ANY of `pyproject.toml`, `uv.lock`, or `CHANGELOG.md`:** follow this sequence:
+
+1. **Take theirs for version files:** `git checkout --theirs pyproject.toml uv.lock` (even if there's no conflict in them)
+2. **Bump the version:** Run `uv version --bump patch` then `uv lock`
+3. **Resolve CHANGELOG.md:** Put a new `# X.Y.Z` at the top with **only our** changelog items (from this branch's PR), then main's existing sections in order below it. Remove all conflict markers.
+4. **Commit:** Stage all resolved files and commit with message like "Merge origin/<base> into <branch>"
+5. **Push and verify:** Push the branch and run `make fix && uv run pytest tests` to confirm everything works
 
 ### Bump version
-Run `uv version --bump patch`, then run `uv lock`, then add a `# X.Y.Z` section at the top of `CHANGELOG.md` with `- Type - subject` bullets from the PR/commit message (Fix, Add, Change, Chore, etc.).
+Run `uv version --bump patch`, then run `uv lock`, then add a `# X.Y.Z` section at the top of `CHANGELOG.md` with `- Type - subject` bullets from the PR/commit message (Fix, Add, Change, Chore, etc.). This step is **mandatory** whenever merging from the base branch results in conflicts in CHANGELOG.md.
 
 ## Step Definitions
 
