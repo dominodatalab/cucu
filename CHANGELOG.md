@@ -8,6 +8,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 # 1.4.25
 - Fix - populate scenario `start_at` in DB at row creation time to prevent `None` on worker crash; prevents reporter `TypeError` when computing step time offsets
 - Fix - report generator guards against scenario `start_at` being `None` (defensive against incomplete DB records)
+- Add - replay timeline view for scenario reports with stage, step navigation, and synced log panels
+- Add - capture before/after scenario hook results (stdout, stderr, status, errors) and persist them on the scenario record
 
 # 1.4.24
 - Chore - upgrade click to 8.4.0 for ParamType typing improvements and bug fixes (readline on non-Windows, Fish shell completion, CLI error messaging)
