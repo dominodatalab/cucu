@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.27
+- Fix - JUnit formatter emits an `<error>` child element for errored scenarios (e.g. hook failures), so standard JUnit consumers (CircleCI, TestRail) classify them as errors instead of silently reporting them as passed
+
 # 1.4.26
 - Fix - populate scenario `start_at` in DB at row creation time to prevent `None` on worker crash; prevents reporter `TypeError` when computing step time offsets
 - Fix - report generator guards against scenario `start_at` being `None` (defensive against incomplete DB records)
