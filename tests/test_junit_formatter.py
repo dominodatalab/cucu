@@ -127,11 +127,10 @@ def test_failed_scenario_emits_failure_only(junit_env):
 
     try:
         raise RuntimeError("assertion did not hold")
-    except RuntimeError as raised:
-        error = raised
-        traceback = raised.__traceback__
-
-    step = StubStep(Status.failed, exception=error, exc_traceback=traceback)
+    except RuntimeError as error:
+        step = StubStep(
+            Status.failed, exception=error, exc_traceback=error.__traceback__
+        )
 
     testsuite = _run_feature(junit_env, feature, scenario, step)
     testcase = testsuite.find("testcase")
@@ -168,9 +167,7 @@ def test_errored_scenario_emits_error_child(junit_env):
     check.is_not_none(error_element, "errored scenario must emit <error>")
     check.is_none(testcase.find("failure"), "errored must not emit <failure>")
     if error_element is not None:
-        check.is_true(
-            error_element.text.strip(), "<error> must not be empty"
-        )
+        check.is_true(error_element.text.strip(), "<error> must not be empty")
         check.is_in("HOOK-ERROR in before_scenario", error_element.text)
     check.equal(testsuite.get("errors"), "1")
     check.equal(testsuite.get("failures"), "0")

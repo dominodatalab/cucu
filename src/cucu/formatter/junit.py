@@ -77,31 +77,25 @@ class CucuJUnitFormatter(Formatter):
                 # error-like status (predominantly a before/after-scenario hook
                 # failure, where no step ran; see environment.py). Standard JUnit
                 # consumers classify a testcase by its child element, so we must
-                # capture details and emit an <error> child below.
-                details = (
-                    self._collect_hook_error_lines()
-                    + self._collect_detail_lines()
-                )
+                # capture the hook error message and emit an <error> child below.
+                details = []
+                for results_attr in (
+                    "before_hook_results",
+                    "after_hook_results",
+                ):
+                    for hook_result in getattr(
+                        self.current_scenario, results_attr, []
+                    ):
+                        if hook_result.get("status") == "error":
+                            details += hook_result.get("error_message", [])
+
+                details += self._collect_detail_lines()
                 if not details:
                     details = [f"scenario errored with status: {status}"]
                 self.current_scenario_results["error"] = details
 
             if status == "skipped":
                 self.current_scenario_results["skipped"] = True
-
-    def _collect_hook_error_lines(self):
-        """
-        collect the error message lines captured by failing before/after
-        scenario hooks (see _run_hook in environment.py)
-        """
-        lines = []
-        for results_attr in ("before_hook_results", "after_hook_results"):
-            for hook_result in getattr(
-                self.current_scenario, results_attr, []
-            ):
-                if hook_result.get("status") == "error":
-                    lines += hook_result.get("error_message", [])
-        return lines
 
     def _collect_detail_lines(self):
         """
