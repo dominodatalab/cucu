@@ -68,45 +68,73 @@ class CucuJUnitFormatter(Formatter):
                 status = self.current_scenario.compute_status().name
 
             self.current_scenario_results["status"] = status
-            failures = []
 
             if status == "failed" and self.current_scenario_traceback:
-                failure_handlers = CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"]
+                self.current_scenario_results["failure"] = (
+                    self._collect_detail_lines()
+                )
+            elif status not in ("passed", "failed", "skipped"):
+                # error-like status (predominantly a before/after-scenario hook
+                # failure, where no step ran; see environment.py). Standard JUnit
+                # consumers classify a testcase by its child element, so we must
+                # capture the hook error message and emit an <error> child below.
+                details = []
+                for results_attr in (
+                    "before_hook_results",
+                    "after_hook_results",
+                ):
+                    for hook_result in getattr(
+                        self.current_scenario, results_attr, []
+                    ):
+                        if hook_result.get("status") == "error":
+                            details += hook_result.get("error_message", [])
 
-                for failure_handler in failure_handlers:
-                    failures.append(
-                        failure_handler(
-                            self.current_feature, self.current_scenario
-                        )
-                    )
-
-                failures += [
-                    f"{self.current_step.keyword} {self.current_step.name} (after {round(self.current_step.duration, 3)}s)"
-                ]
-
-                if error := self.current_step.exception:
-                    if isinstance(error, RetryError):
-                        error = error.last_attempt.exception()
-
-                    if len(error.args) > 0 and isinstance(error.args[0], str):
-                        error_class_name = error.__class__.__name__
-                        error_lines = error.args[0].splitlines()
-                        error_lines[0] = (
-                            f"{error_class_name}: {error_lines[0]}"
-                        )
-                    else:
-                        error_lines = [repr(error)]
-                    failures += error_lines
-
-                if CONFIG["CUCU_JUNIT_WITH_STACKTRACE"] == "true":
-                    failures += traceback.format_tb(
-                        self.current_scenario_traceback
-                    )
-
-                self.current_scenario_results["failure"] = failures
+                details += self._collect_detail_lines()
+                if not details:
+                    details = [f"scenario errored with status: {status}"]
+                self.current_scenario_results["error"] = details
 
             if status == "skipped":
                 self.current_scenario_results["skipped"] = True
+
+    def _collect_detail_lines(self):
+        """
+        build the human readable detail lines for a failed/errored scenario:
+        custom failure handler output, the failing step, the exception, and
+        optionally the formatted stack trace
+        """
+        details = []
+        failure_handlers = CONFIG["__CUCU_CUSTOM_FAILURE_HANDLERS"]
+
+        for failure_handler in failure_handlers:
+            details.append(
+                failure_handler(self.current_feature, self.current_scenario)
+            )
+
+        if getattr(self, "current_step", None) is not None:
+            details += [
+                f"{self.current_step.keyword} {self.current_step.name} (after {round(self.current_step.duration, 3)}s)"
+            ]
+
+            if error := self.current_step.exception:
+                if isinstance(error, RetryError):
+                    error = error.last_attempt.exception()
+
+                if len(error.args) > 0 and isinstance(error.args[0], str):
+                    error_class_name = error.__class__.__name__
+                    error_lines = error.args[0].splitlines()
+                    error_lines[0] = f"{error_class_name}: {error_lines[0]}"
+                else:
+                    error_lines = [repr(error)]
+                details += error_lines
+
+        if (
+            CONFIG["CUCU_JUNIT_WITH_STACKTRACE"] == "true"
+            and self.current_scenario_traceback
+        ):
+            details += traceback.format_tb(self.current_scenario_traceback)
+
+        return details
 
     def scenario(self, scenario):
         self.update_scenario()
@@ -118,6 +146,7 @@ class CucuJUnitFormatter(Formatter):
             "status": "pending",
             "time": "n/a",
             "failure": None,
+            "error": None,
             "skipped": None,
         }
         self.current_scenario_results["foldername"] = escape(
@@ -290,6 +319,12 @@ class CucuJUnitFormatter(Formatter):
                 cleaned_failure_message = remove_ansi(failure_message)
                 failure.append(bs4.CData(cleaned_failure_message))
                 testcase.append(failure)
+
+            if scenario.get("error") is not None:
+                error_message = "\n".join(scenario["error"])
+                error = bs4.Tag(name="error")
+                error.append(bs4.CData(remove_ansi(error_message)))
+                testcase.append(error)
 
             if scenario["skipped"] is not None:
                 testcase.append(bs4.Tag(name="skipped"))
