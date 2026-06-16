@@ -38,3 +38,38 @@ Feature: Run with JUnit
       """
       raise AssertionError("step fails on purpose")
       """
+
+  Scenario: User gets an <error> element in the JUnit XML for an errored scenario
+    Given I create a file at "{CUCU_RESULTS_DIR}/junit_error/environment.py" with the following:
+      """
+      from cucu.environment import *
+      from cucu import register_before_scenario_hook
+
+      def before_scenario_fail(ctx):
+          raise AssertionError("boom")
+
+      register_before_scenario_hook(before_scenario_fail)
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/junit_error/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/junit_error/echo.feature" with the following:
+      """
+      Feature: Feature that errors on a before hook
+
+        Scenario: Hello world scenario
+          Given I echo "Hello World"
+      """
+        * # a failing before_scenario hook reports as error, not failure, so the
+        * # JUnit testcase must carry an <error> child for standard consumers
+        * # (CircleCI, TestRail) to classify it as an error and not a pass
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/junit_error/echo.feature --show-skips --results {CUCU_RESULTS_DIR}/junit_error_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     Then I should see the file at "{CUCU_RESULTS_DIR}/junit_error_results/Feature that errors on a before hook.xml" contains the following:
+      """
+      <error>
+      """
+      And I should see the file at "{CUCU_RESULTS_DIR}/junit_error_results/Feature that errors on a before hook.xml" contains the following:
+      """
+      HOOK-ERROR in before_scenario_fail: AssertionError: boom
+      """
