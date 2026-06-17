@@ -65,11 +65,13 @@ Feature: Run with hooks
       Hello
 
       .* DEBUG just logging some stuff from my after step hook
+      .* DEBUG HOOK after_step_log: passed ✅
           Given I echo "Hello" \s*# .*
       .* DEBUG just logging some stuff from my before step hook
       World
 
       .* DEBUG just logging some stuff from my after step hook
+      .* DEBUG HOOK after_step_log: passed ✅
             And I echo "World" \s*# .*
       .* DEBUG No browser found, skipping keep-alive
       .* DEBUG HOOK start_selenium_keep_alive: passed ✅
