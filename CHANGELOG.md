@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.28
+- Fix - after-hook errors are no longer swallowed or allowed to corrupt status: a failing `after_step` hook keeps the step's own status (and still captures browser logs) instead of being reclassified by behave; `after_step` and `after_scenario` hook errors escalate the scenario to `error` only when no step actually failed (step-failure wins); `after_all` hooks always run cleanup (`CONFIG.restore`) and a hook error now aborts the run rather than being silently dropped
+
 # 1.4.27
 - Fix - JUnit formatter emits an `<error>` child element for errored scenarios (e.g. hook failures), so standard JUnit consumers (CircleCI, TestRail) classify them as errors instead of silently reporting them as passed
 
