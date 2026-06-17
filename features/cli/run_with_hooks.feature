@@ -172,7 +172,7 @@ Feature: Run with hooks
         Scenario: Hello world scenario
           Given I echo "Hello World"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/failing_custom_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/failing_custom_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_custom_hooks/echo.feature --results {CUCU_RESULTS_DIR}/failing_custom_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/failing_custom_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      Then I should see "{STDOUT}" contains the following
       """
       HOOK-ERROR in after_scenario_fail: AssertionError: boom
@@ -248,7 +248,7 @@ Feature: Run with hooks
         Scenario: Hello world scenario
           Given I echo "Hello World"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_fail_pass_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      Then I should see "{STDOUT}" contains the following
       """
       HOOK-ERROR in after_scenario_fail: AssertionError: boom
@@ -295,7 +295,7 @@ Feature: Run with hooks
         Scenario: Hello world scenario
           Given I echo "Hello World"
       """
-     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks/echo.feature --results {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_results/ -l debug --no-color-output --generate-report --report {CUCU_RESULTS_DIR}/mixed_results_pass_fail_hooks_report/" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
      Then I should see "{STDOUT}" contains the following
       """
       HOOK-ERROR in after_scenario_fail: AssertionError: boom
@@ -350,3 +350,101 @@ Feature: Run with hooks
      # When I wait to click the link "Logs"
      #  And I wait to click the link "cucu.debug.console.log"
      # Then I wait to see the text "This error should be logged and reported."
+
+  Scenario: When an after_step hook fails on a passing step, the Scenario reports as error
+    Given I create a file at "{CUCU_RESULTS_DIR}/failing_after_step_pass/environment.py" with the following:
+      """
+      from cucu.environment import *
+      from cucu import register_after_step_hook
+
+      def after_step_fail(ctx):
+          raise AssertionError("boom")
+
+      register_after_step_hook(after_step_fail)
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/failing_after_step_pass/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/failing_after_step_pass/echo.feature" with the following:
+      """
+      Feature: Feature with a passing step and a failing after_step hook
+
+        Scenario: Hello world scenario
+          Given I echo "Hello World"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_after_step_pass/echo.feature --results {CUCU_RESULTS_DIR}/failing_after_step_pass_results/ -l debug --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     Then I should see "{STDOUT}" contains the following
+      """
+      HOOK-ERROR in after_step_fail: AssertionError: boom
+      """
+     When I run the command "cucu report {CUCU_RESULTS_DIR}/failing_after_step_pass_results --output {CUCU_RESULTS_DIR}/failing_after_step_pass_report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/failing_after_step_pass_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
+     Then I should see a table that contains rows matching the following
+        | .* | Feature with a passing step and a failing after_step hook | Hello world scenario | .* | error | .* |
+
+  Scenario: When an after_step hook fails on a failing step, the Scenario still reports as failed
+    Given I create a file at "{CUCU_RESULTS_DIR}/failing_after_step_fail/environment.py" with the following:
+      """
+      from cucu.environment import *
+      from cucu import register_after_step_hook
+
+      def after_step_fail(ctx):
+          raise AssertionError("boom")
+
+      register_after_step_hook(after_step_fail)
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/failing_after_step_fail/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/failing_after_step_fail/echo.feature" with the following:
+      """
+      Feature: Feature with a failing step and a failing after_step hook
+
+        Scenario: Failing scenario
+          Then I should see "Hello" is equal to "Goodbye"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_after_step_fail/echo.feature --results {CUCU_RESULTS_DIR}/failing_after_step_fail_results/ -l debug --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     Then I should see "{STDOUT}" contains the following
+      """
+      HOOK-ERROR in after_step_fail: AssertionError: boom
+      """
+     When I run the command "cucu report {CUCU_RESULTS_DIR}/failing_after_step_fail_results --output {CUCU_RESULTS_DIR}/failing_after_step_fail_report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/failing_after_step_fail_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
+     Then I should see a table that contains rows matching the following
+        | .* | Feature with a failing step and a failing after_step hook | Failing scenario | .* | failed | .* |
+
+  Scenario: When an after_all hook fails, cleanup still runs and the run is marked failing
+    Given I create a file at "{CUCU_RESULTS_DIR}/failing_after_all/environment.py" with the following:
+      """
+      from cucu.environment import *
+      from cucu import register_after_all_hook
+
+      def after_all_fail(ctx):
+          raise AssertionError("boom")
+
+      register_after_all_hook(after_all_fail)
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/failing_after_all/steps/__init__.py" with the following:
+      """
+      from cucu.steps import *
+      """
+      And I create a file at "{CUCU_RESULTS_DIR}/failing_after_all/echo.feature" with the following:
+      """
+      Feature: Feature with a passing scenario and a failing after_all hook
+
+        Scenario: Hello world scenario
+          Given I echo "Hello World"
+      """
+     When I run the command "cucu run {CUCU_RESULTS_DIR}/failing_after_all/echo.feature --results {CUCU_RESULTS_DIR}/failing_after_all_results/ -l debug --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "1"
+     Then I should see "{STDOUT}" contains the following
+      """
+      HOOK-ERROR in after_all_fail: AssertionError: boom
+      """
+      And I should see "{STDOUT}" contains the following
+      """
+      1 scenario passed, 0 failed, 0 skipped
+      """
