@@ -143,6 +143,16 @@
 
 <!-- STAGE: shows current step's screenshot or text -->
 <div id="vp-stage">
+  {% if screenshots_video %}
+  <video id="scenario-video"
+         data-fps="{{ screenshots_video_fps }}"
+         data-step-count="{{ screenshots_video_steps }}"
+         preload="auto"
+         style="max-width: 100%; max-height: 100%; border-radius: 6px; box-shadow: 0 8px 32px var(--vp-stage-shadow);">
+    <source src="{{ screenshots_video }}" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  {% else %}
   {% for step in steps %}
   {% set si = loop.index0 %}
   <div class="step-frame" id="frame-{{ si }}" x-show="shownStepIdx === {{ si }}" style="display:none">
@@ -178,6 +188,7 @@
 
   <button class="stage-nav-btn" id="stage-btn-prev" type="button" title="Previous screenshot (← arrow)" @click="shiftScreenshot(-1)">&#8249;</button>
   <button class="stage-nav-btn" id="stage-btn-next" type="button" title="Next screenshot (→ arrow)" @click="shiftScreenshot(1)">&#8250;</button>
+  {% endif %}
 </div>
 
 <div id="stage-resize-handle" @pointerdown="onResizeDrag($event, 'vp-stage', 120, 'vp-stage-height')"></div>

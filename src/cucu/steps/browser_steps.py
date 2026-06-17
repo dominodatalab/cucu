@@ -461,3 +461,13 @@ def get_browser_window_size(ctx, variable):
     logger.debug(
         f"saved browser window size {size['width']}x{size['height']} to variable {variable}"
     )
+
+
+@step('I should see the element "{selector}"')
+def should_see_element(ctx, selector):
+    ctx.check_browser_initialized()
+    try:
+        ctx.browser.driver.find_element("css selector", selector)
+        logger.debug(f"found element with selector: {selector}")
+    except Exception:
+        raise AssertionError(f'element with selector "{selector}" not found')

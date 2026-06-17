@@ -204,6 +204,8 @@
       _browserLineEls:    null,
       _stepScrollBusy:    {},
       _browserScrollBusy: { value: false },
+      _videoElement:      null,
+      _videoSyncActive:   false,
 
       // ----- derived (getters) -----
       get headPct()       { return this.currentTimeSec / TOTAL_DUR * 100; },
@@ -283,6 +285,12 @@
           });
         }
 
+        // Get video element reference if it exists
+        this._videoElement = document.getElementById('scenario-video');
+        if (this._videoElement) {
+          this._videoSyncActive = true;
+        }
+
         var startTime = 0;
         var hash = window.location.hash;
         if (hash && hash.indexOf('#step_') === 0) {
@@ -327,10 +335,22 @@
 
       seekToTime(t) {
         this.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
+        if (this._videoElement) {
+          this._videoSyncActive = false;
+          this._videoElement.currentTime = this.currentTimeSec;
+          this._videoSyncActive = true;
+        }
         this._reengageFollow();
         this._updateDisplay(true);
       },
-      seekToStepIdx(idx) { this.seekToTime(stepIdxToTime(idx)); },
+      seekToStepIdx(idx) {
+        if (this._videoElement && this._videoElement.dataset.fps) {
+          // Video mode: seek by step index / fps
+          var fps = parseInt(this._videoElement.dataset.fps, 10);
+          this._videoElement.currentTime = idx / fps;
+        }
+        this.seekToTime(stepIdxToTime(idx));
+      },
       navigateStep(delta) {
         if (delta > 0 && this.shownStepIdx >= TOTAL_STEPS - 1) { this.seekToTime(PLAY_END); return; }
         this.seekToStepIdx(Math.max(0, Math.min(this.shownStepIdx + delta, TOTAL_STEPS - 1)));

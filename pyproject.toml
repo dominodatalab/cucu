@@ -1,6 +1,6 @@
 [project]
 name = "cucu"
-version = "1.4.26"
+version = "1.4.27"
 description = "Easy BDD web testing"
 readme = "README.md"
 license = "BSD-3-Clause-Clear"
@@ -57,6 +57,9 @@ dependencies = [
     "tabulate~=0.10.0",
     "tenacity>=9.0",
 ]
+
+[project.optional-dependencies]
+video = ["opencv-python-headless>=4.10", "pillow>=10.4"]
 
 [project.urls]
 Homepage  = "https://github.com/dominodatalab/cucu/wiki"

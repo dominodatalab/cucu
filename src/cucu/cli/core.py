@@ -37,6 +37,7 @@ from cucu.db import (
 )
 from cucu.lint import linter
 from cucu.utils import generate_short_id
+from cucu.video import encoder as video_encoder
 
 # set env var BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON=yes before importing behave
 os.environ["BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON"] = "yes"
@@ -564,6 +565,43 @@ def _generate_report(
 
     if results_dir.exists():
         consolidate_database_files(results_dir, combine)
+
+    # Encode scenario videos if enabled
+    from cucu.config import CONFIG
+    from cucu.db import scenario as scenario_model
+
+    if CONFIG.get("CUCU_SCREENSHOT_VIDEO", False):
+        try:
+            db_path = results_dir / "run.db"
+            if db_path.exists():
+                from cucu import db as cucu_db
+
+                cucu_db.init_html_report_db(db_path)
+                for scen in scenario_model.select():
+                    # Build scenario directory path
+                    from cucu.utils import ellipsize_filename
+
+                    feature_folder = (
+                        scen.feature.folder_name
+                        if scen.feature.folder_name
+                        else None
+                    )
+                    if not feature_folder:
+                        feature_folder = ellipsize_filename(scen.feature.name)
+                    scenario_folder = (
+                        scen.folder_name if scen.folder_name else None
+                    )
+                    if not scenario_folder:
+                        scenario_folder = ellipsize_filename(scen.name)
+                    scenario_dir = (
+                        results_dir / feature_folder / scenario_folder
+                    )
+                    if scenario_dir.exists():
+                        video_encoder.encode_scenario_video(
+                            scen.scenario_run_id, scenario_dir
+                        )
+        except Exception as e:
+            logger.warning(f"Video encoding failed: {e}")
 
     report_location = reporter.generate(results_dir, report_folder)
     print(f"HTML test report at {report_location}")

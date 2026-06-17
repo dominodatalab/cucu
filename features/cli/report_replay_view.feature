@@ -62,3 +62,16 @@ Feature: Report replay view
      Then I wait to see the text "1 /"
       And I should see the link "Flat"
       And I should see the link "Index"
+
+  Scenario: Replay view renders with CUCU_SCREENSHOT_VIDEO enabled
+    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/replay-video-echo-results --env CUCU_SCREENSHOT_VIDEO=true" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/replay-video-echo-results --output {CUCU_RESULTS_DIR}/replay-video-echo-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/replay-video-echo-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     When I click the link "Echo"
+      And I click the link "Echo an environment variable"
+      And I click the link "🔁 Replay"
+     Then I wait to see the text "1 / 6"
+      And I should see the text "Given"
+      And I should see the link "☑ Classic"
+      And I should see the element "video#scenario-video"

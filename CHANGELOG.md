@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.27
+- Add - video screenshot output (AV1 codec, variable framerate, report-time encoding) via `CUCU_SCREENSHOT_VIDEO=true`; encodes one MP4 per scenario with per-frame timestamps, includes text-cards for browserless steps, plays in replay view with timeline sync; requires ffmpeg on $PATH and `uv sync --extra video` for Pillow
+
 # 1.4.26
 - Fix - populate scenario `start_at` in DB at row creation time to prevent `None` on worker crash; prevents reporter `TypeError` when computing step time offsets
 - Fix - report generator guards against scenario `start_at` being `None` (defensive against incomplete DB records)

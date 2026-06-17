@@ -478,6 +478,16 @@ CONFIG.define(
     default=30,
 )
 CONFIG.define(
+    "CUCU_SCREENSHOT_VIDEO",
+    "when set to true, cucu report encodes screenshots into an H.264 video",
+    default=False,
+)
+CONFIG.define(
+    "CUCU_SCREENSHOT_VIDEO_FPS",
+    "frames per second for screenshot video (default: 1)",
+    default=1,
+)
+CONFIG.define(
     "CUCU_SELENIUM_KEEP_ALIVE_MAX_DURATION_S",
     "keep-alive total max duration in seconds to prevent infinite keep-alive pings (default: 30 minutes)",
     default=1800,
