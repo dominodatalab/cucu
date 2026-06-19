@@ -58,9 +58,16 @@ def before_all(ctx):
 
 
 def after_all(ctx):
-    # run the after all hooks
+    # run the after all hooks; wrap each so a raising hook never skips cleanup
+    hook_errored = False
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
-        hook(ctx)
+        if _run_hook(ctx, hook)["status"] == "error":
+            hook_errored = True
+
+    # signal the run as aborted (same mechanism as runtime timeout) so a hook
+    # error at the run tier surfaces as a failure rather than being swallowed
+    if hook_errored:
+        ctx._runner.aborted = True
 
     CONFIG.restore(with_pop=True)
 
@@ -207,11 +214,17 @@ def after_scenario(ctx, scenario):
 
     # run after all scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"][::-1]:
-        scenario.after_hook_results.append(_run_hook(ctx, hook))
+        hook_result = _run_hook(ctx, hook)
+        if hook_result["status"] == "error":
+            scenario.hook_failed = True
+        scenario.after_hook_results.append(hook_result)
 
     # run after this scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"][::-1]:
-        scenario.after_hook_results.append(_run_hook(ctx, hook))
+        hook_result = _run_hook(ctx, hook)
+        if hook_result["status"] == "error":
+            scenario.hook_failed = True
+        scenario.after_hook_results.append(hook_result)
 
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 
@@ -235,6 +248,15 @@ def after_scenario(ctx, scenario):
     )
 
     scenario.end_at = get_iso_timestamp_with_ms()
+
+    # step-failure wins over a hook error: if a step actually failed, the
+    # scenario already has its own failure signal, so don't let an after-hook
+    # error (from after_step or after_scenario) reclassify it as 'error'.
+    if scenario.hook_failed and any(
+        step.status.is_failure() or step.status.is_error()
+        for step in scenario.all_steps
+    ):
+        scenario.hook_failed = False
 
 
 def download_mht_data(ctx):
@@ -369,9 +391,13 @@ def after_step(ctx, step):
 
     CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
 
-    # run after all step hooks
+    # run after all step hooks; wrap each so a raising hook neither skips the
+    # browser-log capture below nor lets behave reclassify the step's status.
+    # An errored hook escalates the scenario to 'error' via hook_failed unless a
+    # step actually failed (resolved at the end of after_scenario).
     for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
-        hook(ctx)
+        if _run_hook(ctx, hook)["status"] == "error":
+            ctx.scenario.hook_failed = True
 
     # Capture browser logs and info for this step
     step.browser_logs = []

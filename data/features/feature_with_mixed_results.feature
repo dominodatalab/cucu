@@ -14,9 +14,9 @@ Feature: Feature with mixed results
       And I echo "should never see this"   
 
   Scenario: Scenario with after-hook error
-    # Consider after-scenario errors outside of scenario status
+    # A passing scenario whose after-hook errors is reported as error
     Given I error after-scenario hook
-      And I echo "should see this as a pass"
+      And I echo "should see this scenario reported as an error"
 
   Scenario: Scenario that also passes
     Given I echo "passing"
