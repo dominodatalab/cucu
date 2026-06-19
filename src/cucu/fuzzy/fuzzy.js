@@ -384,9 +384,14 @@
                 var thing = things[tIndex];
 
                 var nameInNestedChildLabel = `<${thing}><*>...${name}...</*></${thing}>`;
-                results = jqRoots('*:vis:' + matcher + '("' + name + '")').parents(thing).toArray();
-                if (cucu.debug) { console.log(nameInNestedChildLabel, results); }
-                elements = elements.concat(results.map(x => ({element: x, label: nameInNestedChildLabel, label_name: 'nameInNestedChild'})));
+                var innerMatches = jqRoots('*:vis:' + matcher + '("' + name + '")').toArray();
+                for (var iIndex = 0; iIndex < innerMatches.length; iIndex++) {
+                    var innerEl = innerMatches[iIndex];
+                    var innerImm = getImmediateText(innerEl);
+                    var ancestors = jqCucu(innerEl).parents(thing).toArray();
+                    if (cucu.debug) { console.log(nameInNestedChildLabel, ancestors); }
+                    elements = elements.concat(ancestors.map(x => ({element: x, label: nameInNestedChildLabel, label_name: 'nameInNestedChild', immediate_override: innerImm})));
+                }
 
                 for(var aIndex=0; aIndex < attributes.length; aIndex++) {
                     var attribute_name = attributes[aIndex];
