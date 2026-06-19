@@ -72,8 +72,7 @@
         match: {
             exact: 205,
             caselessexact: 200,
-            substring: 55,
-            caselesssubstring: 50
+            substring: 55
         },
         attrSub: {
             'aria-label': 34,
@@ -140,9 +139,6 @@
         } else if (includes(imm, query)) {
             best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.substring);
             higherPriorityMatchFound = true;
-        } else if (includesCi(imm, query)) {
-            best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.caselesssubstring);
-            higherPriorityMatchFound = true;
         }
 
         var attrNames = ['aria-label', 'id', 'class', 'title', 'placeholder', 'value'];
@@ -160,9 +156,6 @@
             } else if (includes(av, query)) {
                 best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.substring + sub);
                 higherPriorityMatchFound = true;
-            } else if (av.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
-                best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.caselesssubstring + sub);
-                higherPriorityMatchFound = true;
             }
         }
 
@@ -178,8 +171,6 @@
         } else if (includes(ft, query)) {
             // Substring matches never get promoted
             best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.substring);
-        } else if (includesCi(ft, query)) {
-            best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.caselesssubstring);
         }
 
         if (best === 0 && ft.length === 0) {
