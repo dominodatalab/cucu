@@ -72,8 +72,7 @@
         match: {
             exact: 205,
             caselessexact: 200,
-            substring: 55,
-            caselesssubstring: 50
+            substring: 55
         },
         attrSub: {
             'aria-label': 34,
@@ -140,9 +139,6 @@
         } else if (includes(imm, query)) {
             best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.substring);
             higherPriorityMatchFound = true;
-        } else if (includesCi(imm, query)) {
-            best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.caselesssubstring);
-            higherPriorityMatchFound = true;
         }
 
         var attrNames = ['aria-label', 'id', 'class', 'title', 'placeholder', 'value'];
@@ -160,9 +156,6 @@
             } else if (includes(av, query)) {
                 best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.substring + sub);
                 higherPriorityMatchFound = true;
-            } else if (av.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
-                best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.caselesssubstring + sub);
-                higherPriorityMatchFound = true;
             }
         }
 
@@ -178,8 +171,6 @@
         } else if (includes(ft, query)) {
             // Substring matches never get promoted
             best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.substring);
-        } else if (includesCi(ft, query)) {
-            best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.caselesssubstring);
         }
 
         if (best === 0 && ft.length === 0) {
@@ -384,9 +375,14 @@
                 var thing = things[tIndex];
 
                 var nameInNestedChildLabel = `<${thing}><*>...${name}...</*></${thing}>`;
-                results = jqRoots('*:vis:' + matcher + '("' + name + '")').parents(thing).toArray();
-                if (cucu.debug) { console.log(nameInNestedChildLabel, results); }
-                elements = elements.concat(results.map(x => ({element: x, label: nameInNestedChildLabel, label_name: 'nameInNestedChild'})));
+                var innerMatches = jqRoots('*:vis:' + matcher + '("' + name + '")').toArray();
+                for (var iIndex = 0; iIndex < innerMatches.length; iIndex++) {
+                    var innerEl = innerMatches[iIndex];
+                    var innerImm = getImmediateText(innerEl);
+                    var ancestors = jqCucu(innerEl).parents(thing).toArray();
+                    if (cucu.debug) { console.log(nameInNestedChildLabel, ancestors); }
+                    elements = elements.concat(ancestors.map(x => ({element: x, label: nameInNestedChildLabel, label_name: 'nameInNestedChild', immediate_override: innerImm})));
+                }
 
                 for(var aIndex=0; aIndex < attributes.length; aIndex++) {
                     var attribute_name = attributes[aIndex];
