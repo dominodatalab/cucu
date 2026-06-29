@@ -158,6 +158,9 @@ def before_scenario(ctx, scenario):
         elif hook_result["status"] == "terminated":
             ctx.scenario.mark_skipped()
             ctx.scenario.terminated = True
+            # Break here: setup failed catastrophically via timeout.
+            # Contrast to after_scenario: cleanup must complete despite
+            # termination to release resources (browser quit, etc).
             break
         scenario.before_hook_results.append(hook_result)
 
@@ -191,14 +194,26 @@ def _run_hook(ctx, hook):
     return hook_result
 
 
+def _run_and_append_hook_result(ctx, scenario, hook):
+    """Run a hook and handle status propagation to scenario flags.
+
+    Sets scenario.hook_failed on error and scenario.terminated on timeout,
+    then appends the result for auditing. Used by system hooks (browser mgmt,
+    logging) in after_scenario that must handle both error and timeout cases.
+    """
+    hook_result = _run_hook(ctx, hook)
+    if hook_result["status"] == "error":
+        scenario.hook_failed = True
+    elif hook_result["status"] == "terminated":
+        scenario.terminated = True
+    scenario.after_hook_results.append(hook_result)
+
+
 def after_scenario(ctx, scenario):
     scenario.after_hook_results = []
 
     # Start Selenium keep-alive to prevent browser timeout during long after-scenario hooks
-    hook_result = _run_hook(ctx, start_selenium_keep_alive)
-    if hook_result["status"] == "terminated":
-        scenario.terminated = True
-    scenario.after_hook_results.append(hook_result)
+    _run_and_append_hook_result(ctx, scenario, start_selenium_keep_alive)
 
     for timer_name in ctx.step_timers:
         logger.warning(f'timer "{timer_name}" was never stopped/recorded')
@@ -220,10 +235,7 @@ def after_scenario(ctx, scenario):
             logger.error(f"Error getting browser info: {e}")
     scenario.browser_info = browser_info
 
-    hook_result = _run_hook(ctx, download_mht_data)
-    if hook_result["status"] == "terminated":
-        scenario.terminated = True
-    scenario.after_hook_results.append(hook_result)
+    _run_and_append_hook_result(ctx, scenario, download_mht_data)
 
     # run after all scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"][::-1]:
@@ -246,19 +258,13 @@ def after_scenario(ctx, scenario):
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 
     # Stop keep-alive before cleaning up browsers
-    hook_result = _run_hook(ctx, stop_selenium_keep_alive)
-    if hook_result["status"] == "terminated":
-        scenario.terminated = True
-    scenario.after_hook_results.append(hook_result)
+    _run_and_append_hook_result(ctx, scenario, stop_selenium_keep_alive)
 
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
     elif len(ctx.browsers) != 0:
         logger.debug("quitting browser between sessions")
-        hook_result = _run_hook(ctx, cleanup_browsers)
-        if hook_result["status"] == "terminated":
-            scenario.terminated = True
-        scenario.after_hook_results.append(hook_result)
+        _run_and_append_hook_result(ctx, scenario, cleanup_browsers)
 
     cucu_config_path = ctx.scenario_logs_dir / "cucu.config.yaml.txt"
     with open(cucu_config_path, "w") as config_file:
