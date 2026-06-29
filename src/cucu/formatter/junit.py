@@ -61,7 +61,7 @@ class CucuJUnitFormatter(Formatter):
             self.current_scenario_results["time"] = str(
                 round(self.current_scenario_duration, 3)
             )
-            if self.current_scenario.terminated:
+            if getattr(self.current_scenario, "terminated", False):
                 status = "terminated"
             elif self.current_scenario.hook_failed:
                 status = "error"

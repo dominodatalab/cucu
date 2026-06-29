@@ -262,7 +262,7 @@ class CucuJSONFormatter(Formatter):
 
     def finish_current_scenario(self):
         if self.current_scenario:
-            if self.current_scenario.terminated:
+            if getattr(self.current_scenario, "terminated", False):
                 status_name = "terminated"
             elif self.current_scenario.hook_failed:
                 status_name = "error"
