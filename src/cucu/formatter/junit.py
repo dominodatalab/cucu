@@ -61,7 +61,7 @@ class CucuJUnitFormatter(Formatter):
             self.current_scenario_results["time"] = str(
                 round(self.current_scenario_duration, 3)
             )
-            if getattr(self.current_scenario, "terminated", False):
+            if self.current_scenario.terminated:
                 status = "terminated"
             elif self.current_scenario.hook_failed:
                 status = "error"
@@ -74,7 +74,12 @@ class CucuJUnitFormatter(Formatter):
                 self.current_scenario_results["failure"] = (
                     self._collect_detail_lines()
                 )
-            elif status not in ("passed", "failed", "skipped", "terminated"):
+            elif status == "terminated":
+                # Emit error child element for terminated (timeout) scenarios
+                # so JUnit consumers (CI, TestRail) classify them as non-passing
+                details = ["scenario terminated: worker timeout (InterruptWorker)"]
+                self.current_scenario_results["error"] = details
+            elif status not in ("passed", "failed", "skipped"):
                 # error-like status (predominantly a before/after-scenario hook
                 # failure, where no step ran; see environment.py). Standard JUnit
                 # consumers classify a testcase by its child element, so we must
@@ -294,7 +299,7 @@ class CucuJUnitFormatter(Formatter):
                     x
                     for x in scenarios.values()
                     if x["status"]
-                    not in (Status.failed, Status.skipped, Status.passed)
+                    not in (Status.failed, Status.skipped, Status.passed, "terminated")
                 ]
             )
         )

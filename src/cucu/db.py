@@ -295,7 +295,7 @@ def finish_scenario_record(scenario_obj):
         ]
         log_files_json = sorted(log_files)
 
-    if getattr(scenario_obj, "terminated", False):
+    if scenario_obj.terminated:
         status = "terminated"
     elif scenario_obj.hook_failed:
         status = "error"

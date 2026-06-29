@@ -275,38 +275,25 @@ def test_relationships_and_record_completion(sample_records_combined):
 
 
 def test_scenario_update_sets_terminated_status(sample_records_combined):
-    """Test that scenario with terminated=True is recorded as 'terminated' status."""
-    # Create a mock scenario object with terminated flag
+    """Test that a terminated scenario is persisted to the DB with 'terminated' status."""
+    # Create a mock scenario object with the minimum required fields
     scenario_obj = type(
         "ScenarioObj",
         (),
         {
             "scenario_run_id": "test_scenario",
-            "status": type("Status", (), {"name": "passed"})(),
-            "hook_failed": False,
             "terminated": True,
-            "error_message": "",
-            "exc_traceback": None,
+            "hook_failed": False,
+            "status": type("Status", (), {"name": "passed"})(),
         },
     )()
 
-    # Import and call the update_scenario function to test status assignment
-    from cucu.db import scenario as scenario_model
+    # Call the real finish_scenario_record function
+    db.finish_scenario_record(scenario_obj)
 
-    # Check status assignment logic directly
-    scenario_obj_status = getattr(scenario_obj, "terminated", False)
-    if scenario_obj_status:
-        status = "terminated"
-    elif scenario_obj.hook_failed:
-        status = "error"
-    else:
-        status = scenario_obj.status.name
-
-    check.equal(
-        status,
-        "terminated",
-        msg="terminated=True should result in 'terminated' status",
-    )
+    # Query the DB to verify the status was persisted as 'terminated'
+    persisted = db.scenario.get(db.scenario.scenario_run_id == "test_scenario")
+    check.equal(persisted.status, "terminated")
 
 
 def test_data_consistency_and_null_handling(sample_records_combined):

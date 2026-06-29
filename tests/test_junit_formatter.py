@@ -204,6 +204,14 @@ def test_terminated_scenario_has_terminated_status(junit_env):
     testcase = testsuite.find("testcase")
 
     check.equal(testcase.get("status"), "terminated")
-    check.is_none(testcase.find("error"), "terminated must not emit <error>")
-    check.is_none(testcase.find("failure"), "terminated must not emit <failure>")
-    check.is_none(testcase.find("skipped"), "terminated must not emit <skipped>")
+    # Terminated scenarios emit <error> child so CI consumers classify them as non-passing
+    error_element = testcase.find("error")
+    check.is_not_none(error_element, "terminated must emit <error>")
+    if error_element is not None:
+        check.is_in("terminated", error_element.text.lower())
+    check.is_none(
+        testcase.find("failure"), "terminated must not emit <failure>"
+    )
+    check.is_none(
+        testcase.find("skipped"), "terminated must not emit <skipped>"
+    )

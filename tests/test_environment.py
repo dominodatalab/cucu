@@ -6,7 +6,6 @@ since environment.py has module-level side effects (init_page_checks) that are h
 to mock in a unit test environment.
 """
 
-import pytest
 import pytest_check as check
 from mpire.exception import InterruptWorker
 

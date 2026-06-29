@@ -100,6 +100,7 @@ def before_scenario(ctx, scenario):
     init_scenario_hook_variables()
 
     ctx.scenario = scenario
+    ctx.scenario.terminated = False
     ctx.step_index = 0
     ctx.browsers = []
     ctx.browser = None
@@ -153,6 +154,9 @@ def before_scenario(ctx, scenario):
             # Set 'hook_failed' status to 'True' so that the test gets marked
             # as 'error', even though no steps ran
             ctx.scenario.hook_failed = True
+        elif hook_result["status"] == "terminated":
+            ctx.scenario.mark_skipped()
+            ctx.scenario.terminated = True
         scenario.before_hook_results.append(hook_result)
 
 
@@ -220,6 +224,8 @@ def after_scenario(ctx, scenario):
         hook_result = _run_hook(ctx, hook)
         if hook_result["status"] == "error":
             scenario.hook_failed = True
+        elif hook_result["status"] == "terminated":
+            scenario.terminated = True
         scenario.after_hook_results.append(hook_result)
 
     # run after this scenario hooks in 'lifo' order.
@@ -227,6 +233,8 @@ def after_scenario(ctx, scenario):
         hook_result = _run_hook(ctx, hook)
         if hook_result["status"] == "error":
             scenario.hook_failed = True
+        elif hook_result["status"] == "terminated":
+            scenario.terminated = True
         scenario.after_hook_results.append(hook_result)
 
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
@@ -408,6 +416,7 @@ def after_step(ctx, step):
                 ctx.scenario.hook_failed = True
             elif hook_result["status"] == "terminated":
                 ctx.scenario.terminated = True
+                break
 
         # Capture browser logs and info for this step
         step.browser_logs = []
