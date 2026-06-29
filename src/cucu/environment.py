@@ -6,6 +6,7 @@ from pathlib import Path
 
 import yaml
 from behave.model import Status
+from mpire.exception import InterruptWorker
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
@@ -168,6 +169,8 @@ def _run_hook(ctx, hook):
     try:
         hook(ctx)
         logger.debug(f"HOOK {hook.__name__}: passed ✅")
+    except InterruptWorker:
+        hook_result["status"] = "terminated"
     except Exception as e:
         error_message = (
             f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}\n"
@@ -356,69 +359,79 @@ def after_step(ctx, step):
         CONFIG["__CUCU_PARENT_STDOUT"].write(".")
         CONFIG["__CUCU_PARENT_STDOUT"].flush()
 
-    # we only take screenshots of steps where there's a browser currently open
-    # and this step has no substeps as in the reporting the substeps that
-    # may actually do something on the browser take their own screenshots
-    if ctx.browser is not None and ctx.current_step.has_substeps is False:
-        take_screenshot(ctx, step.name, label=f"After {step.name}")
+    # Wrap screenshot, hook execution, and browser-log capture in try/except
+    # InterruptWorker so timeout signals during after_step don't trigger hook_failed
+    try:
+        # we only take screenshots of steps where there's a browser currently open
+        # and this step has no substeps as in the reporting the substeps that
+        # may actually do something on the browser take their own screenshots
+        if ctx.browser is not None and ctx.current_step.has_substeps is False:
+            take_screenshot(ctx, step.name, label=f"After {step.name}")
 
-        tab_info = ctx.browser.get_tab_info()
-        total_tabs = tab_info["tab_count"]
-        current_tab = tab_info["index"] + 1
-        title = tab_info["title"]
-        url = tab_info["url"]
-        log_message = (
-            f"\ntab({current_tab} of {total_tabs}): {title}\nurl: {url}\n"
-        )
-        logger.debug(log_message)
+            tab_info = ctx.browser.get_tab_info()
+            total_tabs = tab_info["tab_count"]
+            current_tab = tab_info["index"] + 1
+            title = tab_info["title"]
+            url = tab_info["url"]
+            log_message = (
+                f"\ntab({current_tab} of {total_tabs}): {title}\nurl: {url}\n"
+            )
+            logger.debug(log_message)
 
-        # Add tab info to step.stdout so it shows up in the HTML report
-        step.stdout.extend(
-            [f"tab({current_tab} of {total_tabs}): {title}", f"url: {url}"]
-        )
+            # Add tab info to step.stdout so it shows up in the HTML report
+            step.stdout.extend(
+                [f"tab({current_tab} of {total_tabs}): {title}", f"url: {url}"]
+            )
 
-    # if the step has substeps from using `run_steps` then we already moved
-    # the step index in the run_steps method and shouldn't do it here
-    if not step.has_substeps:
-        ctx.step_index += 1
-        CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
+        # if the step has substeps from using `run_steps` then we already moved
+        # the step index in the run_steps method and shouldn't do it here
+        if not step.has_substeps:
+            ctx.step_index += 1
+            CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
-    if CONFIG.bool("CUCU_DEBUG_ON_FAILURE") and step.status == "failed":
-        ctx._runner.stop_capture()
-        import pdb
+        if CONFIG.bool("CUCU_DEBUG_ON_FAILURE") and step.status == "failed":
+            ctx._runner.stop_capture()
+            import pdb
 
-        pdb.post_mortem(step.exc_traceback)
+            pdb.post_mortem(step.exc_traceback)
 
-    CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
+        CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
 
-    # run after all step hooks; wrap each so a raising hook neither skips the
-    # browser-log capture below nor lets behave reclassify the step's status.
-    # An errored hook escalates the scenario to 'error' via hook_failed unless a
-    # step actually failed (resolved at the end of after_scenario).
-    for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
-        if _run_hook(ctx, hook)["status"] == "error":
-            ctx.scenario.hook_failed = True
+        # run after all step hooks; wrap each so a raising hook neither skips the
+        # browser-log capture below nor lets behave reclassify the step's status.
+        # An errored hook escalates the scenario to 'error' via hook_failed unless a
+        # step actually failed (resolved at the end of after_scenario).
+        # A terminated hook (from InterruptWorker timeout) sets the terminated flag.
+        for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
+            hook_result = _run_hook(ctx, hook)
+            if hook_result["status"] == "error":
+                ctx.scenario.hook_failed = True
+            elif hook_result["status"] == "terminated":
+                ctx.scenario.terminated = True
 
-    # Capture browser logs and info for this step
-    step.browser_logs = []
-    browser_info = {"has_browser": False}
-    if ctx.browser:
-        for log in ctx.browser.get_log():
-            log_entry = json.dumps(log)
-            step.browser_logs.append(log)
-            ctx.browser_log_tee.write(f"{log_entry}\n")
+        # Capture browser logs and info for this step
+        step.browser_logs = []
+        browser_info = {"has_browser": False}
+        if ctx.browser:
+            for log in ctx.browser.get_log():
+                log_entry = json.dumps(log)
+                step.browser_logs.append(log)
+                ctx.browser_log_tee.write(f"{log_entry}\n")
 
-        tab_info = ctx.browser.get_tab_info()
+            tab_info = ctx.browser.get_tab_info()
 
-        browser_info = {
-            "tab_count": tab_info["tab_count"],
-            "tab_number": tab_info["index"] + 1,
-            "tab_title": tab_info["title"],
-            "tab_url": tab_info["url"],
-            "browser_type": ctx.browser.driver.name,
-        }
+            browser_info = {
+                "tab_count": tab_info["tab_count"],
+                "tab_number": tab_info["index"] + 1,
+                "tab_title": tab_info["title"],
+                "tab_url": tab_info["url"],
+                "browser_type": ctx.browser.driver.name,
+            }
 
-    step.browser_info = browser_info
+        step.browser_info = browser_info
+
+    except InterruptWorker:
+        ctx.scenario.terminated = True
 
 
 def start_selenium_keep_alive(ctx):

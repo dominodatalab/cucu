@@ -34,6 +34,7 @@ class StubScenario:
         name,
         status="passed",
         hook_failed=False,
+        terminated=False,
         tags=None,
         before_hook_results=None,
         after_hook_results=None,
@@ -41,6 +42,7 @@ class StubScenario:
         self.name = name
         self._status = status
         self.hook_failed = hook_failed
+        self.terminated = terminated
         self.tags = tags or []
         self.before_hook_results = before_hook_results or []
         self.after_hook_results = after_hook_results or []
@@ -186,3 +188,22 @@ def test_skipped_scenario_emits_skipped_only(junit_env):
     check.is_none(testcase.find("error"), "skipped must not emit <error>")
     check.equal(testsuite.get("skipped"), "1")
     check.equal(testsuite.get("errors"), "0")
+
+
+def test_terminated_scenario_has_terminated_status(junit_env):
+    # model the real path: scenario terminated via InterruptWorker timeout
+    feature = StubFeature("timing out feature")
+    scenario = StubScenario(
+        "a terminated scenario",
+        status="passed",
+        terminated=True,
+        hook_failed=False,
+    )
+
+    testsuite = _run_feature(junit_env, feature, scenario, step=None)
+    testcase = testsuite.find("testcase")
+
+    check.equal(testcase.get("status"), "terminated")
+    check.is_none(testcase.find("error"), "terminated must not emit <error>")
+    check.is_none(testcase.find("failure"), "terminated must not emit <failure>")
+    check.is_none(testcase.find("skipped"), "terminated must not emit <skipped>")

@@ -61,8 +61,9 @@ class CucuJUnitFormatter(Formatter):
             self.current_scenario_results["time"] = str(
                 round(self.current_scenario_duration, 3)
             )
-            hook_failed = self.current_scenario.hook_failed
-            if hook_failed:
+            if getattr(self.current_scenario, "terminated", False):
+                status = "terminated"
+            elif self.current_scenario.hook_failed:
                 status = "error"
             else:
                 status = self.current_scenario.compute_status().name
@@ -73,7 +74,7 @@ class CucuJUnitFormatter(Formatter):
                 self.current_scenario_results["failure"] = (
                     self._collect_detail_lines()
                 )
-            elif status not in ("passed", "failed", "skipped"):
+            elif status not in ("passed", "failed", "skipped", "terminated"):
                 # error-like status (predominantly a before/after-scenario hook
                 # failure, where no step ran; see environment.py). Standard JUnit
                 # consumers classify a testcase by its child element, so we must
