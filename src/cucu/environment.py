@@ -158,6 +158,7 @@ def before_scenario(ctx, scenario):
         elif hook_result["status"] == "terminated":
             ctx.scenario.mark_skipped()
             ctx.scenario.terminated = True
+            scenario.before_hook_results.append(hook_result)
             # Break here: setup failed catastrophically via timeout.
             # Contrast to after_scenario: cleanup must complete despite
             # termination to release resources (browser quit, etc).
@@ -239,21 +240,11 @@ def after_scenario(ctx, scenario):
 
     # run after all scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"][::-1]:
-        hook_result = _run_hook(ctx, hook)
-        if hook_result["status"] == "error":
-            scenario.hook_failed = True
-        elif hook_result["status"] == "terminated":
-            scenario.terminated = True
-        scenario.after_hook_results.append(hook_result)
+        _run_and_append_hook_result(ctx, scenario, hook)
 
     # run after this scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"][::-1]:
-        hook_result = _run_hook(ctx, hook)
-        if hook_result["status"] == "error":
-            scenario.hook_failed = True
-        elif hook_result["status"] == "terminated":
-            scenario.terminated = True
-        scenario.after_hook_results.append(hook_result)
+        _run_and_append_hook_result(ctx, scenario, hook)
 
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 

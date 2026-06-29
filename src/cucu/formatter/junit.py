@@ -301,12 +301,7 @@ class CucuJUnitFormatter(Formatter):
                     x
                     for x in scenarios.values()
                     if x["status"]
-                    not in (
-                        Status.failed,
-                        Status.skipped,
-                        Status.passed,
-                        "terminated",
-                    )
+                    not in (Status.failed, Status.skipped, Status.passed)
                 ]
             )
         )
