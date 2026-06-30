@@ -367,6 +367,7 @@ def create_database_file(db_filepath):
                 SUM(CASE WHEN s.status = 'failed' THEN 1 ELSE 0 END) AS failed,
                 SUM(CASE WHEN s.status = 'skipped' THEN 1 ELSE 0 END) AS skipped,
                 SUM(CASE WHEN s.status = 'error' THEN 1 ELSE 0 END) AS error,
+                SUM(CASE WHEN s.status = 'terminated' THEN 1 ELSE 0 END) AS terminated,
                 SUM(s.duration) AS duration,
                 SUM(s.steps) AS steps
             FROM scenario_with_steps s
@@ -383,6 +384,7 @@ def create_database_file(db_filepath):
                     SUM(CASE WHEN s.status = 'failed' THEN 1 ELSE 0 END) AS failed,
                     SUM(CASE WHEN s.status = 'skipped' THEN 1 ELSE 0 END) AS skipped,
                     SUM(CASE WHEN s.status = 'error' THEN 1 ELSE 0 END) AS error,
+                    SUM(CASE WHEN s.status = 'terminated' THEN 1 ELSE 0 END) AS terminated,
                     SUM(s.duration) AS duration
                 FROM cucu_run r
                 JOIN worker w ON r.cucu_run_id = w.cucu_run_id
@@ -393,10 +395,12 @@ def create_database_file(db_filepath):
             SELECT
                 *,
                 CASE
-                    WHEN failed  > 0 THEN 'failed'
+                    WHEN failed > 0 THEN 'failed'
                     WHEN error > 0 THEN 'error'
-                    WHEN passed  > 0 THEN 'passed'
+                    WHEN terminated > 0 THEN 'terminated'
+                    WHEN passed > 0 THEN 'passed'
                     WHEN skipped > 0 THEN 'skipped'
+                    ELSE 'untested'
                 END AS status
             FROM feature_first_level
             ORDER BY start_at ASC
