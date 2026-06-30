@@ -261,6 +261,19 @@ Feature: Report basics
         | Offset | Scenario      | Steps | Status | Duration |
         | .*     | Slow scenario | 1     | .*     |    >*    |
 
+  @feature-timeout
+  @workers
+  Scenario: User can see terminated status in the HTML report when a feature timeout fires
+    Given I run the command "cucu run data/features/slow_features/slow_feature1.feature --workers 2 --feature-timeout 3 --results {CUCU_RESULTS_DIR}/feature_timeout_reporting_results" and expect exit code "1"
+     Then I should see the previous step took less than "10" seconds
+     When I run the command "cucu report {CUCU_RESULTS_DIR}/feature_timeout_reporting_results --output {CUCU_RESULTS_DIR}/feature_timeout_reporting_report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_timeout_reporting_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     When I click the button "Slow feature #1"
+     Then I should see a table that matches the following:
+        | Offset | Scenario      | Steps | Status     | Duration |
+        | .*     | Slow scenario | 1     | terminated |    >*    |
+
   Scenario: User can run results without skips in the HTML test report
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/report_without_skips --generate-report --report {CUCU_RESULTS_DIR}/report_without_skips_report" and expect exit code "1"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_report/" and save the port to the variable "PORT"
