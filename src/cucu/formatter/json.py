@@ -157,7 +157,7 @@ class CucuJSONFormatter(Formatter):
 
         timestamp = None
         if step.status.name in ["passed", "failed"]:
-            timestamp = step.start_at
+            timestamp = getattr(step, "start_at", None)
 
             step_variables = CONFIG.expand(step.name)
 

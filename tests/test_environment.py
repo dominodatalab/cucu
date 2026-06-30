@@ -28,7 +28,9 @@ from mpire.exception import InterruptWorker
         ),
     ],
 )
-def test_run_hook_status_logic(exception, expected_status, expected_error_message):
+def test_run_hook_status_logic(
+    exception, expected_status, expected_error_message
+):
     """_run_hook maps InterruptWorker → "terminated" and other exceptions → "error"."""
     hook_result = {
         "name": "test_hook",
