@@ -487,22 +487,32 @@
             }
         }
 
-        // deduplicate elements by element identity, keeping order
-        var deduped_elements = [];
-        var seen_elements = new Set();
+        // score every raw occurrence up front (before dedup) so dedup can
+        // keep the best-scoring occurrence of each element rather than
+        // just the first-discovered one. Without this, a weak, incidental
+        // match (e.g. an element swept in by a sibling-scanning rule before
+        // a more specific rule like labelForName even runs) can permanently
+        // shadow a later, correctly-overridden, higher-scoring match for
+        // the very same element.
+        for (var i0 = 0; i0 < elements.length; i0++) {
+            elements[i0].pass = i0;
+            elements[i0].score = cucu.relevance(elements[i0].element, name, elements[i0].immediate_override);
+        }
+
+        // deduplicate elements by element identity, keeping the
+        // highest-scoring occurrence (ties broken by earliest discovery)
+        var best_by_element = new Map();
         for (var i = 0; i < elements.length; i++) {
-            if (!seen_elements.has(elements[i].element)) {
-                seen_elements.add(elements[i].element);
-                elements[i].pass = i;
-                deduped_elements.push(elements[i]);
+            var candidate = elements[i];
+            var existing = best_by_element.get(candidate.element);
+            if (!existing || candidate.score > existing.score) {
+                best_by_element.set(candidate.element, candidate);
             }
         }
-        elements = deduped_elements;
+        elements = Array.from(best_by_element.values());
 
-        // score and sort by relevance (desc), then earlier pass (asc)
-        for (var i2 = 0; i2 < elements.length; i2++) {
-            elements[i2].score = cucu.relevance(elements[i2].element, name, elements[i2].immediate_override);
-        }
+        // sort by relevance (desc), then earlier pass (asc) - scores were
+        // already computed above, before dedup
 
         if (!skip_fuzzy_relevance) {
             elements.sort(function(a, b){
