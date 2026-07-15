@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>Nested Role Button!</title>
+    <style>
+      .button { text-decoration: none; -webkit-appearance: button; color: #333333; display: inline; }
+    </style>
+    <script>
+    function update(value) {
+        document.querySelector("#input").value = value;
+    }
+    </script>
+  </head>
+  <body>
+    <label>value:</label><input id="input" type="text"></input>
+    <br/>
+    <div role="button" class="card-header" onclick="update('card-header clicked');">
+      Card Title
+      <button aria-label="Save" onclick="update('Save clicked');">Save</button>
+    </div>
+    <br/>
+    <div role="button" class="accordion-header" onclick="update('accordion-header clicked');">
+      <button aria-label="Uninstall extension" onclick="update('Uninstall extension clicked');"><svg width="10" height="10"></svg></button>
+    </div>
+  </body>
+
+  <!-- load the utility library that can be used to delay the page loading -->
+  <script src="js/util.js"></script>
+</html>
