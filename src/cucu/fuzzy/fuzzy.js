@@ -574,8 +574,12 @@
                 for (var i = 0; i < elements.length; i++) {
                     var element = elements[i];
                     var keep = useInclusive ? (element.score >= threshold) : (element.score > threshold);
-                    // always keep up to the requested index
-                    if (i <= index || keep) {
+                    // keep up to the requested index, but only if the element has some
+                    // genuine relevance signal - a score at or below the "no real match"
+                    // emptyText floor is not a real candidate and must not be rescued
+                    // just because it happens to land at the requested position (e.g. an
+                    // unrelated element swept in by a sibling-scanning rule).
+                    if ((i <= index && element.score > WEIGHTS.emptyText) || keep) {
                         keptElements.push(element);
                     } else {
                         trimmedElements.push(element);
