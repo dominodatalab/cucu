@@ -157,7 +157,7 @@ class CucuJSONFormatter(Formatter):
 
         timestamp = None
         if step.status.name in ["passed", "failed"]:
-            timestamp = step.start_at
+            timestamp = getattr(step, "start_at", None)
 
             step_variables = CONFIG.expand(step.name)
 
@@ -262,8 +262,9 @@ class CucuJSONFormatter(Formatter):
 
     def finish_current_scenario(self):
         if self.current_scenario:
-            hook_failed = self.current_scenario.hook_failed
-            if hook_failed:
+            if getattr(self.current_scenario, "terminated", False):
+                status_name = "terminated"
+            elif self.current_scenario.hook_failed:
                 status_name = "error"
             else:
                 status_name = self.current_scenario.status.name
