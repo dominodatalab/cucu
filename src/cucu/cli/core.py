@@ -595,7 +595,7 @@ def _generate_report(
                         )
                         if result:
                             output_path, frame_count, fps = result
-                            logger.info(
+                            logger.warning(
                                 f"Video encoded: {output_path} ({frame_count} frames)"
                             )
                         else:
