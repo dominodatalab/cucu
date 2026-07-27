@@ -599,8 +599,8 @@ def _generate_report(
                                 f"Video encoded: {output_path} ({frame_count} frames)"
                             )
                         else:
-                            logger.debug(
-                                f"Video encoding skipped for {scen.name}"
+                            logger.warning(
+                                f"Video encoding failed for {scen.name}"
                             )
         except Exception as e:
             logger.warning(f"Video encoding failed: {e}")
