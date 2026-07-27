@@ -570,6 +570,9 @@ def _generate_report(
     from cucu.config import CONFIG
     from cucu.db import scenario as scenario_model
 
+    if not CONFIG["CUCU_SCREENSHOT_VIDEO"]:
+        logger.warning("skipping video creation")
+
     if CONFIG.get("CUCU_SCREENSHOT_VIDEO", False):
         try:
             db_path = results_dir / "run.db"
@@ -581,25 +584,13 @@ def _generate_report(
                     # Build scenario directory path
                     from cucu.utils import ellipsize_filename
 
-                    feature_folder = (
-                        scen.feature.folder_name
-                        if scen.feature.folder_name
-                        else None
-                    )
-                    if not feature_folder:
-                        feature_folder = ellipsize_filename(scen.feature.name)
-                    scenario_folder = (
-                        scen.folder_name if scen.folder_name else None
-                    )
-                    if not scenario_folder:
-                        scenario_folder = ellipsize_filename(scen.name)
+                    feature_folder = ellipsize_filename(scen.feature.name)
+                    scenario_folder = ellipsize_filename(scen.name)
                     scenario_dir = (
                         results_dir / feature_folder / scenario_folder
                     )
                     if scenario_dir.exists():
-                        video_encoder.encode_scenario_video(
-                            scen.scenario_run_id, scenario_dir
-                        )
+                        video_encoder.encode_scenario_video(scen, scenario_dir)
         except Exception as e:
             logger.warning(f"Video encoding failed: {e}")
 

@@ -480,7 +480,7 @@ CONFIG.define(
 CONFIG.define(
     "CUCU_SCREENSHOT_VIDEO",
     "when set to true, cucu report encodes screenshots into an H.264 video",
-    default=False,
+    default=True,
 )
 CONFIG.define(
     "CUCU_SCREENSHOT_VIDEO_FPS",

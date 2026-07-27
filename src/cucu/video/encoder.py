@@ -18,6 +18,13 @@ def _get_scenario_steps(scenario_run_id):
     )
 
 
+def _get_scenario_steps_from_scenario(scenario_obj):
+    """Fetch all steps for a scenario object, ordered by seq."""
+    return (
+        step.select().where(step.scenario == scenario_obj).order_by(step.seq)
+    )
+
+
 def _render_text_card(
     text,
     keyword,
@@ -174,8 +181,12 @@ def _encode_with_opencv(frames, output_path, width, height, fps=1):
         writer.release()
 
 
-def encode_scenario_video(scenario_run_id, scenario_dir):
+def encode_scenario_video(scenario_obj, scenario_dir):
     """Encode video for a scenario with one frame per step.
+
+    Args:
+        scenario_obj: Scenario model object from DB
+        scenario_dir: Path to scenario results directory
 
     Returns: (output_path, frame_count, fps) or None if encoding failed
     """
@@ -184,7 +195,7 @@ def encode_scenario_video(scenario_run_id, scenario_dir):
     # Check if video already exists
     if output_path.exists():
         try:
-            steps_list = list(_get_scenario_steps(scenario_run_id))
+            steps_list = list(_get_scenario_steps_from_scenario(scenario_obj))
             fps = CONFIG.get("CUCU_SCREENSHOT_VIDEO_FPS", 1)
             return (output_path, len(steps_list), fps)
         except Exception:
@@ -192,9 +203,11 @@ def encode_scenario_video(scenario_run_id, scenario_dir):
 
     # Get steps
     try:
-        steps_list = list(_get_scenario_steps(scenario_run_id))
+        steps_list = list(_get_scenario_steps_from_scenario(scenario_obj))
         if not steps_list:
-            logger.warning(f"No steps found for scenario {scenario_run_id}")
+            logger.warning(
+                f"No steps found for scenario {scenario_obj.scenario_run_id}"
+            )
             return None
     except Exception as e:
         logger.error(f"Failed to fetch scenario steps: {e}")
@@ -249,7 +262,9 @@ def encode_scenario_video(scenario_run_id, scenario_dir):
         frames.append(frame)
 
     if not frames:
-        logger.warning(f"No frames generated for scenario {scenario_run_id}")
+        logger.warning(
+            f"No frames generated for scenario {scenario_obj.scenario_run_id}"
+        )
         return None
 
     # Encode video
