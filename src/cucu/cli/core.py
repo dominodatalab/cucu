@@ -590,7 +590,18 @@ def _generate_report(
                         results_dir / feature_folder / scenario_folder
                     )
                     if scenario_dir.exists():
-                        video_encoder.encode_scenario_video(scen, scenario_dir)
+                        result = video_encoder.encode_scenario_video(
+                            scen, scenario_dir
+                        )
+                        if result:
+                            output_path, frame_count, fps = result
+                            logger.info(
+                                f"Video encoded: {output_path} ({frame_count} frames)"
+                            )
+                        else:
+                            logger.debug(
+                                f"Video encoding skipped for {scen.name}"
+                            )
         except Exception as e:
             logger.warning(f"Video encoding failed: {e}")
 
