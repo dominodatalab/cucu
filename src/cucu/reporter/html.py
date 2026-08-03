@@ -249,9 +249,11 @@ def generate(results: Path, basepath: Path):
                     if step_dict["name"].startswith("#"):
                         # Map the count to the appropriate HTML heading (h2-h5)
                         # We use h2-h5 instead of h1-h4 so h1 can be reserved for scenario/feature titles
-                        step_dict["heading_level"] = (
-                            f"h{step_dict['name'][:4].count('#') + 1}"
-                        )
+                        level = step_dict["name"][:4].count("#") + 1
+                        if step_dict["is_substep"]:
+                            # nest sub-step headings one level under their parent step
+                            level += 1
+                        step_dict["heading_level"] = f"h{min(level, 6)}"
 
                     # process timestamps and time offsets
                     if not step_dict["end_at"]:

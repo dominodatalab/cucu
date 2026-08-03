@@ -126,7 +126,7 @@
             <tr class="row">
                 <td style="min-width: 0;" class="anchor-toggle text-truncate col-12" colspan="2" data-toggle="collapse" href="#collapsable-row-{{ loop.index }}" role="button" aria-expanded="false" aria-controls="collapsable-row-{{ loop.index }}">
                     <a class="anchor" id="step_{{ loop.index}}" href="#step_{{ loop.index }}">🔗</a>
-                    <{{ step['heading_level'] }} style="display: contents;" title="{{ escape(step['name']) }}"> {{ escape(step['name']) }}</{{ step['heading_level'] }}>
+                    <{{ step['heading_level'] }} style="display: contents;" title="{{ escape(step['name']) }}">{% if step['is_substep'] %}⤷ {% endif %}{{ escape(step['name']) }}</{{ step['heading_level'] }}>
                 </td>
             </tr>
 
