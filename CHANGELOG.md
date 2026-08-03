@@ -7,6 +7,10 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.30
 - Add - video screenshot output (AV1 codec, variable framerate, report-time encoding) via `CUCU_SCREENSHOT_VIDEO=true`; encodes one MP4 per scenario with per-frame timestamps, includes text-cards for browserless steps, plays in replay view with timeline sync; requires ffmpeg on $PATH and `uv sync --extra video` for Pillow
+- Fix - replay view video playhead now plays to the end instead of stopping at the last step boundary
+- Fix - replay view video playhead animates smoothly at 60fps by polling video.currentTime from the RAF loop instead of relying on timeupdate (~4fps)
+- Fix - replay view timeline drag moves the playhead continuously without snapping; video frame updates on every pointermove and video seeks to the final position on pointerup
+- Fix - replay view video seeks to the correct step frame instead of overshooting into future steps when steps have multiple screenshots
 
 # 1.4.29
 - Fix - scenarios killed by an mpire worker timeout now record and report a distinct `terminated` status (not `error`) across DB, JUnit XML, and JSON; step-failure takes precedence over termination so the real failure is never masked
