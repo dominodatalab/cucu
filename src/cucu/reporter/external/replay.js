@@ -124,8 +124,7 @@
   function formatPlayheadTime(epochMs) {
     var d = new Date(epochMs);
     return d.getFullYear() + '-' + padN(d.getMonth() + 1) + '-' + padN(d.getDate()) + ' ' +
-           padN(d.getHours()) + ':' + padN(d.getMinutes()) + ':' + padN(d.getSeconds()) + '.' +
-           padN(d.getMilliseconds(), 3) + '000';
+           padN(d.getHours()) + ':' + padN(d.getMinutes()) + ':' + padN(d.getSeconds());
   }
 
   function stepIdxToTime(idx) {
@@ -249,7 +248,7 @@
         return ((PIC_OFFSETS[this.shownStepIdx] || 0) + clamped + 1) + ' / ' + TOTAL_PICS;
       },
       get metaTimeText()  {
-        var cur = this.currentTimeSec.toFixed(1), tot = SCENARIO_DURATION.toFixed(1);
+        var cur = Math.floor(this.currentTimeSec), tot = Math.floor(SCENARIO_DURATION);
         if (SCENARIO_START_MS === null) return '▶ ' + cur + ' / ' + tot + 's';
         return '▶ ' + formatPlayheadTime(SCENARIO_START_MS + this.currentTimeSec * 1000) + ' · ' + cur + ' / ' + tot + 's';
       },

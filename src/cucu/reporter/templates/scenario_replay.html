@@ -62,32 +62,17 @@
 
 <div x-data="replayPlayer()" @keydown.window="onKey($event)">
 
+<div id="vp-sticky-top">
 <nav id="vp-nav">
   <a href="../../flat.html" title="Flat view">Flat</a>
-  <span class="vp-sep">|</span>
-  <a href="../../index.html" title="Index">Index</a>
-  <span class="vp-sep">|</span>
-  <a href="../../{{ urlencode(escape(feature['name'])) }}.html" title="Feature">Feature</a>
-  <span class="vp-sep">|</span>
-  <a href="index.html" title="Classic checklist view">☑ Classic</a>
-  {% if scenario['logs'] %}
-  <span class="vp-sep">|</span>
-  <div id="log-menu-wrap" @click.outside="logsOpen = false">
-    <a href="#" id="log-menu-trigger" @click.prevent="logsOpen = !logsOpen">Logs ▾</a>
-    <div id="log-dd" :class="{ open: logsOpen }">
-      {% for log_file in scenario['logs'] %}
-      <a href="{{ log_file['filepath'] }}">{{ log_file['name'] }}</a>
-      {% endfor %}
-    </div>
-  </div>
-  {% endif %}
+  <span class="vp-breadcrumb-sep">\</span>
+  <a href="../../{{ urlencode(escape(feature['name'])) }}.html" title="Go to feature report">{{ escape(feature['name']) }}</a>
 
   <div class="vp-nav-right">
     <button id="theme-toggle" type="button"
             @click="cycleTheme()"
             x-text="themeIcons[theme]"
             :title="themeTitles[theme]">🖥</button>
-    <span class="vp-meta" id="vp-meta-time" x-text="metaTimeText">▶ {{ scenario["start_at"] }} &nbsp;·&nbsp; 0.0 / {{ '{:.1f}'.format(scenario['duration'] | float) }}s</span>
   </div>
 </nav>
 {% endblock %}
@@ -95,29 +80,29 @@
 {% block content %}
 <!-- SCENARIO HEADER -->
 <div id="vp-header">
-  <div class="vp-feature-row">
-    <div class="vp-feature-name">
-      <span class="vp-feature-label">Feature</span>
-      <a href="../../{{ urlencode(escape(feature['name'])) }}.html" title="Go to feature report">{{ escape(feature['name']) }}</a>
+  <div class="vp-scenario-row">
+    <div class="vp-scenario-left">
+      <span class="vp-scenario-name">{{ escape(scenario['name']) }}</span>{% if feature['tags'] or scenario['tags'] %}<span class="vp-tags">{{ feature['tags'] }} {{ scenario['tags'] }}</span>{% endif %}
     </div>
-    {% set _mht = namespace(files=[]) %}
-    {% for lf in scenario['logs'] %}{% if lf['name'].endswith('.mht') %}{% set _mht.files = _mht.files + [lf] %}{% endif %}{% endfor %}
-    {% if _mht.files %}
-    <div class="vp-mht-link">
-      {% for mf in _mht.files %}
-      <a href="{{ mf['filepath'] }}" title="Browser snapshot (MHT archive)">📄 {{ mf['name'] }}</a>{% if not loop.last %} &nbsp;{% endif %}
-      {% endfor %}
+    <div class="vp-scenario-right">
+      {% if scenario['logs'] %}
+      <div id="log-menu-wrap" @click.outside="logsOpen = false">
+        <a href="#" id="log-menu-trigger" @click.prevent="logsOpen = !logsOpen">Logs ▾</a>
+        <div id="log-dd" :class="{ open: logsOpen }">
+          {% for log_file in scenario['logs'] %}
+          <a href="{{ log_file['filepath'] }}">{{ log_file['name'] }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      <span class="vp-meta" id="vp-meta-time" x-text="metaTimeText">▶ {{ scenario["start_at"].strftime('%Y-%m-%d %H:%M:%S') if scenario["start_at"] else '' }} &nbsp;·&nbsp; 0 / {{ '{:.0f}'.format(scenario['duration'] | float) }}s</span>
     </div>
-    {% endif %}
   </div>
-  <div class="vp-scenario-name"><span class="vp-feature-label">Scenario</span> {{ escape(scenario['name']) }}</div>
-  {% if feature['tags'] or scenario['tags'] %}
-  <div class="vp-tags">{{ feature['tags'] }} {{ scenario['tags'] }}</div>
-  {% endif %}
   {% if scenario['sub_headers'] %}
   <div class="vp-tags" style="margin-top:4px">{{ scenario['sub_headers'] }}</div>
   {% endif %}
 </div>
+</div><!-- /vp-sticky-top -->
 
 <!-- PICS PANEL -->
 <div id="vp-pics-panel" class="vp-log-panel" :class="{ collapsed: panelsCollapsed['vp-pics-panel'] }">
