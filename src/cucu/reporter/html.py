@@ -244,7 +244,9 @@ def generate(results: Path, basepath: Path):
                     scenario_dict["steps"], key=lambda x: x["seq"]
                 )
 
-                for step_dict in scenario_dict["steps"]:
+                steps_list = scenario_dict["steps"]
+                current_heading_level = 2
+                for index, step_dict in enumerate(steps_list):
                     # Handle section headings with different levels (# to ####)
                     if step_dict["name"].startswith("#"):
                         # Map the count to the appropriate HTML heading (h2-h5)
@@ -253,7 +255,20 @@ def generate(results: Path, basepath: Path):
                         if step_dict["is_substep"]:
                             # nest sub-step headings one level under their parent step
                             level += 1
+                        else:
+                            current_heading_level = level
                         step_dict["heading_level"] = f"h{min(level, 6)}"
+                    elif (
+                        not step_dict["is_substep"]
+                        and index + 1 < len(steps_list)
+                        and steps_list[index + 1]["is_substep"]
+                    ):
+                        # this step runs a nested sub-flow (e.g. via run_steps); give it an
+                        # honorary heading one level above the current section so it reads as
+                        # that sub-flow's header, without hiding its own status/duration/details
+                        step_dict["honorary_heading_level"] = (
+                            f"h{max(2, current_heading_level - 1)}"
+                        )
 
                     # process timestamps and time offsets
                     if not step_dict["end_at"]:
