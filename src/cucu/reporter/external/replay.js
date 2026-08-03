@@ -149,19 +149,14 @@
     var imgIdx  = timeToImgIdx(stepIdx, t);
     return PIC_OFFSETS[stepIdx] + imgIdx;
   }
+  // The video has one frame per step (frame index == step index).
+  // Interpolate within the step's scenario duration using the fractional video frame position.
   function videoTimeToScenarioTime(fps, vt) {
-    var picIdx = Math.floor(vt * fps);
-    // find largest step whose PIC_OFFSETS[i] <= picIdx
-    var best = 0;
-    for (var i = 0; i < TOTAL_STEPS; i++) {
-      if (PIC_OFFSETS[i] <= picIdx) best = i;
-    }
-    var step = STEPS[best];
+    var stepIdx = Math.min(Math.floor(vt * fps), TOTAL_STEPS - 1);
+    var step = STEPS[stepIdx];
     if (step.startOffset === null) return 0;
-    var n = step.screenshots.length;
-    if (n <= 1 || step.duration <= 0) return step.startOffset;
-    var localPic = picIdx - PIC_OFFSETS[best];
-    return step.startOffset + (localPic / n) * step.duration;
+    var frac = vt * fps - stepIdx; // 0..1 progress through this video frame
+    return step.startOffset + frac * (step.duration || 0);
   }
 
   function timeToImgIdx(stepIdx, t) {
@@ -227,6 +222,8 @@
       _browserScrollBusy: { value: false },
       _videoElement:      null,
       _videoSyncActive:   false,
+      _videoFps:          1,
+      _dragging:          false,
 
       // ----- derived (getters) -----
       get headPct()       { return this.currentTimeSec / TOTAL_DUR * 100; },
@@ -310,12 +307,13 @@
         this._videoElement = document.getElementById('scenario-video');
         if (this._videoElement) {
           this._videoSyncActive = true;
+          this._videoFps = parseInt(this._videoElement.dataset.fps, 10) || 1;
           var vid = this._videoElement;
-          // Video → timeline: scrubbing or native play/pause updates the playhead
-          var _vidFps = parseInt(vid.dataset.fps, 10) || 1;
+          // Video → timeline: scrubbing or seeking from native controls updates the playhead.
+          // During active playback, the RAF loop polls currentTime at 60fps for smooth motion.
           vid.addEventListener('timeupdate', function () {
-            if (!self._videoSyncActive) return;
-            var t = videoTimeToScenarioTime(_vidFps, vid.currentTime);
+            if (!self._videoSyncActive || self.isPlaying || self._dragging) return;
+            var t = videoTimeToScenarioTime(self._videoFps, vid.currentTime);
             self.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
             self._updateDisplay(false);
           });
@@ -326,6 +324,11 @@
           vid.addEventListener('pause', function () {
             if (!self._videoSyncActive) return;
             if (self.isPlaying) self._stopPlay();
+          });
+          vid.addEventListener('ended', function () {
+            self.currentTimeSec = PLAY_END;
+            self._updateDisplay(false);
+            self._stopPlay();
           });
         }
 
@@ -377,7 +380,7 @@
         if (this._videoElement && this._videoElement.dataset.fps) {
           var fps = parseInt(this._videoElement.dataset.fps, 10);
           this._videoSyncActive = false;
-          this._videoElement.currentTime = timeToGlobalPicIdx(this.currentTimeSec) / fps;
+          this._videoElement.currentTime = timeToStepIdx(this.currentTimeSec) / fps;
           this._videoSyncActive = true;
         }
         this._reengageFollow();
@@ -418,23 +421,28 @@
       },
       _playFrame(rafTime) {
         if (!this.isPlaying) return;
-        // When video is present it drives currentTimeSec via timeupdate; RAF loop only
-        // needed for end-of-playback detection and display refresh.
-        if (!this._videoElement && this._lastRafTime !== null) {
-          this.currentTimeSec += (rafTime - this._lastRafTime) / 1000 * this.playbackRate;
+        if (this._videoElement) {
+          // Poll video.currentTime every frame for smooth 60fps playhead motion.
+          var t = videoTimeToScenarioTime(this._videoFps, this._videoElement.currentTime);
+          this.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
           if (this.currentTimeSec >= PLAY_END) {
-            this.currentTimeSec = PLAY_END;
             this._updateDisplay(false);
             this._stopPlay();
             return;
           }
-        }
-        if (this._videoElement && this.currentTimeSec >= PLAY_END) {
-          this._stopPlay();
-          return;
+        } else {
+          if (this._lastRafTime !== null) {
+            this.currentTimeSec += (rafTime - this._lastRafTime) / 1000 * this.playbackRate;
+            if (this.currentTimeSec >= PLAY_END) {
+              this.currentTimeSec = PLAY_END;
+              this._updateDisplay(false);
+              this._stopPlay();
+              return;
+            }
+          }
         }
         this._lastRafTime = rafTime;
-        if (!this._videoElement) this._updateDisplay(false);
+        this._updateDisplay(false);
         var self = this;
         this._rafId = requestAnimationFrame(function (t) { self._playFrame(t); });
       },
@@ -547,17 +555,27 @@
         var track = e.currentTarget, self = this;
         e.preventDefault();
         track.setPointerCapture(e.pointerId);
-        function seek(x) {
+        this._stopPlay();
+        this._dragging = true;
+        function dragTo(x) {
           var r = track.getBoundingClientRect();
-          self.seekToTime(Math.max(0, Math.min(1, (x - r.left) / r.width)) * PLAY_END);
+          self.currentTimeSec = Math.max(0, Math.min(1, (x - r.left) / r.width)) * PLAY_END;
+          if (self._videoElement) {
+            self._videoSyncActive = false;
+            self._videoElement.currentTime = timeToStepIdx(self.currentTimeSec) / self._videoFps;
+            self._videoSyncActive = true;
+          }
+          self._updateDisplay(false);
         }
-        seek(e.clientX);
-        function onMove(ev) { seek(ev.clientX); }
+        function onMove(ev) { dragTo(ev.clientX); }
         function onUp() {
+          self._dragging = false;
+          self.seekToTime(self.currentTimeSec);
           track.removeEventListener('pointermove', onMove);
           track.removeEventListener('pointerup',   onUp);
           track.removeEventListener('pointercancel', onUp);
         }
+        dragTo(e.clientX);
         track.addEventListener('pointermove', onMove);
         track.addEventListener('pointerup',   onUp);
         track.addEventListener('pointercancel', onUp);
