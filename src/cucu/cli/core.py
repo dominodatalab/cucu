@@ -36,8 +36,8 @@ from cucu.db import (
     finish_worker_record,
 )
 from cucu.lint import linter
+from cucu.reporter import encoder as video_encoder
 from cucu.utils import generate_short_id
-from cucu.video import encoder as video_encoder
 
 # set env var BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON=yes before importing behave
 os.environ["BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON"] = "yes"

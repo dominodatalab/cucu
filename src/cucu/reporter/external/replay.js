@@ -143,6 +143,28 @@
     }
     return best;
   }
+  // Returns the global screenshot index (0-based) for scenario time t.
+  // Divide by fps to get video.currentTime.
+  function timeToGlobalPicIdx(t) {
+    var stepIdx = timeToStepIdx(t);
+    var imgIdx  = timeToImgIdx(stepIdx, t);
+    return PIC_OFFSETS[stepIdx] + imgIdx;
+  }
+  function videoTimeToScenarioTime(fps, vt) {
+    var picIdx = Math.floor(vt * fps);
+    // find largest step whose PIC_OFFSETS[i] <= picIdx
+    var best = 0;
+    for (var i = 0; i < TOTAL_STEPS; i++) {
+      if (PIC_OFFSETS[i] <= picIdx) best = i;
+    }
+    var step = STEPS[best];
+    if (step.startOffset === null) return 0;
+    var n = step.screenshots.length;
+    if (n <= 1 || step.duration <= 0) return step.startOffset;
+    var localPic = picIdx - PIC_OFFSETS[best];
+    return step.startOffset + (localPic / n) * step.duration;
+  }
+
   function timeToImgIdx(stepIdx, t) {
     var step = STEPS[stepIdx];
     var n = step.screenshots.length;
@@ -289,6 +311,23 @@
         this._videoElement = document.getElementById('scenario-video');
         if (this._videoElement) {
           this._videoSyncActive = true;
+          var vid = this._videoElement;
+          // Video → timeline: scrubbing or native play/pause updates the playhead
+          var _vidFps = parseInt(vid.dataset.fps, 10) || 1;
+          vid.addEventListener('timeupdate', function () {
+            if (!self._videoSyncActive) return;
+            var t = videoTimeToScenarioTime(_vidFps, vid.currentTime);
+            self.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
+            self._updateDisplay(false);
+          });
+          vid.addEventListener('play', function () {
+            if (!self._videoSyncActive) return;
+            if (!self.isPlaying) self._startPlay();
+          });
+          vid.addEventListener('pause', function () {
+            if (!self._videoSyncActive) return;
+            if (self.isPlaying) self._stopPlay();
+          });
         }
 
         var startTime = 0;
@@ -334,21 +373,18 @@
       },
 
       seekToTime(t) {
+        this._stopPlay();
         this.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
-        if (this._videoElement) {
+        if (this._videoElement && this._videoElement.dataset.fps) {
+          var fps = parseInt(this._videoElement.dataset.fps, 10);
           this._videoSyncActive = false;
-          this._videoElement.currentTime = this.currentTimeSec;
+          this._videoElement.currentTime = timeToGlobalPicIdx(this.currentTimeSec) / fps;
           this._videoSyncActive = true;
         }
         this._reengageFollow();
         this._updateDisplay(true);
       },
       seekToStepIdx(idx) {
-        if (this._videoElement && this._videoElement.dataset.fps) {
-          // Video mode: seek by step index / fps
-          var fps = parseInt(this._videoElement.dataset.fps, 10);
-          this._videoElement.currentTime = idx / fps;
-        }
         this.seekToTime(stepIdxToTime(idx));
       },
       navigateStep(delta) {
@@ -361,6 +397,12 @@
       _startPlay() {
         if (this.isPlaying || this.currentTimeSec >= PLAY_END) return;
         this.isPlaying = true;
+        if (this._videoElement) {
+          this._videoSyncActive = false;
+          this._videoElement.playbackRate = this.playbackRate;
+          this._videoElement.play().catch(function () {});
+          this._videoSyncActive = true;
+        }
         this._lastRafTime = null;
         this._reengageFollow();
         var self = this;
@@ -368,11 +410,18 @@
       },
       _stopPlay() {
         this.isPlaying = false;
+        if (this._videoElement && !this._videoElement.paused) {
+          this._videoSyncActive = false;
+          this._videoElement.pause();
+          this._videoSyncActive = true;
+        }
         if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
       },
       _playFrame(rafTime) {
         if (!this.isPlaying) return;
-        if (this._lastRafTime !== null) {
+        // When video is present it drives currentTimeSec via timeupdate; RAF loop only
+        // needed for end-of-playback detection and display refresh.
+        if (!this._videoElement && this._lastRafTime !== null) {
           this.currentTimeSec += (rafTime - this._lastRafTime) / 1000 * this.playbackRate;
           if (this.currentTimeSec >= PLAY_END) {
             this.currentTimeSec = PLAY_END;
@@ -381,8 +430,12 @@
             return;
           }
         }
+        if (this._videoElement && this.currentTimeSec >= PLAY_END) {
+          this._stopPlay();
+          return;
+        }
         this._lastRafTime = rafTime;
-        this._updateDisplay(false);
+        if (!this._videoElement) this._updateDisplay(false);
         var self = this;
         this._rafId = requestAnimationFrame(function (t) { self._playFrame(t); });
       },

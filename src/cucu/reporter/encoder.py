@@ -9,22 +9,6 @@ from cucu.db import step
 logger = logging.getLogger(__name__)
 
 
-def _get_scenario_steps(scenario_run_id):
-    """Fetch all steps for a scenario, ordered by seq."""
-    return (
-        step.select()
-        .where(step.scenario.scenario_run_id == scenario_run_id)
-        .order_by(step.seq)
-    )
-
-
-def _get_scenario_steps_from_scenario(scenario_obj):
-    """Fetch all steps for a scenario object, ordered by seq."""
-    return (
-        step.select().where(step.scenario == scenario_obj).order_by(step.seq)
-    )
-
-
 def _render_text_card(
     text,
     keyword,
@@ -109,38 +93,10 @@ def _render_text_card(
     return img
 
 
-def _get_screenshot_dimensions(scenario_dir, steps_list):
-    """Get the maximum dimensions from all screenshots in the scenario."""
-    max_width = None
-    max_height = None
-
-    for s in steps_list:
-        if s.screenshots:
-            for img_data in s.screenshots:
-                if img_data and isinstance(img_data, dict):
-                    path = img_data.get("filepath")
-                    if path:
-                        img_path = scenario_dir / path
-                        if img_path.exists():
-                            try:
-                                from PIL import Image
-
-                                with Image.open(img_path) as img:
-                                    w, h = img.size
-                                    if max_width is None or w > max_width:
-                                        max_width = w
-                                    if max_height is None or h > max_height:
-                                        max_height = h
-                            except Exception:
-                                continue
-
-    # Fall back to config if no screenshots found
-    if max_width is None:
-        max_width = CONFIG.get("CUCU_BROWSER_WINDOW_WIDTH", 1366)
-    if max_height is None:
-        max_height = CONFIG.get("CUCU_BROWSER_WINDOW_HEIGHT", 768)
-
-    return max_width, max_height
+def _get_screenshot_dimensions():
+    width = CONFIG.get("CUCU_BROWSER_WINDOW_WIDTH", 1366)
+    height = CONFIG.get("CUCU_BROWSER_WINDOW_HEIGHT", 768)
+    return width, height
 
 
 def _encode_with_opencv(frames, output_path, width, height, fps=1):
@@ -195,7 +151,7 @@ def encode_scenario_video(scenario_obj, scenario_dir):
     # Check if video already exists
     if output_path.exists():
         try:
-            steps_list = list(_get_scenario_steps_from_scenario(scenario_obj))
+            steps_list = list(scenario_obj.steps.order_by(step.seq))
             fps = CONFIG.get("CUCU_SCREENSHOT_VIDEO_FPS", 1)
             return (output_path, len(steps_list), fps)
         except Exception:
@@ -203,7 +159,7 @@ def encode_scenario_video(scenario_obj, scenario_dir):
 
     # Get steps
     try:
-        steps_list = list(_get_scenario_steps_from_scenario(scenario_obj))
+        steps_list = list(scenario_obj.steps.order_by(step.seq))
         if not steps_list:
             logger.warning(
                 f"No steps found for scenario {scenario_obj.scenario_run_id}"
@@ -213,14 +169,7 @@ def encode_scenario_video(scenario_obj, scenario_dir):
         logger.error(f"Failed to fetch scenario steps: {e}")
         return None
 
-    # Get dimensions
-    try:
-        width, height = _get_screenshot_dimensions(
-            Path(scenario_dir), steps_list
-        )
-    except Exception as e:
-        logger.error(f"Failed to get screenshot dimensions: {e}")
-        return None
+    width, height = _get_screenshot_dimensions()
 
     # Build frames list — one frame per step
     try:
