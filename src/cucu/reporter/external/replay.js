@@ -198,6 +198,7 @@
       playbackRate:    1.0,
       theme:           'auto',
       highlight:       true,
+      _videoHighlight: null,
       logsOpen:        false,
       panelsCollapsed: {},
       followFlags:     {},
@@ -222,12 +223,6 @@
       get picCaption()    {
         var s = this.curStep;
         return s && s.screenshots[this.shownImgIdx] ? (s.screenshots[this.shownImgIdx].label || '') : '';
-      },
-      get curVideoHighlight() {
-        var s = this.curStep;
-        if (!s) return null;
-        var img = s.screenshots[this.shownImgIdx] || s.screenshots[0];
-        return (img && img.highlight) ? img.highlight : null;
       },
       get picCountText()  {
         var s = this.curStep;
@@ -447,6 +442,14 @@
         }
         if (imgIdx !== this.shownImgIdx || stepChanged || force) {
           this.shownImgIdx = this.steps[stepIdx].screenshots.length > 1 ? imgIdx : 0;
+        }
+        // Always recompute _videoHighlight after both indices are finalized so stale
+        // highlights from a previous step/image are never left visible.
+        this._videoHighlight = null;
+        var _vhStep = this.steps[stepIdx];
+        if (_vhStep) {
+          var _vhImg = _vhStep.screenshots[this.shownImgIdx] || _vhStep.screenshots[0];
+          this._videoHighlight = (_vhImg && _vhImg.highlight) ? _vhImg.highlight : null;
         }
         this._scrollBrowserToTime();
         if (stepChanged || force) {

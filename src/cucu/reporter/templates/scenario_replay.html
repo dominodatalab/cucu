@@ -140,8 +140,9 @@
         Your browser does not support the video tag.
       </video>
       <div class="highlight-overlay"
-           x-show="highlight && curVideoHighlight"
-           :style="curVideoHighlight ? 'top:'+curVideoHighlight.top_ratio*100+'%;left:'+curVideoHighlight.left_ratio*100+'%;width:'+curVideoHighlight.width_ratio*100+'%;height:'+curVideoHighlight.height_ratio*100+'%' : ''">
+           style="display:none"
+           x-show="highlight && _videoHighlight"
+           :style="_videoHighlight ? 'top:'+_videoHighlight.top_ratio*100+'%;left:'+_videoHighlight.left_ratio*100+'%;width:'+_videoHighlight.width_ratio*100+'%;height:'+_videoHighlight.height_ratio*100+'%' : ''">
       </div>
     </div>
   </div>
