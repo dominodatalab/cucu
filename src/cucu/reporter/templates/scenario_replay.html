@@ -129,14 +129,22 @@
 <!-- STAGE: shows current step's screenshot or text -->
 <div id="vp-stage">
   {% if screenshots_video %}
-  <video id="scenario-video"
-         data-fps="{{ screenshots_video_fps }}"
-         data-step-count="{{ screenshots_video_steps }}"
-         preload="auto"
-         style="max-width: 100%; max-height: 100%; border-radius: 6px; box-shadow: 0 8px 32px var(--vp-stage-shadow);">
-    <source src="{{ screenshots_video }}" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
+  <div class="stage-screenshots">
+    <div class="screenshot-wrapper active">
+      <video id="scenario-video"
+             class="stage-img"
+             data-fps="{{ screenshots_video_fps }}"
+             data-step-count="{{ screenshots_video_steps }}"
+             preload="auto">
+        <source src="{{ screenshots_video }}" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <div class="highlight-overlay"
+           x-show="highlight && curVideoHighlight"
+           :style="curVideoHighlight ? 'top:'+curVideoHighlight.top_ratio*100+'%;left:'+curVideoHighlight.left_ratio*100+'%;width:'+curVideoHighlight.width_ratio*100+'%;height:'+curVideoHighlight.height_ratio*100+'%' : ''">
+      </div>
+    </div>
+  </div>
   {% else %}
   {% for step in steps %}
   {% set si = loop.index0 %}
@@ -363,7 +371,7 @@
       "isSubstep": {{ 'true' if step['is_substep'] else 'false' }},
       "startOffset": {% if step['time_offset'] %}{{ step['time_offset'].hour * 3600 + step['time_offset'].minute * 60 + step['time_offset'].second + step['time_offset'].microsecond / 1000000.0 }}{% else %}null{% endif %},
       "duration": {{ step['duration'] | default(0) | float }},
-      "screenshots": [{% for img in step['screenshots'] %}{"src": {{ img['html_src']|tojson }}, "label": {{ img['label']|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}],
+      "screenshots": [{% for img in step['screenshots'] %}{"src": {{ img['html_src']|tojson }}, "label": {{ img['label']|tojson }}, "highlight": {{ img['highlight']|tojson if img['highlight'] else 'null' }}}{% if not loop.last %},{% endif %}{% endfor %}],
       "timingLabel": {% if step['timestamp'] and step['duration'] %}"{{ step['timestamp'].strftime('%H:%M:%S') }} · {{ '{:.3f}s'.format(step['duration'] | float) }}"{% else %}""{% endif %},
       "debugOutput": {% if step['debug_output'] %}{{ (step['debug_output'] | join(''))|tojson }}{% else %}null{% endif %},
       "stdout": {{ step['stdout']|tojson if step['stdout'] else 'null' }},

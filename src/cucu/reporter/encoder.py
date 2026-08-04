@@ -169,8 +169,6 @@ def encode_scenario_video(scenario_obj, scenario_dir):
         logger.error(f"Failed to fetch scenario steps: {e}")
         return None
 
-    width, height = _get_screenshot_dimensions()
-
     # Build frames list — one frame per step
     try:
         from PIL import Image
@@ -179,6 +177,31 @@ def encode_scenario_video(scenario_obj, scenario_dir):
             "Pillow is required for video encoding. Install with: uv sync --extra video"
         )
 
+    # Resolve video dimensions from the first loadable PNG so text-card frames
+    # use the same size and no PNG frame gets resized during encoding.
+    width, height = _get_screenshot_dimensions()
+    for s in steps_list:
+        for img_data in s.screenshots or []:
+            if not (img_data and isinstance(img_data, dict)):
+                continue
+            src = img_data.get("html_src") or img_data.get("filepath")
+            if not src:
+                continue
+            img_path = Path(scenario_dir) / src
+            if not img_path.exists():
+                abs_path = Path(img_data.get("filepath", ""))
+                if abs_path.is_absolute() and abs_path.exists():
+                    img_path = abs_path
+            if img_path.exists():
+                try:
+                    width, height = Image.open(img_path).size
+                except Exception:
+                    continue
+                break
+        else:
+            continue
+        break
+
     frames = []
     for s in steps_list:
         frame = None
@@ -186,12 +209,19 @@ def encode_scenario_video(scenario_obj, scenario_dir):
             # Try to use the first screenshot
             for img_data in s.screenshots:
                 if img_data and isinstance(img_data, dict):
-                    path = img_data.get("filepath")
-                    if path:
-                        img_path = Path(scenario_dir) / path
+                    # html_src is relative to scenario_dir; filepath is relative
+                    # to the working directory at capture time — prefer html_src
+                    src = img_data.get("html_src") or img_data.get("filepath")
+                    if src:
+                        img_path = Path(scenario_dir) / src
+                        if not img_path.exists():
+                            # fall back to treating filepath as absolute
+                            abs_path = Path(img_data.get("filepath", ""))
+                            if abs_path.is_absolute() and abs_path.exists():
+                                img_path = abs_path
                         if img_path.exists():
                             try:
-                                frame = Image.open(img_path)
+                                frame = Image.open(img_path).convert("RGB")
                                 break
                             except Exception:
                                 continue

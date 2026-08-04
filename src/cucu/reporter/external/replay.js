@@ -234,6 +234,12 @@
         var s = this.curStep;
         return s && s.screenshots[this.shownImgIdx] ? (s.screenshots[this.shownImgIdx].label || '') : '';
       },
+      get curVideoHighlight() {
+        var s = this.curStep;
+        if (!s) return null;
+        var img = s.screenshots[this.shownImgIdx] || s.screenshots[0];
+        return (img && img.highlight) ? img.highlight : null;
+      },
       get picCountText()  {
         var s = this.curStep;
         return s && s.screenshots.length > 1 ? (this.shownImgIdx + 1) + ' / ' + s.screenshots.length : '– / –';
