@@ -32,6 +32,18 @@ def step_with_substeps(context):
     )
 
 
+@step("I use a step with substeps and a heading")
+def step_with_substeps_and_heading(context):
+    run_steps(
+        context,
+        """
+    When I do nothing
+     And ## Some Heading
+     And I do nothing
+    """,
+    )
+
+
 @step("I use a step with substeps that fail")
 def step_with_substeps_that_fail(context):
     run_steps(
