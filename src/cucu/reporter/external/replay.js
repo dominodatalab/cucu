@@ -149,16 +149,6 @@
     var imgIdx  = timeToImgIdx(stepIdx, t);
     return PIC_OFFSETS[stepIdx] + imgIdx;
   }
-  // The video has one frame per step (frame index == step index).
-  // Interpolate within the step's scenario duration using the fractional video frame position.
-  function videoTimeToScenarioTime(fps, vt) {
-    var stepIdx = Math.min(Math.floor(vt * fps), TOTAL_STEPS - 1);
-    var step = STEPS[stepIdx];
-    if (step.startOffset === null) return 0;
-    var frac = vt * fps - stepIdx; // 0..1 progress through this video frame
-    return step.startOffset + frac * (step.duration || 0);
-  }
-
   function timeToImgIdx(stepIdx, t) {
     var step = STEPS[stepIdx];
     var n = step.screenshots.length;
@@ -221,7 +211,6 @@
       _stepScrollBusy:    {},
       _browserScrollBusy: { value: false },
       _videoElement:      null,
-      _videoSyncActive:   false,
       _videoFps:          1,
       _dragging:          false,
 
@@ -309,33 +298,11 @@
           });
         }
 
-        // Get video element reference if it exists
+        // Get video element reference if it exists. The player controls video.currentTime
+        // directly from the RAF loop — the video stays paused and is used only as a display surface.
         this._videoElement = document.getElementById('scenario-video');
         if (this._videoElement) {
-          this._videoSyncActive = true;
           this._videoFps = parseInt(this._videoElement.dataset.fps, 10) || 1;
-          var vid = this._videoElement;
-          // Video → timeline: scrubbing or seeking from native controls updates the playhead.
-          // During active playback, the RAF loop polls currentTime at 60fps for smooth motion.
-          vid.addEventListener('timeupdate', function () {
-            if (!self._videoSyncActive || self.isPlaying || self._dragging) return;
-            var t = videoTimeToScenarioTime(self._videoFps, vid.currentTime);
-            self.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
-            self._updateDisplay(false);
-          });
-          vid.addEventListener('play', function () {
-            if (!self._videoSyncActive) return;
-            if (!self.isPlaying) self._startPlay();
-          });
-          vid.addEventListener('pause', function () {
-            if (!self._videoSyncActive) return;
-            if (self.isPlaying) self._stopPlay();
-          });
-          vid.addEventListener('ended', function () {
-            self.currentTimeSec = PLAY_END;
-            self._updateDisplay(false);
-            self._stopPlay();
-          });
         }
 
         var startTime = 0;
@@ -383,11 +350,8 @@
       seekToTime(t) {
         this._stopPlay();
         this.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
-        if (this._videoElement && this._videoElement.dataset.fps) {
-          var fps = parseInt(this._videoElement.dataset.fps, 10);
-          this._videoSyncActive = false;
-          this._videoElement.currentTime = timeToStepIdx(this.currentTimeSec) / fps;
-          this._videoSyncActive = true;
+        if (this._videoElement) {
+          this._videoElement.currentTime = timeToStepIdx(this.currentTimeSec) / this._videoFps;
         }
         this._reengageFollow();
         this._updateDisplay(true);
@@ -405,12 +369,6 @@
       _startPlay() {
         if (this.isPlaying || this.currentTimeSec >= PLAY_END) return;
         this.isPlaying = true;
-        if (this._videoElement) {
-          this._videoSyncActive = false;
-          this._videoElement.playbackRate = this.playbackRate;
-          this._videoElement.play().catch(function () {});
-          this._videoSyncActive = true;
-        }
         this._lastRafTime = null;
         this._reengageFollow();
         var self = this;
@@ -418,36 +376,26 @@
       },
       _stopPlay() {
         this.isPlaying = false;
-        if (this._videoElement && !this._videoElement.paused) {
-          this._videoSyncActive = false;
-          this._videoElement.pause();
-          this._videoSyncActive = true;
-        }
         if (this._rafId) { cancelAnimationFrame(this._rafId); this._rafId = null; }
       },
       _playFrame(rafTime) {
         if (!this.isPlaying) return;
-        if (this._videoElement) {
-          // Poll video.currentTime every frame for smooth 60fps playhead motion.
-          var t = videoTimeToScenarioTime(this._videoFps, this._videoElement.currentTime);
-          this.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
+        if (this._lastRafTime !== null) {
+          this.currentTimeSec += (rafTime - this._lastRafTime) / 1000 * this.playbackRate;
           if (this.currentTimeSec >= PLAY_END) {
+            this.currentTimeSec = PLAY_END;
+            if (this._videoElement) {
+              this._videoElement.currentTime = timeToStepIdx(PLAY_END) / this._videoFps;
+            }
             this._updateDisplay(false);
             this._stopPlay();
             return;
           }
-        } else {
-          if (this._lastRafTime !== null) {
-            this.currentTimeSec += (rafTime - this._lastRafTime) / 1000 * this.playbackRate;
-            if (this.currentTimeSec >= PLAY_END) {
-              this.currentTimeSec = PLAY_END;
-              this._updateDisplay(false);
-              this._stopPlay();
-              return;
-            }
-          }
         }
         this._lastRafTime = rafTime;
+        if (this._videoElement) {
+          this._videoElement.currentTime = timeToStepIdx(this.currentTimeSec) / this._videoFps;
+        }
         this._updateDisplay(false);
         var self = this;
         this._rafId = requestAnimationFrame(function (t) { self._playFrame(t); });
@@ -567,9 +515,7 @@
           var r = track.getBoundingClientRect();
           self.currentTimeSec = Math.max(0, Math.min(1, (x - r.left) / r.width)) * PLAY_END;
           if (self._videoElement) {
-            self._videoSyncActive = false;
             self._videoElement.currentTime = timeToStepIdx(self.currentTimeSec) / self._videoFps;
-            self._videoSyncActive = true;
           }
           self._updateDisplay(false);
         }
