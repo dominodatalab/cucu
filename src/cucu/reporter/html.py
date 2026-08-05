@@ -23,6 +23,19 @@ def escape(data):
     return escape_(data, {'"': "&quot;"}).rstrip()
 
 
+def _ignore_screenshots(src, names):
+    ignored = set()
+    for name in names:
+        path = Path(src) / name
+        if name.endswith(".png"):
+            ignored.add(name)
+        elif path.is_dir():
+            contents = list(path.iterdir())
+            if contents and all(f.suffix == ".png" for f in contents):
+                ignored.add(name)
+    return ignored
+
+
 def process_tags(element):
     """
     process tags in the element provided (scenario or feature) and basically
@@ -198,10 +211,16 @@ def generate(results: Path, basepath: Path):
                 )
 
                 if src_feature_filepath.exists():
+                    ignore = (
+                        _ignore_screenshots
+                        if CONFIG.get("CUCU_SCREENSHOT_VIDEO", False)
+                        else None
+                    )
                     shutil.copytree(
                         src_feature_filepath,
                         feature_path,
                         dirs_exist_ok=True,
+                        ignore=ignore,
                     )
                 else:
                     logger.warning(
