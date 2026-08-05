@@ -96,7 +96,7 @@
         </div>
       </div>
       {% endif %}
-      <span class="vp-meta" id="vp-meta-time" x-text="metaTimeText">▶ {{ scenario["start_at"].strftime('%Y-%m-%d %H:%M:%S') if scenario["start_at"] else '' }} &nbsp;·&nbsp; 0 / {{ '{:.0f}'.format(scenario['duration'] | float) }}s</span>
+      <span class="vp-meta" id="vp-meta-time">{% if scenario["start_at"] %}start at {{ scenario["start_at"].strftime('%Y-%m-%d %H:%M:%S') }} for {% endif %}{{ '{:.1f}'.format(scenario['duration'] | float) }}s</span>
     </div>
   </div>
   {% if scenario['sub_headers'] %}

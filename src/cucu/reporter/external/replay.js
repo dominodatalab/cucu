@@ -234,11 +234,6 @@
         var clamped = n > 1 ? Math.min(this.shownImgIdx, n - 1) : 0;
         return ((PIC_OFFSETS[this.shownStepIdx] || 0) + clamped + 1) + ' / ' + TOTAL_PICS;
       },
-      get metaTimeText()  {
-        var cur = Math.floor(this.currentTimeSec), tot = Math.floor(SCENARIO_DURATION);
-        if (SCENARIO_START_MS === null) return '▶ ' + cur + ' / ' + tot + 's';
-        return '▶ ' + formatPlayheadTime(SCENARIO_START_MS + this.currentTimeSec * 1000) + ' · ' + cur + ' / ' + tot + 's';
-      },
       get breadcrumbText() {
         var name = 'Scenario: ' + SCENARIO_NAME;
         for (var i = 0; i <= Math.max(0, this.shownStepIdx) && i < this.steps.length; i++) {
