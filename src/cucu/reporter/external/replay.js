@@ -49,14 +49,86 @@
     : Math.max(TOTAL_STEPS - 1, 0);
   var TOTAL_DUR = PLAY_END > 0 ? PLAY_END : 1;
 
+  // ===== VISUAL COORDINATE SYSTEM =====
+  // Steps get a guaranteed minimum width (VIS_MIN_W) and a gap between adjacent
+  // bars (VIS_GAP), both as percentages of the track width. This decouples visual
+  // position from raw time proportion, so timeToVis() / visToTime() must be used
+  // wherever a visual % coordinate is needed (headPct, drag-to-seek, all leftPct
+  // values on every timeline track).
+  var VIS_MIN_W = 0.4;   // minimum bar width  (% of track)
+  var VIS_GAP   = 0.15;  // gap between bars   (% of track)
+
+  // Cap so reserved space never exceeds 80%, leaving room for proportional widths.
+  (function () {
+    var reserved = TOTAL_STEPS * VIS_MIN_W + Math.max(0, TOTAL_STEPS - 1) * VIS_GAP;
+    if (reserved > 80) {
+      var scale = 80 / reserved;
+      VIS_MIN_W *= scale;
+      VIS_GAP   *= scale;
+    }
+  }());
+
+  // {left, width} in visual-% for each step.
+  var VISUAL_STEPS = (function () {
+    var reserved  = TOTAL_STEPS * VIS_MIN_W + Math.max(0, TOTAL_STEPS - 1) * VIS_GAP;
+    var remaining = 100 - reserved;
+    var cursor = 0, arr = [];
+    STEPS.forEach(function (s) {
+      var bonus = HAS_TIMING
+        ? (s.duration / TOTAL_DUR) * remaining
+        : remaining / Math.max(TOTAL_STEPS, 1);
+      var w = VIS_MIN_W + bonus;
+      arr.push({ left: cursor, width: w });
+      cursor += w + VIS_GAP;
+    });
+    return arr;
+  }());
+
+  // time → visual-% (piecewise linear, one segment per step).
+  function timeToVis(t) {
+    if (TOTAL_STEPS === 0) return 0;
+    if (!HAS_TIMING) {
+      var idx = Math.max(0, Math.min(Math.round(t), TOTAL_STEPS - 1));
+      return VISUAL_STEPS[idx].left;
+    }
+    if (t >= PLAY_END) return 100;
+    var i = timeToStepIdx(t);
+    var s = STEPS[i], vs = VISUAL_STEPS[i];
+    var dur = s.duration > 0 ? s.duration : 0.001;
+    var frac = Math.max(0, Math.min(1, (t - s.startOffset) / dur));
+    return vs.left + frac * vs.width;
+  }
+
+  // visual-% → time (inverse of timeToVis; used by drag-to-seek).
+  function visToTime(pct) {
+    if (TOTAL_STEPS === 0) return 0;
+    if (!HAS_TIMING) {
+      for (var j = 0; j < TOTAL_STEPS; j++) {
+        if (pct <= VISUAL_STEPS[j].left + VISUAL_STEPS[j].width) return j;
+      }
+      return TOTAL_STEPS - 1;
+    }
+    for (var k = 0; k < TOTAL_STEPS; k++) {
+      var vs = VISUAL_STEPS[k], s = STEPS[k];
+      var barEnd = vs.left + vs.width;
+      if (pct <= barEnd) {
+        if (pct >= vs.left) {
+          return s.startOffset + ((pct - vs.left) / vs.width) * s.duration;
+        }
+        // In the gap before bar k — snap to the start of step k.
+        return s.startOffset;
+      }
+    }
+    return PLAY_END;
+  }
+
   // ----- Precomputed tick / bar arrays — bound via <template x-for> in markup. -----
   var STEP_BARS = STEPS.map(function (step, i) {
-    var leftPct = HAS_TIMING ? step.startOffset / TOTAL_DUR * 100 : i / Math.max(TOTAL_STEPS - 1, 1) * 100;
-    var widthPct = HAS_TIMING ? Math.max(step.duration / TOTAL_DUR * 100, 0.25) : 100 / TOTAL_STEPS;
+    var vs = VISUAL_STEPS[i];
     return {
       index:    i,
-      leftPct:  leftPct,
-      widthPct: widthPct,
+      leftPct:  vs.left,
+      widthPct: vs.width,
       cls:      'status-' + (step.status || 'untested') + (step.isHeading ? ' heading' : ''),
       title:    'Step ' + step.num + ': ' + step.keyword + ' ' + step.name.slice(0, 80),
       seekTime: HAS_TIMING ? step.startOffset : i,
@@ -69,7 +141,7 @@
     for (var i = 0; i < n; i++) {
       acc.push({
         cls: 'pics-tick pics-tick-' + (step.status || 'untested'),
-        leftPct: Math.max(0, Math.min(100, (step.startOffset + (i / n) * step.duration) / TOTAL_DUR * 100)),
+        leftPct: timeToVis(step.startOffset + (i / n) * step.duration),
       });
     }
     return acc;
@@ -78,9 +150,8 @@
   function buildPresenceBars(predicate) {
     return STEPS.reduce(function (acc, step, i) {
       if (!predicate(step)) return acc;
-      var leftPct  = HAS_TIMING ? step.startOffset / TOTAL_DUR * 100 : i / Math.max(TOTAL_STEPS, 1) * 100;
-      var widthPct = HAS_TIMING ? Math.max(0.5, step.duration / TOTAL_DUR * 100) : 100 / TOTAL_STEPS;
-      acc.push({ leftPct: leftPct, widthPct: widthPct });
+      var vs = VISUAL_STEPS[i];
+      acc.push({ leftPct: vs.left, widthPct: vs.width });
       return acc;
     }, []);
   }
@@ -98,11 +169,11 @@
       lines.forEach(function (l) {
         if (l.offset !== null) {
           stamped = true;
-          ticks.push({ leftPct: Math.max(0, Math.min(100, l.offset / TOTAL_DUR * 100)), level: 'info' });
+          ticks.push({ leftPct: timeToVis(l.offset), level: 'info' });
         }
       });
       if (!stamped && s.startOffset !== null) {
-        ticks.push({ leftPct: Math.max(0, Math.min(100, s.startOffset / TOTAL_DUR * 100)), level: 'info' });
+        ticks.push({ leftPct: timeToVis(s.startOffset), level: 'info' });
       }
     });
     return ticks;
@@ -111,7 +182,7 @@
   var STDOUT_TICKS = buildLineTicks('stdoutLines');
 
   var BROWSER_TICKS = BROWSER_LOGS.map(function (log) {
-    return { leftPct: Math.max(0, Math.min(100, log.offset / TOTAL_DUR * 100)), level: log.level };
+    return { leftPct: timeToVis(log.offset), level: log.level };
   });
 
   var STEP_PANELS = [
@@ -241,7 +312,7 @@
       _dragging:          false,
 
       // ----- derived (getters) -----
-      get headPct()       { return this.currentTimeSec / TOTAL_DUR * 100; },
+      get headPct()       { return timeToVis(this.currentTimeSec); },
       get atEnd()         { return this.currentTimeSec >= PLAY_END; },
       get curStep()       { return this.shownStepIdx >= 0 ? this.steps[this.shownStepIdx] : null; },
       get hasMultiplePics() { return !!(this.curStep && this.curStep.screenshots.length > 1); },
@@ -599,7 +670,8 @@
         this._dragging = true;
         function dragTo(x) {
           var r = track.getBoundingClientRect();
-          self.currentTimeSec = Math.max(0, Math.min(1, (x - r.left) / r.width)) * PLAY_END;
+          var pct = Math.max(0, Math.min(100, (x - r.left) / r.width * 100));
+          self.currentTimeSec = visToTime(pct);
           if (self._videoElement) {
             self._videoElement.currentTime = timeToGlobalPicIdx(self.currentTimeSec) / self._videoFps;
           }
