@@ -366,11 +366,10 @@ def generate(results: Path, basepath: Path):
 
                 scenario_dict["logs"] = log_files
 
-                # Check if video exists (used by both classic and replay views)
+                # Assign frame indices and set video path when video mode is enabled.
                 screenshots_video = None
                 screenshots_video_steps = None
-                video_path = scenario_filepath / "screenshots.mp4"
-                if video_path.exists():
+                if CONFIG.get("CUCU_SCREENSHOT_VIDEO", False):
                     screenshots_video = "screenshots.mp4"
                     # Assign cumulative frame indices to each screenshot.
                     # The encoder writes one frame per screenshot per step

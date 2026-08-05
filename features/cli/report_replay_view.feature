@@ -56,7 +56,8 @@ Feature: Report replay view
 
   Scenario: Replay view renders with CUCU_SCREENSHOT_VIDEO enabled
     Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/replay-video-echo-results --env CUCU_SCREENSHOT_VIDEO=true" and expect exit code "0"
-      And I run the command "cucu report {CUCU_RESULTS_DIR}/replay-video-echo-results --output {CUCU_RESULTS_DIR}/replay-video-echo-report" and expect exit code "0"
+      And I run the command "env CUCU_SCREENSHOT_VIDEO=true cucu report {CUCU_RESULTS_DIR}/replay-video-echo-results --output {CUCU_RESULTS_DIR}/replay-video-echo-report" and expect exit code "0"
+      And I should see a file at "{CUCU_RESULTS_DIR}/replay-video-echo-results/Echo/Echo an environment variable/screenshots.mp4"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/replay-video-echo-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      When I click the link "Echo"

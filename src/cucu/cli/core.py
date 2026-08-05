@@ -567,11 +567,7 @@ def _generate_report(
         consolidate_database_files(results_dir, combine)
 
     # Encode scenario videos if enabled
-    from cucu.config import CONFIG
     from cucu.db import scenario as scenario_model
-
-    if not CONFIG["CUCU_SCREENSHOT_VIDEO"]:
-        logger.warning("skipping video creation")
 
     if CONFIG.get("CUCU_SCREENSHOT_VIDEO", False):
         try:
