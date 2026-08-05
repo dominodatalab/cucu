@@ -240,8 +240,10 @@
     </label>
   </div>
   <div class="vp-log-body">
-    <div id="steps-breadcrumb">
-      <div class="log-line"><span class="steps-name" x-text="breadcrumbText"></span></div>
+    <div id="steps-breadcrumb" x-show="curStep">
+      <div class="log-line">
+        <span class="steps-kw" :class="'steps-' + (curStep ? curStep.status || 'untested' : '')" x-text="curStep ? curStep.keyword : ''"></span><span class="steps-name" x-text="curStep ? curStep.name : ''"></span>
+      </div>
     </div>
     <div id="vp-steps-content" class="vp-log-content" @scroll.passive="onLogScroll('vp-steps-content', 'steps-follow-chk')">
       <div class="log-step-group steps-row steps-heading" title="Jump to scenario start" @click="seekToTime(0)">

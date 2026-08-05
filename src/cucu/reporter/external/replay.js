@@ -330,13 +330,6 @@
         var clamped = n > 1 ? Math.min(this.shownImgIdx, n - 1) : 0;
         return ((PIC_OFFSETS[this.shownStepIdx] || 0) + clamped + 1) + ' / ' + TOTAL_PICS;
       },
-      get breadcrumbText() {
-        var name = 'Scenario: ' + SCENARIO_NAME;
-        for (var i = 0; i <= Math.max(0, this.shownStepIdx) && i < this.steps.length; i++) {
-          if (this.steps[i].headingLevel) name = ((this.steps[i].keyword || '') + ' ' + this.steps[i].name).trim();
-        }
-        return name;
-      },
       get playPauseDisabled() { return this.atEnd && !this.isPlaying; },
       get stepPrevDisabled()  { return this.shownStepIdx === 0 && this.currentTimeSec <= 0; },
       get startDisabled()     { return this.currentTimeSec <= 0; },
