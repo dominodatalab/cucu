@@ -152,8 +152,7 @@ def encode_scenario_video(scenario_obj, scenario_dir):
     if output_path.exists():
         try:
             steps_list = list(scenario_obj.steps.order_by(step.seq))
-            fps = CONFIG.get("CUCU_SCREENSHOT_VIDEO_FPS", 1)
-            return (output_path, len(steps_list), fps)
+            return (output_path, len(steps_list), 1)
         except Exception:
             pass
 
@@ -244,10 +243,9 @@ def encode_scenario_video(scenario_obj, scenario_dir):
 
     # Encode video
     try:
-        fps = CONFIG.get("CUCU_SCREENSHOT_VIDEO_FPS", 1)
-        _encode_with_opencv(frames, output_path, width, height, fps)
+        _encode_with_opencv(frames, output_path, width, height, 1)
         logger.info(f"Successfully encoded video: {output_path}")
-        return (output_path, len(frames), fps)
+        return (output_path, len(frames), 1)
     except Exception as e:
         logger.error(f"Video encoding error: {e}")
         if output_path.exists():
