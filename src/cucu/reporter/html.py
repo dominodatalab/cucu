@@ -244,31 +244,17 @@ def generate(results: Path, basepath: Path):
                     scenario_dict["steps"], key=lambda x: x["seq"]
                 )
 
-                steps_list = scenario_dict["steps"]
-                current_heading_level = 2
-                for index, step_dict in enumerate(steps_list):
-                    # Handle section headings with different levels (# to ####)
-                    if step_dict["name"].startswith("#"):
-                        # Map the count to the appropriate HTML heading (h2-h5)
-                        # We use h2-h5 instead of h1-h4 so h1 can be reserved for scenario/feature titles
-                        level = step_dict["name"][:4].count("#") + 1
-                        if step_dict["is_substep"]:
-                            # nest sub-step headings one level under their parent step
-                            level += 1
+                for step_dict in scenario_dict["steps"]:
+                    # section_level (root/scenario = 1, everything else is
+                    # enclosing + 1) is computed at runtime in section_steps.py
+                    # and utils.py's run_steps(); has_substeps distinguishes a
+                    # parent step's honorary heading from a real "#" heading
+                    if step_dict["section_level"] is not None:
+                        heading_tag = f"h{min(step_dict['section_level'], 6)}"
+                        if step_dict["has_substeps"]:
+                            step_dict["honorary_heading_level"] = heading_tag
                         else:
-                            current_heading_level = level
-                        step_dict["heading_level"] = f"h{min(level, 6)}"
-                    elif (
-                        not step_dict["is_substep"]
-                        and index + 1 < len(steps_list)
-                        and steps_list[index + 1]["is_substep"]
-                    ):
-                        # this step runs a nested sub-flow (e.g. via run_steps); give it an
-                        # honorary heading one level above the current section so it reads as
-                        # that sub-flow's header, without hiding its own status/duration/details
-                        step_dict["honorary_heading_level"] = (
-                            f"h{max(2, current_heading_level - 1)}"
-                        )
+                            step_dict["heading_level"] = heading_tag
 
                     # process timestamps and time offsets
                     if not step_dict["end_at"]:

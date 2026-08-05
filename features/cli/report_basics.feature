@@ -211,7 +211,7 @@ Feature: Report basics
         .tagName;
       """
      Then I should see "{PARENT_HEADING_CLASS}" contains "honorary-h2"
-      And I should see "{NESTED_HEADING_TAG}" is equal to "H4"
+      And I should see "{NESTED_HEADING_TAG}" is equal to "H3"
 
   Scenario: User can run feature with background and has all results reported correctly without skips
     Given I run the command "cucu run data/features/feature_with_background.feature --results {CUCU_RESULTS_DIR}/feature_with_background" and expect exit code "0"
