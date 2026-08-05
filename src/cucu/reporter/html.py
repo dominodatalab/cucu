@@ -1,3 +1,4 @@
+import re
 import shutil
 import sys
 import traceback
@@ -92,6 +93,26 @@ def browser_log_level(raw_level):
     return "warning" if raw_level == "WARNING" else "info"
 
 
+_LOG_TS_RE = re.compile(r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d+)")
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def log_line_offset(line, scenario_start_at):
+    """Return seconds offset from scenario start for a log line that starts with a Python
+    logging timestamp (``YYYY-MM-DD HH:MM:SS,mmm``), or None if no timestamp is found."""
+    if not scenario_start_at or not line:
+        return None
+    text = _HTML_TAG_RE.sub("", line).strip()
+    m = _LOG_TS_RE.match(text)
+    if not m:
+        return None
+    try:
+        ts = datetime.strptime(m.group(1), "%Y-%m-%d %H:%M:%S,%f")
+        return (ts - scenario_start_at).total_seconds()
+    except Exception:
+        return None
+
+
 def step_table_to_html(table_data):
     """Convert a step table data structure to an indented HTML table format"""
     text_indent = " " * 8
@@ -111,6 +132,7 @@ def generate(results: Path, basepath: Path):
         urlencode=urlencode,
         browser_timestamp_to_datetime=browser_timestamp_to_datetime,
         browser_log_level=browser_log_level,
+        log_line_offset=log_line_offset,
         step_text_list_to_html=step_text_list_to_html,
         step_table_to_html=step_table_to_html,
     )

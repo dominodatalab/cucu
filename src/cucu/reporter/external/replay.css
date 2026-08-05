@@ -322,7 +322,7 @@ body.hide-highlights .highlight-overlay { display: none; }
 .tl-tick.tl-warning { width: 2px; background: #e87d0d;          opacity: 0.85; }
 .tl-tick.tl-error   { width: 2px; background: var(--vp-failed); opacity: 0.95; }
 /* Cursor line on secondary tracks */
-#pics-tl-cursor, #stdout-tl-cursor, #cucu-tl-cursor, #browser-tl-cursor, #errors-tl-cursor {
+#pics-tl-cursor, #stdout-tl-cursor, #cucu-tl-cursor, #browser-tl-cursor, #errors-tl-cursor, #stderr-tl-cursor {
   position: absolute; top: -4px; bottom: -4px; width: 2px;
   background: var(--vp-link); border-radius: 1px;
   pointer-events: none; z-index: 30; left: 0%; transform: translateX(-50%);
@@ -389,6 +389,15 @@ body.hide-highlights .highlight-overlay { display: none; }
 /* Browser log level colouring */
 .browser-log-line.bl-warning { color: #e87d0d; }
 .browser-log-line.bl-error   { color: var(--vp-failed); }
+/* Clickable log rows — cucu/stdout/stderr/errors groups and browser log lines */
+.log-step-group { cursor: pointer; }
+.log-step-group:hover .log-line { background: var(--vp-inset); }
+.browser-log-line { cursor: pointer; }
+.browser-log-line:hover { background: var(--vp-inset); }
+/* Timestamped log lines — individual seek targets within a step */
+.log-line[data-offset] { cursor: pointer; }
+.log-line[data-offset]:hover { background: var(--vp-inset); }
+.log-line.log-line-active { background: var(--vp-inset); border-left: 2px solid var(--vp-accent); }
 /* Steps panel — per-step rows */
 .steps-row { cursor: pointer; }
 .steps-row:hover .log-line { background: var(--vp-inset); }

@@ -271,11 +271,19 @@
 {% if steps | selectattr('debug_output') | list %}
 {% call log_panel('vp-cucu-panel', 'Cucu', 'cucu-follow-chk', 'vp-cucu-content', 'cucu-resize-handle',
                   timeline_track_id='cucu-timeline-track', timeline_cursor_id='cucu-tl-cursor',
-                  timeline_data='cucuBars') %}
+                  timeline_data='cucuTicks', timeline_kind='ticks') %}
       <template x-for="step in cucuSteps" :key="step.index">
         <div class="log-step-group" :data-step="step.index"
-             :class="{ 'step-current': currentStepFor('debugOutput') === step.index }">
-          <div class="log-line" x-html="step.debugOutput"></div>
+             :class="{ 'step-current': currentStepFor('debugLines') === step.index }"
+             @click="seekToStepIdx(step.index)">
+          <template x-for="(line, j) in step.debugLines" :key="j">
+            <div class="log-line"
+                 x-html="line.html"
+                 :class="{ 'log-line-active': line.offset !== null && line.offset === activeDebugOffset }"
+                 :data-offset="line.offset"
+                 @click="seekToLogLineOffset(line.offset, $event)">
+            </div>
+          </template>
         </div>
       </template>
 {% endcall %}
@@ -291,6 +299,7 @@
       <template x-for="(log, i) in browserLogs" :key="i">
         <div :class="'log-line browser-log-line bl-' + log.level"
              :data-offset="log.offset"
+             @click="seekToTime(log.offset)"
              x-text="log.text"></div>
       </template>
 {% endcall %}
@@ -300,12 +309,18 @@
 {% if steps | selectattr('stdout') | list %}
 {% call log_panel('vp-stdout-panel', 'Stdout', 'stdout-follow-chk', 'vp-stdout-content', 'stdout-resize-handle',
                   timeline_track_id='stdout-timeline-track', timeline_cursor_id='stdout-tl-cursor',
-                  timeline_data='stdoutBars') %}
+                  timeline_data='stdoutTicks', timeline_kind='ticks') %}
       <template x-for="step in stdoutSteps" :key="step.index">
         <div class="log-step-group" :data-step="step.index"
-             :class="{ 'step-current': currentStepFor('stdout') === step.index }">
-          <template x-for="(line, j) in step.stdout" :key="j">
-            <div class="log-line" x-text="line"></div>
+             :class="{ 'step-current': currentStepFor('stdoutLines') === step.index }"
+             @click="seekToStepIdx(step.index)">
+          <template x-for="(line, j) in step.stdoutLines" :key="j">
+            <div class="log-line"
+                 x-text="line.text"
+                 :class="{ 'log-line-active': line.offset !== null && line.offset === activeStdoutOffset }"
+                 :data-offset="line.offset"
+                 @click="seekToLogLineOffset(line.offset, $event)">
+            </div>
           </template>
         </div>
       </template>
@@ -314,10 +329,13 @@
 
 <!-- STDERR -->
 {% if steps | selectattr('stderr') | list %}
-{% call log_panel('vp-stderr-panel', 'Stderr', 'stderr-follow-chk', 'vp-stderr-content', 'stderr-resize-handle') %}
+{% call log_panel('vp-stderr-panel', 'Stderr', 'stderr-follow-chk', 'vp-stderr-content', 'stderr-resize-handle',
+                  timeline_track_id='stderr-timeline-track', timeline_cursor_id='stderr-tl-cursor',
+                  timeline_data='stderrBars') %}
       <template x-for="step in stderrSteps" :key="step.index">
         <div class="log-step-group" :data-step="step.index"
-             :class="{ 'step-current': currentStepFor('stderr') === step.index }">
+             :class="{ 'step-current': currentStepFor('stderr') === step.index }"
+             @click="seekToStepIdx(step.index)">
           <div class="log-step-label" x-text="'Step ' + step.num + ': ' + step.keyword + step.name"></div>
           <template x-for="(line, j) in step.stderr" :key="j">
             <div class="log-line stderr-line" x-text="line"></div>
@@ -334,7 +352,8 @@
                   timeline_data='errorsBars') %}
       <template x-for="step in errorSteps" :key="step.index">
         <div class="log-step-group" :data-step="step.index"
-             :class="{ 'step-current': currentStepFor('errorMessage') === step.index }">
+             :class="{ 'step-current': currentStepFor('errorMessage') === step.index }"
+             @click="seekToStepIdx(step.index)">
           <template x-for="(entry, j) in step.errorMessage" :key="j">
             <div class="log-line error-line" x-text="entry"></div>
           </template>
@@ -375,8 +394,8 @@
       "duration": {{ step['duration'] | default(0) | float }},
       "screenshots": [{% for img in step['screenshots'] %}{"src": {{ img['html_src']|tojson }}, "label": {{ img['label']|tojson }}, "highlight": {{ img['highlight']|tojson if img['highlight'] else 'null' }}}{% if not loop.last %},{% endif %}{% endfor %}],
       "timingLabel": {% if step['timestamp'] and step['duration'] %}"{{ step['timestamp'].strftime('%H:%M:%S') }} · {{ '{:.3f}s'.format(step['duration'] | float) }}"{% else %}""{% endif %},
-      "debugOutput": {% if step['debug_output'] %}{{ (step['debug_output'] | join(''))|tojson }}{% else %}null{% endif %},
-      "stdout": {{ step['stdout']|tojson if step['stdout'] else 'null' }},
+      "debugLines": {% if step['debug_output'] %}[{% for line in step['debug_output'] %}{"html":{{ line|tojson }},"offset":{{ log_line_offset(line, scenario['start_at'])|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}]{% else %}null{% endif %},
+      "stdoutLines": {% if step['stdout'] %}[{% for line in step['stdout'] %}{"text":{{ line|tojson }},"offset":{{ log_line_offset(line, scenario['start_at'])|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}]{% else %}null{% endif %},
       "stderr": {{ step['stderr']|tojson if step['stderr'] else 'null' }},
       "errorMessage": {{ step['error_message']|tojson if step['error_message'] else 'null' }}
     }{% if not loop.last %},{% endif %}

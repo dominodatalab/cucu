@@ -84,9 +84,31 @@
       return acc;
     }, []);
   }
-  var STDOUT_BARS = buildPresenceBars(function (s) { return s.stdout && s.stdout.length; });
-  var CUCU_BARS   = buildPresenceBars(function (s) { return !!s.debugOutput; });
   var ERRORS_BARS = buildPresenceBars(function (s) { return s.errorMessage && s.errorMessage.length; });
+  var STDERR_BARS = buildPresenceBars(function (s) { return s.stderr && s.stderr.length; });
+
+  // Build per-line ticks for a field that holds [{html|text, offset}] arrays.
+  // Falls back to a single step-level tick for steps with no per-line timestamps.
+  function buildLineTicks(field) {
+    var ticks = [];
+    STEPS.forEach(function (s) {
+      var lines = s[field];
+      if (!lines || !lines.length) return;
+      var stamped = false;
+      lines.forEach(function (l) {
+        if (l.offset !== null) {
+          stamped = true;
+          ticks.push({ leftPct: Math.max(0, Math.min(100, l.offset / TOTAL_DUR * 100)), level: 'info' });
+        }
+      });
+      if (!stamped && s.startOffset !== null) {
+        ticks.push({ leftPct: Math.max(0, Math.min(100, s.startOffset / TOTAL_DUR * 100)), level: 'info' });
+      }
+    });
+    return ticks;
+  }
+  var CUCU_TICKS   = buildLineTicks('debugLines');
+  var STDOUT_TICKS = buildLineTicks('stdoutLines');
 
   var BROWSER_TICKS = BROWSER_LOGS.map(function (log) {
     return { leftPct: Math.max(0, Math.min(100, log.offset / TOTAL_DUR * 100)), level: log.level };
@@ -94,8 +116,8 @@
 
   var STEP_PANELS = [
     { contentId: 'vp-steps-content',  followId: 'steps-follow-chk',  field: null },
-    { contentId: 'vp-cucu-content',   followId: 'cucu-follow-chk',   field: 'debugOutput' },
-    { contentId: 'vp-stdout-content', followId: 'stdout-follow-chk', field: 'stdout' },
+    { contentId: 'vp-cucu-content',   followId: 'cucu-follow-chk',   field: 'debugLines' },
+    { contentId: 'vp-stdout-content', followId: 'stdout-follow-chk', field: 'stdoutLines' },
     { contentId: 'vp-stderr-content', followId: 'stderr-follow-chk', field: 'stderr' },
     { contentId: 'vp-errors-content', followId: 'errors-follow-chk', field: 'errorMessage' },
   ];
@@ -182,18 +204,21 @@
       totalPics:       TOTAL_PICS,
       stepBars:        STEP_BARS,
       picTicks:        PIC_TICKS,
-      stdoutBars:      STDOUT_BARS,
-      cucuBars:        CUCU_BARS,
+      cucuTicks:       CUCU_TICKS,
+      stdoutTicks:     STDOUT_TICKS,
+      stderrBars:      STDERR_BARS,
       errorsBars:      ERRORS_BARS,
       browserTicks:    BROWSER_TICKS,
       browserLogs:     BROWSER_LOGS,
-      cucuSteps:       STEPS.filter(function (s) { return !!s.debugOutput; }),
-      stdoutSteps:     STEPS.filter(function (s) { return s.stdout && s.stdout.length; }),
+      cucuSteps:       STEPS.filter(function (s) { return s.debugLines && s.debugLines.length; }),
+      stdoutSteps:     STEPS.filter(function (s) { return s.stdoutLines && s.stdoutLines.length; }),
       stderrSteps:     STEPS.filter(function (s) { return s.stderr && s.stderr.length; }),
       errorSteps:      STEPS.filter(function (s) { return s.errorMessage && s.errorMessage.length; }),
       currentTimeSec:  0,
       shownStepIdx:    -1,
       shownImgIdx:     -1,
+      activeDebugOffset:  null,
+      activeStdoutOffset: null,
       isPlaying:       false,
       playbackRate:    1.0,
       theme:           'auto',
@@ -349,6 +374,11 @@
       seekToStepIdx(idx) {
         this.seekToTime(stepIdxToTime(idx));
       },
+      seekToLogLineOffset(offset, event) {
+        if (offset === null || offset === undefined) return;
+        event.stopPropagation();
+        this.seekToTime(offset);
+      },
       navigateStep(delta) {
         if (delta > 0 && this.shownStepIdx >= TOTAL_STEPS - 1) { this.seekToTime(PLAY_END); return; }
         this.seekToStepIdx(Math.max(0, Math.min(this.shownStepIdx + delta, TOTAL_STEPS - 1)));
@@ -446,10 +476,36 @@
           var _vhImg = _vhStep.screenshots[this.shownImgIdx] || _vhStep.screenshots[0];
           this._videoHighlight = (_vhImg && _vhImg.highlight) ? _vhImg.highlight : null;
         }
+        // Compute active log-line offsets for cucu and stdout panels.
+        var t = this.currentTimeSec;
+        var bestDebug = null, bestStdout = null;
+        for (var _li = 0; _li < STEPS.length; _li++) {
+          var _ls = STEPS[_li];
+          if (_ls.debugLines) {
+            for (var _lj = 0; _lj < _ls.debugLines.length; _lj++) {
+              var _lo = _ls.debugLines[_lj].offset;
+              if (_lo !== null && _lo <= t && (bestDebug === null || _lo > bestDebug)) bestDebug = _lo;
+            }
+          }
+          if (_ls.stdoutLines) {
+            for (var _lk = 0; _lk < _ls.stdoutLines.length; _lk++) {
+              var _lp = _ls.stdoutLines[_lk].offset;
+              if (_lp !== null && _lp <= t && (bestStdout === null || _lp > bestStdout)) bestStdout = _lp;
+            }
+          }
+        }
+        var debugOffsetChanged  = bestDebug  !== this.activeDebugOffset;
+        var stdoutOffsetChanged = bestStdout !== this.activeStdoutOffset;
+        this.activeDebugOffset  = bestDebug;
+        this.activeStdoutOffset = bestStdout;
+
         this._scrollBrowserToTime();
         if (stepChanged || force) {
           var self = this;
           STEP_PANELS.forEach(function (p) { self._scrollStepPanel(p.contentId, p.followId); });
+        } else {
+          if (debugOffsetChanged)  this._scrollToActiveLogLine('vp-cucu-content',   'cucu-follow-chk');
+          if (stdoutOffsetChanged) this._scrollToActiveLogLine('vp-stdout-content', 'stdout-follow-chk');
         }
       },
 
@@ -466,10 +522,39 @@
           anchorIdx = p && p.field ? this.currentStepFor(p.field) : this.shownStepIdx;
         }
         if (anchorIdx < 0) return;
-        var anchor = content.querySelector('.log-step-group[data-step="' + anchorIdx + '"]');
+        // For cucu/stdout, scroll to the active timestamped line if one exists.
+        var activeOff = contentId === 'vp-cucu-content'   ? this.activeDebugOffset
+                      : contentId === 'vp-stdout-content' ? this.activeStdoutOffset
+                      : null;
+        var anchor = activeOff !== null ? this._findLogLineEl(content, activeOff)
+                   : content.querySelector('.log-step-group[data-step="' + anchorIdx + '"]');
+        if (!anchor) anchor = content.querySelector('.log-step-group[data-step="' + anchorIdx + '"]');
         if (!anchor) return;
         this._stepScrollBusy[contentId] = true;
-        content.scrollTop = Math.max(0, anchor.offsetTop - content.offsetTop - 4);
+        content.scrollTop = Math.max(0, anchor.offsetTop - content.offsetTop - Math.floor(content.clientHeight * 0.33));
+        var self = this;
+        requestAnimationFrame(function () { self._stepScrollBusy[contentId] = false; });
+      },
+
+      _findLogLineEl(content, offset) {
+        if (offset === null) return null;
+        var els = content.querySelectorAll('.log-line[data-offset]');
+        for (var i = 0; i < els.length; i++) {
+          if (Math.abs(parseFloat(els[i].dataset.offset) - offset) < 0.001) return els[i];
+        }
+        return null;
+      },
+
+      _scrollToActiveLogLine(contentId, followId) {
+        if (!this.followFlags[followId]) return;
+        var content = document.getElementById(contentId);
+        if (!content) return;
+        var offset = contentId === 'vp-cucu-content' ? this.activeDebugOffset : this.activeStdoutOffset;
+        var target = this._findLogLineEl(content, offset);
+        if (!target) return;
+        this._stepScrollBusy[contentId] = true;
+        content.scrollTop += (target.getBoundingClientRect().top - content.getBoundingClientRect().top) -
+                             Math.floor(content.clientHeight * 0.33);
         var self = this;
         requestAnimationFrame(function () { self._stepScrollBusy[contentId] = false; });
       },
@@ -486,18 +571,21 @@
         }
         var container = document.getElementById('vp-browser-content');
         if (!container) return;
-        if (!this._browserLineEls) {
+        if (!this._browserLineEls || !this._browserLineEls.length) {
           this._browserLineEls = container.querySelectorAll('.browser-log-line');
         }
         var target = this._browserLineEls[best];
         if (!target) return;
         var prev = container.querySelector('.log-current');
-        if (prev === target) return;
-        if (prev) prev.classList.remove('log-current');
-        target.classList.add('log-current');
+        if (prev !== target) {
+          if (prev) prev.classList.remove('log-current');
+          target.classList.add('log-current');
+        }
+        // Skip scroll only when the target is already fully in view (avoids thrash during playback).
+        var cr = container.getBoundingClientRect(), tr = target.getBoundingClientRect();
+        if (tr.top >= cr.top && tr.bottom <= cr.bottom) return;
         this._browserScrollBusy.value = true;
-        container.scrollTop += (target.getBoundingClientRect().top - container.getBoundingClientRect().top) -
-                              Math.floor(container.clientHeight * 0.33);
+        container.scrollTop += (tr.top - cr.top) - Math.floor(container.clientHeight * 0.33);
         var self = this;
         requestAnimationFrame(function () { self._browserScrollBusy.value = false; });
       },
