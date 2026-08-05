@@ -346,7 +346,7 @@
         this._stopPlay();
         this.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
         if (this._videoElement) {
-          this._videoElement.currentTime = timeToStepIdx(this.currentTimeSec) / this._videoFps;
+          this._videoElement.currentTime = timeToGlobalPicIdx(this.currentTimeSec) / this._videoFps;
         }
         this._reengageFollow();
         this._updateDisplay(true);
@@ -380,7 +380,7 @@
           if (this.currentTimeSec >= PLAY_END) {
             this.currentTimeSec = PLAY_END;
             if (this._videoElement) {
-              this._videoElement.currentTime = timeToStepIdx(PLAY_END) / this._videoFps;
+              this._videoElement.currentTime = timeToGlobalPicIdx(PLAY_END) / this._videoFps;
             }
             this._updateDisplay(false);
             this._stopPlay();
@@ -389,7 +389,7 @@
         }
         this._lastRafTime = rafTime;
         if (this._videoElement) {
-          this._videoElement.currentTime = timeToStepIdx(this.currentTimeSec) / this._videoFps;
+          this._videoElement.currentTime = timeToGlobalPicIdx(this.currentTimeSec) / this._videoFps;
         }
         this._updateDisplay(false);
         var self = this;
@@ -518,7 +518,7 @@
           var r = track.getBoundingClientRect();
           self.currentTimeSec = Math.max(0, Math.min(1, (x - r.left) / r.width)) * PLAY_END;
           if (self._videoElement) {
-            self._videoElement.currentTime = timeToStepIdx(self.currentTimeSec) / self._videoFps;
+            self._videoElement.currentTime = timeToGlobalPicIdx(self.currentTimeSec) / self._videoFps;
           }
           self._updateDisplay(false);
         }

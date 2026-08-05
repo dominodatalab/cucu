@@ -325,6 +325,32 @@ def generate(results: Path, basepath: Path):
 
                 scenario_dict["logs"] = log_files
 
+                # Check if video exists (used by both classic and replay views)
+                screenshots_video = None
+                screenshots_video_fps = None
+                screenshots_video_steps = None
+                video_path = scenario_filepath / "screenshots.mp4"
+                if video_path.exists():
+                    screenshots_video = "screenshots.mp4"
+                    screenshots_video_fps = CONFIG.get(
+                        "CUCU_SCREENSHOT_VIDEO_FPS", 1
+                    )
+                    # Assign cumulative frame indices to each screenshot.
+                    # The encoder writes one frame per screenshot per step
+                    # (or one text-card frame for steps with no screenshots),
+                    # so the absolute frame index is the running count of
+                    # screenshots seen across all preceding steps.
+                    frame_idx = 0
+                    for step_d in scenario_dict["steps"]:
+                        shots = step_d.get("screenshots") or []
+                        if shots:
+                            for shot in shots:
+                                shot["frame_index"] = frame_idx
+                                frame_idx += 1
+                        else:
+                            frame_idx += 1  # text-card frame
+                    screenshots_video_steps = frame_idx
+
                 # render scenario html
                 scenario_basepath = feature_path / scenario_dict["folder_name"]
                 scenario_basepath.mkdir(parents=True, exist_ok=True)
@@ -336,22 +362,14 @@ def generate(results: Path, basepath: Path):
                     steps=scenario_dict["steps"],
                     title=scenario_dict["name"],
                     dir_depth="../../",
+                    screenshots_video=screenshots_video,
+                    screenshots_video_fps=screenshots_video_fps,
+                    screenshots_video_steps=screenshots_video_steps,
                 )
                 scenario_output_filepath = scenario_basepath / "index.html"
                 scenario_output_filepath.write_text(rendered_scenario_html)
 
                 # render replay-style scenario view
-                # Check if video exists
-                screenshots_video = None
-                screenshots_video_fps = None
-                screenshots_video_steps = None
-                video_path = scenario_filepath / "screenshots.mp4"
-                if video_path.exists():
-                    screenshots_video = "screenshots.mp4"
-                    screenshots_video_fps = CONFIG.get(
-                        "CUCU_SCREENSHOT_VIDEO_FPS", 1
-                    )
-                    screenshots_video_steps = len(scenario_dict["steps"])
 
                 rendered_replay_html = scenario_replay_template.render(
                     basepath=results,

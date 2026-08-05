@@ -204,28 +204,24 @@ def encode_scenario_video(scenario_obj, scenario_dir):
 
     frames = []
     for s in steps_list:
-        frame = None
-        if s.screenshots:
-            # Try to use the first screenshot
-            for img_data in s.screenshots:
-                if img_data and isinstance(img_data, dict):
-                    # html_src is relative to scenario_dir; filepath is relative
-                    # to the working directory at capture time — prefer html_src
-                    src = img_data.get("html_src") or img_data.get("filepath")
-                    if src:
-                        img_path = Path(scenario_dir) / src
-                        if not img_path.exists():
-                            # fall back to treating filepath as absolute
-                            abs_path = Path(img_data.get("filepath", ""))
-                            if abs_path.is_absolute() and abs_path.exists():
-                                img_path = abs_path
-                        if img_path.exists():
-                            try:
-                                frame = Image.open(img_path).convert("RGB")
-                                break
-                            except Exception:
-                                continue
-        if not frame:
+        step_frames = []
+        for img_data in s.screenshots or []:
+            if not (img_data and isinstance(img_data, dict)):
+                continue
+            src = img_data.get("html_src") or img_data.get("filepath")
+            if not src:
+                continue
+            img_path = Path(scenario_dir) / src
+            if not img_path.exists():
+                abs_path = Path(img_data.get("filepath", ""))
+                if abs_path.is_absolute() and abs_path.exists():
+                    img_path = abs_path
+            if img_path.exists():
+                try:
+                    step_frames.append(Image.open(img_path).convert("RGB"))
+                except Exception:
+                    continue
+        if not step_frames:
             # Render text-card if no screenshot available
             step_text = f"{s.keyword} {s.name}"
             if s.text:
@@ -235,10 +231,10 @@ def encode_scenario_video(scenario_obj, scenario_dir):
                     step_text += "\n" + str(s.text)
             step_text = CONFIG.hide_secrets(step_text)
             status = s.status or "untested"
-            frame = _render_text_card(
-                step_text, s.keyword, status, width, height
+            step_frames.append(
+                _render_text_card(step_text, s.keyword, status, width, height)
             )
-        frames.append(frame)
+        frames.extend(step_frames)
 
     if not frames:
         logger.warning(
