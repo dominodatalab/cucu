@@ -69,6 +69,7 @@
   <a href="../../{{ urlencode(escape(feature['name'])) }}.html" title="Go to feature report">{{ escape(feature['name']) }}</a>
 
   <div class="vp-nav-right">
+    <a href="index.html" title="Classic view">Classic</a>
     <button id="theme-toggle" type="button"
             @click="cycleTheme()"
             x-text="themeIcons[theme]"
