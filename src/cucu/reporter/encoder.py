@@ -8,6 +8,42 @@ from cucu.db import step
 
 logger = logging.getLogger(__name__)
 
+_STATUS_COLORS = {
+    "passed": (26, 127, 55),
+    "failed": (207, 34, 46),
+    "error": (207, 34, 46),
+    "skipped": (5, 80, 174),
+    "untested": (145, 152, 161),
+}
+
+_FONT_CACHE = {}
+
+_FONT_PATHS = [
+    "/System/Library/Fonts/Courier.dfont",
+    "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+]
+
+
+def _load_font(size):
+    """Load a monospace font at the given size, cached by size."""
+    if size in _FONT_CACHE:
+        return _FONT_CACHE[size]
+    try:
+        from PIL import ImageFont
+    except ImportError:
+        return None
+    font = None
+    for font_path in _FONT_PATHS:
+        try:
+            font = ImageFont.truetype(font_path, size=size)
+            break
+        except (OSError, IOError):
+            continue
+    if font is None:
+        font = ImageFont.load_default()
+    _FONT_CACHE[size] = font
+    return font
+
 
 def _render_text_card(
     text,
@@ -17,11 +53,10 @@ def _render_text_card(
     height,
     font_size_keyword=48,
     font_size_text=26,
-    font_size_detail=18,
 ):
     """Render step text onto a PIL Image."""
     try:
-        from PIL import Image, ImageDraw, ImageFont
+        from PIL import Image, ImageDraw
     except ImportError:
         raise RuntimeError(
             "Pillow is required for video encoding. Install with: uv sync --extra video"
@@ -32,36 +67,10 @@ def _render_text_card(
     img = Image.new("RGB", (width, height), color=bg_color)
     draw = ImageDraw.Draw(img)
 
-    # Try to load monospace font, fallback to default
-    font_paths = [
-        "/System/Library/Fonts/Courier.dfont",
-        "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
-    ]
-    font_keyword = None
-    font_text = None
-    for font_path in font_paths:
-        try:
-            font_keyword = ImageFont.truetype(
-                font_path, size=font_size_keyword
-            )
-            font_text = ImageFont.truetype(font_path, size=font_size_text)
-            break
-        except (OSError, IOError):
-            continue
-    if not font_keyword:
-        font_keyword = ImageFont.load_default()
-    if not font_text:
-        font_text = ImageFont.load_default()
+    font_keyword = _load_font(font_size_keyword)
+    font_text = _load_font(font_size_text)
 
-    # Status-based text colors (matching CSS)
-    status_colors = {
-        "passed": (26, 127, 55),
-        "failed": (207, 34, 46),
-        "error": (207, 34, 46),
-        "skipped": (5, 80, 174),
-        "untested": (145, 152, 161),
-    }
-    keyword_color = status_colors.get(status, (145, 152, 161))
+    keyword_color = _STATUS_COLORS.get(status, (145, 152, 161))
     text_color = (31, 35, 40)
 
     # Center content vertically and horizontally
@@ -99,11 +108,26 @@ def _get_screenshot_dimensions():
     return width, height
 
 
+def _resolve_image_path(img_data, scenario_dir):
+    """Resolve a screenshot dict to a Path, or None if not loadable."""
+    if not (img_data and isinstance(img_data, dict)):
+        return None
+    src = img_data.get("html_src") or img_data.get("filepath")
+    if not src:
+        return None
+    img_path = Path(scenario_dir) / src
+    if not img_path.exists():
+        abs_path = Path(img_data.get("filepath", ""))
+        if abs_path.is_absolute() and abs_path.exists():
+            img_path = abs_path
+    return img_path if img_path.exists() else None
+
+
 def _encode_with_opencv(frames, output_path, width, height, fps=1):
     """Encode video from PIL Image frames using opencv-python-headless.
 
     Args:
-        frames: List of PIL Image objects
+        frames: List of PIL Image objects (RGB)
         output_path: Output MP4 file path
         width: Video width in pixels
         height: Video height in pixels
@@ -122,12 +146,25 @@ def _encode_with_opencv(frames, output_path, width, height, fps=1):
     width = (width // 2) * 2
     height = (height // 2) * 2
 
-    fourcc = cv2.VideoWriter_fourcc(*"avc1")
-    writer = cv2.VideoWriter(str(output_path), fourcc, fps, (width, height))
+    # Try avc1 (H.264) first; fall back to mp4v (MPEG-4) for headless Linux
+    # environments where h264_v4l2m2m hardware encoder is unavailable.
+    writer = None
+    for fourcc_str in ("avc1", "mp4v"):
+        fourcc = cv2.VideoWriter_fourcc(*fourcc_str)
+        candidate = cv2.VideoWriter(
+            str(output_path), fourcc, fps, (width, height)
+        )
+        if candidate.isOpened():
+            writer = candidate
+            break
+        candidate.release()
+    if writer is None:
+        raise RuntimeError(
+            "Could not open VideoWriter with avc1 or mp4v codecs"
+        )
     try:
         for pil_img in frames:
-            arr = np.array(pil_img.convert("RGB"))
-            bgr = arr[:, :, ::-1]  # PIL RGB → cv2 BGR
+            bgr = np.array(pil_img)[:, :, ::-1]  # PIL RGB → cv2 BGR
             if bgr.shape[1] != width or bgr.shape[0] != height:
                 bgr = cv2.resize(
                     bgr, (width, height), interpolation=cv2.INTER_LANCZOS4
@@ -148,24 +185,21 @@ def encode_scenario_video(scenario_obj, scenario_dir):
     """
     output_path = Path(scenario_dir) / "screenshots.mp4"
 
-    # Check if video already exists
-    if output_path.exists():
-        try:
-            steps_list = list(scenario_obj.steps.order_by(step.seq))
-            return (output_path, len(steps_list), 1)
-        except Exception:
-            pass
-
-    # Get steps
+    # Get steps (fetched once; reused for early-exit and frame building)
     try:
         steps_list = list(scenario_obj.steps.order_by(step.seq))
-        if not steps_list:
-            logger.warning(
-                f"No steps found for scenario {scenario_obj.scenario_run_id}"
-            )
-            return None
     except Exception as e:
         logger.error(f"Failed to fetch scenario steps: {e}")
+        return None
+
+    # Check if video already exists
+    if output_path.exists():
+        return (output_path, len(steps_list), 1)
+
+    if not steps_list:
+        logger.warning(
+            f"No steps found for scenario {scenario_obj.scenario_run_id}"
+        )
         return None
 
     # Build frames list — one frame per step
@@ -181,17 +215,8 @@ def encode_scenario_video(scenario_obj, scenario_dir):
     width, height = _get_screenshot_dimensions()
     for s in steps_list:
         for img_data in s.screenshots or []:
-            if not (img_data and isinstance(img_data, dict)):
-                continue
-            src = img_data.get("html_src") or img_data.get("filepath")
-            if not src:
-                continue
-            img_path = Path(scenario_dir) / src
-            if not img_path.exists():
-                abs_path = Path(img_data.get("filepath", ""))
-                if abs_path.is_absolute() and abs_path.exists():
-                    img_path = abs_path
-            if img_path.exists():
+            img_path = _resolve_image_path(img_data, scenario_dir)
+            if img_path:
                 try:
                     width, height = Image.open(img_path).size
                 except Exception:
@@ -205,17 +230,8 @@ def encode_scenario_video(scenario_obj, scenario_dir):
     for s in steps_list:
         step_frames = []
         for img_data in s.screenshots or []:
-            if not (img_data and isinstance(img_data, dict)):
-                continue
-            src = img_data.get("html_src") or img_data.get("filepath")
-            if not src:
-                continue
-            img_path = Path(scenario_dir) / src
-            if not img_path.exists():
-                abs_path = Path(img_data.get("filepath", ""))
-                if abs_path.is_absolute() and abs_path.exists():
-                    img_path = abs_path
-            if img_path.exists():
+            img_path = _resolve_image_path(img_data, scenario_dir)
+            if img_path:
                 try:
                     step_frames.append(Image.open(img_path).convert("RGB"))
                 except Exception:
