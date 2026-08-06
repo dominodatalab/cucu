@@ -6,11 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 # 1.4.30
-- Add - video screenshot output (AV1 codec, variable framerate, report-time encoding) via `CUCU_SCREENSHOT_VIDEO=true`; encodes one MP4 per scenario with per-frame timestamps, includes text-cards for browserless steps, plays in replay view with timeline sync; requires ffmpeg on $PATH and `uv sync --extra video` for Pillow
-- Fix - replay view video playhead now plays to the end instead of stopping at the last step boundary
-- Fix - replay view video playhead animates smoothly at 60fps by polling video.currentTime from the RAF loop instead of relying on timeupdate (~4fps)
-- Fix - replay view timeline drag moves the playhead continuously without snapping; video frame updates on every pointermove and video seeks to the final position on pointerup
-- Fix - replay view video seeks to the correct step frame instead of overshooting into future steps when steps have multiple screenshots
+Bundle and compress screenshots in video format
+  - enable with CUCU_SCREENSHOT_VIDEO=True
+  - report now encodes screenshots into mp4 video file per scenario with placeholders for non-browser steps
+  - change classic and replay view to use either screenshots or video
+
+Replay view UX
+  - Rework the steps timeline bar layout to guarantee minimum bar widths and gaps while keeping drag-to-seek accurate
+  - Make log panel lines clickable to seek the playhead to that line's timestamp, with active-line highlight and auto-scroll
+  - Add a per-panel timeline tick bar to all log panels, including stderr which had none
+  - Replace the steps breadcrumb with the current step's keyword and name tracked to the playhead
+  - Fix log panel scroll to re-scroll when the active line leaves the viewport after a seek
 
 # 1.4.29
 - Fix - scenarios killed by an mpire worker timeout now record and report a distinct `terminated` status (not `error`) across DB, JUnit XML, and JSON; step-failure takes precedence over termination so the real failure is never masked

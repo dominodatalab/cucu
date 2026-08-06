@@ -42,7 +42,6 @@ to drive various underlying tools/frameworks to create real world testing scenar
 - [Installation](#installation)
   - [Requirements](#requirements)
   - [Setup](#setup)
-  - [Video report encoding (optional)](#video-report-encoding-optional)
   - [Usage](#usage)
 - [Usage](#usage-1)
   - [Cucu Run](#cucu-run)
@@ -102,32 +101,6 @@ Let's get your repo to start using the cucu framework!
    ```
    cucu run features/example.feature:8 -g --no-headless
    ```
-
-## Video report encoding (optional)
-
-HTML reports can encode scenario screenshots into a single MP4 video for
-easier playback in the replay view. This requires two optional dependencies
-(`opencv-python-headless` and `pillow`) that are not installed by default.
-
-Install them via the `video` extra:
-
-```bash
-uv add cucu[video] --dev
-```
-
-Or if working inside the cucu repo itself:
-
-```bash
-uv sync --extra video
-```
-
-Once installed, video encoding is enabled by default when generating reports.
-To disable it, set `CUCU_SCREENSHOT_VIDEO=false` in your `cucurc.yml` or as an
-environment variable:
-
-```bash
-CUCU_SCREENSHOT_VIDEO=false cucu report
-```
 
 ## Usage
 > [!Note] Cucu needs to be run from your **repo root** (i.e. the parent of the `features` folder)
