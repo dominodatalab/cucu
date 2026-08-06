@@ -1,6 +1,7 @@
 """Video encoding for scenario screenshots using per-frame timestamps."""
 
 import logging
+import tempfile
 from pathlib import Path
 
 import cv2
@@ -122,21 +123,32 @@ def _resolve_dimensions(steps_list, scenario_dir):
         for img_data in s.screenshots or []:
             img_path = _resolve_image_path(img_data, scenario_dir)
             if img_path:
-                width, height = Image.open(img_path).size
+                img = Image.open(img_path)
+                width, height = img.size
+                img.close()
                 break
+        else:
+            continue
+        break
     # H.264 requires even dimensions
     return (width // 2) * 2, (height // 2) * 2
 
 
 def _find_fourcc(output_path, fps, size):
     """Return the first working fourcc for the given output path and size."""
-    for codec in ("mp4v", "avc1"):
-        fourcc = cv2.VideoWriter_fourcc(*codec)
-        writer = cv2.VideoWriter(str(output_path), fourcc, fps, size)
-        opened = writer.isOpened()
-        writer.release()
-        if opened:
-            return fourcc
+    suffix = Path(output_path).suffix or ".mp4"
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+        probe_path = tmp.name
+    try:
+        for codec in ("mp4v", "avc1"):
+            fourcc = cv2.VideoWriter_fourcc(*codec)
+            writer = cv2.VideoWriter(probe_path, fourcc, fps, size)
+            opened = writer.isOpened()
+            writer.release()
+            if opened:
+                return fourcc
+    finally:
+        Path(probe_path).unlink(missing_ok=True)
     raise RuntimeError("Could not open VideoWriter with mp4v or avc1 codecs")
 
 

@@ -567,8 +567,9 @@ def _generate_report(
 
     # Encode scenario videos if enabled
     db_path = results_dir / "run.db"
-    if db_path.exists() and CONFIG.get("CUCU_SCREENSHOT_VIDEO", False):
+    if db_path.exists() and CONFIG.true("CUCU_SCREENSHOT_VIDEO"):
         db.init_html_report_db(db_path)
+        encoded_count = 0
         for scen in db.scenario.select():
             # Build scenario directory path
             feature_folder = ellipsize_filename(scen.feature.name)
@@ -576,11 +577,15 @@ def _generate_report(
             scenario_dir = results_dir / feature_folder / scenario_folder
             if scenario_dir.exists():
                 try:
-                    video_encoder.encode_scenario_video(scen, scenario_dir)
+                    if video_encoder.encode_scenario_video(scen, scenario_dir):
+                        encoded_count += 1
                 except Exception as e:
                     logger.error(
                         f"Failed to encode video for scenario {scen.scenario_run_id}: {e}"
                     )
+        logger.warning(
+            f"Successfully encoded screenshots as videos for {encoded_count} scenarios"
+        )
 
     report_location = reporter.generate(results_dir, report_folder)
     print(f"HTML test report at {report_location}")
@@ -644,6 +649,13 @@ def _generate_report(
     is_flag=True,
     help="combine multiple cucu_runs into a single report",
 )
+@click.option(
+    "-e",
+    "--env",
+    default=[],
+    multiple=True,
+    help="set environment variable as KEY=VALUE",
+)
 def report(
     results_dir: Path,
     logging_level,
@@ -651,11 +663,16 @@ def report(
     output: Path,
     junit: Path,
     combine: bool,
+    env,
 ):
     """
     generate a test report from a results directory
     """
     init_global_hook_variables()
+
+    for variable in list(env):
+        key, value = variable.split("=", 1)
+        os.environ[key] = value
 
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())

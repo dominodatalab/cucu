@@ -213,7 +213,7 @@ def generate(results: Path, basepath: Path):
                 if src_feature_filepath.exists():
                     ignore = (
                         _ignore_screenshots
-                        if CONFIG.get("CUCU_SCREENSHOT_VIDEO", False)
+                        if CONFIG.true("CUCU_SCREENSHOT_VIDEO")
                         else None
                     )
                     shutil.copytree(
@@ -369,7 +369,7 @@ def generate(results: Path, basepath: Path):
                 # Assign frame indices and set video path when video mode is enabled.
                 screenshots_video = None
                 screenshots_video_steps = None
-                if CONFIG.get("CUCU_SCREENSHOT_VIDEO", False):
+                if CONFIG.true("CUCU_SCREENSHOT_VIDEO"):
                     screenshots_video = "screenshots.mp4"
                     # Assign cumulative frame indices to each screenshot.
                     # The encoder writes one frame per screenshot per step

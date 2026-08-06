@@ -2,23 +2,9 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
-try:
-    import PIL  # noqa: F401
-
-    HAS_PILLOW = True
-except ImportError:
-    HAS_PILLOW = False
-
 from cucu.reporter.encoder import _render_text_card, _resolve_dimensions
 
-skip_no_pillow = pytest.mark.skipif(
-    not HAS_PILLOW, reason="Pillow not installed"
-)
 
-
-@skip_no_pillow
 def test_render_text_card_creates_image():
     img = _render_text_card(
         text="Test step",
@@ -32,7 +18,6 @@ def test_render_text_card_creates_image():
     assert img.mode == "RGB"
 
 
-@skip_no_pillow
 def test_render_text_card_with_multiline_text():
     img = _render_text_card(
         text="Line 1\nLine 2\nLine 3",
@@ -44,7 +29,6 @@ def test_render_text_card_with_multiline_text():
     assert img.size == (1366, 768)
 
 
-@skip_no_pillow
 def test_render_text_card_different_statuses():
     for status in ["passed", "failed", "skipped", "untested"]:
         img = _render_text_card(
