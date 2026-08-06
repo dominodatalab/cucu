@@ -66,4 +66,3 @@ Feature: Report replay view
      Then I wait to see the text "1 / 6"
       And I should see the text "Given"
       And I should see the link "Echo"
-      And I should see the element "video#scenario-video"

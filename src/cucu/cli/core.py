@@ -18,6 +18,7 @@ from click import ClickException
 from mpire import WorkerPool
 from tabulate import tabulate
 
+import cucu.db as db
 from cucu import (
     fuzzy,
     init_global_hook_variables,
@@ -31,13 +32,9 @@ from cucu.cli.run import behave, behave_init, create_run
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.cli.tags import collect_cucu_tags
 from cucu.config import CONFIG
-from cucu.db import (
-    consolidate_database_files,
-    finish_worker_record,
-)
 from cucu.lint import linter
 from cucu.reporter import encoder as video_encoder
-from cucu.utils import generate_short_id
+from cucu.utils import ellipsize_filename, generate_short_id
 
 # set env var BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON=yes before importing behave
 os.environ["BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON"] = "yes"
@@ -541,8 +538,10 @@ def run(
             dumper.stop()
 
         if results.exists():
-            finish_worker_record(worker_run_id=CONFIG.get("WORKER_PARENT_ID"))
-            consolidate_database_files(results)
+            db.finish_worker_record(
+                worker_run_id=CONFIG.get("WORKER_PARENT_ID")
+            )
+            db.consolidate_database_files(results)
 
         if generate_report:
             _generate_report(
@@ -564,42 +563,19 @@ def _generate_report(
     report_folder.mkdir(parents=True, exist_ok=True)
 
     if results_dir.exists():
-        consolidate_database_files(results_dir, combine)
+        db.consolidate_database_files(results_dir, combine)
 
     # Encode scenario videos if enabled
-    from cucu.db import scenario as scenario_model
-
-    if CONFIG.get("CUCU_SCREENSHOT_VIDEO", False):
-        try:
-            db_path = results_dir / "run.db"
-            if db_path.exists():
-                from cucu import db as cucu_db
-
-                cucu_db.init_html_report_db(db_path)
-                for scen in scenario_model.select():
-                    # Build scenario directory path
-                    from cucu.utils import ellipsize_filename
-
-                    feature_folder = ellipsize_filename(scen.feature.name)
-                    scenario_folder = ellipsize_filename(scen.name)
-                    scenario_dir = (
-                        results_dir / feature_folder / scenario_folder
-                    )
-                    if scenario_dir.exists():
-                        result = video_encoder.encode_scenario_video(
-                            scen, scenario_dir
-                        )
-                        if result:
-                            output_path, frame_count, fps = result
-                            logger.warning(
-                                f"Video encoded: {output_path} ({frame_count} frames)"
-                            )
-                        else:
-                            logger.warning(
-                                f"Video encoding failed for {scen.name}"
-                            )
-        except Exception as e:
-            logger.warning(f"Video encoding failed: {e}")
+    db_path = results_dir / "run.db"
+    if db_path.exists() and CONFIG.get("CUCU_SCREENSHOT_VIDEO", False):
+        db.init_html_report_db(db_path)
+        for scen in db.scenario.select():
+            # Build scenario directory path
+            feature_folder = ellipsize_filename(scen.feature.name)
+            scenario_folder = ellipsize_filename(scen.name)
+            scenario_dir = results_dir / feature_folder / scenario_folder
+            if scenario_dir.exists():
+                video_encoder.encode_scenario_video(scen, scenario_dir)
 
     report_location = reporter.generate(results_dir, report_folder)
     print(f"HTML test report at {report_location}")

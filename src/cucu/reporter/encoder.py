@@ -261,7 +261,7 @@ def encode_scenario_video(scenario_obj, scenario_dir):
     try:
         _encode_with_opencv(frames, output_path, width, height, 1)
         logger.info(f"Successfully encoded video: {output_path}")
-        return (output_path, len(frames), 1)
+        return (output_path, len(frames))
     except Exception as e:
         logger.error(f"Video encoding error: {e}")
         if output_path.exists():
