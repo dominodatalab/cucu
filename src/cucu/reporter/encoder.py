@@ -145,13 +145,22 @@ def _encode_with_opencv(frames, output_path, width, height):
         for pil_img in frames:
             bgr = np.array(pil_img)[:, :, ::-1]  # PIL RGB → cv2 BGR
             if bgr.shape[1] != width or bgr.shape[0] != height:
-                logger.warning(
-                    f"Frame size {bgr.shape[1]}x{bgr.shape[0]} does not match expected {width}x{height}, resizing"
-                )
-                bgr = cv2.resize(
-                    bgr, (width, height), interpolation=cv2.INTER_LANCZOS4
-                )
+                if bgr.shape[1] <= width + 1 and bgr.shape[0] <= height + 1:
+                    bgr = bgr[:height, :width]
+                else:
+                    logger.warning(
+                        f"Frame size {bgr.shape[1]}x{bgr.shape[0]} does not match expected {width}x{height}, resizing"
+                    )
+                    bgr = cv2.resize(
+                        bgr, (width, height), interpolation=cv2.INTER_LANCZOS4
+                    )
             writer.write(bgr)
+        return True
+    except Exception as e:
+        logger.error(f"Video encoding failed for {output_path}: {e}")
+        if output_path.exists():
+            output_path.unlink()
+        return False
     finally:
         writer.release()
 
@@ -218,13 +227,6 @@ def encode_scenario_video(scenario_obj, scenario_dir):
     if not frames:
         return None
 
-    try:
-        _encode_with_opencv(frames, output_path, width, height)
-        return (output_path, len(frames))
-    except Exception as e:
-        logger.error(
-            f"Video encoding failed for scenario {scenario_obj.scenario_run_id}: {e}"
-        )
-        if output_path.exists():
-            output_path.unlink()
+    if not _encode_with_opencv(frames, output_path, width, height):
         return None
+    return (output_path, len(frames))
