@@ -22,9 +22,13 @@ _STATUS_COLORS = {
 
 _FONT_CACHE = {}
 
+# No cross-platform OS API exists for font discovery without adding dependencies;
+# fc-list (Linux) and CoreText (macOS) require subprocess or native bindings.
+# These known paths cover the three target platforms with load_default() as fallback.
 _FONT_PATHS = [
     "/System/Library/Fonts/Courier.dfont",
     "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+    "C:/Windows/Fonts/cour.ttf",
 ]
 
 
