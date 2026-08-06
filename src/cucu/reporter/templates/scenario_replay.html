@@ -240,15 +240,7 @@
     </label>
   </div>
   <div class="vp-log-body">
-    <div id="steps-breadcrumb" x-show="curStep">
-      <div class="log-line">
-        <span class="steps-kw" :class="'steps-' + (curStep ? curStep.status || 'untested' : '')" x-text="curStep ? curStep.keyword : ''"></span><span class="steps-name" x-text="curStep ? curStep.name : ''"></span>
-      </div>
-    </div>
     <div id="vp-steps-content" class="vp-log-content" @scroll.passive="onLogScroll('vp-steps-content', 'steps-follow-chk')">
-      <div class="log-step-group steps-row steps-heading" title="Jump to scenario start" @click="seekToTime(0)">
-        <div class="log-line"><span class="steps-name">Scenario: {{ escape(scenario['name']) }}</span></div>
-      </div>
       {% for step in steps %}
       <div class="log-step-group steps-row{% if step['is_substep'] %} steps-substep{% endif %}{% if step['heading_level'] %} steps-heading{% endif %}"
            data-step="{{ loop.index0 }}"

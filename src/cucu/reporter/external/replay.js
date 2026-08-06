@@ -580,7 +580,7 @@
         if (!content) return;
         var anchorIdx;
         if (contentId === 'vp-steps-content') {
-          anchorIdx = this.shownStepIdx > 0 ? this.shownStepIdx - 1 : this.shownStepIdx;
+          anchorIdx = this.shownStepIdx;
         } else {
           var p = panelByContentId(contentId);
           anchorIdx = p && p.field ? this.currentStepFor(p.field) : this.shownStepIdx;
@@ -595,7 +595,14 @@
         if (!anchor) anchor = content.querySelector('.log-step-group[data-step="' + anchorIdx + '"]');
         if (!anchor) return;
         this._stepScrollBusy[contentId] = true;
-        content.scrollTop = Math.max(0, anchor.offsetTop - content.offsetTop - Math.floor(content.clientHeight * 0.33));
+        var scrollOffset = 0;
+        if (contentId === 'vp-steps-content' && anchorIdx > 0) {
+          var prevStep = content.querySelector('.log-step-group[data-step="' + (anchorIdx - 1) + '"]');
+          scrollOffset = prevStep ? prevStep.offsetTop - content.offsetTop : 0;
+        }
+        content.scrollTop = contentId === 'vp-steps-content'
+          ? Math.max(0, scrollOffset)
+          : Math.max(0, anchor.offsetTop - content.offsetTop - Math.floor(content.clientHeight * 0.33));
         var self = this;
         requestAnimationFrame(function () { self._stepScrollBusy[contentId] = false; });
       },
