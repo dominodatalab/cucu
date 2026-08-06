@@ -575,7 +575,12 @@ def _generate_report(
             scenario_folder = ellipsize_filename(scen.name)
             scenario_dir = results_dir / feature_folder / scenario_folder
             if scenario_dir.exists():
-                video_encoder.encode_scenario_video(scen, scenario_dir)
+                try:
+                    video_encoder.encode_scenario_video(scen, scenario_dir)
+                except Exception as e:
+                    logger.error(
+                        f"Failed to encode video for scenario {scen.scenario_run_id}: {e}"
+                    )
 
     report_location = reporter.generate(results_dir, report_folder)
     print(f"HTML test report at {report_location}")

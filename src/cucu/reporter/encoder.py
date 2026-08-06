@@ -110,6 +110,32 @@ def _resolve_image_path(img_data, scenario_dir):
     return img_path if img_path.exists() else None
 
 
+def _resolve_dimensions(steps_list, scenario_dir):
+    """Return even (width, height) from the first loadable screenshot, or CONFIG defaults."""
+    width = CONFIG.get("CUCU_BROWSER_WINDOW_WIDTH", 1366)
+    height = CONFIG.get("CUCU_BROWSER_WINDOW_HEIGHT", 768)
+    for s in steps_list:
+        for img_data in s.screenshots or []:
+            img_path = _resolve_image_path(img_data, scenario_dir)
+            if img_path:
+                width, height = Image.open(img_path).size
+                break
+    # H.264 requires even dimensions
+    return (width // 2) * 2, (height // 2) * 2
+
+
+def _find_fourcc(output_path, fps, size):
+    """Return the first working fourcc for the given output path and size."""
+    for codec in ("mp4v", "avc1"):
+        fourcc = cv2.VideoWriter_fourcc(*codec)
+        writer = cv2.VideoWriter(str(output_path), fourcc, fps, size)
+        opened = writer.isOpened()
+        writer.release()
+        if opened:
+            return fourcc
+    raise RuntimeError("Could not open VideoWriter with mp4v or avc1 codecs")
+
+
 def _encode_with_opencv(frames, output_path, width, height):
     """Encode video from PIL Image frames using opencv-python-headless.
 
@@ -120,27 +146,8 @@ def _encode_with_opencv(frames, output_path, width, height):
         height: Video height in pixels
     """
     fps = 1
-    # H.264 requires even dimensions
-    width = (width // 2) * 2
-    height = (height // 2) * 2
-
-    # Try mp4v (MPEG-4) first; fall back to avc1 (H.264).
-    writer = cv2.VideoWriter(
-        str(output_path), cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height)
-    )
-    if not writer.isOpened():
-        writer.release()
-        writer = cv2.VideoWriter(
-            str(output_path),
-            cv2.VideoWriter_fourcc(*"avc1"),
-            fps,
-            (width, height),
-        )
-    if not writer.isOpened():
-        writer.release()
-        raise RuntimeError(
-            "Could not open VideoWriter with mp4v or avc1 codecs"
-        )
+    fourcc = _find_fourcc(output_path, fps, (width, height))
+    writer = cv2.VideoWriter(str(output_path), fourcc, fps, (width, height))
     try:
         for pil_img in frames:
             bgr = np.array(pil_img)[:, :, ::-1]  # PIL RGB → cv2 BGR
@@ -155,12 +162,12 @@ def _encode_with_opencv(frames, output_path, width, height):
                         bgr, (width, height), interpolation=cv2.INTER_LANCZOS4
                     )
             writer.write(bgr)
-        return True
+        return output_path
     except Exception as e:
         logger.error(f"Video encoding failed for {output_path}: {e}")
         if output_path.exists():
             output_path.unlink()
-        return False
+        return None
     finally:
         writer.release()
 
@@ -172,30 +179,24 @@ def encode_scenario_video(scenario_obj, scenario_dir):
         scenario_obj: Scenario model object from DB
         scenario_dir: Path to scenario results directory
 
-    Returns: (output_path, frame_count) or None if encoding failed
+    Returns: output_path or None if encoding failed
     """
     output_path = Path(scenario_dir) / "screenshots.mp4"
     steps_list = list(scenario_obj.steps.order_by(step.seq))
 
     if output_path.exists():
-        return (output_path, len(steps_list))
+        logger.warning(
+            f"Video already exists for scenario {scenario_obj.scenario_run_id}, skipping encoding"
+        )
+        return output_path
 
     if not steps_list:
+        logger.warning(
+            f"No steps found for scenario {scenario_obj.scenario_run_id}"
+        )
         return None
 
-    # Resolve video dimensions from the first loadable PNG so text-card
-    # frames match and no PNG gets resized during encoding.
-    width = CONFIG.get("CUCU_BROWSER_WINDOW_WIDTH", 1366)
-    height = CONFIG.get("CUCU_BROWSER_WINDOW_HEIGHT", 768)
-    for s in steps_list:
-        for img_data in s.screenshots or []:
-            img_path = _resolve_image_path(img_data, scenario_dir)
-            if img_path:
-                width, height = Image.open(img_path).size
-                break
-        else:
-            continue
-        break
+    width, height = _resolve_dimensions(steps_list, scenario_dir)
 
     frames = []
     for s in steps_list:
@@ -225,8 +226,9 @@ def encode_scenario_video(scenario_obj, scenario_dir):
         frames.extend(step_frames)
 
     if not frames:
+        logger.warning(
+            f"No frames generated for scenario {scenario_obj.scenario_run_id}"
+        )
         return None
 
-    if not _encode_with_opencv(frames, output_path, width, height):
-        return None
-    return (output_path, len(frames))
+    return _encode_with_opencv(frames, output_path, width, height)
