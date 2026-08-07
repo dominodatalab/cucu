@@ -1,10 +1,9 @@
 """Video encoding for scenario screenshots using per-frame timestamps."""
 
 import logging
-import tempfile
 from pathlib import Path
 
-import cv2
+import imageio.v3 as iio
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
@@ -134,26 +133,8 @@ def _resolve_dimensions(steps_list, scenario_dir):
     return (width // 2) * 2, (height // 2) * 2
 
 
-def _find_fourcc(output_path, fps, size):
-    """Return the first working fourcc for the given output path and size."""
-    suffix = Path(output_path).suffix or ".mp4"
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-        probe_path = tmp.name
-    try:
-        for codec in ("avc1", "mp4v"):
-            fourcc = cv2.VideoWriter_fourcc(*codec)
-            writer = cv2.VideoWriter(probe_path, fourcc, fps, size)
-            opened = writer.isOpened()
-            writer.release()
-            if opened:
-                return fourcc
-    finally:
-        Path(probe_path).unlink(missing_ok=True)
-    raise RuntimeError("Could not open VideoWriter with mp4v or avc1 codecs")
-
-
-def _encode_with_opencv(frames, output_path, width, height):
-    """Encode video from PIL Image frames using opencv-python-headless.
+def _encode_with_imageio(frames, output_path, width, height):
+    """Encode video from PIL Image frames using imageio-ffmpeg (libx264, browser-compatible).
 
     Args:
         frames: List of PIL Image objects (RGB)
@@ -161,31 +142,24 @@ def _encode_with_opencv(frames, output_path, width, height):
         width: Video width in pixels
         height: Video height in pixels
     """
-    fps = 1
-    fourcc = _find_fourcc(output_path, fps, (width, height))
-    writer = cv2.VideoWriter(str(output_path), fourcc, fps, (width, height))
     try:
-        for pil_img in frames:
-            bgr = np.array(pil_img)[:, :, ::-1]  # PIL RGB → cv2 BGR
-            if bgr.shape[1] != width or bgr.shape[0] != height:
-                if bgr.shape[1] <= width + 1 and bgr.shape[0] <= height + 1:
-                    bgr = bgr[:height, :width]
-                else:
-                    logger.warning(
-                        f"Frame size {bgr.shape[1]}x{bgr.shape[0]} does not match expected {width}x{height}, resizing"
-                    )
-                    bgr = cv2.resize(
-                        bgr, (width, height), interpolation=cv2.INTER_LANCZOS4
-                    )
-            writer.write(bgr)
+        with iio.imopen(str(output_path), "w", plugin="FFMPEG") as writer:
+            writer.init_video_stream(
+                "libx264",
+                fps=1,
+                pixel_format="yuv420p",
+            )
+            for pil_img in frames:
+                img = pil_img.convert("RGB")
+                if img.width != width or img.height != height:
+                    img = img.resize((width, height), Image.LANCZOS)
+                writer.write_frame(np.asarray(img))
         return output_path
     except Exception as e:
         logger.error(f"Video encoding failed for {output_path}: {e}")
-        if output_path.exists():
-            output_path.unlink()
+        if Path(output_path).exists():
+            Path(output_path).unlink()
         return None
-    finally:
-        writer.release()
 
 
 def encode_scenario_video(scenario_obj, scenario_dir):
@@ -247,4 +221,4 @@ def encode_scenario_video(scenario_obj, scenario_dir):
         )
         return None
 
-    return _encode_with_opencv(frames, output_path, width, height)
+    return _encode_with_imageio(frames, output_path, width, height)

@@ -10,6 +10,7 @@ Bundle and compress screenshots in video format
   - enable with CUCU_SCREENSHOT_VIDEO=True
   - report now encodes screenshots into mp4 video file per scenario with placeholders for non-browser steps
   - change classic and replay view to use either screenshots or video
+  - swap opencv-python-headless for imageio[ffmpeg] to produce browser-compatible H.264 (libx264/yuv420p) on macOS, Linux, Windows, and Docker without system dependencies
 
 Replay view UX
   - Rework the steps timeline bar layout to guarantee minimum bar widths and gaps while keeping drag-to-seek accurate
