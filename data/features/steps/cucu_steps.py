@@ -37,9 +37,11 @@ def step_with_substeps_and_heading(context):
     run_steps(
         context,
         """
-    When I do nothing
-     And ## Some Heading
-     And I do nothing
+    Given I do nothing
+     When I do nothing
+        * ## Spec as H2 with two #'s but demoted under parent step
+      And I do nothing
+     Then I do nothing
     """,
     )
 
