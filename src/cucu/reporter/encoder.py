@@ -140,7 +140,7 @@ def _find_fourcc(output_path, fps, size):
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
         probe_path = tmp.name
     try:
-        for codec in ("mp4v", "avc1"):
+        for codec in ("avc1", "mp4v"):
             fourcc = cv2.VideoWriter_fourcc(*codec)
             writer = cv2.VideoWriter(probe_path, fourcc, fps, size)
             opened = writer.isOpened()
