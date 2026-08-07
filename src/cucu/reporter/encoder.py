@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-import imageio.v3 as iio
+import imageio.v2 as iio
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
@@ -143,17 +143,24 @@ def _encode_with_imageio(frames, output_path, width, height):
         height: Video height in pixels
     """
     try:
-        with iio.imopen(str(output_path), "w", plugin="FFMPEG") as writer:
-            writer.init_video_stream(
-                "libx264",
-                fps=1,
-                pixel_format="yuv420p",
-            )
+        writer = iio.get_writer(
+            str(output_path),
+            fps=1,
+            codec="libx264",
+            pixelformat="yuv420p",
+            macro_block_size=1,
+            quality=None,
+            ffmpeg_params=["-crf", "23"],
+            ffmpeg_log_level="error",
+        )
+        try:
             for pil_img in frames:
                 img = pil_img.convert("RGB")
                 if img.width != width or img.height != height:
                     img = img.resize((width, height), Image.LANCZOS)
-                writer.write_frame(np.asarray(img))
+                writer.append_data(np.asarray(img))
+        finally:
+            writer.close()
         return output_path
     except Exception as e:
         logger.error(f"Video encoding failed for {output_path}: {e}")
