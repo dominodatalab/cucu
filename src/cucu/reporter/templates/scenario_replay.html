@@ -181,9 +181,9 @@
   </div>
   {% endfor %}
 
+  {% endif %}
   <button class="stage-nav-btn" id="stage-btn-prev" type="button" title="Previous screenshot (← arrow)" @click="shiftScreenshot(-1)">&#8249;</button>
   <button class="stage-nav-btn" id="stage-btn-next" type="button" title="Next screenshot (→ arrow)" @click="shiftScreenshot(1)">&#8250;</button>
-  {% endif %}
 </div>
 
 <div id="stage-resize-handle" @pointerdown="onResizeDrag($event, 'vp-stage', 120, 'vp-stage-height')"></div>
