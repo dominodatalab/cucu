@@ -174,6 +174,56 @@ Feature: Report basics
         | And I echo "last!"             | .* |
         | .*                             | .* |
 
+  Scenario: User can run feature with a heading nested in substeps and the report demotes it under its parent step
+    Given I run the command "cucu run data/features/scenario_with_substeps_and_heading.feature --results {CUCU_RESULTS_DIR}/report_substeps_heading_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/report_substeps_heading_results --output {CUCU_RESULTS_DIR}/report_substeps_heading_report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_substeps_heading_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     When I click the button "Feature with substeps and heading"
+      And I click the button "Scenario that uses a step with substeps and a heading"
+     Then I should see a table that matches the following:
+        | Feature.*                                                    | .* |
+        | Given I echo "first!"                                        | .* |
+        | .*                                                            | .* |
+        | And I use a step with substeps and a heading                 | .* |
+        | .*                                                            | .* |
+        | ⤷ Given I do nothing                                         | .* |
+        | .*                                                            | .* |
+        | ⤷ When I do nothing                                          | .* |
+        | .*                                                            | .* |
+        | ⤷ ### Spec as H2 with two #'s but demoted under parent step  | .* |
+        | .*                                                            | .* |
+        | ⤷ And I do nothing                                           | .* |
+        | .*                                                            | .* |
+        | ⤷ Then I do nothing                                          | .* |
+        | .*                                                            | .* |
+        | And I echo "last!"                                           | .* |
+        | .*                                                            | .* |
+
+      # the parent step renders as a real <h2>, and the nested heading is a real <h3> whose
+      # displayed #-count is rewritten to match the demoted tag (title keeps the original text)
+      And I execute in the current browser the following javascript and save the result to the variable "PARENT_HEADING_TAG"
+      """
+      return Array.from(document.querySelectorAll("h2, h3, h4, h5, h6"))
+        .find((el) => el.textContent.includes("I use a step with substeps and a heading"))
+        .tagName;
+      """
+      And I execute in the current browser the following javascript and save the result to the variable "NESTED_HEADING_TAG"
+      """
+      return Array.from(document.querySelectorAll("h2, h3, h4, h5, h6"))
+        .find((el) => el.textContent.includes("Spec as H2"))
+        .tagName;
+      """
+      And I execute in the current browser the following javascript and save the result to the variable "NESTED_HEADING_TEXT"
+      """
+      return Array.from(document.querySelectorAll("h2, h3, h4, h5, h6"))
+        .find((el) => el.textContent.includes("Spec as H2"))
+        .textContent;
+      """
+     Then I should see "{PARENT_HEADING_TAG}" is equal to "H2"
+      And I should see "{NESTED_HEADING_TAG}" is equal to "H3"
+      And I should see "{NESTED_HEADING_TEXT}" contains "### Spec as H2"
+
   Scenario: User can run feature with background and has all results reported correctly without skips
     Given I run the command "cucu run data/features/feature_with_background.feature --results {CUCU_RESULTS_DIR}/feature_with_background" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/feature_with_background --output {CUCU_RESULTS_DIR}/feature_with_background-report" and expect exit code "0"
