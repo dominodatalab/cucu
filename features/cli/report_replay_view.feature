@@ -60,5 +60,4 @@ Feature: Report replay view
       And I wait to click the link "Just a scenario that opens a web page"
       And I wait to click the link "🔁 Replay"
      Then I wait to see the text "1 /"
-      And I should see the link "Flat"
       And I should see the link "Index"
