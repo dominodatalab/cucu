@@ -262,8 +262,7 @@ def generate(results: Path, basepath: Path):
                                 # directly, so what's on screen always
                                 # matches the rendered tag
                                 step_dict["heading_display_text"] = (
-                                    "#" * level
-                                    + step_dict["name"].lstrip("#")
+                                    "#" * level + step_dict["name"].lstrip("#")
                                 )
 
                     # process timestamps and time offsets
