@@ -79,6 +79,7 @@
     .debug-output .ansi-cyan    { color: cyan; }
     .debug-output .ansi-white   { color: white; }
     .debug-output .ansi-gray    { color: gray; }
+
     </style>
     <table class="table table-borderless container row">
 
@@ -126,7 +127,7 @@
             <tr class="row">
                 <td style="min-width: 0;" class="anchor-toggle text-truncate col-12" colspan="2" data-toggle="collapse" href="#collapsable-row-{{ loop.index }}" role="button" aria-expanded="false" aria-controls="collapsable-row-{{ loop.index }}">
                     <a class="anchor" id="step_{{ loop.index}}" href="#step_{{ loop.index }}">🔗</a>
-                    <{{ step['heading_level'] }} style="display: contents;" title="{{ escape(step['name']) }}"> {{ escape(step['name']) }}</{{ step['heading_level'] }}>
+                    {% if step['is_substep'] %}<pre style="display: inline;">{{ step_prefix }}</pre> {% endif %}<{{ step['heading_level'] }} style="display: contents;" title="{{ escape(step['name']) }}">{{ escape(step['heading_display_text']) if step['heading_display_text'] else escape(step['name']) }}</{{ step['heading_level'] }}>
                 </td>
             </tr>
 
@@ -134,7 +135,7 @@
             <tr class="row">
                 <td style="min-width: 0;" class="anchor-toggle text-truncate col-10" data-toggle="collapse" href="#collapsable-row-{{ loop.index }}" role="button" aria-expanded="false" aria-controls="collapsable-row-{{ loop.index }}">
                     <a class="anchor" id="step_{{ loop.index}}" href="#step_{{ loop.index }}">🔗</a>
-                    <pre class="status-{{ step_status }}">{{ step_keyword }}</pre><span style="display: contents;" title="{{ escape(step['name']) }}"> {{ escape(step['name']) }}</span>
+                    <pre class="status-{{ step_status }}">{{ step_keyword }}</pre>{% if step['honorary_heading_level'] %}<{{ step['honorary_heading_level'] }} style="display: contents;" title="{{ escape(step['name']) }}"> {{ escape(step['name']) }}</{{ step['honorary_heading_level'] }}>{% else %}<span style="display: contents;" title="{{ escape(step['name']) }}"> {{ escape(step['name']) }}</span>{% endif %}
                 </td>
                 <td style="min-width: 0; text-align: right;" class="col-2"><pre style="display: inline; color: gray;" title="{{ step['start_at'] }}">{{ step_timing }}</pre></td>
             </tr>
