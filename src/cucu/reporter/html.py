@@ -250,11 +250,21 @@ def generate(results: Path, basepath: Path):
                     # and utils.py's run_steps(); has_substeps distinguishes a
                     # parent step's honorary heading from a real "#" heading
                     if step_dict["section_level"] is not None:
-                        heading_tag = f"h{min(step_dict['section_level'], 6)}"
+                        level = min(step_dict["section_level"], 6)
+                        heading_tag = f"h{level}"
                         if step_dict["has_substeps"]:
                             step_dict["honorary_heading_level"] = heading_tag
                         else:
                             step_dict["heading_level"] = heading_tag
+                            if step_dict["is_substep"]:
+                                # nested under a parent step: show the number
+                                # of #'s that matches the demoted level
+                                # directly, so what's on screen always
+                                # matches the rendered tag
+                                step_dict["heading_display_text"] = (
+                                    "#" * level
+                                    + step_dict["name"].lstrip("#")
+                                )
 
                     # process timestamps and time offsets
                     if not step_dict["end_at"]:
