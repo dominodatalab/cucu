@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.30
+- Change - HTML report's Index view now renders the per-scenario flat table (previously only at `flat.html`, which is removed); the old per-feature aggregated table is gone
+- Add - every scenario row on the Index view has an icon-only 🔁 replay link straight to that scenario's replay timeline view
+- Remove - `flat.html` report page and the "Flat" nav links on the scenario/replay/index pages
+
 # 1.4.29
 - Fix - scenarios killed by an mpire worker timeout now record and report a distinct `terminated` status (not `error`) across DB, JUnit XML, and JSON; step-failure takes precedence over termination so the real failure is never masked
 - Fix - `step.start_at` accessed via `getattr` in `cucu.py` and `json.py` formatters to prevent `AttributeError` when `InterruptWorker` fires before `before_step` runs
