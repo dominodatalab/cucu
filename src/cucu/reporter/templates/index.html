@@ -16,7 +16,6 @@
                 <th class="text-center">Steps<br/>{{ grand_totals['steps'] | int }}</th>
                 <th class="text-center">Status</th>
                 <th class="text-center">Duration<br/>{{ grand_totals['duration'] | int }}s</th>
-                <th class="text-center">Replay</th>
             </tr>
         </thead>
         {% for feature in features %}
@@ -26,11 +25,10 @@
                 <tr>
                     <td class="text-center">{{ scenario['start_at'] }}</td>
                     <td><a href="{{ urlencode(escape(feature['name'])) }}.html"><span>{{ escape(feature['name']) }}</span></a><br>{{ feature['tags'] }}</td>
-                    <td><a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/index.html"><span>{{ escape(scenario['name']) }}</span></a><br>{{ scenario['tags'] }}</td>
+                    <td><a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/index.html"><span>{{ escape(scenario['name']) }}</span></a> <a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/replay.html" title="Replay timeline view">🔁</a><br>{{ scenario['tags'] }}</td>
                     <td class="text-center">{{ scenario['total_steps'] }}</td>
                     <td class="text-center"><span class="status-{{ scenario['status'] }}">{{ scenario['status'] }}</span></td>
                     <td class="text-center">{{ '{:.1f}'.format(scenario['duration'] | float) }}</td>
-                    <td class="text-center"><a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/replay.html" title="Replay timeline view">🔁</a></td>
                 </tr>
                 {%  endif %}
             {% endfor %}
@@ -38,6 +36,6 @@
     </table>
 
     <script>
-    setupReportTables([[2, 'asc']], [{type: 'timestamp', searchable: false}, {type: 'string'}, {type: 'string'}, {type: 'num', searchable: false}, {type: 'html'} , {type: 'timestamp', searchable: false}, {type: 'html', searchable: false, orderable: false} ])
+    setupReportTables([[2, 'asc']], [{type: 'timestamp', searchable: false}, {type: 'string'}, {type: 'string'}, {type: 'num', searchable: false}, {type: 'html'} , {type: 'timestamp', searchable: false} ])
     </script>
 {% endblock %}

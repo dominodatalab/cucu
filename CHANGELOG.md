@@ -5,10 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 1.4.30
+# 1.4.31
 - Change - HTML report's Index view now renders the per-scenario flat table (previously only at `flat.html`, which is removed); the old per-feature aggregated table is gone
 - Add - every scenario row on the Index view has an icon-only 🔁 replay link straight to that scenario's replay timeline view
 - Remove - `flat.html` report page and the "Flat" nav links on the scenario/replay/index pages
+
+# 1.4.30
+- Add - a `#`/`##` section heading nested inside a step's sub-flow (e.g. via `run_steps`) now renders one heading level deeper than it would at the top level, prefixed with `⤷` and aligned to match its sibling sub-step rows in the HTML report
+- Add - the parent step of a nested sub-flow gets an honorary heading style (bold, slightly larger, scaled one level above the current section) in the HTML report
+- Fix - `section_level`/`parent_seq` are now computed correctly at the source for a step that calls `run_steps(...)`: it becomes an "honorary" section for its own sub-flow, so its sub-steps and any nested heading correctly nest under it.
 
 # 1.4.29
 - Fix - scenarios killed by an mpire worker timeout now record and report a distinct `terminated` status (not `error`) across DB, JUnit XML, and JSON; step-failure takes precedence over termination so the real failure is never masked

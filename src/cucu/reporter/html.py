@@ -245,13 +245,25 @@ def generate(results: Path, basepath: Path):
                 )
 
                 for step_dict in scenario_dict["steps"]:
-                    # Handle section headings with different levels (# to ####)
-                    if step_dict["name"].startswith("#"):
-                        # Map the count to the appropriate HTML heading (h2-h5)
-                        # We use h2-h5 instead of h1-h4 so h1 can be reserved for scenario/feature titles
-                        step_dict["heading_level"] = (
-                            f"h{step_dict['name'][:4].count('#') + 1}"
-                        )
+                    # section_level (root/scenario = 1, everything else is
+                    # enclosing + 1) is computed at runtime in section_steps.py
+                    # and utils.py's run_steps(); has_substeps distinguishes a
+                    # parent step's honorary heading from a real "#" heading
+                    if step_dict["section_level"] is not None:
+                        level = min(step_dict["section_level"], 6)
+                        heading_tag = f"h{level}"
+                        if step_dict["has_substeps"]:
+                            step_dict["honorary_heading_level"] = heading_tag
+                        else:
+                            step_dict["heading_level"] = heading_tag
+                            if step_dict["is_substep"]:
+                                # nested under a parent step: show the number
+                                # of #'s that matches the demoted level
+                                # directly, so what's on screen always
+                                # matches the rendered tag
+                                step_dict["heading_display_text"] = (
+                                    "#" * level + step_dict["name"].lstrip("#")
+                                )
 
                     # process timestamps and time offsets
                     if not step_dict["end_at"]:

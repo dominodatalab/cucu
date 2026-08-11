@@ -346,7 +346,7 @@ Feature: Run with hooks
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that contains rows matching the following
-        | .* | Feature that simply echoes "Hello World" | This is a scenario that simply echoes hello world | .* | error | .* | 🔁 |
+        | .* | Feature that simply echoes "Hello World" | This is a scenario that simply echoes hello world | .* | error | .* |
       And I wait to click the link "This is a scenario that simply echoes hello world"
         * # Additional check of the log file itself here, when QE-16733 is resolved
      # When I wait to click the link "Logs"
@@ -384,7 +384,7 @@ Feature: Run with hooks
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/failing_after_step_pass_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that contains rows matching the following
-        | .* | Feature with a passing step and a failing after_step hook | Hello world scenario | .* | error | .* | 🔁 |
+        | .* | Feature with a passing step and a failing after_step hook | Hello world scenario | .* | error | .* |
 
   Scenario: When an after_step hook fails on a failing step, the Scenario still reports as failed
     Given I create a file at "{CUCU_RESULTS_DIR}/failing_after_step_fail/environment.py" with the following:
@@ -417,7 +417,7 @@ Feature: Run with hooks
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/failing_after_step_fail_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that contains rows matching the following
-        | .* | Feature with a failing step and a failing after_step hook | Failing scenario | .* | failed | .* | 🔁 |
+        | .* | Feature with a failing step and a failing after_step hook | Failing scenario | .* | failed | .* |
 
   Scenario: When an after_all hook fails, cleanup still runs and the run is marked failing
     Given I create a file at "{CUCU_RESULTS_DIR}/failing_after_all/environment.py" with the following:
