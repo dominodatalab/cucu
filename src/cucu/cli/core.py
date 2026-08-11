@@ -567,6 +567,7 @@ def _generate_report(
 
     # Encode scenario videos if enabled
     db_path = results_dir / "run.db"
+    logger.warning(f"CUCU_SCREENSHOT_VIDEO:{CONFIG['CUCU_SCREENSHOT_VIDEO']}")
     if db_path.exists() and CONFIG.true("CUCU_SCREENSHOT_VIDEO"):
         db.init_html_report_db(db_path)
         encoded_count = 0
