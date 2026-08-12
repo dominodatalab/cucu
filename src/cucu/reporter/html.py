@@ -389,21 +389,15 @@ def generate(results: Path, basepath: Path):
             )
 
         # query the database for stats
-        feature_stats_db = db.db.execute_sql("SELECT * FROM flat_feature")
-        keys = tuple([x[0] for x in feature_stats_db.description])
-        feature_stats = [
-            dict(zip(keys, x)) for x in feature_stats_db.fetchall()
-        ]
-
         grand_totals_db = db.db.execute_sql("SELECT * FROM flat_all")
         keys = tuple([x[0] for x in grand_totals_db.description])
         grand_totals = dict(zip(keys, grand_totals_db.fetchone()))
 
-        ## Generate index.html and flat.html
+        ## Generate index.html
 
         index_template = templates.get_template("index.html")
         rendered_index_html = index_template.render(
-            feature_stats=feature_stats,
+            features=features,
             grand_totals=grand_totals,
             title="Cucu HTML Test Report",
             basepath=basepath,
@@ -412,18 +406,7 @@ def generate(results: Path, basepath: Path):
         html_index_path = basepath / "index.html"
         html_index_path.write_text(rendered_index_html)
 
-        flat_template = templates.get_template("flat.html")
-        rendered_flat_html = flat_template.render(
-            features=features,
-            grand_totals=grand_totals,
-            title="Flat HTML Test Report",
-            basepath=basepath,
-            dir_depth="",
-        )
-        html_flat_path = basepath / "flat.html"
-        html_flat_path.write_text(rendered_flat_html)
-
     finally:
         db.close_html_report_db()
 
-    return html_flat_path
+    return html_index_path
