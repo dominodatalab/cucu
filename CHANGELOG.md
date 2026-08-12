@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.32
+- Add - bundle and compress screenshots into H.264 mp4 video per scenario when `CUCU_SCREENSHOT_VIDEO=True`; classic and replay views use video when available
+- Change - replay view timeline bar guarantees minimum bar widths and gaps while keeping drag-to-seek accurate
+- Add - log panel lines are clickable to seek the playhead to that line's timestamp, with active-line highlight and auto-scroll
+- Add - per-panel timeline tick bar on all log panels including stderr
+- Change - replace steps breadcrumb with current step keyword and name tracked to the playhead
+- Fix - log panel re-scrolls when the active line leaves the viewport after a seek
+
 # 1.4.31
 Bundle and compress screenshots in video format
   - enable with CUCU_SCREENSHOT_VIDEO=True
