@@ -64,12 +64,24 @@
 
 <div id="vp-sticky-top">
 <nav id="vp-nav">
-  <a href="../../flat.html" title="Flat view">Flat</a>
-  <span class="vp-breadcrumb-sep">\</span>
-  <a href="../../{{ urlencode(escape(feature['name'])) }}.html" title="Go to feature report">{{ escape(feature['name']) }}</a>
+  <a href="../../index.html" title="Index">Index</a>
+  <span class="vp-sep">|</span>
+  <a href="../../{{ urlencode(escape(feature['name'])) }}.html" title="Feature">Feature</a>
+  <span class="vp-sep">|</span>
+  <a href="index.html" title="Classic checklist view">☑ Classic</a>
+  {% if scenario['logs'] %}
+  <span class="vp-sep">|</span>
+  <div id="log-menu-wrap" @click.outside="logsOpen = false">
+    <a href="#" id="log-menu-trigger" @click.prevent="logsOpen = !logsOpen">Logs ▾</a>
+    <div id="log-dd" :class="{ open: logsOpen }">
+      {% for log_file in scenario['logs'] %}
+      <a href="{{ log_file['filepath'] }}">{{ log_file['name'] }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 
   <div class="vp-nav-right">
-    <a href="index.html" title="Classic view">Classic</a>
     <button id="theme-toggle" type="button"
             @click="cycleTheme()"
             x-text="themeIcons[theme]"
