@@ -179,11 +179,12 @@ def encode_scenario_video(scenario_obj, scenario_dir):
     Returns: output_path or None if encoding failed
     """
     output_path = Path(scenario_dir) / "screenshots.mp4"
+    results_dir = Path(scenario_dir).parent.parent
     steps_list = list(scenario_obj.steps.order_by(step.seq))
 
-    if output_path.exists():
+    if output_path.exists() and output_path.stat().st_size > 0:
         logger.warning(
-            f"Video already exists for scenario {scenario_obj.scenario_run_id}, skipping encoding"
+            f"Skip existing: {output_path.relative_to(results_dir)}"
         )
         return output_path
 
