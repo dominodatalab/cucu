@@ -189,8 +189,8 @@ def encode_scenario_video(scenario_obj, scenario_dir):
         return output_path
 
     if not steps_list:
-        logger.warning(
-            f"No steps found for scenario {scenario_obj.scenario_run_id}"
+        logger.error(
+            f"No steps: {scenario_dir.relative_to(results_dir)}"
         )
         return None
 
@@ -224,7 +224,7 @@ def encode_scenario_video(scenario_obj, scenario_dir):
         frames.extend(step_frames)
 
     if not frames:
-        logger.warning(
+        logger.error(
             f"No frames generated for scenario {scenario_obj.scenario_run_id}"
         )
         return None
