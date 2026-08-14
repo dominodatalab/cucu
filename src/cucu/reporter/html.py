@@ -13,6 +13,7 @@ import cucu.db as db
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
+from cucu.reporter import encoder as video_encoder
 from cucu.utils import behave_filepath_to_cucu_logpath, ellipsize_filename
 
 
@@ -178,6 +179,8 @@ def generate(results: Path, basepath: Path):
         db_features = db.feature.select().order_by(db.feature.start_at)
 
         features = []
+        video_count = 0
+
         for db_feature in db_features:
             if db_feature.status == "untested":
                 logger.debug(f"Skipping untested feature: {db_feature.name}")
@@ -381,7 +384,31 @@ def generate(results: Path, basepath: Path):
                 # Assign frame indices and set video path when video mode is enabled.
                 screenshots_video = None
                 screenshots_video_steps = None
+
                 if CONFIG.true("CUCU_SCREENSHOT_VIDEO"):
+                    src_scenario_dir = (
+                        Path(feature_dict["results_dir"])
+                        / feature_dict["folder_name"]
+                        / scenario_dict["folder_name"]
+                    )
+                    scen_obj = db.scenario.get_by_id(
+                        scenario_dict["scenario_run_id"]
+                    )
+
+                    try:
+                        mp4_src = video_encoder.encode_scenario_video(
+                            scen_obj, src_scenario_dir
+                        )
+                        if mp4_src and mp4_src.exists():
+                            shutil.copy2(
+                                mp4_src, scenario_filepath / "screenshots.mp4"
+                            )
+                            video_count += 1
+                    except Exception as ex:
+                        logger.error(
+                            f"Failed to encode {src_scenario_dir}: {ex}"
+                        )
+
                     screenshots_video = "screenshots.mp4"
                     # Assign cumulative frame indices to each screenshot.
                     # The encoder writes one frame per screenshot per step
@@ -454,6 +481,10 @@ def generate(results: Path, basepath: Path):
                     ]
                 )
             )
+
+        logger.info(
+            f"Processed scenarios: {scenario_count}, videos: {video_count}"
+        )
 
         # query the database for stats
         grand_totals_db = db.db.execute_sql("SELECT * FROM flat_all")

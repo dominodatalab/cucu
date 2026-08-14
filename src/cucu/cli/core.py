@@ -33,8 +33,7 @@ from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.cli.tags import collect_cucu_tags
 from cucu.config import CONFIG
 from cucu.lint import linter
-from cucu.reporter import encoder as video_encoder
-from cucu.utils import ellipsize_filename, generate_short_id
+from cucu.utils import generate_short_id
 
 # set env var BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON=yes before importing behave
 os.environ["BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON"] = "yes"
@@ -564,29 +563,6 @@ def _generate_report(
 
     if results_dir.exists():
         db.consolidate_database_files(results_dir, combine)
-
-    # Encode scenario videos if enabled
-    db_path = results_dir / "run.db"
-    logger.warning(f"CUCU_SCREENSHOT_VIDEO:{CONFIG['CUCU_SCREENSHOT_VIDEO']}")
-    if db_path.exists() and CONFIG.true("CUCU_SCREENSHOT_VIDEO"):
-        db.init_html_report_db(db_path)
-        encoded_count = 0
-        for scen in db.scenario.select():
-            # Build scenario directory path
-            feature_folder = ellipsize_filename(scen.feature.name)
-            scenario_folder = ellipsize_filename(scen.name)
-            scenario_dir = results_dir / feature_folder / scenario_folder
-            if scenario_dir.exists():
-                try:
-                    if video_encoder.encode_scenario_video(scen, scenario_dir):
-                        encoded_count += 1
-                except Exception as e:
-                    logger.error(
-                        f"Failed to encode video for scenario {scen.scenario_run_id}: {e}"
-                    )
-        logger.warning(
-            f"Successfully encoded screenshots as videos for {encoded_count} scenarios"
-        )
 
     report_location = reporter.generate(results_dir, report_folder)
     print(f"HTML test report at {report_location}")

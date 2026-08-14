@@ -183,15 +183,11 @@ def encode_scenario_video(scenario_obj, scenario_dir):
     steps_list = list(scenario_obj.steps.order_by(step.seq))
 
     if output_path.exists() and output_path.stat().st_size > 0:
-        logger.warning(
-            f"Skip existing: {output_path.relative_to(results_dir)}"
-        )
+        logger.debug(f"Skip existing: {output_path.relative_to(results_dir)}")
         return output_path
 
     if not steps_list:
-        logger.error(
-            f"No steps: {scenario_dir.relative_to(results_dir)}"
-        )
+        logger.error(f"No steps: '{scenario_dir.relative_to(results_dir)}'")
         return None
 
     width, height = _resolve_dimensions(steps_list, scenario_dir)
