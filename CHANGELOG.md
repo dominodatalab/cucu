@@ -6,16 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 # 1.4.32
-- Add - bundle and compress screenshots into H.264 mp4 video per scenario when `CUCU_SCREENSHOT_VIDEO=True`; classic and replay views use video when available
-- Change - replay view timeline bar guarantees minimum bar widths and gaps while keeping drag-to-seek accurate
-- Add - log panel lines are clickable to seek the playhead to that line's timestamp, with active-line highlight and auto-scroll
-- Add - per-panel timeline tick bar on all log panels including stderr
-- Change - replace steps breadcrumb with current step keyword and name tracked to the playhead
-- Fix - log panel re-scrolls when the active line leaves the viewport after a seek
-
-# 1.4.31
 Bundle and compress screenshots in video format
-  - enable with CUCU_SCREENSHOT_VIDEO=True
+  - enable with `CUCU_SCREENSHOT_VIDEO=True`
   - report now encodes screenshots into mp4 video file per scenario with placeholders for non-browser steps
   - change classic and replay view to use either screenshots or video
   - add deps pillow and imageio[ffmpeg] to produce browser-compatible H.264 (libx264/yuv420p) on macOS, Linux, Windows, and Docker without system dependencies
@@ -27,6 +19,7 @@ Replay view UX
   - Replace the steps breadcrumb with the current step's keyword and name tracked to the playhead
   - Fix log panel scroll to re-scroll when the active line leaves the viewport after a seek
 
+# 1.4.31
 - Change - HTML report's Index view now renders the per-scenario flat table (previously only at `flat.html`, which is removed); the old per-feature aggregated table is gone
 - Add - every scenario row on the Index view has an icon-only 🔁 replay link straight to that scenario's replay timeline view
 - Remove - `flat.html` report page and the "Flat" nav links on the scenario/replay/index pages
