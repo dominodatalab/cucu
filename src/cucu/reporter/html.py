@@ -1,3 +1,4 @@
+import re
 import shutil
 import sys
 import traceback
@@ -12,6 +13,7 @@ import cucu.db as db
 from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
+from cucu.reporter import encoder as video_encoder
 from cucu.utils import behave_filepath_to_cucu_logpath, ellipsize_filename
 
 
@@ -20,6 +22,19 @@ def escape(data):
         return None
 
     return escape_(data, {'"': "&quot;"}).rstrip()
+
+
+def _ignore_screenshots(src, names):
+    ignored = set()
+    for name in names:
+        path = Path(src) / name
+        if name.endswith(".png"):
+            ignored.add(name)
+        elif path.is_dir():
+            contents = list(path.iterdir())
+            if contents and all(f.suffix == ".png" for f in contents):
+                ignored.add(name)
+    return ignored
 
 
 def process_tags(element):
@@ -92,6 +107,26 @@ def browser_log_level(raw_level):
     return "warning" if raw_level == "WARNING" else "info"
 
 
+_LOG_TS_RE = re.compile(r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d+)")
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def log_line_offset(line, scenario_start_at):
+    """Return seconds offset from scenario start for a log line that starts with a Python
+    logging timestamp (``YYYY-MM-DD HH:MM:SS,mmm``), or None if no timestamp is found."""
+    if not scenario_start_at or not line:
+        return None
+    text = _HTML_TAG_RE.sub("", line).strip()
+    m = _LOG_TS_RE.match(text)
+    if not m:
+        return None
+    try:
+        ts = datetime.strptime(m.group(1), "%Y-%m-%d %H:%M:%S,%f")
+        return (ts - scenario_start_at).total_seconds()
+    except Exception:
+        return None
+
+
 def step_table_to_html(table_data):
     """Convert a step table data structure to an indented HTML table format"""
     text_indent = " " * 8
@@ -111,6 +146,7 @@ def generate(results: Path, basepath: Path):
         urlencode=urlencode,
         browser_timestamp_to_datetime=browser_timestamp_to_datetime,
         browser_log_level=browser_log_level,
+        log_line_offset=log_line_offset,
         step_text_list_to_html=step_text_list_to_html,
         step_table_to_html=step_table_to_html,
     )
@@ -143,6 +179,8 @@ def generate(results: Path, basepath: Path):
         db_features = db.feature.select().order_by(db.feature.start_at)
 
         features = []
+        video_count = 0
+
         for db_feature in db_features:
             if db_feature.status == "untested":
                 logger.debug(f"Skipping untested feature: {db_feature.name}")
@@ -176,10 +214,16 @@ def generate(results: Path, basepath: Path):
                 )
 
                 if src_feature_filepath.exists():
+                    ignore = (
+                        _ignore_screenshots
+                        if CONFIG.true("CUCU_SCREENSHOT_VIDEO")
+                        else None
+                    )
                     shutil.copytree(
                         src_feature_filepath,
                         feature_path,
                         dirs_exist_ok=True,
+                        ignore=ignore,
                     )
                 else:
                     logger.warning(
@@ -337,6 +381,51 @@ def generate(results: Path, basepath: Path):
 
                 scenario_dict["logs"] = log_files
 
+                # Assign frame indices and set video path when video mode is enabled.
+                screenshots_video = None
+                screenshots_video_steps = None
+
+                if CONFIG.true("CUCU_SCREENSHOT_VIDEO"):
+                    src_scenario_dir = (
+                        Path(feature_dict["results_dir"])
+                        / feature_dict["folder_name"]
+                        / scenario_dict["folder_name"]
+                    )
+                    scen_obj = db.scenario.get_by_id(
+                        scenario_dict["scenario_run_id"]
+                    )
+
+                    try:
+                        mp4_src = video_encoder.encode_scenario_video(
+                            scen_obj, src_scenario_dir
+                        )
+                        if mp4_src and mp4_src.exists():
+                            shutil.copy2(
+                                mp4_src, scenario_filepath / "screenshots.mp4"
+                            )
+                            video_count += 1
+                    except Exception as ex:
+                        logger.error(
+                            f"Failed to encode {src_scenario_dir}: {ex}"
+                        )
+
+                    screenshots_video = "screenshots.mp4"
+                    # Assign cumulative frame indices to each screenshot.
+                    # The encoder writes one frame per screenshot per step
+                    # (or one text-card frame for steps with no screenshots),
+                    # so the absolute frame index is the running count of
+                    # screenshots seen across all preceding steps.
+                    frame_idx = 0
+                    for step_d in scenario_dict["steps"]:
+                        shots = step_d.get("screenshots") or []
+                        if shots:
+                            for shot in shots:
+                                shot["frame_index"] = frame_idx
+                                frame_idx += 1
+                        else:
+                            frame_idx += 1  # text-card frame
+                    screenshots_video_steps = frame_idx
+
                 # render scenario html
                 scenario_basepath = feature_path / scenario_dict["folder_name"]
                 scenario_basepath.mkdir(parents=True, exist_ok=True)
@@ -348,11 +437,14 @@ def generate(results: Path, basepath: Path):
                     steps=scenario_dict["steps"],
                     title=scenario_dict["name"],
                     dir_depth="../../",
+                    screenshots_video=screenshots_video,
+                    screenshots_video_steps=screenshots_video_steps,
                 )
                 scenario_output_filepath = scenario_basepath / "index.html"
                 scenario_output_filepath.write_text(rendered_scenario_html)
 
                 # render replay-style scenario view
+
                 rendered_replay_html = scenario_replay_template.render(
                     basepath=results,
                     feature=feature_dict,
@@ -361,6 +453,8 @@ def generate(results: Path, basepath: Path):
                     steps=scenario_dict["steps"],
                     title=scenario_dict["name"],
                     dir_depth="../../",
+                    screenshots_video=screenshots_video,
+                    screenshots_video_steps=screenshots_video_steps,
                 )
                 scenario_replay_filepath = scenario_basepath / "replay.html"
                 scenario_replay_filepath.write_text(rendered_replay_html)
@@ -386,6 +480,14 @@ def generate(results: Path, basepath: Path):
                         if x["duration"]
                     ]
                 )
+            )
+
+        logger.info(
+            f"Processed scenarios: {scenario_count} == videos: {video_count}"
+        )
+        if video_count != scenario_count:
+            logger.warning(
+                "❌ Failed to generated same number of videos to scenarios"
             )
 
         # query the database for stats
