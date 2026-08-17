@@ -483,8 +483,12 @@ def generate(results: Path, basepath: Path):
             )
 
         logger.info(
-            f"Processed scenarios: {scenario_count}, videos: {video_count}"
+            f"Processed scenarios: {scenario_count} == videos: {video_count}"
         )
+        if video_count != scenario_count:
+            logger.warning(
+                "❌ Failed to generated same number of videos to scenarios"
+            )
 
         # query the database for stats
         grand_totals_db = db.db.execute_sql("SELECT * FROM flat_all")
