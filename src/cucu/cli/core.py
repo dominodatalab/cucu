@@ -18,6 +18,7 @@ from click import ClickException
 from mpire import WorkerPool
 from tabulate import tabulate
 
+import cucu.db as db
 from cucu import (
     fuzzy,
     init_global_hook_variables,
@@ -31,10 +32,6 @@ from cucu.cli.run import behave, behave_init, create_run
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.cli.tags import collect_cucu_tags
 from cucu.config import CONFIG
-from cucu.db import (
-    consolidate_database_files,
-    finish_worker_record,
-)
 from cucu.lint import linter
 from cucu.utils import generate_short_id
 
@@ -540,8 +537,10 @@ def run(
             dumper.stop()
 
         if results.exists():
-            finish_worker_record(worker_run_id=CONFIG.get("WORKER_PARENT_ID"))
-            consolidate_database_files(results)
+            db.finish_worker_record(
+                worker_run_id=CONFIG.get("WORKER_PARENT_ID")
+            )
+            db.consolidate_database_files(results)
 
         if generate_report:
             _generate_report(
@@ -563,7 +562,7 @@ def _generate_report(
     report_folder.mkdir(parents=True, exist_ok=True)
 
     if results_dir.exists():
-        consolidate_database_files(results_dir, combine)
+        db.consolidate_database_files(results_dir, combine)
 
     report_location = reporter.generate(results_dir, report_folder)
     print(f"HTML test report at {report_location}")
@@ -627,6 +626,13 @@ def _generate_report(
     is_flag=True,
     help="combine multiple cucu_runs into a single report",
 )
+@click.option(
+    "-e",
+    "--env",
+    default=[],
+    multiple=True,
+    help="set environment variable as KEY=VALUE",
+)
 def report(
     results_dir: Path,
     logging_level,
@@ -634,11 +640,16 @@ def report(
     output: Path,
     junit: Path,
     combine: bool,
+    env,
 ):
     """
     generate a test report from a results directory
     """
     init_global_hook_variables()
+
+    for variable in list(env):
+        key, value = variable.split("=", 1)
+        os.environ[key] = value
 
     os.environ["CUCU_LOGGING_LEVEL"] = logging_level.upper()
     logger.init_logging(logging_level.upper())

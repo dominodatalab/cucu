@@ -49,14 +49,86 @@
     : Math.max(TOTAL_STEPS - 1, 0);
   var TOTAL_DUR = PLAY_END > 0 ? PLAY_END : 1;
 
+  // ===== VISUAL COORDINATE SYSTEM =====
+  // Steps get a guaranteed minimum width (VIS_MIN_W) and a gap between adjacent
+  // bars (VIS_GAP), both as percentages of the track width. This decouples visual
+  // position from raw time proportion, so timeToVis() / visToTime() must be used
+  // wherever a visual % coordinate is needed (headPct, drag-to-seek, all leftPct
+  // values on every timeline track).
+  var VIS_MIN_W = 0.4;   // minimum bar width  (% of track)
+  var VIS_GAP   = 0.15;  // gap between bars   (% of track)
+
+  // Cap so reserved space never exceeds 80%, leaving room for proportional widths.
+  (function () {
+    var reserved = TOTAL_STEPS * VIS_MIN_W + Math.max(0, TOTAL_STEPS - 1) * VIS_GAP;
+    if (reserved > 80) {
+      var scale = 80 / reserved;
+      VIS_MIN_W *= scale;
+      VIS_GAP   *= scale;
+    }
+  }());
+
+  // {left, width} in visual-% for each step.
+  var VISUAL_STEPS = (function () {
+    var reserved  = TOTAL_STEPS * VIS_MIN_W + Math.max(0, TOTAL_STEPS - 1) * VIS_GAP;
+    var remaining = 100 - reserved;
+    var cursor = 0, arr = [];
+    STEPS.forEach(function (s) {
+      var bonus = HAS_TIMING
+        ? (s.duration / TOTAL_DUR) * remaining
+        : remaining / Math.max(TOTAL_STEPS, 1);
+      var w = VIS_MIN_W + bonus;
+      arr.push({ left: cursor, width: w });
+      cursor += w + VIS_GAP;
+    });
+    return arr;
+  }());
+
+  // time → visual-% (piecewise linear, one segment per step).
+  function timeToVis(t) {
+    if (TOTAL_STEPS === 0) return 0;
+    if (!HAS_TIMING) {
+      var idx = Math.max(0, Math.min(Math.round(t), TOTAL_STEPS - 1));
+      return VISUAL_STEPS[idx].left;
+    }
+    if (t >= PLAY_END) return 100;
+    var i = timeToStepIdx(t);
+    var s = STEPS[i], vs = VISUAL_STEPS[i];
+    var dur = s.duration > 0 ? s.duration : 0.001;
+    var frac = Math.max(0, Math.min(1, (t - s.startOffset) / dur));
+    return vs.left + frac * vs.width;
+  }
+
+  // visual-% → time (inverse of timeToVis; used by drag-to-seek).
+  function visToTime(pct) {
+    if (TOTAL_STEPS === 0) return 0;
+    if (!HAS_TIMING) {
+      for (var j = 0; j < TOTAL_STEPS; j++) {
+        if (pct <= VISUAL_STEPS[j].left + VISUAL_STEPS[j].width) return j;
+      }
+      return TOTAL_STEPS - 1;
+    }
+    for (var k = 0; k < TOTAL_STEPS; k++) {
+      var vs = VISUAL_STEPS[k], s = STEPS[k];
+      var barEnd = vs.left + vs.width;
+      if (pct <= barEnd) {
+        if (pct >= vs.left) {
+          return s.startOffset + ((pct - vs.left) / vs.width) * s.duration;
+        }
+        // In the gap before bar k — snap to the start of step k.
+        return s.startOffset;
+      }
+    }
+    return PLAY_END;
+  }
+
   // ----- Precomputed tick / bar arrays — bound via <template x-for> in markup. -----
   var STEP_BARS = STEPS.map(function (step, i) {
-    var leftPct = HAS_TIMING ? step.startOffset / TOTAL_DUR * 100 : i / Math.max(TOTAL_STEPS - 1, 1) * 100;
-    var widthPct = HAS_TIMING ? Math.max(step.duration / TOTAL_DUR * 100, 0.25) : 100 / TOTAL_STEPS;
+    var vs = VISUAL_STEPS[i];
     return {
       index:    i,
-      leftPct:  leftPct,
-      widthPct: widthPct,
+      leftPct:  vs.left,
+      widthPct: vs.width,
       cls:      'status-' + (step.status || 'untested') + (step.isHeading ? ' heading' : ''),
       title:    'Step ' + step.num + ': ' + step.keyword + ' ' + step.name.slice(0, 80),
       seekTime: HAS_TIMING ? step.startOffset : i,
@@ -69,7 +141,7 @@
     for (var i = 0; i < n; i++) {
       acc.push({
         cls: 'pics-tick pics-tick-' + (step.status || 'untested'),
-        leftPct: Math.max(0, Math.min(100, (step.startOffset + (i / n) * step.duration) / TOTAL_DUR * 100)),
+        leftPct: timeToVis(step.startOffset + (i / n) * step.duration),
       });
     }
     return acc;
@@ -78,24 +150,45 @@
   function buildPresenceBars(predicate) {
     return STEPS.reduce(function (acc, step, i) {
       if (!predicate(step)) return acc;
-      var leftPct  = HAS_TIMING ? step.startOffset / TOTAL_DUR * 100 : i / Math.max(TOTAL_STEPS, 1) * 100;
-      var widthPct = HAS_TIMING ? Math.max(0.5, step.duration / TOTAL_DUR * 100) : 100 / TOTAL_STEPS;
-      acc.push({ leftPct: leftPct, widthPct: widthPct });
+      var vs = VISUAL_STEPS[i];
+      acc.push({ leftPct: vs.left, widthPct: vs.width });
       return acc;
     }, []);
   }
-  var STDOUT_BARS = buildPresenceBars(function (s) { return s.stdout && s.stdout.length; });
-  var CUCU_BARS   = buildPresenceBars(function (s) { return !!s.debugOutput; });
   var ERRORS_BARS = buildPresenceBars(function (s) { return s.errorMessage && s.errorMessage.length; });
+  var STDERR_BARS = buildPresenceBars(function (s) { return s.stderr && s.stderr.length; });
+
+  // Build per-line ticks for a field that holds [{html|text, offset}] arrays.
+  // Falls back to a single step-level tick for steps with no per-line timestamps.
+  function buildLineTicks(field) {
+    var ticks = [];
+    STEPS.forEach(function (s) {
+      var lines = s[field];
+      if (!lines || !lines.length) return;
+      var stamped = false;
+      lines.forEach(function (l) {
+        if (l.offset !== null) {
+          stamped = true;
+          ticks.push({ leftPct: timeToVis(l.offset), level: 'info' });
+        }
+      });
+      if (!stamped && s.startOffset !== null) {
+        ticks.push({ leftPct: timeToVis(s.startOffset), level: 'info' });
+      }
+    });
+    return ticks;
+  }
+  var CUCU_TICKS   = buildLineTicks('debugLines');
+  var STDOUT_TICKS = buildLineTicks('stdoutLines');
 
   var BROWSER_TICKS = BROWSER_LOGS.map(function (log) {
-    return { leftPct: Math.max(0, Math.min(100, log.offset / TOTAL_DUR * 100)), level: log.level };
+    return { leftPct: timeToVis(log.offset), level: log.level };
   });
 
   var STEP_PANELS = [
     { contentId: 'vp-steps-content',  followId: 'steps-follow-chk',  field: null },
-    { contentId: 'vp-cucu-content',   followId: 'cucu-follow-chk',   field: 'debugOutput' },
-    { contentId: 'vp-stdout-content', followId: 'stdout-follow-chk', field: 'stdout' },
+    { contentId: 'vp-cucu-content',   followId: 'cucu-follow-chk',   field: 'debugLines' },
+    { contentId: 'vp-stdout-content', followId: 'stdout-follow-chk', field: 'stdoutLines' },
     { contentId: 'vp-stderr-content', followId: 'stderr-follow-chk', field: 'stderr' },
     { contentId: 'vp-errors-content', followId: 'errors-follow-chk', field: 'errorMessage' },
   ];
@@ -124,8 +217,7 @@
   function formatPlayheadTime(epochMs) {
     var d = new Date(epochMs);
     return d.getFullYear() + '-' + padN(d.getMonth() + 1) + '-' + padN(d.getDate()) + ' ' +
-           padN(d.getHours()) + ':' + padN(d.getMinutes()) + ':' + padN(d.getSeconds()) + '.' +
-           padN(d.getMilliseconds(), 3) + '000';
+           padN(d.getHours()) + ':' + padN(d.getMinutes()) + ':' + padN(d.getSeconds());
   }
 
   function stepIdxToTime(idx) {
@@ -142,6 +234,13 @@
       if (STEPS[i].startOffset !== null && STEPS[i].startOffset <= t) best = i;
     }
     return best;
+  }
+  // Returns the global screenshot index (0-based) for scenario time t.
+  // Divide by fps to get video.currentTime.
+  function timeToGlobalPicIdx(t) {
+    var stepIdx = timeToStepIdx(t);
+    var imgIdx  = timeToImgIdx(stepIdx, t);
+    return PIC_OFFSETS[stepIdx] + imgIdx;
   }
   function timeToImgIdx(stepIdx, t) {
     var step = STEPS[stepIdx];
@@ -176,22 +275,26 @@
       totalPics:       TOTAL_PICS,
       stepBars:        STEP_BARS,
       picTicks:        PIC_TICKS,
-      stdoutBars:      STDOUT_BARS,
-      cucuBars:        CUCU_BARS,
+      cucuTicks:       CUCU_TICKS,
+      stdoutTicks:     STDOUT_TICKS,
+      stderrBars:      STDERR_BARS,
       errorsBars:      ERRORS_BARS,
       browserTicks:    BROWSER_TICKS,
       browserLogs:     BROWSER_LOGS,
-      cucuSteps:       STEPS.filter(function (s) { return !!s.debugOutput; }),
-      stdoutSteps:     STEPS.filter(function (s) { return s.stdout && s.stdout.length; }),
+      cucuSteps:       STEPS.filter(function (s) { return s.debugLines && s.debugLines.length; }),
+      stdoutSteps:     STEPS.filter(function (s) { return s.stdoutLines && s.stdoutLines.length; }),
       stderrSteps:     STEPS.filter(function (s) { return s.stderr && s.stderr.length; }),
       errorSteps:      STEPS.filter(function (s) { return s.errorMessage && s.errorMessage.length; }),
       currentTimeSec:  0,
       shownStepIdx:    -1,
       shownImgIdx:     -1,
+      activeDebugOffset:  null,
+      activeStdoutOffset: null,
       isPlaying:       false,
       playbackRate:    1.0,
       theme:           'auto',
       highlight:       true,
+      _videoHighlight: null,
       logsOpen:        false,
       panelsCollapsed: {},
       followFlags:     {},
@@ -204,9 +307,12 @@
       _browserLineEls:    null,
       _stepScrollBusy:    {},
       _browserScrollBusy: { value: false },
+      _videoElement:      null,
+      _videoFps:          1,
+      _dragging:          false,
 
       // ----- derived (getters) -----
-      get headPct()       { return this.currentTimeSec / TOTAL_DUR * 100; },
+      get headPct()       { return timeToVis(this.currentTimeSec); },
       get atEnd()         { return this.currentTimeSec >= PLAY_END; },
       get curStep()       { return this.shownStepIdx >= 0 ? this.steps[this.shownStepIdx] : null; },
       get hasMultiplePics() { return !!(this.curStep && this.curStep.screenshots.length > 1); },
@@ -223,18 +329,6 @@
         var n = this.curStep.screenshots.length;
         var clamped = n > 1 ? Math.min(this.shownImgIdx, n - 1) : 0;
         return ((PIC_OFFSETS[this.shownStepIdx] || 0) + clamped + 1) + ' / ' + TOTAL_PICS;
-      },
-      get metaTimeText()  {
-        var cur = this.currentTimeSec.toFixed(1), tot = SCENARIO_DURATION.toFixed(1);
-        if (SCENARIO_START_MS === null) return '▶ ' + cur + ' / ' + tot + 's';
-        return '▶ ' + formatPlayheadTime(SCENARIO_START_MS + this.currentTimeSec * 1000) + ' · ' + cur + ' / ' + tot + 's';
-      },
-      get breadcrumbText() {
-        var name = 'Scenario: ' + SCENARIO_NAME;
-        for (var i = 0; i <= Math.max(0, this.shownStepIdx) && i < this.steps.length; i++) {
-          if (this.steps[i].headingLevel) name = ((this.steps[i].keyword || '') + ' ' + this.steps[i].name).trim();
-        }
-        return name;
       },
       get playPauseDisabled() { return this.atEnd && !this.isPlaying; },
       get stepPrevDisabled()  { return this.shownStepIdx === 0 && this.currentTimeSec <= 0; },
@@ -283,6 +377,13 @@
           });
         }
 
+        // Get video element reference if it exists. The player controls video.currentTime
+        // directly from the RAF loop — the video stays paused and is used only as a display surface.
+        this._videoElement = document.getElementById('scenario-video');
+        if (this._videoElement) {
+          this._videoFps = parseInt(this._videoElement.dataset.fps, 10) || 1;
+        }
+
         var startTime = 0;
         var hash = window.location.hash;
         if (hash && hash.indexOf('#step_') === 0) {
@@ -326,11 +427,22 @@
       },
 
       seekToTime(t) {
+        this._stopPlay();
         this.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
+        if (this._videoElement) {
+          this._videoElement.currentTime = timeToGlobalPicIdx(this.currentTimeSec) / this._videoFps;
+        }
         this._reengageFollow();
         this._updateDisplay(true);
       },
-      seekToStepIdx(idx) { this.seekToTime(stepIdxToTime(idx)); },
+      seekToStepIdx(idx) {
+        this.seekToTime(stepIdxToTime(idx));
+      },
+      seekToLogLineOffset(offset, event) {
+        if (offset === null || offset === undefined) return;
+        event.stopPropagation();
+        this.seekToTime(offset);
+      },
       navigateStep(delta) {
         if (delta > 0 && this.shownStepIdx >= TOTAL_STEPS - 1) { this.seekToTime(PLAY_END); return; }
         this.seekToStepIdx(Math.max(0, Math.min(this.shownStepIdx + delta, TOTAL_STEPS - 1)));
@@ -356,12 +468,18 @@
           this.currentTimeSec += (rafTime - this._lastRafTime) / 1000 * this.playbackRate;
           if (this.currentTimeSec >= PLAY_END) {
             this.currentTimeSec = PLAY_END;
+            if (this._videoElement) {
+              this._videoElement.currentTime = timeToGlobalPicIdx(PLAY_END) / this._videoFps;
+            }
             this._updateDisplay(false);
             this._stopPlay();
             return;
           }
         }
         this._lastRafTime = rafTime;
+        if (this._videoElement) {
+          this._videoElement.currentTime = timeToGlobalPicIdx(this.currentTimeSec) / this._videoFps;
+        }
         this._updateDisplay(false);
         var self = this;
         this._rafId = requestAnimationFrame(function (t) { self._playFrame(t); });
@@ -414,10 +532,44 @@
         if (imgIdx !== this.shownImgIdx || stepChanged || force) {
           this.shownImgIdx = this.steps[stepIdx].screenshots.length > 1 ? imgIdx : 0;
         }
+        // Always recompute _videoHighlight after both indices are finalized so stale
+        // highlights from a previous step/image are never left visible.
+        this._videoHighlight = null;
+        var _vhStep = this.steps[stepIdx];
+        if (_vhStep) {
+          var _vhImg = _vhStep.screenshots[this.shownImgIdx] || _vhStep.screenshots[0];
+          this._videoHighlight = (_vhImg && _vhImg.highlight) ? _vhImg.highlight : null;
+        }
+        // Compute active log-line offsets for cucu and stdout panels.
+        var t = this.currentTimeSec;
+        var bestDebug = null, bestStdout = null;
+        for (var _li = 0; _li < STEPS.length; _li++) {
+          var _ls = STEPS[_li];
+          if (_ls.debugLines) {
+            for (var _lj = 0; _lj < _ls.debugLines.length; _lj++) {
+              var _lo = _ls.debugLines[_lj].offset;
+              if (_lo !== null && _lo <= t && (bestDebug === null || _lo > bestDebug)) bestDebug = _lo;
+            }
+          }
+          if (_ls.stdoutLines) {
+            for (var _lk = 0; _lk < _ls.stdoutLines.length; _lk++) {
+              var _lp = _ls.stdoutLines[_lk].offset;
+              if (_lp !== null && _lp <= t && (bestStdout === null || _lp > bestStdout)) bestStdout = _lp;
+            }
+          }
+        }
+        var debugOffsetChanged  = bestDebug  !== this.activeDebugOffset;
+        var stdoutOffsetChanged = bestStdout !== this.activeStdoutOffset;
+        this.activeDebugOffset  = bestDebug;
+        this.activeStdoutOffset = bestStdout;
+
         this._scrollBrowserToTime();
         if (stepChanged || force) {
           var self = this;
           STEP_PANELS.forEach(function (p) { self._scrollStepPanel(p.contentId, p.followId); });
+        } else {
+          if (debugOffsetChanged)  this._scrollToActiveLogLine('vp-cucu-content',   'cucu-follow-chk');
+          if (stdoutOffsetChanged) this._scrollToActiveLogLine('vp-stdout-content', 'stdout-follow-chk');
         }
       },
 
@@ -428,16 +580,52 @@
         if (!content) return;
         var anchorIdx;
         if (contentId === 'vp-steps-content') {
-          anchorIdx = this.shownStepIdx > 0 ? this.shownStepIdx - 1 : this.shownStepIdx;
+          anchorIdx = this.shownStepIdx;
         } else {
           var p = panelByContentId(contentId);
           anchorIdx = p && p.field ? this.currentStepFor(p.field) : this.shownStepIdx;
         }
         if (anchorIdx < 0) return;
-        var anchor = content.querySelector('.log-step-group[data-step="' + anchorIdx + '"]');
+        // For cucu/stdout, scroll to the active timestamped line if one exists.
+        var activeOff = contentId === 'vp-cucu-content'   ? this.activeDebugOffset
+                      : contentId === 'vp-stdout-content' ? this.activeStdoutOffset
+                      : null;
+        var anchor = activeOff !== null ? this._findLogLineEl(content, activeOff)
+                   : content.querySelector('.log-step-group[data-step="' + anchorIdx + '"]');
+        if (!anchor) anchor = content.querySelector('.log-step-group[data-step="' + anchorIdx + '"]');
         if (!anchor) return;
         this._stepScrollBusy[contentId] = true;
-        content.scrollTop = Math.max(0, anchor.offsetTop - content.offsetTop - 4);
+        var scrollOffset = 0;
+        if (contentId === 'vp-steps-content' && anchorIdx > 0) {
+          var prevStep = content.querySelector('.log-step-group[data-step="' + (anchorIdx - 1) + '"]');
+          scrollOffset = prevStep ? prevStep.offsetTop - content.offsetTop : 0;
+        }
+        content.scrollTop = contentId === 'vp-steps-content'
+          ? Math.max(0, scrollOffset)
+          : Math.max(0, anchor.offsetTop - content.offsetTop - Math.floor(content.clientHeight * 0.33));
+        var self = this;
+        requestAnimationFrame(function () { self._stepScrollBusy[contentId] = false; });
+      },
+
+      _findLogLineEl(content, offset) {
+        if (offset === null) return null;
+        var els = content.querySelectorAll('.log-line[data-offset]');
+        for (var i = 0; i < els.length; i++) {
+          if (Math.abs(parseFloat(els[i].dataset.offset) - offset) < 0.001) return els[i];
+        }
+        return null;
+      },
+
+      _scrollToActiveLogLine(contentId, followId) {
+        if (!this.followFlags[followId]) return;
+        var content = document.getElementById(contentId);
+        if (!content) return;
+        var offset = contentId === 'vp-cucu-content' ? this.activeDebugOffset : this.activeStdoutOffset;
+        var target = this._findLogLineEl(content, offset);
+        if (!target) return;
+        this._stepScrollBusy[contentId] = true;
+        content.scrollTop += (target.getBoundingClientRect().top - content.getBoundingClientRect().top) -
+                             Math.floor(content.clientHeight * 0.33);
         var self = this;
         requestAnimationFrame(function () { self._stepScrollBusy[contentId] = false; });
       },
@@ -454,18 +642,21 @@
         }
         var container = document.getElementById('vp-browser-content');
         if (!container) return;
-        if (!this._browserLineEls) {
+        if (!this._browserLineEls || !this._browserLineEls.length) {
           this._browserLineEls = container.querySelectorAll('.browser-log-line');
         }
         var target = this._browserLineEls[best];
         if (!target) return;
         var prev = container.querySelector('.log-current');
-        if (prev === target) return;
-        if (prev) prev.classList.remove('log-current');
-        target.classList.add('log-current');
+        if (prev !== target) {
+          if (prev) prev.classList.remove('log-current');
+          target.classList.add('log-current');
+        }
+        // Skip scroll only when the target is already fully in view (avoids thrash during playback).
+        var cr = container.getBoundingClientRect(), tr = target.getBoundingClientRect();
+        if (tr.top >= cr.top && tr.bottom <= cr.bottom) return;
         this._browserScrollBusy.value = true;
-        container.scrollTop += (target.getBoundingClientRect().top - container.getBoundingClientRect().top) -
-                              Math.floor(container.clientHeight * 0.33);
+        container.scrollTop += (tr.top - cr.top) - Math.floor(container.clientHeight * 0.33);
         var self = this;
         requestAnimationFrame(function () { self._browserScrollBusy.value = false; });
       },
@@ -475,17 +666,26 @@
         var track = e.currentTarget, self = this;
         e.preventDefault();
         track.setPointerCapture(e.pointerId);
-        function seek(x) {
+        this._stopPlay();
+        this._dragging = true;
+        function dragTo(x) {
           var r = track.getBoundingClientRect();
-          self.seekToTime(Math.max(0, Math.min(1, (x - r.left) / r.width)) * PLAY_END);
+          var pct = Math.max(0, Math.min(100, (x - r.left) / r.width * 100));
+          self.currentTimeSec = visToTime(pct);
+          if (self._videoElement) {
+            self._videoElement.currentTime = timeToGlobalPicIdx(self.currentTimeSec) / self._videoFps;
+          }
+          self._updateDisplay(false);
         }
-        seek(e.clientX);
-        function onMove(ev) { seek(ev.clientX); }
+        function onMove(ev) { dragTo(ev.clientX); }
         function onUp() {
+          self._dragging = false;
+          self.seekToTime(self.currentTimeSec);
           track.removeEventListener('pointermove', onMove);
           track.removeEventListener('pointerup',   onUp);
           track.removeEventListener('pointercancel', onUp);
         }
+        dragTo(e.clientX);
         track.addEventListener('pointermove', onMove);
         track.addEventListener('pointerup',   onUp);
         track.addEventListener('pointercancel', onUp);

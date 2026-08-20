@@ -5,10 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 1.4.30
+# 1.4.33
 - Fix - `fuzzy_find` no longer resolves an Nth-indexed lookup (e.g. "the 2nd button") to an ancestor `role="button"`-style wrapper that merely contains an already independently-valid nested candidate (e.g. a real `<button>`); the lookup now correctly fails/retries when only one real match exists instead of returning the wrapping container
 - Fix - the "keep up to requested index" trim override no longer rescues a candidate scoring at or below the `emptyText` floor, preventing an unrelated element swept in by a sibling-scanning rule (`leftToRight`, `leftToRightGrandpa`, etc.) from being returned as a false match
 - Fix - `fuzzy_find` dedup keeps the highest-scoring occurrence of a given element instead of the first one discovered, so a weak, incidental match found by a broad rule can no longer permanently shadow a later, correct, higher-scoring match (e.g. via `labelForName`) for the same element
+
+# 1.4.32
+Bundle and compress screenshots in video format
+  - enable with `CUCU_SCREENSHOT_VIDEO=True`
+  - report now encodes screenshots into mp4 video file per scenario with placeholders for non-browser steps
+  - change classic and replay view to use either screenshots or video
+  - add deps pillow and imageio[ffmpeg] to produce browser-compatible H.264 (libx264/yuv420p) on macOS, Linux, Windows, and Docker without system dependencies
+
+Replay view UX
+  - Rework the steps timeline bar layout to guarantee minimum bar widths and gaps while keeping drag-to-seek accurate
+  - Make log panel lines clickable to seek the playhead to that line's timestamp, with active-line highlight and auto-scroll
+  - Add a per-panel timeline tick bar to all log panels, including stderr which had none
+  - Replace the steps breadcrumb with the current step's keyword and name tracked to the playhead
+  - Fix log panel scroll to re-scroll when the active line leaves the viewport after a seek
+
+# 1.4.31
+- Change - HTML report's Index view now renders the per-scenario flat table (previously only at `flat.html`, which is removed); the old per-feature aggregated table is gone
+- Add - every scenario row on the Index view has an icon-only 🔁 replay link straight to that scenario's replay timeline view
+- Remove - `flat.html` report page and the "Flat" nav links on the scenario/replay/index pages
+
+# 1.4.30
+- Add - a `#`/`##` section heading nested inside a step's sub-flow (e.g. via `run_steps`) now renders one heading level deeper than it would at the top level, prefixed with `⤷` and aligned to match its sibling sub-step rows in the HTML report
+- Add - the parent step of a nested sub-flow gets an honorary heading style (bold, slightly larger, scaled one level above the current section) in the HTML report
+- Fix - `section_level`/`parent_seq` are now computed correctly at the source for a step that calls `run_steps(...)`: it becomes an "honorary" section for its own sub-flow, so its sub-steps and any nested heading correctly nest under it.
 
 # 1.4.29
 - Fix - scenarios killed by an mpire worker timeout now record and report a distinct `terminated` status (not `error`) across DB, JUnit XML, and JSON; step-failure takes precedence over termination so the real failure is never masked

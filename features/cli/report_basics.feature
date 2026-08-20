@@ -53,7 +53,7 @@ Feature: Report basics
       And I run the command "cucu report {CUCU_RESULTS_DIR}/browser-results --output {CUCU_RESULTS_DIR}/browser-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/browser-report/" and save the port to the variable "PORT"
       And I set the variable "CUCU_READY_STATE_PAGE_CHECK" to "enabled"
-      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/flat.html"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
       And I wait to click the link "Scenario with sections"
 
         * # Can see inline sections
@@ -105,22 +105,17 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Start at | Features.*                 | Scenarios.* | Passed.* | Failed.* | Skipped.* | Error.* | Terminated.* | Status | Duration.* |
-        | .*       | Feature with mixed results | 6           | 2        | 3        | 0         | 1         | 0            | failed | .*         |
-     When I click the button "Feature with mixed results"
-     Then I should see a table that matches the following:
-        | Offset | Scenario                            | Steps | Status  | Duration |
-        | .*     | Scenario and after-hook both fail   | 3     | failed  | .*       |
-        | .*     | Scenario that also passes           | 1     | passed  | .*       |
-        | .*     | Scenario that fails                 | 2     | failed  | .*       |
-        | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
-        | .*     | Scenario that passes                | 1     | passed  | .*       |
-        | .*     | Scenario with after-hook error      | 2     | error   | .*       |
+        | Start at | Features.*                 | Scenarios.*                          | Steps.* | Status  | Duration.* |
+        | .*       | Feature with mixed results | Scenario and after-hook both fail    | 3       | failed  | .*         |
+        | .*       | Feature with mixed results | Scenario that also passes            | 1       | passed  | .*         |
+        | .*       | Feature with mixed results | Scenario that fails                  | 2       | failed  | .*         |
+        | .*       | Feature with mixed results | Scenario that has an undefined step  | 1       | failed  | .*         |
+        | .*       | Feature with mixed results | Scenario that passes                 | 1       | passed  | .*         |
+        | .*       | Feature with mixed results | Scenario with after-hook error       | 2       | error   | .*         |
       And I click the button "Scenario that fails"
       And I click the button "I fail"
      Then I should see the text "ASSERT FAILED: step fails on purpose"
      When I click the button "Index"
-      And I click the button "Feature with mixed results"
       And I click the button "Scenario that has an undefined step"
      Then I should see the button "Given I attempt to use an undefined step"
 
@@ -131,24 +126,19 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/mixed-results-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Start at | Features.*                 | Scenarios.* | Passed.* | Failed.* | Skipped.* | Error.* | Terminated.* | Status | Duration.* |
-        | .*       | Feature with mixed results | 7           | 2        | 3        | 1         | 1         | 0            | failed | .*         |
-     When I click the button "Feature with mixed results"
-     Then I should see a table that matches the following:
-        | Offset | Scenario                            | Steps | Status  | Duration |
-        | .*     | Scenario and after-hook both fail   | 3     | failed  | .*       |
-        | .*     | Scenario that also passes           | 1     | passed  | .*       |
-        | .*     | Scenario that fails                 | 2     | failed  | .*       |
-        | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
-        | .*     | Scenario that is skipped            | 1     | skipped | .*       |
-        | .*     | Scenario that passes                | 1     | passed  | .*       |
-        | .*     | Scenario with after-hook error      | 2     | error   | .*       |
+        | Start at | Features.*                 | Scenarios.*                          | Steps.* | Status  | Duration.* |
+        | .*       | Feature with mixed results | Scenario and after-hook both fail    | 3       | failed  | .*         |
+        | .*       | Feature with mixed results | Scenario that also passes            | 1       | passed  | .*         |
+        | .*       | Feature with mixed results | Scenario that fails                  | 2       | failed  | .*         |
+        | .*       | Feature with mixed results | Scenario that has an undefined step  | 1       | failed  | .*         |
+        | .*       | Feature with mixed results | Scenario that is skipped             | 1       | skipped | .*         |
+        | .*       | Feature with mixed results | Scenario that passes                 | 1       | passed  | .*         |
+        | .*       | Feature with mixed results | Scenario with after-hook error       | 2       | error   | .*         |
 
       And I click the button "Scenario that fails"
       And I click the button "I fail"
      Then I should see the text "ASSERT FAILED: step fails on purpose"
      When I click the button "Index"
-      And I click the button "Feature with mixed results"
       And I click the button "Scenario that has an undefined step"
      Then I should see the button "Given I attempt to use an undefined step"
 
@@ -174,18 +164,64 @@ Feature: Report basics
         | And I echo "last!"             | .* |
         | .*                             | .* |
 
+  Scenario: User can run feature with a heading nested in substeps and the report demotes it under its parent step
+    Given I run the command "cucu run data/features/scenario_with_substeps_and_heading.feature --results {CUCU_RESULTS_DIR}/report_substeps_heading_results --no-color-output" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/report_substeps_heading_results --output {CUCU_RESULTS_DIR}/report_substeps_heading_report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_substeps_heading_report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     When I click the button "Feature with substeps and heading"
+      And I click the button "Scenario that uses a step with substeps and a heading"
+     Then I should see a table that matches the following:
+        | Feature.*                                                    | .* |
+        | Given I echo "first!"                                        | .* |
+        | .*                                                            | .* |
+        | And I use a step with substeps and a heading                 | .* |
+        | .*                                                            | .* |
+        | ⤷ Given I do nothing                                         | .* |
+        | .*                                                            | .* |
+        | ⤷ When I do nothing                                          | .* |
+        | .*                                                            | .* |
+        | ⤷ ### Spec as H2 with two #'s but demoted under parent step  | .* |
+        | .*                                                            | .* |
+        | ⤷ And I do nothing                                           | .* |
+        | .*                                                            | .* |
+        | ⤷ Then I do nothing                                          | .* |
+        | .*                                                            | .* |
+        | And I echo "last!"                                           | .* |
+        | .*                                                            | .* |
+
+      # the parent step renders as a real <h2>, and the nested heading is a real <h3> whose
+      # displayed #-count is rewritten to match the demoted tag (title keeps the original text)
+      And I execute in the current browser the following javascript and save the result to the variable "PARENT_HEADING_TAG"
+      """
+      return Array.from(document.querySelectorAll("h2, h3, h4, h5, h6"))
+        .find((el) => el.textContent.includes("I use a step with substeps and a heading"))
+        .tagName;
+      """
+      And I execute in the current browser the following javascript and save the result to the variable "NESTED_HEADING_TAG"
+      """
+      return Array.from(document.querySelectorAll("h2, h3, h4, h5, h6"))
+        .find((el) => el.textContent.includes("Spec as H2"))
+        .tagName;
+      """
+      And I execute in the current browser the following javascript and save the result to the variable "NESTED_HEADING_TEXT"
+      """
+      return Array.from(document.querySelectorAll("h2, h3, h4, h5, h6"))
+        .find((el) => el.textContent.includes("Spec as H2"))
+        .textContent;
+      """
+     Then I should see "{PARENT_HEADING_TAG}" is equal to "H2"
+      And I should see "{NESTED_HEADING_TAG}" is equal to "H3"
+      And I should see "{NESTED_HEADING_TEXT}" contains "### Spec as H2"
+
   Scenario: User can run feature with background and has all results reported correctly without skips
     Given I run the command "cucu run data/features/feature_with_background.feature --results {CUCU_RESULTS_DIR}/feature_with_background" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/feature_with_background --output {CUCU_RESULTS_DIR}/feature_with_background-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Start at | Features.*                 | Scenarios.* | Passed.* | Failed.* | Skipped.* | Error.* | Terminated.* | Status | Duration.* |
-        | .*       | Feature with background    | 1           | 1        | 0        | 0         | 0         | 0            | passed | .*         |
-     When I click the button "Feature with background"
-     Then I should see a table that matches the following:
-        | Offset | Scenario                            | Steps | Status  | Duration |
-        | .*     | Scenario which now has a background | 2     | passed  | .*       |
+        | Start at | Features.*               | Scenarios.*                          | Steps.* | Status | Duration.* |
+        | .*       | Feature with background  | Scenario which now has a background  | 2       | passed | .*         |
 
   @show-skips
   Scenario: User can run feature with background and has all results reported correctly
@@ -194,13 +230,9 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/feature_with_background-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Start at | Features.*                 | Scenarios.* | Passed.* | Failed.* | Skipped.* | Error.* | Terminated.* | Status | Duration.* |
-        | .*       | Feature with background    | 2           | 1        | 0        | 1         | 0         | 0            | passed | .*         |
-     When I click the button "Feature with background"
-     Then I should see a table that matches the following:
-        | Offset | Scenario                            | Steps | Status  | Duration |
-        | .*     | Scenario that is skipped            | 2     | skipped | .*       |
-        | .*     | Scenario which now has a background | 2     | passed  | .*       |
+        | Start at | Features.*               | Scenarios.*                          | Steps.* | Status  | Duration.* |
+        | .*       | Feature with background  | Scenario that is skipped             | 2       | skipped | .*         |
+        | .*       | Feature with background  | Scenario which now has a background  | 2       | passed  | .*         |
 
   @workaround @QE-7075
   @disabled
@@ -300,22 +332,17 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Start at | Features.*                 | Scenarios.* | Passed.* | Failed.* | Skipped.* | Error.* | Terminated.* | Status | Duration.* |
-        | .*       | Feature with mixed results | 6           | 2        | 3        | 0         | 1         | 0            | failed | .*         |
-     When I click the button "Feature with mixed results"
-     Then I should see a table that matches the following:
-        | Offset | Scenario                            | Steps | Status  | Duration |
-        | .*     | Scenario and after-hook both fail   | 3     | failed  | .*       |
-        | .*     | Scenario that also passes           | 1     | passed  | .*       |
-        | .*     | Scenario that fails                 | 2     | failed  | .*       |
-        | .*     | Scenario that has an undefined step | 1     | failed  | .*       |
-        | .*     | Scenario that passes                | 1     | passed  | .*       |
-        | .*     | Scenario with after-hook error      | 2     | error   | .*       |
+        | Start at | Features.*                 | Scenarios.*                          | Steps.* | Status  | Duration.* |
+        | .*       | Feature with mixed results | Scenario and after-hook both fail    | 3       | failed  | .*         |
+        | .*       | Feature with mixed results | Scenario that also passes            | 1       | passed  | .*         |
+        | .*       | Feature with mixed results | Scenario that fails                  | 2       | failed  | .*         |
+        | .*       | Feature with mixed results | Scenario that has an undefined step  | 1       | failed  | .*         |
+        | .*       | Feature with mixed results | Scenario that passes                 | 1       | passed  | .*         |
+        | .*       | Feature with mixed results | Scenario with after-hook error       | 2       | error   | .*         |
       And I click the button "Scenario that fails"
       And I click the button "I fail"
      Then I should see the text "ASSERT FAILED: step fails on purpose"
      When I click the button "Index"
-      And I click the button "Feature with mixed results"
       And I click the button "Scenario that has an undefined step"
      Then I should see the button "Given I attempt to use an undefined step"
 
@@ -324,12 +351,8 @@ Feature: Report basics
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/report_without_skips_background_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Start at | Features.*              | Scenarios.* | Passed.* | Failed.* | Skipped.* | Error.* | Terminated.* | Status | Duration.* |
-        | .*       | Feature with background | 1           | 1        | 0        | 0         | 0         | 0            | passed | .*         |
-     When I click the button "Feature with background"
-     Then I should see a table that matches the following:
-        | Offset | Scenario                            | Steps | Status  | Duration |
-        | .*     | Scenario which now has a background | 2     | passed  | .*       |
+        | Start at | Features.*               | Scenarios.*                          | Steps.* | Status | Duration.* |
+        | .*       | Feature with background  | Scenario which now has a background  | 2       | passed | .*         |
 
   Scenario: User can run results without skips in the JUnit results
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/junit_without_skips" and expect exit code "1"
@@ -411,6 +434,6 @@ Feature: Report basics
      When I start a webserver at directory "{CUCU_RESULTS_DIR}/combined_report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
      Then I should see a table that matches the following:
-        | Start at | Features.*                             | Scenarios.* | Passed.* | Failed.* | Skipped.* | Error.* | Terminated.* | Status | Duration.* |
-        | .*       | Echo                                   | 1           | 1        | 0        | 0         | 0         | 0            | passed | .*         |
-        | .*       | Feature with passing scenario with web | 1           | 1        | 0        | 0         | 0         | 0            | passed | .*         |
+        | Start at | Features.*                              | Scenarios.*                             | Steps.* | Status | Duration.* |
+        | .*       | Echo                                    | Echo an environment variable            | 6       | passed | .*         |
+        | .*       | Feature with passing scenario with web  | Just a scenario that opens a web page   | 2       | passed | .*         |

@@ -11,23 +11,14 @@ Feature: Report replay view
      When I click the link "Echo"
       And I click the link "Echo an environment variable"
       And I click the link "🔁 Replay"
-     Then I wait to see the link "☑ Classic"
+     Then I wait to see the link "Echo"
 
-        * # Feature and scenario names shown in the header
+        * # Scenario name shown in the header
       And I should see the text "Echo an environment variable"
-      And I should see the text "Echo"
 
         * # Stage shows step text for non-browser tests
       And I should see the text "1 / 6"
       And I should see the text "Given"
-
-        * # Step counter updates when navigating to the last step
-     When I click the button "⏭"
-     Then I wait to see the text "6 / 6"
-
-        * # Return to the classic scenario view from the replay view
-     When I click the link "☑ Classic"
-     Then I wait to see the link "🔁 Replay"
 
   Scenario: Replay view auto-focuses the first failing step in a failed scenario
     Given I run the command "cucu run data/features/feature_with_failing_scenario.feature --results {CUCU_RESULTS_DIR}/replay-fail-results" and expect exit code "1"
@@ -60,5 +51,18 @@ Feature: Report replay view
       And I wait to click the link "Just a scenario that opens a web page"
       And I wait to click the link "🔁 Replay"
      Then I wait to see the text "1 /"
-      And I should see the link "Flat"
       And I should see the link "Index"
+      And I should see the link "Feature with passing scenario with web"
+
+  Scenario: Replay view renders with CUCU_SCREENSHOT_VIDEO enabled
+    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/replay-video-echo-results --env CUCU_SCREENSHOT_VIDEO=true" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/replay-video-echo-results --env CUCU_SCREENSHOT_VIDEO=true --output {CUCU_RESULTS_DIR}/replay-video-echo-report" and expect exit code "0"
+      And I should see a file at "{CUCU_RESULTS_DIR}/replay-video-echo-results/Echo/Echo an environment variable/screenshots.mp4"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/replay-video-echo-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     When I click the link "Echo"
+      And I click the link "Echo an environment variable"
+      And I click the link "🔁 Replay"
+     Then I wait to see the text "1 / 6"
+      And I should see the text "Given"
+      And I should see the link "Echo"

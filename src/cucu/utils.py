@@ -90,6 +90,19 @@ def run_steps(ctx, steps_text):
 
     ctx.current_step.has_substeps = True
 
+    # push this step as an "honorary" section for the duration of its
+    # substeps, so they (and any real heading among them) nest correctly
+    # under it instead of whatever section was open outside it
+    section_stack_mark = len(ctx.section_step_stack)
+    enclosing_level = (
+        ctx.section_step_stack[-1].section_level
+        if ctx.section_step_stack
+        else 1  # implicit scenario/feature title level
+    )
+    ctx.current_step.section_level = enclosing_level + 1
+    ctx.current_step.is_honorary_section = True
+    ctx.section_step_stack.append(ctx.current_step)
+
     ctx.feature.parser.variant = "steps"
     steps = ctx.feature.parser.parse_steps(steps_text)
 
@@ -120,6 +133,9 @@ def run_steps(ctx, steps_text):
     finally:
         ctx.current_step = current_step
         ctx.current_step.start_at = current_step_start_at
+        # discard the honorary section and anything (e.g. a real heading)
+        # pushed during the nested run, so scope doesn't leak past this call
+        del ctx.section_step_stack[section_stack_mark:]
 
     return True
 
