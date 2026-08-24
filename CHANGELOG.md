@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.33
+- Fix - `fuzzy_find` no longer resolves an Nth-indexed lookup (e.g. "the 2nd button") to an ancestor `role="button"`-style wrapper that merely contains an already independently-valid nested candidate (e.g. a real `<button>`); the lookup now correctly fails/retries when only one real match exists instead of returning the wrapping container
+- Fix - the "keep up to requested index" trim override no longer rescues a candidate scoring at or below the `emptyText` floor, preventing an unrelated element swept in by a sibling-scanning rule (`leftToRight`, `leftToRightGrandpa`, etc.) from being returned as a false match
+- Fix - `fuzzy_find` dedup keeps the highest-scoring occurrence of a given element instead of the first one discovered, so a weak, incidental match found by a broad rule can no longer permanently shadow a later, correct, higher-scoring match (e.g. via `labelForName`) for the same element
+
 # 1.4.32
 Bundle and compress screenshots in video format
   - enable with `CUCU_SCREENSHOT_VIDEO=True`

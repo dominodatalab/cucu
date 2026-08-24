@@ -106,7 +106,7 @@
      * full text, a small default score is applied so empty-but-possibly
      * relevant nodes are not entirely discarded.
      */
-    cucu.relevance = function(el, query, immediateOverride) {
+    cucu.relevance = function(el, query, immediateOverride, skipFullText) {
         function includes(hay, needle) {
             if (!hay) return false;
             return hay.indexOf(needle) !== -1;
@@ -166,24 +166,26 @@
             }
         }
 
-        var ft = getFullText(el);
-        if (equals(ft, query)) {
-            // Only promote exact full text matches to immediate weight when no higher priority matches found
-            var fullTextWeight = (!higherPriorityMatchFound) ? WEIGHTS.area.immediate : WEIGHTS.area.fulltext;
-            best = Math.max(best, fullTextWeight + WEIGHTS.match.exact);
-        } else if (equalsCi(ft, query)) {
-            // Caseless-exact full text matches are promoted on the same rule as exact ones
-            var fullTextWeightCi = (!higherPriorityMatchFound) ? WEIGHTS.area.immediate : WEIGHTS.area.fulltext;
-            best = Math.max(best, fullTextWeightCi + WEIGHTS.match.caselessexact);
-        } else if (includes(ft, query)) {
-            // Substring matches never get promoted
-            best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.substring);
-        } else if (includesCi(ft, query)) {
-            best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.caselesssubstring);
-        }
+        if (!skipFullText) {
+            var ft = getFullText(el);
+            if (equals(ft, query)) {
+                // Only promote exact full text matches to immediate weight when no higher priority matches found
+                var fullTextWeight = (!higherPriorityMatchFound) ? WEIGHTS.area.immediate : WEIGHTS.area.fulltext;
+                best = Math.max(best, fullTextWeight + WEIGHTS.match.exact);
+            } else if (equalsCi(ft, query)) {
+                // Caseless-exact full text matches are promoted on the same rule as exact ones
+                var fullTextWeightCi = (!higherPriorityMatchFound) ? WEIGHTS.area.immediate : WEIGHTS.area.fulltext;
+                best = Math.max(best, fullTextWeightCi + WEIGHTS.match.caselessexact);
+            } else if (includes(ft, query)) {
+                // Substring matches never get promoted
+                best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.substring);
+            } else if (includesCi(ft, query)) {
+                best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.caselesssubstring);
+            }
 
-        if (best === 0 && ft.length === 0) {
-            best = WEIGHTS.emptyText;
+            if (best === 0 && ft.length === 0) {
+                best = WEIGHTS.emptyText;
+            }
         }
 
         return best;
@@ -487,23 +489,64 @@
             }
         }
 
-        // deduplicate elements by element identity, keeping order
-        var deduped_elements = [];
-        var seen_elements = new Set();
+        // score every raw occurrence up front (before dedup) so dedup can
+        // keep the best-scoring occurrence of each element rather than
+        // just the first-discovered one. Without this, a weak, incidental
+        // match (e.g. an element swept in by a sibling-scanning rule before
+        // a more specific rule like labelForName even runs) can permanently
+        // shadow a later, correctly-overridden, higher-scoring match for
+        // the very same element.
+        for (var i0 = 0; i0 < elements.length; i0++) {
+            elements[i0].pass = i0;
+            elements[i0].score = cucu.relevance(elements[i0].element, name, elements[i0].immediate_override);
+        }
+
+        // deduplicate elements by element identity, keeping the
+        // highest-scoring occurrence (ties broken by earliest discovery)
+        var best_by_element = new Map();
         for (var i = 0; i < elements.length; i++) {
-            if (!seen_elements.has(elements[i].element)) {
-                seen_elements.add(elements[i].element);
-                elements[i].pass = i;
-                deduped_elements.push(elements[i]);
+            var candidate = elements[i];
+            var existing = best_by_element.get(candidate.element);
+            if (!existing || candidate.score > existing.score) {
+                best_by_element.set(candidate.element, candidate);
             }
         }
-        elements = deduped_elements;
+        elements = Array.from(best_by_element.values());
 
-        // score and sort by relevance (desc), then earlier pass (asc)
-        for (var i2 = 0; i2 < elements.length; i2++) {
-            elements[i2].score = cucu.relevance(elements[i2].element, name, elements[i2].immediate_override);
+        /*
+         * suppress ancestor candidates that only match because they wrap an
+         * independently-valid nested candidate of one of the same `things`
+         * types (e.g. a real <button> inside a <div role="button"> wrapper).
+         * The nested element is already going to be found as its own
+         * candidate via the direct rules above, so crediting its ancestor
+         * for the same text/attribute is always redundant and often wrong
+         * (e.g. "the 2nd button" resolving to a wrapping container instead
+         * of failing when only one real button exists). An ancestor with a
+         * genuine match of its own (immediate text or its own attributes,
+         * ignoring descendant content) is unaffected.
+         *
+         * The literal "*" selector is excluded from `things` for this check
+         * since every element trivially "is" it (used by text/draggable/
+         * file-drop-target steps), which would otherwise suppress these
+         * rules entirely for those callers.
+         */
+        var independentThings = things.filter(function(t) { return t !== '*'; });
+        var independentThingsSelector = independentThings.join(',');
+        if (independentThingsSelector) {
+            elements = elements.filter(function(candidate) {
+                var ownScore = cucu.relevance(candidate.element, name, candidate.immediate_override, true);
+                if (ownScore > 0) {
+                    return true;
+                }
+                var hasIndependentNestedMatch = jqCucu(candidate.element).find(independentThingsSelector).filter(function(){
+                    return cucu.relevance(this, name) > WEIGHTS.emptyText;
+                }).length > 0;
+                return !hasIndependentNestedMatch;
+            });
         }
 
+        // sort by relevance (desc), then earlier pass (asc) - scores were
+        // already computed above, before dedup
         if (!skip_fuzzy_relevance) {
             elements.sort(function(a, b){
                 if (b.score !== a.score) return b.score - a.score;
@@ -531,8 +574,12 @@
                 for (var i = 0; i < elements.length; i++) {
                     var element = elements[i];
                     var keep = useInclusive ? (element.score >= threshold) : (element.score > threshold);
-                    // always keep up to the requested index
-                    if (i <= index || keep) {
+                    // keep up to the requested index, but only if the element has some
+                    // genuine relevance signal - a score at or below the "no real match"
+                    // emptyText floor is not a real candidate and must not be rescued
+                    // just because it happens to land at the requested position (e.g. an
+                    // unrelated element swept in by a sibling-scanning rule).
+                    if ((i <= index && element.score > WEIGHTS.emptyText) || keep) {
                         keptElements.push(element);
                     } else {
                         trimmedElements.push(element);
