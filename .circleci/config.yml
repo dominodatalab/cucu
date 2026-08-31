@@ -31,14 +31,14 @@ workflows:
 jobs:
   build:
     docker:
-      - image: cimg/python:3.13@sha256:52ea032c3801ccd16732c0a983d9328fd975aa23726fdd6aa1b5218e4d9bb5e3
+      - image: cimg/python:3.14.7@sha256:ae116f87660f57bf3c77a21722ecb9b7de351eceeb09c3321aa9caa64af7de4a
     resource_class: medium
     steps:
       - checkout
       - inline-orb-uv/setup-uv
       - run:
-          name: install cucu with Python 3.13
-          command: uv sync -p 3.13 --dev
+          name: install cucu with Python 3.14.7
+          command: uv sync -p 3.14.7 --dev
       - run:
           name: run pre-commit validations
           command: uv run pre-commit run --show-diff-on-failure --from-ref origin/HEAD --to-ref HEAD
@@ -55,7 +55,7 @@ jobs:
         type: string
         default: "chrome"
     docker:
-      - image: cimg/python:3.13@sha256:52ea032c3801ccd16732c0a983d9328fd975aa23726fdd6aa1b5218e4d9bb5e3
+      - image: cimg/python:3.14.7@sha256:ae116f87660f57bf3c77a21722ecb9b7de351eceeb09c3321aa9caa64af7de4a
       - image: selenium/standalone-<<parameters.browser>>:142.0
         environment:
           SE_ENABLE_TRACING: false
@@ -133,7 +133,7 @@ jobs:
 
   coverage:
     docker:
-      - image: cimg/python:3.13@sha256:52ea032c3801ccd16732c0a983d9328fd975aa23726fdd6aa1b5218e4d9bb5e3
+      - image: cimg/python:3.14.7@sha256:ae116f87660f57bf3c77a21722ecb9b7de351eceeb09c3321aa9caa64af7de4a
     resource_class: small
     steps:
       - checkout
