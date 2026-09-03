@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.34
+- Change - upgrade CI and local dev tooling from Python 3.12/3.13 to Python 3.14.7 (`.python-version`, CircleCI, and GitHub Actions); `requires-python` remains `>=3.12` so existing consumers are unaffected
+
 # 1.4.33
 - Fix - `fuzzy_find` no longer resolves an Nth-indexed lookup (e.g. "the 2nd button") to an ancestor `role="button"`-style wrapper that merely contains an already independently-valid nested candidate (e.g. a real `<button>`); the lookup now correctly fails/retries when only one real match exists instead of returning the wrapping container
 - Fix - the "keep up to requested index" trim override no longer rescues a candidate scoring at or below the `emptyText` floor, preventing an unrelated element swept in by a sibling-scanning rule (`leftToRight`, `leftToRightGrandpa`, etc.) from being returned as a false match
