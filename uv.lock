@@ -253,7 +253,7 @@ wheels = [
 
 [[package]]
 name = "cucu"
-version = "1.4.34"
+version = "1.4.35"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },

@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.35
+- Fix - dynamic dropdown steps type the full option string once and wait for the option list once, instead of searching after every character
+
 # 1.4.34
 - Change - upgrade CI and local dev tooling from Python 3.12/3.13 to Python 3.14.7 (`.python-version`, CircleCI, and GitHub Actions); `requires-python` remains `>=3.12` so existing consumers are unaffected
 
