@@ -244,10 +244,10 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
     if dropdown_element.get_attribute("aria-expanded") != "true":
         logger.debug("open the dropdown")
         click_dropdown(ctx, dropdown_element)
+        ctx.browser.wait_for_page_to_load()
 
-    option_element = find_dropdown_option(ctx, option)
+    option_element = find_dropdown_option.__wrapped__(ctx, option)
 
-    # Use the search feature to make the option visible so cucu can pick it up
     if option_element is None:
         dropdown_input = find_input(ctx, dropdown, index)
         logger.debug(
@@ -256,23 +256,12 @@ def find_n_select_dynamic_dropdown_option(ctx, dropdown, option, index=0):
         dropdown_value = dropdown_input.get_attribute("value")
         if dropdown_value:
             logger.debug(f"clear dropdown value: {dropdown_value}")
-            dropdown_input.send_keys(
-                Keys.ARROW_RIGHT * len(dropdown_value)
-            )  # make sure the cursor is at the end
+            dropdown_input.send_keys(Keys.ARROW_RIGHT * len(dropdown_value))
             dropdown_input.send_keys(Keys.BACKSPACE * len(dropdown_value))
-        # After each key stroke there is a request and an update of the option list. To prevent stale element,
-        # we send keys one by one here and try to find the option after each key.
-        for attempt, key in enumerate(option):
-            try:
-                dropdown_input = find_input(ctx, dropdown, index)
-                logger.debug(f'sending key "{key}" in attempt {attempt + 1}')
-                dropdown_input.send_keys(key)
-                ctx.browser.wait_for_page_to_load()
-                option_element = find_dropdown_option(ctx, option)
-                if option_element:
-                    break
-            except Exception:
-                option_element = None
+            dropdown_input = find_input(ctx, dropdown, index)
+        dropdown_input.send_keys(option)
+        ctx.browser.wait_for_page_to_load()
+        option_element = find_dropdown_option(ctx, option)
 
     if option_element is None:
         raise AssertionError(
