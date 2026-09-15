@@ -72,7 +72,8 @@
         match: {
             exact: 205,
             caselessexact: 200,
-            substring: 55
+            substring: 55,
+            caselesssubstring: 50
         },
         attrSub: {
             'aria-label': 34,
@@ -101,6 +102,14 @@
      * Within each area, exact match outranks substring match, and case-sensitive
      * outranks case-insensitive within each of those.
      *
+     * Caseless substring matches require a whole-word (or whole-phrase)
+     * boundary match, not a raw character substring: query "R" must not
+     * match inside "Govern" (no word boundary around the "r"), but query
+     * "Upload files" must match "Browse & Upload Files" (bounded by a space
+     * and the string end). This keeps short/generic queries from
+     * false-positive matching fragments of unrelated words while still
+     * allowing real, longer phrases to match regardless of case.
+     *
      * Empty text fallback: if nothing matches and the element has empty
      * full text, a small default score is applied so empty-but-possibly
      * relevant nodes are not entirely discarded.
@@ -117,8 +126,15 @@
         }
 
         function includesCi(hay, needle) {
-            if (!hay) return false;
-            return hay.toLowerCase().indexOf(needle.toLowerCase()) !== -1;
+            // word-boundary caseless match: needle must appear as a whole
+            // word (or whole phrase, internal whitespace made flexible) in
+            // hay, not merely as a raw character substring - so "R" does
+            // not match inside "Govern", but "Upload files" does match
+            // "Browse & Upload Files".
+            if (!hay || !needle) return false;
+            var escaped = needle.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+            if (!escaped) return false;
+            return new RegExp('\\b' + escaped + '\\b', 'i').test(hay);
         }
 
         function equalsCi(hay, needle) {
@@ -130,6 +146,17 @@
         var higherPriorityMatchFound = false;
 
         var imm = immediateOverride || getImmediateText(el);
+        // A nested-child override (from nameInNestedChild) reflects the
+        // ancestor's own clean text only when it's a whole/exact match.
+        // A mere substring match inside a longer overridden phrase (e.g. a
+        // sentence that happens to contain the query) doesn't deserve the
+        // same immediate-area credit as a real short immediate text
+        // substring match would - otherwise an ancestor merely wrapping
+        // unrelated prose containing the query can outrank a genuinely
+        // closer match elsewhere (e.g. an attribute match on the real
+        // target). Exact/caseless-exact overrides are unaffected: they're
+        // exactly the clean-title-text case this override exists for.
+        var immSubstringArea = immediateOverride ? WEIGHTS.area.fulltext : WEIGHTS.area.immediate;
         if (equals(imm, query)) {
             best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.exact);
             higherPriorityMatchFound = true;
@@ -137,7 +164,10 @@
             best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.caselessexact);
             higherPriorityMatchFound = true;
         } else if (includes(imm, query)) {
-            best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.substring);
+            best = Math.max(best, immSubstringArea + WEIGHTS.match.substring);
+            higherPriorityMatchFound = true;
+        } else if (includesCi(imm, query)) {
+            best = Math.max(best, immSubstringArea + WEIGHTS.match.caselesssubstring);
             higherPriorityMatchFound = true;
         }
 
@@ -156,6 +186,9 @@
             } else if (includes(av, query)) {
                 best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.substring + sub);
                 higherPriorityMatchFound = true;
+            } else if (includesCi(av, query)) {
+                best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.caselesssubstring + sub);
+                higherPriorityMatchFound = true;
             }
         }
 
@@ -172,6 +205,8 @@
             } else if (includes(ft, query)) {
                 // Substring matches never get promoted
                 best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.substring);
+            } else if (includesCi(ft, query)) {
+                best = Math.max(best, WEIGHTS.area.fulltext + WEIGHTS.match.caselesssubstring);
             }
 
             if (best === 0 && ft.length === 0) {
