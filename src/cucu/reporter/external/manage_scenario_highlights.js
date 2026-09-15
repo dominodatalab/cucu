@@ -7,7 +7,7 @@ function fitHighlightToImage(highlightDiv) {
   const sliceEndIndex = highlightDiv.id.length - "-highlight".length;
 
   const targetImgId = highlightDiv.id.slice(0, sliceEndIndex);
-  const targetImg = document.querySelector(`img#${targetImgId}`);
+  const targetImg = document.querySelector(`img#${targetImgId}, video#${targetImgId}, canvas#${targetImgId}`);
   const imgViewportRect = targetImg.getBoundingClientRect();
   // Compute absolute coordinates relative to the whole document
   const targetDimensions = {

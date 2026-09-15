@@ -118,3 +118,36 @@ Feature: Buttons
       """
       Then I click the button "aria-disabled button"
       """
+
+  # Regression: only one real "Save" button exists (the nested <button
+  # aria-label="Save">). The ancestor <div role="button"> that wraps it
+  # merely contains "Save" in its aggregate text via the nested button - it
+  # must not also be counted as a separate match for "Save". fuzzy.js
+  # suppresses ancestor candidates whose only matching signal comes from an
+  # independently-valid nested candidate of one of the same button-like
+  # types, so "2nd" correctly fails/retries instead of resolving to the
+  # ancestor container.
+  Scenario: Nested role="button" ancestor is not wrongly matched at an index past the real button
+    Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "2"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/nested_role_button.html"
+     Then I should see no value in the input "value:"
+      And I should see the "1st" button "Save"
+      And I expect the following step to fail with "unable to find the "2nd" button "Save""
+      """
+      When I wait to see the "2nd" button "Save"
+      """
+
+  # Regression: icon-only nested button variant (no visible text anywhere,
+  # match only via aria-label) - the ancestor's own score is genuinely 0/empty
+  # here, previously rescued only by the "keep up to requested index" trim
+  # override. Confirms the suppression also removes truly zero-scored
+  # ancestors, not just non-zero full-text-substring ones.
+  Scenario: Nested role="button" ancestor with no visible text is not wrongly matched
+    Given I set the variable "CUCU_STEP_WAIT_TIMEOUT_S" to "2"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/nested_role_button.html"
+     Then I should see no value in the input "value:"
+      And I should see the "1st" button "Uninstall extension"
+      And I expect the following step to fail with "unable to find the "2nd" button "Uninstall extension""
+      """
+      When I wait to see the "2nd" button "Uninstall extension"
+      """

@@ -274,6 +274,28 @@ def test_relationships_and_record_completion(sample_records_combined):
     check.equal(updated_step.end_at, "2024-01-01T10:00:00.5")
 
 
+def test_scenario_update_sets_terminated_status(sample_records_combined):
+    """Test that a terminated scenario is persisted to the DB with 'terminated' status."""
+    # Create a mock scenario object with the minimum required fields
+    scenario_obj = type(
+        "ScenarioObj",
+        (),
+        {
+            "scenario_run_id": "test_scenario",
+            "terminated": True,
+            "hook_failed": False,
+            "status": type("Status", (), {"name": "passed"})(),
+        },
+    )()
+
+    # Call the real finish_scenario_record function
+    db.finish_scenario_record(scenario_obj)
+
+    # Query the DB to verify the status was persisted as 'terminated'
+    persisted = db.scenario.get(db.scenario.scenario_run_id == "test_scenario")
+    check.equal(persisted.status, "terminated")
+
+
 def test_data_consistency_and_null_handling(sample_records_combined):
     check.equal(
         db.cucu_run.select()

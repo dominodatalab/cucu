@@ -22,11 +22,22 @@ def section_step(ctx, section_level, section_text):
     This step is a no-op but provides structure in the HTML report.
     """
     step = ctx.current_step
-    step.section_level = len(section_level)
+    # +1 so the implicit scenario/feature title occupies level 1
+    own_level = len(section_level) + 1
+    step.section_level = own_level
     step.parent_seq = 0
 
     while len(ctx.section_step_stack):
         latest_section = ctx.section_step_stack[-1]
+        if getattr(latest_section, "is_honorary_section", False):
+            # never pop a parent step's honorary section based on a nested
+            # heading's own hash count; always nest under it instead, at
+            # least one level deeper than it
+            step.section_level = max(
+                own_level, latest_section.section_level + 1
+            )
+            step.parent_seq = latest_section.seq
+            break
         if latest_section.section_level < step.section_level:
             step.parent_seq = latest_section.seq
             break

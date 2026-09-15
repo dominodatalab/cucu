@@ -6,6 +6,7 @@ from pathlib import Path
 
 import yaml
 from behave.model import Status
+from mpire.exception import InterruptWorker
 
 from cucu import config, init_scenario_hook_variables, logger
 from cucu.config import CONFIG
@@ -61,7 +62,8 @@ def after_all(ctx):
     # run the after all hooks; wrap each so a raising hook never skips cleanup
     hook_errored = False
     for hook in CONFIG["__CUCU_AFTER_ALL_HOOKS"]:
-        if _run_hook(ctx, hook)["status"] == "error":
+        result = _run_hook(ctx, hook)
+        if result["status"] in ("error", "terminated"):
             hook_errored = True
 
     # signal the run as aborted (same mechanism as runtime timeout) so a hook
@@ -99,6 +101,7 @@ def before_scenario(ctx, scenario):
     init_scenario_hook_variables()
 
     ctx.scenario = scenario
+    ctx.scenario.terminated = False
     ctx.step_index = 0
     ctx.browsers = []
     ctx.browser = None
@@ -152,6 +155,14 @@ def before_scenario(ctx, scenario):
             # Set 'hook_failed' status to 'True' so that the test gets marked
             # as 'error', even though no steps ran
             ctx.scenario.hook_failed = True
+        elif hook_result["status"] == "terminated":
+            ctx.scenario.mark_skipped()
+            ctx.scenario.terminated = True
+            scenario.before_hook_results.append(hook_result)
+            # Break here: setup failed catastrophically via timeout.
+            # Contrast to after_scenario: cleanup must complete despite
+            # termination to release resources (browser quit, etc).
+            break
         scenario.before_hook_results.append(hook_result)
 
 
@@ -168,6 +179,8 @@ def _run_hook(ctx, hook):
     try:
         hook(ctx)
         logger.debug(f"HOOK {hook.__name__}: passed ✅")
+    except InterruptWorker:
+        hook_result["status"] = "terminated"
     except Exception as e:
         error_message = (
             f"HOOK-ERROR in {hook.__name__}: {e.__class__.__name__}: {e}\n"
@@ -182,13 +195,26 @@ def _run_hook(ctx, hook):
     return hook_result
 
 
+def _run_and_append_hook_result(ctx, scenario, hook):
+    """Run a hook and handle status propagation to scenario flags.
+
+    Sets scenario.hook_failed on error and scenario.terminated on timeout,
+    then appends the result for auditing. Used by system hooks (browser mgmt,
+    logging) in after_scenario that must handle both error and timeout cases.
+    """
+    hook_result = _run_hook(ctx, hook)
+    if hook_result["status"] == "error":
+        scenario.hook_failed = True
+    elif hook_result["status"] == "terminated":
+        scenario.terminated = True
+    scenario.after_hook_results.append(hook_result)
+
+
 def after_scenario(ctx, scenario):
     scenario.after_hook_results = []
 
     # Start Selenium keep-alive to prevent browser timeout during long after-scenario hooks
-    scenario.after_hook_results.append(
-        _run_hook(ctx, start_selenium_keep_alive)
-    )
+    _run_and_append_hook_result(ctx, scenario, start_selenium_keep_alive)
 
     for timer_name in ctx.step_timers:
         logger.warning(f'timer "{timer_name}" was never stopped/recorded')
@@ -210,34 +236,26 @@ def after_scenario(ctx, scenario):
             logger.error(f"Error getting browser info: {e}")
     scenario.browser_info = browser_info
 
-    scenario.after_hook_results.append(_run_hook(ctx, download_mht_data))
+    _run_and_append_hook_result(ctx, scenario, download_mht_data)
 
     # run after all scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_SCENARIO_HOOKS"][::-1]:
-        hook_result = _run_hook(ctx, hook)
-        if hook_result["status"] == "error":
-            scenario.hook_failed = True
-        scenario.after_hook_results.append(hook_result)
+        _run_and_append_hook_result(ctx, scenario, hook)
 
     # run after this scenario hooks in 'lifo' order.
     for hook in CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"][::-1]:
-        hook_result = _run_hook(ctx, hook)
-        if hook_result["status"] == "error":
-            scenario.hook_failed = True
-        scenario.after_hook_results.append(hook_result)
+        _run_and_append_hook_result(ctx, scenario, hook)
 
     CONFIG["__CUCU_AFTER_THIS_SCENARIO_HOOKS"] = []
 
     # Stop keep-alive before cleaning up browsers
-    scenario.after_hook_results.append(
-        _run_hook(ctx, stop_selenium_keep_alive)
-    )
+    _run_and_append_hook_result(ctx, scenario, stop_selenium_keep_alive)
 
     if CONFIG.true("CUCU_KEEP_BROWSER_ALIVE"):
         logger.debug("keeping browser alive between sessions")
     elif len(ctx.browsers) != 0:
         logger.debug("quitting browser between sessions")
-        scenario.after_hook_results.append(_run_hook(ctx, cleanup_browsers))
+        _run_and_append_hook_result(ctx, scenario, cleanup_browsers)
 
     cucu_config_path = ctx.scenario_logs_dir / "cucu.config.yaml.txt"
     with open(cucu_config_path, "w") as config_file:
@@ -249,14 +267,17 @@ def after_scenario(ctx, scenario):
 
     scenario.end_at = get_iso_timestamp_with_ms()
 
-    # step-failure wins over a hook error: if a step actually failed, the
-    # scenario already has its own failure signal, so don't let an after-hook
-    # error (from after_step or after_scenario) reclassify it as 'error'.
-    if scenario.hook_failed and any(
+    # step-failure wins over a hook error or termination: if a step actually
+    # failed, the scenario already has its own failure signal, so don't let an
+    # after-hook error or termination reclassify it.
+    if any(
         step.status.is_failure() or step.status.is_error()
         for step in scenario.all_steps
     ):
-        scenario.hook_failed = False
+        if scenario.hook_failed:
+            scenario.hook_failed = False
+        if scenario.terminated:
+            scenario.terminated = False
 
 
 def download_mht_data(ctx):
@@ -356,69 +377,80 @@ def after_step(ctx, step):
         CONFIG["__CUCU_PARENT_STDOUT"].write(".")
         CONFIG["__CUCU_PARENT_STDOUT"].flush()
 
-    # we only take screenshots of steps where there's a browser currently open
-    # and this step has no substeps as in the reporting the substeps that
-    # may actually do something on the browser take their own screenshots
-    if ctx.browser is not None and ctx.current_step.has_substeps is False:
-        take_screenshot(ctx, step.name, label=f"After {step.name}")
+    # Wrap screenshot, hook execution, and browser-log capture in try/except
+    # InterruptWorker so timeout signals during after_step don't trigger hook_failed
+    try:
+        # we only take screenshots of steps where there's a browser currently open
+        # and this step has no substeps as in the reporting the substeps that
+        # may actually do something on the browser take their own screenshots
+        if ctx.browser is not None and ctx.current_step.has_substeps is False:
+            take_screenshot(ctx, step.name, label=f"After {step.name}")
 
-        tab_info = ctx.browser.get_tab_info()
-        total_tabs = tab_info["tab_count"]
-        current_tab = tab_info["index"] + 1
-        title = tab_info["title"]
-        url = tab_info["url"]
-        log_message = (
-            f"\ntab({current_tab} of {total_tabs}): {title}\nurl: {url}\n"
-        )
-        logger.debug(log_message)
+            tab_info = ctx.browser.get_tab_info()
+            total_tabs = tab_info["tab_count"]
+            current_tab = tab_info["index"] + 1
+            title = tab_info["title"]
+            url = tab_info["url"]
+            log_message = (
+                f"\ntab({current_tab} of {total_tabs}): {title}\nurl: {url}\n"
+            )
+            logger.debug(log_message)
 
-        # Add tab info to step.stdout so it shows up in the HTML report
-        step.stdout.extend(
-            [f"tab({current_tab} of {total_tabs}): {title}", f"url: {url}"]
-        )
+            # Add tab info to step.stdout so it shows up in the HTML report
+            step.stdout.extend(
+                [f"tab({current_tab} of {total_tabs}): {title}", f"url: {url}"]
+            )
 
-    # if the step has substeps from using `run_steps` then we already moved
-    # the step index in the run_steps method and shouldn't do it here
-    if not step.has_substeps:
-        ctx.step_index += 1
-        CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
+        # if the step has substeps from using `run_steps` then we already moved
+        # the step index in the run_steps method and shouldn't do it here
+        if not step.has_substeps:
+            ctx.step_index += 1
+            CONFIG["__STEP_SCREENSHOT_COUNT"] = 0
 
-    if CONFIG.bool("CUCU_DEBUG_ON_FAILURE") and step.status == "failed":
-        ctx._runner.stop_capture()
-        import pdb
+        if CONFIG.bool("CUCU_DEBUG_ON_FAILURE") and step.status == "failed":
+            ctx._runner.stop_capture()
+            import pdb
 
-        pdb.post_mortem(step.exc_traceback)
+            pdb.post_mortem(step.exc_traceback)
 
-    CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
+        CONFIG["__CUCU_BEFORE_THIS_SCENARIO_HOOKS"] = []
 
-    # run after all step hooks; wrap each so a raising hook neither skips the
-    # browser-log capture below nor lets behave reclassify the step's status.
-    # An errored hook escalates the scenario to 'error' via hook_failed unless a
-    # step actually failed (resolved at the end of after_scenario).
-    for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
-        if _run_hook(ctx, hook)["status"] == "error":
-            ctx.scenario.hook_failed = True
+        # run after all step hooks; wrap each so a raising hook neither skips the
+        # browser-log capture below nor lets behave reclassify the step's status.
+        # An errored hook escalates the scenario to 'error' via hook_failed unless a
+        # step actually failed (resolved at the end of after_scenario).
+        # A terminated hook (from InterruptWorker timeout) sets the terminated flag.
+        for hook in CONFIG["__CUCU_AFTER_STEP_HOOKS"]:
+            hook_result = _run_hook(ctx, hook)
+            if hook_result["status"] == "error":
+                ctx.scenario.hook_failed = True
+            elif hook_result["status"] == "terminated":
+                ctx.scenario.terminated = True
+                break
 
-    # Capture browser logs and info for this step
-    step.browser_logs = []
-    browser_info = {"has_browser": False}
-    if ctx.browser:
-        for log in ctx.browser.get_log():
-            log_entry = json.dumps(log)
-            step.browser_logs.append(log)
-            ctx.browser_log_tee.write(f"{log_entry}\n")
+        # Capture browser logs and info for this step
+        step.browser_logs = []
+        browser_info = {"has_browser": False}
+        if ctx.browser:
+            for log in ctx.browser.get_log():
+                log_entry = json.dumps(log)
+                step.browser_logs.append(log)
+                ctx.browser_log_tee.write(f"{log_entry}\n")
 
-        tab_info = ctx.browser.get_tab_info()
+            tab_info = ctx.browser.get_tab_info()
 
-        browser_info = {
-            "tab_count": tab_info["tab_count"],
-            "tab_number": tab_info["index"] + 1,
-            "tab_title": tab_info["title"],
-            "tab_url": tab_info["url"],
-            "browser_type": ctx.browser.driver.name,
-        }
+            browser_info = {
+                "tab_count": tab_info["tab_count"],
+                "tab_number": tab_info["index"] + 1,
+                "tab_title": tab_info["title"],
+                "tab_url": tab_info["url"],
+                "browser_type": ctx.browser.driver.name,
+            }
 
-    step.browser_info = browser_info
+        step.browser_info = browser_info
+
+    except InterruptWorker:
+        ctx.scenario.terminated = True
 
 
 def start_selenium_keep_alive(ctx):

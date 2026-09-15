@@ -295,7 +295,9 @@ def finish_scenario_record(scenario_obj):
         ]
         log_files_json = sorted(log_files)
 
-    if scenario_obj.hook_failed:
+    if getattr(scenario_obj, "terminated", False):
+        status = "terminated"
+    elif scenario_obj.hook_failed:
         status = "error"
     else:
         status = scenario_obj.status.name
@@ -365,39 +367,10 @@ def create_database_file(db_filepath):
                 SUM(CASE WHEN s.status = 'failed' THEN 1 ELSE 0 END) AS failed,
                 SUM(CASE WHEN s.status = 'skipped' THEN 1 ELSE 0 END) AS skipped,
                 SUM(CASE WHEN s.status = 'error' THEN 1 ELSE 0 END) AS error,
+                SUM(CASE WHEN s.status = 'terminated' THEN 1 ELSE 0 END) AS terminated,
                 SUM(s.duration) AS duration,
                 SUM(s.steps) AS steps
             FROM scenario_with_steps s
-        """)
-    db.execute_sql("""
-            CREATE VIEW IF NOT EXISTS flat_feature AS
-            WITH feature_first_level AS (
-                SELECT
-                    w.cucu_run_id,
-                    f.start_at,
-                    f.name AS feature_name,
-                    COUNT(s.scenario_run_id) AS scenarios,
-                    SUM(CASE WHEN s.status = 'passed' THEN 1 ELSE 0 END) AS passed,
-                    SUM(CASE WHEN s.status = 'failed' THEN 1 ELSE 0 END) AS failed,
-                    SUM(CASE WHEN s.status = 'skipped' THEN 1 ELSE 0 END) AS skipped,
-                    SUM(CASE WHEN s.status = 'error' THEN 1 ELSE 0 END) AS error,
-                    SUM(s.duration) AS duration
-                FROM cucu_run r
-                JOIN worker w ON r.cucu_run_id = w.cucu_run_id
-                JOIN feature f ON w.worker_run_id = f.worker_run_id
-                JOIN scenario s ON f.feature_run_id = s.feature_run_id
-                GROUP BY f.feature_run_id
-            )
-            SELECT
-                *,
-                CASE
-                    WHEN failed  > 0 THEN 'failed'
-                    WHEN error > 0 THEN 'error'
-                    WHEN passed  > 0 THEN 'passed'
-                    WHEN skipped > 0 THEN 'skipped'
-                END AS status
-            FROM feature_first_level
-            ORDER BY start_at ASC
         """)
     db.execute_sql("""
             CREATE VIEW IF NOT EXISTS flat AS

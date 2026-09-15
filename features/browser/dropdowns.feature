@@ -59,3 +59,17 @@ Feature: Dropdowns
      Then I should see "abbc" in the "2nd" input "Dynamic Dropdown"
       And I should see the option "abbc" is selected on the "2nd" dropdown "Dynamic Dropdown"
       And I should see no value in the "1st" input "Dynamic Dropdown"
+
+  Scenario: User can select an already listed dynamic dropdown option
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/dynamic_dropdown.html"
+     When I should see the dropdown "Dynamic Dropdown"
+      And I wait to select the option "aa" from the "2nd" dynamic dropdown "Dynamic Dropdown"
+     Then I should see the option "aa" is selected on the "2nd" dropdown "Dynamic Dropdown"
+      And I should see no value in the "2nd" input "Dynamic Dropdown"
+
+  Scenario: User can select from a delayed dynamic dropdown
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/dynamic_dropdown_delayed.html"
+     When I should see the dropdown "Delayed Dropdown"
+      And I wait to select the option "delay-abbc" from the dynamic dropdown "Delayed Dropdown"
+     Then I should see "delay-abbc" in the input "Delayed Dropdown"
+      And I should see the option "delay-abbc" is selected on the dropdown "Delayed Dropdown"

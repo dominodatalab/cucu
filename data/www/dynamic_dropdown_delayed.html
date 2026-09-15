@@ -1,0 +1,43 @@
+<html>
+  <head>
+    <title>Delayed Dynamic Dropdown</title>
+    <script>
+    function update(inputElement) {
+        const options = ["delay-aa", "delay-ab", "delay-abbc"];
+        const input = inputElement.value;
+        const available_options = options.filter((option) => option.startsWith(input));
+
+        let sel = inputElement.nextElementSibling;
+        while (sel.hasChildNodes()) {
+            sel.removeChild(sel.firstChild);
+        }
+
+        const size = Math.min(2, available_options.length);
+        for (let i = 0; i < size; i++) {
+            var opt = document.createElement('option');
+            opt.value = available_options[i];
+            opt.innerHTML = available_options[i];
+            sel.appendChild(opt);
+        }
+        sel.size = 2;
+    }
+
+    function delayedUpdate(inputElement) {
+        const spinner = document.getElementById("delay-spinner");
+        spinner.hidden = false;
+        setTimeout(() => {
+            update(inputElement);
+            spinner.hidden = true;
+        }, 300);
+    }
+    </script>
+  </head>
+  <body>
+    <h1>Delayed Dropdown</h1>
+    <span id="delay-spinner" aria-label="loading" hidden>loading</span>
+    <label for="delayed">Delayed Dropdown
+      <input id="delayed" oninput="delayedUpdate(this);" type="text">
+      <select id="select-delayed"></select>
+    </label>
+  </body>
+</html>

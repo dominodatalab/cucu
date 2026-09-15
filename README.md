@@ -4,7 +4,7 @@
 [![coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fdominodatalab.github.io%2Fcucu%2Fcoverage%2Fbadge%2Fbadge.json)](https://dominodatalab.github.io/cucu/coverage/badge)
 
 
-# ![Cucu Logo](https://raw.githubusercontent.com/dominodatalab/cucu/refs/heads/main/logo.png) **CUCU** - Easy BDD web testing <!-- omit from toc -->
+# <img src="https://raw.githubusercontent.com/dominodatalab/cucu/refs/heads/main/logo.svg" width="32" height="32" alt="Cucu Logo"> **CUCU** - Easy BDD web testing <!-- omit from toc -->
 
 End-to-end testing framework that uses [gherkin](https://cucumber.io/docs/gherkin/)
 to drive various underlying tools/frameworks to create real world testing scenarios.
