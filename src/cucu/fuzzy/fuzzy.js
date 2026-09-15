@@ -530,7 +530,12 @@
         var independentThingsSelector = independentThings.join(',');
         if (independentThingsSelector) {
             elements = elements.filter(function(candidate) {
-                var ownScore = cucu.relevance(candidate.element, name, candidate.immediate_override, true);
+                // deliberately omit candidate.immediate_override here: for a
+                // nameInNestedChild candidate that override IS the nested
+                // child's own text, so passing it through would always
+                // report a genuine "own" match and defeat this suppression
+                // entirely. We need the ancestor's own immediate text only.
+                var ownScore = cucu.relevance(candidate.element, name, undefined, true);
                 if (ownScore > 0) {
                     return true;
                 }
