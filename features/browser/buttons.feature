@@ -119,10 +119,7 @@ Feature: Buttons
       Then I click the button "aria-disabled button"
       """
 
-  # Regression: fuzzy find caches :vis answers for the duration of a single
-  # fuzzy_find call. A button that stays in the DOM while its visibility
-  # changes would keep its stale answer if that cache leaked between calls,
-  # so these two cover both directions of the toggle.
+  # Regression: :vis answers are cached per fuzzy_find call, so a stale answer must not survive a visibility change
   Scenario: User can wait to see a button that is revealed without re-entering the DOM
     Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?reveal_hidden_after_ms=5000"
      Then I should not see the button "toggled button"

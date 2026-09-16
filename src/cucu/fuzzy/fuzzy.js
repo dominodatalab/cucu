@@ -18,13 +18,7 @@
      *
      */
 
-    /*
-     * the rules in fuzzy_find run a `*:vis...` query once per `things` entry
-     * per matcher, so :vis gets asked about the same element dozens of times
-     * per call and each ask forces style and layout. Layout cannot change
-     * while fuzzy_find runs, so answers are cached for the call and
-     * fuzzy_find clears the cache on entry.
-     */
+    // each :vis ask forces layout and the rules ask per thing per matcher, so answers are cached per fuzzy_find call
     var visCache = new Map();
     jqCucu.extend(
         jqCucu.expr[ ":" ],
