@@ -17,6 +17,15 @@
      *                one visible parent.
      *
      */
+
+    /*
+     * the rules in fuzzy_find run a `*:vis...` query once per `things` entry
+     * per matcher, so :vis gets asked about the same element dozens of times
+     * per call and each ask forces style and layout. Layout cannot change
+     * while fuzzy_find runs, so answers are cached for the call and
+     * fuzzy_find clears the cache on entry.
+     */
+    var visCache = new Map();
     jqCucu.extend(
         jqCucu.expr[ ":" ],
         {
@@ -30,7 +39,13 @@
                 return (elem.textContent || elem.innerText || jqCucu(elem).text() || '').toLowerCase().indexOf(match[3].toLowerCase()) !== -1;
             },
             vis: function (elem) {
-                return !(jqCucu(elem).is(":hidden") || jqCucu(elem).css("width") == "0px" || jqCucu(elem).css("height") == "0px" || jqCucu(elem).parents(":hidden").length);
+                var cached = visCache.get(elem);
+                if (cached !== undefined) {
+                    return cached;
+                }
+                var visible = !(jqCucu(elem).is(":hidden") || jqCucu(elem).css("width") == "0px" || jqCucu(elem).css("height") == "0px" || jqCucu(elem).parents(":hidden").length);
+                visCache.set(elem, visible);
+                return visible;
             }
         }
     );
@@ -221,6 +236,7 @@
                                skip_fuzzy_relevance=false,
                                shadow=false,
                                case_aware=false) {
+        visCache.clear();
         var elements = [];
         var results = null;
         var attributes = ['aria-label', 'title', 'placeholder', 'value'];

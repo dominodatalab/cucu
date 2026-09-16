@@ -119,6 +119,25 @@ Feature: Buttons
       Then I click the button "aria-disabled button"
       """
 
+  # Regression: fuzzy find caches :vis answers for the duration of a single
+  # fuzzy_find call. A button that stays in the DOM while its visibility
+  # changes would keep its stale answer if that cache leaked between calls,
+  # so these two cover both directions of the toggle.
+  Scenario: User can wait to see a button that is revealed without re-entering the DOM
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?reveal_hidden_after_ms=5000"
+     Then I should not see the button "toggled button"
+     When I wait up to "15" seconds to see the button "toggled button"
+     Then I should see the previous step took more than "4" seconds
+     When I click the button "toggled button"
+     Then I should see "toggled button was clicked" in the input "value:"
+
+  @negative
+  Scenario: User can wait to not see a button that is hidden without leaving the DOM
+    Given I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/buttons.html?hide_shown_after_ms=5000"
+     Then I should see the button "toggled button"
+     When I wait up to "15" seconds to not see the button "toggled button"
+     Then I should see the previous step took more than "4" seconds
+
   # Regression: only one real "Save" button exists (the nested <button
   # aria-label="Save">). The ancestor <div role="button"> that wraps it
   # merely contains "Save" in its aggregate text via the nested button - it
