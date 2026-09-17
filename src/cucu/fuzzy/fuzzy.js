@@ -83,6 +83,21 @@
         emptyText: 11
     };
 
+    /*
+     * Rules that associate a thing with a name found merely somewhere in the
+     * vicinity, rather than in the thing itself or via a for/id label or an
+     * adjacent sibling. A candidate found ONLY by one of these, and only at
+     * the emptyText floor, is not evidence that this document contains what
+     * we're looking for - it's just the least irrelevant thing on the page.
+     * fuzzy_find reports such a match as inconclusive so a caller searching
+     * multiple frames can keep looking instead of stopping on noise.
+     *
+     * This is deliberately a list of the *sweep* rules rather than of the
+     * direct ones, so any rule added later defaults to conclusive and
+     * nothing changes until it's classified on purpose.
+     */
+    cucu.loose_rules = ['nameIsTextSibling', 'leftToRight', 'leftToRightGrandpa', 'rightToLeft', 'rightToLeftGrandpa'];
+
 
     /*
      * Relevance scoring (ordering)
@@ -684,7 +699,13 @@
         }
 
         if (elements.length > 0 && insert_label) {
-            return [elements[index].element, elements[index].label];
+            // a match is inconclusive only when it sits at the emptyText
+            // "nothing actually matched" floor AND was found solely by a
+            // vicinity-sweep rule; see cucu.loose_rules above
+            var chosen = elements[index];
+            var conclusive = chosen.score > WEIGHTS.emptyText
+                || cucu.loose_rules.indexOf(chosen.label_name) === -1;
+            return [chosen.element, chosen.label, chosen.score, conclusive];
         }
         return elements[index];
     };

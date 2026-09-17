@@ -1,5 +1,6 @@
 from collections import deque
 
+from cucu import logger
 from cucu.browser.core import Browser
 
 
@@ -9,12 +10,14 @@ def search_in_all_frames(
     *,
     include_nested_frames: bool = True,
     max_depth: int = 15,
+    is_conclusive=None,
 ):
     """
     search all frames on the page for an element
 
-    Warning: This leaves the browser in whatever frame was last searched so that
-    users of this method are in that frame.
+    Warning: This leaves the browser in the frame the returned result came from,
+    or in the last frame searched when nothing was found, so that users of this
+    method are in that frame.
 
     parameters:
       browser               - the cucu.browser.Browser object
@@ -25,29 +28,73 @@ def search_in_all_frames(
       max_depth             - maximum iframe path length when include_nested_frames
                               is True (ignored otherwise). 0 means "default
                               content only, no iframes."
+      is_conclusive         - optional callable(result) -> bool. Without it the
+                              first truthy result wins and no later frame is
+                              visited. With it, a truthy result it rejects is
+                              only a fallback: the walk keeps going so a better
+                              match in a later frame can win, and the fallback
+                              is re-resolved in its own frame if nothing better
+                              turns up. Callers passing this must already be on
+                              default content - the "current context as is"
+                              probe is skipped, since that context has no frame
+                              path to come back to.
     returns:
         the WebElement that matches (if found)
     """
-    result = search_function()
-    if result:
-        return result
+    fallback_path = None
+
+    if is_conclusive is None:
+        result = search_function()
+        if result:
+            return result
 
     browser.switch_to_default_frame()
     result = search_function()
     if result:
-        return result
+        if is_conclusive is None or is_conclusive(result):
+            return result
+        fallback_path = ()
 
+    for path in _iter_frame_paths(browser, include_nested_frames, max_depth):
+        result = search_function()
+        if result:
+            if is_conclusive is None or is_conclusive(result):
+                return result
+            # keep the first inconclusive result: they're all low-signal
+            # noise, so there's nothing meaningful to rank between them, and
+            # keeping the first reproduces the pre-is_conclusive choice
+            if fallback_path is None:
+                fallback_path = path
+
+    if fallback_path is None:
+        return None
+
+    # Re-resolve rather than returning the cached element: WebDriver element
+    # references are scoped to the browsing context they came from, so one
+    # captured in another frame would be stale the moment the caller touched
+    # it. Re-running also restores the "browser is left in the frame the
+    # result came from" contract and picks up any re-render during the walk.
+    logger.debug(
+        f"no conclusive match found, re-resolving the fallback in frame path {fallback_path}"
+    )
+    _switch_to_frame_path(browser, fallback_path)
+    return search_function()
+
+
+def _iter_frame_paths(browser, include_nested_frames: bool, max_depth: int):
+    """
+    yield the iframe index path of every frame to search, leaving the browser
+    switched into that frame as its path is yielded
+    """
     if not include_nested_frames:
         frames = browser.execute('return document.querySelectorAll("iframe");')
-        for frame in frames:
+        for index, frame in enumerate(frames):
             # need to be in the default frame in order to switch to a child
             # frame w/o getting a stale element exception
             browser.switch_to_default_frame()
             browser.switch_to_frame(frame)
-            result = search_function()
-            if result:
-                return result
-        return None
+            yield (index,)
+        return
 
     # Nested BFS. Each queue entry is an iframe index path from default
     # content; e.g. (0, 1, 2) means "first iframe, then its second child
@@ -64,9 +111,7 @@ def search_in_all_frames(
     while queue:
         path = queue.popleft()
         _switch_to_frame_path(browser, path)
-        result = search_function()
-        if result:
-            return result
+        yield path
 
         if len(path) < max_depth:
             child_frames = browser.execute(
@@ -74,8 +119,6 @@ def search_in_all_frames(
             )
             for child_index in range(len(child_frames)):
                 queue.append(path + (child_index,))
-
-    return None
 
 
 def run_in_all_frames(browser, search_function):
