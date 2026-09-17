@@ -18,7 +18,7 @@
      *
      */
 
-    // each :vis ask forces layout and the rules ask per thing per matcher, so answers are cached per fuzzy_find call
+    // cached per fuzzy_find call: the rules below check :vis on the same element many times and each check forces a layout recalc
     var visCache = new Map();
     jqCucu.extend(
         jqCucu.expr[ ":" ],
