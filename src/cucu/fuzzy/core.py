@@ -31,7 +31,10 @@ def init(browser):
     parameters:
         browser - ...
     """
-    script = "return typeof cucu !== 'undefined' && typeof cucu.fuzzy_find === 'function';"
+    # cucu.loose_rules is part of the check so a frame still holding a
+    # pre-upgrade fuzzy.js re-injects, rather than returning the older
+    # 2-element result shape that find() below would index past
+    script = "return typeof cucu !== 'undefined' && typeof cucu.fuzzy_find === 'function' && typeof cucu.loose_rules !== 'undefined';"
     cucu_injected = browser.execute(script)
     if cucu_injected:
         # cucu fuzzy find already exists
@@ -92,6 +95,12 @@ def find(
     name = name.replace('"', '\\"')
     name_within_thing = "true" if name_within_thing else "false"
 
+    # read once: the value is interpolated into the javascript call below as a
+    # bare token, so a non-boolean setting (e.g. "enabled") would reach the
+    # browser as an undefined identifier, and the python-side gate on ranking
+    # has to agree with what the javascript actually did
+    skip_relevance = CONFIG.true("CUCU_SKIP_FUZZY_RELEVANCE")
+
     args = [
         f'"{name}"',
         str(things),
@@ -99,7 +108,7 @@ def find(
         str(direction.value),
         name_within_thing,
         "true",
-        str(CONFIG["CUCU_SKIP_FUZZY_RELEVANCE"]).lower(),
+        str(skip_relevance).lower(),
         str(CONFIG.true("CUCU_SHADOW_DOM_SEARCH")).lower(),
         str(CONFIG.bool("CUCU_FUZZY_CASE_AWARE")).lower(),
     ]
@@ -109,11 +118,18 @@ def find(
         script = f"return cucu.fuzzy_find({','.join(args)});"
         return browser.execute(script)
 
-    fuzzy_return = search_in_all_frames(browser, execute_fuzzy_find)
+    fuzzy_return = search_in_all_frames(
+        browser,
+        execute_fuzzy_find,
+        # when relevance is skipped the results come back in discovery order
+        # rather than score order, so fuzzy_find's verdict means nothing
+        is_conclusive=None if skip_relevance else lambda result: result[3],
+    )
     if fuzzy_return is None:
         logger.debug("Fuzzy found no element.")
         return None
     logger.debug(
-        "Fuzzy found element by search term {}".format(fuzzy_return[1])
+        f"Fuzzy found element by search term {fuzzy_return[1]} "
+        f"(score {fuzzy_return[2]}, conclusive {fuzzy_return[3]})"
     )
     return fuzzy_return[0]

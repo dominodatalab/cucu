@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.36
+- Fix - `nameInNestedChild` passes the inner element's immediate text as `immediate_override` so the clickable ancestor is scored on the clean title text, not the concatenated descendant text (e.g. badge counts)
+- Fix - removed caseless substring scoring from `cucu.relevance` to prevent short queries (e.g. `"R"`) from false-positive matching unrelated labels (e.g. `"Govern"`); caseless exact matching is preserved
+
 # 1.4.35
 - Fix - dynamic dropdown steps type the full option string once and wait for the option list once, instead of searching after every character
 
