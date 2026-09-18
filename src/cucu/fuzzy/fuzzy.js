@@ -17,6 +17,9 @@
      *                one visible parent.
      *
      */
+
+    // cached per fuzzy_find call: the rules below check :vis on the same element many times and each check forces a layout recalc
+    var visCache = new Map();
     jqCucu.extend(
         jqCucu.expr[ ":" ],
         {
@@ -30,7 +33,13 @@
                 return (elem.textContent || elem.innerText || jqCucu(elem).text() || '').toLowerCase().indexOf(match[3].toLowerCase()) !== -1;
             },
             vis: function (elem) {
-                return !(jqCucu(elem).is(":hidden") || jqCucu(elem).css("width") == "0px" || jqCucu(elem).css("height") == "0px" || jqCucu(elem).parents(":hidden").length);
+                var cached = visCache.get(elem);
+                if (cached !== undefined) {
+                    return cached;
+                }
+                var visible = !(jqCucu(elem).is(":hidden") || jqCucu(elem).css("width") == "0px" || jqCucu(elem).css("height") == "0px" || jqCucu(elem).parents(":hidden").length);
+                visCache.set(elem, visible);
+                return visible;
             }
         }
     );
@@ -221,6 +230,7 @@
                                skip_fuzzy_relevance=false,
                                shadow=false,
                                case_aware=false) {
+        visCache.clear();
         var elements = [];
         var results = null;
         var attributes = ['aria-label', 'title', 'placeholder', 'value'];

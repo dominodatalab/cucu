@@ -26,6 +26,26 @@
     <button onclick="update('aria-disabled button');" aria-disabled="true">aria-disabled button</button>
 
     <button id="button-with-child" onclick="update('button with inner child label');"><label>button with inner child label</label></button><br/>
+
+    <button id="toggled" style="display: none;" onclick="update('toggled button');">toggled button</button>
+    <script>
+    // reveal_hidden_after_ms and hide_shown_after_ms change #toggled's visibility without adding or removing it
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        var toggled = document.querySelector('#toggled');
+
+        var reveal_after = params.get('reveal_hidden_after_ms');
+        if (reveal_after) {
+            setTimeout(function() { toggled.style.display = 'inline'; }, parseInt(reveal_after))
+        }
+
+        var hide_after = params.get('hide_shown_after_ms');
+        if (hide_after) {
+            toggled.style.display = 'inline';
+            setTimeout(function() { toggled.style.display = 'none'; }, parseInt(hide_after))
+        }
+    })();
+    </script>
   </body>
   </body>
 
