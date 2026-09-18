@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block extra_head %}
+    <link href="{{ dir_depth }}external/gantt.css" rel="stylesheet"></link>
+{% endblock %}
+{% block container_class %}container-fluid{% endblock %}
+{% block nav %}
+    <nav class="navbar navbar-expand-sm navbar-light bg-light sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Gantt HTML Test Report</a>
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+              <li class="nav-item active">
+                <a class="nav-link" href="index.html" title="go to index report">Index</a>
+              </li>
+            </ul>
+        </div>
+    </nav>
+{% endblock %}
+{% block content %}
+    {% if gantt['rows'] %}
+    <div class="gantt">
+        <div class="gantt-axis">
+            <div class="gantt-label-spacer"></div>
+            <div class="gantt-axis-track">
+                {% for tick in gantt['ticks'] %}
+                <span class="gantt-tick" style="left: {{ tick['left_pct'] }}%">{{ tick['label'] }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% for row in gantt['rows'] %}
+        <div class="gantt-row">
+            <div class="gantt-label">
+                <div class="gantt-scenario">
+                    <a href="{{ urlencode(escape(row['feature_folder_name'])) }}/{{ urlencode(escape(row['scenario_folder_name'])) }}/index.html" title="{{ escape(row['name']) }} - {{ escape(row['feature_name']) }}">{{ escape(row['name']) }}</a>
+                </div>
+                <div class="gantt-feature">{{ escape(row['feature_name']) }}</div>
+            </div>
+            <div class="gantt-track">
+                <a class="gantt-bar status-{{ row['status'] }}"
+                   href="{{ urlencode(escape(row['feature_folder_name'])) }}/{{ urlencode(escape(row['scenario_folder_name'])) }}/index.html"
+                   title="{{ escape(row['name']) }} — {{ row['status'] }} — {{ row['start_at'] }} — {{ row['duration_label'] }}"
+                   style="left: {{ row['left_pct'] }}%; width: {{ row['width_pct'] }}%">{{ row['duration_label'] }}</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No scenario timings available for a Gantt chart.</p>
+    {% endif %}
+{% endblock %}
