@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block extra_head %}
     <link href="{{ dir_depth }}external/gantt.css" rel="stylesheet"></link>
+    <script src="{{ dir_depth }}external/gantt.js"></script>
 {% endblock %}
 {% block container_class %}container-fluid{% endblock %}
 {% block nav %}
@@ -22,7 +23,7 @@
             <div class="gantt-label-spacer"></div>
             <div class="gantt-axis-track">
                 {% for tick in gantt['ticks'] %}
-                <span class="gantt-tick" style="left: {{ tick['left_pct'] }}%">{{ tick['label'] }}</span>
+                <span class="gantt-tick" data-left="{{ tick['left_pct'] }}">{{ tick['label'] }}</span>
                 {% endfor %}
             </div>
         </div>
@@ -37,8 +38,9 @@
             <div class="gantt-track">
                 <a class="gantt-bar status-{{ row['status'] }}"
                    href="{{ urlencode(escape(row['feature_folder_name'])) }}/{{ urlencode(escape(row['scenario_folder_name'])) }}/index.html"
-                   title="{{ escape(row['name']) }} — {{ row['status'] }} — {{ row['start_at'] }} — {{ row['duration_label'] }}"
-                   style="left: {{ row['left_pct'] }}%; width: {{ row['width_pct'] }}%">{{ row['duration_label'] }}</a>
+                   title="{{ row['bar_title'] }}"
+                   data-left="{{ row['left_pct'] }}"
+                   data-width="{{ row['width_pct'] }}">{{ row['duration_label'] }}</a>
             </div>
         </div>
         {% endfor %}

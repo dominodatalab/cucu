@@ -141,6 +141,11 @@ def build_gantt_chart(features):
         row["width_pct"] = max(GANTT_MIN_WIDTH_PCT, width_pct)
         if row["left_pct"] + row["width_pct"] > 100:
             row["width_pct"] = max(GANTT_MIN_WIDTH_PCT, 100 - row["left_pct"])
+        start_label = row["start_at"].strftime("%Y-%m-%d %H:%M:%S")
+        end_label = row["end_at"].strftime("%Y-%m-%d %H:%M:%S")
+        row["bar_title"] = (
+            f"{row['status']} — {start_label} – {end_label} — {row['duration_label']}"
+        )
 
     rows.sort(key=lambda row: row["start_at"])
 

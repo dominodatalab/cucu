@@ -52,6 +52,10 @@ def test_build_gantt_chart_positions_bars_and_skips_background():
     assert gantt["rows"][1]["status"] == "failed"
     assert gantt["rows"][0]["duration_label"] == "10s"
     assert gantt["rows"][1]["duration_label"] == "10s"
+    assert (
+        gantt["rows"][0]["bar_title"]
+        == "passed — 2026-09-18 12:00:00 – 2026-09-18 12:00:10 — 10s"
+    )
     assert len(gantt["ticks"]) == 6
 
 
