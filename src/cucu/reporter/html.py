@@ -79,6 +79,95 @@ def left_pad_zeroes(elapsed_time):
     return padded_duration
 
 
+GANTT_TICK_COUNT = 5
+GANTT_MIN_WIDTH_PCT = 0.4
+
+
+def format_gantt_duration(seconds):
+    total = int(round(float(seconds or 0)))
+    hours, rem = divmod(total, 3600)
+    minutes, secs = divmod(rem, 60)
+    parts = []
+    if hours:
+        parts.append(f"{hours}h")
+    if minutes:
+        parts.append(f"{minutes}m")
+    if secs or not parts:
+        parts.append(f"{secs}s")
+    return " ".join(parts)
+
+
+def build_gantt_chart(features):
+    rows = []
+    for feature in features:
+        for scenario in feature.get("scenarios", []):
+            if scenario.get("keyword") == "Background":
+                continue
+            start_at = scenario.get("start_at")
+            end_at = scenario.get("end_at")
+            if not start_at or not end_at:
+                continue
+            rows.append(
+                {
+                    "name": scenario["name"],
+                    "feature_name": feature["name"],
+                    "feature_folder_name": feature["folder_name"],
+                    "scenario_folder_name": scenario["folder_name"],
+                    "status": scenario["status"],
+                    "start_at": start_at,
+                    "end_at": end_at,
+                    "duration": scenario.get("duration"),
+                    "duration_label": format_gantt_duration(
+                        scenario.get("duration")
+                    ),
+                }
+            )
+
+    if not rows:
+        return {"rows": [], "ticks": [], "run_start": None, "run_end": None}
+
+    run_start = min(row["start_at"] for row in rows)
+    run_end = max(row["end_at"] for row in rows)
+    span = (run_end - run_start).total_seconds()
+    if span <= 0:
+        span = 1.0
+
+    for row in rows:
+        left_pct = (row["start_at"] - run_start).total_seconds() / span * 100
+        width_pct = (
+            (row["end_at"] - row["start_at"]).total_seconds() / span * 100
+        )
+        row["left_pct"] = max(0.0, left_pct)
+        row["width_pct"] = max(GANTT_MIN_WIDTH_PCT, width_pct)
+        if row["left_pct"] + row["width_pct"] > 100:
+            row["width_pct"] = max(GANTT_MIN_WIDTH_PCT, 100 - row["left_pct"])
+        start_label = row["start_at"].strftime("%Y-%m-%d %H:%M:%S")
+        end_label = row["end_at"].strftime("%Y-%m-%d %H:%M:%S")
+        row["bar_title"] = (
+            f"{row['status']} — {start_label} – {end_label} — {row['duration_label']}"
+        )
+
+    rows.sort(key=lambda row: row["start_at"])
+
+    ticks = []
+    for i in range(GANTT_TICK_COUNT + 1):
+        frac = i / GANTT_TICK_COUNT
+        tick_at = run_start + (run_end - run_start) * frac
+        ticks.append(
+            {
+                "left_pct": frac * 100,
+                "label": tick_at.strftime("%H:%M:%S"),
+            }
+        )
+
+    return {
+        "rows": rows,
+        "ticks": ticks,
+        "run_start": run_start,
+        "run_end": run_end,
+    }
+
+
 def browser_timestamp_to_datetime(value):
     """Convert a browser timestamp (in milliseconds since epoch) to a datetime object"""
     try:
@@ -507,6 +596,17 @@ def generate(results: Path, basepath: Path):
         )
         html_index_path = basepath / "index.html"
         html_index_path.write_text(rendered_index_html)
+
+        gantt = build_gantt_chart(features)
+        gantt_template = templates.get_template("gantt.html")
+        rendered_gantt_html = gantt_template.render(
+            gantt=gantt,
+            grand_totals=grand_totals,
+            title="Cucu HTML Test Report - Gantt",
+            basepath=basepath,
+            dir_depth="",
+        )
+        (basepath / "gantt.html").write_text(rendered_gantt_html)
 
     finally:
         db.close_html_report_db()
