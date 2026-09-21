@@ -63,3 +63,9 @@ Feature: Frames
       And I should see the text "leaf one"
       And I should see the button "shadow target"
       And I should see the image with the alt text "shadow image"
+
+  Scenario: A frame with only noise does not mask a real match in a nested frame
+    Given I start a webserver at directory "data/www" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/frame_weak_match.html"
+     When I click the button "New"
+     Then I should see "New was clicked" in the input "value:"
