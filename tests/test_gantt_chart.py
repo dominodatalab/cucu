@@ -59,6 +59,31 @@ def test_build_gantt_chart_positions_bars_and_skips_background():
     assert len(gantt["ticks"]) == 6
 
 
+def test_build_gantt_chart_keeps_bars_inside_timeline():
+    t0 = datetime(2026, 9, 18, 12, 0, 0)
+    features = [
+        {
+            "name": "Feature A",
+            "folder_name": "Feature A",
+            "scenarios": [
+                _scenario("First", "passed", t0, t0 + timedelta(seconds=10)),
+                _scenario(
+                    "Instant at end",
+                    "passed",
+                    t0 + timedelta(seconds=10),
+                    t0 + timedelta(seconds=10),
+                ),
+            ],
+        }
+    ]
+
+    gantt = build_gantt_chart(features)
+
+    for row in gantt["rows"]:
+        assert row["width_pct"] >= 0
+        assert row["left_pct"] + row["width_pct"] <= 100
+
+
 def test_format_gantt_duration():
     assert format_gantt_duration(0) == "0s"
     assert format_gantt_duration(3) == "3s"

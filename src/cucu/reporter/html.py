@@ -137,10 +137,10 @@ def build_gantt_chart(features):
         width_pct = (
             (row["end_at"] - row["start_at"]).total_seconds() / span * 100
         )
-        row["left_pct"] = max(0.0, left_pct)
+        row["left_pct"] = min(max(0.0, left_pct), 100 - GANTT_MIN_WIDTH_PCT)
         row["width_pct"] = max(GANTT_MIN_WIDTH_PCT, width_pct)
         if row["left_pct"] + row["width_pct"] > 100:
-            row["width_pct"] = max(GANTT_MIN_WIDTH_PCT, 100 - row["left_pct"])
+            row["width_pct"] = 100 - row["left_pct"]
         start_label = row["start_at"].strftime("%Y-%m-%d %H:%M:%S")
         end_label = row["end_at"].strftime("%Y-%m-%d %H:%M:%S")
         row["bar_title"] = (
