@@ -92,6 +92,21 @@
         emptyText: 11
     };
 
+    /*
+     * Rules that associate a thing with a name found merely somewhere in the
+     * vicinity, rather than in the thing itself or via a for/id label or an
+     * adjacent sibling. A candidate found ONLY by one of these, and only at
+     * the emptyText floor, is not evidence that this document contains what
+     * we're looking for - it's just the least irrelevant thing on the page.
+     * fuzzy_find reports such a match as inconclusive so a caller searching
+     * multiple frames can keep looking instead of stopping on noise.
+     *
+     * This is deliberately a list of the *sweep* rules rather than of the
+     * direct ones, so any rule added later defaults to conclusive and
+     * nothing changes until it's classified on purpose.
+     */
+    cucu.loose_rules = ['nameIsTextSibling', 'leftToRight', 'leftToRightGrandpa', 'rightToLeft', 'rightToLeftGrandpa'];
+
 
     /*
      * Relevance scoring (ordering)
@@ -111,6 +126,14 @@
      * Within each area, exact match outranks substring match, and case-sensitive
      * outranks case-insensitive within each of those.
      *
+     * Caseless substring matches require a whole-word (or whole-phrase)
+     * boundary match, not a raw character substring: query "R" must not
+     * match inside "Govern" (no word boundary around the "r"), but query
+     * "Upload files" must match "Browse & Upload Files" (bounded by a space
+     * and the string end). This keeps short/generic queries from
+     * false-positive matching fragments of unrelated words while still
+     * allowing real, longer phrases to match regardless of case.
+     *
      * Empty text fallback: if nothing matches and the element has empty
      * full text, a small default score is applied so empty-but-possibly
      * relevant nodes are not entirely discarded.
@@ -127,8 +150,15 @@
         }
 
         function includesCi(hay, needle) {
-            if (!hay) return false;
-            return hay.toLowerCase().indexOf(needle.toLowerCase()) !== -1;
+            // word-boundary caseless match: needle must appear as a whole
+            // word (or whole phrase, internal whitespace made flexible) in
+            // hay, not merely as a raw character substring - so "R" does
+            // not match inside "Govern", but "Upload files" does match
+            // "Browse & Upload Files".
+            if (!hay || !needle) return false;
+            var escaped = needle.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+            if (!escaped) return false;
+            return new RegExp('\\b' + escaped + '\\b', 'i').test(hay);
         }
 
         function equalsCi(hay, needle) {
@@ -140,6 +170,17 @@
         var higherPriorityMatchFound = false;
 
         var imm = immediateOverride || getImmediateText(el);
+        // A nested-child override (from nameInNestedChild) reflects the
+        // ancestor's own clean text only when it's a whole/exact match.
+        // A mere substring match inside a longer overridden phrase (e.g. a
+        // sentence that happens to contain the query) doesn't deserve the
+        // same immediate-area credit as a real short immediate text
+        // substring match would - otherwise an ancestor merely wrapping
+        // unrelated prose containing the query can outrank a genuinely
+        // closer match elsewhere (e.g. an attribute match on the real
+        // target). Exact/caseless-exact overrides are unaffected: they're
+        // exactly the clean-title-text case this override exists for.
+        var immSubstringArea = immediateOverride ? WEIGHTS.area.fulltext : WEIGHTS.area.immediate;
         if (equals(imm, query)) {
             best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.exact);
             higherPriorityMatchFound = true;
@@ -147,10 +188,10 @@
             best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.caselessexact);
             higherPriorityMatchFound = true;
         } else if (includes(imm, query)) {
-            best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.substring);
+            best = Math.max(best, immSubstringArea + WEIGHTS.match.substring);
             higherPriorityMatchFound = true;
         } else if (includesCi(imm, query)) {
-            best = Math.max(best, WEIGHTS.area.immediate + WEIGHTS.match.caselesssubstring);
+            best = Math.max(best, immSubstringArea + WEIGHTS.match.caselesssubstring);
             higherPriorityMatchFound = true;
         }
 
@@ -169,7 +210,7 @@
             } else if (includes(av, query)) {
                 best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.substring + sub);
                 higherPriorityMatchFound = true;
-            } else if (av.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
+            } else if (includesCi(av, query)) {
                 best = Math.max(best, WEIGHTS.area.attribute + WEIGHTS.match.caselesssubstring + sub);
                 higherPriorityMatchFound = true;
             }
@@ -396,9 +437,14 @@
                 var thing = things[tIndex];
 
                 var nameInNestedChildLabel = `<${thing}><*>...${name}...</*></${thing}>`;
-                results = jqRoots('*:vis:' + matcher + '("' + name + '")').parents(thing).toArray();
-                if (cucu.debug) { console.log(nameInNestedChildLabel, results); }
-                elements = elements.concat(results.map(x => ({element: x, label: nameInNestedChildLabel, label_name: 'nameInNestedChild'})));
+                var innerMatches = jqRoots('*:vis:' + matcher + '("' + name + '")').toArray();
+                for (var iIndex = 0; iIndex < innerMatches.length; iIndex++) {
+                    var innerEl = innerMatches[iIndex];
+                    var innerImm = getImmediateText(innerEl);
+                    var ancestors = jqCucu(innerEl).parents(thing).toArray();
+                    if (cucu.debug) { console.log(nameInNestedChildLabel, ancestors); }
+                    elements = elements.concat(ancestors.map(x => ({element: x, label: nameInNestedChildLabel, label_name: 'nameInNestedChild', immediate_override: innerImm})));
+                }
 
                 for(var aIndex=0; aIndex < attributes.length; aIndex++) {
                     var attribute_name = attributes[aIndex];
@@ -544,7 +590,12 @@
         var independentThingsSelector = independentThings.join(',');
         if (independentThingsSelector) {
             elements = elements.filter(function(candidate) {
-                var ownScore = cucu.relevance(candidate.element, name, candidate.immediate_override, true);
+                // deliberately omit candidate.immediate_override here: for a
+                // nameInNestedChild candidate that override IS the nested
+                // child's own text, so passing it through would always
+                // report a genuine "own" match and defeat this suppression
+                // entirely. We need the ancestor's own immediate text only.
+                var ownScore = cucu.relevance(candidate.element, name, undefined, true);
                 if (ownScore > 0) {
                     return true;
                 }
@@ -658,7 +709,13 @@
         }
 
         if (elements.length > 0 && insert_label) {
-            return [elements[index].element, elements[index].label];
+            // a match is inconclusive only when it sits at the emptyText
+            // "nothing actually matched" floor AND was found solely by a
+            // vicinity-sweep rule; see cucu.loose_rules above
+            var chosen = elements[index];
+            var conclusive = chosen.score > WEIGHTS.emptyText
+                || cucu.loose_rules.indexOf(chosen.label_name) === -1;
+            return [chosen.element, chosen.label, chosen.score, conclusive];
         }
         return elements[index];
     };

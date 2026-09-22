@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <title>Fuzzy Short Query Rules</title>
+    <script>
+    function update(value) {
+      document.querySelector("#input").value = value;
+    }
+    </script>
+  </head>
+  <body>
+    <label>value:</label><input id="input" type="text"></input>
+    <hr/>
+    <!-- Decoys: each contains a lowercase "r" (never an uppercase "R") and
+         used to be an eligible caseless-substring match for query "R" (e.g.
+         "project" scored immediate + caselesssubstring = 350). That tier
+         has been removed, so these now score 0 against "R". -->
+    <button onclick="update('project clicked');">project</button>
+    <button onclick="update('dashboard clicked');">dashboard</button>
+    <hr/>
+    <!-- Real target: icon-only button, no visible text, matched only via a
+         case-sensitive substring on aria-label ("Reports" contains "R").
+         That scores attribute + substring + aria-label-sub = 289, which is
+         below the old caseless-substring ceiling (350) - so pre-fix, the
+         decoys above would incorrectly outrank this genuine match. -->
+    <button aria-label="Reports" onclick="update('Reports icon clicked');"><svg width="10" height="10"></svg></button>
+  </body>
+
+  <!-- load the utility library that can be used to delay the page loading -->
+  <script src="js/util.js"></script>
+</html>

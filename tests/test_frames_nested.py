@@ -1,3 +1,5 @@
+import pytest
+
 from cucu.browser.frames import search_in_all_frames
 
 
@@ -122,3 +124,125 @@ def test_search_in_all_frames_shallow_does_not_reach_nested_only_match():
         search_in_all_frames(browser, search, include_nested_frames=True)
         == "deep"
     )
+
+
+# Parametrized tests for is_conclusive ranking (frame ranking fix)
+
+
+@pytest.mark.parametrize(
+    "search_results,expected_result,expected_final_path",
+    [
+        pytest.param(
+            {
+                (): None,
+                (0,): ("elem_0", "label_0", 11, True),
+                (1,): ("elem_1", "label_1", 500, True),
+            },
+            ("elem_0", "label_0", 11, True),
+            (0,),
+            id="conclusive-in-early-frame-stops-walk",
+        ),
+        pytest.param(
+            {
+                (): None,
+                (0,): ("elem_0", "label_0", 11, False),
+                (1,): ("elem_1", "label_1", 500, True),
+            },
+            ("elem_1", "label_1", 500, True),
+            (1,),
+            id="inconclusive-early-conclusive-late-chooses-conclusive",
+        ),
+        pytest.param(
+            {
+                (): None,
+                (0,): ("elem_0", "label_0", 11, False),
+                (1,): ("elem_1", "label_1", 200, False),
+            },
+            ("elem_0", "label_0", 11, False),
+            (0,),
+            id="inconclusive-only-returns-first-re-resolved",
+        ),
+        pytest.param(
+            {(): None, (0,): ("elem_0", "label_0", 11, False), (1,): None},
+            ("elem_0", "label_0", 11, False),
+            (0,),
+            id="fallback-rerun-after-no-conclusive-found",
+        ),
+        pytest.param(
+            {(): None, (0,): ("elem_0", "label_0", 11, False), (1,): None},
+            ("elem_0", "label_0", 11, False),
+            (0,),
+            id="is-conclusive-with-shallow-frames",
+        ),
+    ],
+)
+def test_search_in_all_frames_is_conclusive_ranking(
+    search_results, expected_result, expected_final_path
+):
+    """Test the is_conclusive parameter that ranks matches by discovery rule."""
+    browser = _three_level_browser()
+    visited_paths: list[tuple[int, ...]] = []
+
+    def search():
+        path = browser.frame_path
+        visited_paths.append(path)
+        return search_results.get(path)
+
+    result = search_in_all_frames(
+        browser,
+        search,
+        include_nested_frames=True,
+        is_conclusive=lambda r: (
+            r[3] if isinstance(r, tuple) and len(r) == 4 else True
+        ),
+    )
+
+    assert result == expected_result
+    assert browser.frame_path == expected_final_path
+
+
+def test_search_in_all_frames_is_conclusive_shallow():
+    """Test is_conclusive with include_nested_frames=False."""
+    browser = _three_level_browser()
+    visited_paths: list[tuple[int, ...]] = []
+
+    def search():
+        path = browser.frame_path
+        visited_paths.append(path)
+        if path == ():
+            return None
+        if path == (0,):
+            return ("elem_0", "label_0", 11, False)  # inconclusive
+        return None
+
+    result = search_in_all_frames(
+        browser,
+        search,
+        include_nested_frames=False,
+        is_conclusive=lambda r: (
+            r[3] if isinstance(r, tuple) and len(r) == 4 else True
+        ),
+    )
+
+    # Should visit default and top-level frames only
+    assert result == ("elem_0", "label_0", 11, False)
+    assert (0, 0) not in visited_paths
+
+
+def test_search_in_all_frames_no_predicate_unchanged():
+    """Test that behavior is unchanged when is_conclusive is not provided."""
+    browser = _three_level_browser()
+    visited: list[tuple[int, ...]] = []
+
+    def search():
+        visited.append(browser.frame_path)
+        if browser.frame_path == (1,):
+            return "found-at-frame-1"
+        return None
+
+    result = search_in_all_frames(browser, search, include_nested_frames=True)
+    assert result == "found-at-frame-1"
+    # With no predicate, should probe as-is and default before walking frames
+    assert visited[0] == ()
+    assert visited[1] == ()
+    assert (1,) in visited

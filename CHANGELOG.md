@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.37
+- Fix - `nameInNestedChild` passes the inner element's immediate text as `immediate_override` so the clickable ancestor is scored on the clean title text, not the concatenated descendant text (e.g. badge counts)
+- Fix - caseless substring matching now requires word boundaries (e.g. `"Upload files"` matches `"Browse & Upload Files"` but `"R"` does not match `"Govern"`) to prevent short queries from false-positives on unrelated labels
+- Fix - substring matches inside a `nameInNestedChild` override are demoted to fulltext-area scoring so they don't outrank exact matches elsewhere
+- Fix - `search_in_all_frames` and `fuzzy_find` classify matches by discovery rule, so a low-quality sweep-rule match in an early frame does not mask a better match in a later frame; Matches from direct rules (adjacent, sibling, attribute, etc.) still return immediately. A fallback inconclusive matches are re-resolved in their own frame if nothing conclusive is found.
+
 # 1.4.36
 - Fix - `fuzzy_find` caches `:vis` answers for the duration of a single call instead of re-deriving them per rule, cutting element lookups on large pages by roughly an order of magnitude (a button lookup on a 15k-element table drops from ~7.4s to ~0.6s); pages big enough to previously exceed the WebDriver script timeout are now found well within it
 

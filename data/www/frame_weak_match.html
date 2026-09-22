@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <title>Frame Weak Match Test</title>
+  </head>
+  <body>
+    <h1>Outer Frame - Weak Match Test</h1>
+    <hr/>
+
+    <!-- Decoy: produces only a sweep-rule match (leftToRightGrandpa)
+         The name "New" and the button are in separate sibling wrapper divs,
+         so no direct rule (nameIsPreviousSibling, etc.) can reach the button.
+         Only a vicinity-sweep rule like leftToRightGrandpa bridges the gap.
+         The button is sized explicitly so :vis doesn't filter it out. -->
+    <div><span>New</span></div>
+    <div><button id="decoy" style="width:40px;height:20px;"></button></div>
+
+    <hr/>
+
+    <!-- Real target: in a nested iframe -->
+    <iframe name="nested" src="frame_weak_match_inner.html"></iframe>
+  </body>
+
+  <script src="js/util.js"></script>
+</html>

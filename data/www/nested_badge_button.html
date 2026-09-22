@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <title>Nested Badge Button!</title>
+    <script>
+    function update(value) {
+        document.querySelector("#input").value = value;
+    }
+    </script>
+  </head>
+  <body>
+    <label>value:</label><input id="input" type="text"></input>
+    <br/>
+    <!-- Ancestor has no direct text node of its own - all content lives in
+         a nested title span plus a sibling badge span, so its full text
+         concatenates to "File Changes3". nameInNestedChild must score this
+         element on the inner span's own immediate text ("File Changes"),
+         not the badge-concatenated full text, or it under-scores as a
+         substring match (155) instead of an exact one (505). -->
+    <div role="button" class="collapse-header" onclick="update('File Changes clicked');">
+      <span>File Changes</span><span class="badge">3</span>
+    </div>
+    <br/>
+    <!-- Decoy: matches "File Changes" exactly via aria-label (score 439),
+         which used to outrank the badge ancestor's incorrect 155. -->
+    <div role="button" aria-label="File Changes" onclick="update('decoy clicked');">
+      Some unrelated old history text
+    </div>
+  </body>
+
+  <!-- load the utility library that can be used to delay the page loading -->
+  <script src="js/util.js"></script>
+</html>
