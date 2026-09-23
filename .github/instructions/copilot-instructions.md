@@ -152,3 +152,19 @@ The replay view is a browser-based step-by-step timeline player rendered in scen
 - Timeline uses `startOffset` and `duration` when available (timed steps) — falls back to step index when timing is missing
 - Failed scenarios auto-focus the first failing step in the replay view
 - Substeps are rendered flattened within the parent step's text (not as separate timeline entries)
+
+## Gantt View
+
+The Gantt view is a run-level HTML report page showing every scenario as a timespan bar on a wall-clock axis. Bars are colored by outcome and link to that scenario's classic result page. Reach it from the Index navbar link "Gantt".
+
+**Files:**
+- `src/cucu/reporter/html.py` — `build_gantt_chart()` computes bar positions from scenario `start_at`/`end_at`
+- `src/cucu/reporter/templates/gantt.html` — Gantt page
+- `src/cucu/reporter/external/gantt.css` — chart layout
+- `src/cucu/reporter/templates/index.html` — Index navbar link to `gantt.html`
+- `features/cli/report_gantt.feature` — integration test
+- `tests/test_gantt_chart.py` — unit tests for bar positioning
+
+**Testing Gantt view changes:**
+- `uv run pytest tests/test_gantt_chart.py`
+- `uv run cucu run features/cli/report_gantt.feature`

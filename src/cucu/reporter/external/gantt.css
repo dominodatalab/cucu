@@ -1,0 +1,104 @@
+.gantt {
+    margin: 12px 0 24px 0;
+    min-width: 640px;
+}
+
+.gantt-axis,
+.gantt-row {
+    display: flex;
+    align-items: stretch;
+}
+
+.gantt-label-spacer,
+.gantt-label {
+    flex: 0 0 280px;
+    width: 280px;
+    box-sizing: border-box;
+    padding: 4px 12px 4px 0;
+    position: sticky;
+    left: 0;
+    background: #fff;
+    z-index: 2;
+}
+
+.gantt-label {
+    border-right: 1px solid #ddd;
+    overflow: hidden;
+}
+
+.gantt-scenario {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gantt-feature {
+    color: #666;
+    font-size: 0.85em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gantt-axis-track,
+.gantt-track {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 36px;
+}
+
+.gantt-axis {
+    min-height: 24px;
+    margin-bottom: 4px;
+}
+
+.gantt-tick {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    font-size: 0.75em;
+    color: #666;
+    white-space: nowrap;
+}
+
+.gantt-tick:first-child {
+    transform: translateX(0);
+}
+
+.gantt-tick:last-child {
+    transform: translateX(-100%);
+}
+
+.gantt-row {
+    border-bottom: 1px solid #eee;
+}
+
+.gantt-row:hover .gantt-label,
+.gantt-row:hover .gantt-track {
+    background: #f8f9fa;
+}
+
+.gantt-bar {
+    position: absolute;
+    top: 6px;
+    height: 24px;
+    border-radius: 3px;
+    color: #fff !important;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 2px 6px;
+    font-size: 0.8em;
+    line-height: 20px;
+    text-align: center;
+    text-decoration: none !important;
+    min-width: 4px;
+    box-sizing: border-box;
+}
+
+.gantt-bar:hover {
+    filter: brightness(0.9);
+    text-decoration: none !important;
+}

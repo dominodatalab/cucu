@@ -14,6 +14,7 @@
     <link href="{{ dir_depth }}external/dataTables.bootstrap.min.css" rel="stylesheet"></link>
     <script src="{{ dir_depth }}external/jquery.dataTables.min.js" language="javascript"></script>
     <script src="{{ dir_depth}}external/dataTables.bootstrap.min.js" language="javascript"></script>
+    {% block extra_head %}{% endblock %}
     <style>
     .remove-table-hover tr:hover{
        background-color: unset !important;
@@ -55,6 +56,13 @@
         display: inline;
         color: orange;
     }
+
+    .gantt-bar.status-passed { background-color: green; }
+    .gantt-bar.status-failed { background-color: red; }
+    .gantt-bar.status-error { background-color: purple; }
+    .gantt-bar.status-skipped { background-color: blue; }
+    .gantt-bar.status-untested { background-color: gray; }
+    .gantt-bar.status-terminated { background-color: orange; }
 
     /* Section heading styles */
     h2[style*="display: contents;"] {
@@ -140,7 +148,7 @@
     </script>
   </head>
   <body>
-    <div class="container">
+    <div class="{% block container_class %}container{% endblock %}">
         {% block nav %}{% endblock %}
         {% block content %}{% endblock %}
     </div>

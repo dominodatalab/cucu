@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.37
+- Add - HTML report Gantt view, linked from the Index, with one outcome-colored timespan bar per scenario showing compact duration and linking to that scenario's result page
+
 # 1.4.36
 - Fix - `fuzzy_find` caches `:vis` answers for the duration of a single call instead of re-deriving them per rule, cutting element lookups on large pages by roughly an order of magnitude (a button lookup on a 15k-element table drops from ~7.4s to ~0.6s); pages big enough to previously exceed the WebDriver script timeout are now found well within it
 
