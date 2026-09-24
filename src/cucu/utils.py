@@ -490,8 +490,15 @@ class SeleniumKeepAlive:
         """
         self.browser = browser
         self.interval = interval
-        self.active = False
+        # set = not running; the loop waits on this event so stop() can wake
+        # it immediately instead of waiting out a blocking time.sleep()
+        self._stop_event = threading.Event()
+        self._stop_event.set()
         self.thread = None
+
+    @property
+    def active(self):
+        return not self._stop_event.is_set()
 
     def start(self):
         """
@@ -501,7 +508,7 @@ class SeleniumKeepAlive:
         """
 
         if not self.active and self.browser:
-            self.active = True
+            self._stop_event.clear()
             self.start_time = time.time()
             self.max_duration = int(
                 CONFIG["CUCU_SELENIUM_KEEP_ALIVE_MAX_DURATION_S"]
@@ -517,10 +524,12 @@ class SeleniumKeepAlive:
     def stop(self):
         """
         Stop the keep-alive background thread.
-        This signals the thread to stop and waits up to 5 seconds for it to terminate.
+        This wakes the thread immediately (it waits on an event rather than
+        sleeping) and joins it; the join timeout only bounds the case where a
+        ping is mid-flight against a wedged browser.
         """
         if self.active:
-            self.active = False
+            self._stop_event.set()
             if self.thread:
                 self.thread.join(timeout=5)
             logger.debug("Selenium keep-alive stopped")
@@ -533,10 +542,9 @@ class SeleniumKeepAlive:
         The thread will automatically stop if the session is closed or an error occurs.
         """
 
-        while self.active:
+        while True:
             if time.time() - self.start_time > self.max_duration:
                 logger.warning("Keep-alive max duration reached, stopping")
-                self.active = False
                 break
             try:
                 if self.browser:
@@ -548,11 +556,14 @@ class SeleniumKeepAlive:
                 logger.warning(
                     f"Selenium session closed, stopping keep-alive: {e}"
                 )
-                self.active = False
                 break
             except Exception as e:
                 # Log but continue - don't let errors stop the keep-alive
                 logger.warning(f"Keep-alive ping failed (continuing): {e}")
 
-            # Wait before next ping
-            time.sleep(self.interval)
+            # Wait before the next ping; wakes immediately when stop() is
+            # called (wait returns True when the event is set)
+            if self._stop_event.wait(self.interval):
+                break
+
+        self._stop_event.set()
