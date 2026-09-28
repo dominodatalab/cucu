@@ -85,6 +85,23 @@ Feature: Report replay view
       """
       And I should see "{CLEANUP_STEPS_CHECK}" is equal to "has-cleanup"
 
+        * # clicking a cleanup entry shows its own duration instead of leaving the step-timing
+        * # display frozen on the last real step's duration (which never changes shownStepIdx)
+      And I execute in the current browser the following javascript
+      """
+      document.querySelector(".steps-cleanup:last-of-type").click();
+      """
+      And I execute in the current browser the following javascript and save the result to the variable "CLEANUP_TIMING_CHECK"
+      """
+      const data = JSON.parse(document.getElementById("replay-data").textContent);
+      const lastCleanup = data.cleanupSteps[data.cleanupSteps.length - 1];
+      const displayed = document.getElementById("step-timing-text").textContent;
+      return displayed === lastCleanup.timingLabel
+        ? "matches"
+        : "mismatch displayed=" + displayed + " expected=" + lastCleanup.timingLabel;
+      """
+      And I should see "{CLEANUP_TIMING_CHECK}" is equal to "matches"
+
   Scenario: Replay view renders with CUCU_SCREENSHOT_VIDEO enabled
     Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/replay-video-echo-results --env CUCU_SCREENSHOT_VIDEO=true" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/replay-video-echo-results --env CUCU_SCREENSHOT_VIDEO=true --output {CUCU_RESULTS_DIR}/replay-video-echo-report" and expect exit code "0"

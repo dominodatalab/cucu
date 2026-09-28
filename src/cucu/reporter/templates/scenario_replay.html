@@ -211,7 +211,7 @@
     <button class="step-pic-nav-btn" type="button" title="Next screenshot" @click="shiftScreenshot(1)">▶</button>
   </span>
   <span id="pic-caption" x-text="picCaption"></span>
-  <span id="step-timing-text" x-text="curStep ? curStep.timingLabel : ''"></span>
+  <span id="step-timing-text" x-text="activeTimingLabel"></span>
 </div>
 
 <!-- STEPS PANEL -->

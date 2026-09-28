@@ -362,6 +362,15 @@
         }
         return idx;
       },
+      // curStep stays pinned to the last real step while the playhead is in the cleanup
+      // region (by design — cleanup entries aren't step-navigable), so its timingLabel would
+      // otherwise look frozen/wrong for every cleanup entry. Prefer the active cleanup entry's
+      // own timingLabel there instead.
+      get activeTimingLabel() {
+        var idx = this.cleanupCurrentIdx;
+        if (idx !== null) return this.cleanupSteps[idx].timingLabel;
+        return this.curStep ? this.curStep.timingLabel : '';
+      },
       get hasMultiplePics() { return !!(this.curStep && this.curStep.screenshots.length > 1); },
       get picCaption()    {
         var s = this.curStep;

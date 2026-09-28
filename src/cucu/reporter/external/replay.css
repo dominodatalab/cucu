@@ -426,7 +426,7 @@ body.hide-highlights .highlight-overlay { display: none; }
 #vp-steps-content .log-step-group.cleanup-current .log-line {
   background: var(--vp-inset); border-left-color: var(--vp-accent);
 }
-.steps-kw { font-weight: bold; font-family: monospace; flex-shrink: 0; min-width: 6.5ch; }
+.steps-kw { font-weight: bold; font-family: monospace; flex-shrink: 0; min-width: 6.5ch; margin-right: 0.5ch; }
 .steps-passed     { color: var(--vp-passed); }
 .steps-failed     { color: var(--vp-failed); }
 .steps-error      { color: var(--vp-failed); }
