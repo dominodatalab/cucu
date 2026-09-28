@@ -67,6 +67,24 @@ Feature: Report replay view
       And I should see the link "Index"
       And I should see the link "Feature with passing scenario with web"
 
+        * # after-scenario cleanup hooks (keep-alive, MHT download, browser quit) get their own
+        * # trailing entries on the timeline instead of being silently dropped
+      And I should see the text "Cleanup"
+      And I execute in the current browser the following javascript and save the result to the variable "CLEANUP_STEPS_CHECK"
+      """
+      const data = JSON.parse(document.getElementById("replay-data").textContent);
+      const lastStepEnd = Math.max(
+        ...data.steps
+          .filter((step) => step.startOffset !== null)
+          .map((step) => step.startOffset + (step.duration || 0))
+      );
+      const allAfterSteps = data.cleanupSteps.every(
+        (cleanup) => cleanup.startOffset !== null && cleanup.startOffset >= lastStepEnd
+      );
+      return data.cleanupSteps.length > 0 && allAfterSteps ? "has-cleanup" : "no-cleanup";
+      """
+      And I should see "{CLEANUP_STEPS_CHECK}" is equal to "has-cleanup"
+
   Scenario: Replay view renders with CUCU_SCREENSHOT_VIDEO enabled
     Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/replay-video-echo-results --env CUCU_SCREENSHOT_VIDEO=true" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/replay-video-echo-results --env CUCU_SCREENSHOT_VIDEO=true --output {CUCU_RESULTS_DIR}/replay-video-echo-report" and expect exit code "0"

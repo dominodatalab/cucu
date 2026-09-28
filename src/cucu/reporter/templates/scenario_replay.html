@@ -231,6 +231,14 @@
              :title="bar.title"
              @click.stop="seekToTime(bar.seekTime)"></div>
       </template>
+      <template x-for="bar in cleanupBars" :key="'cleanup-' + bar.index">
+        <div class="step-bar cleanup-bar"
+             :id="'cleanup-bar-' + bar.index"
+             :class="[bar.cls, { active: cleanupCurrentIdx === bar.index }]"
+             :style="{ left: bar.leftPct + '%', width: bar.widthPct + '%' }"
+             :title="bar.title"
+             @click.stop="seekToTime(bar.seekTime)"></div>
+      </template>
     </div>
     <label class="log-follow-label">
       <input type="checkbox" id="steps-follow-chk" checked
@@ -252,6 +260,16 @@
           {% else %}
           <span class="steps-kw steps-{{ step['status'] or 'untested' }}">{{ escape(step['keyword']) }}</span><span class="steps-name">{{ escape(step['name']) }}</span>
           {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      {% for cstep in scenario['cleanup_steps'] %}
+      <div class="log-step-group steps-row steps-cleanup"
+           data-cleanup="{{ loop.index0 }}"
+           :class="{ 'cleanup-current': cleanupCurrentIdx === {{ loop.index0 }} }"
+           @click="seekToTime(cleanupBars[{{ loop.index0 }}].seekTime)">
+        <div class="log-line">
+          <span class="steps-kw steps-{{ cstep['status'] or 'untested' }}">Cleanup</span><span class="steps-name">{{ escape(cstep['name']) }}</span>
         </div>
       </div>
       {% endfor %}
@@ -392,6 +410,20 @@
       "stdoutLines": {% if step['stdout'] %}[{% for line in step['stdout'] %}{"text":{{ line|tojson }},"offset":{{ log_line_offset(line, scenario['start_at'])|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}]{% else %}null{% endif %},
       "stderr": {{ step['stderr']|tojson if step['stderr'] else 'null' }},
       "errorMessage": {{ step['error_message']|tojson if step['error_message'] else 'null' }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ],
+  "cleanupSteps": [
+    {% for cstep in scenario['cleanup_steps'] %}
+    {
+      "index": {{ loop.index0 }},
+      "name": {{ cstep['name']|tojson }},
+      "status": {{ cstep['status']|tojson }},
+      "startOffset": {% if cstep['time_offset'] %}{{ cstep['time_offset'].hour * 3600 + cstep['time_offset'].minute * 60 + cstep['time_offset'].second + cstep['time_offset'].microsecond / 1000000.0 }}{% else %}null{% endif %},
+      "duration": {{ cstep['duration'] | default(0) | float }},
+      "timingLabel": {% if cstep['timestamp'] and cstep['duration'] %}"{{ cstep['timestamp'].strftime('%H:%M:%S') }} · {{ '{:.3f}s'.format(cstep['duration'] | float) }}"{% else %}""{% endif %},
+      "stderr": {{ cstep['stderr']|tojson if cstep['stderr'] else 'null' }},
+      "errorMessage": {{ cstep['error_message']|tojson if cstep['error_message'] else 'null' }}
     }{% if not loop.last %},{% endif %}
     {% endfor %}
   ]

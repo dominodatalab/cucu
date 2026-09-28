@@ -7,6 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.37
 - Fix - replay view timeline no longer overflows for parent steps with nested substeps; `RundbFormatter.result()` now preserves the real per-step `start_at`/`end_at` timestamps set during execution instead of always overwriting them with a sequential chain value
+- Change - replay view timeline and Steps panel now show after-scenario cleanup hooks (selenium keep-alive, MHT download, user after_scenario/after_this_scenario hooks, browser cleanup) as trailing entries, instead of leaving that time unaccounted for; they're visually distinct and excluded from the "N / total" step count since they aren't Gherkin steps
 
 # 1.4.36
 - Fix - `fuzzy_find` caches `:vis` answers for the duration of a single call instead of re-deriving them per rule, cutting element lookups on large pages by roughly an order of magnitude (a button lookup on a 15k-element table drops from ~7.4s to ~0.6s); pages big enough to previously exceed the WebDriver script timeout are now found well within it
