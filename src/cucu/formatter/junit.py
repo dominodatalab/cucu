@@ -58,6 +58,9 @@ class CucuJUnitFormatter(Formatter):
 
     def update_scenario(self):
         if self.current_scenario is not None:
+            self.current_scenario_results["scenario_run_id"] = (
+                self.current_scenario.scenario_run_id
+            )
             self.current_scenario_results["time"] = str(
                 round(self.current_scenario_duration, 3)
             )
@@ -156,13 +159,13 @@ class CucuJUnitFormatter(Formatter):
             "failure": None,
             "error": None,
             "skipped": None,
+            "scenario_run_id": "",
         }
         self.current_scenario_results["foldername"] = escape(
             ellipsize_filename(scenario.name)
         )
         if scenario.tags:
             self.current_scenario_results["tags"] = ", ".join(scenario.tags)
-        self.current_scenario_results["scenario_run_id"] = scenario.scenario_run_id
 
         scenario_name = escape(scenario.name)
         self.feature_results["scenarios"][scenario_name] = (
