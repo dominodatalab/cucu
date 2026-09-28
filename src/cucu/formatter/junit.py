@@ -162,6 +162,7 @@ class CucuJUnitFormatter(Formatter):
         )
         if scenario.tags:
             self.current_scenario_results["tags"] = ", ".join(scenario.tags)
+        self.current_scenario_results["scenario_run_id"] = scenario.scenario_run_id
 
         scenario_name = escape(scenario.name)
         self.feature_results["scenarios"][scenario_name] = (
@@ -245,6 +246,7 @@ class CucuJUnitFormatter(Formatter):
                     "timestamp",
                     "time",
                     "tags",
+                    "scenario_run_id",
                 ]
 
                 return [
@@ -320,6 +322,7 @@ class CucuJUnitFormatter(Formatter):
                 testcase["tags"] = scenario["tags"]
             testcase["status"] = scenario["status"]
             testcase["time"] = scenario["time"]
+            testcase["scenario_run_id"] = scenario["scenario_run_id"]
 
             if scenario["failure"] is not None:
                 failure_message = "\n".join(scenario["failure"])
