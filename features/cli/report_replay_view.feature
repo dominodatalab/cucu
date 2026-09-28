@@ -42,6 +42,19 @@ Feature: Report replay view
      Then I wait to see the text "1 /"
       And I should see the text "passed"
 
+        * # parent steps with substeps must not double-count timing and overflow the timeline
+      And I execute in the current browser the following javascript and save the result to the variable "TIMELINE_OVERFLOW_CHECK"
+      """
+      const data = JSON.parse(document.getElementById("replay-data").textContent);
+      const maxEnd = Math.max(
+        ...data.steps
+          .filter((step) => step.startOffset !== null)
+          .map((step) => step.startOffset + (step.duration || 0))
+      );
+      return maxEnd <= data.scenarioDuration ? "no-overflow" : "overflow";
+      """
+      And I should see "{TIMELINE_OVERFLOW_CHECK}" is equal to "no-overflow"
+
   Scenario: Replay view renders screenshots for a browser scenario
     Given I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --results {CUCU_RESULTS_DIR}/replay-browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/replay-browser-results --output {CUCU_RESULTS_DIR}/replay-browser-report" and expect exit code "0"
