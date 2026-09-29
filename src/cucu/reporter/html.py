@@ -14,7 +14,11 @@ from cucu import format_gherkin_table, logger
 from cucu.ansi_parser import parse_log_to_html
 from cucu.config import CONFIG
 from cucu.reporter import encoder as video_encoder
-from cucu.utils import behave_filepath_to_cucu_logpath, ellipsize_filename
+from cucu.utils import (
+    behave_filepath_to_cucu_logpath,
+    ellipsize_filename,
+    parse_iso_timestamp,
+)
 
 
 def escape(data):
@@ -135,6 +139,41 @@ def step_table_to_html(table_data):
         table_data["headings"],
         text_indent,
     )
+
+
+def build_cleanup_steps(after_hooks, scenario_start_at):
+    """Synthesize step-like dicts from a scenario's after_hooks results (selenium
+    keep-alive, MHT download, user after_scenario/after_this_scenario hooks, browser
+    cleanup) so the replay view can place them on the timeline. Mirrors the offset/duration
+    computation used for real steps in generate()."""
+    cleanup_steps = []
+    for hook_result in after_hooks or []:
+        cleanup_step = {
+            "name": hook_result.get("name", ""),
+            "status": hook_result.get("status", "passed"),
+            "stderr": hook_result.get("stderr") or [],
+            "error_message": hook_result.get("error_message") or [],
+            "timestamp": "",
+            "time_offset": "",
+            "duration": 0.0,
+        }
+        hook_start_at = parse_iso_timestamp(hook_result.get("start_at"))
+        hook_end_at = parse_iso_timestamp(hook_result.get("end_at"))
+        if hook_start_at and hook_end_at:
+            cleanup_step["timestamp"] = hook_start_at
+            cleanup_step["duration"] = (
+                hook_end_at - hook_start_at
+            ).total_seconds()
+            if scenario_start_at:
+                hook_offset_seconds = max(
+                    0.0,
+                    (hook_start_at - scenario_start_at).total_seconds(),
+                )
+                cleanup_step["time_offset"] = datetime.fromtimestamp(
+                    hook_offset_seconds, timezone.utc
+                )
+        cleanup_steps.append(cleanup_step)
+    return cleanup_steps
 
 
 def generate(results: Path, basepath: Path):
@@ -337,6 +376,16 @@ def generate(results: Path, basepath: Path):
                         offset_seconds, timezone.utc
                     )
                     step_dict["time_offset"] = time_offset
+
+                # after-scenario hooks (selenium keep-alive, MHT download, user
+                # after_scenario/after_this_scenario hooks, browser cleanup) run after
+                # scenario.end_at is captured, so they're not part of the "steps" list;
+                # synthesize step-like entries so the replay view can place them on the
+                # timeline instead of leaving that trailing time unaccounted for.
+                scenario_dict["cleanup_steps"] = build_cleanup_steps(
+                    scenario_dict.get("after_hooks"),
+                    scenario_dict["start_at"],
+                )
 
                 logs_path = scenario_filepath / "logs"
 

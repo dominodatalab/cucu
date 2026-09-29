@@ -178,8 +178,15 @@ class RundbFormatter(Formatter):
 
     def result(self, step):
         """Called after processing a step result is known, applies to executed/skipped too."""
-        step.start_at = self.next_start_at
-        self.next_start_at = step.end_at = get_iso_timestamp_with_ms()
+        # Use real per-step timestamps from environment.py when available (set during step execution).
+        # Fall back to sequential chain only for untimed steps (e.g., skipped, undefined).
+        if not getattr(step, "start_at", None):
+            step.start_at = self.next_start_at
+        if not getattr(step, "end_at", None):
+            step.end_at = get_iso_timestamp_with_ms()
+
+        self.next_start_at = step.end_at
+
         previous_step_duration = getattr(
             self.this_scenario, "previous_step_duration", 0
         )

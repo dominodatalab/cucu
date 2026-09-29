@@ -42,6 +42,45 @@ Feature: Report replay view
      Then I wait to see the text "1 /"
       And I should see the text "passed"
 
+        * # parent steps with substeps must not double-count timing and overflow the timeline
+      And I execute in the current browser the following javascript and save the result to the variable "TIMELINE_OVERFLOW_CHECK"
+      """
+      const data = JSON.parse(document.getElementById("replay-data").textContent);
+      const maxEnd = Math.max(
+        ...data.steps
+          .filter((step) => step.startOffset !== null)
+          .map((step) => step.startOffset + (step.duration || 0))
+      );
+      return maxEnd <= data.scenarioDuration ? "no-overflow" : "overflow";
+      """
+      And I should see "{TIMELINE_OVERFLOW_CHECK}" is equal to "no-overflow"
+
+  Scenario: Replay view timeline bars do not overflow the track when substep durations double-count real time
+    Given I run the command "cucu run data/features/scenario_with_substeps_that_sleep.feature --results {CUCU_RESULTS_DIR}/replay-substeps-sleep-results" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/replay-substeps-sleep-results --output {CUCU_RESULTS_DIR}/replay-substeps-sleep-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/replay-substeps-sleep-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     When I click the link "Feature with substeps that sleep"
+      And I click the link "Scenario that uses a step with substeps that sleep"
+      And I click the link "🔁 Replay"
+     Then I wait to see the text "1 /"
+      And I should see the text "passed"
+
+        * # a step wrapping substeps that each sleep for real seconds has its own duration
+        * # legitimately span the same wall-clock window as its substeps, so summed bar
+        * # durations exceed the scenario's real elapsed time (PLAY_END) -- the width math
+        * # must not let that push step or cleanup bars past the right edge of the track
+      And I execute in the current browser the following javascript and save the result to the variable "BAR_OVERFLOW_CHECK"
+      """
+      const track = document.getElementById("timeline-track").getBoundingClientRect();
+      const bars = Array.from(document.querySelectorAll("#timeline-track .step-bar"));
+      const maxRight = bars.reduce((acc, bar) => Math.max(acc, bar.getBoundingClientRect().right), 0);
+      return maxRight <= track.right + 1
+        ? "no-overflow"
+        : "overflow maxRight=" + maxRight + " trackRight=" + track.right;
+      """
+      And I should see "{BAR_OVERFLOW_CHECK}" is equal to "no-overflow"
+
   Scenario: Replay view renders screenshots for a browser scenario
     Given I run the command "cucu run data/features/feature_with_passing_scenario_with_web.feature --results {CUCU_RESULTS_DIR}/replay-browser-results --env CUCU_BROKEN_IMAGES_PAGE_CHECK=disabled" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/replay-browser-results --output {CUCU_RESULTS_DIR}/replay-browser-report" and expect exit code "0"
@@ -53,6 +92,41 @@ Feature: Report replay view
      Then I wait to see the text "1 /"
       And I should see the link "Index"
       And I should see the link "Feature with passing scenario with web"
+
+        * # after-scenario cleanup hooks (keep-alive, MHT download, browser quit) get their own
+        * # trailing entries on the timeline instead of being silently dropped
+      And I should see the text "Cleanup"
+      And I execute in the current browser the following javascript and save the result to the variable "CLEANUP_STEPS_CHECK"
+      """
+      const data = JSON.parse(document.getElementById("replay-data").textContent);
+      const lastStepEnd = Math.max(
+        ...data.steps
+          .filter((step) => step.startOffset !== null)
+          .map((step) => step.startOffset + (step.duration || 0))
+      );
+      const allAfterSteps = data.cleanupSteps.every(
+        (cleanup) => cleanup.startOffset !== null && cleanup.startOffset >= lastStepEnd
+      );
+      return data.cleanupSteps.length > 0 && allAfterSteps ? "has-cleanup" : "no-cleanup";
+      """
+      And I should see "{CLEANUP_STEPS_CHECK}" is equal to "has-cleanup"
+
+        * # clicking a cleanup entry shows its own duration instead of leaving the step-timing
+        * # display frozen on the last real step's duration (which never changes shownStepIdx)
+      And I execute in the current browser the following javascript
+      """
+      document.querySelector(".steps-cleanup:last-of-type").click();
+      """
+      And I execute in the current browser the following javascript and save the result to the variable "CLEANUP_TIMING_CHECK"
+      """
+      const data = JSON.parse(document.getElementById("replay-data").textContent);
+      const lastCleanup = data.cleanupSteps[data.cleanupSteps.length - 1];
+      const displayed = document.getElementById("step-timing-text").textContent;
+      return displayed === lastCleanup.timingLabel
+        ? "matches"
+        : "mismatch displayed=" + displayed + " expected=" + lastCleanup.timingLabel;
+      """
+      And I should see "{CLEANUP_TIMING_CHECK}" is equal to "matches"
 
   Scenario: Replay view renders with CUCU_SCREENSHOT_VIDEO enabled
     Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/replay-video-echo-results --env CUCU_SCREENSHOT_VIDEO=true" and expect exit code "0"
