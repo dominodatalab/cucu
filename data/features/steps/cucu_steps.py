@@ -32,6 +32,18 @@ def step_with_substeps(context):
     )
 
 
+@step("I use a step with substeps that sleep")
+def step_with_substeps_that_sleep(context):
+    run_steps(
+        context,
+        """
+    When I sleep for "1" seconds
+     And I sleep for "1" seconds
+     And I sleep for "1" seconds
+    """,
+    )
+
+
 @step("I use a step with substeps and a heading")
 def step_with_substeps_and_heading(context):
     run_steps(

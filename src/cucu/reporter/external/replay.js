@@ -60,6 +60,18 @@
     : Math.max(BAR_COUNT - 1, 0);
   var TOTAL_DUR = PLAY_END > 0 ? PLAY_END : 1;
 
+  // A parent step's own duration legitimately spans the same wall-clock window as its
+  // substeps (each gets its own bar), so summed bar durations can exceed PLAY_END — that's
+  // fine for the *time* domain (timeToVis/timeToStepIdx key off real startOffset/PLAY_END,
+  // untouched below), but the *width* bonus formula divides by a single denominator shared
+  // across all bars, so an inflated sum there would push later bars' cumulative width past
+  // 100%. Normalize against whichever is larger so bonus widths can never overbook `remaining`.
+  var BONUS_DUR = Math.max(
+    TOTAL_DUR,
+    ALL_BARS.reduce(function (sum, s) { return sum + (s.duration || 0); }, 0),
+    0.001
+  );
+
   // ===== VISUAL COORDINATE SYSTEM =====
   // Steps (and trailing cleanup entries) get a guaranteed minimum width (VIS_MIN_W) and
   // a gap between adjacent bars (VIS_GAP), both as percentages of the track width. This
@@ -87,7 +99,7 @@
     var cursor = 0, arr = [];
     ALL_BARS.forEach(function (s) {
       var bonus = HAS_TIMING
-        ? (s.duration / TOTAL_DUR) * remaining
+        ? (s.duration / BONUS_DUR) * remaining
         : remaining / Math.max(BAR_COUNT, 1);
       var w = VIS_MIN_W + bonus;
       arr.push({ left: cursor, width: w });
