@@ -2,7 +2,15 @@
 
 from unittest.mock import MagicMock, patch
 
-from cucu.reporter.encoder import _render_text_card, _resolve_dimensions
+from cucu.config import CONFIG
+from cucu.reporter.encoder import (
+    _render_text_card,
+    _resolve_dimensions,
+    encode_frame_specs,
+    encode_videos_parallel,
+    encode_workers,
+    gather_scenario_frames,
+)
 
 
 def test_render_text_card_creates_image():
@@ -64,3 +72,118 @@ def test_resolve_dimensions_returns_image_size_from_first_screenshot():
         width, height = _resolve_dimensions([step], "/some/dir")
     assert width == 1920
     assert height == 1080
+
+
+def _fake_scenario(steps):
+    scenario = MagicMock()
+    scenario.steps.order_by.return_value = steps
+    return scenario
+
+
+def _fake_step(keyword="Given", name="a step", status="passed", shots=None):
+    s = MagicMock()
+    s.keyword = keyword
+    s.name = name
+    s.status = status
+    s.text = None
+    s.screenshots = shots or []
+    return s
+
+
+def test_gather_scenario_frames_returns_card_specs(tmp_path):
+    scenario_dir = tmp_path / "feature" / "scenario"
+    scenario_dir.mkdir(parents=True)
+    scenario = _fake_scenario(
+        [
+            _fake_step(name="step one"),
+            _fake_step(name="step two", status="failed"),
+        ]
+    )
+
+    gathered = gather_scenario_frames(scenario, scenario_dir)
+
+    assert gathered is not None
+    frame_specs, width, height = gathered
+    assert len(frame_specs) == 2
+    assert frame_specs[0] == ("card", "Given step one", "Given", "passed")
+    assert frame_specs[1][3] == "failed"
+    assert (width, height) == (1366, 768)
+
+
+def test_gather_scenario_frames_returns_image_specs(tmp_path):
+    scenario_dir = tmp_path / "feature" / "scenario"
+    scenario_dir.mkdir(parents=True)
+    img_path = scenario_dir / "0001 - step.png"
+    _render_text_card("x", "Given", "passed", 64, 64).save(img_path)
+    scenario = _fake_scenario(
+        [_fake_step(shots=[{"html_src": "0001 - step.png"}])]
+    )
+
+    gathered = gather_scenario_frames(scenario, scenario_dir)
+
+    frame_specs, width, height = gathered
+    assert frame_specs == [("image", str(img_path))]
+    assert (width, height) == (64, 64)
+
+
+def test_gather_scenario_frames_no_steps_returns_none(tmp_path):
+    scenario_dir = tmp_path / "feature" / "scenario"
+    scenario_dir.mkdir(parents=True)
+
+    assert gather_scenario_frames(_fake_scenario([]), scenario_dir) is None
+
+
+def test_encode_frame_specs_writes_mp4(tmp_path):
+    output = tmp_path / "screenshots.mp4"
+    specs = [
+        ("card", "Given a step", "Given", "passed"),
+        ("card", "Then another", "Then", "failed"),
+    ]
+
+    result = encode_frame_specs(specs, output, 64, 64)
+
+    assert result == output
+    assert output.exists() and output.stat().st_size > 0
+
+
+def test_encode_videos_parallel_encodes_and_copies(tmp_path):
+    jobs = []
+    for i in range(3):
+        src = tmp_path / f"scenario{i}" / "screenshots.mp4"
+        dest = tmp_path / f"report{i}" / "screenshots.mp4"
+        src.parent.mkdir()
+        dest.parent.mkdir()
+        specs = [("card", f"Given step {i}", "Given", "passed")]
+        jobs.append((specs, 64, 64, src, dest))
+
+    encoded = encode_videos_parallel(jobs, workers=2)
+
+    assert encoded == 3
+    for i in range(3):
+        assert (tmp_path / f"scenario{i}" / "screenshots.mp4").exists()
+        assert (tmp_path / f"report{i}" / "screenshots.mp4").exists()
+
+
+def test_encode_videos_parallel_counts_failures(tmp_path):
+    bad_spec = [("image", str(tmp_path / "missing.png"))]
+    good_spec = [("card", "Given ok", "Given", "passed")]
+    jobs = [
+        (bad_spec, 64, 64, tmp_path / "bad.mp4", None),
+        (good_spec, 64, 64, tmp_path / "good.mp4", None),
+    ]
+
+    assert encode_videos_parallel(jobs, workers=2) == 1
+    assert (tmp_path / "good.mp4").exists()
+
+
+def test_encode_workers_default_capped_at_three():
+    CONFIG["CUCU_VIDEO_ENCODE_WORKERS"] = ""
+    assert 1 <= encode_workers() <= 3
+
+
+def test_encode_workers_respects_config_override():
+    CONFIG["CUCU_VIDEO_ENCODE_WORKERS"] = "7"
+    try:
+        assert encode_workers() == 7
+    finally:
+        CONFIG["CUCU_VIDEO_ENCODE_WORKERS"] = ""

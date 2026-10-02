@@ -1,6 +1,9 @@
 """Video encoding for scenario screenshots using per-frame timestamps."""
 
 import logging
+import os
+import shutil
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import imageio.v2 as iio
@@ -150,7 +153,10 @@ def _encode_with_imageio(frames, output_path, width, height):
             pixelformat="yuv420p",
             macro_block_size=1,
             quality=None,
-            ffmpeg_params=["-crf", "23"],
+            # Screenshot slideshows at 1 fps don't benefit from slower
+            # presets: ultrafast encodes ~15x faster than the libx264
+            # default (medium) for a modest size increase.
+            ffmpeg_params=["-preset", "ultrafast", "-crf", "28"],
             ffmpeg_log_level="error",
         )
         try:
@@ -169,6 +175,132 @@ def _encode_with_imageio(frames, output_path, width, height):
         return None
 
 
+def gather_scenario_frames(scenario_obj, scenario_dir):
+    """Collect frame specs for a scenario without decoding any images.
+
+    Must run in the caller's thread: it reads the scenario's steps from the
+    DB and applies CONFIG.hide_secrets with the scenario's config loaded.
+    The returned specs are plain data safe to hand to worker threads.
+
+    Args:
+        scenario_obj: Scenario model object from DB
+        scenario_dir: Path to scenario results directory
+
+    Returns: (frame_specs, width, height) or None if there is nothing to
+        encode. Each frame spec is ("image", path) or
+        ("card", text, keyword, status).
+    """
+    scenario_dir = Path(scenario_dir)
+    results_dir = scenario_dir.parent.parent
+    steps_list = list(scenario_obj.steps.order_by(step.seq))
+
+    if not steps_list:
+        logger.error(f"No steps: '{scenario_dir.relative_to(results_dir)}'")
+        return None
+
+    width, height = _resolve_dimensions(steps_list, scenario_dir)
+
+    frame_specs = []
+    for s in steps_list:
+        step_specs = []
+        for img_data in s.screenshots or []:
+            img_path = _resolve_image_path(img_data, scenario_dir)
+            if img_path:
+                step_specs.append(("image", str(img_path)))
+        if not step_specs:
+            step_text = f"{s.keyword} {s.name}"
+            if s.text:
+                step_text += "\n" + (
+                    "\n".join(s.text)
+                    if isinstance(s.text, list)
+                    else str(s.text)
+                )
+            step_text = CONFIG.hide_secrets(step_text)
+            step_specs.append(
+                ("card", step_text, s.keyword, s.status or "untested")
+            )
+        frame_specs.extend(step_specs)
+
+    if not frame_specs:
+        logger.error(
+            f"No frames generated for scenario {scenario_obj.scenario_run_id}"
+        )
+        return None
+
+    return frame_specs, width, height
+
+
+def encode_frame_specs(frame_specs, output_path, width, height):
+    """Decode/render frames from specs and encode them to an MP4.
+
+    Thread-safe: touches no CONFIG or DB state, so multiple encodes can run
+    concurrently (the x264 work happens in a per-writer ffmpeg subprocess).
+
+    Args:
+        frame_specs: List of specs from gather_scenario_frames
+        output_path: Output MP4 file path
+        width: Video width in pixels
+        height: Video height in pixels
+
+    Returns: output_path or None if encoding failed
+    """
+    frames = []
+    for spec in frame_specs:
+        if spec[0] == "image":
+            frames.append(Image.open(spec[1]).convert("RGB"))
+        else:
+            _, text, keyword, status = spec
+            frames.append(
+                _render_text_card(text, keyword, status, width, height)
+            )
+    return _encode_with_imageio(frames, output_path, width, height)
+
+
+def encode_workers():
+    """Worker count for parallel video encoding.
+
+    Uses CUCU_VIDEO_ENCODE_WORKERS when set; otherwise min(3, cpu count).
+    The default is capped because each in-flight scenario holds all its
+    decoded frames in memory while encoding.
+    """
+    configured = str(CONFIG.get("CUCU_VIDEO_ENCODE_WORKERS", "") or "").strip()
+    if configured:
+        return max(1, int(configured))
+    return max(1, min(3, os.cpu_count() or 1))
+
+
+def encode_videos_parallel(jobs, workers=None):
+    """Encode scenario videos concurrently on a thread pool.
+
+    Args:
+        jobs: list of (frame_specs, width, height, output_path, copy_to)
+            tuples; copy_to (or None) is a destination the finished MP4 is
+            copied to (e.g. the report directory).
+        workers: thread count; defaults to encode_workers()
+
+    Returns: number of successfully encoded videos
+    """
+    if workers is None:
+        workers = encode_workers()
+
+    def _encode_one(job):
+        frame_specs, width, height, output_path, copy_to = job
+        try:
+            result = encode_frame_specs(
+                frame_specs, output_path, width, height
+            )
+            if result and Path(result).exists():
+                if copy_to:
+                    shutil.copy2(result, copy_to)
+                return True
+        except Exception as ex:
+            logger.error(f"Video encoding failed for {output_path}: {ex}")
+        return False
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        return sum(pool.map(_encode_one, jobs))
+
+
 def encode_scenario_video(scenario_obj, scenario_dir):
     """Encode video for a scenario with one frame per step.
 
@@ -180,49 +312,14 @@ def encode_scenario_video(scenario_obj, scenario_dir):
     """
     output_path = Path(scenario_dir) / "screenshots.mp4"
     results_dir = Path(scenario_dir).parent.parent
-    steps_list = list(scenario_obj.steps.order_by(step.seq))
 
     if output_path.exists() and output_path.stat().st_size > 0:
         logger.debug(f"Skip existing: {output_path.relative_to(results_dir)}")
         return output_path
 
-    if not steps_list:
-        logger.error(f"No steps: '{scenario_dir.relative_to(results_dir)}'")
+    gathered = gather_scenario_frames(scenario_obj, scenario_dir)
+    if gathered is None:
         return None
 
-    width, height = _resolve_dimensions(steps_list, scenario_dir)
-
-    frames = []
-    for s in steps_list:
-        step_frames = []
-        for img_data in s.screenshots or []:
-            img_path = _resolve_image_path(img_data, scenario_dir)
-            if img_path:
-                step_frames.append(Image.open(img_path).convert("RGB"))
-        if not step_frames:
-            step_text = f"{s.keyword} {s.name}"
-            if s.text:
-                step_text += "\n" + (
-                    "\n".join(s.text)
-                    if isinstance(s.text, list)
-                    else str(s.text)
-                )
-            step_text = CONFIG.hide_secrets(step_text)
-            step_frames.append(
-                _render_text_card(
-                    step_text,
-                    s.keyword,
-                    s.status or "untested",
-                    width,
-                    height,
-                )
-            )
-        frames.extend(step_frames)
-
-    if not frames:
-        logger.error(
-            f"No frames generated for scenario {scenario_obj.scenario_run_id}"
-        )
-        return None
-
-    return _encode_with_imageio(frames, output_path, width, height)
+    frame_specs, width, height = gathered
+    return encode_frame_specs(frame_specs, output_path, width, height)

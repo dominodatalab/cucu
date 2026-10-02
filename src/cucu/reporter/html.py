@@ -180,6 +180,7 @@ def generate(results: Path, basepath: Path):
 
         features = []
         video_count = 0
+        pending_videos = []
 
         for db_feature in db_features:
             if db_feature.status == "untested":
@@ -391,23 +392,41 @@ def generate(results: Path, basepath: Path):
                         / feature_dict["folder_name"]
                         / scenario_dict["folder_name"]
                     )
-                    scen_obj = db.scenario.get_by_id(
-                        scenario_dict["scenario_run_id"]
-                    )
+                    mp4_src = src_scenario_dir / "screenshots.mp4"
 
-                    try:
-                        mp4_src = video_encoder.encode_scenario_video(
-                            scen_obj, src_scenario_dir
+                    if mp4_src.exists() and mp4_src.stat().st_size > 0:
+                        # Already encoded (e.g. by a previous report run)
+                        shutil.copy2(
+                            mp4_src, scenario_filepath / "screenshots.mp4"
                         )
-                        if mp4_src and mp4_src.exists():
-                            shutil.copy2(
-                                mp4_src, scenario_filepath / "screenshots.mp4"
+                        video_count += 1
+                    else:
+                        # Gather frame specs now, while this scenario's
+                        # config (secrets redaction) is loaded and the DB is
+                        # available; the actual encoding runs on a thread
+                        # pool after all scenarios are processed.
+                        scen_obj = db.scenario.get_by_id(
+                            scenario_dict["scenario_run_id"]
+                        )
+                        try:
+                            gathered = video_encoder.gather_scenario_frames(
+                                scen_obj, src_scenario_dir
                             )
-                            video_count += 1
-                    except Exception as ex:
-                        logger.error(
-                            f"Failed to encode {src_scenario_dir}: {ex}"
-                        )
+                            if gathered:
+                                frame_specs, vid_width, vid_height = gathered
+                                pending_videos.append(
+                                    (
+                                        frame_specs,
+                                        vid_width,
+                                        vid_height,
+                                        mp4_src,
+                                        scenario_filepath / "screenshots.mp4",
+                                    )
+                                )
+                        except Exception as ex:
+                            logger.error(
+                                f"Failed to gather frames for {src_scenario_dir}: {ex}"
+                            )
 
                     screenshots_video = "screenshots.mp4"
                     # Assign cumulative frame indices to each screenshot.
@@ -480,6 +499,15 @@ def generate(results: Path, basepath: Path):
                         if x["duration"]
                     ]
                 )
+            )
+
+        if pending_videos:
+            workers = video_encoder.encode_workers()
+            logger.info(
+                f"Encoding {len(pending_videos)} scenario videos with {workers} workers"
+            )
+            video_count += video_encoder.encode_videos_parallel(
+                pending_videos, workers
             )
 
         logger.info(

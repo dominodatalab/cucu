@@ -483,6 +483,13 @@ CONFIG.define(
     default=False,
 )
 CONFIG.define(
+    "CUCU_VIDEO_ENCODE_WORKERS",
+    "number of parallel workers used to encode scenario videos during "
+    "cucu report; defaults to min(3, cpu count) since each in-flight "
+    "scenario holds its decoded frames in memory",
+    default="",
+)
+CONFIG.define(
     "CUCU_SELENIUM_KEEP_ALIVE_MAX_DURATION_S",
     "keep-alive total max duration in seconds to prevent infinite keep-alive pings (default: 30 minutes)",
     default=1800,
