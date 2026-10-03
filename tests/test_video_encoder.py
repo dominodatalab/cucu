@@ -2,6 +2,8 @@
 
 from unittest.mock import MagicMock, patch
 
+import imageio.v2 as iio
+
 from cucu.config import CONFIG
 from cucu.reporter.encoder import (
     _render_text_card,
@@ -146,6 +148,49 @@ def test_encode_frame_specs_writes_mp4(tmp_path):
     assert output.exists() and output.stat().st_size > 0
 
 
+def test_encode_frame_specs_exact_frame_count_and_size(tmp_path):
+    # The concat list repeats the last entry so its duration counts;
+    # -frames:v must trim the output back to exactly len(frame_specs).
+    output = tmp_path / "screenshots.mp4"
+    specs = [("card", f"Given step {i}", "Given", "passed") for i in range(3)]
+
+    assert encode_frame_specs(specs, output, 64, 64) == output
+
+    reader = iio.get_reader(str(output))
+    try:
+        assert reader.count_frames() == 3
+        assert tuple(reader.get_meta_data()["size"]) == (64, 64)
+    finally:
+        reader.close()
+
+
+def test_encode_frame_specs_scales_mismatched_image(tmp_path):
+    img_path = tmp_path / "shot.png"
+    _render_text_card("x", "Given", "passed", 128, 96).save(img_path)
+    output = tmp_path / "screenshots.mp4"
+
+    assert encode_frame_specs([("image", str(img_path))], output, 64, 64)
+
+    reader = iio.get_reader(str(output))
+    try:
+        assert tuple(reader.get_meta_data()["size"]) == (64, 64)
+    finally:
+        reader.close()
+
+
+def test_encode_frame_specs_path_with_single_quote(tmp_path):
+    img_dir = tmp_path / "scenario with 'quotes'"
+    img_dir.mkdir()
+    img_path = img_dir / "0001 - shot.png"
+    _render_text_card("x", "Given", "passed", 64, 64).save(img_path)
+    output = tmp_path / "screenshots.mp4"
+
+    result = encode_frame_specs([("image", str(img_path))], output, 64, 64)
+
+    assert result == output
+    assert output.stat().st_size > 0
+
+
 def test_encode_videos_parallel_encodes_and_copies(tmp_path):
     jobs = []
     for i in range(3):
@@ -176,9 +221,9 @@ def test_encode_videos_parallel_counts_failures(tmp_path):
     assert (tmp_path / "good.mp4").exists()
 
 
-def test_encode_workers_default_capped_at_three():
+def test_encode_workers_default_capped_at_six():
     CONFIG["CUCU_VIDEO_ENCODE_WORKERS"] = ""
-    assert 1 <= encode_workers() <= 3
+    assert 1 <= encode_workers() <= 6
 
 
 def test_encode_workers_respects_config_override():

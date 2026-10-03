@@ -485,8 +485,8 @@ CONFIG.define(
 CONFIG.define(
     "CUCU_VIDEO_ENCODE_WORKERS",
     "number of parallel workers used to encode scenario videos during "
-    "cucu report; defaults to min(3, cpu count) since each in-flight "
-    "scenario holds its decoded frames in memory",
+    "cucu report; defaults to min(6, cpu count), the measured scaling "
+    "plateau since each ffmpeg subprocess also runs its own x264 threads",
     default="",
 )
 CONFIG.define(

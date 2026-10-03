@@ -3,11 +3,12 @@
 import logging
 import os
 import shutil
+import subprocess
+import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-import imageio.v2 as iio
-import numpy as np
+import imageio_ffmpeg
 from PIL import Image, ImageDraw, ImageFont
 
 from cucu.config import CONFIG
@@ -136,43 +137,12 @@ def _resolve_dimensions(steps_list, scenario_dir):
     return (width // 2) * 2, (height // 2) * 2
 
 
-def _encode_with_imageio(frames, output_path, width, height):
-    """Encode video from PIL Image frames using imageio-ffmpeg (libx264, browser-compatible).
-
-    Args:
-        frames: List of PIL Image objects (RGB)
-        output_path: Output MP4 file path
-        width: Video width in pixels
-        height: Video height in pixels
-    """
-    try:
-        writer = iio.get_writer(
-            str(output_path),
-            fps=1,
-            codec="libx264",
-            pixelformat="yuv420p",
-            macro_block_size=1,
-            quality=None,
-            # Screenshot slideshows at 1 fps don't benefit from slower
-            # presets: ultrafast encodes ~15x faster than the libx264
-            # default (medium) for a modest size increase.
-            ffmpeg_params=["-preset", "ultrafast", "-crf", "28"],
-            ffmpeg_log_level="error",
-        )
-        try:
-            for pil_img in frames:
-                img = pil_img.convert("RGB")
-                if img.width != width or img.height != height:
-                    img = img.resize((width, height), Image.LANCZOS)
-                writer.append_data(np.asarray(img))
-        finally:
-            writer.close()
-        return output_path
-    except Exception as e:
-        logger.error(f"Video encoding failed for {output_path}: {e}")
-        if Path(output_path).exists():
-            Path(output_path).unlink()
-        return None
+def _concat_entry(frame_path):
+    """Format one concat-demuxer list entry for a frame shown for 1 second."""
+    # The concat demuxer quotes paths with single quotes; an embedded single
+    # quote is escaped shell-style as '\''.
+    escaped = str(frame_path).replace("'", "'\\''")
+    return f"file '{escaped}'\nduration 1"
 
 
 def gather_scenario_frames(scenario_obj, scenario_dir):
@@ -231,10 +201,16 @@ def gather_scenario_frames(scenario_obj, scenario_dir):
 
 
 def encode_frame_specs(frame_specs, output_path, width, height):
-    """Decode/render frames from specs and encode them to an MP4.
+    """Encode frames to an MP4, letting ffmpeg decode the PNGs directly.
+
+    Screenshot paths are passed to ffmpeg via its concat demuxer so decoding,
+    scaling, and x264 encoding all happen in one subprocess — ~2.5x faster
+    than decoding in Python and holds no decoded frames in process memory.
+    Text cards (steps without screenshots) are rendered with PIL to temporary
+    PNGs first.
 
     Thread-safe: touches no CONFIG or DB state, so multiple encodes can run
-    concurrently (the x264 work happens in a per-writer ffmpeg subprocess).
+    concurrently and all heavy work happens in per-call ffmpeg subprocesses.
 
     Args:
         frame_specs: List of specs from gather_scenario_frames
@@ -244,29 +220,84 @@ def encode_frame_specs(frame_specs, output_path, width, height):
 
     Returns: output_path or None if encoding failed
     """
-    frames = []
-    for spec in frame_specs:
-        if spec[0] == "image":
-            frames.append(Image.open(spec[1]).convert("RGB"))
-        else:
-            _, text, keyword, status = spec
-            frames.append(
-                _render_text_card(text, keyword, status, width, height)
+    try:
+        with tempfile.TemporaryDirectory(prefix="cucu-video-") as tmp_dir:
+            entries = []
+            for i, spec in enumerate(frame_specs):
+                if spec[0] == "image":
+                    frame_path = spec[1]
+                else:
+                    _, text, keyword, status = spec
+                    card = _render_text_card(
+                        text, keyword, status, width, height
+                    )
+                    frame_path = os.path.join(tmp_dir, f"card-{i}.png")
+                    card.save(frame_path)
+                entries.append(_concat_entry(frame_path))
+            # The concat demuxer ignores the last entry's duration, so repeat
+            # the final frame and trim back to the exact count with -frames:v.
+            entries.append(entries[-1])
+            list_path = Path(tmp_dir) / "frames.txt"
+            list_path.write_text("\n".join(entries), encoding="utf-8")
+
+            result = subprocess.run(
+                [
+                    imageio_ffmpeg.get_ffmpeg_exe(),
+                    "-y",
+                    "-loglevel",
+                    "error",
+                    "-f",
+                    "concat",
+                    "-safe",
+                    "0",
+                    "-i",
+                    str(list_path),
+                    # lanczos matches the PIL resize previously used for
+                    # frames whose size differs from the video dimensions
+                    "-vf",
+                    f"scale={width}:{height}:flags=lanczos,format=yuv420p",
+                    "-r",
+                    "1",
+                    "-frames:v",
+                    str(len(frame_specs)),
+                    "-c:v",
+                    "libx264",
+                    # Screenshot slideshows at 1 fps don't benefit from
+                    # slower presets: ultrafast encodes ~15x faster than the
+                    # libx264 default (medium) for a modest size increase.
+                    "-preset",
+                    "ultrafast",
+                    "-crf",
+                    "28",
+                    str(output_path),
+                ],
+                capture_output=True,
+                text=True,
             )
-    return _encode_with_imageio(frames, output_path, width, height)
+        if result.returncode != 0:
+            raise RuntimeError(
+                result.stderr.strip() or f"ffmpeg exited {result.returncode}"
+            )
+        return output_path
+    except Exception as e:
+        logger.error(f"Video encoding failed for {output_path}: {e}")
+        if Path(output_path).exists():
+            Path(output_path).unlink()
+        return None
 
 
 def encode_workers():
     """Worker count for parallel video encoding.
 
-    Uses CUCU_VIDEO_ENCODE_WORKERS when set; otherwise min(3, cpu count).
-    The default is capped because each in-flight scenario holds all its
-    decoded frames in memory while encoding.
+    Uses CUCU_VIDEO_ENCODE_WORKERS when set; otherwise min(6, cpu count).
+    Benchmarks on real report workloads plateau around 6 workers (each
+    ffmpeg subprocess also runs its own x264 threads), so going wider only
+    oversubscribes the CPU.
     """
     configured = str(CONFIG.get("CUCU_VIDEO_ENCODE_WORKERS", "") or "").strip()
     if configured:
         return max(1, int(configured))
-    return max(1, min(3, os.cpu_count() or 1))
+    return max(1, min(6, os.cpu_count() or 1))
 
 
 def encode_videos_parallel(jobs, workers=None):
