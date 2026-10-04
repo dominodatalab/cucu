@@ -483,6 +483,23 @@ CONFIG.define(
     default=False,
 )
 CONFIG.define(
+    "CUCU_VIDEO_ENCODE_WORKERS",
+    "number of parallel workers used to encode scenario videos during "
+    "cucu run and cucu report; defaults to min(6, cpu count), the measured "
+    "scaling plateau since each ffmpeg subprocess also runs its own x264 "
+    "threads",
+    default="",
+)
+CONFIG.define(
+    "CUCU_VIDEO_ENCODE_START_REMAINING",
+    "with --workers > 1 and CUCU_SCREENSHOT_VIDEO, cucu run starts encoding "
+    "finished scenarios' videos once at most this many features remain "
+    "unfinished, so cucu report only copies them; defaults to "
+    "ceil(workers / 2) - 1 (more than half the workers idle), and a "
+    "negative value leaves all encoding to cucu report",
+    default="",
+)
+CONFIG.define(
     "CUCU_SELENIUM_KEEP_ALIVE_MAX_DURATION_S",
     "keep-alive total max duration in seconds to prevent infinite keep-alive pings (default: 30 minutes)",
     default=1800,
