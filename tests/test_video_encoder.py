@@ -1,14 +1,19 @@
 """Unit tests for video encoder module."""
 
+import json
+import sqlite3
 from unittest.mock import MagicMock, patch
 
 import imageio.v2 as iio
 
 from cucu.config import CONFIG
 from cucu.reporter.encoder import (
+    RunVideoEncoder,
+    _merge_identical_frames,
     _render_text_card,
     _resolve_dimensions,
     encode_frame_specs,
+    encode_start_remaining,
     encode_videos_parallel,
     encode_workers,
     gather_scenario_frames,
@@ -76,12 +81,6 @@ def test_resolve_dimensions_returns_image_size_from_first_screenshot():
     assert height == 1080
 
 
-def _fake_scenario(steps):
-    scenario = MagicMock()
-    scenario.steps.order_by.return_value = steps
-    return scenario
-
-
 def _fake_step(keyword="Given", name="a step", status="passed", shots=None):
     s = MagicMock()
     s.keyword = keyword
@@ -95,14 +94,12 @@ def _fake_step(keyword="Given", name="a step", status="passed", shots=None):
 def test_gather_scenario_frames_returns_card_specs(tmp_path):
     scenario_dir = tmp_path / "feature" / "scenario"
     scenario_dir.mkdir(parents=True)
-    scenario = _fake_scenario(
-        [
-            _fake_step(name="step one"),
-            _fake_step(name="step two", status="failed"),
-        ]
-    )
+    steps = [
+        _fake_step(name="step one"),
+        _fake_step(name="step two", status="failed"),
+    ]
 
-    gathered = gather_scenario_frames(scenario, scenario_dir)
+    gathered = gather_scenario_frames(steps, scenario_dir)
 
     assert gathered is not None
     frame_specs, width, height = gathered
@@ -117,11 +114,9 @@ def test_gather_scenario_frames_returns_image_specs(tmp_path):
     scenario_dir.mkdir(parents=True)
     img_path = scenario_dir / "0001 - step.png"
     _render_text_card("x", "Given", "passed", 64, 64).save(img_path)
-    scenario = _fake_scenario(
-        [_fake_step(shots=[{"html_src": "0001 - step.png"}])]
-    )
+    steps = [_fake_step(shots=[{"html_src": "0001 - step.png"}])]
 
-    gathered = gather_scenario_frames(scenario, scenario_dir)
+    gathered = gather_scenario_frames(steps, scenario_dir)
 
     frame_specs, width, height = gathered
     assert frame_specs == [("image", str(img_path))]
@@ -132,7 +127,7 @@ def test_gather_scenario_frames_no_steps_returns_none(tmp_path):
     scenario_dir = tmp_path / "feature" / "scenario"
     scenario_dir.mkdir(parents=True)
 
-    assert gather_scenario_frames(_fake_scenario([]), scenario_dir) is None
+    assert gather_scenario_frames([], scenario_dir) is None
 
 
 def test_encode_frame_specs_writes_mp4(tmp_path):
@@ -232,3 +227,170 @@ def test_encode_workers_respects_config_override():
         assert encode_workers() == 7
     finally:
         CONFIG["CUCU_VIDEO_ENCODE_WORKERS"] = ""
+
+
+def _frame_count(path):
+    reader = iio.get_reader(str(path))
+    try:
+        return reader.count_frames()
+    finally:
+        reader.close()
+
+
+def test_merge_identical_frames_groups_consecutive_duplicates(tmp_path):
+    a = tmp_path / "a.png"
+    a_copy = tmp_path / "a-copy.png"
+    b = tmp_path / "b.png"
+    _render_text_card("a", "Given", "passed", 64, 64).save(a)
+    a_copy.write_bytes(a.read_bytes())
+    _render_text_card("b", "Given", "failed", 64, 64).save(b)
+    card = ("card", "Then done", "Then", "passed")
+    specs = [
+        ("image", str(a)),
+        ("image", str(a_copy)),
+        ("image", str(b)),
+        ("image", str(a)),
+        card,
+        card,
+    ]
+
+    runs = _merge_identical_frames(specs)
+
+    assert [count for _, count in runs] == [2, 1, 1, 2]
+    assert runs[0][0] == ("image", str(a))
+
+
+def test_encode_frame_specs_keeps_one_frame_per_spec_with_duplicates(
+    tmp_path,
+):
+    img = tmp_path / "same.png"
+    _render_text_card("x", "Given", "passed", 64, 64).save(img)
+    specs = [("image", str(img))] * 4 + [
+        ("card", "Then done", "Then", "passed")
+    ]
+    output = tmp_path / "screenshots.mp4"
+
+    assert encode_frame_specs(specs, output, 64, 64) == output
+    assert _frame_count(output) == 5
+
+
+def test_encode_frame_specs_failure_leaves_no_partial_file(tmp_path):
+    output = tmp_path / "screenshots.mp4"
+    specs = [("image", str(tmp_path / "missing.png"))]
+
+    assert encode_frame_specs(specs, output, 64, 64) is None
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_encode_start_remaining_default_and_override():
+    CONFIG["CUCU_VIDEO_ENCODE_START_REMAINING"] = ""
+    try:
+        assert encode_start_remaining(7) == 3
+        assert encode_start_remaining(8) == 3
+        assert encode_start_remaining(2) == 0
+        CONFIG["CUCU_VIDEO_ENCODE_START_REMAINING"] = "-1"
+        assert encode_start_remaining(7) == -1
+    finally:
+        CONFIG["CUCU_VIDEO_ENCODE_START_REMAINING"] = ""
+
+
+def _worker_db(results, run_id, worker_id):
+    conn = sqlite3.connect(results / f"run_{run_id}_{worker_id}.db")
+    conn.executescript(
+        """
+        CREATE TABLE feature (feature_run_id TEXT, name TEXT, status TEXT,
+                              end_at TEXT);
+        CREATE TABLE scenario (scenario_run_id TEXT, feature_run_id TEXT,
+                               name TEXT, seq INTEGER);
+        CREATE TABLE step (scenario_run_id TEXT, seq INTEGER, keyword TEXT,
+                           name TEXT, status TEXT, text TEXT,
+                           screenshots TEXT);
+        """
+    )
+    return conn
+
+
+def _add_feature(conn, results, feature_id, finished):
+    name = f"Feature {feature_id}"
+    conn.execute(
+        "INSERT INTO feature VALUES (?, ?, ?, ?)",
+        (feature_id, name, "passed", "2026-10-03" if finished else None),
+    )
+    conn.execute(
+        "INSERT INTO scenario VALUES (?, ?, ?, 1)",
+        (f"s-{feature_id}", feature_id, f"Scenario {feature_id}"),
+    )
+    scenario_dir = results / name / f"Scenario {feature_id}"
+    (scenario_dir / "logs").mkdir(parents=True)
+    _render_text_card("x", "Given", "passed", 64, 64).save(
+        scenario_dir / "0000 - shot.png"
+    )
+    conn.executemany(
+        "INSERT INTO step VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [
+            (
+                f"s-{feature_id}",
+                1,
+                "Given",
+                "I open a page",
+                "passed",
+                None,
+                json.dumps([{"html_src": "0000 - shot.png"}]),
+            ),
+            (f"s-{feature_id}", 2, "Then", "I see it", "passed", None, "[]"),
+        ],
+    )
+    conn.commit()
+    return scenario_dir / "screenshots.mp4"
+
+
+def test_run_video_encoder_waits_for_threshold_and_finished_features(
+    tmp_path,
+):
+    CONFIG["CUCU_RUN_ID"] = "run1"
+    conn = _worker_db(tmp_path, "run1", "w1")
+    done_mp4 = _add_feature(conn, tmp_path, "f1", finished=True)
+    pending_mp4 = _add_feature(conn, tmp_path, "f2", finished=False)
+    encoder = RunVideoEncoder(tmp_path, start_remaining=1, workers=2)
+
+    encoder.poll(2)
+    assert encoder.pool is None
+
+    encoder.poll(1)
+    assert encoder.pool is not None
+
+    conn.execute("UPDATE feature SET end_at = 'x' WHERE feature_run_id='f2'")
+    conn.commit()
+    conn.close()
+
+    assert encoder.finish() == 2
+    assert _frame_count(done_mp4) == 2
+    assert _frame_count(pending_mp4) == 2
+    assert not list(tmp_path.rglob("*.partial"))
+
+
+def test_run_video_encoder_ignores_other_runs_and_existing_videos(tmp_path):
+    CONFIG["CUCU_RUN_ID"] = "run2"
+    other = _worker_db(tmp_path, "older", "w1")
+    other_mp4 = _add_feature(other, tmp_path, "old", finished=True)
+    other.close()
+    conn = _worker_db(tmp_path, "run2", "w1")
+    existing_mp4 = _add_feature(conn, tmp_path, "f1", finished=True)
+    existing_mp4.write_bytes(b"already encoded")
+    conn.close()
+    encoder = RunVideoEncoder(tmp_path, start_remaining=0, workers=1)
+
+    assert encoder.finish() == 0
+    assert not other_mp4.exists()
+    assert existing_mp4.read_bytes() == b"already encoded"
+
+
+def test_run_video_encoder_cancel_before_start_is_noop(tmp_path):
+    CONFIG["CUCU_RUN_ID"] = "run3"
+    conn = _worker_db(tmp_path, "run3", "w1")
+    mp4 = _add_feature(conn, tmp_path, "f1", finished=True)
+    conn.close()
+    encoder = RunVideoEncoder(tmp_path, start_remaining=0, workers=1)
+
+    assert encoder.finish(cancel=True) == 0
+    assert not mp4.exists()

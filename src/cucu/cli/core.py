@@ -28,11 +28,12 @@ from cucu import (
     reporter,
 )
 from cucu.cli import thread_dumper
-from cucu.cli.run import behave, behave_init, create_run
+from cucu.cli.run import behave, behave_init, create_run, cucurc_anchor
 from cucu.cli.steps import print_human_readable_steps, print_json_steps
 from cucu.cli.tags import collect_cucu_tags
 from cucu.config import CONFIG
 from cucu.lint import linter
+from cucu.reporter import encoder as video_encoder
 from cucu.utils import generate_short_id
 
 # set env var BEHAVE_STRIP_STEPS_WITH_TRAILING_COLON=yes before importing behave
@@ -336,6 +337,7 @@ def run(
 
     create_run(results, filepaths)
 
+    run_video_encoder = None
     try:
         if workers is None or workers == 1:
             logger.debug(
@@ -398,6 +400,24 @@ def run(
                 start_method = "forkserver"
             else:
                 start_method = "fork"
+
+            # The parent never loads cucurc (only workers do), so peek at it
+            # for the video settings without keeping it loaded.
+            CONFIG.snapshot("run-video-settings")
+            try:
+                CONFIG.load_cucurc_files(cucurc_anchor(filepaths))
+                if not dry_run and CONFIG.true("CUCU_SCREENSHOT_VIDEO"):
+                    start_remaining = video_encoder.encode_start_remaining(
+                        int(workers)
+                    )
+                    if start_remaining >= 0:
+                        run_video_encoder = video_encoder.RunVideoEncoder(
+                            results,
+                            start_remaining,
+                            video_encoder.encode_workers(),
+                        )
+            finally:
+                CONFIG.restore(with_pop=True)
 
             with WorkerPool(
                 n_jobs=int(workers), start_method=start_method
@@ -508,6 +528,9 @@ def run(
 
                     async_results = remaining
 
+                    if run_video_encoder:
+                        run_video_encoder.poll(len(remaining))
+
                     if len(remaining) == 0:
                         if timer:
                             # we're done so cancel any outstanding overall time limit
@@ -522,6 +545,9 @@ def run(
                     )
                     kill_workers()
 
+                if run_video_encoder:
+                    run_video_encoder.finish(cancel=timeout_reached)
+
                 task_failed.update(async_results)
 
                 if task_failed:
@@ -533,6 +559,11 @@ def run(
                         "there are failures, see above for details"
                     )
     finally:
+        if run_video_encoder:
+            # no-op after a normal finish; on an interrupt, let in-flight
+            # encodes complete and drop the queued ones
+            run_video_encoder.finish(cancel=True)
+
         if dumper is not None:
             dumper.stop()
 

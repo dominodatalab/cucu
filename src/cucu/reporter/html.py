@@ -410,7 +410,8 @@ def generate(results: Path, basepath: Path):
                         )
                         try:
                             gathered = video_encoder.gather_scenario_frames(
-                                scen_obj, src_scenario_dir
+                                list(scen_obj.steps.order_by(db.step.seq)),
+                                src_scenario_dir,
                             )
                             if gathered:
                                 frame_specs, vid_width, vid_height = gathered
