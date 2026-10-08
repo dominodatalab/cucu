@@ -58,6 +58,9 @@ class CucuJUnitFormatter(Formatter):
 
     def update_scenario(self):
         if self.current_scenario is not None:
+            self.current_scenario_results["scenario_run_id"] = (
+                self.current_scenario.scenario_run_id
+            )
             self.current_scenario_results["time"] = str(
                 round(self.current_scenario_duration, 3)
             )
@@ -156,6 +159,7 @@ class CucuJUnitFormatter(Formatter):
             "failure": None,
             "error": None,
             "skipped": None,
+            "scenario_run_id": "",
         }
         self.current_scenario_results["foldername"] = escape(
             ellipsize_filename(scenario.name)
@@ -245,6 +249,7 @@ class CucuJUnitFormatter(Formatter):
                     "timestamp",
                     "time",
                     "tags",
+                    "scenario_run_id",
                 ]
 
                 return [
@@ -320,6 +325,7 @@ class CucuJUnitFormatter(Formatter):
                 testcase["tags"] = scenario["tags"]
             testcase["status"] = scenario["status"]
             testcase["time"] = scenario["time"]
+            testcase["scenario_run_id"] = scenario["scenario_run_id"]
 
             if scenario["failure"] is not None:
                 failure_message = "\n".join(scenario["failure"])
