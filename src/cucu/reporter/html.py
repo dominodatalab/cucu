@@ -239,13 +239,11 @@ def generate(results: Path, basepath: Path, workers: int | None = None):
         feature_count = db.feature.select().count()
         scenario_count = db.scenario.select().count()
         step_count = db.step.select().count()
-        worker_info = (
-            f"{workers} workers"
-            if workers and workers > 1
-            else "1 worker (serial)"
+        worker_suffix = (
+            f" using {workers} workers" if workers and workers > 1 else ""
         )
         logger.info(
-            f"Starting to process {feature_count} features, {scenario_count} scenarios, and {step_count} steps for report using {worker_info}"
+            f"Starting to process {feature_count} features, {scenario_count} scenarios, and {step_count} steps for report{worker_suffix}"
         )
 
         db_features = db.feature.select().order_by(db.feature.start_at)
