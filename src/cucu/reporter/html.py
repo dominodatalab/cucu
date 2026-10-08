@@ -238,8 +238,12 @@ def generate(results: Path, basepath: Path):
             feature_dict["results_dir"] = feature_results_dir
             feature_dict["folder_name"] = ellipsize_filename(db_feature.name)
             feature_dict["duration"] = (
-                feature_dict["start_at"] - feature_dict["start_at"]
-            ).total_seconds()
+                (
+                    feature_dict["end_at"] - feature_dict["start_at"]
+                ).total_seconds()
+                if feature_dict["end_at"]
+                else 0.0
+            )
 
             process_tags(feature_dict)
 

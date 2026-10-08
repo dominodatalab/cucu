@@ -340,7 +340,7 @@
 {% endif %}
 
 <!-- STDERR -->
-{% if steps | selectattr('stderr') | list %}
+{% if (steps | selectattr('stderr') | list) or (scenario['cleanup_steps'] | selectattr('stderr') | list) %}
 {% call log_panel('vp-stderr-panel', 'Stderr', 'stderr-follow-chk', 'vp-stderr-content', 'stderr-resize-handle',
                   timeline_track_id='stderr-timeline-track', timeline_cursor_id='stderr-tl-cursor',
                   timeline_data='stderrBars') %}
@@ -354,11 +354,21 @@
           </template>
         </div>
       </template>
+      <template x-for="cstep in cleanupStderrSteps" :key="'cleanup-' + cstep.index">
+        <div class="log-step-group" :data-cleanup="cstep.index"
+             :class="{ 'step-current': cleanupCurrentIdx === cstep.index }"
+             @click="seekToTime(cleanupBars[cstep.index].seekTime)">
+          <div class="log-step-label" x-text="'Cleanup: ' + cstep.name"></div>
+          <template x-for="(line, j) in cstep.stderr" :key="j">
+            <div class="log-line stderr-line" x-text="line"></div>
+          </template>
+        </div>
+      </template>
 {% endcall %}
 {% endif %}
 
 <!-- ERRORS -->
-{% if steps | selectattr('error_message') | list %}
+{% if (steps | selectattr('error_message') | list) or (scenario['cleanup_steps'] | selectattr('error_message') | list) %}
 {% call log_panel('vp-errors-panel', 'Errors', 'errors-follow-chk', 'vp-errors-content', 'errors-resize-handle',
                   timeline_track_id='errors-timeline-track', timeline_cursor_id='errors-tl-cursor',
                   timeline_data='errorsBars') %}
@@ -367,6 +377,16 @@
              :class="{ 'step-current': currentStepFor('errorMessage') === step.index }"
              @click="seekToStepIdx(step.index)">
           <template x-for="(entry, j) in step.errorMessage" :key="j">
+            <div class="log-line error-line" x-text="entry"></div>
+          </template>
+        </div>
+      </template>
+      <template x-for="cstep in cleanupErrorSteps" :key="'cleanup-' + cstep.index">
+        <div class="log-step-group" :data-cleanup="cstep.index"
+             :class="{ 'step-current': cleanupCurrentIdx === cstep.index }"
+             @click="seekToTime(cleanupBars[cstep.index].seekTime)">
+          <div class="log-step-label" x-text="'Cleanup: ' + cstep.name"></div>
+          <template x-for="(entry, j) in cstep.errorMessage" :key="j">
             <div class="log-line error-line" x-text="entry"></div>
           </template>
         </div>

@@ -91,34 +91,100 @@
     }
   }());
 
+  // Each bar's own wall-clock "ownership" window, clamped so adjacent windows never
+  // overlap. A parent step's recorded duration legitimately spans its substeps' own
+  // windows (each gets its own bar) -- trusting startOffset+duration as-is would let two
+  // bars claim the same instant, which breaks the monotone time<->visual mapping below.
+  var BAR_TIME = (function () {
+    if (!HAS_TIMING) return [];
+    // nextStart[i]: the first non-null startOffset among bars after i, else PLAY_END --
+    // bar i's own window may never extend past wherever that next bar actually begins.
+    var nextStart = new Array(BAR_COUNT);
+    var seen = PLAY_END;
+    for (var i = BAR_COUNT - 1; i >= 0; i--) {
+      nextStart[i] = seen;
+      if (ALL_BARS[i].startOffset !== null) seen = ALL_BARS[i].startOffset;
+    }
+    var windows = [], cursor = 0;
+    for (var j = 0; j < BAR_COUNT; j++) {
+      var s = ALL_BARS[j];
+      var start = s.startOffset !== null ? Math.max(s.startOffset, cursor) : cursor;
+      var bound = Math.max(nextStart[j], start);
+      var end   = Math.max(start, Math.min(start + (s.duration || 0), bound));
+      windows.push({ start: start, end: end });
+      cursor = end;
+    }
+    return windows;
+  }());
+
+  // Wall-clock length of the gap before each bar, plus one trailing entry for the gap
+  // after the last bar (GAP_T.length === BAR_COUNT + 1).
+  var GAP_T = (function () {
+    if (!HAS_TIMING || BAR_TIME.length === 0) return [];
+    var gaps = [BAR_TIME[0].start];
+    for (var i = 1; i < BAR_TIME.length; i++) {
+      gaps.push(Math.max(0, BAR_TIME[i].start - BAR_TIME[i - 1].end));
+    }
+    gaps.push(Math.max(0, PLAY_END - BAR_TIME[BAR_TIME.length - 1].end));
+    return gaps;
+  }());
+
   // {left, width} in visual-% for each bar (steps followed by cleanup entries), then split
   // back into the two lists callers actually use.
   var VISUAL_ALL = (function () {
     var reserved  = BAR_COUNT * VIS_MIN_W + Math.max(0, BAR_COUNT - 1) * VIS_GAP;
     var remaining = 100 - reserved;
-    var cursor = 0, arr = [];
-    ALL_BARS.forEach(function (s) {
-      var bonus = HAS_TIMING
+
+    var bonuses = ALL_BARS.map(function (s) {
+      return HAS_TIMING
         ? (s.duration / BONUS_DUR) * remaining
         : remaining / Math.max(BAR_COUNT, 1);
-      var w = VIS_MIN_W + bonus;
+    });
+
+    // A bar's duration is almost always a small fraction of the scenario's real elapsed
+    // time (clicking/asserting is near-instant; most of a scenario's wall clock is time
+    // *between* steps, not inside one), so bar widths rarely use up the whole `remaining`
+    // budget. Left unaccounted for, that leftover space collapses into a single dead zone
+    // past the last bar -- which timeToVis/visToTime then have to represent as one point
+    // (100% / PLAY_END), so a drag anywhere in that zone pins the head to the far right
+    // regardless of where the cursor actually is. Spread the leftover proportionally across
+    // every gap instead (including the trailing one), so every instant in [0, PLAY_END]
+    // still gets its own distinct visual position.
+    var usedBonus = bonuses.reduce(function (sum, b) { return sum + b; }, 0);
+    var leftover  = Math.max(0, remaining - usedBonus);
+    var gapTotal  = HAS_TIMING ? GAP_T.reduce(function (sum, g) { return sum + g; }, 0) : 0;
+    function gapBonus(i) { return gapTotal > 0 ? leftover * GAP_T[i] / gapTotal : 0; }
+
+    var cursor = gapBonus(0), arr = [];
+    ALL_BARS.forEach(function (s, i) {
+      var w = VIS_MIN_W + bonuses[i];
       arr.push({ left: cursor, width: w });
-      cursor += w + VIS_GAP;
+      cursor += w + VIS_GAP + gapBonus(i + 1);
     });
     return arr;
   }());
   var VISUAL_STEPS   = VISUAL_ALL.slice(0, TOTAL_STEPS);
   var VISUAL_CLEANUP = VISUAL_ALL.slice(TOTAL_STEPS);
 
-  function timeToBarIdx(t) {
-    var best = 0;
+  // A single, monotone, piecewise-linear time<->visual-% table that timeToVis and
+  // visToTime both look up into, so the two are true inverses of each other by
+  // construction: one segment per bar's own window, interleaved with one segment per gap
+  // (including the leading and trailing gap), tiling [0, PLAY_END] and [0, 100] exactly.
+  var SEGMENTS = (function () {
+    if (!HAS_TIMING) return [];
+    var segs = [], tPrev = 0, vPrev = 0;
     for (var i = 0; i < BAR_COUNT; i++) {
-      if (ALL_BARS[i].startOffset !== null && ALL_BARS[i].startOffset <= t) best = i;
+      var bt = BAR_TIME[i], vs = VISUAL_ALL[i];
+      segs.push({ t0: tPrev, t1: bt.start, v0: vPrev, v1: vs.left });
+      segs.push({ t0: bt.start, t1: bt.end, v0: vs.left, v1: vs.left + vs.width });
+      tPrev = bt.end;
+      vPrev = vs.left + vs.width;
     }
-    return best;
-  }
+    segs.push({ t0: tPrev, t1: Math.max(tPrev, PLAY_END), v0: vPrev, v1: 100 });
+    return segs;
+  }());
 
-  // time → visual-% (piecewise linear, one segment per step/cleanup bar).
+  // time → visual-% (piecewise linear over SEGMENTS; see visToTime for its exact inverse).
   function timeToVis(t) {
     if (BAR_COUNT === 0) return 0;
     if (!HAS_TIMING) {
@@ -126,14 +192,19 @@
       return VISUAL_ALL[idx].left;
     }
     if (t >= PLAY_END) return 100;
-    var i = timeToBarIdx(t);
-    var s = ALL_BARS[i], vs = VISUAL_ALL[i];
-    var dur = s.duration > 0 ? s.duration : 0.001;
-    var frac = Math.max(0, Math.min(1, (t - s.startOffset) / dur));
-    return vs.left + frac * vs.width;
+    // last non-time-degenerate segment with t0 <= t (SEGMENTS.t0 is non-decreasing).
+    var seg = SEGMENTS[0];
+    for (var i = 0; i < SEGMENTS.length; i++) {
+      var s = SEGMENTS[i];
+      if (s.t1 > s.t0 && s.t0 <= t) seg = s;
+    }
+    var dur  = seg.t1 - seg.t0;
+    var frac = dur > 0 ? Math.max(0, Math.min(1, (t - seg.t0) / dur)) : 0;
+    return seg.v0 + frac * (seg.v1 - seg.v0);
   }
 
-  // visual-% → time (inverse of timeToVis; used by drag-to-seek).
+  // visual-% → time (exact inverse of timeToVis over the same SEGMENTS table; used by
+  // drag-to-seek).
   function visToTime(pct) {
     if (BAR_COUNT === 0) return 0;
     if (!HAS_TIMING) {
@@ -142,18 +213,15 @@
       }
       return BAR_COUNT - 1;
     }
-    for (var k = 0; k < BAR_COUNT; k++) {
-      var vs = VISUAL_ALL[k], s = ALL_BARS[k];
-      var barEnd = vs.left + vs.width;
-      if (pct <= barEnd) {
-        if (pct >= vs.left) {
-          return s.startOffset + ((pct - vs.left) / vs.width) * s.duration;
-        }
-        // In the gap before bar k — snap to the start of step k.
-        return s.startOffset;
-      }
+    // last non-visually-degenerate segment with v0 <= pct (SEGMENTS.v0 is non-decreasing).
+    var seg = SEGMENTS[0];
+    for (var i = 0; i < SEGMENTS.length; i++) {
+      var s = SEGMENTS[i];
+      if (s.v1 > s.v0 && s.v0 <= pct) seg = s;
     }
-    return PLAY_END;
+    var width = seg.v1 - seg.v0;
+    var frac  = width > 0 ? Math.max(0, Math.min(1, (pct - seg.v0) / width)) : 0;
+    return seg.t0 + frac * (seg.t1 - seg.t0);
   }
 
   // ----- Precomputed tick / bar arrays — bound via <template x-for> in markup. -----
@@ -193,16 +261,22 @@
     return acc;
   }, []);
 
-  function buildPresenceBars(predicate) {
-    return STEPS.reduce(function (acc, step, i) {
-      if (!predicate(step)) return acc;
-      var vs = VISUAL_STEPS[i];
+  function buildPresenceBars(list, visual, predicate) {
+    return list.reduce(function (acc, item, i) {
+      if (!predicate(item)) return acc;
+      var vs = visual[i];
       acc.push({ leftPct: vs.left, widthPct: vs.width });
       return acc;
     }, []);
   }
-  var ERRORS_BARS = buildPresenceBars(function (s) { return s.errorMessage && s.errorMessage.length; });
-  var STDERR_BARS = buildPresenceBars(function (s) { return s.stderr && s.stderr.length; });
+  // A cleanup hook can fail too (e.g. cleanup_browsers throwing) -- include its bar here as
+  // well so the Errors/Stderr panels aren't silently empty when only a cleanup hook failed.
+  function hasErrorMessage(s) { return s.errorMessage && s.errorMessage.length; }
+  function hasStderr(s) { return s.stderr && s.stderr.length; }
+  var ERRORS_BARS = buildPresenceBars(STEPS, VISUAL_STEPS, hasErrorMessage)
+    .concat(buildPresenceBars(CLEANUP_STEPS, VISUAL_CLEANUP, hasErrorMessage));
+  var STDERR_BARS = buildPresenceBars(STEPS, VISUAL_STEPS, hasStderr)
+    .concat(buildPresenceBars(CLEANUP_STEPS, VISUAL_CLEANUP, hasStderr));
 
   // Build per-line ticks for a field that holds [{html|text, offset}] arrays.
   // Falls back to a single step-level tick for steps with no per-line timestamps.
@@ -331,8 +405,10 @@
       browserLogs:     BROWSER_LOGS,
       cucuSteps:       STEPS.filter(function (s) { return s.debugLines && s.debugLines.length; }),
       stdoutSteps:     STEPS.filter(function (s) { return s.stdoutLines && s.stdoutLines.length; }),
-      stderrSteps:     STEPS.filter(function (s) { return s.stderr && s.stderr.length; }),
-      errorSteps:      STEPS.filter(function (s) { return s.errorMessage && s.errorMessage.length; }),
+      stderrSteps:     STEPS.filter(hasStderr),
+      errorSteps:      STEPS.filter(hasErrorMessage),
+      cleanupStderrSteps: CLEANUP_STEPS.filter(hasStderr),
+      cleanupErrorSteps:  CLEANUP_STEPS.filter(hasErrorMessage),
       currentTimeSec:  0,
       shownStepIdx:    -1,
       shownImgIdx:     -1,
@@ -364,8 +440,9 @@
       get atEnd()         { return this.currentTimeSec >= PLAY_END; },
       get curStep()       { return this.shownStepIdx >= 0 ? this.steps[this.shownStepIdx] : null; },
       // Highest-indexed cleanup entry whose startOffset has been reached by the playhead,
-      // or null while the playhead is still within the real steps. Mirrors timeToBarIdx but
-      // scoped to CLEANUP_STEPS so cleanup rows/bars highlight without touching shownStepIdx.
+      // or null while the playhead is still within the real steps. Same "highest startOffset
+      // <= t" scan timeToVis/visToTime use internally, scoped to CLEANUP_STEPS so cleanup
+      // rows/bars highlight without touching shownStepIdx.
       get cleanupCurrentIdx() {
         var t = this.currentTimeSec;
         var idx = null;
