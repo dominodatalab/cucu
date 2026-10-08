@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.38
+- Add - `--workers`/`-w` option to `cucu report` and `cucu run --generate-report` for parallel per-scenario HTML and video rendering via `ThreadPoolExecutor`
+
 # 1.4.37
 - Add - emit `scenario_run_id` as an attribute on each `<testcase>` element in the JUnit XML output
 
