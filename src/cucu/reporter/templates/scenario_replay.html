@@ -211,7 +211,7 @@
     <button class="step-pic-nav-btn" type="button" title="Next screenshot" @click="shiftScreenshot(1)">▶</button>
   </span>
   <span id="pic-caption" x-text="picCaption"></span>
-  <span id="step-timing-text" x-text="curStep ? curStep.timingLabel : ''"></span>
+  <span id="step-timing-text" x-text="activeTimingLabel"></span>
 </div>
 
 <!-- STEPS PANEL -->
@@ -226,10 +226,18 @@
       <template x-for="bar in stepBars" :key="bar.index">
         <div class="step-bar"
              :id="'bar-' + bar.index"
-             :class="[bar.cls, { active: shownStepIdx === bar.index }]"
+             :class="bar.cls + (shownStepIdx === bar.index ? ' active' : '')"
              :style="{ left: bar.leftPct + '%', width: bar.widthPct + '%' }"
              :title="bar.title"
              @click.stop="seekToTime(bar.seekTime)"></div>
+      </template>
+      <template x-for="bar in cleanupBars" :key="'cleanup-' + bar.index">
+        <div class="step-bar cleanup-bar"
+             :id="'cleanup-bar-' + bar.index"
+             :class="bar.cls + (cleanupCurrentIdx === bar.index ? ' active' : '')"
+             :style="{ left: bar.leftPct + '%', width: bar.widthPct + '%' }"
+             :title="bar.title"
+             @click.stop="selectCleanupIdx(bar.index)"></div>
       </template>
     </div>
     <label class="log-follow-label">
@@ -252,6 +260,16 @@
           {% else %}
           <span class="steps-kw steps-{{ step['status'] or 'untested' }}">{{ escape(step['keyword']) }}</span><span class="steps-name">{{ escape(step['name']) }}</span>
           {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      {% for cstep in scenario['cleanup_steps'] %}
+      <div class="log-step-group steps-row steps-cleanup"
+           data-cleanup="{{ loop.index0 }}"
+           :class="{ 'cleanup-current': cleanupCurrentIdx === {{ loop.index0 }} }"
+           @click="selectCleanupIdx({{ loop.index0 }})">
+        <div class="log-line">
+          <span class="steps-kw steps-{{ cstep['status'] or 'untested' }}">Cleanup</span><span class="steps-name">{{ escape(cstep['name']) }}</span>
         </div>
       </div>
       {% endfor %}
@@ -322,7 +340,7 @@
 {% endif %}
 
 <!-- STDERR -->
-{% if steps | selectattr('stderr') | list %}
+{% if (steps | selectattr('stderr') | list) or (scenario['cleanup_steps'] | selectattr('stderr') | list) %}
 {% call log_panel('vp-stderr-panel', 'Stderr', 'stderr-follow-chk', 'vp-stderr-content', 'stderr-resize-handle',
                   timeline_track_id='stderr-timeline-track', timeline_cursor_id='stderr-tl-cursor',
                   timeline_data='stderrBars') %}
@@ -336,11 +354,21 @@
           </template>
         </div>
       </template>
+      <template x-for="cstep in cleanupStderrSteps" :key="'cleanup-' + cstep.index">
+        <div class="log-step-group" :data-cleanup="cstep.index"
+             :class="{ 'step-current': cleanupCurrentIdx === cstep.index }"
+             @click="selectCleanupIdx(cstep.index)">
+          <div class="log-step-label" x-text="'Cleanup: ' + cstep.name"></div>
+          <template x-for="(line, j) in cstep.stderr" :key="j">
+            <div class="log-line stderr-line" x-text="line"></div>
+          </template>
+        </div>
+      </template>
 {% endcall %}
 {% endif %}
 
 <!-- ERRORS -->
-{% if steps | selectattr('error_message') | list %}
+{% if (steps | selectattr('error_message') | list) or (scenario['cleanup_steps'] | selectattr('error_message') | list) %}
 {% call log_panel('vp-errors-panel', 'Errors', 'errors-follow-chk', 'vp-errors-content', 'errors-resize-handle',
                   timeline_track_id='errors-timeline-track', timeline_cursor_id='errors-tl-cursor',
                   timeline_data='errorsBars') %}
@@ -349,6 +377,16 @@
              :class="{ 'step-current': currentStepFor('errorMessage') === step.index }"
              @click="seekToStepIdx(step.index)">
           <template x-for="(entry, j) in step.errorMessage" :key="j">
+            <div class="log-line error-line" x-text="entry"></div>
+          </template>
+        </div>
+      </template>
+      <template x-for="cstep in cleanupErrorSteps" :key="'cleanup-' + cstep.index">
+        <div class="log-step-group" :data-cleanup="cstep.index"
+             :class="{ 'step-current': cleanupCurrentIdx === cstep.index }"
+             @click="selectCleanupIdx(cstep.index)">
+          <div class="log-step-label" x-text="'Cleanup: ' + cstep.name"></div>
+          <template x-for="(entry, j) in cstep.errorMessage" :key="j">
             <div class="log-line error-line" x-text="entry"></div>
           </template>
         </div>
@@ -392,6 +430,20 @@
       "stdoutLines": {% if step['stdout'] %}[{% for line in step['stdout'] %}{"text":{{ line|tojson }},"offset":{{ log_line_offset(line, scenario['start_at'])|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}]{% else %}null{% endif %},
       "stderr": {{ step['stderr']|tojson if step['stderr'] else 'null' }},
       "errorMessage": {{ step['error_message']|tojson if step['error_message'] else 'null' }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ],
+  "cleanupSteps": [
+    {% for cstep in scenario['cleanup_steps'] %}
+    {
+      "index": {{ loop.index0 }},
+      "name": {{ cstep['name']|tojson }},
+      "status": {{ cstep['status']|tojson }},
+      "startOffset": {% if cstep['time_offset'] %}{{ cstep['time_offset'].hour * 3600 + cstep['time_offset'].minute * 60 + cstep['time_offset'].second + cstep['time_offset'].microsecond / 1000000.0 }}{% else %}null{% endif %},
+      "duration": {{ cstep['duration'] | default(0) | float }},
+      "timingLabel": {% if cstep['timestamp'] and cstep['duration'] %}"{{ cstep['timestamp'].strftime('%H:%M:%S') }} · {{ '{:.3f}s'.format(cstep['duration'] | float) }}"{% else %}""{% endif %},
+      "stderr": {{ cstep['stderr']|tojson if cstep['stderr'] else 'null' }},
+      "errorMessage": {{ cstep['error_message']|tojson if cstep['error_message'] else 'null' }}
     }{% if not loop.last %},{% endif %}
     {% endfor %}
   ]
