@@ -11,6 +11,11 @@ Feature: Report basics
      Then I should see the link "Echo"
      When I click the link "Echo"
      Then I should see the link "Echo an environment variable"
+
+        * # the feature page's own "Start at ... for Xs" must show the real elapsed time,
+        * # not a start_at-minus-itself duration that always renders as 0.0s
+      And I should not see the text "for 0.0s"
+
      When I click the link "Echo an environment variable"
      Then I should see the text "I echo \"current shell is '\{SHELL\}'\""
 

@@ -277,11 +277,24 @@ body.hide-highlights .highlight-overlay { display: none; }
 .step-bar                  { background: var(--vp-link);     color: var(--vp-link); }
 .step-bar.status-passed    { background: var(--vp-passed);   color: var(--vp-passed); }
 .step-bar.status-failed,
-.step-bar.status-error     { background: var(--vp-failed);   color: var(--vp-failed); }
+.step-bar.status-error,
+.step-bar.status-terminated { background: var(--vp-failed);  color: var(--vp-failed); }
 .step-bar.status-skipped,
 .step-bar.status-untested  { background: var(--vp-untested); color: var(--vp-untested); }
 /* Group-header steps (`* # heading`) — neutral foreground, overrides status colouring */
 .step-bar.heading          { background: var(--vp-text);     color: var(--vp-text);  opacity: 1; }
+/* Cleanup (after-scenario hook) bars — same status colouring as step bars, plus a diagonal
+   hatch so they read as "not a Gherkin step" at a glance. Rule order matters: this must come
+   after the .status-* rules above so its background-image layers on top of their background-color
+   instead of being cleared by the `background` shorthand. */
+.step-bar.cleanup-bar {
+  background-image: repeating-linear-gradient(
+    45deg, currentColor 0, currentColor 2px, transparent 2px, transparent 5px
+  );
+  opacity: 0.55;
+}
+.step-bar.cleanup-bar:hover { opacity: 0.9; }
+.step-bar.cleanup-bar.active { opacity: 1; }
 /* Shared playhead — thin vertical line tracking current time */
 #timeline-playhead {
   position: absolute; top: -3px; bottom: -3px; width: 2px;
@@ -408,13 +421,21 @@ body.hide-highlights .highlight-overlay { display: none; }
 #vp-steps-content .log-step-group.step-previous .log-line {
   background: var(--vp-surface); border-left-color: var(--vp-text3); opacity: 0.85;
 }
-.steps-kw { font-weight: bold; font-family: monospace; flex-shrink: 0; min-width: 6.5ch; }
-.steps-passed   { color: var(--vp-passed); }
-.steps-failed   { color: var(--vp-failed); }
-.steps-error    { color: var(--vp-failed); }
-.steps-skipped  { color: var(--vp-untested); }
-.steps-untested { color: var(--vp-untested); }
+/* Cleanup rows (after-scenario hooks) — highlighted the same way as the current step,
+   but driven by cleanupCurrentIdx instead of shownStepIdx since they're not step-indexed. */
+#vp-steps-content .log-step-group.cleanup-current .log-line {
+  background: var(--vp-inset); border-left-color: var(--vp-accent);
+}
+.steps-kw { font-weight: bold; font-family: monospace; flex-shrink: 0; min-width: 6.5ch; margin-right: 0.5ch; }
+.steps-passed     { color: var(--vp-passed); }
+.steps-failed     { color: var(--vp-failed); }
+.steps-error      { color: var(--vp-failed); }
+.steps-terminated { color: var(--vp-failed); }
+.steps-skipped    { color: var(--vp-untested); }
+.steps-untested   { color: var(--vp-untested); }
 .steps-substep  { padding-left: 28px; }
+/* Cleanup rows — dimmer than regular steps, matching the cleanup-bar hatch treatment */
+.steps-cleanup  { opacity: 0.8; }
 /* Group-header step rows — match the muted colour used by `.log-line` / `.log-step-label`
    group headers in the other panels, and align flush with the row's left edge. */
 .steps-heading .steps-kw,
