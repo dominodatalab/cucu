@@ -11,6 +11,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Fix - dragging the replay view timeline playhead no longer strands it far from the cursor
 - Fix - replay view Errors/Stderr panels now also surface a failing after-scenario cleanup hook, not just failing steps
 - Fix - the per-feature HTML report page's duration no longer always shows 0.0s
+- Fix - clicking a specific timeline bar/row for a cleanup hook now reliably selects that entry, even when several hooks share the exact same recorded timestamp; also fixes the step/cleanup bar "active" highlight, which was silently broken for all bars due to an Alpine `:class` array-with-object binding that doesn't resolve the way it does in other templating libraries
 
 # 1.4.37
 - Add - emit `scenario_run_id` as an attribute on each `<testcase>` element in the JUnit XML output

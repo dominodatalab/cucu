@@ -96,6 +96,18 @@ def i_wait_to_fail(_):
     retry(fail)()
 
 
+@step("I register two near-instant after-scenario hooks")
+def register_two_instant_hooks(_):
+    def instant_hook_one(_ctx):
+        pass
+
+    def instant_hook_two(_ctx):
+        pass
+
+    register_after_this_scenario_hook(instant_hook_one)
+    register_after_this_scenario_hook(instant_hook_two)
+
+
 @step("I error after-scenario hook")
 def i_error_after_hook(_):
     def after_hook_fail(_):

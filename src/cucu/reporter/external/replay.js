@@ -434,16 +434,32 @@
       _videoElement:      null,
       _videoFps:          1,
       _dragging:          false,
+      // Explicitly-clicked cleanup entry (Steps-panel row, timeline bar, or Errors/Stderr
+      // row), or null. Several cleanup hooks can legitimately share the exact same recorded
+      // instant (e.g. two near-instantaneous hooks both timestamped at the same millisecond),
+      // which makes "which entry is at time t" ambiguous -- time alone can't tell them apart.
+      // An explicit click records *which bar was clicked*, sidestepping that ambiguity; it's
+      // cleared on any other seek (drag, step navigation, log-line click) so those fall back
+      // to the inherently-ambiguous-but-unavoidable time-based resolution below.
+      selectedCleanupIdx: null,
 
       // ----- derived (getters) -----
-      get headPct()       { return timeToVis(this.currentTimeSec); },
+      get headPct() {
+        if (this.selectedCleanupIdx !== null) {
+          var bar = this.cleanupBars[this.selectedCleanupIdx];
+          return bar.leftPct + bar.widthPct / 2;
+        }
+        return timeToVis(this.currentTimeSec);
+      },
       get atEnd()         { return this.currentTimeSec >= PLAY_END; },
       get curStep()       { return this.shownStepIdx >= 0 ? this.steps[this.shownStepIdx] : null; },
       // Highest-indexed cleanup entry whose startOffset has been reached by the playhead,
       // or null while the playhead is still within the real steps. Same "highest startOffset
       // <= t" scan timeToVis/visToTime use internally, scoped to CLEANUP_STEPS so cleanup
-      // rows/bars highlight without touching shownStepIdx.
+      // rows/bars highlight without touching shownStepIdx. An explicit selection (see
+      // selectedCleanupIdx above) always wins over this time-based guess.
       get cleanupCurrentIdx() {
+        if (this.selectedCleanupIdx !== null) return this.selectedCleanupIdx;
         var t = this.currentTimeSec;
         var idx = null;
         for (var i = 0; i < CLEANUP_STEPS.length; i++) {
@@ -573,6 +589,7 @@
 
       seekToTime(t) {
         this._stopPlay();
+        this.selectedCleanupIdx = null;
         this.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
         if (this._videoElement) {
           this._videoElement.currentTime = timeToGlobalPicIdx(this.currentTimeSec) / this._videoFps;
@@ -582,6 +599,12 @@
       },
       seekToStepIdx(idx) {
         this.seekToTime(stepIdxToTime(idx));
+      },
+      // Explicitly select one cleanup entry (as opposed to seeking to a bare time value) --
+      // see selectedCleanupIdx above for why this exists.
+      selectCleanupIdx(idx) {
+        this.seekToTime(this.cleanupBars[idx].seekTime);
+        this.selectedCleanupIdx = idx;
       },
       seekToLogLineOffset(offset, event) {
         if (offset === null || offset === undefined) return;
@@ -816,6 +839,7 @@
         function dragTo(x) {
           var r = track.getBoundingClientRect();
           var pct = Math.max(0, Math.min(100, (x - r.left) / r.width * 100));
+          self.selectedCleanupIdx = null;
           self.currentTimeSec = visToTime(pct);
           if (self._videoElement) {
             self._videoElement.currentTime = timeToGlobalPicIdx(self.currentTimeSec) / self._videoFps;

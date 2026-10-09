@@ -226,7 +226,7 @@
       <template x-for="bar in stepBars" :key="bar.index">
         <div class="step-bar"
              :id="'bar-' + bar.index"
-             :class="[bar.cls, { active: shownStepIdx === bar.index }]"
+             :class="bar.cls + (shownStepIdx === bar.index ? ' active' : '')"
              :style="{ left: bar.leftPct + '%', width: bar.widthPct + '%' }"
              :title="bar.title"
              @click.stop="seekToTime(bar.seekTime)"></div>
@@ -234,10 +234,10 @@
       <template x-for="bar in cleanupBars" :key="'cleanup-' + bar.index">
         <div class="step-bar cleanup-bar"
              :id="'cleanup-bar-' + bar.index"
-             :class="[bar.cls, { active: cleanupCurrentIdx === bar.index }]"
+             :class="bar.cls + (cleanupCurrentIdx === bar.index ? ' active' : '')"
              :style="{ left: bar.leftPct + '%', width: bar.widthPct + '%' }"
              :title="bar.title"
-             @click.stop="seekToTime(bar.seekTime)"></div>
+             @click.stop="selectCleanupIdx(bar.index)"></div>
       </template>
     </div>
     <label class="log-follow-label">
@@ -267,7 +267,7 @@
       <div class="log-step-group steps-row steps-cleanup"
            data-cleanup="{{ loop.index0 }}"
            :class="{ 'cleanup-current': cleanupCurrentIdx === {{ loop.index0 }} }"
-           @click="seekToTime(cleanupBars[{{ loop.index0 }}].seekTime)">
+           @click="selectCleanupIdx({{ loop.index0 }})">
         <div class="log-line">
           <span class="steps-kw steps-{{ cstep['status'] or 'untested' }}">Cleanup</span><span class="steps-name">{{ escape(cstep['name']) }}</span>
         </div>
@@ -357,7 +357,7 @@
       <template x-for="cstep in cleanupStderrSteps" :key="'cleanup-' + cstep.index">
         <div class="log-step-group" :data-cleanup="cstep.index"
              :class="{ 'step-current': cleanupCurrentIdx === cstep.index }"
-             @click="seekToTime(cleanupBars[cstep.index].seekTime)">
+             @click="selectCleanupIdx(cstep.index)">
           <div class="log-step-label" x-text="'Cleanup: ' + cstep.name"></div>
           <template x-for="(line, j) in cstep.stderr" :key="j">
             <div class="log-line stderr-line" x-text="line"></div>
@@ -384,7 +384,7 @@
       <template x-for="cstep in cleanupErrorSteps" :key="'cleanup-' + cstep.index">
         <div class="log-step-group" :data-cleanup="cstep.index"
              :class="{ 'step-current': cleanupCurrentIdx === cstep.index }"
-             @click="seekToTime(cleanupBars[cstep.index].seekTime)">
+             @click="selectCleanupIdx(cstep.index)">
           <div class="log-step-label" x-text="'Cleanup: ' + cstep.name"></div>
           <template x-for="(entry, j) in cstep.errorMessage" :key="j">
             <div class="log-line error-line" x-text="entry"></div>

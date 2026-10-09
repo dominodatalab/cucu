@@ -182,6 +182,42 @@ Feature: Report replay view
       """
       And I should see "{CLEANUP_ERROR_PANEL_CHECK}" is equal to "found"
 
+  Scenario: Replay view selects the clicked cleanup entry even when several share the exact same timestamp
+    Given I run the command "cucu run data/features/scenario_with_tied_cleanup_hooks.feature --results {CUCU_RESULTS_DIR}/replay-tied-cleanup-results" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/replay-tied-cleanup-results --output {CUCU_RESULTS_DIR}/replay-tied-cleanup-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/replay-tied-cleanup-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/index.html"
+     When I click the link "Feature with tied cleanup hooks"
+      And I click the link "Scenario with two near-instant after-scenario hooks"
+      And I click the link "🔁 Replay"
+     Then I wait to see the text "1 /"
+
+        * # several after-scenario hooks here are recorded at the exact same millisecond
+        * # (two trivial hooks plus the built-in keep-alive/MHT hooks finish back to back).
+        * # Clicking one specific entry in that tied cluster must select *that* entry --
+        * # not whichever tied entry happens to have the highest index -- both in the Steps
+        * # panel row highlight and in where the timeline playhead actually lands
+      And I execute in the current browser the following javascript
+      """
+      const rows = Array.from(document.querySelectorAll(".steps-cleanup"));
+      const row = rows.find((el) => el.textContent.includes("instant_hook_one"));
+      row.click();
+      """
+      And I execute in the current browser the following javascript and save the result to the variable "TIED_CLEANUP_SELECTION_CHECK"
+      """
+      const activeRow = document.querySelector(".steps-cleanup.cleanup-current");
+      const rowMatches = !!activeRow && activeRow.textContent.includes("instant_hook_one");
+      const activeBar = document.querySelector("#timeline-track .cleanup-bar.active");
+      const headPct = parseFloat(document.getElementById("timeline-playhead").style.left);
+      const barLeft = parseFloat(activeBar.style.left);
+      const barWidth = parseFloat(activeBar.style.width);
+      const headInBar = headPct >= barLeft - 0.01 && headPct <= barLeft + barWidth + 0.01;
+      return rowMatches && headInBar
+        ? "correctly-selected"
+        : "mismatch row=" + (activeRow ? activeRow.textContent : "none") + " headPct=" + headPct + " barLeft=" + barLeft + " barWidth=" + barWidth;
+      """
+      And I should see "{TIED_CLEANUP_SELECTION_CHECK}" is equal to "correctly-selected"
+
   Scenario: Replay view renders with CUCU_SCREENSHOT_VIDEO enabled
     Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/replay-video-echo-results --env CUCU_SCREENSHOT_VIDEO=true" and expect exit code "0"
       And I run the command "cucu report {CUCU_RESULTS_DIR}/replay-video-echo-results --env CUCU_SCREENSHOT_VIDEO=true --output {CUCU_RESULTS_DIR}/replay-video-echo-report" and expect exit code "0"
