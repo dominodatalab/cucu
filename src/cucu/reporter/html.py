@@ -2,6 +2,7 @@ import re
 import shutil
 import sys
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 from xml.sax.saxutils import escape as escape_
@@ -141,6 +142,72 @@ def step_table_to_html(table_data):
     )
 
 
+def _render_scenario(
+    scenario_dict,
+    feature_dict,
+    scenario_filepath,
+    log_files,
+    scen_obj,
+    src_scenario_dir,
+    screenshot_video_enabled,
+    screenshots_video,
+    screenshots_video_steps,
+    scenario_template,
+    scenario_replay_template,
+    results,
+):
+    """Render one scenario's HTML and encode its video. Returns 1 if a video was produced."""
+    # generate html version of console log
+    for log_file in [x for x in log_files if ".console." in x["name"]]:
+        input_file = scenario_filepath / "logs" / log_file["name"]
+        output_file = scenario_filepath / log_file["filepath"]
+        output_file.write_text(
+            parse_log_to_html(input_file.read_text(encoding="utf-8")),
+            encoding="utf-8",
+        )
+
+    video_produced = 0
+    if screenshot_video_enabled and scen_obj is not None:
+        try:
+            mp4_src = video_encoder.encode_scenario_video(
+                scen_obj, src_scenario_dir
+            )
+            if mp4_src and mp4_src.exists():
+                shutil.copy2(mp4_src, scenario_filepath / "screenshots.mp4")
+                video_produced = 1
+        except Exception as ex:
+            logger.error(f"Failed to encode {src_scenario_dir}: {ex}")
+
+    scenario_filepath.mkdir(parents=True, exist_ok=True)
+    rendered_scenario_html = scenario_template.render(
+        basepath=results,
+        feature=feature_dict,
+        path_exists=lambda path: Path(path).exists(),
+        scenario=scenario_dict,
+        steps=scenario_dict["steps"],
+        title=scenario_dict["name"],
+        dir_depth="../../",
+        screenshots_video=screenshots_video,
+        screenshots_video_steps=screenshots_video_steps,
+    )
+    (scenario_filepath / "index.html").write_text(rendered_scenario_html)
+
+    rendered_replay_html = scenario_replay_template.render(
+        basepath=results,
+        feature=feature_dict,
+        path_exists=lambda path: Path(path).exists(),
+        scenario=scenario_dict,
+        steps=scenario_dict["steps"],
+        title=scenario_dict["name"],
+        dir_depth="../../",
+        screenshots_video=screenshots_video,
+        screenshots_video_steps=screenshots_video_steps,
+    )
+    (scenario_filepath / "replay.html").write_text(rendered_replay_html)
+
+    return video_produced
+
+
 def build_cleanup_steps(after_hooks, scenario_start_at):
     """Synthesize step-like dicts from a scenario's after_hooks results (selenium
     keep-alive, MHT download, user after_scenario/after_this_scenario hooks, browser
@@ -176,7 +243,7 @@ def build_cleanup_steps(after_hooks, scenario_start_at):
     return cleanup_steps
 
 
-def generate(results: Path, basepath: Path):
+def generate(results: Path, basepath: Path, workers: int | None = None):
     ## Jinja2 templates setup
     package_loader = jinja2.PackageLoader("cucu.reporter", "templates")
     templates = jinja2.Environment(loader=package_loader)  # nosec
@@ -211,8 +278,11 @@ def generate(results: Path, basepath: Path):
         feature_count = db.feature.select().count()
         scenario_count = db.scenario.select().count()
         step_count = db.step.select().count()
+        worker_suffix = (
+            f" using {workers} workers" if workers and workers > 1 else ""
+        )
         logger.info(
-            f"Starting to process {feature_count} features, {scenario_count} scenarios, and {step_count} steps for report"
+            f"Starting to process {feature_count} features, {scenario_count} scenarios, and {step_count} steps for report{worker_suffix}"
         )
 
         db_features = db.feature.select().order_by(db.feature.start_at)
@@ -280,6 +350,8 @@ def generate(results: Path, basepath: Path):
             if len(db_scenarios) == 0:
                 logger.debug(f"Feature {db_feature.name} has no scenarios")
                 continue
+
+            scenario_tasks = []
 
             for scenario_dict in sorted(
                 feature_dict["scenarios"], key=lambda x: x["seq"]
@@ -419,26 +491,16 @@ def generate(results: Path, basepath: Path):
                         }
                     )
 
-                # generate html version of console log
-                for log_file in [
-                    x for x in log_files if ".console." in x["name"]
-                ]:
-                    input_file = scenario_filepath / "logs" / log_file["name"]
-                    output_file = scenario_filepath / log_file["filepath"]
-                    output_file.write_text(
-                        parse_log_to_html(
-                            input_file.read_text(encoding="utf-8")
-                        ),
-                        encoding="utf-8",
-                    )
-
                 scenario_dict["logs"] = log_files
 
-                # Assign frame indices and set video path when video mode is enabled.
+                # Compute frame indices and fetch scen_obj in main thread (DB access).
                 screenshots_video = None
                 screenshots_video_steps = None
+                scen_obj = None
+                src_scenario_dir = None
+                screenshot_video_enabled = CONFIG.true("CUCU_SCREENSHOT_VIDEO")
 
-                if CONFIG.true("CUCU_SCREENSHOT_VIDEO"):
+                if screenshot_video_enabled:
                     src_scenario_dir = (
                         Path(feature_dict["results_dir"])
                         / feature_dict["folder_name"]
@@ -447,21 +509,6 @@ def generate(results: Path, basepath: Path):
                     scen_obj = db.scenario.get_by_id(
                         scenario_dict["scenario_run_id"]
                     )
-
-                    try:
-                        mp4_src = video_encoder.encode_scenario_video(
-                            scen_obj, src_scenario_dir
-                        )
-                        if mp4_src and mp4_src.exists():
-                            shutil.copy2(
-                                mp4_src, scenario_filepath / "screenshots.mp4"
-                            )
-                            video_count += 1
-                    except Exception as ex:
-                        logger.error(
-                            f"Failed to encode {src_scenario_dir}: {ex}"
-                        )
-
                     screenshots_video = "screenshots.mp4"
                     # Assign cumulative frame indices to each screenshot.
                     # The encoder writes one frame per screenshot per step
@@ -479,38 +526,44 @@ def generate(results: Path, basepath: Path):
                             frame_idx += 1  # text-card frame
                     screenshots_video_steps = frame_idx
 
-                # render scenario html
-                scenario_basepath = feature_path / scenario_dict["folder_name"]
-                scenario_basepath.mkdir(parents=True, exist_ok=True)
-                rendered_scenario_html = scenario_template.render(
-                    basepath=results,
-                    feature=feature_dict,
-                    path_exists=lambda path: Path(path).exists(),
-                    scenario=scenario_dict,
-                    steps=scenario_dict["steps"],
-                    title=scenario_dict["name"],
-                    dir_depth="../../",
-                    screenshots_video=screenshots_video,
-                    screenshots_video_steps=screenshots_video_steps,
+                scenario_tasks.append(
+                    (
+                        scenario_dict,
+                        feature_dict,
+                        scenario_filepath,
+                        log_files,
+                        scen_obj,
+                        src_scenario_dir,
+                        screenshot_video_enabled,
+                        screenshots_video,
+                        screenshots_video_steps,
+                    )
                 )
-                scenario_output_filepath = scenario_basepath / "index.html"
-                scenario_output_filepath.write_text(rendered_scenario_html)
 
-                # render replay-style scenario view
-
-                rendered_replay_html = scenario_replay_template.render(
-                    basepath=results,
-                    feature=feature_dict,
-                    path_exists=lambda path: Path(path).exists(),
-                    scenario=scenario_dict,
-                    steps=scenario_dict["steps"],
-                    title=scenario_dict["name"],
-                    dir_depth="../../",
-                    screenshots_video=screenshots_video,
-                    screenshots_video_steps=screenshots_video_steps,
-                )
-                scenario_replay_filepath = scenario_basepath / "replay.html"
-                scenario_replay_filepath.write_text(rendered_replay_html)
+            # Fan out per-scenario render work.
+            use_threads = workers is not None and workers > 1
+            if use_threads:
+                executor = ThreadPoolExecutor(max_workers=workers)
+                futures = [
+                    executor.submit(
+                        _render_scenario,
+                        *task,
+                        scenario_template,
+                        scenario_replay_template,
+                        results,
+                    )
+                    for task in scenario_tasks
+                ]
+                executor.shutdown(wait=True)
+                video_count += sum(f.result() for f in futures)
+            else:
+                for task in scenario_tasks:
+                    video_count += _render_scenario(
+                        *task,
+                        scenario_template,
+                        scenario_replay_template,
+                        results,
+                    )
 
             # render feature html
             rendered_feature_html = feature_template.render(

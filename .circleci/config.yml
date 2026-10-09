@@ -87,7 +87,12 @@ jobs:
           command: |
             set -euxo pipefail
             export COVERAGE_PROCESS_START=${CIRCLE_WORKING_DIRECTORY}/pyproject.toml
-            uv run cucu run features --workers 8 --selenium-remote-url http://localhost:4444 --generate-report --junit junit_results --browser "<<parameters.browser>>"
+            uv run cucu run features --workers 8 --selenium-remote-url http://localhost:4444 --junit junit_results --browser "<<parameters.browser>>"
+      - run:
+          name: generate_report
+          command: |
+            set -euxo pipefail
+            uv run cucu report results --workers 8 --env CUCU_SCREENSHOT_VIDEO=true
       - run:
           name: run unit tests
           command: |
