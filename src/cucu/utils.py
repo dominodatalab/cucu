@@ -256,6 +256,29 @@ def take_saw_element_screenshot(ctx, thing, name, index, element=None):
     )
 
 
+def get_top_level_rect(browser, element) -> dict:
+    """
+    return element's bounding rect (x, y, width, height) relative to the
+    top-level document, not whatever iframe the browser is currently
+    switched into.
+    """
+    script = """
+        const rect = arguments[0].getBoundingClientRect();
+        let x = rect.left, y = rect.top;
+        let win = window;
+        while (win !== win.top) {
+            const frameElement = win.frameElement;
+            if (!frameElement) break;  // cross-origin: degrade gracefully
+            const frameRect = frameElement.getBoundingClientRect();
+            x += frameRect.left;
+            y += frameRect.top;
+            win = win.parent;
+        }
+        return {x: x, y: y, width: rect.width, height: rect.height};
+    """
+    return browser.execute(script, element)
+
+
 def take_screenshot(ctx, step_name, label="", element=None):
     step = ctx.current_step
     if not hasattr(step, "screenshots"):
@@ -277,16 +300,19 @@ def take_screenshot(ctx, step_name, label="", element=None):
     ctx.browser.screenshot(filepath)
 
     # driver.get_window_size returns the size of the window the OS draws for
-    # the browser, not the window the browser uses to display the DOM.
-    # If we go through JavaScript, we ignore the height of the adress bar
-    # and such.
+    # the browser, not the window the browser uses to display the DOM. If we
+    # go through JavaScript, we ignore the height of the address bar and
+    # such. Climb to the top window first since the browser may currently be
+    # switched into an iframe (whose innerWidth/innerHeight are not the real
+    # viewport size the screenshot was taken at).
     script = """
         function getDimensionsOfCurrentWindow() {
-          const windowSize = {
-            width: window.innerWidth,
-            height: window.innerHeight,
-          };
-          return windowSize;
+          let win = window;
+          while (win !== win.top) {
+            if (!win.frameElement) break;
+            win = win.parent;
+          }
+          return { width: win.innerWidth, height: win.innerHeight };
         };
         return getDimensionsOfCurrentWindow();
     """
@@ -300,7 +326,7 @@ def take_screenshot(ctx, step_name, label="", element=None):
     }
     highlight = {}
     if element:
-        location.update(element.rect)
+        location.update(get_top_level_rect(ctx.browser, element))
         highlight = {
             "height_ratio": location["height"] / size["height"],
             "width_ratio": location["width"] / size["width"],

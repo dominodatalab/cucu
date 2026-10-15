@@ -23,6 +23,13 @@ Feature: Frames
   Scenario: User can see images in iframes
      Then I should see the image with the alt text "Stars"
 
+        * # the "Stars" image lives in the 4th of 6 stacked iframes, never
+        * # scrolled into view, so its screenshot highlight must be computed
+        * # relative to the top-level page, not the iframe it was found in
+      And I should see the db "{CUCU_RESULTS_DIR}/run.db" query "SELECT CAST(json_extract(screenshots, '$[0].highlight.top_ratio') AS TEXT) AS top_ratio FROM step WHERE name LIKE '%alt text \"Stars\"%'" table matches the following:
+        | top_ratio |
+        | 1\.\d+    |
+
   Scenario: User can see multiple things across iframes
      When I write "some text" into the input "input type=text"
      Then I should see "some text" in the input "input type=text"
