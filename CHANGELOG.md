@@ -7,7 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.41
 
-- Chore - bump Python to 3.14.10 with security patch for compromised eMudhra CA
+- Chore - bump Python to 3.14.10 with patch for CVE-2026-115557
 
 # 1.4.40
 - Fix - screenshot highlight position in HTML reports now accounts for the element's offset within nested iframes relative to the top-level document
