@@ -1,6 +1,10 @@
+from unittest.mock import patch
+
 import pytest
 
+from cucu import config
 from cucu.browser.core import Browser
+from cucu.browser.selenium import Selenium
 
 
 def test_any_subclass_of_browser_gets_appropriate_error_from_unimplemented_class_method():
@@ -23,3 +27,17 @@ def test_any_subclass_of_browser_gets_appropriate_error_from_unimplemented_class
             ]
             # XXX: eventually need to pass keyword arguments
             method(*args)
+
+
+@patch("cucu.browser.selenium.webdriver.Remote")
+def test_edge_ignore_ssl_uses_w3c_capability_on_remote(remote):
+    config.CONFIG.snapshot()
+    try:
+        config.CONFIG["CUCU_IGNORE_SSL_CERTIFICATE_ERRORS"] = "true"
+        Selenium().open("edge", selenium_remote_url="http://localhost:4444")
+    finally:
+        config.CONFIG.restore()
+
+    capabilities = remote.call_args.kwargs["options"].to_capabilities()
+    assert capabilities["acceptInsecureCerts"] is True
+    assert "acceptSslCerts" not in capabilities

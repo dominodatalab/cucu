@@ -218,7 +218,7 @@ class Selenium(Browser):
                 options.add_argument("--headless")
 
             if ignore_ssl_certificate_errors:
-                options.set_capability("acceptSslCerts", True)
+                options.accept_insecure_certs = True
 
             if selenium_remote_url is not None:
                 logger.debug(f"webdriver.Remote init: {selenium_remote_url}")
