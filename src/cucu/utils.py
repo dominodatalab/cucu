@@ -302,20 +302,26 @@ def take_screenshot(ctx, step_name, label="", element=None):
     # driver.get_window_size returns the size of the window the OS draws for
     # the browser, not the window the browser uses to display the DOM. If we
     # go through JavaScript, we ignore the height of the address bar and
-    # such. Climb to the top window first since the browser may currently be
-    # switched into an iframe (whose innerWidth/innerHeight are not the real
-    # viewport size the screenshot was taken at).
-    script = """
-        function getDimensionsOfCurrentWindow() {
-          let win = window;
-          while (win !== win.top) {
-            if (!win.frameElement) break;
-            win = win.parent;
-          }
-          return { width: win.innerWidth, height: win.innerHeight };
-        };
-        return getDimensionsOfCurrentWindow();
-    """
+    # such.
+    #
+    # Only when highlighting an element do we climb to the top window, since
+    # the browser may be switched into an iframe whose innerWidth/innerHeight
+    # are not the real viewport size. The climb is skipped for the automatic
+    # after-step screenshots (no element): walking window.parent from inside
+    # nested VSCode/code-server webviews can hang chromedriver (QE-19984).
+    if element:
+        script = """
+            let win = window;
+            while (win !== win.top) {
+              if (!win.frameElement) break;
+              win = win.parent;
+            }
+            return { width: win.innerWidth, height: win.innerHeight };
+        """
+    else:
+        script = (
+            "return { width: window.innerWidth, height: window.innerHeight };"
+        )
     size = ctx.browser.execute(script)
 
     location = {
