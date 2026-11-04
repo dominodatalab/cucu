@@ -7,7 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.43
 
-- Fix - automatic after-step screenshots no longer climb parent frames to read the viewport size, which could hang chromedriver (ReadTimeoutError in the after-step hook) when the driver sits inside nested VSCode/code-server webviews; the climb now runs only when highlighting an element
+- Fix - screenshots no longer hang chromedriver (ReadTimeoutError in the step or after-step hook) when the driver is inside nested VSCode/code-server webviews; the top-level viewport size and element offset are now computed by switching frames with WebDriver instead of walking `window.parent`/`frameElement` in JavaScript
 
 # 1.4.42
 
