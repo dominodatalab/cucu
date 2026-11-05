@@ -256,27 +256,41 @@ def take_saw_element_screenshot(ctx, thing, name, index, element=None):
     )
 
 
-def get_top_level_rect(browser, element) -> dict:
+VIEWPORT_SIZE_SCRIPT = (
+    "return { width: window.innerWidth, height: window.innerHeight };"
+)
+
+
+def get_top_level_rect_and_size(browser, element):
     """
-    return element's bounding rect (x, y, width, height) relative to the
-    top-level document, not whatever iframe the browser is currently
-    switched into.
+    return the element's bounding rect (x, y, width, height) relative to the
+    top-level document and the top-level viewport size (width, height), not
+    those of whatever iframe the browser is currently switched into.
+
+    The offsets are summed by switching up through browser.frame_stack with
+    WebDriver instead of walking window.parent/frameElement in JavaScript,
+    since that script hangs chromedriver inside nested VSCode/code-server
+    webviews (QE-19984). The browser is switched back into the same frame
+    before returning.
     """
-    script = """
+    rect_script = """
         const rect = arguments[0].getBoundingClientRect();
-        let x = rect.left, y = rect.top;
-        let win = window;
-        while (win !== win.top) {
-            const frameElement = win.frameElement;
-            if (!frameElement) break;  // cross-origin: degrade gracefully
-            const frameRect = frameElement.getBoundingClientRect();
-            x += frameRect.left;
-            y += frameRect.top;
-            win = win.parent;
-        }
-        return {x: x, y: y, width: rect.width, height: rect.height};
+        return {x: rect.left, y: rect.top, width: rect.width, height: rect.height};
     """
-    return browser.execute(script, element)
+    rect = browser.execute(rect_script, element)
+    frames = list(browser.frame_stack)
+    for frame in reversed(frames):
+        browser.switch_to_parent_frame()
+        frame_rect = browser.execute(rect_script, frame)
+        rect["x"] += frame_rect["x"]
+        rect["y"] += frame_rect["y"]
+
+    size = browser.execute(VIEWPORT_SIZE_SCRIPT)
+
+    for frame in frames:
+        browser.switch_to_frame(frame)
+
+    return rect, size
 
 
 def take_screenshot(ctx, step_name, label="", element=None):
@@ -302,22 +316,8 @@ def take_screenshot(ctx, step_name, label="", element=None):
     # driver.get_window_size returns the size of the window the OS draws for
     # the browser, not the window the browser uses to display the DOM. If we
     # go through JavaScript, we ignore the height of the address bar and
-    # such. Climb to the top window first since the browser may currently be
-    # switched into an iframe (whose innerWidth/innerHeight are not the real
-    # viewport size the screenshot was taken at).
-    script = """
-        function getDimensionsOfCurrentWindow() {
-          let win = window;
-          while (win !== win.top) {
-            if (!win.frameElement) break;
-            win = win.parent;
-          }
-          return { width: win.innerWidth, height: win.innerHeight };
-        };
-        return getDimensionsOfCurrentWindow();
-    """
-    size = ctx.browser.execute(script)
-
+    # such. When highlighting an element the browser may be switched into an
+    # iframe, so the top-level size and rect are computed together.
     location = {
         "x": None,
         "y": None,
@@ -326,13 +326,18 @@ def take_screenshot(ctx, step_name, label="", element=None):
     }
     highlight = {}
     if element:
-        location.update(get_top_level_rect(ctx.browser, element))
+        top_level_rect, size = get_top_level_rect_and_size(
+            ctx.browser, element
+        )
+        location.update(top_level_rect)
         highlight = {
             "height_ratio": location["height"] / size["height"],
             "width_ratio": location["width"] / size["width"],
             "top_ratio": location["y"] / size["height"],
             "left_ratio": location["x"] / size["width"],
         }
+    else:
+        size = ctx.browser.execute(VIEWPORT_SIZE_SCRIPT)
 
     filename = os.path.split(filepath)[-1]
     if not getattr(step, "step_image_dir", None):

@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.43
+
+- Fix - screenshots no longer hang chromedriver (ReadTimeoutError in the step or after-step hook) when the driver is inside nested VSCode/code-server webviews; the top-level viewport size and element offset are now computed by switching frames with WebDriver instead of walking `window.parent`/`frameElement` in JavaScript
+
 # 1.4.42
 
 - Fix - Edge ignore-SSL now uses the W3C acceptInsecureCerts capability so remote Selenium Grid 4 accepts the session
