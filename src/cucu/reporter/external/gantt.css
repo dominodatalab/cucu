@@ -227,7 +227,7 @@
 }
 
 .gantt-track {
-    height: 18px;
+    height: 17px;
     cursor: grab;
     background-image: linear-gradient(to right, #eee 1px, transparent 1px);
     background-size: var(--grid-px, 100px) 100%;
@@ -259,6 +259,11 @@
     text-decoration: underline;
 }
 
+.gantt-row {
+    height: 17px;
+    line-height: 16px;
+}
+
 .gantt-row.hidden {
     display: none;
 }
@@ -271,7 +276,7 @@
 
 .gantt-bar {
     position: absolute;
-    top: 1px;
+    top: 0;
     bottom: 1px;
     border-radius: 2px;
     border-left: 3px solid transparent;
