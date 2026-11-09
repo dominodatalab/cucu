@@ -108,6 +108,7 @@
 
 .gantt {
     --label-w: 320px;
+    --run-w: 40px;
     --worker-w: 56px;
 }
 
@@ -177,12 +178,13 @@
     user-select: none;
 }
 
+.gantt-run-cell,
 .gantt-worker-cell {
     flex: 0 0 var(--worker-w);
     width: var(--worker-w);
     box-sizing: border-box;
     position: sticky;
-    left: var(--label-w);
+    left: calc(var(--label-w) + var(--run-w));
     z-index: 2;
     background: #fff;
     display: flex;
@@ -191,8 +193,53 @@
     border-right: 1px solid #ddd;
 }
 
+.gantt-run-cell {
+    flex-basis: var(--run-w);
+    width: var(--run-w);
+    left: var(--label-w);
+}
+
+.gantt-run-header,
 .gantt-worker-header {
     color: #666;
+}
+
+.gantt-run-badge {
+    border-radius: 3px;
+    border: 1px solid #999;
+    min-width: 18px;
+    height: 18px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85em;
+    color: #444;
+}
+
+.gantt-chip-label {
+    display: inline-block;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.gantt-bar.tiny {
+    border-left-width: 0;
+}
+
+.gantt-run-chip {
+    background-color: #fff;
+    border-color: #999;
+    color: #333;
+}
+
+.gantt-btn.active {
+    background: #333;
+    border-color: #333;
+    color: #fff;
 }
 
 .gantt-worker {
@@ -248,6 +295,7 @@
 }
 
 .gantt-row:hover .gantt-label,
+.gantt-row:hover .gantt-run-cell,
 .gantt-row:hover .gantt-worker-cell,
 .gantt-row:hover .gantt-track {
     background-color: #f4f6f8;

@@ -5,11 +5,26 @@ from cucu.reporter.html import build_gantt_chart, format_gantt_duration
 T0 = datetime(2026, 9, 18, 12, 0, 0)
 
 
-def _feature(name, scenarios, worker_id="w1", worker_start=T0):
+def _feature(
+    name,
+    scenarios,
+    worker_id="w1",
+    worker_start=T0,
+    run_id="r1",
+    run_file=None,
+):
     return {
         "name": name,
         "folder_name": name,
-        "worker": {"worker_run_id": worker_id, "start_at": worker_start},
+        "worker": {
+            "worker_run_id": worker_id,
+            "start_at": worker_start,
+            "cucu_run": {
+                "cucu_run_id": run_id,
+                "filepath": run_file or f"features/{run_id}",
+                "full_arguments": ["cucu", "run", run_file or run_id],
+            },
+        },
         "scenarios": scenarios,
     }
 
@@ -65,7 +80,7 @@ def test_build_gantt_chart_positions_bars_and_skips_background():
     assert gantt["rows"][1]["duration_label"] == "10s"
     assert (
         gantt["rows"][0]["bar_title"]
-        == "passed — 2026-09-18 12:00:00 – 2026-09-18 12:00:10 — 10s — worker 1"
+        == "passed — 2026-09-18 12:00:00 – 2026-09-18 12:00:10 — 10s — Worker 1"
     )
     assert gantt["untimed_count"] == 1
     assert gantt["span_s"] == 20.0
@@ -77,7 +92,10 @@ def test_build_gantt_chart_positions_bars_and_skips_background():
         "skipped": 0,
         "untested": 0,
     }
-    assert gantt["worker_counts"] == {1: 2}
+    assert [(w["key"], w["label"], w["count"]) for w in gantt["workers"]] == [
+        ("1.1", "Worker 1", 2)
+    ]
+    assert len(gantt["runs"]) == 1
 
 
 def test_build_gantt_chart_keeps_bars_inside_timeline():
@@ -145,7 +163,10 @@ def test_build_gantt_chart_numbers_workers_by_start_time():
 
     workers = {row["name"]: row["worker"] for row in gantt["rows"]}
     assert workers == {"A": 1, "C": 1, "B": 2}
-    assert gantt["worker_counts"] == {1: 2, 2: 1}
+    assert [(w["key"], w["count"]) for w in gantt["workers"]] == [
+        ("1.1", 2),
+        ("1.2", 1),
+    ]
     assert gantt["status_counts"]["terminated"] == 1
     assert gantt["status_counts"]["error"] == 1
 
@@ -155,3 +176,95 @@ def test_build_gantt_chart_duration_label_matches_bar():
     scenario["duration"] = 3.0
     gantt = build_gantt_chart([_feature("F", [scenario])])
     assert gantt["rows"][0]["duration_label"] == "1m 1s"
+
+
+def test_build_gantt_chart_numbers_runs_and_workers_within_runs():
+    later = T0 + timedelta(hours=2)
+    features = [
+        _feature(
+            "Second run",
+            [_scenario("B", "failed", later, later + timedelta(seconds=20))],
+            worker_id="w-b",
+            worker_start=later,
+            run_id="run-b",
+            run_file="b.feature",
+        ),
+        _feature(
+            "First run",
+            [_scenario("A", "passed", T0, T0 + timedelta(seconds=10))],
+            worker_id="w-a",
+            run_id="run-a",
+            run_file="a.feature",
+        ),
+    ]
+
+    gantt = build_gantt_chart(features)
+
+    rows = {row["name"]: row for row in gantt["rows"]}
+    assert (rows["A"]["run"], rows["A"]["worker_key"]) == (1, "1.1")
+    assert (rows["B"]["run"], rows["B"]["worker_key"]) == (2, "2.1")
+    assert [(r["number"], r["label"], r["count"]) for r in gantt["runs"]] == [
+        (1, "a.feature", 1),
+        (2, "b.feature", 1),
+    ]
+    assert [w["label"] for w in gantt["workers"]] == ["R1 W1", "R2 W1"]
+    assert rows["B"]["bar_title"].endswith("— R2 W1 — b.feature")
+
+
+def test_build_gantt_chart_aligns_runs_at_their_own_start():
+    later = T0 + timedelta(hours=1)
+    features = [
+        _feature(
+            "First run",
+            [_scenario("A", "passed", T0, T0 + timedelta(seconds=10))],
+            run_id="run-a",
+        ),
+        _feature(
+            "Second run",
+            [
+                _scenario("B", "passed", later, later + timedelta(seconds=5)),
+                _scenario(
+                    "C",
+                    "passed",
+                    later + timedelta(seconds=15),
+                    later + timedelta(seconds=20),
+                ),
+            ],
+            worker_id="w2",
+            worker_start=later,
+            run_id="run-b",
+        ),
+    ]
+
+    gantt = build_gantt_chart(features)
+
+    rows = {row["name"]: row for row in gantt["rows"]}
+    assert gantt["span_s"] == 3620.0
+    assert gantt["aligned_span_s"] == 20.0
+    assert rows["A"]["aligned_left_pct"] == 0.0
+    assert rows["A"]["aligned_width_pct"] == 50.0
+    assert rows["B"]["aligned_left_pct"] == 0.0
+    assert rows["C"]["aligned_left_pct"] == 75.0
+    assert rows["C"]["aligned_width_pct"] == 25.0
+
+
+def test_build_gantt_chart_disambiguates_duplicate_run_labels():
+    later = T0 + timedelta(minutes=5)
+    features = [
+        _feature(
+            "F1",
+            [_scenario("A", "passed", T0, T0 + timedelta(seconds=1))],
+            run_id="run-a",
+            run_file="same.feature",
+        ),
+        _feature(
+            "F2",
+            [_scenario("B", "passed", later, later + timedelta(seconds=1))],
+            run_id="run-b",
+            run_file="same.feature",
+        ),
+    ]
+
+    labels = [run["label"] for run in build_gantt_chart(features)["runs"]]
+
+    assert labels == ["same.feature @ 12:00:00", "same.feature @ 12:05:00"]

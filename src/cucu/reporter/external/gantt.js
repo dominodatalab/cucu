@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var axisTrack = gantt.querySelector(".gantt-axis-track");
     var spacer = gantt.querySelector(".gantt-label-spacer");
     var workerHeader = gantt.querySelector(".gantt-worker-header");
+    var runHeader = gantt.querySelector(".gantt-run-header");
     var resizer = gantt.querySelector(".gantt-resizer");
     var LABEL_W_DEFAULT = 320;
     var LABEL_W_MIN = 120;
@@ -19,23 +20,45 @@ document.addEventListener("DOMContentLoaded", function () {
     var bars = rows.map(function (row) { return row.querySelector(".gantt-bar"); });
     var statusChips = Array.prototype.slice.call(document.querySelectorAll(".gantt-status-chip"));
     var workerChips = Array.prototype.slice.call(document.querySelectorAll(".gantt-worker-chip"));
+    var runChips = Array.prototype.slice.call(document.querySelectorAll(".gantt-run-chip"));
+    var alignButton = document.querySelector(".gantt-align");
     var search = document.querySelector(".gantt-search");
     var shown = document.querySelector(".gantt-shown");
     var zoomLevel = document.querySelector(".gantt-zoom-level");
 
-    var spanS = parseFloat(gantt.getAttribute("data-span-s"));
+    var clockSpanS = parseFloat(gantt.getAttribute("data-span-s"));
+    var alignedSpanS = parseFloat(gantt.getAttribute("data-aligned-span-s"));
     var clockStartS = parseFloat(gantt.getAttribute("data-run-start-clock-s"));
+    var aligned = false;
+    var spanS = clockSpanS;
     var zoom = 1;
 
-    bars.forEach(function (bar) {
-        bar.style.left = bar.getAttribute("data-left") + "%";
-        bar.style.width = bar.getAttribute("data-width") + "%";
-    });
+    function barLeft(i) { return parseFloat(bars[i].getAttribute(aligned ? "data-aligned-left" : "data-left")); }
+    function barWidth(i) { return parseFloat(bars[i].getAttribute(aligned ? "data-aligned-width" : "data-width")); }
 
-    function labelWidth() { return spacer.offsetWidth + workerHeader.offsetWidth; }
+    function positionBars() {
+        spanS = aligned ? alignedSpanS : clockSpanS;
+        bars.forEach(function (bar, i) {
+            bar.style.left = barLeft(i) + "%";
+            bar.style.width = barWidth(i) + "%";
+        });
+        if (alignButton) alignButton.classList.toggle("active", aligned);
+    }
+    positionBars();
+
+    function setAligned(value) {
+        if (aligned === value) return;
+        aligned = value;
+        positionBars();
+        applyZoom(zoom, 0);
+        followTopRow(true);
+        writeHash();
+    }
+
+    function labelWidth() { return spacer.offsetWidth + runHeader.offsetWidth + workerHeader.offsetWidth; }
 
     function setLabelWidth(px) {
-        var max = Math.max(LABEL_W_MIN, scroller.clientWidth - workerHeader.offsetWidth - 200);
+        var max = Math.max(LABEL_W_MIN, scroller.clientWidth - runHeader.offsetWidth - workerHeader.offsetWidth - 200);
         px = Math.round(Math.min(max, Math.max(LABEL_W_MIN, px)));
         gantt.style.setProperty("--label-w", px + "px");
         return px;
@@ -45,10 +68,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function pad(n) { return (n < 10 ? "0" : "") + n; }
 
-    function formatClock(offsetS, step) {
-        var total = (clockStartS + offsetS) % 86400;
-        var whole = Math.floor(total);
-        var text = pad(Math.floor(whole / 3600)) + ":" + pad(Math.floor(whole / 60) % 60) + ":" + pad(whole % 60);
+    function formatTick(offsetS, step) {
+        var total = aligned ? offsetS : (clockStartS + offsetS) % 86400;
+        var whole = Math.floor(total + 1e-9);
+        var hours = Math.floor(whole / 3600);
+        var text = aligned
+            ? "+" + (hours ? hours + ":" + pad(Math.floor(whole / 60) % 60) : Math.floor(whole / 60)) + ":" + pad(whole % 60)
+            : pad(hours) + ":" + pad(Math.floor(whole / 60) % 60) + ":" + pad(whole % 60);
         if (step < 1) {
             var digits = step >= 0.1 ? 1 : step >= 0.01 ? 2 : 3;
             text += "." + (total - whole).toFixed(digits).slice(2);
@@ -68,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var t = n * step;
             var left = t * pxPerS;
             if (left < 30 || left > width - 30) continue;
-            html += '<span class="gantt-tick" style="left:' + left + 'px">' + formatClock(t, step) + "</span>";
+            html += '<span class="gantt-tick" style="left:' + left + 'px">' + formatTick(t, step) + "</span>";
         }
         axisTrack.innerHTML = html;
         gantt.style.setProperty("--grid-px", step * pxPerS + "px");
@@ -79,6 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (rows[i].classList.contains("hidden")) return;
             var label = bar.firstElementChild;
             bar.classList.toggle("narrow", bar.clientWidth < label.scrollWidth + 8);
+            bar.classList.toggle("tiny", bar.offsetWidth < 12);
         });
     }
 
@@ -116,11 +143,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function applyFilters() {
         var statuses = activeValues(statusChips, "data-status");
         var workers = activeValues(workerChips, "data-worker");
+        var runs = activeValues(runChips, "data-run");
         var query = search.value.trim().toLowerCase();
         var count = 0;
         rows.forEach(function (row) {
             var visible = statuses.indexOf(row.getAttribute("data-status")) !== -1 &&
-                (!workerChips.length || workers.indexOf(row.getAttribute("data-worker")) !== -1) &&
+                workers.indexOf(row.getAttribute("data-worker")) !== -1 &&
+                runs.indexOf(row.getAttribute("data-run")) !== -1 &&
                 (!query || row.getAttribute("data-search").indexOf(query) !== -1);
             row.classList.toggle("hidden", !visible);
             if (visible) count++;
@@ -134,9 +163,8 @@ document.addEventListener("DOMContentLoaded", function () {
         var lo = 100, hi = 0;
         rows.forEach(function (row, i) {
             if (row.classList.contains("hidden")) return;
-            var left = parseFloat(bars[i].getAttribute("data-left"));
-            lo = Math.min(lo, left);
-            hi = Math.max(hi, left + parseFloat(bars[i].getAttribute("data-width")));
+            lo = Math.min(lo, barLeft(i));
+            hi = Math.max(hi, barLeft(i) + barWidth(i));
         });
         if (hi <= lo) return;
         applyZoom(100 / (hi - lo) * 0.96, 0);
@@ -154,6 +182,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         if (scroller.scrollTop > 0) parts.push("y=" + Math.round(scroller.scrollTop));
         if (!allActive(statusChips)) parts.push("status=" + activeValues(statusChips, "data-status").join(","));
+        if (aligned) parts.push("align=1");
+        if (!allActive(runChips)) parts.push("run=" + activeValues(runChips, "data-run").join(","));
         if (!allActive(workerChips)) parts.push("worker=" + activeValues(workerChips, "data-worker").join(","));
         if (search.value.trim()) parts.push("q=" + encodeURIComponent(search.value.trim()));
         var hash = parts.length ? "#" + parts.join("&") : "";
@@ -170,7 +200,11 @@ document.addEventListener("DOMContentLoaded", function () {
         statusChips.forEach(function (c) { c.classList.toggle("active", !statuses || statuses.indexOf(c.getAttribute("data-status")) !== -1); });
         var workers = params.worker === undefined ? null : params.worker.split(",");
         workerChips.forEach(function (c) { c.classList.toggle("active", !workers || workers.indexOf(c.getAttribute("data-worker")) !== -1); });
+        var runs = params.run === undefined ? null : params.run.split(",");
+        runChips.forEach(function (c) { c.classList.toggle("active", !runs || runs.indexOf(c.getAttribute("data-run")) !== -1); });
         search.value = params.q || "";
+        aligned = !!alignButton && params.align === "1";
+        positionBars();
         applyFilters();
         var z = parseFloat(params.zoom);
         applyZoom(isFinite(z) ? z : 1, 0);
@@ -195,6 +229,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     wireChips(statusChips);
     wireChips(workerChips);
+    wireChips(runChips);
+    if (alignButton) alignButton.addEventListener("click", function () { setAligned(!aligned); });
     search.addEventListener("input", applyFilters);
 
     document.querySelectorAll(".gantt-btn[data-zoom]").forEach(function (btn) {
@@ -254,12 +290,12 @@ document.addEventListener("DOMContentLoaded", function () {
     function followTopRow(instant) {
         var i = topVisibleRowIndex();
         if (i === -1) return;
-        var barLeft = parseFloat(bars[i].getAttribute("data-left")) / 100 * trackWidth();
+        var target = barLeft(i) / 100 * trackWidth() - FOLLOW_MARGIN_PX;
         if (instant) {
             stopGlide();
-            scroller.scrollLeft = barLeft - FOLLOW_MARGIN_PX;
+            scroller.scrollLeft = target;
         } else {
-            glideTo(barLeft - FOLLOW_MARGIN_PX);
+            glideTo(target);
         }
     }
 
