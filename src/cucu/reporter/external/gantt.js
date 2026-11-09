@@ -49,7 +49,6 @@ document.addEventListener("DOMContentLoaded", function () {
         aligned = value;
         positionBars();
         applyZoom(zoom, 0);
-        followTopRow(true);
         writeHash();
     }
 
@@ -264,17 +263,19 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".gantt-btn[data-zoom]").forEach(function (btn) {
         btn.addEventListener("click", function () {
             var action = btn.getAttribute("data-zoom");
-            if (action === "in") { applyZoom(zoom * 2); followTopRow(true); }
-            else if (action === "out") { applyZoom(zoom / 2); followTopRow(true); }
-            else if (action === "fit") { followPaused = false; fitToShown(); }
+            followPaused = false;
+            if (action === "in") applyZoom(zoom * 2);
+            else if (action === "out") applyZoom(zoom / 2);
+            else if (action === "fit") fitToShown();
         });
     });
 
     scroller.addEventListener("wheel", function (event) {
         if (!event.ctrlKey && !event.metaKey) return;
         event.preventDefault();
-        applyZoom(zoom * Math.exp(-event.deltaY * 0.002), 0);
-        followTopRow(true);
+        followPaused = false;
+        var anchor = event.clientX - scroller.getBoundingClientRect().left - labelWidth();
+        applyZoom(zoom * Math.exp(-event.deltaY * 0.002), Math.max(0, anchor));
     }, { passive: false });
 
     var FOLLOW_MARGIN_PX = 24;
@@ -316,18 +317,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var followPaused = false;
 
-    function followTopRow(instant) {
-        if (instant) followPaused = false;
+    function followTopRow() {
         if (followPaused) return;
         var i = topVisibleRowIndex();
         if (i === -1) return;
-        var target = barLeft(i) / 100 * trackWidth() - FOLLOW_MARGIN_PX;
-        if (instant) {
-            stopGlide();
-            scroller.scrollLeft = target;
-        } else {
-            glideTo(target);
-        }
+        glideTo(barLeft(i) / 100 * trackWidth() - FOLLOW_MARGIN_PX);
     }
 
     scroller.addEventListener("wheel", function (event) {
