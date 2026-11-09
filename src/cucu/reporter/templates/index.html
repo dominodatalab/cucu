@@ -30,7 +30,7 @@
                 <tr>
                     <td class="text-center">{{ scenario['start_at'] }}</td>
                     <td><a href="{{ urlencode(escape(feature['name'])) }}.html"><span>{{ escape(feature['name']) }}</span></a><br>{{ feature['tags'] }}</td>
-                    <td><a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/index.html"><span>{{ escape(scenario['name']) }}</span></a> <a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/replay.html" title="Replay timeline view">🔁</a> <a href="gantt.html#scenario={{ scenario['scenario_run_id'] }}" title="show this scenario in the Gantt view">{% include "gantt_icon.html" %}</a><br>{{ scenario['tags'] }}</td>
+                    <td><a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/index.html"><span>{{ escape(scenario['name']) }}</span></a> <a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/replay.html" title="Replay timeline view">🔁</a> <a href="gantt.html#scenario={{ scenario['scenario_run_id'] }}" title="show this scenario in the Gantt view" style="color: #000;">{% include "gantt_icon.html" %}</a><br>{{ scenario['tags'] }}</td>
                     <td class="text-center">{{ scenario['total_steps'] }}</td>
                     <td class="text-center"><span class="status-{{ scenario['status'] }}">{{ scenario['status'] }}</span></td>
                     <td class="text-center">{{ '{:.1f}'.format(scenario['duration'] | float) }}</td>
