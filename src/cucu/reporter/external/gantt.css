@@ -86,6 +86,7 @@
 }
 
 .gantt {
+    position: relative;
     min-width: 640px;
     font-size: 0.85em;
 }

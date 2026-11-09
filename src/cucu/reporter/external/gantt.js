@@ -149,8 +149,9 @@ document.addEventListener("DOMContentLoaded", function () {
         var parts = [];
         if (zoom !== 1) {
             parts.push("zoom=" + Math.round(zoom * 100) / 100);
-            parts.push("t=" + Math.round(leftEdgeSeconds() * 10) / 10);
+            parts.push("t=" + parseFloat(leftEdgeSeconds().toPrecision(6)));
         }
+        if (scroller.scrollTop > 0) parts.push("y=" + Math.round(scroller.scrollTop));
         if (!allActive(statusChips)) parts.push("status=" + activeValues(statusChips, "data-status").join(","));
         if (!allActive(workerChips)) parts.push("worker=" + activeValues(workerChips, "data-worker").join(","));
         if (search.value.trim()) parts.push("q=" + encodeURIComponent(search.value.trim()));
@@ -176,6 +177,9 @@ document.addEventListener("DOMContentLoaded", function () {
         applyFilters();
         var z = parseFloat(params.zoom);
         applyZoom(isFinite(z) ? z : 1, 0);
+        var y = parseFloat(params.y);
+        if (isFinite(y) && y > 0) scroller.scrollTop = y;
+        lastScrollTop = scroller.scrollTop;
         var t = parseFloat(params.t);
         if (isFinite(t) && t >= 0 && t <= spanS) scrollToSeconds(t);
     }
@@ -213,8 +217,28 @@ document.addEventListener("DOMContentLoaded", function () {
         applyZoom(zoom * Math.exp(-event.deltaY * 0.002), Math.max(0, anchor));
     }, { passive: false });
 
+    var FOLLOW_MARGIN_PX = 24;
+    var lastScrollTop = scroller.scrollTop;
+
+    function followTopRow() {
+        var axisHeight = gantt.querySelector(".gantt-axis").offsetHeight;
+        var viewTop = scroller.scrollTop + axisHeight;
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.classList.contains("hidden")) continue;
+            if (row.offsetTop + row.offsetHeight / 2 < viewTop) continue;
+            var barLeft = parseFloat(bars[i].getAttribute("data-left")) / 100 * trackWidth();
+            scroller.scrollLeft = Math.max(0, barLeft - FOLLOW_MARGIN_PX);
+            return;
+        }
+    }
+
     var scrollTimer = null;
     scroller.addEventListener("scroll", function () {
+        if (scroller.scrollTop !== lastScrollTop) {
+            lastScrollTop = scroller.scrollTop;
+            if (zoom > 1 && !pan) followTopRow();
+        }
         clearTimeout(scrollTimer);
         scrollTimer = setTimeout(writeHash, 150);
     });
