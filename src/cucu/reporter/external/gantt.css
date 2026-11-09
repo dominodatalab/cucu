@@ -249,6 +249,16 @@
     border-bottom: 1px solid #f0f0f0;
 }
 
+.gantt-row.focused .gantt-label,
+.gantt-row.focused .gantt-worker-cell,
+.gantt-row.focused .gantt-track {
+    background-color: #fff3cd;
+}
+
+.gantt-row.focused .gantt-scenario {
+    text-decoration: underline;
+}
+
 .gantt-row.hidden {
     display: none;
 }

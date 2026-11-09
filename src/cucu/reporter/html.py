@@ -147,6 +147,7 @@ def build_gantt_chart(features):
             )
             rows.append(
                 {
+                    "id": scenario["scenario_run_id"],
                     "name": scenario["name"],
                     "feature_name": feature["name"],
                     "feature_folder_name": feature["folder_name"],

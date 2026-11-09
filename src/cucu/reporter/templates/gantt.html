@@ -49,7 +49,7 @@
                 <div class="gantt-axis-track"></div>
             </div>
             {% for row in gantt['rows'] %}
-            <div class="gantt-row" data-status="{{ row['status'] }}" data-worker="{{ row['worker_key'] }}" data-search="{{ escape((row['name'] ~ ' ' ~ row['feature_name']) | lower) }}">
+            <div class="gantt-row" data-id="{{ row['id'] }}" data-status="{{ row['status'] }}" data-worker="{{ row['worker_key'] }}" data-search="{{ escape((row['name'] ~ ' ' ~ row['feature_name']) | lower) }}">
                 <div class="gantt-label" title="{{ escape(row['name']) }} - {{ escape(row['feature_name']) }}">
                     <a class="gantt-scenario" href="{{ urlencode(escape(row['feature_folder_name'])) }}/{{ urlencode(escape(row['scenario_folder_name'])) }}/index.html">{{ escape(row['name']) }}</a>
                     <span class="gantt-feature">{{ escape(row['feature_name']) }}</span>

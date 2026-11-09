@@ -180,6 +180,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!allActive(statusChips)) parts.push("status=" + activeValues(statusChips, "data-status").join(","));
         if (aligned) parts.push("align=1");
         if (!allActive(workerChips)) parts.push("worker=" + activeValues(workerChips, "data-worker").join(","));
+        if (focusedRow) parts.push("scenario=" + encodeURIComponent(focusedRow.getAttribute("data-id")));
         if (search.value.trim()) parts.push("q=" + encodeURIComponent(search.value.trim()));
         var hash = parts.length ? "#" + parts.join("&") : "";
         history.replaceState(null, "", location.pathname + location.search + hash);
@@ -206,6 +207,27 @@ document.addEventListener("DOMContentLoaded", function () {
         lastScrollTop = scroller.scrollTop;
         var t = parseFloat(params.t);
         if (isFinite(t) && t >= 0 && t <= spanS) scrollToSeconds(t);
+        setFocus(params.scenario ? gantt.querySelector('.gantt-row[data-id="' + CSS.escape(params.scenario) + '"]') : null);
+        if (focusedRow && !isFinite(z) && !isFinite(y)) showFocused();
+    }
+
+    var FOCUS_BAR_VIEW_PCT = 25;
+    var focusedRow = null;
+
+    function setFocus(row) {
+        if (focusedRow) focusedRow.classList.remove("focused");
+        focusedRow = row;
+        if (focusedRow) focusedRow.classList.add("focused");
+    }
+
+    function showFocused() {
+        var i = rows.indexOf(focusedRow);
+        if (focusedRow.classList.contains("hidden")) return;
+        applyZoom(FOCUS_BAR_VIEW_PCT / Math.max(barWidth(i), 1e-6), 0);
+        scroller.scrollTop = focusedRow.offsetTop - axis.offsetHeight;
+        lastScrollTop = scroller.scrollTop;
+        stopGlide();
+        scroller.scrollLeft = barLeft(i) / 100 * trackWidth() - FOLLOW_MARGIN_PX;
     }
 
     function wireChips(chips) {

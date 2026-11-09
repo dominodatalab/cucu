@@ -22,6 +22,14 @@ Feature: Report Gantt view
      When I click the link "Scenario that fails"
      Then I wait to see the button "I fail"
       And I should see the text "Scenario HTML Test Report"
+     When I click the link "Gantt"
+     Then I should see the text "Gantt HTML Test Report"
+      And I should see the current url matches ".*#.*scenario=.*"
+     When I click the link "Scenario that fails"
+      And I click the link "Replay"
+      And I click the link "Gantt"
+     Then I should see the text "Gantt HTML Test Report"
+      And I should see the current url matches ".*#.*scenario=.*"
 
   Scenario: User can filter, search and zoom the Gantt chart and restore the view from the url
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/gantt-filter-results" and expect exit code "1"

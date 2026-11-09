@@ -34,6 +34,9 @@
                 <li class="nav-item active">
                     <button class="btn btn-md btn-light" title="scroll to bottom" onclick="window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });" class="nav-link">⬇️ </button>
                 </li>
+                <li class="nav-item active">
+                  <a class="nav-link" href="{{ dir_depth }}gantt.html#scenario={{ scenario['scenario_run_id'] }}" title="show this scenario in the Gantt view">{% include "gantt_icon.html" %} Gantt</a>
+                </li>
                 <li class="align-middle">
                     <div style="padding: 8px">Start at {{ scenario["start_at"] }} for {{ '{:.1f}'.format(scenario['duration'] | float) }}s</div>
                 </li>

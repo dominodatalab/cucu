@@ -31,6 +31,7 @@ def _feature(
 
 def _scenario(name, status, start, end, keyword=None):
     return {
+        "scenario_run_id": f"id-{name}",
         "name": name,
         "status": status,
         "start_at": start,
