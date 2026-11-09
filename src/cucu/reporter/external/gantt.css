@@ -127,7 +127,6 @@
     align-items: center;
     gap: 6px;
     padding: 0 6px 0 0;
-    border-right: 1px solid #ddd;
     overflow: hidden;
     white-space: nowrap;
 }
@@ -153,7 +152,6 @@
     display: flex;
     align-items: center;
     color: #666;
-    border-right: 1px solid #ddd;
     padding-left: 2px;
 }
 
@@ -188,7 +186,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-right: 1px solid #ddd;
 }
 
 .gantt-worker-header {
@@ -208,8 +205,8 @@
 .gantt-worker {
     border-radius: 3px;
     padding: 0 2px;
-    min-width: 18px;
-    height: 18px;
+    min-width: 16px;
+    height: 15px;
     box-sizing: border-box;
     display: inline-flex;
     align-items: center;
@@ -230,7 +227,7 @@
 }
 
 .gantt-track {
-    height: 22px;
+    height: 18px;
     cursor: grab;
     background-image: linear-gradient(to right, #eee 1px, transparent 1px);
     background-size: var(--grid-px, 100px) 100%;
@@ -250,7 +247,6 @@
 }
 
 .gantt-row {
-    border-bottom: 1px solid #f0f0f0;
 }
 
 .gantt-row.focused .gantt-label,
