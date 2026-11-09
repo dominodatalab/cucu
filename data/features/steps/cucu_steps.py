@@ -32,6 +32,18 @@ def step_with_substeps(context):
     )
 
 
+@step("I use a step with substeps that sleep")
+def step_with_substeps_that_sleep(context):
+    run_steps(
+        context,
+        """
+    When I sleep for "1" seconds
+     And I sleep for "1" seconds
+     And I sleep for "1" seconds
+    """,
+    )
+
+
 @step("I use a step with substeps and a heading")
 def step_with_substeps_and_heading(context):
     run_steps(
@@ -82,6 +94,18 @@ def i_wait_to_fail(_):
         raise AssertionError("step fails on purpose after a while")
 
     retry(fail)()
+
+
+@step("I register two near-instant after-scenario hooks")
+def register_two_instant_hooks(_):
+    def instant_hook_one(_ctx):
+        pass
+
+    def instant_hook_two(_ctx):
+        pass
+
+    register_after_this_scenario_hook(instant_hook_one)
+    register_after_this_scenario_hook(instant_hook_two)
 
 
 @step("I error after-scenario hook")

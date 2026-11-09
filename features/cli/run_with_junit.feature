@@ -73,3 +73,22 @@ Feature: Run with JUnit
       """
       HOOK-ERROR in before_scenario_fail: AssertionError: boom
       """
+
+  Scenario: JUnit XML testcase element has the expected structure
+    Given I run the command "cucu run data/features/echo.feature --results {CUCU_RESULTS_DIR}/junit_structure_results" and save stdout to "STDOUT", stderr to "STDERR" and expect exit code "0"
+     Then I should see the file at "{CUCU_RESULTS_DIR}/junit_structure_results/Echo.xml" contains the following:
+      """
+      <testsuite name="Echo"
+      """
+      And I should see the file at "{CUCU_RESULTS_DIR}/junit_structure_results/Echo.xml" contains the following:
+      """
+      classname="Echo" name="Echo an environment variable"
+      """
+      And I should see the file at "{CUCU_RESULTS_DIR}/junit_structure_results/Echo.xml" contains the following:
+      """
+      status="passed"
+      """
+      And I should see the file at "{CUCU_RESULTS_DIR}/junit_structure_results/Echo.xml" contains the following:
+      """
+      scenario_run_id="
+      """

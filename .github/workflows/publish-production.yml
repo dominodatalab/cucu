@@ -20,14 +20,14 @@ jobs:
           ref: main
           fetch-depth: 0
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           enable-cache: true
-      - name: Install cucu with Python 3.14.7
+      - name: Install cucu with Python 3.14.10
         run: |
-          uv sync -p 3.14.7
+          uv sync -p 3.14.10
       - name: build package
         run: |
           uv build
       - name: publish to pypi.org
-        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3

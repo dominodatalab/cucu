@@ -49,6 +49,9 @@ class Browser:
     def switch_to_frame(self, frame):
         raise RuntimeError("implement me")
 
+    def switch_to_parent_frame(self):
+        raise RuntimeError("implement me")
+
     def screenshot(self, filepath):
         raise RuntimeError("implement me")
 

@@ -547,6 +547,7 @@ def run(
                 results_dir=results,
                 report_folder=report,
                 junit_folder=junit,
+                workers=workers,
             )
 
 
@@ -555,6 +556,7 @@ def _generate_report(
     report_folder: Path,
     junit_folder: Path | None = None,
     combine: bool = False,
+    workers: int | None = None,
 ):
     if report_folder.exists():
         shutil.rmtree(report_folder)
@@ -564,7 +566,9 @@ def _generate_report(
     if results_dir.exists():
         db.consolidate_database_files(results_dir, combine)
 
-    report_location = reporter.generate(results_dir, report_folder)
+    report_location = reporter.generate(
+        results_dir, report_folder, workers=workers
+    )
     print(f"HTML test report at {report_location}")
 
     if junit_folder:
@@ -627,6 +631,13 @@ def _generate_report(
     help="combine multiple cucu_runs into a single report",
 )
 @click.option(
+    "-w",
+    "--workers",
+    default=None,
+    type=int,
+    help="number of workers to use for parallel report generation",
+)
+@click.option(
     "-e",
     "--env",
     default=[],
@@ -640,6 +651,7 @@ def report(
     output: Path,
     junit: Path,
     combine: bool,
+    workers: int | None,
     env,
 ):
     """
@@ -676,6 +688,7 @@ def report(
         report_folder=output,
         junit_folder=junit,
         combine=combine,
+        workers=workers,
     )
 
 

@@ -38,6 +38,7 @@ class StubScenario:
         tags=None,
         before_hook_results=None,
         after_hook_results=None,
+        scenario_run_id="stub-scenario-run-id",
     ):
         self.name = name
         self._status = status
@@ -46,6 +47,7 @@ class StubScenario:
         self.tags = tags or []
         self.before_hook_results = before_hook_results or []
         self.after_hook_results = after_hook_results or []
+        self.scenario_run_id = scenario_run_id
 
     def compute_status(self):
         return StubStatus(self._status)
@@ -188,6 +190,20 @@ def test_skipped_scenario_emits_skipped_only(junit_env):
     check.is_none(testcase.find("error"), "skipped must not emit <error>")
     check.equal(testsuite.get("skipped"), "1")
     check.equal(testsuite.get("errors"), "0")
+
+
+def test_scenario_run_id_is_emitted(junit_env):
+    feature = StubFeature("feature with run id")
+    scenario = StubScenario(
+        "a scenario with a run id",
+        status="passed",
+        scenario_run_id="abc-123-def-456",
+    )
+
+    testsuite = _run_feature(junit_env, feature, scenario)
+    testcase = testsuite.find("testcase")
+
+    check.equal(testcase.get("scenario_run_id"), "abc-123-def-456")
 
 
 def test_terminated_scenario_has_terminated_status(junit_env):

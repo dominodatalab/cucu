@@ -5,8 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 1.4.37
+# 1.4.44
+
 - Add - HTML report Gantt view, linked from the Index, with one outcome-colored timespan bar per scenario showing compact duration and linking to that scenario's result page
+
+# 1.4.43
+
+- Fix - screenshots no longer hang chromedriver (ReadTimeoutError in the step or after-step hook) when the driver is inside nested VSCode/code-server webviews; the top-level viewport size and element offset are now computed by switching frames with WebDriver instead of walking `window.parent`/`frameElement` in JavaScript
+
+# 1.4.42
+
+- Fix - Edge ignore-SSL now uses the W3C acceptInsecureCerts capability so remote Selenium Grid 4 accepts the session
+
+# 1.4.41
+
+- Chore - bump Python to 3.14.10 with patch for CVE-2026-115557
+
+# 1.4.40
+- Fix - screenshot highlight position in HTML reports now accounts for the element's offset within nested iframes relative to the top-level document
+
+# 1.4.39
+- Add - `--workers`/`-w` option to `cucu report` and `cucu run --generate-report` for parallel per-scenario HTML and video rendering via `ThreadPoolExecutor`
+
+# 1.4.38
+- Fix - replay view timeline no longer overflows for parent steps with nested substeps
+- Change - replay view timeline and Steps panel now show after-scenario cleanup hooks as trailing entries instead of leaving that time unaccounted for
+- Fix - dragging the replay view timeline playhead no longer strands it far from the cursor
+- Fix - replay view Errors/Stderr panels now also surface a failing after-scenario cleanup hook, not just failing steps
+- Fix - the per-feature HTML report page's duration no longer always shows 0.0s
+- Fix - clicking a specific timeline bar/row for a cleanup hook now reliably selects that entry, even when several hooks share the exact same recorded timestamp; also fixes the step/cleanup bar "active" highlight, which was silently broken for all bars due to an Alpine `:class` array-with-object binding that doesn't resolve the way it does in other templating libraries
+
+# 1.4.37
+- Add - emit `scenario_run_id` as an attribute on each `<testcase>` element in the JUnit XML output
 
 # 1.4.36
 - Fix - `fuzzy_find` caches `:vis` answers for the duration of a single call instead of re-deriving them per rule, cutting element lookups on large pages by roughly an order of magnitude (a button lookup on a 15k-element table drops from ~7.4s to ~0.6s); pages big enough to previously exceed the WebDriver script timeout are now found well within it

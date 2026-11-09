@@ -175,6 +175,8 @@ def _run_hook(ctx, hook):
         "stdout": [],
         "stderr": [],
         "error_message": [],
+        "start_at": get_iso_timestamp_with_ms(),
+        "end_at": None,
     }
     try:
         hook(ctx)
@@ -192,6 +194,7 @@ def _run_hook(ctx, hook):
     finally:
         hook_result["stdout"] = sys.stdout.captured()
         hook_result["stderr"] = sys.stderr.captured()
+        hook_result["end_at"] = get_iso_timestamp_with_ms()
     return hook_result
 
 

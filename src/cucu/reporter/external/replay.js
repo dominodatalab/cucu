@@ -16,6 +16,17 @@
   var BROWSER_LOGS      = DATA.browserLogs || [];
   var TOTAL_STEPS       = STEPS.length;
 
+  // Cleanup entries (after-scenario hooks) are appended after the real steps on the
+  // timeline, but are never a valid step-navigation target: they have no screenshots,
+  // don't count toward the "N / total" step badge, and don't move shownStepIdx.
+  var CLEANUP_STEPS = DATA.cleanupSteps || [];
+
+  // Combined ordered bar list, used only for the shared timeline visual-coordinate system
+  // (VISUAL_STEPS/VISUAL_CLEANUP, timeToVis/visToTime, PLAY_END). Step-navigation logic
+  // (timeToStepIdx, curStep, screenshot stepping) stays scoped to STEPS alone.
+  var ALL_BARS  = STEPS.concat(CLEANUP_STEPS);
+  var BAR_COUNT = ALL_BARS.length;
+
   function stepFrameCount(s) { return Math.max(1, s.screenshots.length); }
 
   var PIC_OFFSETS = STEPS.reduce(function (acc, s) {
@@ -45,22 +56,34 @@
   })();
 
   var PLAY_END = HAS_TIMING
-    ? STEPS.reduce(function (m, s) { return s.startOffset !== null ? Math.max(m, s.startOffset + (s.duration || 0)) : m; }, 0) || SCENARIO_DURATION
-    : Math.max(TOTAL_STEPS - 1, 0);
+    ? ALL_BARS.reduce(function (m, s) { return s.startOffset !== null ? Math.max(m, s.startOffset + (s.duration || 0)) : m; }, 0) || SCENARIO_DURATION
+    : Math.max(BAR_COUNT - 1, 0);
   var TOTAL_DUR = PLAY_END > 0 ? PLAY_END : 1;
 
+  // A parent step's own duration legitimately spans the same wall-clock window as its
+  // substeps (each gets its own bar), so summed bar durations can exceed PLAY_END — that's
+  // fine for the *time* domain (timeToVis/timeToStepIdx key off real startOffset/PLAY_END,
+  // untouched below), but the *width* bonus formula divides by a single denominator shared
+  // across all bars, so an inflated sum there would push later bars' cumulative width past
+  // 100%. Normalize against whichever is larger so bonus widths can never overbook `remaining`.
+  var BONUS_DUR = Math.max(
+    TOTAL_DUR,
+    ALL_BARS.reduce(function (sum, s) { return sum + (s.duration || 0); }, 0),
+    0.001
+  );
+
   // ===== VISUAL COORDINATE SYSTEM =====
-  // Steps get a guaranteed minimum width (VIS_MIN_W) and a gap between adjacent
-  // bars (VIS_GAP), both as percentages of the track width. This decouples visual
-  // position from raw time proportion, so timeToVis() / visToTime() must be used
-  // wherever a visual % coordinate is needed (headPct, drag-to-seek, all leftPct
+  // Steps (and trailing cleanup entries) get a guaranteed minimum width (VIS_MIN_W) and
+  // a gap between adjacent bars (VIS_GAP), both as percentages of the track width. This
+  // decouples visual position from raw time proportion, so timeToVis() / visToTime() must
+  // be used wherever a visual % coordinate is needed (headPct, drag-to-seek, all leftPct
   // values on every timeline track).
   var VIS_MIN_W = 0.4;   // minimum bar width  (% of track)
   var VIS_GAP   = 0.15;  // gap between bars   (% of track)
 
   // Cap so reserved space never exceeds 80%, leaving room for proportional widths.
   (function () {
-    var reserved = TOTAL_STEPS * VIS_MIN_W + Math.max(0, TOTAL_STEPS - 1) * VIS_GAP;
+    var reserved = BAR_COUNT * VIS_MIN_W + Math.max(0, BAR_COUNT - 1) * VIS_GAP;
     if (reserved > 80) {
       var scale = 80 / reserved;
       VIS_MIN_W *= scale;
@@ -68,58 +91,137 @@
     }
   }());
 
-  // {left, width} in visual-% for each step.
-  var VISUAL_STEPS = (function () {
-    var reserved  = TOTAL_STEPS * VIS_MIN_W + Math.max(0, TOTAL_STEPS - 1) * VIS_GAP;
+  // Each bar's own wall-clock "ownership" window, clamped so adjacent windows never
+  // overlap. A parent step's recorded duration legitimately spans its substeps' own
+  // windows (each gets its own bar) -- trusting startOffset+duration as-is would let two
+  // bars claim the same instant, which breaks the monotone time<->visual mapping below.
+  var BAR_TIME = (function () {
+    if (!HAS_TIMING) return [];
+    // nextStart[i]: the first non-null startOffset among bars after i, else PLAY_END --
+    // bar i's own window may never extend past wherever that next bar actually begins.
+    var nextStart = new Array(BAR_COUNT);
+    var seen = PLAY_END;
+    for (var i = BAR_COUNT - 1; i >= 0; i--) {
+      nextStart[i] = seen;
+      if (ALL_BARS[i].startOffset !== null) seen = ALL_BARS[i].startOffset;
+    }
+    var windows = [], cursor = 0;
+    for (var j = 0; j < BAR_COUNT; j++) {
+      var s = ALL_BARS[j];
+      var start = s.startOffset !== null ? Math.max(s.startOffset, cursor) : cursor;
+      var bound = Math.max(nextStart[j], start);
+      var end   = Math.max(start, Math.min(start + (s.duration || 0), bound));
+      windows.push({ start: start, end: end });
+      cursor = end;
+    }
+    return windows;
+  }());
+
+  // Wall-clock length of the gap before each bar, plus one trailing entry for the gap
+  // after the last bar (GAP_T.length === BAR_COUNT + 1).
+  var GAP_T = (function () {
+    if (!HAS_TIMING || BAR_TIME.length === 0) return [];
+    var gaps = [BAR_TIME[0].start];
+    for (var i = 1; i < BAR_TIME.length; i++) {
+      gaps.push(Math.max(0, BAR_TIME[i].start - BAR_TIME[i - 1].end));
+    }
+    gaps.push(Math.max(0, PLAY_END - BAR_TIME[BAR_TIME.length - 1].end));
+    return gaps;
+  }());
+
+  // {left, width} in visual-% for each bar (steps followed by cleanup entries), then split
+  // back into the two lists callers actually use.
+  var VISUAL_ALL = (function () {
+    var reserved  = BAR_COUNT * VIS_MIN_W + Math.max(0, BAR_COUNT - 1) * VIS_GAP;
     var remaining = 100 - reserved;
-    var cursor = 0, arr = [];
-    STEPS.forEach(function (s) {
-      var bonus = HAS_TIMING
-        ? (s.duration / TOTAL_DUR) * remaining
-        : remaining / Math.max(TOTAL_STEPS, 1);
-      var w = VIS_MIN_W + bonus;
+
+    var bonuses = ALL_BARS.map(function (s) {
+      return HAS_TIMING
+        ? (s.duration / BONUS_DUR) * remaining
+        : remaining / Math.max(BAR_COUNT, 1);
+    });
+
+    // A bar's duration is almost always a small fraction of the scenario's real elapsed
+    // time (clicking/asserting is near-instant; most of a scenario's wall clock is time
+    // *between* steps, not inside one), so bar widths rarely use up the whole `remaining`
+    // budget. Left unaccounted for, that leftover space collapses into a single dead zone
+    // past the last bar -- which timeToVis/visToTime then have to represent as one point
+    // (100% / PLAY_END), so a drag anywhere in that zone pins the head to the far right
+    // regardless of where the cursor actually is. Spread the leftover proportionally across
+    // every gap instead (including the trailing one), so every instant in [0, PLAY_END]
+    // still gets its own distinct visual position.
+    var usedBonus = bonuses.reduce(function (sum, b) { return sum + b; }, 0);
+    var leftover  = Math.max(0, remaining - usedBonus);
+    var gapTotal  = HAS_TIMING ? GAP_T.reduce(function (sum, g) { return sum + g; }, 0) : 0;
+    function gapBonus(i) { return gapTotal > 0 ? leftover * GAP_T[i] / gapTotal : 0; }
+
+    var cursor = gapBonus(0), arr = [];
+    ALL_BARS.forEach(function (s, i) {
+      var w = VIS_MIN_W + bonuses[i];
       arr.push({ left: cursor, width: w });
-      cursor += w + VIS_GAP;
+      cursor += w + VIS_GAP + gapBonus(i + 1);
     });
     return arr;
   }());
+  var VISUAL_STEPS   = VISUAL_ALL.slice(0, TOTAL_STEPS);
+  var VISUAL_CLEANUP = VISUAL_ALL.slice(TOTAL_STEPS);
 
-  // time → visual-% (piecewise linear, one segment per step).
+  // A single, monotone, piecewise-linear time<->visual-% table that timeToVis and
+  // visToTime both look up into, so the two are true inverses of each other by
+  // construction: one segment per bar's own window, interleaved with one segment per gap
+  // (including the leading and trailing gap), tiling [0, PLAY_END] and [0, 100] exactly.
+  var SEGMENTS = (function () {
+    if (!HAS_TIMING) return [];
+    var segs = [], tPrev = 0, vPrev = 0;
+    for (var i = 0; i < BAR_COUNT; i++) {
+      var bt = BAR_TIME[i], vs = VISUAL_ALL[i];
+      segs.push({ t0: tPrev, t1: bt.start, v0: vPrev, v1: vs.left });
+      segs.push({ t0: bt.start, t1: bt.end, v0: vs.left, v1: vs.left + vs.width });
+      tPrev = bt.end;
+      vPrev = vs.left + vs.width;
+    }
+    segs.push({ t0: tPrev, t1: Math.max(tPrev, PLAY_END), v0: vPrev, v1: 100 });
+    return segs;
+  }());
+
+  // time → visual-% (piecewise linear over SEGMENTS; see visToTime for its exact inverse).
   function timeToVis(t) {
-    if (TOTAL_STEPS === 0) return 0;
+    if (BAR_COUNT === 0) return 0;
     if (!HAS_TIMING) {
-      var idx = Math.max(0, Math.min(Math.round(t), TOTAL_STEPS - 1));
-      return VISUAL_STEPS[idx].left;
+      var idx = Math.max(0, Math.min(Math.round(t), BAR_COUNT - 1));
+      return VISUAL_ALL[idx].left;
     }
     if (t >= PLAY_END) return 100;
-    var i = timeToStepIdx(t);
-    var s = STEPS[i], vs = VISUAL_STEPS[i];
-    var dur = s.duration > 0 ? s.duration : 0.001;
-    var frac = Math.max(0, Math.min(1, (t - s.startOffset) / dur));
-    return vs.left + frac * vs.width;
+    // last non-time-degenerate segment with t0 <= t (SEGMENTS.t0 is non-decreasing).
+    var seg = SEGMENTS[0];
+    for (var i = 0; i < SEGMENTS.length; i++) {
+      var s = SEGMENTS[i];
+      if (s.t1 > s.t0 && s.t0 <= t) seg = s;
+    }
+    var dur  = seg.t1 - seg.t0;
+    var frac = dur > 0 ? Math.max(0, Math.min(1, (t - seg.t0) / dur)) : 0;
+    return seg.v0 + frac * (seg.v1 - seg.v0);
   }
 
-  // visual-% → time (inverse of timeToVis; used by drag-to-seek).
+  // visual-% → time (exact inverse of timeToVis over the same SEGMENTS table; used by
+  // drag-to-seek).
   function visToTime(pct) {
-    if (TOTAL_STEPS === 0) return 0;
+    if (BAR_COUNT === 0) return 0;
     if (!HAS_TIMING) {
-      for (var j = 0; j < TOTAL_STEPS; j++) {
-        if (pct <= VISUAL_STEPS[j].left + VISUAL_STEPS[j].width) return j;
+      for (var j = 0; j < BAR_COUNT; j++) {
+        if (pct <= VISUAL_ALL[j].left + VISUAL_ALL[j].width) return j;
       }
-      return TOTAL_STEPS - 1;
+      return BAR_COUNT - 1;
     }
-    for (var k = 0; k < TOTAL_STEPS; k++) {
-      var vs = VISUAL_STEPS[k], s = STEPS[k];
-      var barEnd = vs.left + vs.width;
-      if (pct <= barEnd) {
-        if (pct >= vs.left) {
-          return s.startOffset + ((pct - vs.left) / vs.width) * s.duration;
-        }
-        // In the gap before bar k — snap to the start of step k.
-        return s.startOffset;
-      }
+    // last non-visually-degenerate segment with v0 <= pct (SEGMENTS.v0 is non-decreasing).
+    var seg = SEGMENTS[0];
+    for (var i = 0; i < SEGMENTS.length; i++) {
+      var s = SEGMENTS[i];
+      if (s.v1 > s.v0 && s.v0 <= pct) seg = s;
     }
-    return PLAY_END;
+    var width = seg.v1 - seg.v0;
+    var frac  = width > 0 ? Math.max(0, Math.min(1, (pct - seg.v0) / width)) : 0;
+    return seg.t0 + frac * (seg.t1 - seg.t0);
   }
 
   // ----- Precomputed tick / bar arrays — bound via <template x-for> in markup. -----
@@ -135,6 +237,18 @@
     };
   });
 
+  var CLEANUP_BARS = CLEANUP_STEPS.map(function (cstep, i) {
+    var vs = VISUAL_CLEANUP[i];
+    return {
+      index:    i,
+      leftPct:  vs.left,
+      widthPct: vs.width,
+      cls:      'status-' + (cstep.status || 'untested'),
+      title:    'Cleanup: ' + cstep.name,
+      seekTime: HAS_TIMING ? cstep.startOffset : (TOTAL_STEPS + i),
+    };
+  });
+
   var PIC_TICKS = STEPS.reduce(function (acc, step) {
     if (step.startOffset === null) return acc;
     var n = Math.max(1, step.screenshots.length);
@@ -147,16 +261,22 @@
     return acc;
   }, []);
 
-  function buildPresenceBars(predicate) {
-    return STEPS.reduce(function (acc, step, i) {
-      if (!predicate(step)) return acc;
-      var vs = VISUAL_STEPS[i];
+  function buildPresenceBars(list, visual, predicate) {
+    return list.reduce(function (acc, item, i) {
+      if (!predicate(item)) return acc;
+      var vs = visual[i];
       acc.push({ leftPct: vs.left, widthPct: vs.width });
       return acc;
     }, []);
   }
-  var ERRORS_BARS = buildPresenceBars(function (s) { return s.errorMessage && s.errorMessage.length; });
-  var STDERR_BARS = buildPresenceBars(function (s) { return s.stderr && s.stderr.length; });
+  // A cleanup hook can fail too (e.g. cleanup_browsers throwing) -- include its bar here as
+  // well so the Errors/Stderr panels aren't silently empty when only a cleanup hook failed.
+  function hasErrorMessage(s) { return s.errorMessage && s.errorMessage.length; }
+  function hasStderr(s) { return s.stderr && s.stderr.length; }
+  var ERRORS_BARS = buildPresenceBars(STEPS, VISUAL_STEPS, hasErrorMessage)
+    .concat(buildPresenceBars(CLEANUP_STEPS, VISUAL_CLEANUP, hasErrorMessage));
+  var STDERR_BARS = buildPresenceBars(STEPS, VISUAL_STEPS, hasStderr)
+    .concat(buildPresenceBars(CLEANUP_STEPS, VISUAL_CLEANUP, hasStderr));
 
   // Build per-line ticks for a field that holds [{html|text, offset}] arrays.
   // Falls back to a single step-level tick for steps with no per-line timestamps.
@@ -271,9 +391,11 @@
     return {
       // ----- bound state -----
       steps:           STEPS,
+      cleanupSteps:    CLEANUP_STEPS,
       totalSteps:      TOTAL_STEPS,
       totalPics:       TOTAL_PICS,
       stepBars:        STEP_BARS,
+      cleanupBars:     CLEANUP_BARS,
       picTicks:        PIC_TICKS,
       cucuTicks:       CUCU_TICKS,
       stdoutTicks:     STDOUT_TICKS,
@@ -283,8 +405,10 @@
       browserLogs:     BROWSER_LOGS,
       cucuSteps:       STEPS.filter(function (s) { return s.debugLines && s.debugLines.length; }),
       stdoutSteps:     STEPS.filter(function (s) { return s.stdoutLines && s.stdoutLines.length; }),
-      stderrSteps:     STEPS.filter(function (s) { return s.stderr && s.stderr.length; }),
-      errorSteps:      STEPS.filter(function (s) { return s.errorMessage && s.errorMessage.length; }),
+      stderrSteps:     STEPS.filter(hasStderr),
+      errorSteps:      STEPS.filter(hasErrorMessage),
+      cleanupStderrSteps: CLEANUP_STEPS.filter(hasStderr),
+      cleanupErrorSteps:  CLEANUP_STEPS.filter(hasErrorMessage),
       currentTimeSec:  0,
       shownStepIdx:    -1,
       shownImgIdx:     -1,
@@ -310,11 +434,48 @@
       _videoElement:      null,
       _videoFps:          1,
       _dragging:          false,
+      // Explicitly-clicked cleanup entry (Steps-panel row, timeline bar, or Errors/Stderr
+      // row), or null. Several cleanup hooks can legitimately share the exact same recorded
+      // instant (e.g. two near-instantaneous hooks both timestamped at the same millisecond),
+      // which makes "which entry is at time t" ambiguous -- time alone can't tell them apart.
+      // An explicit click records *which bar was clicked*, sidestepping that ambiguity; it's
+      // cleared on any other seek (drag, step navigation, log-line click) so those fall back
+      // to the inherently-ambiguous-but-unavoidable time-based resolution below.
+      selectedCleanupIdx: null,
 
       // ----- derived (getters) -----
-      get headPct()       { return timeToVis(this.currentTimeSec); },
+      get headPct() {
+        if (this.selectedCleanupIdx !== null) {
+          var bar = this.cleanupBars[this.selectedCleanupIdx];
+          return bar.leftPct + bar.widthPct / 2;
+        }
+        return timeToVis(this.currentTimeSec);
+      },
       get atEnd()         { return this.currentTimeSec >= PLAY_END; },
       get curStep()       { return this.shownStepIdx >= 0 ? this.steps[this.shownStepIdx] : null; },
+      // Highest-indexed cleanup entry whose startOffset has been reached by the playhead,
+      // or null while the playhead is still within the real steps. Same "highest startOffset
+      // <= t" scan timeToVis/visToTime use internally, scoped to CLEANUP_STEPS so cleanup
+      // rows/bars highlight without touching shownStepIdx. An explicit selection (see
+      // selectedCleanupIdx above) always wins over this time-based guess.
+      get cleanupCurrentIdx() {
+        if (this.selectedCleanupIdx !== null) return this.selectedCleanupIdx;
+        var t = this.currentTimeSec;
+        var idx = null;
+        for (var i = 0; i < CLEANUP_STEPS.length; i++) {
+          if (CLEANUP_STEPS[i].startOffset !== null && CLEANUP_STEPS[i].startOffset <= t) idx = i;
+        }
+        return idx;
+      },
+      // curStep stays pinned to the last real step while the playhead is in the cleanup
+      // region (by design — cleanup entries aren't step-navigable), so its timingLabel would
+      // otherwise look frozen/wrong for every cleanup entry. Prefer the active cleanup entry's
+      // own timingLabel there instead.
+      get activeTimingLabel() {
+        var idx = this.cleanupCurrentIdx;
+        if (idx !== null) return this.cleanupSteps[idx].timingLabel;
+        return this.curStep ? this.curStep.timingLabel : '';
+      },
       get hasMultiplePics() { return !!(this.curStep && this.curStep.screenshots.length > 1); },
       get picCaption()    {
         var s = this.curStep;
@@ -428,6 +589,7 @@
 
       seekToTime(t) {
         this._stopPlay();
+        this.selectedCleanupIdx = null;
         this.currentTimeSec = Math.max(0, Math.min(t, PLAY_END));
         if (this._videoElement) {
           this._videoElement.currentTime = timeToGlobalPicIdx(this.currentTimeSec) / this._videoFps;
@@ -437,6 +599,12 @@
       },
       seekToStepIdx(idx) {
         this.seekToTime(stepIdxToTime(idx));
+      },
+      // Explicitly select one cleanup entry (as opposed to seeking to a bare time value) --
+      // see selectedCleanupIdx above for why this exists.
+      selectCleanupIdx(idx) {
+        this.seekToTime(this.cleanupBars[idx].seekTime);
+        this.selectedCleanupIdx = idx;
       },
       seekToLogLineOffset(offset, event) {
         if (offset === null || offset === undefined) return;
@@ -671,6 +839,7 @@
         function dragTo(x) {
           var r = track.getBoundingClientRect();
           var pct = Math.max(0, Math.min(100, (x - r.left) / r.width * 100));
+          self.selectedCleanupIdx = null;
           self.currentTimeSec = visToTime(pct);
           if (self._videoElement) {
             self._videoElement.currentTime = timeToGlobalPicIdx(self.currentTimeSec) / self._videoFps;

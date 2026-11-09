@@ -81,6 +81,8 @@ def init():
 class Selenium(Browser):
     def __init__(self):
         self.driver = None
+        # iframe elements the driver is currently switched into, outermost first
+        self.frame_stack = []
 
     def open(
         self, browser, headless=False, selenium_remote_url=None, detach=False
@@ -218,7 +220,7 @@ class Selenium(Browser):
                 options.add_argument("--headless")
 
             if ignore_ssl_certificate_errors:
-                options.set_capability("acceptSslCerts", True)
+                options.accept_insecure_certs = True
 
             if selenium_remote_url is not None:
                 logger.debug(f"webdriver.Remote init: {selenium_remote_url}")
@@ -403,9 +405,15 @@ class Selenium(Browser):
 
     def switch_to_default_frame(self):
         self.driver.switch_to.default_content()
+        self.frame_stack = []
 
     def switch_to_frame(self, frame):
         self.driver.switch_to.frame(frame)
+        self.frame_stack.append(frame)
+
+    def switch_to_parent_frame(self):
+        self.driver.switch_to.parent_frame()
+        self.frame_stack.pop()
 
     def screenshot(self, filepath):
         self.driver.get_screenshot_as_file(filepath)

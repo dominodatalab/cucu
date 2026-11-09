@@ -256,6 +256,43 @@ def take_saw_element_screenshot(ctx, thing, name, index, element=None):
     )
 
 
+VIEWPORT_SIZE_SCRIPT = (
+    "return { width: window.innerWidth, height: window.innerHeight };"
+)
+
+
+def get_top_level_rect_and_size(browser, element):
+    """
+    return the element's bounding rect (x, y, width, height) relative to the
+    top-level document and the top-level viewport size (width, height), not
+    those of whatever iframe the browser is currently switched into.
+
+    The offsets are summed by switching up through browser.frame_stack with
+    WebDriver instead of walking window.parent/frameElement in JavaScript,
+    since that script hangs chromedriver inside nested VSCode/code-server
+    webviews (QE-19984). The browser is switched back into the same frame
+    before returning.
+    """
+    rect_script = """
+        const rect = arguments[0].getBoundingClientRect();
+        return {x: rect.left, y: rect.top, width: rect.width, height: rect.height};
+    """
+    rect = browser.execute(rect_script, element)
+    frames = list(browser.frame_stack)
+    for frame in reversed(frames):
+        browser.switch_to_parent_frame()
+        frame_rect = browser.execute(rect_script, frame)
+        rect["x"] += frame_rect["x"]
+        rect["y"] += frame_rect["y"]
+
+    size = browser.execute(VIEWPORT_SIZE_SCRIPT)
+
+    for frame in frames:
+        browser.switch_to_frame(frame)
+
+    return rect, size
+
+
 def take_screenshot(ctx, step_name, label="", element=None):
     step = ctx.current_step
     if not hasattr(step, "screenshots"):
@@ -277,21 +314,10 @@ def take_screenshot(ctx, step_name, label="", element=None):
     ctx.browser.screenshot(filepath)
 
     # driver.get_window_size returns the size of the window the OS draws for
-    # the browser, not the window the browser uses to display the DOM.
-    # If we go through JavaScript, we ignore the height of the adress bar
-    # and such.
-    script = """
-        function getDimensionsOfCurrentWindow() {
-          const windowSize = {
-            width: window.innerWidth,
-            height: window.innerHeight,
-          };
-          return windowSize;
-        };
-        return getDimensionsOfCurrentWindow();
-    """
-    size = ctx.browser.execute(script)
-
+    # the browser, not the window the browser uses to display the DOM. If we
+    # go through JavaScript, we ignore the height of the address bar and
+    # such. When highlighting an element the browser may be switched into an
+    # iframe, so the top-level size and rect are computed together.
     location = {
         "x": None,
         "y": None,
@@ -300,13 +326,18 @@ def take_screenshot(ctx, step_name, label="", element=None):
     }
     highlight = {}
     if element:
-        location.update(element.rect)
+        top_level_rect, size = get_top_level_rect_and_size(
+            ctx.browser, element
+        )
+        location.update(top_level_rect)
         highlight = {
             "height_ratio": location["height"] / size["height"],
             "width_ratio": location["width"] / size["width"],
             "top_ratio": location["y"] / size["height"],
             "left_ratio": location["x"] / size["width"],
         }
+    else:
+        size = ctx.browser.execute(VIEWPORT_SIZE_SCRIPT)
 
     filename = os.path.split(filepath)[-1]
     if not getattr(step, "step_image_dir", None):
