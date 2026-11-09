@@ -378,7 +378,6 @@ document.addEventListener("DOMContentLoaded", function () {
         scroller.scrollTop = pan.top - (event.clientY - pan.y);
     });
     window.addEventListener("mouseup", function () {
-        if (pan) scroller.dispatchEvent(new Event("scroll"));
         pan = null;
         scroller.classList.remove("panning");
     });
@@ -440,40 +439,6 @@ document.addEventListener("DOMContentLoaded", function () {
             setBounce(0);
         }, 90);
     }, { passive: true });
-
-    var bottomSpacer = gantt.querySelector(".gantt-spacer-bottom");
-
-    function sizeBottomSpacer() {
-        var rowH = rows[0].offsetHeight || 17;
-        var area = scroller.clientHeight - axis.offsetHeight;
-        bottomSpacer.style.height = rowH + (((area - rowH) % rowH) + rowH) % rowH + "px";
-    }
-    sizeBottomSpacer();
-    window.addEventListener("resize", sizeBottomSpacer);
-
-    var SNAP_IDLE_MS = 150;
-    var snapTimer = null;
-
-    function snapTarget() {
-        var max = scroller.scrollHeight - scroller.clientHeight;
-        var axisHeight = axis.offsetHeight;
-        var points = [0, max];
-        rows.forEach(function (row) {
-            if (row.classList.contains("hidden") || row.classList.contains("first-shown")) return;
-            points.push(Math.min(max, row.offsetTop - axisHeight));
-        });
-        var top = scroller.scrollTop;
-        return points.reduce(function (best, p) { return Math.abs(p - top) < Math.abs(best - top) ? p : best; }, 0);
-    }
-
-    scroller.addEventListener("scroll", function () {
-        clearTimeout(snapTimer);
-        snapTimer = setTimeout(function () {
-            if (pan || bounce) return;
-            var target = snapTarget();
-            if (Math.abs(target - scroller.scrollTop) > 0.5) scroller.scrollTo({ top: target, behavior: "smooth" });
-        }, SNAP_IDLE_MS);
-    });
 
     var tip = document.createElement("div");
     tip.className = "gantt-tip";
