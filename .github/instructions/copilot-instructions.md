@@ -162,7 +162,7 @@ The Gantt view is a run-level HTML report page showing every scenario as a times
 - Zoom with `−`/`+`/Fit/Reset or ctrl/⌘+wheel; pan in both directions with scroll or drag; axis ticks are generated client-side for the current zoom
 - View state (`zoom`, `t`, `status`, `worker`, `q`) is kept in the URL hash so links restore the same view
 - Scenario name column is resizable by dragging its header edge (width saved in localStorage, double-click resets)
-- Workers are numbered by start time and shown in their own column as colored `⚙ N` badges; multi-worker runs also get a bar edge stripe and worker filters
+- Workers are numbered by start time and shown in their own column as colored number badges and as worker filters; multi-worker runs also get a bar edge stripe
 
 **Files:**
 - `src/cucu/reporter/html.py` — `build_gantt_chart()` computes bar positions, worker numbers, and status/worker totals

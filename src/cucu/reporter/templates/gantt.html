@@ -23,14 +23,12 @@
             <button type="button" class="gantt-chip gantt-status-chip status-{{ status }} active" data-status="{{ status }}" title="click to toggle, alt-click to show only {{ status }}"{% if not count %} disabled{% endif %}>{{ status | capitalize }} {{ count }}</button>
             {% endfor %}
         </div>
-        {% if gantt['worker_counts'] | length > 1 %}
         <div class="gantt-toolbar-line">
             <span class="gantt-toolbar-label">Workers:</span>
             {% for worker, count in gantt['worker_counts'].items() %}
-            <button type="button" class="gantt-chip gantt-worker-chip worker-c{{ (worker - 1) % 10 }} active" data-worker="{{ worker }}" title="click to toggle, alt-click to show only worker {{ worker }}">⚙ {{ worker }} <span class="gantt-chip-count">({{ count }})</span></button>
+            <button type="button" class="gantt-chip gantt-worker-chip worker-c{{ (worker - 1) % 10 }} active" data-worker="{{ worker }}" title="click to toggle, alt-click to show only worker {{ worker }}">Worker {{ worker }} <span class="gantt-chip-count">({{ count }})</span></button>
             {% endfor %}
         </div>
-        {% endif %}
         <div class="gantt-toolbar-line">
             <input type="search" class="gantt-search" placeholder="filter scenarios…" aria-label="filter scenarios">
             <span class="gantt-shown"></span>
@@ -58,7 +56,7 @@
                     <a class="gantt-scenario" href="{{ urlencode(escape(row['feature_folder_name'])) }}/{{ urlencode(escape(row['scenario_folder_name'])) }}/index.html">{{ escape(row['name']) }}</a>
                     <span class="gantt-feature">{{ escape(row['feature_name']) }}</span>
                 </div>
-                <div class="gantt-worker-cell"><span class="gantt-worker worker-c{{ (row['worker'] - 1) % 10 }}" title="worker {{ row['worker'] }}">⚙ {{ row['worker'] }}</span></div>
+                <div class="gantt-worker-cell"><span class="gantt-worker worker-c{{ (row['worker'] - 1) % 10 }}" title="worker {{ row['worker'] }}">{{ row['worker'] }}</span></div>
                 <div class="gantt-track">
                     <a class="gantt-bar status-{{ row['status'] }} worker-c{{ (row['worker'] - 1) % 10 }}"
                        href="{{ urlencode(escape(row['feature_folder_name'])) }}/{{ urlencode(escape(row['scenario_folder_name'])) }}/index.html"
