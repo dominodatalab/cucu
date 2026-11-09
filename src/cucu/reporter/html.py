@@ -140,11 +140,22 @@ def build_gantt_chart(features):
             if not start_at or not end_at:
                 untimed_count += 1
                 continue
+            hooks = [
+                {
+                    **hook,
+                    "start_at": _gantt_time(hook["start_at"]),
+                    "end_at": _gantt_time(hook["end_at"]),
+                }
+                for hook in scenario.get("after_hooks") or []
+                if hook.get("start_at") and hook.get("end_at")
+            ]
+            cleanup_end_at = max([end_at] + [hook["end_at"] for hook in hooks])
             run_entry = runs.setdefault(
-                run_id, {"run": run, "start_at": start_at, "end_at": end_at}
+                run_id,
+                {"run": run, "start_at": start_at, "end_at": cleanup_end_at},
             )
             run_entry["start_at"] = min(run_entry["start_at"], start_at)
-            run_entry["end_at"] = max(run_entry["end_at"], end_at)
+            run_entry["end_at"] = max(run_entry["end_at"], cleanup_end_at)
             worker_start = worker.get("start_at") or start_at
             workers[worker_key] = min(
                 workers.get(worker_key, worker_start), worker_start
@@ -159,6 +170,8 @@ def build_gantt_chart(features):
                     "status": scenario["status"],
                     "start_at": start_at,
                     "end_at": end_at,
+                    "cleanup_end_at": cleanup_end_at,
+                    "hooks": hooks,
                     "steps": [
                         step
                         for step in scenario.get("steps", [])
@@ -211,7 +224,7 @@ def build_gantt_chart(features):
         }
 
     run_start = min(row["start_at"] for row in rows)
-    run_end = max(row["end_at"] for row in rows)
+    run_end = max(row["cleanup_end_at"] for row in rows)
     span = (run_end - run_start).total_seconds() or 1.0
     aligned_span = (
         max(
@@ -243,16 +256,21 @@ def build_gantt_chart(features):
 
     status_counts = {status: 0 for status in GANTT_STATUSES}
     for row in rows:
-        elapsed = (row["end_at"] - row["start_at"]).total_seconds()
+        core_end_at = min(
+            [row["end_at"]] + [hook["start_at"] for hook in row["hooks"]]
+        )
+        elapsed = (core_end_at - row["start_at"]).total_seconds()
+        total = (row["cleanup_end_at"] - row["start_at"]).total_seconds()
         run_entry = runs[row["run_id"]]
         row["left_pct"], row["width_pct"] = _gantt_place(
-            (row["start_at"] - run_start).total_seconds(), elapsed, span
+            (row["start_at"] - run_start).total_seconds(), total, span
         )
         row["aligned_left_pct"], row["aligned_width_pct"] = _gantt_place(
             (row["start_at"] - run_entry["start_at"]).total_seconds(),
-            elapsed,
+            total,
             aligned_span,
         )
+        row["cleanup_ratio"] = total / elapsed if elapsed > 0 else 1.0
         worker = worker_info[row.pop("worker_key")]
         run = run_list[run_numbers[row.pop("run_id")] - 1]
         status_counts[row["status"]] = status_counts.get(row["status"], 0) + 1
@@ -262,31 +280,43 @@ def build_gantt_chart(features):
         row["worker_badge"] = worker["label"]
         row["worker_color"] = worker["color"]
         row["duration_label"] = format_gantt_duration(elapsed)
+        steps = [
+            {
+                "start_at": _gantt_time(step["start_at"]),
+                "end_at": _gantt_time(step["end_at"]),
+                "status": step["status"],
+                "title": f"{step['keyword']} {step['name']} — {step['status']}",
+                "cleanup": False,
+            }
+            for step in row.pop("steps")
+        ] + [
+            {
+                "start_at": hook["start_at"],
+                "end_at": hook["end_at"],
+                "status": hook.get("status", "passed"),
+                "title": f"cleanup: {hook.get('name', '')} — {hook.get('status', 'passed')}",
+                "cleanup": True,
+            }
+            for hook in row.pop("hooks")
+        ]
         row["segments"] = [
             {
-                "status": step["status"],
+                **step,
                 "left_pct": (
                     step["start_at"] - row["start_at"]
                 ).total_seconds()
-                / (elapsed or 1.0)
+                / (total or 1.0)
                 * 100,
                 "width_pct": max(
                     (step["end_at"] - step["start_at"]).total_seconds()
-                    / (elapsed or 1.0)
+                    / (total or 1.0)
                     * 100,
                     0.5,
                 ),
-                "title": f"{step['keyword']} {step['name']} — {step['status']}",
             }
-            for step in (
-                {
-                    **step,
-                    "start_at": _gantt_time(step["start_at"]),
-                    "end_at": _gantt_time(step["end_at"]),
-                }
-                for step in row.pop("steps")
-            )
+            for step in steps
         ]
+        row.pop("cleanup_end_at")
         start_label = row["start_at"].strftime("%Y-%m-%d %H:%M:%S")
         end_label = row["end_at"].strftime("%Y-%m-%d %H:%M:%S")
         row["bar_title"] = (

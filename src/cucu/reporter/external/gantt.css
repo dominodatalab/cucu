@@ -332,7 +332,15 @@
     position: absolute;
 }
 
-.gantt-bar::before {
+.gantt-bar-inner {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+
+.gantt-bar-inner::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -356,4 +364,26 @@
     position: relative;
     z-index: 1;
     text-shadow: 0 0 2px #000;
+}
+
+.gantt-seg.cleanup {
+    background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0 2px, transparent 2px 5px);
+}
+
+.gantt-cleanup-chip {
+    background-color: #555;
+}
+
+.gantt-tip {
+    position: fixed;
+    z-index: 1000;
+    display: none;
+    pointer-events: none;
+    max-width: 480px;
+    padding: 3px 7px;
+    border-radius: 3px;
+    background: rgba(33, 37, 41, 0.92);
+    color: #fff;
+    font-size: 0.8rem;
+    white-space: pre-wrap;
 }

@@ -20,6 +20,9 @@ document.addEventListener("DOMContentLoaded", function () {
     var statusChips = Array.prototype.slice.call(document.querySelectorAll(".gantt-status-chip"));
     var workerChips = Array.prototype.slice.call(document.querySelectorAll(".gantt-worker-chip"));
     var alignButton = document.querySelector(".gantt-align");
+    var cleanupChip = document.querySelector(".gantt-cleanup-chip");
+    var inners = bars.map(function (bar) { return bar.querySelector(".gantt-bar-inner"); });
+    var showCleanup = true;
     var search = document.querySelector(".gantt-search");
     var shown = document.querySelector(".gantt-shown");
     var zoomLevel = document.querySelector(".gantt-zoom-level");
@@ -32,14 +35,20 @@ document.addEventListener("DOMContentLoaded", function () {
     var zoom = 1;
 
     function barLeft(i) { return parseFloat(bars[i].getAttribute(aligned ? "data-aligned-left" : "data-left")); }
-    function barWidth(i) { return parseFloat(bars[i].getAttribute(aligned ? "data-aligned-width" : "data-width")); }
+    function cleanupRatio(i) { return parseFloat(inners[i].getAttribute("data-cleanup-ratio")) || 1; }
+    function barWidth(i) {
+        var width = parseFloat(bars[i].getAttribute(aligned ? "data-aligned-width" : "data-width"));
+        return showCleanup ? width : width / cleanupRatio(i);
+    }
 
     function positionBars() {
         spanS = aligned ? alignedSpanS : clockSpanS;
         bars.forEach(function (bar, i) {
             bar.style.left = barLeft(i) + "%";
             bar.style.width = barWidth(i) + "%";
+            inners[i].style.width = (showCleanup ? 100 : cleanupRatio(i) * 100) + "%";
         });
+        cleanupChip.classList.toggle("active", showCleanup);
         if (alignButton) alignButton.classList.toggle("active", aligned);
     }
     positionBars();
@@ -180,6 +189,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (scroller.scrollTop > 0) parts.push("y=" + Math.round(scroller.scrollTop));
         if (!allActive(statusChips)) parts.push("status=" + activeValues(statusChips, "data-status").join(","));
         if (aligned) parts.push("align=1");
+        if (!showCleanup) parts.push("cleanup=0");
         if (!allActive(workerChips)) parts.push("worker=" + activeValues(workerChips, "data-worker").join(","));
         if (focusedRow) parts.push("scenario=" + encodeURIComponent(focusedRow.getAttribute("data-id")));
         if (search.value.trim()) parts.push("q=" + encodeURIComponent(search.value.trim()));
@@ -199,6 +209,7 @@ document.addEventListener("DOMContentLoaded", function () {
         workerChips.forEach(function (c) { c.classList.toggle("active", !workers || workers.indexOf(c.getAttribute("data-worker")) !== -1); });
         search.value = params.q || "";
         aligned = !!alignButton && params.align === "1";
+        showCleanup = params.cleanup !== "0";
         positionBars();
         applyFilters();
         var z = parseFloat(params.zoom);
@@ -245,11 +256,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     wireChips(statusChips);
     wireChips(workerChips);
+    cleanupChip.addEventListener("click", function () {
+        showCleanup = !showCleanup;
+        positionBars();
+        markNarrowBars();
+        writeHash();
+    });
     if (alignButton) alignButton.addEventListener("click", function () { setAligned(!aligned); });
     search.addEventListener("input", applyFilters);
     document.querySelector(".gantt-reset-filters").addEventListener("click", function () {
         statusChips.concat(workerChips).forEach(function (c) { c.classList.add("active"); });
         search.value = "";
+        showCleanup = true;
+        positionBars();
         setFocus(null);
         followPaused = false;
         applyFilters();
@@ -390,6 +409,26 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     window.addEventListener("resize", function () { applyZoom(zoom, 0); });
+
+    var tip = document.createElement("div");
+    tip.className = "gantt-tip";
+    document.body.appendChild(tip);
+    gantt.querySelectorAll(".gantt-track [title], .gantt-worker[title]").forEach(function (el) {
+        el.setAttribute("data-tip", el.getAttribute("title"));
+        el.removeAttribute("title");
+    });
+    gantt.addEventListener("mousemove", function (event) {
+        var el = event.target.closest("[data-tip]");
+        if (!el || pan) { tip.style.display = "none"; return; }
+        tip.textContent = el.getAttribute("data-tip");
+        tip.style.display = "block";
+        var x = event.clientX + 12, y = event.clientY + 14;
+        if (x + tip.offsetWidth > window.innerWidth - 4) x = event.clientX - tip.offsetWidth - 12;
+        if (y + tip.offsetHeight > window.innerHeight - 4) y = event.clientY - tip.offsetHeight - 10;
+        tip.style.left = x + "px";
+        tip.style.top = y + "px";
+    });
+    gantt.addEventListener("mouseleave", function () { tip.style.display = "none"; });
 
     readHash();
     restoring = false;
