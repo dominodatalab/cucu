@@ -6,7 +6,8 @@
     <nav class="navbar navbar-expand-sm navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Gantt HTML Test Report</a>
-            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            {% if gantt['rows'] %}<span class="gantt-run navbar-text me-auto">Run: {{ gantt['run_start'].strftime('%H:%M:%S') }}–{{ gantt['run_end'].strftime('%H:%M:%S') }} ({{ gantt['span_label'] }})</span>{% endif %}
+            <ul class="navbar-nav mt-2 mt-lg-0">
               <li class="nav-item active">
                 <a class="nav-link" href="index.html" title="go to index report">Index</a>
               </li>
@@ -17,31 +18,24 @@
 {% block content %}
     {% if gantt['rows'] %}
     <div class="gantt-toolbar">
-        <div class="gantt-toolbar-line">
-            <span class="gantt-toolbar-label">Status:</span>
-            {% for status, count in gantt['status_counts'].items() %}
-            <button type="button" class="gantt-chip gantt-status-chip status-{{ status }} active" data-status="{{ status }}" title="click to toggle, alt-click to show only {{ status }}"{% if not count %} disabled{% endif %}>{{ status | capitalize }} {{ count }}</button>
-            {% endfor %}
-        </div>
-        <div class="gantt-toolbar-line">
-            <span class="gantt-toolbar-label">Workers:</span>
-            {% for worker, count in gantt['worker_counts'].items() %}
-            <button type="button" class="gantt-chip gantt-worker-chip worker-c{{ (worker - 1) % 10 }} active" data-worker="{{ worker }}" title="click to toggle, alt-click to show only worker {{ worker }}">Worker {{ worker }} <span class="gantt-chip-count">({{ count }})</span></button>
-            {% endfor %}
-        </div>
-        <div class="gantt-toolbar-line">
-            <input type="search" class="gantt-search" placeholder="filter scenarios…" aria-label="filter scenarios">
-            <span class="gantt-shown"></span>
-            {% if gantt['untimed_count'] %}<span class="gantt-untimed">+{{ gantt['untimed_count'] }} untimed not plotted</span>{% endif %}
-            <span class="gantt-zoom-controls">
-                <button type="button" class="gantt-btn" data-zoom="out" title="zoom out">−</button>
-                <span class="gantt-zoom-level">1×</span>
-                <button type="button" class="gantt-btn" data-zoom="in" title="zoom in">+</button>
-                <button type="button" class="gantt-btn" data-zoom="fit" title="zoom to the shown scenarios">Fit</button>
-                <button type="button" class="gantt-btn" data-zoom="reset" title="reset zoom">Reset</button>
-            </span>
-            <span class="gantt-run">Run: {{ gantt['run_start'].strftime('%H:%M:%S') }}–{{ gantt['run_end'].strftime('%H:%M:%S') }} ({{ gantt['span_label'] }})</span>
-        </div>
+        <input type="search" class="gantt-search" placeholder="filter scenarios…" aria-label="filter scenarios">
+        <span class="gantt-shown"></span>
+        {% if gantt['untimed_count'] %}<span class="gantt-untimed">+{{ gantt['untimed_count'] }} untimed not plotted</span>{% endif %}
+        <span class="gantt-divider"></span>
+        {% for worker, count in gantt['worker_counts'].items() %}
+        <button type="button" class="gantt-chip gantt-worker-chip worker-c{{ (worker - 1) % 10 }} active" data-worker="{{ worker }}" title="click to toggle, alt-click to show only worker {{ worker }}">Worker {{ worker }} <span class="gantt-chip-count">({{ count }})</span></button>
+        {% endfor %}
+        <span class="gantt-divider"></span>
+        {% for status, count in gantt['status_counts'].items() %}
+        <button type="button" class="gantt-chip gantt-status-chip status-{{ status }} active" data-status="{{ status }}" title="click to toggle, alt-click to show only {{ status }}"{% if not count %} disabled{% endif %}>{{ status | capitalize }} {{ count }}</button>
+        {% endfor %}
+        <span class="gantt-zoom-controls">
+            <button type="button" class="gantt-btn" data-zoom="out" title="zoom out">−</button>
+            <span class="gantt-zoom-level">1×</span>
+            <button type="button" class="gantt-btn" data-zoom="in" title="zoom in">+</button>
+            <button type="button" class="gantt-btn" data-zoom="fit" title="zoom to the shown scenarios">Fit</button>
+            <button type="button" class="gantt-btn" data-zoom="reset" title="reset zoom">Reset</button>
+        </span>
     </div>
     <div class="gantt-scroll">
         <div class="gantt" data-span-s="{{ gantt['span_s'] }}" data-run-start-clock-s="{{ gantt['run_start_clock_s'] }}" data-workers="{{ gantt['worker_counts'] | length }}">

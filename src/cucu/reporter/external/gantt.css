@@ -6,19 +6,21 @@
     border-bottom: 1px solid #ddd;
     padding: 6px 0;
     font-size: 0.85em;
-}
-
-.gantt-toolbar-line {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 4px 6px;
-    margin: 2px 0;
 }
 
-.gantt-toolbar-label {
-    color: #666;
-    min-width: 60px;
+.gantt-divider {
+    width: 1px;
+    height: 18px;
+    background: #ddd;
+    margin: 0 4px;
+}
+
+.gantt-run {
+    font-size: 0.85rem;
 }
 
 .gantt-chip {
@@ -56,6 +58,10 @@
 .gantt-untimed,
 .gantt-run {
     color: #666;
+}
+
+.gantt-shown {
+    min-width: 100px;
 }
 
 .gantt-zoom-controls {
