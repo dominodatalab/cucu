@@ -387,3 +387,15 @@
     font-size: 0.8rem;
     white-space: pre-wrap;
 }
+
+.gantt-scroll {
+    overscroll-behavior: none;
+}
+
+.gantt-spacer {
+    height: 17px;
+}
+
+.gantt-rows.bouncing {
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.3, 1);
+}

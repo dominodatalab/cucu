@@ -50,6 +50,8 @@
                 <div class="gantt-worker-cell gantt-worker-header" title="run and worker within that run">R#-W#</div>
                 <div class="gantt-axis-track"></div>
             </div>
+            <div class="gantt-rows">
+            <div class="gantt-spacer gantt-spacer-top"></div>
             {% for row in gantt['rows'] %}
             <div class="gantt-row" data-id="{{ row['id'] }}" data-status="{{ row['status'] }}" data-worker="{{ row['worker_key'] }}" data-search="{{ escape((row['name'] ~ ' ' ~ row['feature_name']) | lower) }}">
                 <div class="gantt-label" title="{{ escape(row['name']) }} - {{ escape(row['feature_name']) }}">
@@ -68,6 +70,8 @@
                 </div>
             </div>
             {% endfor %}
+            <div class="gantt-spacer gantt-spacer-bottom"></div>
+            </div>
         </div>
     </div>
     {% else %}

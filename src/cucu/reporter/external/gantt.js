@@ -161,6 +161,8 @@ document.addEventListener("DOMContentLoaded", function () {
             if (visible) count++;
         });
         shown.textContent = "Showing " + count + " of " + rows.length;
+        var firstShown = rows.filter(function (row) { return !row.classList.contains("hidden"); })[0];
+        rows.forEach(function (row) { row.classList.toggle("first-shown", row === firstShown); });
         markNarrowBars();
         writeHash();
     }
@@ -236,7 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
         var i = rows.indexOf(focusedRow);
         if (focusedRow.classList.contains("hidden")) return;
         applyZoom(FOCUS_BAR_VIEW_PCT / Math.max(barWidth(i), 1e-6), 0);
-        scroller.scrollTop = focusedRow.offsetTop - axis.offsetHeight;
+        scroller.scrollTop = focusedRow.classList.contains("first-shown") ? 0 : focusedRow.offsetTop - axis.offsetHeight;
         lastScrollTop = scroller.scrollTop;
         stopGlide();
         scroller.scrollLeft = barLeft(i) / 100 * trackWidth() - FOLLOW_MARGIN_PX;
@@ -376,6 +378,7 @@ document.addEventListener("DOMContentLoaded", function () {
         scroller.scrollTop = pan.top - (event.clientY - pan.y);
     });
     window.addEventListener("mouseup", function () {
+        if (pan) scroller.dispatchEvent(new Event("scroll"));
         pan = null;
         scroller.classList.remove("panning");
     });
@@ -409,6 +412,68 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     window.addEventListener("resize", function () { applyZoom(zoom, 0); });
+
+    var rowsBox = gantt.querySelector(".gantt-rows");
+    var BOUNCE_MAX_PX = 48;
+    var bounce = 0;
+    var bounceTimer = null;
+
+    function setBounce(px) {
+        bounce = px;
+        rowsBox.style.transform = px ? "translateY(" + px + "px)" : "";
+    }
+
+    scroller.addEventListener("wheel", function (event) {
+        if (event.ctrlKey || event.metaKey || event.shiftKey || !event.deltaY) return;
+        var atTop = scroller.scrollTop <= 0 && event.deltaY < 0;
+        var atBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1 && event.deltaY > 0;
+        if (!atTop && !atBottom && !bounce) return;
+        rowsBox.classList.remove("bouncing");
+        var next = bounce - event.deltaY * 0.35 * (1 - Math.abs(bounce) / BOUNCE_MAX_PX);
+        if (atTop) next = Math.max(0, Math.min(BOUNCE_MAX_PX, next));
+        else if (atBottom) next = Math.min(0, Math.max(-BOUNCE_MAX_PX, next));
+        else next = 0;
+        setBounce(next);
+        clearTimeout(bounceTimer);
+        bounceTimer = setTimeout(function () {
+            rowsBox.classList.add("bouncing");
+            setBounce(0);
+        }, 90);
+    }, { passive: true });
+
+    var bottomSpacer = gantt.querySelector(".gantt-spacer-bottom");
+
+    function sizeBottomSpacer() {
+        var rowH = rows[0].offsetHeight || 17;
+        var area = scroller.clientHeight - axis.offsetHeight;
+        bottomSpacer.style.height = rowH + (((area - rowH) % rowH) + rowH) % rowH + "px";
+    }
+    sizeBottomSpacer();
+    window.addEventListener("resize", sizeBottomSpacer);
+
+    var SNAP_IDLE_MS = 150;
+    var snapTimer = null;
+
+    function snapTarget() {
+        var max = scroller.scrollHeight - scroller.clientHeight;
+        var axisHeight = axis.offsetHeight;
+        var points = [0, max];
+        rows.forEach(function (row) {
+            if (row.classList.contains("hidden") || row.classList.contains("first-shown")) return;
+            points.push(Math.min(max, row.offsetTop - axisHeight));
+        });
+        var top = scroller.scrollTop;
+        return points.reduce(function (best, p) { return Math.abs(p - top) < Math.abs(best - top) ? p : best; }, 0);
+    }
+
+    scroller.addEventListener("scroll", function () {
+        clearTimeout(snapTimer);
+        snapTimer = setTimeout(function () {
+            if (pan || bounce) return;
+            var target = snapTarget();
+            if (Math.abs(target - scroller.scrollTop) > 0.5) scroller.scrollTo({ top: target, behavior: "smooth" });
+        }, SNAP_IDLE_MS);
+    });
 
     var tip = document.createElement("div");
     tip.className = "gantt-tip";
