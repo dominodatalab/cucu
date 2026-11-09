@@ -5,7 +5,7 @@
     <script src="{{ dir_depth }}external/gantt.js"></script>
     <nav class="navbar navbar-expand-sm navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand me-2" href="#">Gantt HTML Test Report</a>
+            <a class="navbar-brand me-2" href="#">{% include "gantt_icon.html" %} Gantt HTML Test Report</a>
             {% if gantt['rows'] %}<span class="gantt-run navbar-text me-auto ms-0 ps-0">{% if gantt['runs'] | length > 1 %}{{ gantt['runs'] | length }} runs: {% else %}Run: {% endif %}{{ gantt['run_start'].strftime('%H:%M:%S') }}–{{ gantt['run_end'].strftime('%H:%M:%S') }} ({{ gantt['span_label'] }})</span>{% endif %}
             <ul class="navbar-nav mt-2 mt-lg-0">
               <li class="nav-item active">

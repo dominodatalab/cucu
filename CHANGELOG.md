@@ -10,6 +10,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Add - HTML report Gantt view, linked from the Index, with one outcome-colored timespan bar per scenario linking to that scenario's result page
 - Add - Gantt status and worker filters with totals, name search, zoom and two-way pan, a resizable name column, a worker column, and view state kept in the URL
 - Add - Gantt run filters, a Run column, and a "Line up runs" toggle for combined reports
+- Add - Gantt icon on the Gantt page title and the Index navbar link
 
 # 1.4.43
 

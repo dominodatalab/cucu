@@ -169,6 +169,7 @@ The Gantt view is a run-level HTML report page showing every scenario as a times
 **Files:**
 - `src/cucu/reporter/html.py` — `build_gantt_chart()` computes shared-clock and lined-up bar positions, run/worker numbers, and run/worker/status totals
 - `src/cucu/reporter/templates/gantt.html` — Gantt page
+- `src/cucu/reporter/templates/gantt_icon.html` — inline SVG icon included on the Gantt title and the Index link
 - `src/cucu/reporter/external/gantt.js` — zoom, pan, ticks, filters, URL hash state
 - `src/cucu/reporter/external/gantt.css` — chart layout, outcome and worker colors
 - `src/cucu/reporter/templates/index.html` — Index navbar link to `gantt.html`
