@@ -54,8 +54,10 @@ Feature: Report Gantt view
      Then I should see the text "2×"
       And I should see "after-hook" in the input "filter scenarios…"
       And I should see the text "Showing 2 of 6"
-     When I click the button "Reset"
+     When I click the button "−"
      Then I should see the text "1×"
+     When I click the button "Reset Filters"
+     Then I should see the text "Showing 6 of 6"
      When I navigate to the url "http://{HOST_ADDRESS}:{PORT}/gantt.html#status=failed"
       And I refresh the browser
      Then I should see the text "Showing 3 of 6"

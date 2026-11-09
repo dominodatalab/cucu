@@ -91,7 +91,7 @@ def test_build_gantt_chart_positions_bars_and_skips_background():
         "failed": 1,
         "error": 0,
         "skipped": 0,
-        "untested": 0,
+        "terminated": 0,
     }
     assert [(w["key"], w["label"]) for w in gantt["workers"]] == [
         ("1.1", "R1-W1")

@@ -85,7 +85,7 @@ def left_pad_zeroes(elapsed_time):
 
 
 GANTT_MIN_WIDTH_PCT = 0.4
-GANTT_STATUSES = ["passed", "failed", "error", "skipped", "untested"]
+GANTT_STATUSES = ["passed", "failed", "error", "skipped", "terminated"]
 
 
 def format_gantt_duration(seconds):

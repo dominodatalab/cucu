@@ -140,11 +140,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function applyFilters() {
         var statuses = activeValues(statusChips, "data-status");
+        var chipStatuses = statusChips.map(function (c) { return c.getAttribute("data-status"); });
         var workers = activeValues(workerChips, "data-worker");
         var query = search.value.trim().toLowerCase();
         var count = 0;
         rows.forEach(function (row) {
-            var visible = statuses.indexOf(row.getAttribute("data-status")) !== -1 &&
+            var status = row.getAttribute("data-status");
+            var visible = (statuses.indexOf(status) !== -1 || chipStatuses.indexOf(status) === -1) &&
                 workers.indexOf(row.getAttribute("data-worker")) !== -1 &&
                 (!query || row.getAttribute("data-search").indexOf(query) !== -1);
             row.classList.toggle("hidden", !visible);
@@ -246,6 +248,12 @@ document.addEventListener("DOMContentLoaded", function () {
     wireChips(workerChips);
     if (alignButton) alignButton.addEventListener("click", function () { setAligned(!aligned); });
     search.addEventListener("input", applyFilters);
+    document.querySelector(".gantt-reset-filters").addEventListener("click", function () {
+        statusChips.concat(workerChips).forEach(function (c) { c.classList.add("active"); });
+        search.value = "";
+        applyFilters();
+        followTopRow(true);
+    });
 
     document.querySelectorAll(".gantt-btn[data-zoom]").forEach(function (btn) {
         btn.addEventListener("click", function () {
@@ -253,7 +261,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (action === "in") { applyZoom(zoom * 2); followTopRow(true); }
             else if (action === "out") { applyZoom(zoom / 2); followTopRow(true); }
             else if (action === "fit") fitToShown();
-            else { applyZoom(1, 0); scroller.scrollLeft = 0; writeHash(); }
         });
     });
 
