@@ -327,3 +327,33 @@
 .gantt[data-workers]:not([data-workers="1"]) .gantt-bar {
     border-left-color: var(--worker-color);
 }
+
+.gantt-bar {
+    position: absolute;
+}
+
+.gantt-bar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.gantt-seg {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+
+.gantt-seg.status-passed { background-color: green; }
+.gantt-seg.status-failed { background-color: red; }
+.gantt-seg.status-error { background-color: purple; }
+.gantt-seg.status-skipped { background-color: blue; }
+.gantt-seg.status-untested,
+.gantt-seg.status-undefined { background-color: gray; }
+
+.gantt-bar-label {
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 0 2px #000;
+}

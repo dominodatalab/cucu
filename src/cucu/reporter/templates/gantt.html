@@ -63,7 +63,7 @@
                        data-left="{{ row['left_pct'] }}"
                        data-width="{{ row['width_pct'] }}"
                        data-aligned-left="{{ row['aligned_left_pct'] }}"
-                       data-aligned-width="{{ row['aligned_width_pct'] }}"><span class="gantt-bar-label">{{ row['duration_label'] }}</span></a>
+                       data-aligned-width="{{ row['aligned_width_pct'] }}">{% for seg in row['segments'] %}<span class="gantt-seg status-{{ seg['status'] }}" style="left: {{ seg['left_pct'] }}%; width: {{ seg['width_pct'] }}%" title="{{ escape(seg['title']) }}"></span>{% endfor %}<span class="gantt-bar-label">{{ row['duration_label'] }}</span></a>
                 </div>
             </div>
             {% endfor %}

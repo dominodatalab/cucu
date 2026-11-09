@@ -113,6 +113,10 @@ def _gantt_place(offset_s, elapsed_s, span_s):
     return left_pct, min(width_pct, 100 - left_pct)
 
 
+def _gantt_time(value):
+    return parse_iso_timestamp(value) if isinstance(value, str) else value
+
+
 def _gantt_run_label(run):
     filepath = run.get("filepath")
     return Path(filepath).name if filepath else str(run.get("cucu_run_id"))
@@ -155,6 +159,13 @@ def build_gantt_chart(features):
                     "status": scenario["status"],
                     "start_at": start_at,
                     "end_at": end_at,
+                    "steps": [
+                        step
+                        for step in scenario.get("steps", [])
+                        if not step.get("is_substep")
+                        and step.get("start_at")
+                        and step.get("end_at")
+                    ],
                     "run_id": run_id,
                     "worker_key": worker_key,
                 }
@@ -251,6 +262,31 @@ def build_gantt_chart(features):
         row["worker_badge"] = worker["label"]
         row["worker_color"] = worker["color"]
         row["duration_label"] = format_gantt_duration(elapsed)
+        row["segments"] = [
+            {
+                "status": step["status"],
+                "left_pct": (
+                    step["start_at"] - row["start_at"]
+                ).total_seconds()
+                / (elapsed or 1.0)
+                * 100,
+                "width_pct": max(
+                    (step["end_at"] - step["start_at"]).total_seconds()
+                    / (elapsed or 1.0)
+                    * 100,
+                    0.5,
+                ),
+                "title": f"{step['keyword']} {step['name']} — {step['status']}",
+            }
+            for step in (
+                {
+                    **step,
+                    "start_at": _gantt_time(step["start_at"]),
+                    "end_at": _gantt_time(step["end_at"]),
+                }
+                for step in row.pop("steps")
+            )
+        ]
         start_label = row["start_at"].strftime("%Y-%m-%d %H:%M:%S")
         end_label = row["end_at"].strftime("%Y-%m-%d %H:%M:%S")
         row["bar_title"] = (
