@@ -81,7 +81,7 @@ def test_build_gantt_chart_positions_bars_and_skips_background():
     assert gantt["rows"][1]["duration_label"] == "10s"
     assert (
         gantt["rows"][0]["bar_title"]
-        == "passed — 2026-09-18 12:00:00 – 2026-09-18 12:00:10 — 10s — Worker 1"
+        == "passed — 2026-09-18 12:00:00 – 2026-09-18 12:00:10 — 10s — R1-W1"
     )
     assert gantt["untimed_count"] == 1
     assert gantt["span_s"] == 20.0
@@ -94,7 +94,7 @@ def test_build_gantt_chart_positions_bars_and_skips_background():
         "untested": 0,
     }
     assert [(w["key"], w["label"]) for w in gantt["workers"]] == [
-        ("1.1", "Worker 1")
+        ("1.1", "R1-W1")
     ]
     assert len(gantt["runs"]) == 1
 

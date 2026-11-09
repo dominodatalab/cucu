@@ -12,6 +12,10 @@
     gap: 4px 6px;
 }
 
+.gantt-filter-label {
+    color: #666;
+}
+
 .gantt-divider {
     width: 1px;
     height: 18px;
@@ -104,7 +108,7 @@
 
 .gantt {
     --label-w: 320px;
-    --worker-w: 64px;
+    --worker-w: 84px;
 }
 
 .gantt-label-spacer,

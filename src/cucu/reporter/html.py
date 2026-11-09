@@ -195,9 +195,7 @@ def build_gantt_chart(features):
             "key": f"{run_number}.{number}",
             "run": run_number,
             "number": number,
-            "label": f"R{run_number}-W{number}"
-            if multi_run
-            else f"Worker {number}",
+            "label": f"R{run_number}-W{number}",
             "color": index % 10,
         }
 
@@ -250,9 +248,7 @@ def build_gantt_chart(features):
         row["run"] = run["number"]
         row["worker"] = worker["number"]
         row["worker_key"] = worker["key"]
-        row["worker_badge"] = (
-            worker["label"] if multi_run else str(worker["number"])
-        )
+        row["worker_badge"] = worker["label"]
         row["worker_color"] = worker["color"]
         row["duration_label"] = format_gantt_duration(elapsed)
         start_label = row["start_at"].strftime("%Y-%m-%d %H:%M:%S")

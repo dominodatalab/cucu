@@ -158,14 +158,14 @@ The replay view is a browser-based step-by-step timeline player rendered in scen
 The Gantt view is a run-level HTML report page showing every scenario as a timespan bar on a wall-clock axis. Bars are colored by outcome and link to that scenario's classic result page. Reach it from the Index navbar link "Gantt".
 
 **Key behaviors:**
-- Sticky filter bar with worker toggles, per-status totals (click toggles, alt-click isolates), a name search, and "Showing N of M"
+- Sticky filter bar with colored, clickable Run-Worker toggles (`R1-W1`), per-status totals (click toggles, alt-click isolates), a name search, and "Showing N of M"
 - Zoom with `−`/`+`/Fit/Reset or ctrl/⌘+wheel; pan in both directions with scroll or drag; axis ticks are generated client-side for the current zoom
 - Scrolling vertically (smooth glide) and zooming (instant) auto-pan so the first fully visible scenario's bar starts at the left of the timeline
-- Combined reports (`cucu report --combine`) number runs by start time and workers within their run; the Worker column badges and worker toggles use combined run-worker labels (`R2-W1`) so workers from different runs are never confused; "Line up runs" switches from the shared clock to each run's own start (`+m:ss` axis)
+- Combined reports (`cucu report --combine`) number runs by start time and workers within their run; the Run-Worker column badges and Run-Worker toggles use combined labels (`R2-W1`, also for single-run reports) so workers from different runs are never confused; "Line up runs" switches from the shared clock to each run's own start (`+m:ss` axis)
 - Scenario Classic and Replay pages link to `gantt.html#scenario=<scenario_run_id>`, which highlights that row, scrolls it to the top, zooms so its bar fills about a quarter of the timeline, and pans to it
 - View state (`zoom`, `t` left-edge seconds, `y` vertical scroll, `align`, `status`, `worker` as `run.worker`, `scenario`, `q`) is kept in the URL hash so links restore the same view
 - Scenario name column is resizable by dragging its header edge (width saved in localStorage, double-click resets)
-- Workers are numbered by start time and shown in their own column as colored number badges and as worker filters; multi-worker runs also get a bar edge stripe
+- Multi-worker reports also get a worker-colored bar edge stripe
 
 **Files:**
 - `src/cucu/reporter/html.py` — `build_gantt_chart()` computes shared-clock and lined-up bar positions, run/worker numbers, and status totals

@@ -16,7 +16,8 @@ Feature: Report Gantt view
       And I should see the text "Scenario that fails"
       And I should see the text "Scenario with after-hook error"
       And I should see the text "Worker"
-      And I should see the button "Worker 1"
+      And I should see the text "Run-Worker"
+      And I should see the button "R1-W1"
       And I should see the text "Run:"
       And I should see the link "Index"
      When I click the link "Scenario that fails"
@@ -64,9 +65,9 @@ Feature: Report Gantt view
       And I run the command "cucu report {CUCU_RESULTS_DIR}/gantt-workers-results --output {CUCU_RESULTS_DIR}/gantt-workers-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/gantt-workers-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/gantt.html"
-     Then I should see the button "Worker 1"
-      And I should see the button "Worker 2"
-     When I click the button "Worker 1"
+     Then I should see the button "R1-W1"
+      And I should see the button "R1-W2"
+     When I click the button "R1-W1"
      Then I should see the current url matches ".*worker=1.2.*"
 
   Scenario: User can filter and line up runs on the Gantt chart of a combined report

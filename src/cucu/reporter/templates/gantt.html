@@ -21,6 +21,7 @@
         <input type="search" class="gantt-search" placeholder="filter scenarios…" aria-label="filter scenarios">
         {% if gantt['untimed_count'] %}<span class="gantt-untimed">+{{ gantt['untimed_count'] }} untimed not plotted</span>{% endif %}
         <span class="gantt-divider"></span>
+        <span class="gantt-filter-label">Run-Worker:</span>
         {% for worker in gantt['workers'] %}
         <button type="button" class="gantt-chip gantt-worker-chip worker-c{{ worker['color'] }} active" data-worker="{{ worker['key'] }}" title="{% if gantt['runs'] | length > 1 %}{{ escape(gantt['runs'][worker['run'] - 1]['label']) }}: {{ escape(gantt['runs'][worker['run'] - 1]['title']) }} — {% endif %}click to toggle, alt-click to show only {{ worker['label'] }}">{{ worker['label'] }}</button>
         {% endfor %}
@@ -45,7 +46,7 @@
         <div class="gantt" data-span-s="{{ gantt['span_s'] }}" data-aligned-span-s="{{ gantt['aligned_span_s'] }}" data-run-start-clock-s="{{ gantt['run_start_clock_s'] }}" data-workers="{{ gantt['workers'] | length }}">
             <div class="gantt-axis">
                 <div class="gantt-label-spacer">Scenario<span class="gantt-resizer" title="drag to resize, double-click to reset"></span></div>
-                <div class="gantt-worker-cell gantt-worker-header" title="{% if gantt['runs'] | length > 1 %}run and worker within that run{% else %}worker{% endif %}">Worker</div>
+                <div class="gantt-worker-cell gantt-worker-header" title="run and worker within that run">Run-Worker</div>
                 <div class="gantt-axis-track"></div>
             </div>
             {% for row in gantt['rows'] %}
