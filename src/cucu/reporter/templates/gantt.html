@@ -29,7 +29,7 @@
         {% for status, count in gantt['status_counts'].items() %}
         <button type="button" class="gantt-chip gantt-status-chip status-{{ status }} active" data-status="{{ status }}" title="click to toggle, alt-click to show only {{ status }}">{{ status | capitalize }} {{ count }}</button>
         {% endfor %}
-        <button type="button" class="gantt-btn gantt-reset-filters" title="turn on every Run-Worker and status and clear the search">Reset Filters</button>
+        <button type="button" class="gantt-btn gantt-reset-filters" title="reset filters, search, selected scenario, zoom and scroll">Reset</button>
         <span class="gantt-divider"></span>
         <span class="gantt-shown"></span>
         <span class="gantt-zoom-controls">
@@ -39,7 +39,7 @@
             <button type="button" class="gantt-btn" data-zoom="out" title="zoom out">−</button>
             <span class="gantt-zoom-level">1×</span>
             <button type="button" class="gantt-btn" data-zoom="in" title="zoom in">+</button>
-            <button type="button" class="gantt-btn" data-zoom="fit" title="zoom to the time range of the shown scenarios">Fit Shown</button>
+            <button type="button" class="gantt-btn" data-zoom="fit" title="zoom to the time range of the shown scenarios">Fit</button>
         </span>
     </div>
     <div class="gantt-scroll">

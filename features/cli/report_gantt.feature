@@ -56,8 +56,11 @@ Feature: Report Gantt view
       And I should see the text "Showing 2 of 6"
      When I click the button "−"
      Then I should see the text "1×"
-     When I click the button "Reset Filters"
+     When I click the button "+"
+      And I click the button "Reset"
      Then I should see the text "Showing 6 of 6"
+      And I should see the text "1×"
+      And I should see the current url matches ".*/gantt\.html$"
      When I navigate to the url "http://{HOST_ADDRESS}:{PORT}/gantt.html#status=failed"
       And I refresh the browser
      Then I should see the text "Showing 3 of 6"

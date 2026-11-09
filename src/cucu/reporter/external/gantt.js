@@ -251,8 +251,13 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector(".gantt-reset-filters").addEventListener("click", function () {
         statusChips.concat(workerChips).forEach(function (c) { c.classList.add("active"); });
         search.value = "";
+        setFocus(null);
         applyFilters();
-        followTopRow(true);
+        applyZoom(1, 0);
+        scroller.scrollTop = 0;
+        lastScrollTop = 0;
+        scroller.scrollLeft = 0;
+        history.replaceState(null, "", location.pathname + location.search);
     });
 
     document.querySelectorAll(".gantt-btn[data-zoom]").forEach(function (btn) {
