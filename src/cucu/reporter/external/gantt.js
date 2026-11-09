@@ -200,8 +200,8 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".gantt-btn[data-zoom]").forEach(function (btn) {
         btn.addEventListener("click", function () {
             var action = btn.getAttribute("data-zoom");
-            if (action === "in") applyZoom(zoom * 2);
-            else if (action === "out") applyZoom(zoom / 2);
+            if (action === "in") { applyZoom(zoom * 2); followTopRow(true); }
+            else if (action === "out") { applyZoom(zoom / 2); followTopRow(true); }
             else if (action === "fit") fitToShown();
             else { applyZoom(1, 0); scroller.scrollLeft = 0; writeHash(); }
         });
@@ -210,13 +210,13 @@ document.addEventListener("DOMContentLoaded", function () {
     scroller.addEventListener("wheel", function (event) {
         if (!event.ctrlKey && !event.metaKey) return;
         event.preventDefault();
-        var anchor = event.clientX - scroller.getBoundingClientRect().left - labelWidth();
-        applyZoom(zoom * Math.exp(-event.deltaY * 0.002), Math.max(0, anchor));
+        applyZoom(zoom * Math.exp(-event.deltaY * 0.002), 0);
+        followTopRow(true);
     }, { passive: false });
 
     var FOLLOW_MARGIN_PX = 24;
     var FOLLOW_CLIP_TOLERANCE_PX = 3;
-    var FOLLOW_DURATION_MS = 300;
+    var FOLLOW_DURATION_MS = 150;
     var lastScrollTop = scroller.scrollTop;
     var axis = gantt.querySelector(".gantt-axis");
     var glide = null;
@@ -251,11 +251,16 @@ document.addEventListener("DOMContentLoaded", function () {
         glide.frame = requestAnimationFrame(step);
     }
 
-    function followTopRow() {
+    function followTopRow(instant) {
         var i = topVisibleRowIndex();
         if (i === -1) return;
         var barLeft = parseFloat(bars[i].getAttribute("data-left")) / 100 * trackWidth();
-        glideTo(barLeft - FOLLOW_MARGIN_PX);
+        if (instant) {
+            stopGlide();
+            scroller.scrollLeft = barLeft - FOLLOW_MARGIN_PX;
+        } else {
+            glideTo(barLeft - FOLLOW_MARGIN_PX);
+        }
     }
 
     scroller.addEventListener("wheel", function (event) {
