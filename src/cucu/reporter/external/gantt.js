@@ -166,15 +166,11 @@ document.addEventListener("DOMContentLoaded", function () {
             var idx = pair.indexOf("=");
             if (idx > 0) params[pair.slice(0, idx)] = decodeURIComponent(pair.slice(idx + 1));
         });
-        if (params.status !== undefined) {
-            var statuses = params.status.split(",");
-            statusChips.forEach(function (c) { c.classList.toggle("active", statuses.indexOf(c.getAttribute("data-status")) !== -1); });
-        }
-        if (params.worker !== undefined) {
-            var workers = params.worker.split(",");
-            workerChips.forEach(function (c) { c.classList.toggle("active", workers.indexOf(c.getAttribute("data-worker")) !== -1); });
-        }
-        if (params.q) search.value = params.q;
+        var statuses = params.status === undefined ? null : params.status.split(",");
+        statusChips.forEach(function (c) { c.classList.toggle("active", !statuses || statuses.indexOf(c.getAttribute("data-status")) !== -1); });
+        var workers = params.worker === undefined ? null : params.worker.split(",");
+        workerChips.forEach(function (c) { c.classList.toggle("active", !workers || workers.indexOf(c.getAttribute("data-worker")) !== -1); });
+        search.value = params.q || "";
         applyFilters();
         var z = parseFloat(params.zoom);
         applyZoom(isFinite(z) ? z : 1, 0);
@@ -270,7 +266,7 @@ document.addEventListener("DOMContentLoaded", function () {
     scroller.addEventListener("scroll", function () {
         if (scroller.scrollTop !== lastScrollTop) {
             lastScrollTop = scroller.scrollTop;
-            if (zoom > 1 && !pan) followTopRow();
+            if (!pan) followTopRow();
         }
         clearTimeout(scrollTimer);
         scrollTimer = setTimeout(writeHash, 150);
@@ -326,5 +322,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     readHash();
     restoring = false;
+
+    window.addEventListener("hashchange", function () {
+        clearTimeout(scrollTimer);
+        restoring = true;
+        readHash();
+        restoring = false;
+    });
     writeHash();
 });

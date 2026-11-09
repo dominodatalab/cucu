@@ -196,8 +196,10 @@
 }
 
 .gantt-worker {
-    border-radius: 8px;
-    padding: 0 5px;
+    border-radius: 3px;
+    padding: 0 6px;
+    min-width: 24px;
+    text-align: center;
     font-size: 0.85em;
     line-height: 16px;
     color: #fff;

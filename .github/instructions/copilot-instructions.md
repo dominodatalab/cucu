@@ -160,7 +160,7 @@ The Gantt view is a run-level HTML report page showing every scenario as a times
 **Key behaviors:**
 - Sticky filter bar with per-status and per-worker totals (click toggles, alt-click isolates), a name search, and "Showing N of M"
 - Zoom with `−`/`+`/Fit/Reset or ctrl/⌘+wheel; pan in both directions with scroll or drag; axis ticks are generated client-side for the current zoom
-- When zoomed in, scrolling vertically smoothly auto-pans so the first fully visible scenario's bar starts at the left of the timeline
+- Scrolling vertically smoothly auto-pans so the first fully visible scenario's bar starts at the left of the timeline
 - View state (`zoom`, `t` left-edge seconds, `y` vertical scroll, `status`, `worker`, `q`) is kept in the URL hash so links restore the same view
 - Scenario name column is resizable by dragging its header edge (width saved in localStorage, double-click resets)
 - Workers are numbered by start time and shown in their own column as colored number badges and as worker filters; multi-worker runs also get a bar edge stripe
