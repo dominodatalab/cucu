@@ -249,6 +249,9 @@ def build_gantt_chart(features):
         row["run"] = run["number"]
         row["worker"] = worker["number"]
         row["worker_key"] = worker["key"]
+        row["worker_badge"] = (
+            worker["label"] if multi_run else str(worker["number"])
+        )
         row["worker_color"] = worker["color"]
         row["duration_label"] = format_gantt_duration(elapsed)
         start_label = row["start_at"].strftime("%Y-%m-%d %H:%M:%S")

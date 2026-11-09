@@ -45,18 +45,16 @@
         <div class="gantt" data-span-s="{{ gantt['span_s'] }}" data-aligned-span-s="{{ gantt['aligned_span_s'] }}" data-run-start-clock-s="{{ gantt['run_start_clock_s'] }}" data-workers="{{ gantt['workers'] | length }}">
             <div class="gantt-axis">
                 <div class="gantt-label-spacer">Scenario<span class="gantt-resizer" title="drag to resize, double-click to reset"></span></div>
-                <div class="gantt-run-cell gantt-run-header" title="run">Run</div>
-                <div class="gantt-worker-cell gantt-worker-header" title="worker within its run">Worker</div>
+                <div class="gantt-worker-cell gantt-worker-header" title="{% if gantt['runs'] | length > 1 %}run and worker within that run{% else %}worker{% endif %}">Worker</div>
                 <div class="gantt-axis-track"></div>
             </div>
             {% for row in gantt['rows'] %}
-            <div class="gantt-row" data-status="{{ row['status'] }}" data-run="{{ row['run'] }}" data-worker="{{ row['worker_key'] }}" data-search="{{ escape((row['name'] ~ ' ' ~ row['feature_name']) | lower) }}">
+            <div class="gantt-row" data-status="{{ row['status'] }}" data-worker="{{ row['worker_key'] }}" data-search="{{ escape((row['name'] ~ ' ' ~ row['feature_name']) | lower) }}">
                 <div class="gantt-label" title="{{ escape(row['name']) }} - {{ escape(row['feature_name']) }}">
                     <a class="gantt-scenario" href="{{ urlencode(escape(row['feature_folder_name'])) }}/{{ urlencode(escape(row['scenario_folder_name'])) }}/index.html">{{ escape(row['name']) }}</a>
                     <span class="gantt-feature">{{ escape(row['feature_name']) }}</span>
                 </div>
-                <div class="gantt-run-cell"><span class="gantt-run-badge" title="{{ escape(gantt['runs'][row['run'] - 1]['label']) }}">{{ row['run'] }}</span></div>
-                <div class="gantt-worker-cell"><span class="gantt-worker worker-c{{ row['worker_color'] }}" title="worker {{ row['worker'] }}">{{ row['worker'] }}</span></div>
+                <div class="gantt-worker-cell"><span class="gantt-worker worker-c{{ row['worker_color'] }}" title="{% if gantt['runs'] | length > 1 %}{{ escape(gantt['runs'][row['run'] - 1]['label']) }} — {% endif %}worker {{ row['worker'] }}">{{ row['worker_badge'] }}</span></div>
                 <div class="gantt-track">
                     <a class="gantt-bar status-{{ row['status'] }} worker-c{{ row['worker_color'] }}"
                        href="{{ urlencode(escape(row['feature_folder_name'])) }}/{{ urlencode(escape(row['scenario_folder_name'])) }}/index.html"

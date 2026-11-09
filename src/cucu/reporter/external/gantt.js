@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
     var axisTrack = gantt.querySelector(".gantt-axis-track");
     var spacer = gantt.querySelector(".gantt-label-spacer");
     var workerHeader = gantt.querySelector(".gantt-worker-header");
-    var runHeader = gantt.querySelector(".gantt-run-header");
     var resizer = gantt.querySelector(".gantt-resizer");
     var LABEL_W_DEFAULT = 320;
     var LABEL_W_MIN = 120;
@@ -54,10 +53,10 @@ document.addEventListener("DOMContentLoaded", function () {
         writeHash();
     }
 
-    function labelWidth() { return spacer.offsetWidth + runHeader.offsetWidth + workerHeader.offsetWidth; }
+    function labelWidth() { return spacer.offsetWidth + workerHeader.offsetWidth; }
 
     function setLabelWidth(px) {
-        var max = Math.max(LABEL_W_MIN, scroller.clientWidth - runHeader.offsetWidth - workerHeader.offsetWidth - 200);
+        var max = Math.max(LABEL_W_MIN, scroller.clientWidth - workerHeader.offsetWidth - 200);
         px = Math.round(Math.min(max, Math.max(LABEL_W_MIN, px)));
         gantt.style.setProperty("--label-w", px + "px");
         return px;

@@ -200,6 +200,7 @@ def test_build_gantt_chart_numbers_runs_and_workers_within_runs():
     rows = {row["name"]: row for row in gantt["rows"]}
     assert (rows["A"]["run"], rows["A"]["worker_key"]) == (1, "1.1")
     assert (rows["B"]["run"], rows["B"]["worker_key"]) == (2, "2.1")
+    assert rows["B"]["worker_badge"] == "R2-W1"
     assert [(r["number"], r["label"]) for r in gantt["runs"]] == [
         (1, "a.feature"),
         (2, "b.feature"),
