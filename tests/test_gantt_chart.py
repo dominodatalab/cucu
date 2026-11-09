@@ -267,3 +267,71 @@ def test_build_gantt_chart_disambiguates_duplicate_run_labels():
     labels = [run["label"] for run in build_gantt_chart(features)["runs"]]
 
     assert labels == ["same.feature @ 12:00:00", "same.feature @ 12:05:00"]
+
+
+def test_build_gantt_chart_builds_step_and_cleanup_segments():
+    scenario = _scenario("A", "error", T0, T0 + timedelta(seconds=10))
+    scenario["steps"] = [
+        {
+            "keyword": "Given",
+            "name": "I pass",
+            "status": "passed",
+            "is_substep": False,
+            "start_at": T0 + timedelta(seconds=1),
+            "end_at": T0 + timedelta(seconds=3),
+        },
+        {
+            "keyword": "And",
+            "name": "I am nested",
+            "status": "passed",
+            "is_substep": True,
+            "start_at": T0 + timedelta(seconds=1),
+            "end_at": T0 + timedelta(seconds=2),
+        },
+        {
+            "keyword": "Then",
+            "name": "I am skipped",
+            "status": "skipped",
+            "is_substep": False,
+            "start_at": None,
+            "end_at": None,
+        },
+    ]
+    scenario["after_hooks"] = [
+        {
+            "name": "cleanup",
+            "status": "error",
+            "start_at": "2026-09-18T12:00:05",
+            "end_at": "2026-09-18T12:00:10",
+        }
+    ]
+
+    row = build_gantt_chart([_feature("F", [scenario])])["rows"][0]
+
+    assert [(s["status"], s["cleanup"]) for s in row["segments"]] == [
+        ("passed", False),
+        ("error", True),
+    ]
+    assert row["segments"][0]["left_pct"] == 10.0
+    assert row["segments"][0]["width_pct"] == 20.0
+    assert row["segments"][1]["left_pct"] == 50.0
+    assert row["cleanup_ratio"] == 2.0
+    assert row["duration_label"] == "10s"
+
+
+def test_build_gantt_chart_extends_bars_past_scenario_end_for_cleanup():
+    scenario = _scenario("A", "passed", T0, T0 + timedelta(seconds=10))
+    scenario["after_hooks"] = [
+        {
+            "name": "late",
+            "status": "passed",
+            "start_at": "2026-09-18T12:00:10",
+            "end_at": "2026-09-18T12:00:20",
+        }
+    ]
+
+    gantt = build_gantt_chart([_feature("F", [scenario])])
+
+    assert gantt["span_s"] == 20.0
+    assert gantt["rows"][0]["width_pct"] == 100.0
+    assert gantt["rows"][0]["cleanup_ratio"] == 2.0

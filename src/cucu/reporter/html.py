@@ -279,7 +279,7 @@ def build_gantt_chart(features):
         row["worker_key"] = worker["key"]
         row["worker_badge"] = worker["label"]
         row["worker_color"] = worker["color"]
-        row["duration_label"] = format_gantt_duration(elapsed)
+        row["duration_label"] = format_gantt_duration(total)
         steps = [
             {
                 "start_at": _gantt_time(step["start_at"]),

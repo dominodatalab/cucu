@@ -166,6 +166,8 @@ The Gantt view is a run-level HTML report page showing every scenario as a times
 - Scenario Classic and Replay pages (Gantt link) and each scenario row on the Index and feature pages (icon after 🔁) link to `gantt.html#scenario=<scenario_run_id>`, which highlights that row, scrolls it to the top, zooms so its bar fills about a quarter of the timeline, and pans to it
 - View state (`zoom`, `t` left-edge seconds, `y` vertical scroll, `align`, `status`, `worker` as `run.worker`, `scenario`, `q`) is kept in the URL hash so links restore the same view
 - Scenario name column is resizable by dragging its header edge (width saved in localStorage, double-click resets)
+- Bars have a faded scenario-outcome background with a full-color segment per top-level step (by step status); after-scenario hooks and end-of-scenario steps are hatched "cleanup" segments at the end of the bar (bars extend to the last hook end); the "Cleanup Steps" toggle trims bars back to where cleanup starts (`cleanup=0` in the URL)
+- Bars, segments and run-worker badges show an instant custom tooltip
 - Multi-worker reports also get a worker-colored bar edge stripe
 
 **Files:**
