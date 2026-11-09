@@ -162,7 +162,7 @@ The Gantt view is a run-level HTML report page showing every scenario as a times
 - Zoom with `−`/`+`/Fit/Reset or ctrl/⌘+wheel; pan in both directions with scroll or drag; axis ticks are generated client-side for the current zoom
 - Scrolling vertically (smooth glide) and zooming (instant) auto-pan so the first fully visible scenario's bar starts at the left of the timeline
 - Combined reports (`cucu report --combine`) number runs by start time and workers within their run; the `R#-W#` column badges and Run-Worker toggles use combined labels (`R2-W1`, also for single-run reports) so workers from different runs are never confused; "Line up runs" switches from the shared clock to each run's own start (`+m:ss` axis)
-- Scenario Classic and Replay pages link to `gantt.html#scenario=<scenario_run_id>`, which highlights that row, scrolls it to the top, zooms so its bar fills about a quarter of the timeline, and pans to it
+- Scenario Classic and Replay pages (Gantt link) and each scenario row on the Index and feature pages (icon after 🔁) link to `gantt.html#scenario=<scenario_run_id>`, which highlights that row, scrolls it to the top, zooms so its bar fills about a quarter of the timeline, and pans to it
 - View state (`zoom`, `t` left-edge seconds, `y` vertical scroll, `align`, `status`, `worker` as `run.worker`, `scenario`, `q`) is kept in the URL hash so links restore the same view
 - Scenario name column is resizable by dragging its header edge (width saved in localStorage, double-click resets)
 - Multi-worker reports also get a worker-colored bar edge stripe
@@ -174,7 +174,7 @@ The Gantt view is a run-level HTML report page showing every scenario as a times
 - `src/cucu/reporter/external/gantt.js` — zoom, pan, ticks, filters, URL hash state
 - `src/cucu/reporter/external/gantt.css` — chart layout, outcome and worker colors
 - `src/cucu/reporter/templates/index.html` — Index navbar link to `gantt.html`
-- `src/cucu/reporter/templates/scenario.html`, `scenario_replay.html` — Gantt link that focuses the scenario
+- `src/cucu/reporter/templates/scenario.html`, `scenario_replay.html`, `index.html`, `feature.html` — Gantt links that focus the scenario
 - `features/cli/report_gantt.feature` — integration test
 - `tests/test_gantt_chart.py` — unit tests for bar positioning
 

@@ -11,7 +11,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Add - Gantt status and worker filters with totals, name search, zoom and two-way pan, a resizable name column, a worker column, and view state kept in the URL
 - Add - Gantt combined run-worker badges and filters, and a "Line up runs" toggle for combined reports
 - Add - Gantt icon on the Gantt page title and the Index navbar link
-- Add - Gantt link on scenario Classic and Replay pages that focuses that scenario in the Gantt view
+- Add - Gantt links on scenario Classic and Replay pages and on Index and feature page scenario rows that focus that scenario in the Gantt view
 
 # 1.4.43
 
