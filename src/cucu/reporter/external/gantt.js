@@ -252,6 +252,7 @@ document.addEventListener("DOMContentLoaded", function () {
         statusChips.concat(workerChips).forEach(function (c) { c.classList.add("active"); });
         search.value = "";
         setFocus(null);
+        followPaused = false;
         applyFilters();
         applyZoom(1, 0);
         scroller.scrollTop = 0;
@@ -265,7 +266,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var action = btn.getAttribute("data-zoom");
             if (action === "in") { applyZoom(zoom * 2); followTopRow(true); }
             else if (action === "out") { applyZoom(zoom / 2); followTopRow(true); }
-            else if (action === "fit") fitToShown();
+            else if (action === "fit") { followPaused = false; fitToShown(); }
         });
     });
 
@@ -313,7 +314,11 @@ document.addEventListener("DOMContentLoaded", function () {
         glide.frame = requestAnimationFrame(step);
     }
 
+    var followPaused = false;
+
     function followTopRow(instant) {
+        if (instant) followPaused = false;
+        if (followPaused) return;
         var i = topVisibleRowIndex();
         if (i === -1) return;
         var target = barLeft(i) / 100 * trackWidth() - FOLLOW_MARGIN_PX;
@@ -326,7 +331,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     scroller.addEventListener("wheel", function (event) {
-        if (event.shiftKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) stopGlide();
+        if (event.ctrlKey || event.metaKey) return;
+        if (event.shiftKey || Math.abs(event.deltaX) > 0) {
+            stopGlide();
+            followPaused = true;
+        }
     }, { passive: true });
 
     var scrollTimer = null;
@@ -343,6 +352,7 @@ document.addEventListener("DOMContentLoaded", function () {
     gantt.addEventListener("mousedown", function (event) {
         if (event.button !== 0 || !event.target.classList.contains("gantt-track")) return;
         stopGlide();
+        followPaused = true;
         pan = { x: event.clientX, y: event.clientY, left: scroller.scrollLeft, top: scroller.scrollTop };
         scroller.classList.add("panning");
         event.preventDefault();
