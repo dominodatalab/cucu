@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, { passive: false });
 
     var FOLLOW_MARGIN_PX = 24;
-    var FOLLOW_CLIP_TOLERANCE_PX = 3;
+    var FOLLOW_CLIP_TOLERANCE_PX = 0.5;
     var FOLLOW_DURATION_MS = 150;
     var lastScrollTop = scroller.scrollTop;
     var axis = gantt.querySelector(".gantt-axis");
