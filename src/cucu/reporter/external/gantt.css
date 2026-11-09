@@ -37,10 +37,6 @@
     opacity: 1;
 }
 
-.gantt-chip-count {
-    opacity: 0.85;
-}
-
 .gantt-search {
     width: 220px;
     padding: 0 6px;
@@ -217,23 +213,8 @@
     color: #444;
 }
 
-.gantt-chip-label {
-    display: inline-block;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    vertical-align: bottom;
-}
-
 .gantt-bar.tiny {
     border-left-width: 0;
-}
-
-.gantt-run-chip {
-    background-color: #fff;
-    border-color: #999;
-    color: #333;
 }
 
 .gantt-btn.active {

@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", function () {
     var bars = rows.map(function (row) { return row.querySelector(".gantt-bar"); });
     var statusChips = Array.prototype.slice.call(document.querySelectorAll(".gantt-status-chip"));
     var workerChips = Array.prototype.slice.call(document.querySelectorAll(".gantt-worker-chip"));
-    var runChips = Array.prototype.slice.call(document.querySelectorAll(".gantt-run-chip"));
     var alignButton = document.querySelector(".gantt-align");
     var search = document.querySelector(".gantt-search");
     var shown = document.querySelector(".gantt-shown");
@@ -143,13 +142,11 @@ document.addEventListener("DOMContentLoaded", function () {
     function applyFilters() {
         var statuses = activeValues(statusChips, "data-status");
         var workers = activeValues(workerChips, "data-worker");
-        var runs = activeValues(runChips, "data-run");
         var query = search.value.trim().toLowerCase();
         var count = 0;
         rows.forEach(function (row) {
             var visible = statuses.indexOf(row.getAttribute("data-status")) !== -1 &&
                 workers.indexOf(row.getAttribute("data-worker")) !== -1 &&
-                runs.indexOf(row.getAttribute("data-run")) !== -1 &&
                 (!query || row.getAttribute("data-search").indexOf(query) !== -1);
             row.classList.toggle("hidden", !visible);
             if (visible) count++;
@@ -183,7 +180,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (scroller.scrollTop > 0) parts.push("y=" + Math.round(scroller.scrollTop));
         if (!allActive(statusChips)) parts.push("status=" + activeValues(statusChips, "data-status").join(","));
         if (aligned) parts.push("align=1");
-        if (!allActive(runChips)) parts.push("run=" + activeValues(runChips, "data-run").join(","));
         if (!allActive(workerChips)) parts.push("worker=" + activeValues(workerChips, "data-worker").join(","));
         if (search.value.trim()) parts.push("q=" + encodeURIComponent(search.value.trim()));
         var hash = parts.length ? "#" + parts.join("&") : "";
@@ -200,8 +196,6 @@ document.addEventListener("DOMContentLoaded", function () {
         statusChips.forEach(function (c) { c.classList.toggle("active", !statuses || statuses.indexOf(c.getAttribute("data-status")) !== -1); });
         var workers = params.worker === undefined ? null : params.worker.split(",");
         workerChips.forEach(function (c) { c.classList.toggle("active", !workers || workers.indexOf(c.getAttribute("data-worker")) !== -1); });
-        var runs = params.run === undefined ? null : params.run.split(",");
-        runChips.forEach(function (c) { c.classList.toggle("active", !runs || runs.indexOf(c.getAttribute("data-run")) !== -1); });
         search.value = params.q || "";
         aligned = !!alignButton && params.align === "1";
         positionBars();
@@ -229,7 +223,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     wireChips(statusChips);
     wireChips(workerChips);
-    wireChips(runChips);
     if (alignButton) alignButton.addEventListener("click", function () { setAligned(!aligned); });
     search.addEventListener("input", applyFilters);
 

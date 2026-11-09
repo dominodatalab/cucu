@@ -194,11 +194,10 @@ def build_gantt_chart(features):
             "key": f"{run_number}.{number}",
             "run": run_number,
             "number": number,
-            "label": f"R{run_number} W{number}"
+            "label": f"R{run_number}-W{number}"
             if multi_run
             else f"Worker {number}",
             "color": index % 10,
-            "count": 0,
         }
 
     run_start = min(row["start_at"] for row in rows)
@@ -223,7 +222,6 @@ def build_gantt_chart(features):
                 "title": " ".join(run.get("full_arguments") or [])
                 or str(run_id),
                 "start_label": entry["start_at"].strftime("%H:%M:%S"),
-                "count": 0,
             }
         )
     label_counts = {}
@@ -247,8 +245,6 @@ def build_gantt_chart(features):
         )
         worker = worker_info[row.pop("worker_key")]
         run = run_list[run_numbers[row.pop("run_id")] - 1]
-        worker["count"] += 1
-        run["count"] += 1
         status_counts[row["status"]] = status_counts.get(row["status"], 0) + 1
         row["run"] = run["number"]
         row["worker"] = worker["number"]

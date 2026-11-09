@@ -21,12 +21,8 @@
         <input type="search" class="gantt-search" placeholder="filter scenarios…" aria-label="filter scenarios">
         {% if gantt['untimed_count'] %}<span class="gantt-untimed">+{{ gantt['untimed_count'] }} untimed not plotted</span>{% endif %}
         <span class="gantt-divider"></span>
-        {% for run in gantt['runs'] %}
-        <button type="button" class="gantt-chip gantt-run-chip active" data-run="{{ run['number'] }}" title="{{ escape(run['title']) }} — click to toggle, alt-click to show only this run">R{{ run['number'] }} <span class="gantt-chip-label">{{ escape(run['label']) }}</span> <span class="gantt-chip-count">({{ run['count'] }})</span></button>
-        {% endfor %}
-        <span class="gantt-divider"></span>
         {% for worker in gantt['workers'] %}
-        <button type="button" class="gantt-chip gantt-worker-chip worker-c{{ worker['color'] }} active" data-worker="{{ worker['key'] }}" title="click to toggle, alt-click to show only {{ worker['label'] }}">{{ worker['label'] }} <span class="gantt-chip-count">({{ worker['count'] }})</span></button>
+        <button type="button" class="gantt-chip gantt-worker-chip worker-c{{ worker['color'] }} active" data-worker="{{ worker['key'] }}" title="{% if gantt['runs'] | length > 1 %}{{ escape(gantt['runs'][worker['run'] - 1]['label']) }}: {{ escape(gantt['runs'][worker['run'] - 1]['title']) }} — {% endif %}click to toggle, alt-click to show only {{ worker['label'] }}">{{ worker['label'] }}</button>
         {% endfor %}
         <span class="gantt-divider"></span>
         {% for status, count in gantt['status_counts'].items() %}

@@ -92,8 +92,8 @@ def test_build_gantt_chart_positions_bars_and_skips_background():
         "skipped": 0,
         "untested": 0,
     }
-    assert [(w["key"], w["label"], w["count"]) for w in gantt["workers"]] == [
-        ("1.1", "Worker 1", 2)
+    assert [(w["key"], w["label"]) for w in gantt["workers"]] == [
+        ("1.1", "Worker 1")
     ]
     assert len(gantt["runs"]) == 1
 
@@ -163,10 +163,7 @@ def test_build_gantt_chart_numbers_workers_by_start_time():
 
     workers = {row["name"]: row["worker"] for row in gantt["rows"]}
     assert workers == {"A": 1, "C": 1, "B": 2}
-    assert [(w["key"], w["count"]) for w in gantt["workers"]] == [
-        ("1.1", 2),
-        ("1.2", 1),
-    ]
+    assert [w["key"] for w in gantt["workers"]] == ["1.1", "1.2"]
     assert gantt["status_counts"]["terminated"] == 1
     assert gantt["status_counts"]["error"] == 1
 
@@ -203,12 +200,12 @@ def test_build_gantt_chart_numbers_runs_and_workers_within_runs():
     rows = {row["name"]: row for row in gantt["rows"]}
     assert (rows["A"]["run"], rows["A"]["worker_key"]) == (1, "1.1")
     assert (rows["B"]["run"], rows["B"]["worker_key"]) == (2, "2.1")
-    assert [(r["number"], r["label"], r["count"]) for r in gantt["runs"]] == [
-        (1, "a.feature", 1),
-        (2, "b.feature", 1),
+    assert [(r["number"], r["label"]) for r in gantt["runs"]] == [
+        (1, "a.feature"),
+        (2, "b.feature"),
     ]
-    assert [w["label"] for w in gantt["workers"]] == ["R1 W1", "R2 W1"]
-    assert rows["B"]["bar_title"].endswith("— R2 W1 — b.feature")
+    assert [w["label"] for w in gantt["workers"]] == ["R1-W1", "R2-W1"]
+    assert rows["B"]["bar_title"].endswith("— R2-W1 — b.feature")
 
 
 def test_build_gantt_chart_aligns_runs_at_their_own_start():
