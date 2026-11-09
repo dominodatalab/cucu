@@ -37,11 +37,6 @@
     opacity: 1;
 }
 
-.gantt-chip:disabled {
-    opacity: 0.2;
-    cursor: default;
-}
-
 .gantt-chip-count {
     opacity: 0.85;
 }

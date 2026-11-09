@@ -5,8 +5,8 @@
     <script src="{{ dir_depth }}external/gantt.js"></script>
     <nav class="navbar navbar-expand-sm navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Gantt HTML Test Report</a>
-            {% if gantt['rows'] %}<span class="gantt-run navbar-text me-auto">Run: {{ gantt['run_start'].strftime('%H:%M:%S') }}–{{ gantt['run_end'].strftime('%H:%M:%S') }} ({{ gantt['span_label'] }})</span>{% endif %}
+            <a class="navbar-brand me-2" href="#">Gantt HTML Test Report</a>
+            {% if gantt['rows'] %}<span class="gantt-run navbar-text me-auto ms-0 ps-0">Run: {{ gantt['run_start'].strftime('%H:%M:%S') }}–{{ gantt['run_end'].strftime('%H:%M:%S') }} ({{ gantt['span_label'] }})</span>{% endif %}
             <ul class="navbar-nav mt-2 mt-lg-0">
               <li class="nav-item active">
                 <a class="nav-link" href="index.html" title="go to index report">Index</a>
@@ -19,7 +19,6 @@
     {% if gantt['rows'] %}
     <div class="gantt-toolbar">
         <input type="search" class="gantt-search" placeholder="filter scenarios…" aria-label="filter scenarios">
-        <span class="gantt-shown"></span>
         {% if gantt['untimed_count'] %}<span class="gantt-untimed">+{{ gantt['untimed_count'] }} untimed not plotted</span>{% endif %}
         <span class="gantt-divider"></span>
         {% for worker, count in gantt['worker_counts'].items() %}
@@ -27,8 +26,10 @@
         {% endfor %}
         <span class="gantt-divider"></span>
         {% for status, count in gantt['status_counts'].items() %}
-        <button type="button" class="gantt-chip gantt-status-chip status-{{ status }} active" data-status="{{ status }}" title="click to toggle, alt-click to show only {{ status }}"{% if not count %} disabled{% endif %}>{{ status | capitalize }} {{ count }}</button>
+        <button type="button" class="gantt-chip gantt-status-chip status-{{ status }} active" data-status="{{ status }}" title="click to toggle, alt-click to show only {{ status }}">{{ status | capitalize }} {{ count }}</button>
         {% endfor %}
+        <span class="gantt-divider"></span>
+        <span class="gantt-shown"></span>
         <span class="gantt-zoom-controls">
             <button type="button" class="gantt-btn" data-zoom="out" title="zoom out">−</button>
             <span class="gantt-zoom-level">1×</span>
