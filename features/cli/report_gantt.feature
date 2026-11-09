@@ -15,6 +15,8 @@ Feature: Report Gantt view
       And I should see the text "Scenario that passes"
       And I should see the text "Scenario that fails"
       And I should see the text "Scenario with after-hook error"
+      And I should see the text "Worker"
+      And I should see the text "⚙ 1"
       And I should see the link "Index"
      When I click the link "Scenario that fails"
      Then I wait to see the button "I fail"

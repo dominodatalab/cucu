@@ -10,6 +10,11 @@ document.addEventListener("DOMContentLoaded", function () {
     var scroller = document.querySelector(".gantt-scroll");
     var axisTrack = gantt.querySelector(".gantt-axis-track");
     var spacer = gantt.querySelector(".gantt-label-spacer");
+    var workerHeader = gantt.querySelector(".gantt-worker-header");
+    var resizer = gantt.querySelector(".gantt-resizer");
+    var LABEL_W_DEFAULT = 320;
+    var LABEL_W_MIN = 120;
+    var LABEL_W_KEY = "cucu-gantt-label-width";
     var rows = Array.prototype.slice.call(gantt.querySelectorAll(".gantt-row"));
     var bars = rows.map(function (row) { return row.querySelector(".gantt-bar"); });
     var statusChips = Array.prototype.slice.call(document.querySelectorAll(".gantt-status-chip"));
@@ -27,7 +32,14 @@ document.addEventListener("DOMContentLoaded", function () {
         bar.style.width = bar.getAttribute("data-width") + "%";
     });
 
-    function labelWidth() { return spacer.offsetWidth; }
+    function labelWidth() { return spacer.offsetWidth + workerHeader.offsetWidth; }
+
+    function setLabelWidth(px) {
+        var max = Math.max(LABEL_W_MIN, scroller.clientWidth - workerHeader.offsetWidth - 200);
+        px = Math.round(Math.min(max, Math.max(LABEL_W_MIN, px)));
+        gantt.style.setProperty("--label-w", px + "px");
+        return px;
+    }
     function viewTrackWidth() { return Math.max(1, scroller.clientWidth - labelWidth()); }
     function trackWidth() { return viewTrackWidth() * zoom; }
 
@@ -210,16 +222,46 @@ document.addEventListener("DOMContentLoaded", function () {
     var pan = null;
     gantt.addEventListener("mousedown", function (event) {
         if (event.button !== 0 || !event.target.classList.contains("gantt-track")) return;
-        pan = { x: event.clientX, left: scroller.scrollLeft };
+        pan = { x: event.clientX, y: event.clientY, left: scroller.scrollLeft, top: scroller.scrollTop };
         scroller.classList.add("panning");
         event.preventDefault();
     });
     window.addEventListener("mousemove", function (event) {
-        if (pan) scroller.scrollLeft = pan.left - (event.clientX - pan.x);
+        if (!pan) return;
+        scroller.scrollLeft = pan.left - (event.clientX - pan.x);
+        scroller.scrollTop = pan.top - (event.clientY - pan.y);
     });
     window.addEventListener("mouseup", function () {
         pan = null;
         scroller.classList.remove("panning");
+    });
+
+    var stored = parseFloat(localStorage.getItem(LABEL_W_KEY));
+    if (isFinite(stored)) setLabelWidth(stored);
+
+    var resize = null;
+    resizer.addEventListener("mousedown", function (event) {
+        if (event.button !== 0) return;
+        resize = { x: event.clientX, width: spacer.offsetWidth };
+        gantt.classList.add("resizing");
+        event.preventDefault();
+        event.stopPropagation();
+    });
+    window.addEventListener("mousemove", function (event) {
+        if (!resize) return;
+        setLabelWidth(resize.width + event.clientX - resize.x);
+        applyZoom(zoom, 0);
+    });
+    window.addEventListener("mouseup", function () {
+        if (!resize) return;
+        resize = null;
+        gantt.classList.remove("resizing");
+        localStorage.setItem(LABEL_W_KEY, spacer.offsetWidth);
+    });
+    resizer.addEventListener("dblclick", function () {
+        setLabelWidth(LABEL_W_DEFAULT);
+        localStorage.removeItem(LABEL_W_KEY);
+        applyZoom(zoom, 0);
     });
 
     window.addEventListener("resize", function () { applyZoom(zoom, 0); });
