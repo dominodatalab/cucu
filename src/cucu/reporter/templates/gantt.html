@@ -29,6 +29,7 @@
         {% for status, count in gantt['status_counts'].items() %}
         <button type="button" class="gantt-chip gantt-status-chip status-{{ status }} active" data-status="{{ status }}" title="click to toggle, alt-click to show only {{ status }}">{{ status | capitalize }} {{ count }}</button>
         {% endfor %}
+        <span class="gantt-divider"></span>
         <button type="button" class="gantt-chip gantt-cleanup-chip active" title="show after-scenario hooks and end-of-scenario steps at the end of each bar">Cleanup Steps</button>
         <button type="button" class="gantt-btn gantt-reset-filters" title="reset filters, search, selected scenario, zoom and scroll">Reset</button>
         <span class="gantt-divider"></span>
