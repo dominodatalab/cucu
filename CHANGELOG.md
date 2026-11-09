@@ -7,7 +7,8 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.44
 
-- Add - HTML report Gantt view, linked from the Index, with one outcome-colored timespan bar per scenario showing compact duration and linking to that scenario's result page
+- Add - HTML report Gantt view, linked from the Index, with one outcome-colored timespan bar per scenario linking to that scenario's result page
+- Add - Gantt status and worker filters with totals, name search, zoom and pan, worker badges, and view state kept in the URL
 
 # 1.4.43
 

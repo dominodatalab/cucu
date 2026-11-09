@@ -84,12 +84,15 @@ def left_pad_zeroes(elapsed_time):
     return padded_duration
 
 
-GANTT_TICK_COUNT = 5
 GANTT_MIN_WIDTH_PCT = 0.4
+GANTT_STATUSES = ["passed", "failed", "error", "skipped", "untested"]
 
 
 def format_gantt_duration(seconds):
-    total = int(round(float(seconds or 0)))
+    seconds = float(seconds or 0)
+    if 0 < seconds < 1:
+        return f"{max(1, round(seconds * 1000))}ms"
+    total = int(round(seconds))
     hours, rem = divmod(total, 3600)
     minutes, secs = divmod(rem, 60)
     parts = []
@@ -104,14 +107,23 @@ def format_gantt_duration(seconds):
 
 def build_gantt_chart(features):
     rows = []
+    untimed_count = 0
+    worker_starts = {}
     for feature in features:
+        worker = feature.get("worker") or {}
+        worker_id = worker.get("worker_run_id")
         for scenario in feature.get("scenarios", []):
             if scenario.get("keyword") == "Background":
                 continue
             start_at = scenario.get("start_at")
             end_at = scenario.get("end_at")
             if not start_at or not end_at:
+                untimed_count += 1
                 continue
+            worker_start = worker.get("start_at") or start_at
+            worker_starts[worker_id] = min(
+                worker_starts.get(worker_id, worker_start), worker_start
+            )
             rows.append(
                 {
                     "name": scenario["name"],
@@ -121,15 +133,31 @@ def build_gantt_chart(features):
                     "status": scenario["status"],
                     "start_at": start_at,
                     "end_at": end_at,
-                    "duration": scenario.get("duration"),
-                    "duration_label": format_gantt_duration(
-                        scenario.get("duration")
-                    ),
+                    "worker_id": worker_id,
                 }
             )
 
+    empty = {
+        "rows": [],
+        "run_start": None,
+        "run_end": None,
+        "run_start_clock_s": 0,
+        "span_s": 0,
+        "span_label": "",
+        "status_counts": {},
+        "worker_counts": {},
+        "untimed_count": untimed_count,
+    }
     if not rows:
-        return {"rows": [], "ticks": [], "run_start": None, "run_end": None}
+        return empty
+
+    worker_numbers = {
+        worker_id: number
+        for number, worker_id in enumerate(
+            sorted(worker_starts, key=lambda w: (worker_starts[w], str(w))),
+            start=1,
+        )
+    }
 
     run_start = min(row["start_at"] for row in rows)
     run_end = max(row["end_at"] for row in rows)
@@ -138,38 +166,42 @@ def build_gantt_chart(features):
         span = 1.0
 
     for row in rows:
+        elapsed = (row["end_at"] - row["start_at"]).total_seconds()
         left_pct = (row["start_at"] - run_start).total_seconds() / span * 100
-        width_pct = (
-            (row["end_at"] - row["start_at"]).total_seconds() / span * 100
-        )
         row["left_pct"] = min(max(0.0, left_pct), 100 - GANTT_MIN_WIDTH_PCT)
-        row["width_pct"] = max(GANTT_MIN_WIDTH_PCT, width_pct)
+        row["width_pct"] = max(GANTT_MIN_WIDTH_PCT, elapsed / span * 100)
         if row["left_pct"] + row["width_pct"] > 100:
             row["width_pct"] = 100 - row["left_pct"]
+        row["worker"] = worker_numbers[row.pop("worker_id")]
+        row["duration_label"] = format_gantt_duration(elapsed)
         start_label = row["start_at"].strftime("%Y-%m-%d %H:%M:%S")
         end_label = row["end_at"].strftime("%Y-%m-%d %H:%M:%S")
         row["bar_title"] = (
-            f"{row['status']} — {start_label} – {end_label} — {row['duration_label']}"
+            f"{row['status']} — {start_label} – {end_label} — "
+            f"{row['duration_label']} — worker {row['worker']}"
         )
 
-    rows.sort(key=lambda row: row["start_at"])
+    rows.sort(key=lambda row: (row["start_at"], row["worker"]))
 
-    ticks = []
-    for i in range(GANTT_TICK_COUNT + 1):
-        frac = i / GANTT_TICK_COUNT
-        tick_at = run_start + (run_end - run_start) * frac
-        ticks.append(
-            {
-                "left_pct": frac * 100,
-                "label": tick_at.strftime("%H:%M:%S"),
-            }
-        )
+    status_counts = {status: 0 for status in GANTT_STATUSES}
+    worker_counts = {number: 0 for number in worker_numbers.values()}
+    for row in rows:
+        status_counts[row["status"]] = status_counts.get(row["status"], 0) + 1
+        worker_counts[row["worker"]] += 1
 
     return {
+        **empty,
         "rows": rows,
-        "ticks": ticks,
         "run_start": run_start,
         "run_end": run_end,
+        "run_start_clock_s": (
+            run_start
+            - run_start.replace(hour=0, minute=0, second=0, microsecond=0)
+        ).total_seconds(),
+        "span_s": span,
+        "span_label": format_gantt_duration(span),
+        "status_counts": status_counts,
+        "worker_counts": worker_counts,
     }
 
 

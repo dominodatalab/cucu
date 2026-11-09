@@ -157,14 +157,21 @@ The replay view is a browser-based step-by-step timeline player rendered in scen
 
 The Gantt view is a run-level HTML report page showing every scenario as a timespan bar on a wall-clock axis. Bars are colored by outcome and link to that scenario's classic result page. Reach it from the Index navbar link "Gantt".
 
+**Key behaviors:**
+- Sticky filter bar with per-status and per-worker totals (click toggles, alt-click isolates), a name search, and "Showing N of M"
+- Zoom with `−`/`+`/Fit/Reset or ctrl/⌘+wheel; pan with horizontal scroll or drag; axis ticks are generated client-side for the current zoom
+- View state (`zoom`, `t`, `status`, `worker`, `q`) is kept in the URL hash so links restore the same view
+- Workers are numbered by start time and shown as colored `⚙ N` badges plus a bar edge stripe; hidden for single-worker runs
+
 **Files:**
-- `src/cucu/reporter/html.py` — `build_gantt_chart()` computes bar positions from scenario `start_at`/`end_at`
+- `src/cucu/reporter/html.py` — `build_gantt_chart()` computes bar positions, worker numbers, and status/worker totals
 - `src/cucu/reporter/templates/gantt.html` — Gantt page
-- `src/cucu/reporter/external/gantt.css` — chart layout
+- `src/cucu/reporter/external/gantt.js` — zoom, pan, ticks, filters, URL hash state
+- `src/cucu/reporter/external/gantt.css` — chart layout, outcome and worker colors
 - `src/cucu/reporter/templates/index.html` — Index navbar link to `gantt.html`
 - `features/cli/report_gantt.feature` — integration test
 - `tests/test_gantt_chart.py` — unit tests for bar positioning
 
 **Testing Gantt view changes:**
 - `uv run pytest tests/test_gantt_chart.py`
-- `uv run cucu run features/cli/report_gantt.feature`
+- `HOST_ADDRESS=localhost uv run cucu run features/cli/report_gantt.feature`

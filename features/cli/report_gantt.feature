@@ -1,7 +1,8 @@
 @report
 Feature: Report Gantt view
   As a developer I want to see every scenario in a run on a Gantt chart of
-  wall-clock timespans, colored by outcome, with links to the scenario report
+  wall-clock timespans, colored by outcome, with filters, zoom and links to
+  the scenario report
 
   Scenario: User can open the Gantt chart from the report index and follow a bar
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/gantt-mixed-results" and expect exit code "1"
@@ -18,3 +19,42 @@ Feature: Report Gantt view
      When I click the link "Scenario that fails"
      Then I wait to see the button "I fail"
       And I should see the text "Scenario HTML Test Report"
+
+  Scenario: User can filter, search and zoom the Gantt chart and restore the view from the url
+    Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/gantt-filter-results" and expect exit code "1"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/gantt-filter-results --output {CUCU_RESULTS_DIR}/gantt-filter-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/gantt-filter-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/gantt.html"
+     Then I should see the text "Showing 6 of 6"
+     When I click the button "Passed 2"
+     Then I should see the text "Showing 4 of 6"
+      And I should see the text "Scenario that fails"
+      And I should see the current url matches ".*#status=.*"
+     When I click the button "Passed 2"
+      And I write "after-hook" into the input "filter scenarios…"
+     Then I should see the text "Showing 2 of 6"
+      And I should see the text "Scenario with after-hook error"
+     When I click the button "+"
+     Then I should see the text "2×"
+      And I should see the current url matches ".*zoom=2.*q=after-hook.*"
+     When I refresh the browser
+     Then I should see the text "2×"
+      And I should see "after-hook" in the input "filter scenarios…"
+      And I should see the text "Showing 2 of 6"
+     When I click the button "Reset"
+     Then I should see the text "1×"
+     When I navigate to the url "http://{HOST_ADDRESS}:{PORT}/gantt.html#status=failed"
+      And I refresh the browser
+     Then I should see the text "Showing 3 of 6"
+      And I should see the text "Scenario that fails"
+
+  Scenario: User can see and filter workers on the Gantt chart of a parallel run
+    Given I run the command "cucu run data/features/slow_features --workers 2 --results {CUCU_RESULTS_DIR}/gantt-workers-results" and expect exit code "0"
+      And I run the command "cucu report {CUCU_RESULTS_DIR}/gantt-workers-results --output {CUCU_RESULTS_DIR}/gantt-workers-report" and expect exit code "0"
+      And I start a webserver at directory "{CUCU_RESULTS_DIR}/gantt-workers-report/" and save the port to the variable "PORT"
+      And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/gantt.html"
+     Then I should see the text "Workers:"
+      And I should see the text "⚙ 1"
+      And I should see the text "⚙ 2"
+     When I click the button "⚙ 1"
+     Then I should see the current url matches ".*worker=2.*"
