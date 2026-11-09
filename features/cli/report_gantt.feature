@@ -17,6 +17,7 @@ Feature: Report Gantt view
       And I should see the text "Scenario with after-hook error"
       And I should see the text "Worker"
       And I should see the text "Run-Worker"
+      And I should see the text "R#-W#"
       And I should see the button "R1-W1"
       And I should see the text "Run:"
       And I should see the link "Index"

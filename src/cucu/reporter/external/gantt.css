@@ -108,7 +108,7 @@
 
 .gantt {
     --label-w: 320px;
-    --worker-w: 84px;
+    --worker-w: 64px;
 }
 
 .gantt-label-spacer,
