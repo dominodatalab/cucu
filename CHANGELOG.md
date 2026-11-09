@@ -12,6 +12,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 - Add - Gantt combined run-worker badges and filters, and a "Line up runs" toggle for combined reports
 - Add - Gantt icon on the Gantt page title and the Index navbar link
 - Add - Gantt bars colored by step status with hatched cleanup steps, a Cleanup Steps toggle, and instant tooltips
+- Add - Gantt blank edge rows, overscroll bounce, and auto-pan to the first completely visible row
 - Add - Gantt links on scenario Classic and Replay pages and on Index and feature page scenario rows that focus that scenario in the Gantt view
 
 # 1.4.43
