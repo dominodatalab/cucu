@@ -153,6 +153,12 @@ The replay view is a browser-based step-by-step timeline player rendered in scen
 - Failed scenarios auto-focus the first failing step in the replay view
 - Substeps are rendered flattened within the parent step's text (not as separate timeline entries)
 
+## Reporter changes
+
+- When the change is only in report generation (`src/cucu/reporter/`, `cucu report`), run the tests once into a stable results folder (e.g. under `.context/`, since `results/` is cleared by feature runs) and iterate with `uv run cucu report <results> --output <report>`; any change that affects running tests (`cucu run`, steps, hooks, runner) must be re-tested with `cucu run`
+- For refactors of report pages, record a baseline before changing code (behavior checks in a headless browser plus `getComputedStyle` for CSS), regenerate after each step, and diff against it
+- In headless checks, navigate through `about:blank` before reloading a URL that differs only by `#hash`, and size the window so the rows being measured are on screen
+
 ## Gantt View
 
 Run-level report page (`gantt.html`, linked from the Index navbar) showing every scenario as a bar on a wall-clock axis. Bars have a faded outcome-colored background with a full-color segment per top-level step and hatched "cleanup" segments for after-scenario hooks.
