@@ -5,9 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 1.4.44
+# 1.4.45
 
 - Add - HTML report Gantt view showing every scenario's timespan on a wall-clock axis, with step and cleanup segments, run-worker and status filters, zoom and scroll-tracking pan, combined-run alignment, a shareable URL view, and links from every scenario listing and page
+
+# 1.4.44
 - Fix - parallel workers started with `fork` (Linux) record their own worker in the run database instead of reusing the parent's
 
 # 1.4.43
