@@ -129,6 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
         renderTicks();
         markNarrowBars();
         if (bottomSpacer) sizeBottomSpacer();
+        lastScrollTop = scroller.scrollTop;
         syncPanOffset();
         writeHash();
     }
@@ -297,8 +298,7 @@ document.addEventListener("DOMContentLoaded", function () {
     scroller.addEventListener("wheel", function (event) {
         if (!event.ctrlKey && !event.metaKey) return;
         event.preventDefault();
-        var anchor = event.clientX - scroller.getBoundingClientRect().left - labelWidth();
-        applyZoom(zoom * Math.exp(-event.deltaY * 0.002), Math.max(0, anchor));
+        applyZoom(zoom * Math.exp(-event.deltaY * 0.002));
     }, { passive: false });
 
     var FOLLOW_MARGIN_PX = 24;
