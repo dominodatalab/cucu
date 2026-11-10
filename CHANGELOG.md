@@ -8,6 +8,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 # 1.4.44
 
 - Add - HTML report Gantt view showing every scenario's timespan on a wall-clock axis, with step and cleanup segments, run-worker and status filters, zoom and scroll-tracking pan, combined-run alignment, a shareable URL view, and links from every scenario listing and page
+- Fix - parallel workers started with `fork` (Linux) record their own worker in the run database instead of reusing the parent's
 
 # 1.4.43
 

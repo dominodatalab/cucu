@@ -71,11 +71,10 @@ Feature: Report Gantt view
       And I run the command "cucu report {CUCU_RESULTS_DIR}/gantt-workers-results --output {CUCU_RESULTS_DIR}/gantt-workers-report" and expect exit code "0"
       And I start a webserver at directory "{CUCU_RESULTS_DIR}/gantt-workers-report/" and save the port to the variable "PORT"
       And I open a browser at the url "http://{HOST_ADDRESS}:{PORT}/gantt.html"
-        * # how the 5 features split across the 2 workers depends on machine load, so
-        * # only R1-W1 is guaranteed to have scenarios
      Then I should see the button "R1-W1"
+      And I should see the button "R1-W2"
      When I click the button "R1-W1"
-     Then I should see the current url matches ".*#.*worker=.*"
+     Then I should see the current url matches ".*worker=1.2.*"
 
   Scenario: User can filter and line up runs on the Gantt chart of a combined report
     Given I run the command "cucu run data/features/feature_with_mixed_results.feature --results {CUCU_RESULTS_DIR}/gantt-combined-results/mixed" and expect exit code "1"
