@@ -117,69 +117,71 @@ def _gantt_time(value):
     return parse_iso_timestamp(value) if isinstance(value, str) else value
 
 
-def _gantt_run_label(run):
-    filepath = run.get("filepath")
-    return Path(filepath).name if filepath else str(run.get("cucu_run_id"))
-
-
 def build_gantt_chart(features):
     rows = []
     untimed_count = 0
     runs = {}
-    workers = {}
+    worker_starts = {}
     for feature in features:
-        worker = feature.get("worker") or {}
-        run = worker.get("cucu_run") or {}
-        run_id = run.get("cucu_run_id")
-        worker_key = (run_id, worker.get("worker_run_id"))
-        for scenario in feature.get("scenarios", []):
-            if scenario.get("keyword") == "Background":
-                continue
-            start_at = scenario.get("start_at")
-            end_at = scenario.get("end_at")
+        worker = feature["worker"]
+        run = worker["cucu_run"]
+        worker_key = (run["cucu_run_id"], worker["worker_run_id"])
+        for scenario in feature["scenarios"]:
+            start_at = scenario["start_at"]
+            end_at = scenario["end_at"]
             if not start_at or not end_at:
                 untimed_count += 1
                 continue
-            hooks = [
+            segments = [
                 {
-                    **hook,
+                    "start_at": _gantt_time(step["start_at"]),
+                    "end_at": _gantt_time(step["end_at"]),
+                    "status": step["status"],
+                    "title": f"{step['keyword']} {step['name']} — {step['status']}",
+                    "cleanup": False,
+                }
+                for step in scenario["steps"]
+                if not step["is_substep"]
+                and step["start_at"]
+                and step["end_at"]
+            ] + [
+                {
                     "start_at": _gantt_time(hook["start_at"]),
                     "end_at": _gantt_time(hook["end_at"]),
+                    "status": hook["status"],
+                    "title": f"cleanup: {hook['name']} — {hook['status']}",
+                    "cleanup": True,
                 }
-                for hook in scenario.get("after_hooks") or []
-                if hook.get("start_at") and hook.get("end_at")
+                for hook in scenario["after_hooks"] or []
+                if hook["start_at"] and hook["end_at"]
             ]
-            cleanup_end_at = max([end_at] + [hook["end_at"] for hook in hooks])
+            cleanup = [seg for seg in segments if seg["cleanup"]]
+            bar_end_at = max([end_at] + [seg["end_at"] for seg in cleanup])
             run_entry = runs.setdefault(
-                run_id,
-                {"run": run, "start_at": start_at, "end_at": cleanup_end_at},
+                run["cucu_run_id"],
+                {"run": run, "start_at": start_at, "end_at": bar_end_at},
             )
             run_entry["start_at"] = min(run_entry["start_at"], start_at)
-            run_entry["end_at"] = max(run_entry["end_at"], cleanup_end_at)
-            worker_start = worker.get("start_at") or start_at
-            workers[worker_key] = min(
-                workers.get(worker_key, worker_start), worker_start
+            run_entry["end_at"] = max(run_entry["end_at"], bar_end_at)
+            worker_starts[worker_key] = min(
+                worker_starts.get(worker_key, worker["start_at"]),
+                worker["start_at"],
             )
             rows.append(
                 {
                     "id": scenario["scenario_run_id"],
                     "name": scenario["name"],
                     "feature_name": feature["name"],
-                    "feature_folder_name": feature["folder_name"],
-                    "scenario_folder_name": scenario["folder_name"],
+                    "href": f"{urlencode(escape(feature['folder_name']))}/{urlencode(escape(scenario['folder_name']))}/index.html",
                     "status": scenario["status"],
                     "start_at": start_at,
                     "end_at": end_at,
-                    "cleanup_end_at": cleanup_end_at,
-                    "hooks": hooks,
-                    "steps": [
-                        step
-                        for step in scenario.get("steps", [])
-                        if not step.get("is_substep")
-                        and step.get("start_at")
-                        and step.get("end_at")
-                    ],
-                    "run_id": run_id,
+                    "core_end_at": min(
+                        [end_at] + [seg["start_at"] for seg in cleanup]
+                    ),
+                    "bar_end_at": bar_end_at,
+                    "segments": segments,
+                    "run_id": run["cucu_run_id"],
                     "worker_key": worker_key,
                 }
             )
@@ -195,36 +197,55 @@ def build_gantt_chart(features):
         "status_counts": {},
         "runs": [],
         "workers": [],
+        "multi_run": False,
         "untimed_count": untimed_count,
     }
     if not rows:
         return empty
 
-    run_ids = sorted(runs, key=lambda r: (runs[r]["start_at"], str(r)))
-    run_numbers = {run_id: n for n, run_id in enumerate(run_ids, start=1)}
-    multi_run = len(run_ids) > 1
-
-    worker_keys = sorted(
-        workers,
-        key=lambda k: (run_numbers[k[0]], workers[k], str(k[1])),
+    run_ids = sorted(
+        runs, key=lambda run_id: (runs[run_id]["start_at"], run_id)
     )
+    run_list = []
+    for number, run_id in enumerate(run_ids, start=1):
+        run = runs[run_id]["run"]
+        run_list.append(
+            {
+                "number": number,
+                "label": Path(run["filepath"]).name,
+                "title": " ".join(run["full_arguments"]),
+                "start_label": runs[run_id]["start_at"].strftime("%H:%M:%S"),
+            }
+        )
+    labels = [run_info["label"] for run_info in run_list]
+    for run_info in run_list:
+        if labels.count(run_info["label"]) > 1:
+            run_info["label"] += f" @ {run_info['start_label']}"
+    run_numbers = {run_id: index + 1 for index, run_id in enumerate(run_ids)}
+
     worker_info = {}
     workers_per_run = {}
-    for index, key in enumerate(worker_keys):
-        run_number = run_numbers[key[0]]
+    for color, worker_key in enumerate(
+        sorted(
+            worker_starts,
+            key=lambda key: (run_numbers[key[0]], worker_starts[key], key[1]),
+        )
+    ):
+        run_number = run_numbers[worker_key[0]]
         number = workers_per_run[run_number] = (
             workers_per_run.get(run_number, 0) + 1
         )
-        worker_info[key] = {
+        worker_info[worker_key] = {
             "key": f"{run_number}.{number}",
             "run": run_number,
             "number": number,
             "label": f"R{run_number}-W{number}",
-            "color": index % 10,
+            "color": color % 10,
+            "title": f"{run_list[run_number - 1]['label']}: {run_list[run_number - 1]['title']}",
         }
 
     run_start = min(row["start_at"] for row in rows)
-    run_end = max(row["cleanup_end_at"] for row in rows)
+    run_end = max(row["bar_end_at"] for row in rows)
     span = (run_end - run_start).total_seconds() or 1.0
     aligned_span = (
         max(
@@ -233,96 +254,50 @@ def build_gantt_chart(features):
         )
         or 1.0
     )
-
-    run_list = []
-    for run_id in run_ids:
-        entry = runs[run_id]
-        run = entry["run"]
-        run_list.append(
-            {
-                "number": run_numbers[run_id],
-                "label": _gantt_run_label(run),
-                "title": " ".join(run.get("full_arguments") or [])
-                or str(run_id),
-                "start_label": entry["start_at"].strftime("%H:%M:%S"),
-            }
-        )
-    label_counts = {}
-    for run in run_list:
-        label_counts[run["label"]] = label_counts.get(run["label"], 0) + 1
-    for run in run_list:
-        if label_counts[run["label"]] > 1:
-            run["label"] = f"{run['label']} @ {run['start_label']}"
+    multi_run = len(run_list) > 1
 
     status_counts = {status: 0 for status in GANTT_STATUSES}
     for row in rows:
-        core_end_at = min(
-            [row["end_at"]] + [hook["start_at"] for hook in row["hooks"]]
-        )
-        elapsed = (core_end_at - row["start_at"]).total_seconds()
-        total = (row["cleanup_end_at"] - row["start_at"]).total_seconds()
+        core_s = (row.pop("core_end_at") - row["start_at"]).total_seconds()
+        total_s = (row.pop("bar_end_at") - row["start_at"]).total_seconds()
         run_entry = runs[row["run_id"]]
+        worker = worker_info[row.pop("worker_key")]
+        run_info = run_list[run_numbers[row.pop("run_id")] - 1]
         row["left_pct"], row["width_pct"] = _gantt_place(
-            (row["start_at"] - run_start).total_seconds(), total, span
+            (row["start_at"] - run_start).total_seconds(), total_s, span
         )
         row["aligned_left_pct"], row["aligned_width_pct"] = _gantt_place(
             (row["start_at"] - run_entry["start_at"]).total_seconds(),
-            total,
+            total_s,
             aligned_span,
         )
-        row["cleanup_ratio"] = total / elapsed if elapsed > 0 else 1.0
-        worker = worker_info[row.pop("worker_key")]
-        run = run_list[run_numbers[row.pop("run_id")] - 1]
+        row["cleanup_ratio"] = total_s / core_s if core_s > 0 else 1.0
+        for seg in row["segments"]:
+            seg["left_pct"] = (
+                (seg["start_at"] - row["start_at"]).total_seconds()
+                / (total_s or 1.0)
+                * 100
+            )
+            seg["width_pct"] = max(
+                (seg["end_at"] - seg["start_at"]).total_seconds()
+                / (total_s or 1.0)
+                * 100,
+                0.5,
+            )
         status_counts[row["status"]] = status_counts.get(row["status"], 0) + 1
-        row["run"] = run["number"]
+        row["run"] = run_info["number"]
         row["worker"] = worker["number"]
         row["worker_key"] = worker["key"]
         row["worker_badge"] = worker["label"]
         row["worker_color"] = worker["color"]
-        row["duration_label"] = format_gantt_duration(total)
-        steps = [
-            {
-                "start_at": _gantt_time(step["start_at"]),
-                "end_at": _gantt_time(step["end_at"]),
-                "status": step["status"],
-                "title": f"{step['keyword']} {step['name']} — {step['status']}",
-                "cleanup": False,
-            }
-            for step in row.pop("steps")
-        ] + [
-            {
-                "start_at": hook["start_at"],
-                "end_at": hook["end_at"],
-                "status": hook.get("status", "passed"),
-                "title": f"cleanup: {hook.get('name', '')} — {hook.get('status', 'passed')}",
-                "cleanup": True,
-            }
-            for hook in row.pop("hooks")
-        ]
-        row["segments"] = [
-            {
-                **step,
-                "left_pct": (
-                    step["start_at"] - row["start_at"]
-                ).total_seconds()
-                / (total or 1.0)
-                * 100,
-                "width_pct": max(
-                    (step["end_at"] - step["start_at"]).total_seconds()
-                    / (total or 1.0)
-                    * 100,
-                    0.5,
-                ),
-            }
-            for step in steps
-        ]
-        row.pop("cleanup_end_at")
-        start_label = row["start_at"].strftime("%Y-%m-%d %H:%M:%S")
-        end_label = row["end_at"].strftime("%Y-%m-%d %H:%M:%S")
+        row["worker_title"] = (
+            f"{run_info['label']} — " if multi_run else ""
+        ) + f"worker {worker['number']}"
+        row["duration_label"] = format_gantt_duration(total_s)
         row["bar_title"] = (
-            f"{row['status']} — {start_label} – {end_label} — "
-            f"{row['duration_label']} — {worker['label']}"
-            f"{' — ' + run['label'] if multi_run else ''}"
+            f"{row['status']} — {row['start_at']:%Y-%m-%d %H:%M:%S} – "
+            f"{row['end_at']:%Y-%m-%d %H:%M:%S} — {row['duration_label']} — "
+            f"{worker['label']}{' — ' + run_info['label'] if multi_run else ''}"
         )
 
     rows.sort(key=lambda row: (row["start_at"], row["run"], row["worker"]))
@@ -342,6 +317,7 @@ def build_gantt_chart(features):
         "status_counts": status_counts,
         "runs": run_list,
         "workers": list(worker_info.values()),
+        "multi_run": multi_run,
     }
 
 

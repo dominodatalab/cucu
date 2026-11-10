@@ -6,7 +6,7 @@
     <nav class="navbar navbar-expand-sm navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand me-2" href="#">{% include "gantt_icon.html" %} Gantt HTML Test Report</a>
-            {% if gantt['rows'] %}<span class="gantt-run navbar-text me-auto ms-0 ps-0">{% if gantt['runs'] | length > 1 %}{{ gantt['runs'] | length }} runs: {% else %}Run: {% endif %}{{ gantt['run_start'].strftime('%H:%M:%S') }}–{{ gantt['run_end'].strftime('%H:%M:%S') }} ({{ gantt['span_label'] }})</span>{% endif %}
+            {% if gantt['rows'] %}<span class="gantt-run navbar-text me-auto ms-0 ps-0">{% if gantt['multi_run'] %}{{ gantt['runs'] | length }} runs: {% else %}Run: {% endif %}{{ gantt['run_start'].strftime('%H:%M:%S') }}–{{ gantt['run_end'].strftime('%H:%M:%S') }} ({{ gantt['span_label'] }})</span>{% endif %}
             <ul class="navbar-nav mt-2 mt-lg-0">
               <li class="nav-item active">
                 <a class="nav-link" href="index.html" title="go to index report">Index</a>
@@ -23,7 +23,7 @@
         <span class="gantt-divider"></span>
         <span class="gantt-filter-label">Run-Worker:</span>
         {% for worker in gantt['workers'] %}
-        <button type="button" class="gantt-chip gantt-worker-chip worker-c{{ worker['color'] }} active" data-worker="{{ worker['key'] }}" title="{% if gantt['runs'] | length > 1 %}{{ escape(gantt['runs'][worker['run'] - 1]['label']) }}: {{ escape(gantt['runs'][worker['run'] - 1]['title']) }} — {% endif %}click to toggle, alt-click to show only {{ worker['label'] }}">{{ worker['label'] }}</button>
+        <button type="button" class="gantt-chip gantt-worker-chip worker-c{{ worker['color'] }} active" data-worker="{{ worker['key'] }}" title="{% if gantt['multi_run'] %}{{ escape(worker['title']) }} — {% endif %}click to toggle, alt-click to show only {{ worker['label'] }}">{{ worker['label'] }}</button>
         {% endfor %}
         <span class="gantt-divider"></span>
         {% for status, count in gantt['status_counts'].items() %}
@@ -35,7 +35,7 @@
         <span class="gantt-divider"></span>
         <span class="gantt-shown"></span>
         <span class="gantt-zoom-controls">
-            {% if gantt['runs'] | length > 1 %}
+            {% if gantt['multi_run'] %}
             <button type="button" class="gantt-btn gantt-align" title="toggle between a shared clock and lining every run up at its own start">Line up runs</button>
             {% endif %}
             <button type="button" class="gantt-btn" data-zoom="out" title="zoom out">−</button>
@@ -56,18 +56,25 @@
             {% for row in gantt['rows'] %}
             <div class="gantt-row" data-id="{{ row['id'] }}" data-status="{{ row['status'] }}" data-worker="{{ row['worker_key'] }}" data-search="{{ escape((row['name'] ~ ' ' ~ row['feature_name']) | lower) }}">
                 <div class="gantt-label" title="{{ escape(row['name']) }} - {{ escape(row['feature_name']) }}">
-                    <a class="gantt-scenario" href="{{ urlencode(escape(row['feature_folder_name'])) }}/{{ urlencode(escape(row['scenario_folder_name'])) }}/index.html">{{ escape(row['name']) }}</a>
+                    <a class="gantt-scenario" href="{{ row['href'] }}">{{ escape(row['name']) }}</a>
                     <span class="gantt-feature">{{ escape(row['feature_name']) }}</span>
                 </div>
-                <div class="gantt-worker-cell"><span class="gantt-worker worker-c{{ row['worker_color'] }}" title="{% if gantt['runs'] | length > 1 %}{{ escape(gantt['runs'][row['run'] - 1]['label']) }} — {% endif %}worker {{ row['worker'] }}">{{ row['worker_badge'] }}</span></div>
+                <div class="gantt-worker-cell"><span class="gantt-worker worker-c{{ row['worker_color'] }}" title="{{ escape(row['worker_title']) }}">{{ row['worker_badge'] }}</span></div>
                 <div class="gantt-track">
                     <a class="gantt-bar status-{{ row['status'] }} worker-c{{ row['worker_color'] }}"
-                       href="{{ urlencode(escape(row['feature_folder_name'])) }}/{{ urlencode(escape(row['scenario_folder_name'])) }}/index.html"
+                       href="{{ row['href'] }}"
                        title="{{ row['bar_title'] }}"
                        data-left="{{ row['left_pct'] }}"
                        data-width="{{ row['width_pct'] }}"
                        data-aligned-left="{{ row['aligned_left_pct'] }}"
-                       data-aligned-width="{{ row['aligned_width_pct'] }}"><span class="gantt-bar-inner" data-cleanup-ratio="{{ row['cleanup_ratio'] }}">{% for seg in row['segments'] %}<span class="gantt-seg status-{{ seg['status'] }}{% if seg['cleanup'] %} cleanup{% endif %}" style="left: {{ seg['left_pct'] }}%; width: {{ seg['width_pct'] }}%" title="{{ escape(seg['title']) }}"></span>{% endfor %}</span><span class="gantt-bar-label">{{ row['duration_label'] }}</span></a>
+                       data-aligned-width="{{ row['aligned_width_pct'] }}">
+                        <span class="gantt-bar-inner" data-cleanup-ratio="{{ row['cleanup_ratio'] }}">
+                            {%- for seg in row['segments'] %}
+                            <span class="gantt-seg status-{{ seg['status'] }}{% if seg['cleanup'] %} cleanup{% endif %}" style="left: {{ seg['left_pct'] }}%; width: {{ seg['width_pct'] }}%" title="{{ escape(seg['title']) }}"></span>
+                            {%- endfor %}
+                        </span>
+                        <span class="gantt-bar-label">{{ row['duration_label'] }}</span>
+                    </a>
                 </div>
             </div>
             {% endfor %}
