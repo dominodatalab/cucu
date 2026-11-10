@@ -155,32 +155,23 @@ The replay view is a browser-based step-by-step timeline player rendered in scen
 
 ## Gantt View
 
-The Gantt view is a run-level HTML report page showing every scenario as a timespan bar on a wall-clock axis. Bars are colored by outcome and link to that scenario's classic result page. Reach it from the Index navbar link "Gantt".
+Run-level report page (`gantt.html`, linked from the Index navbar) showing every scenario as a bar on a wall-clock axis. Bars have a faded outcome-colored background with a full-color segment per top-level step and hatched "cleanup" segments for after-scenario hooks.
 
 **Key behaviors:**
-- Sticky filter bar with colored, clickable Run-Worker toggles (`R1-W1`), per-status totals (click toggles, alt-click isolates), a name search, and "Showing N of M"
-- "Reset" (after the status toggles) turns every Run-Worker and status back on, clears the search and selected scenario, returns to 1× at the top-left, and clears the URL hash
-- Zoom with `−`/`+`/"Fit" (zoom to the shown rows) or ctrl/⌘+wheel; pan in both directions with scroll or drag; axis ticks are generated client-side for the current zoom
-- One blank row sits above the first row, and the bottom spacer is sized (on load, resize, zoom and filter changes) so the last shown row can scroll up to be the first visible row; and scrolling past either end rubber-bands back
-- Vertical scrolling drives horizontal position directly (no animation): the left edge interpolates between consecutive shown rows' bar starts as each row scrolls under the axis, so the first completely visible row's bar sits at the left; when zoomed in, the timeline gets a trailing blank area one view wide so late bars can still reach the left edge; manual horizontal panning (drag, horizontal scroll) is kept as an offset on top of that tracking; zoom (buttons and ctrl/⌘+wheel/pinch) centers on the time range of the bars in the rows currently on screen and never triggers auto-pan
-- Combined reports (`cucu report --combine`) number runs by start time and workers within their run; the `R#-W#` column badges and Run-Worker toggles use combined labels (`R2-W1`, also for single-run reports) so workers from different runs are never confused; "Line up runs" switches from the shared clock to each run's own start (`+m:ss` axis)
-- Scenario Classic and Replay pages (Gantt link) and each scenario row on the Index and feature pages (icon after 🔁) link to `gantt.html#scenario=<scenario_run_id>`, which highlights that row, scrolls it to the top, zooms so its bar fills about a quarter of the timeline, and pans to it
-- View state (`zoom`, `t` left-edge seconds, `y` vertical scroll, `align`, `status`, `worker` as `run.worker`, `scenario`, `q`) is kept in the URL hash so links restore the same view
-- Scenario name column is resizable by dragging its header edge (width saved in localStorage, double-click resets)
-- Bars have a faded scenario-outcome background with a full-color segment per top-level step (by step status); after-scenario hooks and end-of-scenario steps are hatched "cleanup" segments at the end of the bar (bars extend to the last hook end); the "Cleanup Steps" toggle trims bars back to where cleanup starts (`cleanup=0` in the URL)
-- Bars, segments and run-worker badges show an instant custom tooltip
-- Multi-worker reports also get a worker-colored bar edge stripe
+- Toolbar: name search, Run-Worker toggles (`R1-W1`), status toggles with totals (click toggles, alt-click isolates), Cleanup Steps toggle, Reset (filters, selection, zoom, scroll, URL), "Showing N of M", zoom `−`/`+`/Fit
+- Combined reports (`cucu report --combine`) number runs by start time and workers within each run; "Line up runs" aligns each run at its own start (`+m:ss` axis)
+- Vertical scroll drives horizontal position (no animation) so the first completely visible row's bar sits at the left; manual horizontal pans are kept as an offset; zoom (buttons, ctrl/⌘+wheel, pinch) centers on the rows on screen
+- A blank row sits above the first row, the bottom spacer lets the last row scroll to the top, and scrolling past either end bounces back; zoomed timelines get trailing room one view wide
+- View state is kept in the URL hash (`zoom`, `t`, `y`, `align`, `cleanup`, `status`, `worker` as `run.worker`, `scenario`, `q`)
+- `gantt.html#scenario=<scenario_run_id>` (linked from Index/feature rows and Classic/Replay pages) highlights, scrolls to, and zooms onto that scenario
+- Resizable scenario column (localStorage, double-click resets) and instant tooltips on bars, segments, and badges
 
 **Files:**
-- `src/cucu/reporter/html.py` — `build_gantt_chart()` computes shared-clock and lined-up bar positions, run/worker numbers, and status totals
-- `src/cucu/reporter/templates/gantt.html` — Gantt page
-- `src/cucu/reporter/templates/gantt_icon.html` — inline SVG icon included on the Gantt title and the Index link
-- `src/cucu/reporter/external/gantt.js` — zoom, pan, ticks, filters, URL hash state
-- `src/cucu/reporter/external/gantt.css` — chart layout, outcome and worker colors
-- `src/cucu/reporter/templates/index.html` — Index navbar link to `gantt.html`
-- `src/cucu/reporter/templates/scenario.html`, `scenario_replay.html`, `index.html`, `feature.html` — Gantt links that focus the scenario
-- `features/cli/report_gantt.feature` — integration test
-- `tests/test_gantt_chart.py` — unit tests for bar positioning
+- `src/cucu/reporter/html.py` — `build_gantt_chart()`
+- `src/cucu/reporter/templates/gantt.html`, `gantt_icon.html`
+- `src/cucu/reporter/external/gantt.js`, `gantt.css`
+- `src/cucu/reporter/templates/index.html`, `feature.html`, `scenario.html`, `scenario_replay.html` — Gantt links
+- `features/cli/report_gantt.feature`, `tests/test_gantt_chart.py`
 
 **Testing Gantt view changes:**
 - `uv run pytest tests/test_gantt_chart.py`
