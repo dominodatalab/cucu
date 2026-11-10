@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project closely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 1.4.44
+- Fix - parallel workers started with `fork` (Linux) record their own worker in the run database instead of reusing the parent's
+
 # 1.4.43
 
 - Fix - screenshots no longer hang chromedriver (ReadTimeoutError in the step or after-step hook) when the driver is inside nested VSCode/code-server webviews; the top-level viewport size and element offset are now computed by switching frames with WebDriver instead of walking `window.parent`/`frameElement` in JavaScript

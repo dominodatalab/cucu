@@ -72,6 +72,7 @@ class RundbFormatter(Formatter):
         if (
             not CONFIG["RUN_DB_PATH"]
             or CONFIG["WORKER_RUN_ID"] != CONFIG["WORKER_PARENT_ID"]
+            or str(os.getpid()) != os.environ["WORKER_PARENT_PID"]
         ):
             logger.debug(
                 "Create a new worker db since this isn't the parent process"
