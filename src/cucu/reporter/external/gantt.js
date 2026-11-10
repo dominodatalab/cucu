@@ -126,6 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
         zoomLevel.textContent = (Math.round(zoom * 10) / 10) + "×";
         renderTicks();
         markNarrowBars();
+        syncPanOffset();
         writeHash();
     }
 
@@ -272,7 +273,6 @@ document.addEventListener("DOMContentLoaded", function () {
         showCleanup = true;
         positionBars();
         setFocus(null);
-        followPaused = false;
         applyFilters();
         applyZoom(1, 0);
         scroller.scrollTop = 0;
@@ -284,8 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".gantt-btn[data-zoom]").forEach(function (btn) {
         btn.addEventListener("click", function () {
             var action = btn.getAttribute("data-zoom");
-            followPaused = false;
-            if (action === "in") applyZoom(zoom * 2);
+                if (action === "in") applyZoom(zoom * 2);
             else if (action === "out") applyZoom(zoom / 2);
             else if (action === "fit") fitToShown();
         });
@@ -294,70 +293,56 @@ document.addEventListener("DOMContentLoaded", function () {
     scroller.addEventListener("wheel", function (event) {
         if (!event.ctrlKey && !event.metaKey) return;
         event.preventDefault();
-        followPaused = false;
         var anchor = event.clientX - scroller.getBoundingClientRect().left - labelWidth();
         applyZoom(zoom * Math.exp(-event.deltaY * 0.002), Math.max(0, anchor));
     }, { passive: false });
 
     var FOLLOW_MARGIN_PX = 24;
-    var FOLLOW_CLIP_TOLERANCE_PX = 0.5;
-    var FOLLOW_DURATION_MS = 150;
     var lastScrollTop = scroller.scrollTop;
     var axis = gantt.querySelector(".gantt-axis");
-    var glide = null;
+    var panOffset = 0;
+    var lastSetLeft = null;
 
-    function topVisibleRowIndex() {
-        var axisBottom = axis.getBoundingClientRect().bottom;
+    function stopGlide() {}
+
+    function followLeft(top) {
+        var axisHeight = axis.offsetHeight;
+        var prev = null;
         for (var i = 0; i < rows.length; i++) {
             if (rows[i].classList.contains("hidden")) continue;
-            if (rows[i].getBoundingClientRect().top >= axisBottom - FOLLOW_CLIP_TOLERANCE_PX) return i;
+            var point = { y: rows[i].offsetTop - axisHeight, x: barLeft(i) / 100 * trackWidth() - FOLLOW_MARGIN_PX };
+            if (top <= point.y) {
+                if (!prev) return point.x;
+                var t = (top - prev.y) / Math.max(1, point.y - prev.y);
+                return prev.x + (point.x - prev.x) * t;
+            }
+            prev = point;
         }
-        return -1;
+        return prev ? prev.x : 0;
     }
 
-    function stopGlide() {
-        if (glide) cancelAnimationFrame(glide.frame);
-        glide = null;
+    function clampLeft(left) {
+        return Math.max(0, Math.min(left, scroller.scrollWidth - scroller.clientWidth));
     }
 
-    function glideTo(left) {
-        left = Math.max(0, Math.min(left, scroller.scrollWidth - scroller.clientWidth));
-        if (glide && glide.to === left) return;
-        stopGlide();
-        if (Math.abs(scroller.scrollLeft - left) < 1) return;
-        glide = { from: scroller.scrollLeft, to: left, start: performance.now() };
-        function step(now) {
-            var p = Math.min(1, (now - glide.start) / FOLLOW_DURATION_MS);
-            var eased = 1 - Math.pow(1 - p, 3);
-            scroller.scrollLeft = glide.from + (glide.to - glide.from) * eased;
-            if (p < 1) glide.frame = requestAnimationFrame(step);
-            else glide = null;
-        }
-        glide.frame = requestAnimationFrame(step);
+    function syncPanOffset() {
+        panOffset = scroller.scrollLeft - clampLeft(followLeft(scroller.scrollTop));
+        lastSetLeft = null;
     }
-
-    var followPaused = false;
 
     function followTopRow() {
-        if (followPaused) return;
-        var i = topVisibleRowIndex();
-        if (i === -1) return;
-        glideTo(barLeft(i) / 100 * trackWidth() - FOLLOW_MARGIN_PX);
+        var left = clampLeft(clampLeft(followLeft(scroller.scrollTop)) + panOffset);
+        lastSetLeft = Math.round(left);
+        scroller.scrollLeft = left;
     }
-
-    scroller.addEventListener("wheel", function (event) {
-        if (event.ctrlKey || event.metaKey) return;
-        if (event.shiftKey || Math.abs(event.deltaX) > 0) {
-            stopGlide();
-            followPaused = true;
-        }
-    }, { passive: true });
 
     var scrollTimer = null;
     scroller.addEventListener("scroll", function () {
         if (scroller.scrollTop !== lastScrollTop) {
             lastScrollTop = scroller.scrollTop;
             if (!pan) followTopRow();
+        } else if (!pan && (lastSetLeft === null || Math.abs(scroller.scrollLeft - lastSetLeft) > 1)) {
+            syncPanOffset();
         }
         clearTimeout(scrollTimer);
         scrollTimer = setTimeout(writeHash, 150);
@@ -366,8 +351,6 @@ document.addEventListener("DOMContentLoaded", function () {
     var pan = null;
     gantt.addEventListener("mousedown", function (event) {
         if (event.button !== 0 || !event.target.classList.contains("gantt-track")) return;
-        stopGlide();
-        followPaused = true;
         pan = { x: event.clientX, y: event.clientY, left: scroller.scrollLeft, top: scroller.scrollTop };
         scroller.classList.add("panning");
         event.preventDefault();
@@ -378,6 +361,7 @@ document.addEventListener("DOMContentLoaded", function () {
         scroller.scrollTop = pan.top - (event.clientY - pan.y);
     });
     window.addEventListener("mouseup", function () {
+        if (pan) syncPanOffset();
         pan = null;
         scroller.classList.remove("panning");
     });
