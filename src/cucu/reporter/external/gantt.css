@@ -372,6 +372,8 @@
 
 .gantt-cleanup-chip {
     background-color: #555;
+    background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0 2px, transparent 2px 5px);
+    text-shadow: 0 0 2px #000;
 }
 
 .gantt-tip {
