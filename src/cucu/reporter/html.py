@@ -84,6 +84,243 @@ def left_pad_zeroes(elapsed_time):
     return padded_duration
 
 
+GANTT_MIN_WIDTH_PCT = 0.4
+GANTT_STATUSES = ["passed", "failed", "error", "skipped", "terminated"]
+
+
+def format_gantt_duration(seconds):
+    seconds = float(seconds or 0)
+    if 0 < seconds < 1:
+        return f"{max(1, round(seconds * 1000))}ms"
+    total = int(round(seconds))
+    hours, rem = divmod(total, 3600)
+    minutes, secs = divmod(rem, 60)
+    parts = []
+    if hours:
+        parts.append(f"{hours}h")
+    if minutes:
+        parts.append(f"{minutes}m")
+    if secs or not parts:
+        parts.append(f"{secs}s")
+    return " ".join(parts)
+
+
+def _gantt_place(offset_s, elapsed_s, span_s):
+    left_pct = min(
+        max(0.0, offset_s / span_s * 100), 100 - GANTT_MIN_WIDTH_PCT
+    )
+    width_pct = max(GANTT_MIN_WIDTH_PCT, elapsed_s / span_s * 100)
+    return left_pct, min(width_pct, 100 - left_pct)
+
+
+def _gantt_time(value):
+    return parse_iso_timestamp(value) if isinstance(value, str) else value
+
+
+def build_gantt_chart(features):
+    rows = []
+    untimed_count = 0
+    runs = {}
+    worker_starts = {}
+    for feature in features:
+        worker = feature["worker"]
+        run = worker["cucu_run"]
+        worker_key = (run["cucu_run_id"], worker["worker_run_id"])
+        for scenario in feature["scenarios"]:
+            start_at = scenario["start_at"]
+            end_at = scenario["end_at"]
+            if not start_at or not end_at:
+                untimed_count += 1
+                continue
+            segments = [
+                {
+                    "start_at": _gantt_time(step["start_at"]),
+                    "end_at": _gantt_time(step["end_at"]),
+                    "status": step["status"],
+                    "title": f"{step['keyword']} {step['name']} — {step['status']}",
+                    "cleanup": False,
+                }
+                for step in scenario["steps"]
+                if not step["is_substep"]
+                and step["start_at"]
+                and step["end_at"]
+            ] + [
+                {
+                    "start_at": _gantt_time(hook["start_at"]),
+                    "end_at": _gantt_time(hook["end_at"]),
+                    "status": hook["status"],
+                    "title": f"cleanup: {hook['name']} — {hook['status']}",
+                    "cleanup": True,
+                }
+                for hook in scenario["after_hooks"] or []
+                if hook["start_at"] and hook["end_at"]
+            ]
+            cleanup = [seg for seg in segments if seg["cleanup"]]
+            bar_end_at = max([end_at] + [seg["end_at"] for seg in cleanup])
+            run_entry = runs.setdefault(
+                run["cucu_run_id"],
+                {"run": run, "start_at": start_at, "end_at": bar_end_at},
+            )
+            run_entry["start_at"] = min(run_entry["start_at"], start_at)
+            run_entry["end_at"] = max(run_entry["end_at"], bar_end_at)
+            worker_starts[worker_key] = min(
+                worker_starts.get(worker_key, worker["start_at"]),
+                worker["start_at"],
+            )
+            rows.append(
+                {
+                    "id": scenario["scenario_run_id"],
+                    "name": scenario["name"],
+                    "feature_name": feature["name"],
+                    "href": f"{urlencode(escape(feature['folder_name']))}/{urlencode(escape(scenario['folder_name']))}/index.html",
+                    "status": scenario["status"],
+                    "start_at": start_at,
+                    "end_at": end_at,
+                    "core_end_at": min(
+                        [end_at] + [seg["start_at"] for seg in cleanup]
+                    ),
+                    "bar_end_at": bar_end_at,
+                    "segments": segments,
+                    "run_id": run["cucu_run_id"],
+                    "worker_key": worker_key,
+                }
+            )
+
+    empty = {
+        "rows": [],
+        "run_start": None,
+        "run_end": None,
+        "run_start_clock_s": 0,
+        "span_s": 0,
+        "aligned_span_s": 0,
+        "span_label": "",
+        "status_counts": {},
+        "runs": [],
+        "workers": [],
+        "multi_run": False,
+        "untimed_count": untimed_count,
+    }
+    if not rows:
+        return empty
+
+    run_ids = sorted(
+        runs, key=lambda run_id: (runs[run_id]["start_at"], run_id)
+    )
+    run_list = []
+    for number, run_id in enumerate(run_ids, start=1):
+        run = runs[run_id]["run"]
+        run_list.append(
+            {
+                "number": number,
+                "label": Path(run["filepath"]).name,
+                "title": " ".join(run["full_arguments"]),
+                "start_label": runs[run_id]["start_at"].strftime("%H:%M:%S"),
+            }
+        )
+    labels = [run_info["label"] for run_info in run_list]
+    for run_info in run_list:
+        if labels.count(run_info["label"]) > 1:
+            run_info["label"] += f" @ {run_info['start_label']}"
+    run_numbers = {run_id: index + 1 for index, run_id in enumerate(run_ids)}
+
+    worker_info = {}
+    workers_per_run = {}
+    for color, worker_key in enumerate(
+        sorted(
+            worker_starts,
+            key=lambda key: (run_numbers[key[0]], worker_starts[key], key[1]),
+        )
+    ):
+        run_number = run_numbers[worker_key[0]]
+        number = workers_per_run[run_number] = (
+            workers_per_run.get(run_number, 0) + 1
+        )
+        worker_info[worker_key] = {
+            "key": f"{run_number}.{number}",
+            "run": run_number,
+            "number": number,
+            "label": f"R{run_number}-W{number}",
+            "color": color % 10,
+            "title": f"{run_list[run_number - 1]['label']}: {run_list[run_number - 1]['title']}",
+        }
+
+    run_start = min(row["start_at"] for row in rows)
+    run_end = max(row["bar_end_at"] for row in rows)
+    span = (run_end - run_start).total_seconds() or 1.0
+    aligned_span = (
+        max(
+            (entry["end_at"] - entry["start_at"]).total_seconds()
+            for entry in runs.values()
+        )
+        or 1.0
+    )
+    multi_run = len(run_list) > 1
+
+    status_counts = {status: 0 for status in GANTT_STATUSES}
+    for row in rows:
+        core_s = (row.pop("core_end_at") - row["start_at"]).total_seconds()
+        total_s = (row.pop("bar_end_at") - row["start_at"]).total_seconds()
+        run_entry = runs[row["run_id"]]
+        worker = worker_info[row.pop("worker_key")]
+        run_info = run_list[run_numbers[row.pop("run_id")] - 1]
+        row["left_pct"], row["width_pct"] = _gantt_place(
+            (row["start_at"] - run_start).total_seconds(), total_s, span
+        )
+        row["aligned_left_pct"], row["aligned_width_pct"] = _gantt_place(
+            (row["start_at"] - run_entry["start_at"]).total_seconds(),
+            total_s,
+            aligned_span,
+        )
+        row["cleanup_ratio"] = total_s / core_s if core_s > 0 else 1.0
+        for seg in row["segments"]:
+            seg["left_pct"] = (
+                (seg["start_at"] - row["start_at"]).total_seconds()
+                / (total_s or 1.0)
+                * 100
+            )
+            seg["width_pct"] = max(
+                (seg["end_at"] - seg["start_at"]).total_seconds()
+                / (total_s or 1.0)
+                * 100,
+                0.5,
+            )
+        status_counts[row["status"]] = status_counts.get(row["status"], 0) + 1
+        row["run"] = run_info["number"]
+        row["worker"] = worker["number"]
+        row["worker_key"] = worker["key"]
+        row["worker_badge"] = worker["label"]
+        row["worker_color"] = worker["color"]
+        row["worker_title"] = (
+            f"{run_info['label']} — " if multi_run else ""
+        ) + f"worker {worker['number']}"
+        row["duration_label"] = format_gantt_duration(total_s)
+        row["bar_title"] = (
+            f"{row['status']} — {row['start_at']:%Y-%m-%d %H:%M:%S} – "
+            f"{row['end_at']:%Y-%m-%d %H:%M:%S} — {row['duration_label']} — "
+            f"{worker['label']}{' — ' + run_info['label'] if multi_run else ''}"
+        )
+
+    rows.sort(key=lambda row: (row["start_at"], row["run"], row["worker"]))
+
+    return {
+        **empty,
+        "rows": rows,
+        "run_start": run_start,
+        "run_end": run_end,
+        "run_start_clock_s": (
+            run_start
+            - run_start.replace(hour=0, minute=0, second=0, microsecond=0)
+        ).total_seconds(),
+        "span_s": span,
+        "aligned_span_s": aligned_span,
+        "span_label": format_gantt_duration(span),
+        "status_counts": status_counts,
+        "runs": run_list,
+        "workers": list(worker_info.values()),
+        "multi_run": multi_run,
+    }
+
+
 def browser_timestamp_to_datetime(value):
     """Convert a browser timestamp (in milliseconds since epoch) to a datetime object"""
     try:
@@ -613,6 +850,17 @@ def generate(results: Path, basepath: Path, workers: int | None = None):
         )
         html_index_path = basepath / "index.html"
         html_index_path.write_text(rendered_index_html)
+
+        gantt = build_gantt_chart(features)
+        gantt_template = templates.get_template("gantt.html")
+        rendered_gantt_html = gantt_template.render(
+            gantt=gantt,
+            grand_totals=grand_totals,
+            title="Cucu HTML Test Report - Gantt",
+            basepath=basepath,
+            dir_depth="",
+        )
+        (basepath / "gantt.html").write_text(rendered_gantt_html)
 
     finally:
         db.close_html_report_db()

@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+{% block container_class %}container-fluid{% endblock %}
+{% block nav %}
+    <link href="{{ dir_depth }}external/gantt.css" rel="stylesheet"></link>
+    <script src="{{ dir_depth }}external/gantt.js"></script>
+    <nav class="navbar navbar-expand-sm navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand me-2" href="#">{% include "gantt_icon.html" %} Gantt HTML Test Report</a>
+            {% if gantt['rows'] %}<span class="gantt-run navbar-text me-auto ms-0 ps-0">{% if gantt['multi_run'] %}{{ gantt['runs'] | length }} runs: {% else %}Run: {% endif %}{{ gantt['run_start'].strftime('%H:%M:%S') }}–{{ gantt['run_end'].strftime('%H:%M:%S') }} ({{ gantt['span_label'] }})</span>{% endif %}
+            <ul class="navbar-nav mt-2 mt-lg-0">
+              <li class="nav-item active">
+                <a class="nav-link" href="index.html" title="go to index report">Index</a>
+              </li>
+            </ul>
+        </div>
+    </nav>
+{% endblock %}
+{% block content %}
+    {% if gantt['rows'] %}
+    <div class="gantt-toolbar">
+        <input type="search" class="gantt-search" placeholder="filter scenarios…" aria-label="filter scenarios">
+        {% if gantt['untimed_count'] %}<span class="gantt-untimed">+{{ gantt['untimed_count'] }} untimed not plotted</span>{% endif %}
+        <span class="gantt-divider"></span>
+        <span class="gantt-filter-label">Run-Worker:</span>
+        {% for worker in gantt['workers'] %}
+        <button type="button" class="gantt-chip gantt-worker-chip worker-c{{ worker['color'] }} active" data-worker="{{ worker['key'] }}" title="{% if gantt['multi_run'] %}{{ escape(worker['title']) }} — {% endif %}click to toggle, alt-click to show only {{ worker['label'] }}">{{ worker['label'] }}</button>
+        {% endfor %}
+        <span class="gantt-divider"></span>
+        {% for status, count in gantt['status_counts'].items() %}
+        <button type="button" class="gantt-chip gantt-status-chip status-{{ status }} active" data-status="{{ status }}" title="click to toggle, alt-click to show only {{ status }}">{{ status | capitalize }} {{ count }}</button>
+        {% endfor %}
+        <span class="gantt-divider"></span>
+        <button type="button" class="gantt-chip gantt-cleanup-chip active" title="show after-scenario hooks and end-of-scenario steps at the end of each bar">Cleanup Steps</button>
+        <button type="button" class="gantt-btn gantt-reset-filters" title="reset filters, search, selected scenario, zoom and scroll">Reset</button>
+        <span class="gantt-divider"></span>
+        <span class="gantt-shown"></span>
+        <span class="gantt-zoom-controls">
+            {% if gantt['multi_run'] %}
+            <button type="button" class="gantt-btn gantt-align" title="toggle between a shared clock and lining every run up at its own start">Line up runs</button>
+            {% endif %}
+            <button type="button" class="gantt-btn" data-zoom="out" title="zoom out">−</button>
+            <span class="gantt-zoom-level">1×</span>
+            <button type="button" class="gantt-btn" data-zoom="in" title="zoom in">+</button>
+            <button type="button" class="gantt-btn" data-zoom="fit" title="zoom to the time range of the shown scenarios">Fit</button>
+        </span>
+    </div>
+    <div class="gantt-scroll">
+        <div class="gantt" data-span-s="{{ gantt['span_s'] }}" data-aligned-span-s="{{ gantt['aligned_span_s'] }}" data-run-start-clock-s="{{ gantt['run_start_clock_s'] }}" data-workers="{{ gantt['workers'] | length }}">
+            <div class="gantt-axis">
+                <div class="gantt-label-spacer">Scenario<span class="gantt-resizer" title="drag to resize, double-click to reset"></span></div>
+                <div class="gantt-worker-cell gantt-worker-header" title="run and worker within that run">R#-W#</div>
+                <div class="gantt-axis-track"></div>
+            </div>
+            <div class="gantt-rows">
+            <div class="gantt-spacer gantt-spacer-top"></div>
+            {% for row in gantt['rows'] %}
+            <div class="gantt-row" data-id="{{ row['id'] }}" data-status="{{ row['status'] }}" data-worker="{{ row['worker_key'] }}" data-search="{{ escape((row['name'] ~ ' ' ~ row['feature_name']) | lower) }}">
+                <div class="gantt-label" title="{{ escape(row['name']) }} - {{ escape(row['feature_name']) }}">
+                    <a class="gantt-scenario" href="{{ row['href'] }}">{{ escape(row['name']) }}</a>
+                    <span class="gantt-feature">{{ escape(row['feature_name']) }}</span>
+                </div>
+                <div class="gantt-worker-cell"><span class="gantt-worker worker-c{{ row['worker_color'] }}" title="{{ escape(row['worker_title']) }}">{{ row['worker_badge'] }}</span></div>
+                <div class="gantt-track">
+                    <a class="gantt-bar status-{{ row['status'] }} worker-c{{ row['worker_color'] }}"
+                       href="{{ row['href'] }}"
+                       title="{{ row['bar_title'] }}"
+                       data-left="{{ row['left_pct'] }}"
+                       data-width="{{ row['width_pct'] }}"
+                       data-aligned-left="{{ row['aligned_left_pct'] }}"
+                       data-aligned-width="{{ row['aligned_width_pct'] }}">
+                        <span class="gantt-bar-inner" data-cleanup-ratio="{{ row['cleanup_ratio'] }}">
+                            {%- for seg in row['segments'] %}
+                            <span class="gantt-seg status-{{ seg['status'] }}{% if seg['cleanup'] %} cleanup{% endif %}" style="left: {{ seg['left_pct'] }}%; width: {{ seg['width_pct'] }}%" title="{{ escape(seg['title']) }}"></span>
+                            {%- endfor %}
+                        </span>
+                        <span class="gantt-bar-label">{{ row['duration_label'] }}</span>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+            <div class="gantt-spacer gantt-spacer-bottom"></div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p>No scenario timings available for a Gantt chart.</p>
+    {% endif %}
+{% endblock %}

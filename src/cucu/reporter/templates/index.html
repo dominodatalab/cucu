@@ -1,8 +1,13 @@
 {% extends "layout.html" %}
 {% block nav %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+    <nav class="navbar navbar-expand-sm navbar-light bg-light sticky-top">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">Index HTML Test Report</a>
+          <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+              <a class="nav-link" href="gantt.html" title="run Gantt chart">{% include "gantt_icon.html" %} Gantt</a>
+            </li>
+          </ul>
         </div>
     </nav>
 {% endblock %}
@@ -25,7 +30,7 @@
                 <tr>
                     <td class="text-center">{{ scenario['start_at'] }}</td>
                     <td><a href="{{ urlencode(escape(feature['name'])) }}.html"><span>{{ escape(feature['name']) }}</span></a><br>{{ feature['tags'] }}</td>
-                    <td><a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/index.html"><span>{{ escape(scenario['name']) }}</span></a> <a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/replay.html" title="Replay timeline view">🔁</a><br>{{ scenario['tags'] }}</td>
+                    <td><a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/index.html"><span>{{ escape(scenario['name']) }}</span></a> <a href="{{ urlencode(escape(feature['folder_name'])) }}/{{ urlencode(escape(scenario['folder_name'])) }}/replay.html" title="Replay timeline view">🔁</a> <a href="gantt.html#scenario={{ scenario['scenario_run_id'] }}" title="show this scenario in the Gantt view" style="color: #000;">{% include "gantt_icon.html" %}</a><br>{{ scenario['tags'] }}</td>
                     <td class="text-center">{{ scenario['total_steps'] }}</td>
                     <td class="text-center"><span class="status-{{ scenario['status'] }}">{{ scenario['status'] }}</span></td>
                     <td class="text-center">{{ '{:.1f}'.format(scenario['duration'] | float) }}</td>
