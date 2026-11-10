@@ -7,14 +7,7 @@ and this project closely adheres to [Semantic Versioning](https://semver.org/spe
 
 # 1.4.44
 
-- Add - HTML report Gantt view, linked from the Index, with one outcome-colored timespan bar per scenario linking to that scenario's result page
-- Add - Gantt status and worker filters with totals, name search, zoom and two-way pan, a resizable name column, a worker column, and view state kept in the URL
-- Add - Gantt combined run-worker badges and filters, and a "Line up runs" toggle for combined reports
-- Add - Gantt icon on the Gantt page title and the Index navbar link
-- Add - Gantt bars colored by step status with hatched cleanup steps, a Cleanup Steps toggle, and instant tooltips
-- Add - Gantt blank edge rows, overscroll bounce, and horizontal tracking that follows vertical scroll to the first completely visible row (manual pans kept as an offset)
-- Change - Gantt zoom centers on the rows on screen, the last row can scroll to the top, and zoomed timelines get trailing room so late bars can reach the left edge
-- Add - Gantt links on scenario Classic and Replay pages and on Index and feature page scenario rows that focus that scenario in the Gantt view
+- Add - HTML report Gantt view showing every scenario's timespan on a wall-clock axis, with step and cleanup segments, run-worker and status filters, zoom and scroll-tracking pan, combined-run alignment, a shareable URL view, and links from every scenario listing and page
 
 # 1.4.43
 
