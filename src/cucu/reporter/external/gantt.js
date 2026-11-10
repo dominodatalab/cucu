@@ -126,6 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
         zoomLevel.textContent = (Math.round(zoom * 10) / 10) + "×";
         renderTicks();
         markNarrowBars();
+        if (bottomSpacer) sizeBottomSpacer();
         syncPanOffset();
         writeHash();
     }
@@ -162,6 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (visible) count++;
         });
         shown.textContent = "Showing " + count + " of " + rows.length;
+        if (bottomSpacer) sizeBottomSpacer();
         var firstShown = rows.filter(function (row) { return !row.classList.contains("hidden"); })[0];
         rows.forEach(function (row) { row.classList.toggle("first-shown", row === firstShown); });
         markNarrowBars();
@@ -423,6 +425,19 @@ document.addEventListener("DOMContentLoaded", function () {
             setBounce(0);
         }, 90);
     }, { passive: true });
+
+    var bottomSpacer = gantt.querySelector(".gantt-spacer-bottom");
+
+    function sizeBottomSpacer() {
+        var shownRows = rows.filter(function (row) { return !row.classList.contains("hidden"); });
+        var last = shownRows[shownRows.length - 1] || rows[rows.length - 1];
+        var rowH = last.offsetHeight || 17;
+        var current = bottomSpacer.offsetHeight;
+        var excess = (scroller.scrollHeight - scroller.clientHeight) - (last.offsetTop - axis.offsetHeight);
+        bottomSpacer.style.height = Math.max(rowH, current - excess) + "px";
+    }
+    sizeBottomSpacer();
+    window.addEventListener("resize", sizeBottomSpacer);
 
     var tip = document.createElement("div");
     tip.className = "gantt-tip";
