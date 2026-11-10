@@ -134,6 +134,30 @@ document.addEventListener("DOMContentLoaded", function () {
         writeHash();
     }
 
+    function visibleCenterFrac() {
+        var box = scroller.getBoundingClientRect();
+        var top = axis.getBoundingClientRect().bottom;
+        var bottom = box.top + scroller.clientHeight;
+        var lo = Infinity, hi = -Infinity;
+        rows.forEach(function (row, i) {
+            if (row.classList.contains("hidden")) return;
+            var r = row.getBoundingClientRect();
+            if (r.bottom <= top || r.top >= bottom) return;
+            lo = Math.min(lo, barLeft(i));
+            hi = Math.max(hi, barLeft(i) + barWidth(i));
+        });
+        if (lo === Infinity) return (scroller.scrollLeft + viewTrackWidth() / 2) / trackWidth();
+        return (lo + hi) / 200;
+    }
+
+    function zoomOnVisible(newZoom) {
+        var frac = visibleCenterFrac();
+        applyZoom(newZoom, 0);
+        scroller.scrollLeft = frac * trackWidth() - viewTrackWidth() / 2;
+        syncPanOffset();
+        writeHash();
+    }
+
     function scrollToSeconds(seconds) {
         scroller.scrollLeft = seconds / spanS * trackWidth();
     }
@@ -289,8 +313,8 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".gantt-btn[data-zoom]").forEach(function (btn) {
         btn.addEventListener("click", function () {
             var action = btn.getAttribute("data-zoom");
-                if (action === "in") applyZoom(zoom * 2);
-            else if (action === "out") applyZoom(zoom / 2);
+                if (action === "in") zoomOnVisible(zoom * 2);
+            else if (action === "out") zoomOnVisible(zoom / 2);
             else if (action === "fit") fitToShown();
         });
     });
@@ -298,7 +322,7 @@ document.addEventListener("DOMContentLoaded", function () {
     scroller.addEventListener("wheel", function (event) {
         if (!event.ctrlKey && !event.metaKey) return;
         event.preventDefault();
-        applyZoom(zoom * Math.exp(-event.deltaY * 0.002));
+        zoomOnVisible(zoom * Math.exp(-event.deltaY * 0.002));
     }, { passive: false });
 
     var FOLLOW_MARGIN_PX = 24;
