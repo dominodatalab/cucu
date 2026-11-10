@@ -15,10 +15,10 @@ document.addEventListener("DOMContentLoaded", function () {
     var LABEL_W_DEFAULT = 320;
     var LABEL_W_MIN = 120;
     var LABEL_W_KEY = "cucu-gantt-label-width";
-    var rows = Array.prototype.slice.call(gantt.querySelectorAll(".gantt-row"));
+    var rows = Array.from(gantt.querySelectorAll(".gantt-row"));
     var bars = rows.map(function (row) { return row.querySelector(".gantt-bar"); });
-    var statusChips = Array.prototype.slice.call(document.querySelectorAll(".gantt-status-chip"));
-    var workerChips = Array.prototype.slice.call(document.querySelectorAll(".gantt-worker-chip"));
+    var statusChips = Array.from(document.querySelectorAll(".gantt-status-chip"));
+    var workerChips = Array.from(document.querySelectorAll(".gantt-worker-chip"));
     var alignButton = document.querySelector(".gantt-align");
     var cleanupChip = document.querySelector(".gantt-cleanup-chip");
     var inners = bars.map(function (bar) { return bar.querySelector(".gantt-bar-inner"); });
@@ -26,6 +26,12 @@ document.addEventListener("DOMContentLoaded", function () {
     var search = document.querySelector(".gantt-search");
     var shown = document.querySelector(".gantt-shown");
     var zoomLevel = document.querySelector(".gantt-zoom-level");
+    var axis = gantt.querySelector(".gantt-axis");
+    var rowsBox = gantt.querySelector(".gantt-rows");
+    var bottomSpacer = gantt.querySelector(".gantt-spacer-bottom");
+    var FOLLOW_MARGIN_PX = 24;
+    var FOCUS_BAR_VIEW_PCT = 25;
+    var BOUNCE_MAX_PX = 48;
 
     var clockSpanS = parseFloat(gantt.getAttribute("data-span-s"));
     var alignedSpanS = parseFloat(gantt.getAttribute("data-aligned-span-s"));
@@ -33,9 +39,19 @@ document.addEventListener("DOMContentLoaded", function () {
     var aligned = false;
     var spanS = clockSpanS;
     var zoom = 1;
+    var restoring = true;
+    var focusedRow = null;
+    var lastScrollTop = 0;
+    var panOffset = 0;
+    var lastSetLeft = null;
+    var pan = null;
+    var resize = null;
+    var bounce = 0;
+    var bounceTimer = null;
+    var scrollTimer = null;
 
     function barLeft(i) { return parseFloat(bars[i].getAttribute(aligned ? "data-aligned-left" : "data-left")); }
-    function cleanupRatio(i) { return parseFloat(inners[i].getAttribute("data-cleanup-ratio")) || 1; }
+    function cleanupRatio(i) { return parseFloat(inners[i].getAttribute("data-cleanup-ratio")); }
     function barWidth(i) {
         var width = parseFloat(bars[i].getAttribute(aligned ? "data-aligned-width" : "data-width"));
         return showCleanup ? width : width / cleanupRatio(i);
@@ -53,21 +69,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     positionBars();
 
-    function setAligned(value) {
-        if (aligned === value) return;
-        aligned = value;
-        positionBars();
-        applyZoom(zoom, 0);
-        writeHash();
-    }
-
     function labelWidth() { return spacer.offsetWidth + workerHeader.offsetWidth; }
 
     function setLabelWidth(px) {
         var max = Math.max(LABEL_W_MIN, scroller.clientWidth - workerHeader.offsetWidth - 200);
         px = Math.round(Math.min(max, Math.max(LABEL_W_MIN, px)));
         gantt.style.setProperty("--label-w", px + "px");
-        return px;
     }
     function viewTrackWidth() { return Math.max(1, scroller.clientWidth - labelWidth()); }
     function trackWidth() { return viewTrackWidth() * zoom; }
@@ -109,14 +116,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function markNarrowBars() {
         bars.forEach(function (bar, i) {
             if (rows[i].classList.contains("hidden")) return;
-            var label = bar.firstElementChild;
+            var label = bar.querySelector(".gantt-bar-label");
             bar.classList.toggle("narrow", bar.clientWidth < label.scrollWidth + 8);
             bar.classList.toggle("tiny", bar.offsetWidth < 12);
         });
     }
 
     function applyZoom(newZoom, anchorPx) {
-        stopGlide();
         newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, newZoom));
         if (anchorPx === undefined) anchorPx = viewTrackWidth() / 2;
         var anchorFrac = (scroller.scrollLeft + anchorPx) / trackWidth();
@@ -128,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
         zoomLevel.textContent = (Math.round(zoom * 10) / 10) + "×";
         renderTicks();
         markNarrowBars();
-        if (bottomSpacer) sizeBottomSpacer();
+        sizeBottomSpacer();
         lastScrollTop = scroller.scrollTop;
         syncPanOffset();
         writeHash();
@@ -158,21 +164,13 @@ document.addEventListener("DOMContentLoaded", function () {
         writeHash();
     }
 
-    function scrollToSeconds(seconds) {
-        scroller.scrollLeft = seconds / spanS * trackWidth();
-    }
-
-    function leftEdgeSeconds() {
-        return scroller.scrollLeft / trackWidth() * spanS;
-    }
-
     function activeValues(chips, attr) {
-        return chips.filter(function (c) { return c.classList.contains("active") && !c.disabled; })
+        return chips.filter(function (c) { return c.classList.contains("active"); })
             .map(function (c) { return c.getAttribute(attr); });
     }
 
     function allActive(chips) {
-        return chips.every(function (c) { return c.disabled || c.classList.contains("active"); });
+        return chips.every(function (c) { return c.classList.contains("active"); });
     }
 
     function applyFilters() {
@@ -190,9 +188,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (visible) count++;
         });
         shown.textContent = "Showing " + count + " of " + rows.length;
-        if (bottomSpacer) sizeBottomSpacer();
-        var firstShown = rows.filter(function (row) { return !row.classList.contains("hidden"); })[0];
-        rows.forEach(function (row) { row.classList.toggle("first-shown", row === firstShown); });
+        sizeBottomSpacer();
         markNarrowBars();
         writeHash();
     }
@@ -210,13 +206,12 @@ document.addEventListener("DOMContentLoaded", function () {
         writeHash();
     }
 
-    var restoring = true;
     function writeHash() {
         if (restoring) return;
         var parts = [];
         if (zoom !== 1) {
             parts.push("zoom=" + Math.round(zoom * 100) / 100);
-            parts.push("t=" + parseFloat(leftEdgeSeconds().toPrecision(6)));
+            parts.push("t=" + parseFloat((scroller.scrollLeft / trackWidth() * spanS).toPrecision(6)));
         }
         if (scroller.scrollTop > 0) parts.push("y=" + Math.round(scroller.scrollTop));
         if (!allActive(statusChips)) parts.push("status=" + activeValues(statusChips, "data-status").join(","));
@@ -250,13 +245,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isFinite(y) && y > 0) scroller.scrollTop = y;
         lastScrollTop = scroller.scrollTop;
         var t = parseFloat(params.t);
-        if (isFinite(t) && t >= 0 && t <= spanS) scrollToSeconds(t);
+        if (isFinite(t) && t >= 0 && t <= spanS) scroller.scrollLeft = t / spanS * trackWidth();
         setFocus(params.scenario ? gantt.querySelector('.gantt-row[data-id="' + CSS.escape(params.scenario) + '"]') : null);
         if (focusedRow && !isFinite(z) && !isFinite(y)) showFocused();
     }
-
-    var FOCUS_BAR_VIEW_PCT = 25;
-    var focusedRow = null;
 
     function setFocus(row) {
         if (focusedRow) focusedRow.classList.remove("focused");
@@ -268,9 +260,8 @@ document.addEventListener("DOMContentLoaded", function () {
         var i = rows.indexOf(focusedRow);
         if (focusedRow.classList.contains("hidden")) return;
         applyZoom(FOCUS_BAR_VIEW_PCT / Math.max(barWidth(i), 1e-6), 0);
-        scroller.scrollTop = focusedRow.classList.contains("first-shown") ? 0 : focusedRow.offsetTop - axis.offsetHeight;
+        scroller.scrollTop = focusedRow === rows.find(function (row) { return !row.classList.contains("hidden"); }) ? 0 : focusedRow.offsetTop - axis.offsetHeight;
         lastScrollTop = scroller.scrollTop;
-        stopGlide();
         scroller.scrollLeft = barLeft(i) / 100 * trackWidth() - FOLLOW_MARGIN_PX;
     }
 
@@ -294,7 +285,11 @@ document.addEventListener("DOMContentLoaded", function () {
         markNarrowBars();
         writeHash();
     });
-    if (alignButton) alignButton.addEventListener("click", function () { setAligned(!aligned); });
+    if (alignButton) alignButton.addEventListener("click", function () {
+        aligned = !aligned;
+        positionBars();
+        applyZoom(zoom, 0);
+    });
     search.addEventListener("input", applyFilters);
     document.querySelector(".gantt-reset-filters").addEventListener("click", function () {
         statusChips.concat(workerChips).forEach(function (c) { c.classList.add("active"); });
@@ -313,9 +308,8 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".gantt-btn[data-zoom]").forEach(function (btn) {
         btn.addEventListener("click", function () {
             var action = btn.getAttribute("data-zoom");
-                if (action === "in") zoomOnVisible(zoom * 2);
-            else if (action === "out") zoomOnVisible(zoom / 2);
-            else if (action === "fit") fitToShown();
+            if (action === "fit") fitToShown();
+            else zoomOnVisible(action === "in" ? zoom * 2 : zoom / 2);
         });
     });
 
@@ -324,14 +318,6 @@ document.addEventListener("DOMContentLoaded", function () {
         event.preventDefault();
         zoomOnVisible(zoom * Math.exp(-event.deltaY * 0.002));
     }, { passive: false });
-
-    var FOLLOW_MARGIN_PX = 24;
-    var lastScrollTop = scroller.scrollTop;
-    var axis = gantt.querySelector(".gantt-axis");
-    var panOffset = 0;
-    var lastSetLeft = null;
-
-    function stopGlide() {}
 
     function followLeft(top) {
         var axisHeight = axis.offsetHeight;
@@ -364,7 +350,6 @@ document.addEventListener("DOMContentLoaded", function () {
         scroller.scrollLeft = left;
     }
 
-    var scrollTimer = null;
     scroller.addEventListener("scroll", function () {
         if (scroller.scrollTop !== lastScrollTop) {
             lastScrollTop = scroller.scrollTop;
@@ -376,28 +361,16 @@ document.addEventListener("DOMContentLoaded", function () {
         scrollTimer = setTimeout(writeHash, 150);
     });
 
-    var pan = null;
     gantt.addEventListener("mousedown", function (event) {
         if (event.button !== 0 || !event.target.classList.contains("gantt-track")) return;
         pan = { x: event.clientX, y: event.clientY, left: scroller.scrollLeft, top: scroller.scrollTop };
         scroller.classList.add("panning");
         event.preventDefault();
     });
-    window.addEventListener("mousemove", function (event) {
-        if (!pan) return;
-        scroller.scrollLeft = pan.left - (event.clientX - pan.x);
-        scroller.scrollTop = pan.top - (event.clientY - pan.y);
-    });
-    window.addEventListener("mouseup", function () {
-        if (pan) syncPanOffset();
-        pan = null;
-        scroller.classList.remove("panning");
-    });
 
     var stored = parseFloat(localStorage.getItem(LABEL_W_KEY));
     if (isFinite(stored)) setLabelWidth(stored);
 
-    var resize = null;
     resizer.addEventListener("mousedown", function (event) {
         if (event.button !== 0) return;
         resize = { x: event.clientX, width: spacer.offsetWidth };
@@ -406,15 +379,20 @@ document.addEventListener("DOMContentLoaded", function () {
         event.stopPropagation();
     });
     window.addEventListener("mousemove", function (event) {
-        if (!resize) return;
-        setLabelWidth(resize.width + event.clientX - resize.x);
-        applyZoom(zoom, 0);
+        if (pan) {
+            scroller.scrollLeft = pan.left - (event.clientX - pan.x);
+            scroller.scrollTop = pan.top - (event.clientY - pan.y);
+        } else if (resize) {
+            setLabelWidth(resize.width + event.clientX - resize.x);
+            applyZoom(zoom, 0);
+        }
     });
     window.addEventListener("mouseup", function () {
-        if (!resize) return;
-        resize = null;
+        if (pan) syncPanOffset();
+        if (resize) localStorage.setItem(LABEL_W_KEY, spacer.offsetWidth);
+        pan = resize = null;
+        scroller.classList.remove("panning");
         gantt.classList.remove("resizing");
-        localStorage.setItem(LABEL_W_KEY, spacer.offsetWidth);
     });
     resizer.addEventListener("dblclick", function () {
         setLabelWidth(LABEL_W_DEFAULT);
@@ -423,11 +401,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     window.addEventListener("resize", function () { applyZoom(zoom, 0); });
-
-    var rowsBox = gantt.querySelector(".gantt-rows");
-    var BOUNCE_MAX_PX = 48;
-    var bounce = 0;
-    var bounceTimer = null;
 
     function setBounce(px) {
         bounce = px;
@@ -452,8 +425,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 90);
     }, { passive: true });
 
-    var bottomSpacer = gantt.querySelector(".gantt-spacer-bottom");
-
     function sizeBottomSpacer() {
         var shownRows = rows.filter(function (row) { return !row.classList.contains("hidden"); });
         var last = shownRows[shownRows.length - 1] || rows[rows.length - 1];
@@ -462,8 +433,6 @@ document.addEventListener("DOMContentLoaded", function () {
         var excess = (scroller.scrollHeight - scroller.clientHeight) - (last.offsetTop - axis.offsetHeight);
         bottomSpacer.style.height = Math.max(rowH, current - excess) + "px";
     }
-    sizeBottomSpacer();
-    window.addEventListener("resize", sizeBottomSpacer);
 
     var tip = document.createElement("div");
     tip.className = "gantt-tip";
