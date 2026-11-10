@@ -121,7 +121,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (anchorPx === undefined) anchorPx = viewTrackWidth() / 2;
         var anchorFrac = (scroller.scrollLeft + anchorPx) / trackWidth();
         zoom = newZoom;
-        gantt.style.width = labelWidth() + trackWidth() + "px";
+        var tailPx = zoom > 1 ? Math.max(0, viewTrackWidth() - 24) : 0;
+        gantt.style.setProperty("--track-w", trackWidth() + "px");
+        gantt.style.width = labelWidth() + trackWidth() + tailPx + "px";
         scroller.scrollLeft = anchorFrac * trackWidth() - anchorPx;
         zoomLevel.textContent = (Math.round(zoom * 10) / 10) + "×";
         renderTicks();

@@ -219,7 +219,7 @@
 .gantt-axis-track,
 .gantt-track {
     position: relative;
-    flex: 1 1 auto;
+    flex: 0 0 var(--track-w, auto);
 }
 
 .gantt-axis-track {
