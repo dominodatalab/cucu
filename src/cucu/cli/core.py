@@ -306,6 +306,7 @@ def run(
     os.environ["WORKER_PARENT_ID"] = CONFIG["WORKER_RUN_ID"] = (
         generate_short_id(worker_id_seed)
     )
+    os.environ["WORKER_PARENT_PID"] = str(os.getpid())
 
     filepaths = list(filepath) or [Path("features")]
 
