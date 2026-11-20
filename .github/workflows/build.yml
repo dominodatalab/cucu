@@ -50,7 +50,7 @@ jobs:
         name: unit-tests
         path: output.tgz
     - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d # v2
+      uses: EnricoMi/publish-unit-test-result-action@da5b7be67623cd59bbbd1a0ce4f022050a55605f # v2
       if: always()
       with:
         check_name: "unit results"
@@ -118,7 +118,7 @@ jobs:
         name: ${{ matrix.browser }}-tests
         path: output.tgz
     - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d # v2
+      uses: EnricoMi/publish-unit-test-result-action@da5b7be67623cd59bbbd1a0ce4f022050a55605f # v2
       if: always()
       with:
         check_name: "${{ matrix.browser }} results"
